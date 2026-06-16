@@ -167,6 +167,33 @@ class _StartWorkoutSection extends ConsumerWidget {
     );
   }
 
+  Future<void> _startAndOpenWorkout(
+    BuildContext context,
+    WidgetRef ref,
+    Future<void> Function() start,
+  ) async {
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const FitForgeLoadingScreen(message: 'Iniciando entrenamiento…'),
+    );
+
+    try {
+      await start();
+      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) await _navigateToActiveWorkout(context, ref);
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al iniciar entrenamiento: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _navigateToActiveWorkout(BuildContext context, WidgetRef ref) async {
     ref.invalidate(activeWorkoutProvider);
     await ref.read(activeWorkoutProvider.future);
@@ -185,10 +212,11 @@ class _StartWorkoutSection extends ConsumerWidget {
               title: const Text('Entrenamiento libre'),
               onTap: () async {
                 Navigator.pop(ctx);
-                await ref.read(workoutServiceProvider).startWorkout(
-                      name: 'Entrenamiento libre',
-                    );
-                if (context.mounted) await _navigateToActiveWorkout(context, ref);
+                await _startAndOpenWorkout(context, ref, () async {
+                  await ref.read(workoutServiceProvider).startWorkout(
+                        name: 'Entrenamiento libre',
+                      );
+                });
               },
             ),
             routinesAsync.when(
@@ -221,12 +249,13 @@ class _StartWorkoutSection extends ConsumerWidget {
                                 ),
                               )
                               .toList();
-                          await ref.read(workoutServiceProvider).startWorkout(
-                                name: r.name,
-                                routineId: r.id,
-                                exercises: exercises,
-                              );
-                          if (context.mounted) await _navigateToActiveWorkout(context, ref);
+                          await _startAndOpenWorkout(context, ref, () async {
+                            await ref.read(workoutServiceProvider).startWorkout(
+                                  name: r.name,
+                                  routineId: r.id,
+                                  exercises: exercises,
+                                );
+                          });
                         },
                       ),
                     )

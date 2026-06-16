@@ -10,6 +10,7 @@ import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
 import '../../widgets/rest_timer.dart';
 import '../../widgets/set_log_tile.dart';
+import '../../widgets/workout_elapsed_timer.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -23,19 +24,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   bool _showRestTimer = false;
   int _restSeconds = 90;
   int _restTimerKey = 0;
-  DateTime? _startTime;
 
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now();
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
   }
 
   Future<void> _completeWorkout(Workout workout) async {
-    final duration = DateTime.now().difference(_startTime!).inMinutes;
+    final duration = DateTime.now().difference(workout.startedAt).inMinutes;
     final volume = workout.exercises.fold<double>(
       0,
       (sum, ex) => sum + ex.totalVolume,
@@ -92,18 +91,25 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           }
 
           if (workout.exercises.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Añade ejercicios desde la biblioteca'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.push('/exercises'),
-                    child: const Text('Ir a ejercicios'),
+            return Column(
+              children: [
+                WorkoutElapsedTimer(startedAt: workout.startedAt),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Añade ejercicios desde la biblioteca'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => context.push('/exercises'),
+                          child: const Text('Ir a ejercicios'),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 
@@ -111,6 +117,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
           return Column(
             children: [
+              WorkoutElapsedTimer(startedAt: workout.startedAt),
               if (_showRestTimer)
                 RestTimer(
                   key: ValueKey(_restTimerKey),
