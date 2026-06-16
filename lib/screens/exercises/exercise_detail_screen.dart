@@ -5,6 +5,7 @@ import '../../services/exercise_service.dart';
 import '../../models/exercise.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class ExerciseDetailScreen extends ConsumerWidget {
   final String exerciseId;
@@ -39,7 +40,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
             error: (_, __) => _ExerciseBody(exercise: exercise, media: const ExerciseMedia()),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FitForgeLoadingScreen(),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
@@ -77,7 +78,7 @@ class _ExerciseBody extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    const FitForgeLoadingIndicator(size: 80, message: 'Cargando imagen…'),
                     const SizedBox(height: 8),
                     Text('Cargando imagen…', style: Theme.of(context).textTheme.bodySmall),
                   ],

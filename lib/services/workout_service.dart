@@ -52,16 +52,42 @@ class WorkoutService {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return null;
 
-    final data = await _client
+    final rows = await _client
         .from('workouts')
         .select()
         .eq('user_id', userId)
         .filter('completed_at', 'is', null)
-        .maybeSingle();
+        .order('started_at', ascending: false);
 
-    if (data == null) return null;
-    final exercises = await _getWorkoutExercises(data['id'] as String);
-    return Workout.fromJson(data, exercises: exercises);
+    final list = rows as List;
+    if (list.isEmpty) return null;
+
+    final active = Map<String, dynamic>.from(list.first as Map);
+    final activeId = active['id'] as String;
+
+    if (list.length > 1) {
+      await _closeStaleActiveWorkouts(userId, keepWorkoutId: activeId);
+    }
+
+    final exercises = await _getWorkoutExercises(activeId);
+    return Workout.fromJson(active, exercises: exercises);
+  }
+
+  Future<void> _closeStaleActiveWorkouts(String userId, {String? keepWorkoutId}) async {
+    var query = _client
+        .from('workouts')
+        .update({
+          'completed_at': DateTime.now().toIso8601String(),
+          'duration_minutes': 0,
+        })
+        .eq('user_id', userId)
+        .filter('completed_at', 'is', null);
+
+    if (keepWorkoutId != null) {
+      query = query.neq('id', keepWorkoutId);
+    }
+
+    await query;
   }
 
   Future<List<WorkoutExercise>> _getWorkoutExercises(String workoutId) async {
@@ -95,6 +121,8 @@ class WorkoutService {
     List<WorkoutExercise>? exercises,
   }) async {
     final userId = SupabaseService.currentUser!.id;
+    await _closeStaleActiveWorkouts(userId);
+
     final workoutId = _uuid.v4();
 
     await _client.from('workouts').insert({

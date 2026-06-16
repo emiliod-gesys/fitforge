@@ -7,6 +7,7 @@ import '../../models/workout.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/muscle_recovery_map.dart';
 import '../../widgets/stat_card.dart';
@@ -40,7 +41,7 @@ class WorkoutListScreen extends ConsumerWidget {
                 }
                 return _StartWorkoutSection(routinesAsync: routinesAsync);
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const FitForgeLoadingScreen(),
               error: (_, __) => _StartWorkoutSection(routinesAsync: routinesAsync),
             ),
             const SizedBox(height: 20),
@@ -66,7 +67,7 @@ class WorkoutListScreen extends ConsumerWidget {
                       .toList(),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const FitForgeLoadingScreen(),
               error: (e, _) => Text('Error: $e'),
             ),
           ],

@@ -8,6 +8,7 @@ import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/body_metric_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -82,7 +83,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   loading: () => const Padding(
                     padding: EdgeInsets.all(32),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: FitForgeLoadingIndicator(size: 100)),
                   ),
                   error: (e, _) => Text('Error al cargar métricas: $e'),
                 ),
@@ -124,7 +125,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FitForgeLoadingScreen(),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );

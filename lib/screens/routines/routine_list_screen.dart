@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class RoutineListScreen extends ConsumerWidget {
   const RoutineListScreen({super.key});
@@ -53,7 +54,7 @@ class RoutineListScreen extends ConsumerWidget {
             itemBuilder: (_, i) => _RoutineCard(routine: routines[i]),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FitForgeLoadingScreen(),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
@@ -101,7 +102,7 @@ class RoutineListScreen extends ConsumerWidget {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => const Center(child: CircularProgressIndicator()),
+                  builder: (_) => const FitForgeLoadingScreen(message: 'Generando rutina…'),
                 );
 
                 try {

@@ -9,6 +9,7 @@ import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
@@ -129,7 +130,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: FitForgeLoadingScreen());
     }
 
     final unitSystem = ref.watch(unitSystemProvider);

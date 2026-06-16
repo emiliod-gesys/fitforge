@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -147,7 +148,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   ),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => const FitForgeLoadingIndicator(size: 80),
               error: (e, _) => Text('Error: $e'),
             ),
             const SizedBox(height: 24),
@@ -175,7 +176,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   }).toList(),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => const FitForgeLoadingIndicator(size: 80),
               error: (e, _) => Text('Error: $e'),
             ),
           ],

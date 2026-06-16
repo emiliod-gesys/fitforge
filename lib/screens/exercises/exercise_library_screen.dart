@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/exercise_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
   const ExerciseLibraryScreen({super.key});
@@ -96,7 +97,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                 ),
               );
             },
-            loading: () => const Expanded(child: Center(child: CircularProgressIndicator())),
+            loading: () => const Expanded(child: FitForgeLoadingScreen()),
             error: (e, _) => Expanded(child: Center(child: Text('Error: $e'))),
           ),
         ],

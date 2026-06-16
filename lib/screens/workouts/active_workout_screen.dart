@@ -6,6 +6,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
 import '../../widgets/rest_timer.dart';
 import '../../widgets/set_log_tile.dart';
@@ -179,7 +180,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FitForgeLoadingScreen(),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
