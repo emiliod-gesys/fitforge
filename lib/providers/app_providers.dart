@@ -56,9 +56,20 @@ final workoutsProvider = FutureProvider((ref) async {
   return ref.watch(workoutServiceProvider).getWorkouts();
 });
 
+/// Vista rápida del menú principal (sin cargar ejercicios de cada entreno).
+final recentWorkoutsProvider = FutureProvider((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 8);
+});
+
+final workoutHistoryProvider = FutureProvider((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 100);
+});
+
 final progressWorkoutsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
-  return ref.watch(workoutServiceProvider).getWorkouts(limit: 60);
+  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 60);
 });
 
 final workoutWeeklyStatsProvider = FutureProvider<WorkoutWeeklyStats>((ref) async {

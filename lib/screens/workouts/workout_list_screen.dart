@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
-import '../../core/utils/unit_converter.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/muscle_recovery_map.dart';
 import '../../widgets/stat_card.dart';
+import '../../widgets/workout_tile.dart';
 
 class WorkoutListScreen extends ConsumerWidget {
+  static const _previewCount = 7;
   const WorkoutListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workoutsAsync = ref.watch(workoutsProvider);
+    final recentAsync = ref.watch(recentWorkoutsProvider);
     final activeAsync = ref.watch(activeWorkoutProvider);
     final recoveryAsync = ref.watch(muscleRecoveryProvider);
     final routinesAsync = ref.watch(routinesProvider);
@@ -26,7 +26,7 @@ class WorkoutListScreen extends ConsumerWidget {
       appBar: const FitForgeAppBar(),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(workoutsProvider);
+          ref.invalidate(recentWorkoutsProvider);
           ref.invalidate(activeWorkoutProvider);
           ref.invalidate(muscleRecoveryProvider);
           ref.invalidate(workoutWeeklyStatsProvider);
@@ -53,7 +53,7 @@ class WorkoutListScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             Text('Historial', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            workoutsAsync.when(
+            recentAsync.when(
               data: (workouts) {
                 if (workouts.isEmpty) {
                   return const Padding(
@@ -61,10 +61,25 @@ class WorkoutListScreen extends ConsumerWidget {
                     child: Center(child: Text('Sin entrenamientos aún. ¡Empieza hoy!')),
                   );
                 }
+                final preview = workouts.take(_previewCount).toList();
+                final hasMore = workouts.length > _previewCount;
                 return Column(
-                  children: workouts
-                      .map((w) => _WorkoutTile(workout: w, unitSystem: ref.watch(unitSystemProvider)))
-                      .toList(),
+                  children: [
+                    ...preview.map(
+                      (w) => WorkoutTile(workout: w, unitSystem: ref.watch(unitSystemProvider)),
+                    ),
+                    if (hasMore) ...[
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => context.push('/workouts/history'),
+                          icon: const Icon(Icons.history),
+                          label: const Text('Ver historial completo'),
+                        ),
+                      ),
+                    ],
+                  ],
                 );
               },
               loading: () => const FitForgeLoadingScreen(),
@@ -260,34 +275,6 @@ class _StartWorkoutSection extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _WorkoutTile extends StatelessWidget {
-  final Workout workout;
-  final String unitSystem;
-
-  const _WorkoutTile({required this.workout, required this.unitSystem});
-
-  @override
-  Widget build(BuildContext context) {
-    final date = DateFormat('dd MMM yyyy, HH:mm').format(workout.startedAt);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.orange.withValues(alpha: 0.15),
-          child: Icon(Icons.fitness_center, color: AppColors.orange),
-        ),
-        title: Text(workout.name),
-        subtitle: Text(
-          '$date · ${workout.durationMinutes} min · ${UnitConverter.formatVolume(workout.totalVolume, unitSystem)} vol.',
-        ),
-        trailing: workout.isActive
-            ? Chip(label: const Text('Activo'), backgroundColor: AppColors.orange.withValues(alpha: 0.2), labelStyle: const TextStyle(color: AppColors.orange))
-            : null,
       ),
     );
   }

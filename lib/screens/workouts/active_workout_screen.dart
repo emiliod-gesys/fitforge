@@ -53,6 +53,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         );
 
     ref.invalidate(workoutsProvider);
+    ref.invalidate(recentWorkoutsProvider);
+    ref.invalidate(workoutHistoryProvider);
+    ref.invalidate(progressWorkoutsProvider);
     ref.invalidate(activeWorkoutProvider);
     ref.invalidate(personalRecordsProvider);
     ref.invalidate(muscleRecoveryProvider);

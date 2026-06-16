@@ -11,6 +11,26 @@ class WorkoutService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
 
+  Future<List<Workout>> getWorkoutSummaries({int limit = 20}) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final workoutsData = await _client
+        .from('workouts')
+        .select('*, routines(name)')
+        .eq('user_id', userId)
+        .order('started_at', ascending: false)
+        .limit(limit);
+
+    return (workoutsData as List).map((w) {
+      final map = Map<String, dynamic>.from(w as Map);
+      if (map['routines'] != null) {
+        map['routine_name'] = (map['routines'] as Map)['name'];
+      }
+      return Workout.fromJson(map, exercises: const []);
+    }).toList();
+  }
+
   Future<List<Workout>> getWorkouts({int limit = 20}) async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return [];
