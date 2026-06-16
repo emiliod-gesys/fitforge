@@ -9,6 +9,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
+import '../../widgets/exercise_history_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
@@ -165,9 +166,30 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
-                    RestTimeSelector(
-                      selectedSeconds: _restSeconds,
-                      onChanged: _onRestSecondsChanged,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: RestTimeSelector(
+                            selectedSeconds: _restSeconds,
+                            onChanged: _onRestSecondsChanged,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: IconButton.filledTonal(
+                            tooltip: 'Historial del ejercicio',
+                            onPressed: () => ExerciseHistorySheet.show(
+                              context,
+                              exerciseId: exercise.exerciseId,
+                              exerciseName: exercise.exerciseName,
+                              excludeWorkoutId: workout.id,
+                            ),
+                            icon: const Icon(Icons.history),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     ...exercise.sets.map(
@@ -236,11 +258,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Future<void> _addSet(Workout workout, WorkoutExercise exercise) async {
+    final previous = await ref.read(workoutServiceProvider).getPreviousSetsForExercise(
+          exercise.exerciseId,
+          excludeWorkoutId: workout.id,
+        );
+    final setIndex = exercise.sets.length;
+    final prevSet = exercise.sets.isNotEmpty
+        ? exercise.sets.last
+        : (previous != null && previous.isNotEmpty
+            ? (setIndex < previous.length ? previous[setIndex] : previous.last)
+            : null);
+
     final newSet = WorkoutSet(
       id: const Uuid().v4(),
       setNumber: exercise.sets.length + 1,
-      weight: exercise.sets.isNotEmpty ? exercise.sets.last.weight : null,
-      reps: exercise.sets.isNotEmpty ? exercise.sets.last.reps : 10,
+      weight: prevSet?.weight,
+      reps: prevSet?.reps ?? 10,
     );
     await ref.read(workoutServiceProvider).logSet(exercise.id, newSet);
     ref.invalidate(activeWorkoutProvider);

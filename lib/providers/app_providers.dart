@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/workout_streak.dart';
+import '../models/exercise_history.dart';
 import '../models/profile.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/exercise_service.dart';
-import '../services/profile_service.dart';import '../services/routine_service.dart';
+import '../services/profile_service.dart';
+import '../services/routine_service.dart';
 import '../services/workout_service.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
@@ -79,3 +81,13 @@ final muscleRecoveryProvider = FutureProvider((ref) async {
   final workouts = await ref.watch(workoutsProvider.future);
   return ref.watch(workoutServiceProvider).calculateMuscleRecovery(workouts);
 });
+
+final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistory>, ExerciseHistoryQuery>(
+  (ref, query) async {
+    ref.watch(authStateProvider);
+    return ref.watch(workoutServiceProvider).getExerciseHistory(
+          query.exerciseId,
+          excludeWorkoutId: query.excludeWorkoutId,
+        );
+  },
+);

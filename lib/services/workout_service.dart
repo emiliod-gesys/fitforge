@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/muscle_inference.dart';
+import '../models/exercise_history.dart';
 import '../models/profile.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../models/workout.dart';
@@ -134,10 +135,16 @@ class WorkoutService {
       'started_at': SupabaseDateTime.nowUtc.toIso8601String(),
     });
 
-    if (exercises != null) {
-      for (final ex in exercises) {
+    var workoutExercises = exercises;
+    if (workoutExercises != null) {
+      final enriched = await _applyPreviousSetSuggestions(
+        workoutExercises,
+        excludeWorkoutId: workoutId,
+      );
+      for (final ex in enriched) {
         await _addExerciseToWorkout(workoutId, ex);
       }
+      workoutExercises = enriched;
     }
 
     return Workout(
@@ -146,8 +153,119 @@ class WorkoutService {
       routineId: routineId,
       name: name,
       startedAt: SupabaseDateTime.nowUtc,
-      exercises: exercises ?? [],
+      exercises: workoutExercises ?? [],
     );
+  }
+
+  Future<List<WorkoutExercise>> _applyPreviousSetSuggestions(
+    List<WorkoutExercise> exercises, {
+    String? excludeWorkoutId,
+  }) async {
+    final result = <WorkoutExercise>[];
+    for (final ex in exercises) {
+      final previous = await getPreviousSetsForExercise(
+        ex.exerciseId,
+        excludeWorkoutId: excludeWorkoutId,
+      );
+      if (previous == null || previous.isEmpty) {
+        result.add(ex);
+        continue;
+      }
+
+      final sets = List.generate(ex.sets.length, (i) {
+        final template = ex.sets[i];
+        final prev = i < previous.length ? previous[i] : previous.last;
+        return WorkoutSet(
+          id: '',
+          setNumber: template.setNumber,
+          weight: prev.weight ?? template.weight,
+          reps: prev.reps > 0 ? prev.reps : template.reps,
+        );
+      });
+
+      result.add(WorkoutExercise(
+        id: ex.id,
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+        imageUrl: ex.imageUrl,
+        orderIndex: ex.orderIndex,
+        sets: sets,
+        notes: ex.notes,
+      ));
+    }
+    return result;
+  }
+
+  Future<List<ExerciseSessionHistory>> getExerciseHistory(
+    String exerciseId, {
+    int limit = 5,
+    String? excludeWorkoutId,
+  }) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final data = await _client
+        .from('workout_exercises')
+        .select('id, workouts!inner(id, name, completed_at)')
+        .eq('exercise_id', exerciseId)
+        .not('workouts.completed_at', 'is', null);
+
+    final entries = <({String weId, Map<String, dynamic> workout})>[];
+    for (final row in data as List) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final workout = Map<String, dynamic>.from(map['workouts'] as Map);
+      final wId = workout['id'] as String;
+      if (excludeWorkoutId != null && wId == excludeWorkoutId) continue;
+      entries.add((weId: map['id'] as String, workout: workout));
+    }
+
+    entries.sort((a, b) {
+      final aDate = SupabaseDateTime.parse(a.workout['completed_at'] as String);
+      final bDate = SupabaseDateTime.parse(b.workout['completed_at'] as String);
+      return bDate.compareTo(aDate);
+    });
+
+    final history = <ExerciseSessionHistory>[];
+    for (final entry in entries.take(limit)) {
+      final setsData = await _client
+          .from('workout_sets')
+          .select()
+          .eq('workout_exercise_id', entry.weId)
+          .order('set_number');
+
+      final sets = (setsData as List)
+          .map((s) => WorkoutSet.fromJson(s as Map<String, dynamic>))
+          .toList();
+      final meaningful = _meaningfulSets(sets);
+      if (meaningful.isEmpty) continue;
+
+      history.add(ExerciseSessionHistory(
+        workoutId: entry.workout['id'] as String,
+        workoutName: entry.workout['name'] as String? ?? 'Entrenamiento',
+        date: SupabaseDateTime.parse(entry.workout['completed_at'] as String),
+        sets: meaningful,
+      ));
+    }
+    return history;
+  }
+
+  Future<List<WorkoutSet>?> getPreviousSetsForExercise(
+    String exerciseId, {
+    String? excludeWorkoutId,
+  }) async {
+    final history = await getExerciseHistory(
+      exerciseId,
+      limit: 1,
+      excludeWorkoutId: excludeWorkoutId,
+    );
+    if (history.isEmpty) return null;
+    return history.first.sets;
+  }
+
+  List<WorkoutSet> _meaningfulSets(List<WorkoutSet> sets) {
+    final completed = sets.where((s) => s.completed).toList();
+    final source = completed.isNotEmpty ? completed : sets;
+    return source.where((s) => s.weight != null || s.reps > 0).toList();
   }
 
   Future<void> _addExerciseToWorkout(String workoutId, WorkoutExercise exercise) async {
