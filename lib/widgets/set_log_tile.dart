@@ -6,13 +6,15 @@ import '../models/workout.dart';
 class SetLogTile extends StatefulWidget {
   final WorkoutSet set;
   final String unitSystem;
-  final ValueChanged<WorkoutSet> onChanged;
+  final void Function(WorkoutSet set) onChanged;
+  final VoidCallback? onDelete;
 
   const SetLogTile({
     super.key,
     required this.set,
     required this.unitSystem,
     required this.onChanged,
+    this.onDelete,
   });
 
   @override
@@ -23,6 +25,9 @@ class _SetLogTileState extends State<SetLogTile> {
   late TextEditingController _weightController;
   late TextEditingController _repsController;
   late String _lastUnitSystem;
+  bool _editing = false;
+
+  bool get _fieldsEnabled => !widget.set.completed || _editing;
 
   @override
   void initState() {
@@ -47,7 +52,7 @@ class _SetLogTileState extends State<SetLogTile> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.unitSystem != widget.unitSystem) {
       final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
-      if (parsed != null && !widget.set.completed) {
+      if (parsed != null && _fieldsEnabled) {
         final kg = UnitConverter.displayToKg(parsed, _lastUnitSystem);
         final display = UnitConverter.kgToDisplay(kg, widget.unitSystem);
         _weightController.text = display.toStringAsFixed(1);
@@ -55,10 +60,12 @@ class _SetLogTileState extends State<SetLogTile> {
         _syncWeightField();
       }
       _lastUnitSystem = widget.unitSystem;
-    } else if (oldWidget.set.weight != widget.set.weight || oldWidget.set.completed != widget.set.completed) {
-      _syncWeightField();
+    } else if (oldWidget.set.weight != widget.set.weight ||
+        oldWidget.set.completed != widget.set.completed) {
+      if (! _editing) _syncWeightField();
+      if (widget.set.completed) _editing = false;
     }
-    if (oldWidget.set.reps != widget.set.reps) {
+    if (oldWidget.set.reps != widget.set.reps && !_editing) {
       _repsController.text = widget.set.reps.toString();
     }
   }
@@ -70,14 +77,37 @@ class _SetLogTileState extends State<SetLogTile> {
     super.dispose();
   }
 
-  void _submit() {
+  WorkoutSet _buildSet({bool? completed}) {
     final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
     final weightKg = parsed != null ? UnitConverter.displayToKg(parsed, widget.unitSystem) : null;
-    widget.onChanged(widget.set.copyWith(
+    return widget.set.copyWith(
       weight: weightKg,
       reps: int.tryParse(_repsController.text) ?? widget.set.reps,
-      completed: true,
-    ));
+      completed: completed ?? widget.set.completed,
+    );
+  }
+
+  void _submit({bool markCompleted = true}) {
+    widget.onChanged(_buildSet(completed: markCompleted ? true : widget.set.completed));
+    setState(() => _editing = false);
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar serie'),
+        content: Text('¿Eliminar la serie ${widget.set.setNumber}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) widget.onDelete?.call();
   }
 
   @override
@@ -86,21 +116,22 @@ class _SetLogTileState extends State<SetLogTile> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: widget.set.completed ? AppColors.orange.withValues(alpha: 0.1) : null,
+      color: widget.set.completed && !_editing ? AppColors.orange.withValues(alpha: 0.1) : null,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: widget.set.completed ? AppColors.orange : AppColors.slate,
+              backgroundColor:
+                  widget.set.completed && !_editing ? AppColors.orange : AppColors.slate,
               child: Text('${widget.set.setNumber}', style: const TextStyle(fontSize: 12)),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
                 controller: _weightController,
-                enabled: !widget.set.completed,
+                enabled: _fieldsEnabled,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   labelText: unitLabel,
@@ -113,7 +144,7 @@ class _SetLogTileState extends State<SetLogTile> {
             Expanded(
               child: TextField(
                 controller: _repsController,
-                enabled: !widget.set.completed,
+                enabled: _fieldsEnabled,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'reps',
@@ -122,13 +153,27 @@ class _SetLogTileState extends State<SetLogTile> {
                 ),
               ),
             ),
-            IconButton(
-              onPressed: widget.set.completed ? null : _submit,
-              icon: Icon(
-                widget.set.completed ? Icons.check_circle : Icons.check_circle_outline,
-                color: widget.set.completed ? AppColors.orange : null,
+            if (widget.set.completed && !_editing) ...[
+              IconButton(
+                tooltip: 'Editar',
+                onPressed: () => setState(() => _editing = true),
+                icon: const Icon(Icons.edit_outlined, size: 22),
               ),
-            ),
+              if (widget.onDelete != null)
+                IconButton(
+                  tooltip: 'Eliminar',
+                  onPressed: _confirmDelete,
+                  icon: const Icon(Icons.delete_outline, size: 22, color: AppColors.error),
+                ),
+            ] else
+              IconButton(
+                tooltip: widget.set.completed ? 'Guardar' : 'Completar serie',
+                onPressed: _submit,
+                icon: Icon(
+                  Icons.check_circle,
+                  color: AppColors.orange,
+                ),
+              ),
           ],
         ),
       ),

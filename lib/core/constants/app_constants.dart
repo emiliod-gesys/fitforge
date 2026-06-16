@@ -21,13 +21,13 @@ class AppConstants {
   static const muscleRecoveryHours = <String, int>{
     'Pecho': 48,
     'Espalda': 48,
-    'Hombros': 36,
-    'Bíceps': 24,
-    'Tríceps': 24,
-    'Piernas': 72,
+    'Hombros': 48,
+    'Bíceps': 48,
+    'Tríceps': 48,
+    'Piernas': 48,
     'Glúteos': 48,
-    'Abdominales': 24,
-    'Antebrazos': 24,
-    'Cardio': 12,
+    'Abdominales': 48,
+    'Antebrazos': 48,
+    'Cardio': 48,
   };
 }

@@ -28,7 +28,7 @@ class MuscleRecoveryMap extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Text('Basado en tus entrenamientos recientes', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            const Text('Basado en tus entrenamientos recientes · recuperación en 48 h', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             const SizedBox(height: 16),
             ...recovery.entries.map((e) {
               return Padding(

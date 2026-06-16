@@ -1,11 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
+import '../../services/rest_preferences.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/rest_time_selector.dart';
 import '../../widgets/rest_timer.dart';
 import '../../widgets/set_log_tile.dart';
 
@@ -20,12 +21,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   int _currentExerciseIndex = 0;
   bool _showRestTimer = false;
   int _restSeconds = 90;
+  int _restTimerKey = 0;
   DateTime? _startTime;
 
   @override
   void initState() {
     super.initState();
     _startTime = DateTime.now();
+    RestPreferences.getDefaultRestSeconds().then((seconds) {
+      if (mounted) setState(() => _restSeconds = seconds);
+    });
   }
 
   Future<void> _completeWorkout(Workout workout) async {
@@ -53,6 +58,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       );
       context.pop();
     }
+  }
+
+  void _onRestSecondsChanged(int seconds) {
+    setState(() => _restSeconds = seconds);
+    RestPreferences.setDefaultRestSeconds(seconds);
   }
 
   @override
@@ -102,6 +112,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             children: [
               if (_showRestTimer)
                 RestTimer(
+                  key: ValueKey(_restTimerKey),
                   seconds: _restSeconds,
                   onComplete: () => setState(() => _showRestTimer = false),
                   onSkip: () => setState(() => _showRestTimer = false),
@@ -127,11 +138,23 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
+                    RestTimeSelector(
+                      selectedSeconds: _restSeconds,
+                      onChanged: _onRestSecondsChanged,
+                    ),
+                    const SizedBox(height: 16),
                     ...exercise.sets.map(
                       (set) => SetLogTile(
+                        key: ValueKey(set.id),
                         set: set,
                         unitSystem: unitSystem,
-                        onChanged: (updated) => _logSet(workout, exercise, updated),
+                        onChanged: (updated) => _logSet(
+                          workout,
+                          exercise,
+                          updated,
+                          wasAlreadyCompleted: set.completed,
+                        ),
+                        onDelete: () => _deleteSet(workout, exercise, set),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -162,13 +185,30 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
   }
 
-  Future<void> _logSet(Workout workout, WorkoutExercise exercise, WorkoutSet set) async {
+  Future<void> _logSet(
+    Workout workout,
+    WorkoutExercise exercise,
+    WorkoutSet set, {
+    required bool wasAlreadyCompleted,
+  }) async {
     await ref.read(workoutServiceProvider).logSet(exercise.id, set.copyWith(completed: true));
     ref.invalidate(activeWorkoutProvider);
-    setState(() {
-      _showRestTimer = true;
-      _restSeconds = 90;
-    });
+
+    if (!wasAlreadyCompleted) {
+      setState(() {
+        _restTimerKey++;
+        _showRestTimer = true;
+      });
+    }
+  }
+
+  Future<void> _deleteSet(
+    Workout workout,
+    WorkoutExercise exercise,
+    WorkoutSet set,
+  ) async {
+    await ref.read(workoutServiceProvider).deleteSet(exercise.id, set.id);
+    ref.invalidate(activeWorkoutProvider);
   }
 
   Future<void> _addSet(Workout workout, WorkoutExercise exercise) async {

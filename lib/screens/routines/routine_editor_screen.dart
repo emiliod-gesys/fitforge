@@ -7,6 +7,7 @@ import '../../core/utils/unit_converter.dart';
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
 
 class RoutineEditorScreen extends ConsumerStatefulWidget {
@@ -82,31 +83,34 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     final exercises = await ref.read(exercisesProvider.future);
     if (!mounted) return;
 
+    final selectedIds = _exercises.map((e) => e.exerciseId).toSet();
+
     final selected = await showModalBottomSheet<Exercise>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.7,
-        builder: (_, controller) => ListView.builder(
-          controller: controller,
-          itemCount: exercises.length,
-          itemBuilder: (_, i) {
-            final ex = exercises[i];
-            return ListTile(
-              leading: ex.imageUrl != null
-                  ? Image.network(ex.imageUrl!, width: 48, height: 48, fit: BoxFit.cover)
-                  : const Icon(Icons.fitness_center),
-              title: Text(ex.name),
-              subtitle: Text(ex.category),
-              onTap: () => Navigator.pop(ctx, ex),
-            );
-          },
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, __) => ExercisePickerSheet(
+          exercises: exercises,
+          selectedExerciseIds: selectedIds,
         ),
       ),
     );
 
     if (selected != null) {
+      final alreadyAdded = _exercises.any((e) => e.exerciseId == selected.id);
+      if (alreadyAdded) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('"${selected.name}" ya está en la rutina')),
+          );
+        }
+        return;
+      }
+
       setState(() {
         _exercises.add(RoutineExercise(
           id: const Uuid().v4(),

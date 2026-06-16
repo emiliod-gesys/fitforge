@@ -1,4 +1,6 @@
 import 'package:uuid/uuid.dart';
+import '../core/constants/app_constants.dart';
+import '../core/utils/muscle_inference.dart';
 import '../models/profile.dart';
 import '../models/workout.dart';
 import 'supabase_service.dart';
@@ -190,6 +192,24 @@ class WorkoutService {
     });
   }
 
+  Future<void> deleteSet(String workoutExerciseId, String setId) async {
+    await _client.from('workout_sets').delete().eq('id', setId);
+
+    final data = await _client
+        .from('workout_sets')
+        .select('id')
+        .eq('workout_exercise_id', workoutExerciseId)
+        .order('set_number');
+
+    final rows = data as List;
+    for (var i = 0; i < rows.length; i++) {
+      await _client
+          .from('workout_sets')
+          .update({'set_number': i + 1})
+          .eq('id', (rows[i] as Map<String, dynamic>)['id'] as String);
+    }
+  }
+
   Future<List<PersonalRecord>> getPersonalRecords() async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return [];
@@ -235,49 +255,40 @@ class WorkoutService {
     final recovery = <String, double>{};
     final now = DateTime.now();
 
-    for (final muscle in ['Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps', 'Piernas', 'Glúteos', 'Abdominales']) {
+    for (final muscle in AppConstants.muscleGroups) {
+      if (muscle == 'Cardio') continue;
       recovery[muscle] = 100.0;
     }
 
     for (final workout in recentWorkouts.where((w) => w.completedAt != null)) {
-      final hoursSince = now.difference(workout.completedAt!).inHours.toDouble();
+      final hoursSince = now.difference(workout.completedAt!).inMinutes / 60.0;
+
       for (final ex in workout.exercises) {
-        for (final muscle in _inferMuscles(ex.exerciseName)) {
+        final completedSets = ex.sets.where((s) => s.completed).length;
+        if (completedSets == 0) continue;
+
+        final muscles = MuscleInference.fromExerciseName(ex.exerciseName);
+        if (muscles.isEmpty) continue;
+
+        // Más series = mayor fatiga inicial (mín. 50 %, máx. 100 %).
+        final fatigueDepth = (0.5 + (completedSets.clamp(1, 6) / 6.0) * 0.5).clamp(0.5, 1.0);
+
+        for (final muscle in muscles) {
+          if (!recovery.containsKey(muscle)) continue;
+
           final recoveryHours = _recoveryHours(muscle);
-          final percent = (hoursSince / recoveryHours * 100).clamp(0.0, 100.0);
-          if (recovery.containsKey(muscle)) {
-            recovery[muscle] = recovery[muscle]!.clamp(0.0, 100 - percent);
-          }
+          final timeRecovery = (hoursSince / recoveryHours * 100).clamp(0.0, 100.0);
+          final muscleRecovery = timeRecovery + (100 - timeRecovery) * (1 - fatigueDepth);
+
+          recovery[muscle] = recovery[muscle]!.clamp(0.0, muscleRecovery);
         }
       }
     }
+
     return recovery;
   }
 
-  List<String> _inferMuscles(String exerciseName) {
-    final name = exerciseName.toLowerCase();
-    if (name.contains('press') || name.contains('pecho') || name.contains('bench')) return ['Pecho'];
-    if (name.contains('remo') || name.contains('pull') || name.contains('espalda')) return ['Espalda'];
-    if (name.contains('hombro') || name.contains('shoulder') || name.contains('militar')) return ['Hombros'];
-    if (name.contains('curl') || name.contains('bícep')) return ['Bíceps'];
-    if (name.contains('trícep') || name.contains('extension')) return ['Tríceps'];
-    if (name.contains('sentadilla') || name.contains('squat') || name.contains('pierna')) return ['Piernas'];
-    if (name.contains('glúteo') || name.contains('hip')) return ['Glúteos'];
-    if (name.contains('abdominal') || name.contains('crunch')) return ['Abdominales'];
-    return ['Pecho'];
-  }
-
   double _recoveryHours(String muscle) {
-    const hours = {
-      'Pecho': 48.0,
-      'Espalda': 48.0,
-      'Hombros': 36.0,
-      'Bíceps': 24.0,
-      'Tríceps': 24.0,
-      'Piernas': 72.0,
-      'Glúteos': 48.0,
-      'Abdominales': 24.0,
-    };
-    return hours[muscle] ?? 48.0;
+    return AppConstants.muscleRecoveryHours[muscle]?.toDouble() ?? 48.0;
   }
 }
