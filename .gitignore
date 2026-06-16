@@ -1,0 +1,22 @@
+# FitForge - archivos ignorados por git
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.iml
+
+# Secrets
+dart_defines.json
+.env
+*.keystore
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

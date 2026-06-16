@@ -1,0 +1,23 @@
+# FitForge Supabase local config
+# Docs: https://supabase.com/docs/guides/cli/config
+
+project_id = "fitforge"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "io.fitforge.app://login-callback"
+additional_redirect_urls = ["io.fitforge.app://login-callback"]
+
+[auth.external.google]
+enabled = false
