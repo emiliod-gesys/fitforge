@@ -79,8 +79,6 @@ class _ExerciseBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const FitForgeLoadingIndicator(size: 80, message: 'Cargando imagen…'),
-                    const SizedBox(height: 8),
-                    Text('Cargando imagen…', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ),

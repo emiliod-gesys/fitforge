@@ -1,79 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/app_colors.dart';
 
-/// Animación de carga en bucle usando el video de marca FitForge.
-class FitForgeLoadingIndicator extends StatefulWidget {
+/// Indicador de carga con el logo FitForge (fondo transparente sobre UI oscura).
+class FitForgeLoadingIndicator extends StatelessWidget {
   final double size;
   final String? message;
 
   const FitForgeLoadingIndicator({
     super.key,
-    this.size = 140,
+    this.size = 120,
     this.message,
   });
 
   @override
-  State<FitForgeLoadingIndicator> createState() => _FitForgeLoadingIndicatorState();
-}
-
-class _FitForgeLoadingIndicatorState extends State<FitForgeLoadingIndicator> {
-  late final VideoPlayerController _controller;
-  bool _ready = false;
-  bool _failed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.asset('assets/animations/loading.mp4')
-      ..initialize().then((_) {
-        if (!mounted) return;
-        _controller
-          ..setLooping(true)
-          ..setVolume(0)
-          ..play();
-        setState(() => _ready = true);
-      }).catchError((_) {
-        if (mounted) setState(() => _failed = true);
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final logoSize = size * 0.5;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: widget.size,
-          height: widget.size,
-          child: _failed
-              ? const Center(child: CircularProgressIndicator(color: AppColors.orange))
-              : _ready
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: SizedBox(
-                          width: _controller.value.size.width,
-                          height: _controller.value.size.height,
-                          child: VideoPlayer(_controller),
-                        ),
-                      ),
-                    )
-                  : const Center(
-                      child: CircularProgressIndicator(color: AppColors.orange, strokeWidth: 2),
-                    ),
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: size,
+                height: size,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppColors.orange,
+                  backgroundColor: AppColors.slate.withValues(alpha: 0.35),
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              // BlendMode.lighten oculta el negro del PNG y deja solo el logo.
+              ColorFiltered(
+                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.lighten),
+                child: Image.asset(
+                  'assets/images/logo_icon.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.contain,
+                ),
+              )
+                  .animate(onPlay: (controller) => controller.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(0.86, 0.86),
+                    end: const Offset(1, 1),
+                    duration: 950.ms,
+                    curve: Curves.easeInOut,
+                  )
+                  .fade(begin: 0.65, end: 1, duration: 950.ms),
+            ],
+          ),
         ),
-        if (widget.message != null) ...[
+        if (message != null) ...[
           const SizedBox(height: 12),
           Text(
-            widget.message!,
+            message!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
             textAlign: TextAlign.center,
           ),
