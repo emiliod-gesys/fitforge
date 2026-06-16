@@ -167,6 +167,12 @@ class _StartWorkoutSection extends ConsumerWidget {
     );
   }
 
+  Future<void> _navigateToActiveWorkout(BuildContext context, WidgetRef ref) async {
+    ref.invalidate(activeWorkoutProvider);
+    await ref.read(activeWorkoutProvider.future);
+    if (context.mounted) context.push('/workout/active');
+  }
+
   void _showStartOptions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -179,10 +185,10 @@ class _StartWorkoutSection extends ConsumerWidget {
               title: const Text('Entrenamiento libre'),
               onTap: () async {
                 Navigator.pop(ctx);
-                final workout = await ref.read(workoutServiceProvider).startWorkout(
+                await ref.read(workoutServiceProvider).startWorkout(
                       name: 'Entrenamiento libre',
                     );
-                if (context.mounted) context.push('/workout/active');
+                if (context.mounted) await _navigateToActiveWorkout(context, ref);
               },
             ),
             routinesAsync.when(
@@ -220,7 +226,7 @@ class _StartWorkoutSection extends ConsumerWidget {
                                 routineId: r.id,
                                 exercises: exercises,
                               );
-                          if (context.mounted) context.push('/workout/active');
+                          if (context.mounted) await _navigateToActiveWorkout(context, ref);
                         },
                       ),
                     )
