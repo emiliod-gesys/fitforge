@@ -41,10 +41,14 @@ class ProfileService {
   Future<void> updateProfile(Map<String, dynamic> data) async {
     final user = _client.auth.currentUser;
     if (user == null) return;
-    await _client.from('profiles').update({
+    final payload = {
       ...data,
       'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', user.id);
+    };
+    if (data.containsKey('display_name') && data['display_name'] != null) {
+      payload['search_name'] = (data['display_name'] as String).toLowerCase();
+    }
+    await _client.from('profiles').update(payload).eq('id', user.id);
   }
 
   Future<void> saveApiKey(AiProvider provider, String apiKey) async {

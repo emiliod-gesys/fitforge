@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/workout_streak.dart';
 import '../models/exercise_history.dart';
@@ -8,12 +10,15 @@ import '../services/exercise_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
 import '../services/workout_service.dart';
+import '../models/social.dart';
+import '../services/social_service.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
 final exerciseServiceProvider = Provider((ref) => ExerciseService());
 final routineServiceProvider = Provider((ref) => RoutineService());
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final profileServiceProvider = Provider((ref) => ProfileService());
+final socialServiceProvider = Provider((ref) => SocialService());
 final aiCoachServiceProvider = Provider(
   (ref) => AiCoachService(ref.watch(profileServiceProvider)),
 );
@@ -107,3 +112,48 @@ final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistor
         );
   },
 );
+
+final friendshipsProvider = FutureProvider<List<Friendship>>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getFriendships();
+});
+
+final userSearchProvider = FutureProvider.family<List<FriendUser>, String>((ref, query) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).searchUsers(query);
+});
+
+final friendProfileProvider = FutureProvider.family<FriendProfileView?, String>((ref, friendId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getFriendProfile(friendId);
+});
+
+final socialNotificationsProvider = FutureProvider<List<SocialNotification>>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getNotifications();
+});
+
+final socialUnreadCountProvider = FutureProvider<int>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getUnreadCount();
+});
+
+final socialRealtimeProvider = StreamProvider<String>((ref) {
+  final auth = ref.watch(authStateProvider).valueOrNull;
+  if (auth?.session == null) return const Stream.empty();
+
+  final service = ref.watch(socialServiceProvider);
+  final controller = StreamController<String>();
+
+  final channel = service.subscribeToNotifications((payload) {
+    final message = payload.newRecord['message'] as String?;
+    if (message != null) controller.add(message);
+  });
+
+  ref.onDispose(() {
+    channel.unsubscribe();
+    controller.close();
+  });
+
+  return controller.stream;
+});

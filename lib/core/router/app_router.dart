@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
@@ -11,10 +10,13 @@ import '../../screens/profile/api_keys_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/progress/progress_screen.dart';
 import '../../screens/routines/routine_editor_screen.dart';
-import '../../screens/routines/routine_list_screen.dart';
+import '../../screens/social/friend_profile_screen.dart';
+import '../../screens/social/social_screen.dart';
 import '../../screens/workouts/active_workout_screen.dart';
 import '../../screens/workouts/workout_history_screen.dart';
+import '../../screens/routines/routine_list_screen.dart';
 import '../../screens/workouts/workout_list_screen.dart';
+import '../../widgets/social_notification_listener.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -35,7 +37,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const LoginScreen(),
       ),
       ShellRoute(
-        builder: (context, state, child) => HomeScreen(child: child),
+        builder: (context, state, child) => SocialNotificationListener(
+          child: HomeScreen(child: child),
+        ),
         routes: [
           GoRoute(
             path: '/',
@@ -54,10 +58,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (_, __) => const NoTransitionPage(child: ProgressScreen()),
           ),
           GoRoute(
+            path: '/social',
+            pageBuilder: (_, __) => const NoTransitionPage(child: SocialScreen()),
+          ),
+          GoRoute(
             path: '/profile',
             pageBuilder: (_, __) => const NoTransitionPage(child: ProfileScreen()),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/social/friend/:id',
+        builder: (_, state) => FriendProfileScreen(friendId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/workout/active',

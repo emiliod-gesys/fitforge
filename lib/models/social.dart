@@ -1,0 +1,121 @@
+import 'profile.dart';
+
+enum FriendshipStatus { pending, accepted }
+
+class FriendUser {
+  final String id;
+  final String? displayName;
+  final String? avatarUrl;
+  final String? email;
+
+  const FriendUser({
+    required this.id,
+    this.displayName,
+    this.avatarUrl,
+    this.email,
+  });
+
+  String get label => displayName ?? email?.split('@').first ?? 'Usuario';
+
+  factory FriendUser.fromJson(Map<String, dynamic> json) {
+    return FriendUser(
+      id: json['id'] as String,
+      displayName: json['display_name'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+      email: json['email'] as String?,
+    );
+  }
+}
+
+class Friendship {
+  final String id;
+  final String requesterId;
+  final String addresseeId;
+  final FriendshipStatus status;
+  final DateTime createdAt;
+  final FriendUser? requester;
+  final FriendUser? addressee;
+
+  const Friendship({
+    required this.id,
+    required this.requesterId,
+    required this.addresseeId,
+    required this.status,
+    required this.createdAt,
+    this.requester,
+    this.addressee,
+  });
+
+  factory Friendship.fromJson(Map<String, dynamic> json) {
+    return Friendship(
+      id: json['id'] as String,
+      requesterId: json['requester_id'] as String,
+      addresseeId: json['addressee_id'] as String,
+      status: (json['status'] as String) == 'accepted'
+          ? FriendshipStatus.accepted
+          : FriendshipStatus.pending,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      requester: json['requester'] != null
+          ? FriendUser.fromJson(Map<String, dynamic>.from(json['requester'] as Map))
+          : null,
+      addressee: json['addressee'] != null
+          ? FriendUser.fromJson(Map<String, dynamic>.from(json['addressee'] as Map))
+          : null,
+    );
+  }
+
+  FriendUser friendFor(String currentUserId) {
+    if (requesterId == currentUserId) {
+      return addressee ?? FriendUser(id: addresseeId);
+    }
+    return requester ?? FriendUser(id: requesterId);
+  }
+
+  bool isIncoming(String currentUserId) =>
+      status == FriendshipStatus.pending && addresseeId == currentUserId;
+}
+
+class SocialNotification {
+  final String id;
+  final String actorId;
+  final String message;
+  final DateTime createdAt;
+  final DateTime? readAt;
+  final FriendUser? actor;
+
+  const SocialNotification({
+    required this.id,
+    required this.actorId,
+    required this.message,
+    required this.createdAt,
+    this.readAt,
+    this.actor,
+  });
+
+  bool get isUnread => readAt == null;
+
+  factory SocialNotification.fromJson(Map<String, dynamic> json) {
+    return SocialNotification(
+      id: json['id'] as String,
+      actorId: json['actor_id'] as String,
+      message: json['message'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
+      actor: json['actor'] != null
+          ? FriendUser.fromJson(Map<String, dynamic>.from(json['actor'] as Map))
+          : null,
+    );
+  }
+}
+
+class FriendProfileView {
+  final FriendUser user;
+  final UserProfile profile;
+  final List<PersonalRecord> personalRecords;
+
+  const FriendProfileView({
+    required this.user,
+    required this.profile,
+    required this.personalRecords,
+  });
+}
