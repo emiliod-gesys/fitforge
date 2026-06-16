@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/utils/supabase_datetime.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
@@ -34,7 +35,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Future<void> _completeWorkout(Workout workout) async {
-    final duration = DateTime.now().difference(workout.startedAt).inMinutes;
+    final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
     final volume = workout.exercises.fold<double>(
       0,
       (sum, ex) => sum + ex.totalVolume,

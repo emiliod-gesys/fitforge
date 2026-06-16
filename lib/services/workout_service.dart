@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/muscle_inference.dart';
 import '../models/profile.dart';
+import '../core/utils/supabase_datetime.dart';
 import '../models/workout.dart';
 import 'supabase_service.dart';
 
@@ -44,7 +45,7 @@ class WorkoutService {
         .order('completed_at', ascending: false);
 
     return (data as List)
-        .map((row) => DateTime.parse((row as Map<String, dynamic>)['completed_at'] as String))
+        .map((row) => SupabaseDateTime.parse((row as Map<String, dynamic>)['completed_at'] as String))
         .toList();
   }
 
@@ -77,7 +78,7 @@ class WorkoutService {
     var query = _client
         .from('workouts')
         .update({
-          'completed_at': DateTime.now().toIso8601String(),
+          'completed_at': SupabaseDateTime.nowUtc.toIso8601String(),
           'duration_minutes': 0,
         })
         .eq('user_id', userId)
@@ -130,7 +131,7 @@ class WorkoutService {
       'user_id': userId,
       'routine_id': routineId,
       'name': name,
-      'started_at': DateTime.now().toIso8601String(),
+      'started_at': SupabaseDateTime.nowUtc.toIso8601String(),
     });
 
     if (exercises != null) {
@@ -144,7 +145,7 @@ class WorkoutService {
       userId: userId,
       routineId: routineId,
       name: name,
-      startedAt: DateTime.now(),
+      startedAt: SupabaseDateTime.nowUtc,
       exercises: exercises ?? [],
     );
   }
@@ -172,7 +173,7 @@ class WorkoutService {
 
   Future<void> completeWorkout(String workoutId, {int durationMinutes = 0, double totalVolume = 0}) async {
     await _client.from('workouts').update({
-      'completed_at': DateTime.now().toIso8601String(),
+      'completed_at': SupabaseDateTime.nowUtc.toIso8601String(),
       'duration_minutes': durationMinutes,
       'total_volume': totalVolume,
     }).eq('id', workoutId);
@@ -203,7 +204,7 @@ class WorkoutService {
               'weight': set.weight,
               'reps': set.reps,
               'one_rep_max': oneRm,
-              'achieved_at': DateTime.now().toIso8601String(),
+              'achieved_at': SupabaseDateTime.nowUtc.toIso8601String(),
             },
             onConflict: 'user_id,exercise_id',
           );

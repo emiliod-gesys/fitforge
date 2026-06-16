@@ -1,3 +1,5 @@
+import '../core/utils/supabase_datetime.dart';
+
 class WorkoutSet {
   final String id;
   final int setNumber;
@@ -127,9 +129,9 @@ class Workout {
       routineId: json['routine_id'] as String?,
       routineName: json['routine_name'] as String?,
       name: json['name'] as String? ?? 'Entrenamiento',
-      startedAt: DateTime.parse(json['started_at'] as String),
+      startedAt: SupabaseDateTime.parse(json['started_at'] as String),
       completedAt: json['completed_at'] != null
-          ? DateTime.parse(json['completed_at'] as String)
+          ? SupabaseDateTime.parse(json['completed_at'] as String)
           : null,
       durationMinutes: json['duration_minutes'] as int? ?? 0,
       exercises: exercises ?? [],
