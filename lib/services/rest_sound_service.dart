@@ -16,4 +16,11 @@ class RestSoundService {
       _player.stop();
     });
   }
+
+  /// Detiene la campana y cancela el auto-stop pendiente.
+  static Future<void> cancelBell() async {
+    _stopTimer?.cancel();
+    _stopTimer = null;
+    await _player.stop();
+  }
 }

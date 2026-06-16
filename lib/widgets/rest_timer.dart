@@ -4,12 +4,14 @@ import '../core/theme/app_colors.dart';
 import '../services/rest_sound_service.dart';
 
 class RestTimer extends StatefulWidget {
+  final int sessionId;
   final int seconds;
   final VoidCallback onComplete;
   final VoidCallback onSkip;
 
   const RestTimer({
     super.key,
+    required this.sessionId,
     required this.seconds,
     required this.onComplete,
     required this.onSkip,
@@ -20,33 +22,55 @@ class RestTimer extends StatefulWidget {
 }
 
 class _RestTimerState extends State<RestTimer> {
+  static int? _activeSessionId;
+
   late int _remaining;
   late int _total;
   Timer? _timer;
   bool _finished = false;
+  bool _cancelled = false;
+
+  bool get _isActiveSession =>
+      !_cancelled && _activeSessionId == widget.sessionId && mounted;
 
   @override
   void initState() {
     super.initState();
+    _activeSessionId = widget.sessionId;
     _total = widget.seconds;
     _remaining = widget.seconds;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
+  @override
+  void dispose() {
+    _cancelled = true;
+    _timer?.cancel();
+    if (_activeSessionId == widget.sessionId) {
+      _activeSessionId = null;
+    }
+    super.dispose();
+  }
+
   Future<void> _tick() async {
+    if (!_isActiveSession) return;
+
     if (_remaining <= 1) {
       _timer?.cancel();
-      if (!_finished) {
-        _finished = true;
-        await RestSoundService.playRestCompleteBell();
-        widget.onComplete();
-      }
+      if (_finished || !_isActiveSession) return;
+
+      _finished = true;
+      await RestSoundService.playRestCompleteBell();
+      if (!_isActiveSession) return;
+      widget.onComplete();
     } else {
+      if (!_isActiveSession) return;
       setState(() => _remaining--);
     }
   }
 
   void _adjust(int delta) {
+    if (!_isActiveSession) return;
     setState(() {
       _remaining = (_remaining + delta).clamp(0, 600);
       _total = _total < _remaining ? _remaining : _total;
@@ -57,10 +81,12 @@ class _RestTimerState extends State<RestTimer> {
     }
   }
 
-  @override
-  void dispose() {
+  void _skip() {
+    if (!_isActiveSession) return;
     _timer?.cancel();
-    super.dispose();
+    _finished = true;
+    unawaited(RestSoundService.cancelBell());
+    widget.onSkip();
   }
 
   @override
@@ -102,7 +128,7 @@ class _RestTimerState extends State<RestTimer> {
             onPressed: () => _adjust(15),
             icon: const Icon(Icons.add_circle_outline),
           ),
-          TextButton(onPressed: widget.onSkip, child: const Text('Saltar')),
+          TextButton(onPressed: _skip, child: const Text('Saltar')),
         ],
       ),
     );

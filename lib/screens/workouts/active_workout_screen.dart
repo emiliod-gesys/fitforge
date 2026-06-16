@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import '../../core/utils/supabase_datetime.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
+import '../../services/rest_sound_service.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
@@ -66,6 +69,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     RestPreferences.setDefaultRestSeconds(seconds);
   }
 
+  void _startRestTimer() {
+    unawaited(RestSoundService.cancelBell());
+    setState(() {
+      _restTimerKey++;
+      _showRestTimer = true;
+    });
+  }
+
+  void _dismissRestTimer(int sessionId) {
+    if (sessionId != _restTimerKey) return;
+    setState(() => _showRestTimer = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeAsync = ref.watch(activeWorkoutProvider);
@@ -115,16 +131,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           }
 
           final exercise = workout.exercises[_currentExerciseIndex];
+          final restSession = _restTimerKey;
 
           return Column(
             children: [
               WorkoutElapsedTimer(startedAt: workout.startedAt),
               if (_showRestTimer)
                 RestTimer(
-                  key: ValueKey(_restTimerKey),
+                  key: ValueKey(restSession),
+                  sessionId: restSession,
                   seconds: _restSeconds,
-                  onComplete: () => setState(() => _showRestTimer = false),
-                  onSkip: () => setState(() => _showRestTimer = false),
+                  onComplete: () => _dismissRestTimer(restSession),
+                  onSkip: () => _dismissRestTimer(restSession),
                 ),
               Expanded(
                 child: ListView(
@@ -204,10 +222,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     ref.invalidate(activeWorkoutProvider);
 
     if (!wasAlreadyCompleted) {
-      setState(() {
-        _restTimerKey++;
-        _showRestTimer = true;
-      });
+      _startRestTimer();
     }
   }
 
