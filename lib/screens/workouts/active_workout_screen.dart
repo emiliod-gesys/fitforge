@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
@@ -296,24 +297,43 @@ class _ExerciseNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border(top: BorderSide(color: Colors.white12)),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: onPrevious,
-            icon: const Icon(Icons.chevron_left),
-          ),
-          Text('${currentIndex + 1} / $total'),
-          IconButton(
-            onPressed: onNext,
-            icon: const Icon(Icons.chevron_right),
-          ),
-        ],
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Ejercicio ${currentIndex + 1} de $total',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onPrevious,
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    label: const Text('Ejercicio anterior'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: onNext,
+                    icon: const Icon(Icons.arrow_forward, size: 18),
+                    label: const Text('Siguiente ejercicio'),
+                    iconAlignment: IconAlignment.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
