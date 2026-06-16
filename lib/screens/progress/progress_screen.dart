@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import '../../models/profile.dart';
+import '../../core/utils/unit_converter.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -22,33 +22,33 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   Future<void> _addWeight() async {
-    final value = double.tryParse(_weightController.text);
+    final unitSystem = ref.read(unitSystemProvider);
+    final value = double.tryParse(_weightController.text.replaceAll(',', '.'));
     if (value == null) return;
 
-    await ref.read(workoutServiceProvider).addBodyMeasurement(
-          BodyMeasurement(
-            id: '',
-            userId: '',
-            type: 'weight',
-            value: value,
-            measuredAt: DateTime.now(),
-          ),
+    await ref.read(profileServiceProvider).saveBodyMetric(
+          type: 'weight',
+          displayValue: value,
+          unitSystem: unitSystem,
         );
 
     _weightController.clear();
     ref.invalidate(bodyMeasurementsProvider);
+    ref.invalidate(bodyMetricSnapshotsProvider);
+    ref.invalidate(profileProvider);
     if (mounted) Navigator.pop(context);
   }
 
   void _showAddWeight() {
+    final unitLabel = UnitConverter.massLabel(ref.read(unitSystemProvider));
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Registrar peso'),
         content: TextField(
           controller: _weightController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Peso (kg)', suffixText: 'kg'),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(labelText: 'Peso ($unitLabel)', suffixText: unitLabel),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
@@ -69,10 +69,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final prsAsync = ref.watch(personalRecordsProvider);
     final measurementsAsync = ref.watch(bodyMeasurementsProvider);
     final workoutsAsync = ref.watch(workoutsProvider);
+    final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Progreso'),
+      appBar: FitForgeAppBar(
+        title: 'Progreso',
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: _showAddWeight),
         ],
@@ -94,7 +95,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   children: [
                     Expanded(child: _StatBox('Entrenos', '$completed')),
                     const SizedBox(width: 12),
-                    Expanded(child: _StatBox('Volumen total', '${totalVolume.toStringAsFixed(0)} kg')),
+                    Expanded(
+                      child: _StatBox(
+                        'Volumen total',
+                        UnitConverter.formatVolume(totalVolume, unitSystem),
+                      ),
+                    ),
                   ],
                 );
               },
@@ -124,7 +130,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       lineBarsData: [
                         LineChartBarData(
                           spots: measurements.reversed.toList().asMap().entries.map((e) {
-                            return FlSpot(e.key.toDouble(), e.value.value);
+                            final display = UnitConverter.kgToDisplay(e.value.value, unitSystem);
+                            return FlSpot(e.key.toDouble(), display);
                           }).toList(),
                           isCurved: true,
                           color: Theme.of(context).colorScheme.primary,
@@ -158,9 +165,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       child: ListTile(
                         leading: const Icon(Icons.emoji_events, color: Colors.amber),
                         title: Text(pr.exerciseName),
-                        subtitle: Text('${pr.weight} kg × ${pr.reps} reps'),
+                        subtitle: Text(UnitConverter.formatSetLine(pr.weight, pr.reps, unitSystem)),
                         trailing: Text(
-                          '1RM: ${pr.oneRepMax.toStringAsFixed(1)} kg',
+                          '1RM: ${UnitConverter.formatMass(pr.oneRepMax, unitSystem)}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

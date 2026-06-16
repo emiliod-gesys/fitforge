@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/unit_converter.dart';
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
 
 class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
@@ -126,9 +128,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final unitSystem = ref.watch(unitSystemProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.routineId != null ? 'Editar rutina' : 'Nueva rutina'),
+      appBar: FitForgeAppBar(
+        title: widget.routineId != null ? 'Editar' : 'Nueva rutina',
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
@@ -192,7 +196,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                     ? Image.network(ex.imageUrl!, width: 48, height: 48, fit: BoxFit.cover)
                     : const Icon(Icons.fitness_center),
                 title: Text(ex.exerciseName),
-                subtitle: Text('${ex.targetSets}×${ex.targetReps} · ${ex.restSeconds}s descanso'),
+                subtitle: Text(_exerciseSubtitle(ex, unitSystem)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => setState(() => _exercises.removeAt(i)),
@@ -207,6 +211,13 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String _exerciseSubtitle(RoutineExercise ex, String unitSystem) {
+    final weightPart = ex.targetWeight != null
+        ? ' · ${UnitConverter.formatMass(ex.targetWeight, unitSystem)}'
+        : '';
+    return '${ex.targetSets}×${ex.targetReps}$weightPart · ${ex.restSeconds}s descanso';
   }
 
   @override

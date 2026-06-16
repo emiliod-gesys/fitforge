@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class MuscleRecoveryMap extends StatelessWidget {
   final Map<String, double> recovery;
@@ -6,9 +7,9 @@ class MuscleRecoveryMap extends StatelessWidget {
   const MuscleRecoveryMap({super.key, required this.recovery});
 
   Color _colorFor(double percent) {
-    if (percent >= 80) return Colors.green;
-    if (percent >= 50) return Colors.orange;
-    return Colors.redAccent;
+    if (percent >= 80) return AppColors.orange;
+    if (percent >= 50) return const Color(0xFFE8A87C);
+    return AppColors.slateLight;
   }
 
   @override
@@ -19,9 +20,15 @@ class MuscleRecoveryMap extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Recuperación muscular', style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              children: [
+                Icon(Icons.bolt, color: AppColors.orange, size: 20),
+                const SizedBox(width: 8),
+                Text('Recuperación muscular', style: Theme.of(context).textTheme.titleMedium),
+              ],
+            ),
             const SizedBox(height: 4),
-            const Text('Basado en tus entrenamientos recientes', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            const Text('Basado en tus entrenamientos recientes', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             const SizedBox(height: 16),
             ...recovery.entries.map((e) {
               return Padding(
@@ -33,7 +40,7 @@ class MuscleRecoveryMap extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(e.key, style: const TextStyle(fontSize: 13)),
-                        Text('${e.value.toStringAsFixed(0)}%', style: TextStyle(color: _colorFor(e.value), fontSize: 13)),
+                        Text('${e.value.toStringAsFixed(0)}%', style: TextStyle(color: _colorFor(e.value), fontSize: 13, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -42,7 +49,7 @@ class MuscleRecoveryMap extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: e.value / 100,
                         minHeight: 6,
-                        backgroundColor: Colors.white12,
+                        backgroundColor: AppColors.cardElevated,
                         color: _colorFor(e.value),
                       ),
                     ),

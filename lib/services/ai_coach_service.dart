@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/utils/unit_converter.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
@@ -27,11 +28,14 @@ class AiCoachService {
     }
 
     final context = _buildContext(recentWorkouts, routines, profile);
+    final usesLb = profile != null && UnitConverter.isLb(profile.unitSystem);
+    final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
+    final progressionHint = usesLb ? '+5 lb o +5%' : '+2.5 kg o +5%';
     final systemPrompt = '''
 Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
 Responde siempre en español. Sé conciso pero útil.
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
-Si sugieres pesos, usa progresión gradual (+2.5kg o +5% cuando aplique).
+El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
 
 Contexto del usuario:
@@ -115,16 +119,26 @@ Responde SOLO con JSON válido (sin markdown):
   ) {
     final buffer = StringBuffer();
     if (profile != null) {
-      buffer.writeln('Peso corporal: ${profile.bodyWeight ?? 'no registrado'} kg');
+      final weightText = profile.bodyWeight != null
+          ? UnitConverter.formatMass(profile.bodyWeight, profile.unitSystem)
+          : 'no registrado';
+      buffer.writeln('Peso corporal: $weightText');
+      buffer.writeln('Unidades preferidas: ${profile.unitSystem == 'lb' ? 'libras' : 'kilogramos'}');
       buffer.writeln('Objetivo: ${profile.fitnessGoal ?? 'no definido'}');
       buffer.writeln('Experiencia: ${profile.experienceLevel ?? 'intermedio'}');
     }
     if (workouts != null && workouts.isNotEmpty) {
+      final unit = profile?.unitSystem ?? 'kg';
       buffer.writeln('\nÚltimos entrenamientos:');
       for (final w in workouts.take(5)) {
-        buffer.writeln('- ${w.name} (${w.durationMinutes} min, volumen: ${w.totalVolume.toStringAsFixed(0)} kg)');
+        buffer.writeln(
+          '- ${w.name} (${w.durationMinutes} min, volumen: ${UnitConverter.formatVolume(w.totalVolume, unit)})',
+        );
         for (final ex in w.exercises.take(3)) {
-          final sets = ex.sets.where((s) => s.completed).map((s) => '${s.weight}kg×${s.reps}').join(', ');
+          final sets = ex.sets
+              .where((s) => s.completed && s.weight != null)
+              .map((s) => UnitConverter.formatSetLine(s.weight!, s.reps, unit))
+              .join(', ');
           buffer.writeln('  ${ex.exerciseName}: $sets');
         }
       }

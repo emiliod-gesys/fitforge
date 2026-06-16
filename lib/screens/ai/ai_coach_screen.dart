@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
   const AiCoachScreen({super.key});
@@ -57,7 +59,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Coach IA')),
+      appBar: const FitForgeAppBar(title: 'Coach IA'),
       body: Column(
         children: [
           if (_messages.isEmpty)
@@ -65,7 +67,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Icon(Icons.auto_awesome, size: 64, color: Colors.purple),
+          const Icon(Icons.auto_awesome_outlined, size: 64, color: AppColors.orange),
                   const SizedBox(height: 16),
                   Text(
                     'Tu entrenador personal con IA',
@@ -158,11 +160,11 @@ class _MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
         decoration: BoxDecoration(
-          color: message.isError
-              ? Colors.red.withValues(alpha: 0.2)
+            color: message.isError
+              ? AppColors.error.withValues(alpha: 0.2)
               : message.isUser
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-                  : Theme.of(context).cardColor,
+                  ? AppColors.orange.withValues(alpha: 0.2)
+                  : AppColors.card,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(message.text),

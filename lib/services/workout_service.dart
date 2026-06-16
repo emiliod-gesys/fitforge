@@ -30,6 +30,22 @@ class WorkoutService {
     return workouts;
   }
 
+  Future<List<DateTime>> getCompletedWorkoutTimestamps() async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final data = await _client
+        .from('workouts')
+        .select('completed_at')
+        .eq('user_id', userId)
+        .not('completed_at', 'is', null)
+        .order('completed_at', ascending: false);
+
+    return (data as List)
+        .map((row) => DateTime.parse((row as Map<String, dynamic>)['completed_at'] as String))
+        .toList();
+  }
+
   Future<Workout?> getActiveWorkout() async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return null;

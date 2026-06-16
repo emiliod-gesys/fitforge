@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/app_providers.dart';
-import '../screens/ai/ai_coach_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/exercises/exercise_detail_screen.dart';
-import '../screens/exercises/exercise_library_screen.dart';
-import '../screens/home/home_screen.dart';
-import '../screens/profile/api_keys_screen.dart';
-import '../screens/profile/profile_screen.dart';
-import '../screens/progress/progress_screen.dart';
-import '../screens/routines/routine_editor_screen.dart';
-import '../screens/routines/routine_list_screen.dart';
-import '../screens/workouts/active_workout_screen.dart';
-import '../screens/workouts/workout_list_screen.dart';
+import '../../providers/app_providers.dart';
+import '../../screens/ai/ai_coach_screen.dart';
+import '../../screens/auth/login_screen.dart';
+import '../../screens/exercises/exercise_detail_screen.dart';
+import '../../screens/exercises/exercise_library_screen.dart';
+import '../../screens/home/home_screen.dart';
+import '../../screens/profile/api_keys_screen.dart';
+import '../../screens/profile/profile_screen.dart';
+import '../../screens/progress/progress_screen.dart';
+import '../../screens/routines/routine_editor_screen.dart';
+import '../../screens/routines/routine_list_screen.dart';
+import '../../screens/workouts/active_workout_screen.dart';
+import '../../screens/workouts/workout_list_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);

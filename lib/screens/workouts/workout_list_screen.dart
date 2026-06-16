@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
+import '../../core/utils/unit_converter.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
+import '../../core/theme/app_colors.dart';
 import '../../widgets/muscle_recovery_map.dart';
 import '../../widgets/stat_card.dart';
 
@@ -19,12 +22,13 @@ class WorkoutListScreen extends ConsumerWidget {
     final routinesAsync = ref.watch(routinesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('FitForge')),
+      appBar: const FitForgeAppBar(),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(workoutsProvider);
           ref.invalidate(activeWorkoutProvider);
           ref.invalidate(muscleRecoveryProvider);
+          ref.invalidate(workoutWeeklyStatsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -57,7 +61,9 @@ class WorkoutListScreen extends ConsumerWidget {
                   );
                 }
                 return Column(
-                  children: workouts.map((w) => _WorkoutTile(workout: w)).toList(),
+                  children: workouts
+                      .map((w) => _WorkoutTile(workout: w, unitSystem: ref.watch(unitSystemProvider)))
+                      .toList(),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -78,9 +84,9 @@ class _ActiveWorkoutBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+      color: AppColors.orange.withValues(alpha: 0.12),
       child: ListTile(
-        leading: const Icon(Icons.play_circle_fill, size: 40),
+        leading: Icon(Icons.play_circle_fill, size: 40, color: AppColors.orange),
         title: Text(workout.name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: const Text('Entrenamiento en curso'),
         trailing: const Icon(Icons.chevron_right),
@@ -97,27 +103,57 @@ class _StartWorkoutSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(workoutWeeklyStatsProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                icon: Icons.local_fire_department,
-                label: 'Racha',
-                value: '0 días',
+        statsAsync.when(
+          data: (stats) => Row(
+            children: [
+              Expanded(
+                child: StatCard(
+                  icon: Icons.local_fire_department,
+                  label: 'Racha (≥4/sem)',
+                  value: stats.streakLabel,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                icon: Icons.fitness_center,
-                label: 'Esta semana',
-                value: '0',
+              const SizedBox(width: 12),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.fitness_center,
+                  label: 'Esta semana',
+                  value: stats.weekProgressLabel,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          loading: () => const Row(
+            children: [
+              Expanded(child: StatCard(icon: Icons.local_fire_department, label: 'Racha', value: '…')),
+              SizedBox(width: 12),
+              Expanded(child: StatCard(icon: Icons.fitness_center, label: 'Esta semana', value: '…')),
+            ],
+          ),
+          error: (_, __) => const Row(
+            children: [
+              Expanded(
+                child: StatCard(
+                  icon: Icons.local_fire_department,
+                  label: 'Racha (≥4/sem)',
+                  value: '0 semanas',
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.fitness_center,
+                  label: 'Esta semana',
+                  value: '0/4',
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         ElevatedButton.icon(
@@ -201,8 +237,9 @@ class _StartWorkoutSection extends ConsumerWidget {
 
 class _WorkoutTile extends StatelessWidget {
   final Workout workout;
+  final String unitSystem;
 
-  const _WorkoutTile({required this.workout});
+  const _WorkoutTile({required this.workout, required this.unitSystem});
 
   @override
   Widget build(BuildContext context) {
@@ -211,13 +248,15 @@ class _WorkoutTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-          child: const Icon(Icons.fitness_center),
+          backgroundColor: AppColors.orange.withValues(alpha: 0.15),
+          child: Icon(Icons.fitness_center, color: AppColors.orange),
         ),
         title: Text(workout.name),
-        subtitle: Text('$date · ${workout.durationMinutes} min · ${workout.totalVolume.toStringAsFixed(0)} kg vol.'),
+        subtitle: Text(
+          '$date · ${workout.durationMinutes} min · ${UnitConverter.formatVolume(workout.totalVolume, unitSystem)} vol.',
+        ),
         trailing: workout.isActive
-            ? Chip(label: const Text('Activo'), backgroundColor: Colors.green.withValues(alpha: 0.2))
+            ? Chip(label: const Text('Activo'), backgroundColor: AppColors.orange.withValues(alpha: 0.2), labelStyle: const TextStyle(color: AppColors.orange))
             : null,
       ),
     );

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_colors.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
 
 class RoutineListScreen extends ConsumerWidget {
   const RoutineListScreen({super.key});
@@ -12,11 +14,11 @@ class RoutineListScreen extends ConsumerWidget {
     final routinesAsync = ref.watch(routinesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis rutinas'),
+      appBar: FitForgeAppBar(
+        title: 'Rutinas',
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome),
+            icon: const Icon(Icons.auto_awesome_outlined),
             tooltip: 'Generar con IA',
             onPressed: () => _showAiGenerator(context, ref),
           ),
@@ -151,9 +153,9 @@ class _RoutineCard extends ConsumerWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: routine.isAiGenerated
-              ? Colors.purple.withValues(alpha: 0.2)
-              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-          child: Icon(routine.isAiGenerated ? Icons.auto_awesome : Icons.list_alt),
+              ? AppColors.orange.withValues(alpha: 0.15)
+              : AppColors.slate.withValues(alpha: 0.4),
+          child: Icon(routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt, color: AppColors.orange),
         ),
         title: Text(routine.name),
         subtitle: Text(

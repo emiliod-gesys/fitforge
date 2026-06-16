@@ -1,4 +1,6 @@
 {
   "SUPABASE_URL": "https://TU_PROYECTO.supabase.co",
-  "SUPABASE_ANON_KEY": "tu-publishable-o-anon-key-aqui"
+  "SUPABASE_ANON_KEY": "tu-publishable-o-anon-key-aqui",
+  "TURNSTILE_SITE_KEY": "tu-site-key-de-cloudflare",
+  "TURNSTILE_BASE_URL": "http://localhost/"
 }

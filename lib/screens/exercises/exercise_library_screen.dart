@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/exercise.dart';
+import '../../core/theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/exercise_card.dart';
+import '../../widgets/fitforge_app_bar.dart';
 
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
   const ExerciseLibraryScreen({super.key});
@@ -21,7 +22,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Biblioteca de ejercicios')),
+      appBar: const FitForgeAppBar(title: 'Ejercicios'),
       body: Column(
         children: [
           Padding(
@@ -47,7 +48,16 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 
               return Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        '${filtered.length} ejercicios',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     SizedBox(
                       height: 40,
                       child: ListView(

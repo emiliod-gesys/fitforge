@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/rest_timer.dart';
 import '../../widgets/set_log_tile.dart';
 
@@ -44,6 +45,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     ref.invalidate(activeWorkoutProvider);
     ref.invalidate(personalRecordsProvider);
     ref.invalidate(muscleRecoveryProvider);
+    ref.invalidate(workoutWeeklyStatsProvider);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -56,10 +58,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     final activeAsync = ref.watch(activeWorkoutProvider);
+    final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Entrenamiento activo'),
+      appBar: FitForgeAppBar(
+        title: 'Entrenando',
         actions: [
           activeAsync.whenOrNull(
             data: (workout) => workout != null
@@ -127,6 +130,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     ...exercise.sets.map(
                       (set) => SetLogTile(
                         set: set,
+                        unitSystem: unitSystem,
                         onChanged: (updated) => _logSet(workout, exercise, updated),
                       ),
                     ),

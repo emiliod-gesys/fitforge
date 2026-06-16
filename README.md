@@ -4,7 +4,7 @@ App móvil de entrenamiento tipo **Fitbod** para Android e iOS, construida con *
 
 ## Características
 
-- **Autenticación** con email/contraseña (Supabase Auth). Google se añadirá más adelante.
+- **Autenticación** con email/contraseña y verificación **Cloudflare Turnstile** (sin confirmación por email)
 - **Rutinas personalizadas** — crear, editar y ejecutar rutinas
 - **Registro de entrenamientos** — series, reps, peso, RIR, temporizador de descanso
 - **Biblioteca de ejercicios** — +200 ejercicios con imágenes y videos desde [wger.de](https://wger.de) (API pública, CC-BY-SA)
@@ -34,7 +34,24 @@ flutter pub get
 
 1. Crea un proyecto en [supabase.com](https://supabase.com)
 2. En **SQL Editor**, ejecuta el contenido de `supabase/migrations/001_initial_schema.sql`
-3. (Opcional, más adelante) Configurar Google OAuth en Authentication → Providers
+3. **Authentication → Providers → Email** → desactiva **Confirm email**
+4. **Authentication → Bot and Abuse Protection** → activa CAPTCHA con **Cloudflare Turnstile** y pega la **Secret key**
+5. (Opcional, más adelante) Configurar Google OAuth en Authentication → Providers
+
+### 2b. Configurar Cloudflare Turnstile
+
+1. En [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Turnstile** → **Add widget**
+2. Modo recomendado: **Managed**
+3. En dominios permitidos añade: `localhost` (desarrollo) y tu dominio si tienes
+4. Copia el **Site key** (va en la app) y **Secret key** (solo en Supabase)
+5. Añade en `dart_defines.json`:
+
+```json
+"TURNSTILE_SITE_KEY": "tu-site-key",
+"TURNSTILE_BASE_URL": "http://localhost/"
+```
+
+`TURNSTILE_BASE_URL` debe coincidir con un dominio del widget de Turnstile.
 
 ### 3. Variables de entorno
 

@@ -8,15 +8,29 @@ class AuthService {
 
   User? get currentUser => _client.auth.currentUser;
 
-  Future<AuthResponse> signInWithEmail(String email, String password) async {
-    return _client.auth.signInWithPassword(email: email, password: password);
+  Future<AuthResponse> signInWithEmail(
+    String email,
+    String password, {
+    String? captchaToken,
+  }) async {
+    return _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+      captchaToken: captchaToken,
+    );
   }
 
-  Future<AuthResponse> signUpWithEmail(String email, String password, {String? name}) async {
+  Future<AuthResponse> signUpWithEmail(
+    String email,
+    String password, {
+    String? name,
+    String? captchaToken,
+  }) async {
     return _client.auth.signUp(
       email: email,
       password: password,
-      data: name != null ? {'display_name': name} : null,
+      data: name != null && name.isNotEmpty ? {'display_name': name} : null,
+      captchaToken: captchaToken,
     );
   }
 
@@ -24,7 +38,10 @@ class AuthService {
     await _client.auth.signOut();
   }
 
-  Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+  Future<void> resetPassword(String email, {String? captchaToken}) async {
+    await _client.auth.resetPasswordForEmail(
+      email,
+      captchaToken: captchaToken,
+    );
   }
 }

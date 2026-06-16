@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class RestTimer extends StatefulWidget {
   final int seconds;
@@ -46,7 +47,7 @@ class _RestTimerState extends State<RestTimer> {
     final progress = _remaining / widget.seconds;
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.15),
+      color: AppColors.orange.withValues(alpha: 0.12),
       child: Row(
         children: [
           SizedBox(
