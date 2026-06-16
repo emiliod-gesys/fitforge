@@ -19,15 +19,16 @@ class RoutineListScreen extends ConsumerWidget {
         title: 'Rutinas',
         actions: [
           IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Nueva rutina',
+            onPressed: () => context.push('/routines/new'),
+          ),
+          IconButton(
             icon: const Icon(Icons.auto_awesome_outlined),
             tooltip: 'Generar con IA',
             onPressed: () => _showAiGenerator(context, ref),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/routines/new'),
-        child: const Icon(Icons.add),
       ),
       body: routinesAsync.when(
         data: (routines) {
@@ -48,10 +49,22 @@ class RoutineListScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: routines.length,
-            itemBuilder: (_, i) => _RoutineCard(routine: routines[i]),
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => context.push('/routines/new'),
+                icon: const Icon(Icons.add),
+                label: const Text('Nueva rutina'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  foregroundColor: AppColors.orange,
+                  side: const BorderSide(color: AppColors.orange),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...routines.map((routine) => _RoutineCard(routine: routine)),
+            ],
           );
         },
         loading: () => const FitForgeLoadingScreen(),
