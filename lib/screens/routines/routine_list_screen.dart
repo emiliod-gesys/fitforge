@@ -99,21 +99,18 @@ class RoutineListScreen extends ConsumerWidget {
                 final workouts = await ref.read(workoutsProvider.future);
 
                 if (!context.mounted) return;
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => const FitForgeLoadingScreen(message: 'Generando rutina…'),
-                );
 
                 try {
-                  final routine = await ref.read(aiCoachServiceProvider).generateRoutine(
-                        targetMuscles: muscles.isEmpty ? ['Pecho', 'Espalda'] : muscles,
-                        durationMinutes: duration,
-                        profile: profile,
-                        recentWorkouts: workouts,
-                      );
-
-                  if (context.mounted) Navigator.pop(context);
+                  final routine = await FitForgeLoadingOverlay.run(
+                    context,
+                    message: 'Generando rutina…',
+                    task: () => ref.read(aiCoachServiceProvider).generateRoutine(
+                          targetMuscles: muscles.isEmpty ? ['Pecho', 'Espalda'] : muscles,
+                          durationMinutes: duration,
+                          profile: profile,
+                          recentWorkouts: workouts,
+                        ),
+                  );
 
                   if (routine != null) {
                     await ref.read(routineServiceProvider).createRoutine(routine);
@@ -126,7 +123,6 @@ class RoutineListScreen extends ConsumerWidget {
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error: $e')),
                     );

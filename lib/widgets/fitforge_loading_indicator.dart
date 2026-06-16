@@ -57,3 +57,46 @@ class FitForgeLoadingScreen extends StatelessWidget {
     return Center(child: FitForgeLoadingIndicator(message: message));
   }
 }
+
+/// Overlay modal de carga compatible con GoRouter (cierra el diálogo correcto).
+abstract final class FitForgeLoadingOverlay {
+  static Future<T> run<T>(
+    BuildContext context, {
+    required Future<T> Function() task,
+    String? message,
+  }) async {
+    if (!context.mounted) {
+      throw StateError('Context is not mounted');
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      barrierColor: Colors.black54,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(48),
+          child: FitForgeLoadingIndicator(message: message),
+        ),
+      ),
+    );
+
+    try {
+      return await task();
+    } finally {
+      dismiss(context);
+    }
+  }
+
+  static void dismiss(BuildContext context) {
+    if (!context.mounted) return;
+    final navigator = Navigator.of(context, rootNavigator: true);
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+  }
+}

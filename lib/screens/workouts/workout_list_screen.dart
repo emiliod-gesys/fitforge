@@ -174,30 +174,24 @@ class _StartWorkoutSection extends ConsumerWidget {
   ) async {
     if (!context.mounted) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const FitForgeLoadingScreen(message: 'Iniciando entrenamiento…'),
-    );
-
     try {
-      await start();
-      if (context.mounted) Navigator.pop(context);
-      if (context.mounted) await _navigateToActiveWorkout(context, ref);
+      await FitForgeLoadingOverlay.run(
+        context,
+        message: 'Iniciando entrenamiento…',
+        task: () async {
+          await start();
+          ref.invalidate(activeWorkoutProvider);
+          await ref.read(activeWorkoutProvider.future);
+        },
+      );
+      if (context.mounted) context.push('/workout/active');
     } catch (e) {
-      if (context.mounted) Navigator.pop(context);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al iniciar entrenamiento: $e')),
         );
       }
     }
-  }
-
-  Future<void> _navigateToActiveWorkout(BuildContext context, WidgetRef ref) async {
-    ref.invalidate(activeWorkoutProvider);
-    await ref.read(activeWorkoutProvider.future);
-    if (context.mounted) context.push('/workout/active');
   }
 
   void _showStartOptions(BuildContext context, WidgetRef ref) {
