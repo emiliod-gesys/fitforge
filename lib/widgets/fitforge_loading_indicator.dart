@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lottie/lottie.dart';
 import '../core/theme/app_colors.dart';
 
-/// Indicador de carga con el logo FitForge (fondo transparente sobre UI oscura).
+/// Indicador de carga con animación Lottie (fondo transparente).
 class FitForgeLoadingIndicator extends StatelessWidget {
   final double size;
   final String? message;
@@ -15,46 +15,22 @@ class FitForgeLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoSize = size * 0.5;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           width: size,
           height: size,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: size,
-                height: size,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.orange,
-                  backgroundColor: AppColors.slate.withValues(alpha: 0.35),
-                  strokeCap: StrokeCap.round,
-                ),
-              ),
-              // BlendMode.lighten oculta el negro del PNG y deja solo el logo.
-              ColorFiltered(
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.lighten),
-                child: Image.asset(
-                  'assets/images/logo_icon.png',
-                  width: logoSize,
-                  height: logoSize,
-                  fit: BoxFit.contain,
-                ),
-              )
-                  .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                  .scale(
-                    begin: const Offset(0.86, 0.86),
-                    end: const Offset(1, 1),
-                    duration: 950.ms,
-                    curve: Curves.easeInOut,
-                  )
-                  .fade(begin: 0.65, end: 1, duration: 950.ms),
-            ],
+          child: Lottie.asset(
+            'assets/animations/loading_spinner.json',
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            repeat: true,
+            frameRate: FrameRate.max,
+            errorBuilder: (_, __, ___) => const Center(
+              child: CircularProgressIndicator(color: AppColors.orange),
+            ),
           ),
         ),
         if (message != null) ...[
