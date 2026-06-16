@@ -1,7 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/muscle_inference.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../models/profile.dart';
+import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -15,6 +21,7 @@ class ProgressScreen extends ConsumerStatefulWidget {
 
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   final _weightController = TextEditingController();
+  String? _muscleFilter;
 
   @override
   void dispose() {
@@ -65,11 +72,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     );
   }
 
+  List<Workout> _workoutsLast30Days(List<Workout> workouts) {
+    final cutoff = DateTime.now().subtract(const Duration(days: 30));
+    return workouts
+        .where((w) => w.completedAt != null && w.completedAt!.isAfter(cutoff))
+        .toList()
+      ..sort((a, b) => a.completedAt!.compareTo(b.completedAt!));
+  }
+
+  bool _matchesMuscleFilter(PersonalRecord pr) {
+    if (_muscleFilter == null) return true;
+    return MuscleInference.fromExerciseName(pr.exerciseName).contains(_muscleFilter);
+  }
+
   @override
   Widget build(BuildContext context) {
     final prsAsync = ref.watch(personalRecordsProvider);
-    final measurementsAsync = ref.watch(bodyMeasurementsProvider);
-    final workoutsAsync = ref.watch(workoutsProvider);
+    final workoutsAsync = ref.watch(progressWorkoutsProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
@@ -83,22 +102,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         onRefresh: () async {
           ref.invalidate(personalRecordsProvider);
           ref.invalidate(bodyMeasurementsProvider);
-          ref.invalidate(workoutsProvider);
+          ref.invalidate(progressWorkoutsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             workoutsAsync.when(
               data: (workouts) {
-                final completed = workouts.where((w) => w.completedAt != null).length;
-                final totalVolume = workouts.fold<double>(0, (s, w) => s + w.totalVolume);
+                final last30 = _workoutsLast30Days(workouts);
+                final completed = last30.length;
+                final totalVolume = last30.fold<double>(0, (s, w) => s + w.totalVolume);
                 return Row(
                   children: [
-                    Expanded(child: _StatBox('Entrenos', '$completed')),
+                    Expanded(child: _StatBox('Entrenos (30 d)', '$completed')),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _StatBox(
-                        'Volumen total',
+                        'Volumen (30 d)',
                         UnitConverter.formatVolume(totalVolume, unitSystem),
                       ),
                     ),
@@ -109,44 +129,27 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
-            Text('Peso corporal', style: Theme.of(context).textTheme.titleLarge),
+            Text('Volumen por entrenamiento', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              'Últimos 30 días',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+            ),
             const SizedBox(height: 12),
-            measurementsAsync.when(
-              data: (measurements) {
-                if (measurements.isEmpty) {
+            workoutsAsync.when(
+              data: (workouts) {
+                final last30 = _workoutsLast30Days(workouts);
+                if (last30.isEmpty) {
                   return const Card(
                     child: Padding(
                       padding: EdgeInsets.all(24),
-                      child: Center(child: Text('Registra tu peso para ver el gráfico')),
+                      child: Center(
+                        child: Text('Completa entrenamientos para ver tu volumen'),
+                      ),
                     ),
                   );
                 }
-                return SizedBox(
-                  height: 200,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      titlesData: const FlTitlesData(show: false),
-                      borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: measurements.reversed.toList().asMap().entries.map((e) {
-                            final display = UnitConverter.kgToDisplay(e.value.value, unitSystem);
-                            return FlSpot(e.key.toDouble(), display);
-                          }).toList(),
-                          isCurved: true,
-                          color: Theme.of(context).colorScheme.primary,
-                          barWidth: 3,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return _VolumeChart(workouts: last30, unitSystem: unitSystem);
               },
               loading: () => const FitForgeLoadingIndicator(size: 80),
               error: (e, _) => Text('Error: $e'),
@@ -154,13 +157,47 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             const SizedBox(height: 24),
             Text('Records personales', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: const Text('Todos'),
+                      selected: _muscleFilter == null,
+                      onSelected: (_) => setState(() => _muscleFilter = null),
+                    ),
+                  ),
+                  ...AppConstants.muscleGroups
+                      .where((m) => m != 'Cardio')
+                      .map(
+                        (muscle) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(muscle),
+                            selected: _muscleFilter == muscle,
+                            onSelected: (_) => setState(() => _muscleFilter = muscle),
+                          ),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
             prsAsync.when(
               data: (prs) {
-                if (prs.isEmpty) {
-                  return const Text('Completa entrenamientos para registrar PRs');
+                final filtered = prs.where(_matchesMuscleFilter).toList();
+                if (filtered.isEmpty) {
+                  return Text(
+                    _muscleFilter == null
+                        ? 'Completa entrenamientos para registrar PRs'
+                        : 'Sin records para $_muscleFilter',
+                  );
                 }
                 return Column(
-                  children: prs.take(10).map((pr) {
+                  children: filtered.map((pr) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
@@ -180,6 +217,94 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               error: (e, _) => Text('Error: $e'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VolumeChart extends StatelessWidget {
+  final List<Workout> workouts;
+  final String unitSystem;
+
+  const _VolumeChart({required this.workouts, required this.unitSystem});
+
+  @override
+  Widget build(BuildContext context) {
+    final volumes = workouts
+        .map((w) => UnitConverter.kgToDisplay(w.totalVolume, unitSystem))
+        .toList();
+    final maxVolume = volumes.reduce((a, b) => a > b ? a : b);
+    final chartMax = maxVolume <= 0 ? 1.0 : maxVolume * 1.15;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 16, 16, 8),
+        child: SizedBox(
+          height: 220,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: chartMax,
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: chartMax / 4,
+                getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.border, strokeWidth: 1),
+              ),
+              borderData: FlBorderData(show: false),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 44,
+                    interval: chartMax / 4,
+                    getTitlesWidget: (value, meta) {
+                      if (value < 0 || value > chartMax) return const SizedBox.shrink();
+                      return Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                      );
+                    },
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 28,
+                    getTitlesWidget: (value, meta) {
+                      final i = value.toInt();
+                      if (i < 0 || i >= workouts.length) return const SizedBox.shrink();
+                      if (workouts.length > 8 && i.isOdd) return const SizedBox.shrink();
+                      final date = workouts[i].completedAt!.toLocal();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          DateFormat('d/M').format(date),
+                          style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              barGroups: List.generate(workouts.length, (i) {
+                return BarChartGroupData(
+                  x: i,
+                  barRods: [
+                    BarChartRodData(
+                      toY: volumes[i],
+                      width: workouts.length > 15 ? 8 : 14,
+                      color: AppColors.orange,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );

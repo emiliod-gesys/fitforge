@@ -56,6 +56,11 @@ final workoutsProvider = FutureProvider((ref) async {
   return ref.watch(workoutServiceProvider).getWorkouts();
 });
 
+final progressWorkoutsProvider = FutureProvider((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).getWorkouts(limit: 60);
+});
+
 final workoutWeeklyStatsProvider = FutureProvider<WorkoutWeeklyStats>((ref) async {
   ref.watch(authStateProvider);
   final dates = await ref.watch(workoutServiceProvider).getCompletedWorkoutTimestamps();
