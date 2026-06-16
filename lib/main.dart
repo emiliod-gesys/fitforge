@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'services/supabase_service.dart';
+import 'widgets/push_notification_bootstrap.dart';
 
 class FitForgeApp extends ConsumerWidget {
   const FitForgeApp({super.key});
@@ -11,11 +12,14 @@ class FitForgeApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    return MaterialApp.router(
-      title: 'FitForge',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
-      routerConfig: router,
+    return PushNotificationBootstrap(
+      router: router,
+      child: MaterialApp.router(
+        title: 'FitForge',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        routerConfig: router,
+      ),
     );
   }
 }

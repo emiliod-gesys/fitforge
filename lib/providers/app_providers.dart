@@ -12,6 +12,7 @@ import '../services/routine_service.dart';
 import '../services/workout_service.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
+import '../services/push_notification_service.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
 final exerciseServiceProvider = Provider((ref) => ExerciseService());
@@ -19,6 +20,7 @@ final routineServiceProvider = Provider((ref) => RoutineService());
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final profileServiceProvider = Provider((ref) => ProfileService());
 final socialServiceProvider = Provider((ref) => SocialService());
+final pushNotificationServiceProvider = Provider((ref) => PushNotificationService());
 final aiCoachServiceProvider = Provider(
   (ref) => AiCoachService(ref.watch(profileServiceProvider)),
 );

@@ -12,7 +12,8 @@ App móvil de entrenamiento tipo **Fitbod** para Android e iOS, construida con *
 - **Mapa de recuperación muscular** — estimación de fatiga por grupo muscular
 - **Coach IA** — recomendaciones con tu propia API key de **OpenAI** o **Gemini** (guardada de forma segura en el dispositivo)
 - **Generación de rutinas con IA** — desde la pantalla de rutinas
-- **Sincronización en la nube** — Supabase Postgres con Row Level Security
+- **Social** — amigos por email/nombre, ver perfiles y PRs, avisos cuando un amigo entrena
+- **Notificaciones push** — avisos sociales con la app cerrada (FCM)
 
 ## Requisitos
 
@@ -69,6 +70,39 @@ flutter run --dart-define-from-file=dart_defines.json
 
 > `dart_defines.json` está en `.gitignore` — no lo subas a git.
 
+### 3b. Notificaciones push (FCM)
+
+Para avisos cuando un amigo entrena **con la app cerrada**:
+
+#### Firebase
+
+1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com)
+2. Añade app **Android** (`io.fitforge.fitforge`) e **iOS** (`io.fitforge.fitforge`)
+3. En **Configuración del proyecto → Cuentas de servicio**, genera una clave JSON (Admin SDK)
+4. Copia en `dart_defines.json` los valores de cada app:
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_APP_ID`
+   - `FIREBASE_MESSAGING_SENDER_ID`
+   - `FIREBASE_PROJECT_ID`
+5. **iOS:** en Xcode → Runner → Signing & Capabilities → **Push Notifications**; sube la clave APNs a Firebase
+
+#### Supabase
+
+1. Ejecuta `supabase/migrations/004_push_tokens.sql` en el SQL Editor
+2. Despliega la Edge Function:
+   ```bash
+   supabase secrets set FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}'
+   supabase secrets set WEBHOOK_SECRET='un-secreto-largo-aleatorio'
+   supabase functions deploy send-social-push --no-verify-jwt
+   ```
+3. En **Database → Webhooks → Create hook**:
+   - Tabla: `social_notifications`
+   - Evento: `INSERT`
+   - URL: `https://TU_PROYECTO.supabase.co/functions/v1/send-social-push`
+   - Header: `Authorization: Bearer tu-webhook-secret`
+
+Sin las variables `FIREBASE_*` la app funciona igual; solo se desactivan los push nativos.
+
 ### 4. API Keys de IA
 
 1. Abre la app → **Perfil** → **API Keys**
@@ -108,7 +142,6 @@ flutter build ios --dart-define-from-file=dart_defines.json
 
 ## Próximos pasos sugeridos
 
-- Notificaciones push para recordatorios de entrenamiento
 - Modo offline con caché local (Hive/Isar)
 - Apple Sign-In
 - Integración con wearables
