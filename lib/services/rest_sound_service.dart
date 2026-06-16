@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 
 class RestSoundService {
   static const _bellDuration = Duration(seconds: 2);
+  static const _bellVolume = 0.5;
 
   static final _player = AudioPlayer();
   static Timer? _stopTimer;
@@ -11,6 +12,7 @@ class RestSoundService {
   static Future<void> playRestCompleteBell() async {
     _stopTimer?.cancel();
     await _player.stop();
+    await _player.setVolume(_bellVolume);
     await _player.play(AssetSource('sounds/boxing-bell.mp3'));
     _stopTimer = Timer(_bellDuration, () {
       _player.stop();
