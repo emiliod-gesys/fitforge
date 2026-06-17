@@ -328,6 +328,48 @@ class WorkoutService {
     return exercise;
   }
 
+  Future<void> swapExerciseInWorkout(
+    String workoutExerciseId,
+    String workoutId, {
+    required String newExerciseId,
+    required String newExerciseName,
+    String? newImageUrl,
+  }) async {
+    final exercises = await _getWorkoutExercises(workoutId);
+    final current = exercises.firstWhere((e) => e.id == workoutExerciseId);
+    final setCount = current.sets.isEmpty ? 3 : current.sets.length;
+
+    await _client.from('workout_exercises').update({
+      'exercise_id': newExerciseId,
+      'exercise_name': newExerciseName,
+      'image_url': newImageUrl,
+    }).eq('id', workoutExerciseId);
+
+    await _client.from('workout_sets').delete().eq('workout_exercise_id', workoutExerciseId);
+
+    final previous = await getPreviousSetsForExercise(newExerciseId, excludeWorkoutId: workoutId);
+    final sets = List.generate(setCount, (i) {
+      final prev = previous != null && previous.isNotEmpty
+          ? (i < previous.length ? previous[i] : previous.last)
+          : null;
+      final oldSet = i < current.sets.length ? current.sets[i] : null;
+      return WorkoutSet(
+        id: _uuid.v4(),
+        setNumber: i + 1,
+        weight: prev?.weight ?? oldSet?.weight,
+        reps: (prev?.reps ?? 0) > 0 ? prev!.reps : (oldSet?.reps ?? 10),
+      );
+    });
+
+    for (final set in sets) {
+      await _client.from('workout_sets').insert({
+        'id': set.id,
+        'workout_exercise_id': workoutExerciseId,
+        ...set.toJson(),
+      });
+    }
+  }
+
   Future<void> removeExerciseFromWorkout(String workoutExerciseId) async {
     final row = await _client
         .from('workout_exercises')

@@ -5,12 +5,14 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
   final bool showWordmark;
+  final Widget? leading;
 
   const FitForgeAppBar({
     super.key,
     this.title,
     this.actions,
     this.showWordmark = true,
+    this.leading,
   });
 
   @override
@@ -19,6 +21,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      leading: leading,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
