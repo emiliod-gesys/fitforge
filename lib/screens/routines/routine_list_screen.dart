@@ -110,6 +110,7 @@ class RoutineListScreen extends ConsumerWidget {
                 final muscles = musclesController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
                 final profile = await ref.read(profileProvider.future);
                 final workouts = await ref.read(workoutsProvider.future);
+                final catalog = await ref.read(exercisesProvider.future);
 
                 if (!context.mounted) return;
 
@@ -122,6 +123,7 @@ class RoutineListScreen extends ConsumerWidget {
                           durationMinutes: duration,
                           profile: profile,
                           recentWorkouts: workouts,
+                          catalog: catalog,
                         ),
                   );
 

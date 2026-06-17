@@ -1,15 +1,104 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/constants/app_constants.dart';
+import '../core/utils/exercise_matcher.dart';
 import '../core/utils/unit_converter.dart';
+import '../models/exercise.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
 import 'profile_service.dart';
 
 class AiCoachService {
+  AiCoachService(this._profileService);
+
   final ProfileService _profileService;
 
-  AiCoachService(this._profileService);
+  static bool isRoutineCreationRequest(String message) {
+    final m = message.toLowerCase();
+    const triggers = [
+      'crea una rutina',
+      'crear rutina',
+      'créame una rutina',
+      'hazme una rutina',
+      'haz una rutina',
+      'genera una rutina',
+      'generar rutina',
+      'arma una rutina',
+      'arma me una rutina',
+      'diseña una rutina',
+      'disena una rutina',
+      'muéstrame una rutina',
+      'muestrame una rutina',
+      'necesito una rutina',
+      'quiero una rutina',
+      'guarda la rutina',
+      'guardar rutina',
+      'guárdala como rutina',
+      'guardala como rutina',
+    ];
+
+    if (triggers.any(m.contains)) return true;
+
+    return m.contains('rutina') &&
+        (m.contains('crea') ||
+            m.contains('haz') ||
+            m.contains('genera') ||
+            m.contains('arma') ||
+            m.contains('diseña') ||
+            m.contains('disena') ||
+            m.contains('guarda'));
+  }
+
+  static int parseDurationMinutes(String message) {
+    final minMatch = RegExp(r'(\d+)\s*(min|minutos|mins?)', caseSensitive: false).firstMatch(message);
+    if (minMatch != null) {
+      return int.tryParse(minMatch.group(1)!) ?? 45;
+    }
+    if (RegExp(r'1\s*h(ora|oras)?', caseSensitive: false).hasMatch(message)) return 60;
+    if (RegExp(r'90', caseSensitive: false).hasMatch(message)) return 90;
+    return 45;
+  }
+
+  static List<String> parseTargetMuscles(String message) {
+    final m = message.toLowerCase();
+    final found = <String>{};
+
+    const keywords = <String, String>{
+      'pierna': 'Piernas',
+      'piernas': 'Piernas',
+      'leg': 'Piernas',
+      'cuadriceps': 'Piernas',
+      'cuádriceps': 'Piernas',
+      'pecho': 'Pecho',
+      'chest': 'Pecho',
+      'espalda': 'Espalda',
+      'back': 'Espalda',
+      'hombro': 'Hombros',
+      'hombros': 'Hombros',
+      'shoulder': 'Hombros',
+      'biceps': 'Bíceps',
+      'bíceps': 'Bíceps',
+      'triceps': 'Tríceps',
+      'tríceps': 'Tríceps',
+      'gluteo': 'Glúteos',
+      'glúteo': 'Glúteos',
+      'gluteos': 'Glúteos',
+      'abdominal': 'Abdominales',
+      'abdominales': 'Abdominales',
+      'core': 'Abdominales',
+      'antebrazo': 'Antebrazos',
+      'cardio': 'Cardio',
+      'full body': 'Pecho',
+      'cuerpo completo': 'Pecho',
+    };
+
+    for (final entry in keywords.entries) {
+      if (m.contains(entry.key)) found.add(entry.value);
+    }
+
+    return found.toList();
+  }
 
   Future<String> getRecommendation({
     required String userMessage,
@@ -37,6 +126,7 @@ Responde siempre en español. Sé conciso pero útil.
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
+Si el usuario pide crear o guardar una rutina, explícale brevemente el enfoque; la app le mostrará una vista previa para guardarla cuando corresponda.
 
 Contexto del usuario:
 $context
@@ -52,36 +142,150 @@ $context
     }
   }
 
+  Future<Routine?> generateRoutineFromMessage({
+    required String userMessage,
+    required List<Exercise> catalog,
+    UserProfile? profile,
+    List<Workout>? recentWorkouts,
+  }) async {
+    final targetMuscles = parseTargetMuscles(userMessage);
+    final duration = parseDurationMinutes(userMessage);
+    final names = _catalogNamesForMuscles(catalog, targetMuscles);
+
+    final prompt = '''
+El usuario pidió lo siguiente:
+"$userMessage"
+
+Genera una rutina de gimnasio de $duration minutos.
+Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje' : targetMuscles.join(', ')}.
+Nivel: ${profile?.experienceLevel ?? 'intermedio'}.
+Objetivo: ${profile?.fitnessGoal ?? 'hipertrofia'}.
+
+IMPORTANTE: usa SOLO nombres de ejercicio de esta lista (copia el nombre exacto):
+${names.take(100).join('\n')}
+
+Responde SOLO con JSON válido (sin markdown ni texto extra):
+{
+  "name": "nombre corto de la rutina",
+  "description": "breve descripción",
+  "target_muscles": ["Piernas"],
+  "exercises": [
+    {"name": "nombre exacto de la lista", "sets": 3, "reps": 10, "weight_kg": null, "rest_seconds": 90}
+  ]
+}
+''';
+
+    final response = await _complete(
+      profile: profile,
+      systemPrompt: '''
+Eres un generador de rutinas de gimnasio para FitForge.
+Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+''',
+      userPrompt: prompt,
+    );
+
+    final routine = _parseRoutineJson(
+      response,
+      targetMuscles: targetMuscles,
+      profile: profile,
+    );
+    if (routine == null) return null;
+
+    return ExerciseMatcher.enrich(routine, catalog);
+  }
+
   Future<Routine?> generateRoutine({
     required List<String> targetMuscles,
     required int durationMinutes,
     UserProfile? profile,
     List<Workout>? recentWorkouts,
+    List<Exercise>? catalog,
   }) async {
+    final names = catalog != null ? _catalogNamesForMuscles(catalog, targetMuscles) : <String>[];
+
+    final catalogHint = names.isEmpty
+        ? ''
+        : '\nUsa SOLO nombres de esta lista:\n${names.take(80).join(', ')}';
+
     final prompt = '''
 Genera una rutina de gimnasio de $durationMinutes minutos enfocada en: ${targetMuscles.join(', ')}.
 Nivel: ${profile?.experienceLevel ?? 'intermedio'}.
 Objetivo: ${profile?.fitnessGoal ?? 'hipertrofia'}.
+$catalogHint
 
 Responde SOLO con JSON válido (sin markdown):
 {
   "name": "nombre de la rutina",
   "description": "breve descripción",
+  "target_muscles": ${jsonEncode(targetMuscles)},
   "exercises": [
     {"name": "nombre ejercicio", "sets": 3, "reps": 10, "weight_kg": null, "rest_seconds": 90}
   ]
 }
 ''';
 
-    final response = await getRecommendation(
-      userMessage: prompt,
-      recentWorkouts: recentWorkouts,
+    final response = await _complete(
       profile: profile,
+      systemPrompt: '''
+Eres un generador de rutinas de gimnasio para FitForge.
+Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+''',
+      userPrompt: prompt,
     );
 
+    final routine = _parseRoutineJson(
+      response,
+      targetMuscles: targetMuscles,
+      profile: profile,
+    );
+    if (routine == null || catalog == null) return routine;
+
+    return ExerciseMatcher.enrich(routine, catalog);
+  }
+
+  Future<String> _complete({
+    required UserProfile? profile,
+    required String systemPrompt,
+    required String userPrompt,
+  }) async {
+    final aiProvider = profile?.aiProvider ?? AiProvider.none;
+    if (aiProvider == AiProvider.none) {
+      throw Exception('Configura un proveedor de IA en tu perfil');
+    }
+
+    final apiKey = await _profileService.getApiKey(aiProvider);
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('Configura tu API key en el perfil');
+    }
+
+    switch (aiProvider) {
+      case AiProvider.openai:
+        return _callOpenAI(apiKey, systemPrompt, userPrompt);
+      case AiProvider.gemini:
+        return _callGemini(apiKey, systemPrompt, userPrompt);
+      case AiProvider.none:
+        throw Exception('Proveedor no configurado');
+    }
+  }
+
+  Routine? _parseRoutineJson(
+    String response, {
+    required List<String> targetMuscles,
+    UserProfile? profile,
+  }) {
     try {
       final cleaned = response.replaceAll(RegExp(r'```json|```'), '').trim();
-      final json = jsonDecode(cleaned) as Map<String, dynamic>;
+      final start = cleaned.indexOf('{');
+      final end = cleaned.lastIndexOf('}');
+      if (start < 0 || end <= start) return null;
+
+      final json = jsonDecode(cleaned.substring(start, end + 1)) as Map<String, dynamic>;
+      final parsedMuscles = (json['target_muscles'] as List?)
+              ?.map((m) => m.toString())
+              .where((m) => m.isNotEmpty)
+              .toList() ??
+          targetMuscles;
+
       final exercises = (json['exercises'] as List? ?? []).asMap().entries.map((e) {
         final ex = e.value as Map<String, dynamic>;
         return RoutineExercise(
@@ -89,19 +293,21 @@ Responde SOLO con JSON válido (sin markdown):
           exerciseId: ex['name'] as String? ?? '',
           exerciseName: ex['name'] as String? ?? '',
           orderIndex: e.key,
-          targetSets: ex['sets'] as int? ?? 3,
-          targetReps: ex['reps'] as int? ?? 10,
+          targetSets: ex['sets'] as int? ?? AppConstants.defaultSets,
+          targetReps: ex['reps'] as int? ?? AppConstants.defaultReps,
           targetWeight: (ex['weight_kg'] as num?)?.toDouble(),
-          restSeconds: ex['rest_seconds'] as int? ?? 90,
+          restSeconds: ex['rest_seconds'] as int? ?? AppConstants.defaultRestSeconds,
         );
       }).toList();
+
+      if (exercises.isEmpty) return null;
 
       return Routine(
         id: '',
         userId: profile?.id ?? '',
         name: json['name'] as String? ?? 'Rutina IA',
         description: json['description'] as String?,
-        targetMuscles: targetMuscles,
+        targetMuscles: parsedMuscles,
         exercises: exercises,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -110,6 +316,29 @@ Responde SOLO con JSON válido (sin markdown):
     } catch (_) {
       return null;
     }
+  }
+
+  List<String> _catalogNamesForMuscles(List<Exercise> catalog, List<String> targetMuscles) {
+    if (targetMuscles.isEmpty) {
+      return catalog.map((e) => e.name).toList();
+    }
+
+    final matches = catalog.where((e) {
+      final category = e.category.toLowerCase();
+      final muscles = e.muscles.map((m) => m.toLowerCase()).join(' ');
+      for (final target in targetMuscles) {
+        final t = target.toLowerCase();
+        if (category.contains(t) || muscles.contains(t)) return true;
+        if (t == 'piernas' && (category.contains('pierna') || category.contains('leg'))) {
+          return true;
+        }
+        if (t == 'pecho' && category.contains('pecho')) return true;
+        if (t == 'espalda' && category.contains('espalda')) return true;
+      }
+      return false;
+    }).map((e) => e.name).toList();
+
+    return matches.isEmpty ? catalog.map((e) => e.name).toList() : matches;
   }
 
   String _buildContext(
@@ -162,7 +391,7 @@ Responde SOLO con JSON válido (sin markdown):
           {'role': 'system', 'content': system},
           {'role': 'user', 'content': user},
         ],
-        'max_tokens': 1500,
+        'max_tokens': 2000,
         'temperature': 0.7,
       }),
     );
@@ -182,11 +411,20 @@ Responde SOLO con JSON válido (sin markdown):
       ),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'system_instruction': {'parts': [{'text': system}]},
+        'system_instruction': {
+          'parts': [
+            {'text': system},
+          ],
+        },
         'contents': [
-          {'role': 'user', 'parts': [{'text': user}]},
+          {
+            'role': 'user',
+            'parts': [
+              {'text': user},
+            ],
+          },
         ],
-        'generationConfig': {'maxOutputTokens': 1500, 'temperature': 0.7},
+        'generationConfig': {'maxOutputTokens': 2000, 'temperature': 0.7},
       }),
     );
 
