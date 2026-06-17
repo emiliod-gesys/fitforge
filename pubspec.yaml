@@ -35,7 +35,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.3.3
   url_launcher: ^6.3.1
-  audioplayers: ^6.1.0
+  audioplayers: ^6.7.1
 
   # Push notifications (FCM)
   firebase_core: ^3.13.0
@@ -51,6 +51,12 @@ dev_dependencies:
 dependency_overrides:
   flutter_inappwebview: 6.2.0-beta.3
   flutter_inappwebview_android: 1.2.0-beta.3
+  # Built-in Kotlin fix merged in PR #1991; remove when audioplayers_android >5.2.1 ships on pub.dev.
+  audioplayers_android:
+    git:
+      url: https://github.com/bluefireteam/audioplayers.git
+      path: packages/audioplayers_android
+      ref: 687218b96682a7bcadd9490572db692dbc9a2f07
 
 flutter_launcher_icons:
   android: true

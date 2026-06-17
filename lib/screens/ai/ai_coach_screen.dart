@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/coach_message.dart';
-import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../services/ai_coach_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
+import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 
@@ -142,98 +142,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     final routine = message.routinePreview;
     if (routine == null) return;
 
-    final nameController = TextEditingController(text: routine.name);
-    var exercises = List<RoutineExercise>.from(routine.exercises);
+    final updated = await EditRoutineDialog.show(context, routine);
 
-    final updated = await showDialog<Routine>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Editar rutina'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Nombre'),
-                ),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: exercises.length,
-                    itemBuilder: (_, i) {
-                      final ex = exercises[i];
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(ex.exerciseName, style: const TextStyle(fontSize: 14)),
-                        subtitle: Text('${ex.targetSets}×${ex.targetReps}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close, size: 18, color: AppColors.error),
-                          onPressed: () {
-                            setDialogState(() {
-                              exercises = List.from(exercises)..removeAt(i);
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-            ElevatedButton(
-              onPressed: exercises.isEmpty
-                  ? null
-                  : () {
-                      Navigator.pop(
-                        ctx,
-                        Routine(
-                          id: routine.id,
-                          userId: routine.userId,
-                          name: nameController.text.trim().isEmpty
-                              ? routine.name
-                              : nameController.text.trim(),
-                          description: routine.description,
-                          targetMuscles: routine.targetMuscles,
-                          exercises: exercises
-                              .asMap()
-                              .entries
-                              .map(
-                                (e) => RoutineExercise(
-                                  id: e.value.id,
-                                  exerciseId: e.value.exerciseId,
-                                  exerciseName: e.value.exerciseName,
-                                  orderIndex: e.key,
-                                  targetSets: e.value.targetSets,
-                                  targetReps: e.value.targetReps,
-                                  targetWeight: e.value.targetWeight,
-                                  restSeconds: e.value.restSeconds,
-                                  imageUrl: e.value.imageUrl,
-                                ),
-                              )
-                              .toList(),
-                          createdAt: routine.createdAt,
-                          updatedAt: routine.updatedAt,
-                          isAiGenerated: true,
-                        ),
-                      );
-                    },
-              child: const Text('Aplicar'),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    nameController.dispose();
-
-    if (updated != null) {
+    if (updated != null && mounted) {
       setState(() {
         _messages[messageIndex] = message.copyWith(routinePreview: updated);
       });

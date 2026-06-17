@@ -38,16 +38,16 @@ class RoutineService {
     final routineId = routine.id.isEmpty ? _uuid.v4() : routine.id;
 
     await _client.from('routines').insert({
+      ...routine.toJson(),
       'id': routineId,
       'user_id': userId,
-      ...routine.toJson(),
     });
 
     for (final ex in routine.exercises) {
       await _client.from('routine_exercises').insert({
-        'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
-        'routine_id': routineId,
         ...ex.toJson(),
+        'routine_id': routineId,
+        'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
       });
     }
 
@@ -74,9 +74,9 @@ class RoutineService {
 
     for (final ex in routine.exercises) {
       await _client.from('routine_exercises').insert({
-        'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
-        'routine_id': routine.id,
         ...ex.toJson(),
+        'routine_id': routine.id,
+        'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
       });
     }
   }
