@@ -27,7 +27,8 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
 
   List<WorkoutExercise> get _visibleExercises => workout.exercises
       .where((e) => !removedExerciseIds.contains(e.id))
-      .toList();
+      .toList()
+    ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
   String _subtitle(WorkoutExercise exercise) {
     final total = exercise.sets.length;

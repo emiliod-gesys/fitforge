@@ -117,7 +117,7 @@ class WorkoutService {
         .from('workout_exercises')
         .select()
         .eq('workout_id', workoutId)
-        .order('order_index');
+        .order('order_index', ascending: true);
 
     final exercises = <WorkoutExercise>[];
     for (final ex in exercisesData as List) {
@@ -135,6 +135,7 @@ class WorkoutService {
 
       exercises.add(WorkoutExercise.fromJson(exMap, sets: sets));
     }
+    exercises.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
     return exercises;
   }
 

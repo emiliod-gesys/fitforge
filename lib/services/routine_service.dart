@@ -22,7 +22,7 @@ class RoutineService {
           .from('routine_exercises')
           .select()
           .eq('routine_id', r['id'])
-          .order('order_index');
+          .order('order_index', ascending: true);
 
       final exercises = (exercisesData as List)
           .map((e) => RoutineExercise.fromJson(e as Map<String, dynamic>))
