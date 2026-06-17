@@ -206,12 +206,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           final visibleCount =
               workout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).length;
           final inExerciseView = !_showExerciseList && visibleCount > 0;
-          final exercise = inExerciseView
-              ? workout.exercises[_currentExerciseIndex.clamp(0, workout.exercises.length - 1)]
-              : null;
 
           return FitForgeAppBar(
-            title: inExerciseView ? exercise!.exerciseName : 'Entrenando',
+            title: 'Entrenando',
             showWordmark: !inExerciseView,
             leading: inExerciseView
                 ? IconButton(
@@ -298,30 +295,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                 ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
                     if (exercise.imageUrl != null)
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.network(
                           exercise.imageUrl!,
-                          height: 180,
+                          height: 160,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                         ),
                       ),
-                    const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercise.exerciseName,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                    if (exercise.imageUrl != null) const SizedBox(height: 16),
+                    Text(
+                      exercise.exerciseName,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
                           ),
-                        ),
-                      ],
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -333,9 +326,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                             onChanged: _onRestSecondsChanged,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 8),
                         Padding(
-                          padding: const EdgeInsets.only(top: 20),
+                          padding: const EdgeInsets.only(top: 22),
                           child: IconButton.filledTonal(
                             tooltip: 'Historial del ejercicio',
                             onPressed: () => ExerciseHistorySheet.show(
@@ -349,29 +342,41 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    ...sortedSets.map(
-                      (set) => SetLogTile(
-                        key: ValueKey(set.id),
-                        set: set,
+                    const SizedBox(height: 20),
+                    ...sortedSets.asMap().entries.map(
+                      (entry) => SetLogTile(
+                        key: ValueKey(entry.value.id),
+                        set: entry.value,
                         unitSystem: unitSystem,
+                        exerciseName: exercise.exerciseName,
+                        isLast: entry.key == sortedSets.length - 1,
+                        onValidationError: (message) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        },
                         onChanged: (updated) => _logSet(
                           workout,
                           exercise,
                           updated,
-                          wasAlreadyCompleted: set.completed,
+                          wasAlreadyCompleted: entry.value.completed,
                         ),
                         onDelete: () {
-                          setState(() => _removedSetIds.add(set.id));
-                          unawaited(_deleteSet(workout, exercise, set));
+                          setState(() => _removedSetIds.add(entry.value.id));
+                          unawaited(_deleteSet(workout, exercise, entry.value));
                         },
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => _addSet(workout, exercise),
                       icon: const Icon(Icons.add),
                       label: const Text('Añadir serie'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        side: const BorderSide(color: AppColors.orange),
+                        foregroundColor: AppColors.orange,
+                      ),
                     ),
                   ],
                 ),
@@ -413,6 +418,25 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     WorkoutSet set, {
     required bool wasAlreadyCompleted,
   }) async {
+    if (!wasAlreadyCompleted) {
+      if (set.weight == null || set.weight! <= 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Indica el peso antes de marcar la serie como hecha')),
+          );
+        }
+        return;
+      }
+      if (set.reps <= 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Indica las repeticiones')),
+          );
+        }
+        return;
+      }
+    }
+
     await ref.read(workoutServiceProvider).logSet(exercise.id, set.copyWith(completed: true));
     ref.invalidate(activeWorkoutProvider);
 

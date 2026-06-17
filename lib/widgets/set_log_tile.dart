@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/exercise_load.dart';
 import '../core/utils/unit_converter.dart';
 import '../models/workout.dart';
 
 class SetLogTile extends StatefulWidget {
   final WorkoutSet set;
   final String unitSystem;
+  final String exerciseName;
+  final bool isLast;
   final void Function(WorkoutSet set) onChanged;
   final VoidCallback? onDelete;
+  final void Function(String message)? onValidationError;
 
   const SetLogTile({
     super.key,
     required this.set,
     required this.unitSystem,
+    required this.exerciseName,
+    this.isLast = true,
     required this.onChanged,
     this.onDelete,
+    this.onValidationError,
   });
 
   @override
@@ -77,76 +84,190 @@ class _SetLogTileState extends State<SetLogTile> {
     super.dispose();
   }
 
-  WorkoutSet _buildSet({bool? completed}) {
+  double? _parsedWeightKg() {
     final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
-    final weightKg = parsed != null ? UnitConverter.displayToKg(parsed, widget.unitSystem) : null;
+    if (parsed == null || parsed <= 0) return null;
+    return UnitConverter.displayToKg(parsed, widget.unitSystem);
+  }
+
+  WorkoutSet _buildSet({bool? completed}) {
     return widget.set.copyWith(
-      weight: weightKg,
+      weight: _parsedWeightKg(),
       reps: int.tryParse(_repsController.text) ?? widget.set.reps,
       completed: completed ?? widget.set.completed,
     );
   }
 
+  bool _validateForComplete() {
+    if (_parsedWeightKg() == null) {
+      widget.onValidationError?.call('Indica el peso antes de marcar la serie como hecha');
+      return false;
+    }
+    final reps = int.tryParse(_repsController.text);
+    if (reps == null || reps <= 0) {
+      widget.onValidationError?.call('Indica las repeticiones');
+      return false;
+    }
+    return true;
+  }
+
   void _submit({bool markCompleted = true}) {
+    if (markCompleted && !_validateForComplete()) return;
     widget.onChanged(_buildSet(completed: markCompleted ? true : widget.set.completed));
     setState(() => _editing = false);
   }
 
+  InputDecoration _fieldDecoration({
+    required String label,
+    bool emphasize = false,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      isDense: true,
+      filled: true,
+      fillColor: emphasize
+          ? AppColors.cardElevated
+          : (_fieldsEnabled ? AppColors.card : AppColors.card.withValues(alpha: 0.6)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: emphasize ? AppColors.orange.withValues(alpha: 0.6) : AppColors.border,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+      ),
+    );
+  }
+
   Widget _buildTile(BuildContext context) {
     final unitLabel = UnitConverter.massLabel(widget.unitSystem);
+    final weightLabel = ExerciseLoad.weightLabel(unitLabel, widget.exerciseName);
+    final isDone = widget.set.completed && !_editing;
+    final isActive = _fieldsEnabled && !isDone;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: widget.set.completed && !_editing ? AppColors.orange.withValues(alpha: 0.1) : null,
+    return Opacity(
+      opacity: isDone ? 0.72 : 1,
       child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor:
-                  widget.set.completed && !_editing ? AppColors.orange : AppColors.slate,
-              child: Text('${widget.set.setNumber}', style: const TextStyle(fontSize: 12)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: _weightController,
-                enabled: _fieldsEnabled,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: unitLabel,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.only(bottom: 4),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 36,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDone
+                            ? AppColors.orange.withValues(alpha: 0.2)
+                            : isActive
+                                ? AppColors.cardElevated
+                                : AppColors.card,
+                        border: Border.all(
+                          color: isDone || isActive ? AppColors.orange : AppColors.border,
+                          width: isActive ? 2 : 1,
+                        ),
+                      ),
+                      child: isDone
+                          ? const Icon(Icons.check, size: 16, color: AppColors.orange)
+                          : Text(
+                              '${widget.set.setNumber}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isActive ? AppColors.textPrimary : AppColors.textMuted,
+                              ),
+                            ),
+                    ),
+                    if (!widget.isLast)
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          color: AppColors.border,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _repsController,
-                enabled: _fieldsEnabled,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'reps',
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _weightController,
+                          enabled: _fieldsEnabled,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                          decoration: _fieldDecoration(
+                            label: weightLabel,
+                            emphasize: isActive,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _repsController,
+                          enabled: _fieldsEnabled,
+                          keyboardType: TextInputType.number,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                          decoration: _fieldDecoration(
+                            label: 'Reps',
+                            emphasize: isActive,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      if (isDone)
+                        IconButton(
+                          tooltip: 'Editar',
+                          onPressed: () => setState(() => _editing = true),
+                          icon: const Icon(Icons.edit_outlined, size: 22),
+                        )
+                      else
+                        FilledButton(
+                          onPressed: _submit,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text('Hecho'),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (widget.set.completed && !_editing)
-              IconButton(
-                tooltip: 'Editar',
-                onPressed: () => setState(() => _editing = true),
-                icon: const Icon(Icons.edit_outlined, size: 22),
-              )
-            else
-              IconButton(
-                tooltip: widget.set.completed ? 'Guardar' : 'Completar serie',
-                onPressed: _submit,
-                icon: const Icon(Icons.check_circle, color: AppColors.orange),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -163,7 +284,7 @@ class _SetLogTileState extends State<SetLogTile> {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
           color: AppColors.error,
           borderRadius: BorderRadius.circular(12),

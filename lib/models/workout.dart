@@ -1,4 +1,5 @@
 import '../core/utils/supabase_datetime.dart';
+import '../core/utils/exercise_load.dart';
 
 class WorkoutSet {
   final String id;
@@ -91,8 +92,12 @@ class WorkoutExercise {
     );
   }
 
-  double get totalVolume =>
-      sets.where((s) => s.completed).fold(0.0, (sum, s) => sum + (s.weight ?? 0) * s.reps);
+  double get totalVolume => sets
+      .where((s) => s.completed)
+      .fold(
+        0.0,
+        (sum, s) => sum + ExerciseLoad.setVolumeKg(s, exerciseName: exerciseName),
+      );
 }
 
 class Workout {

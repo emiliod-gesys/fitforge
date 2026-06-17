@@ -49,7 +49,7 @@ class RestTimeSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Descanso entre series', style: Theme.of(context).textTheme.titleSmall),
+        Text('Descanso', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

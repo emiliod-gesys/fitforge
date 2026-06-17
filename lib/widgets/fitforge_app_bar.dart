@@ -23,13 +23,18 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       leading: leading,
       title: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           const FitForgeLogo.icon(height: 32),
           if (showWordmark || title != null) ...[
             const SizedBox(width: 10),
             if (title != null)
-              Text(title!)
+              Flexible(
+                child: Text(
+                  title!,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              )
             else
               const FitForgeLogo.wordmark(height: 22),
           ],
