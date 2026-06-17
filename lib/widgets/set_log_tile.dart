@@ -158,7 +158,7 @@ class _SetLogTileState extends State<SetLogTile> {
     if (widget.onDelete == null) return tile;
 
     return Dismissible(
-      key: widget.key ?? ValueKey(widget.set.id),
+      key: ValueKey('dismiss-${widget.set.id}'),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,

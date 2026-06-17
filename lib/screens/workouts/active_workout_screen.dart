@@ -31,6 +31,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   bool _showRestTimer = false;
   int _restSeconds = 90;
   int _restTimerKey = 0;
+  final Set<String> _removedSetIds = {};
 
   @override
   void initState() {
@@ -225,7 +226,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             });
           }
           final exercise = workout.exercises[exerciseIndex];
-          final sortedSets = _sortedSets(exercise);
+          final sortedSets = _sortedSets(exercise)
+              .where((s) => !_removedSetIds.contains(s.id))
+              .toList();
           final restSession = _restTimerKey;
 
           return Column(
@@ -309,7 +312,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                           updated,
                           wasAlreadyCompleted: set.completed,
                         ),
-                        onDelete: () => _deleteSet(workout, exercise, set),
+                        onDelete: () {
+                          setState(() => _removedSetIds.add(set.id));
+                          unawaited(_deleteSet(workout, exercise, set));
+                        },
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -360,8 +366,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     WorkoutExercise exercise,
     WorkoutSet set,
   ) async {
-    await ref.read(workoutServiceProvider).deleteSet(exercise.id, set.id);
-    ref.invalidate(activeWorkoutProvider);
+    try {
+      await ref.read(workoutServiceProvider).deleteSet(exercise.id, set.id);
+      ref.invalidate(activeWorkoutProvider);
+      if (mounted) {
+        setState(() => _removedSetIds.remove(set.id));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _removedSetIds.remove(set.id));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo eliminar la serie: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _addSet(Workout workout, WorkoutExercise exercise) async {
