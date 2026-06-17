@@ -53,6 +53,11 @@ final exerciseMediaProvider = FutureProvider.family<ExerciseMedia, int>((ref, wg
   return ref.watch(exerciseServiceProvider).fetchExerciseMedia(wgerId);
 });
 
+final exerciseImageUrlProvider =
+    FutureProvider.family<String?, ExerciseImageLookup>((ref, lookup) async {
+  return ref.watch(exerciseServiceProvider).resolveImageUrl(lookup);
+});
+
 final routinesProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(routineServiceProvider).getRoutines();

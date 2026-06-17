@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
+import '../core/utils/exercise_matcher.dart';
 import '../data/supplemental_exercises.dart';
 import '../models/exercise.dart';
 
@@ -9,6 +10,30 @@ class ExerciseMedia {
   final String? videoUrl;
 
   const ExerciseMedia({this.imageUrl, this.videoUrl});
+}
+
+/// Clave para resolver la imagen de un ejercicio en entrenos/rutinas.
+class ExerciseImageLookup {
+  final String exerciseId;
+  final String exerciseName;
+  final String? imageUrl;
+
+  const ExerciseImageLookup({
+    required this.exerciseId,
+    required this.exerciseName,
+    this.imageUrl,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExerciseImageLookup &&
+        other.exerciseId == exerciseId &&
+        other.exerciseName == exerciseName &&
+        other.imageUrl == imageUrl;
+  }
+
+  @override
+  int get hashCode => Object.hash(exerciseId, exerciseName, imageUrl);
 }
 
 class ExerciseService {
@@ -90,6 +115,15 @@ class ExerciseService {
         ? Exercise.translateCategory((json['category'] as Map)['name'] as String? ?? 'Otros')
         : 'Otros';
 
+    final aliases = <String>[];
+    for (final t in json['translations'] as List? ?? []) {
+      if (t is! Map<String, dynamic>) continue;
+      final alias = t['name'] as String?;
+      if (alias != null && alias.trim().isNotEmpty) {
+        aliases.add(alias.trim());
+      }
+    }
+
     return Exercise(
       wgerId: id,
       name: name,
@@ -97,6 +131,7 @@ class ExerciseService {
       category: category,
       muscles: muscles,
       imageUrl: _pickImageUrl(json),
+      aliases: aliases,
     );
   }
 
@@ -141,6 +176,53 @@ class ExerciseService {
     );
     _mediaCache[wgerId] = media;
     return media;
+  }
+
+  Exercise? findInCatalog({
+    required String exerciseId,
+    required String exerciseName,
+    required List<Exercise> catalog,
+  }) {
+    final parsed = int.tryParse(exerciseId);
+    if (parsed != null) {
+      for (final e in catalog) {
+        if (e.wgerId == parsed) return e;
+      }
+    }
+
+    for (final e in catalog) {
+      if (e.id == exerciseId) return e;
+    }
+
+    for (final e in catalog) {
+      if (e.matchesName(exerciseName) || e.matchesName(exerciseId)) return e;
+    }
+
+    return ExerciseMatcher.findBest(exerciseName, catalog) ??
+        ExerciseMatcher.findBest(exerciseId, catalog);
+  }
+
+  Future<String?> resolveImageUrl(ExerciseImageLookup lookup) async {
+    if (lookup.imageUrl != null && lookup.imageUrl!.isNotEmpty) {
+      return lookup.imageUrl;
+    }
+
+    final catalog = await fetchExercises();
+    final match = findInCatalog(
+      exerciseId: lookup.exerciseId,
+      exerciseName: lookup.exerciseName,
+      catalog: catalog,
+    );
+    if (match == null) return null;
+
+    if (match.imageUrl != null && match.imageUrl!.isNotEmpty) {
+      return match.imageUrl;
+    }
+
+    final wgerId = match.wgerId;
+    if (wgerId == null || wgerId < 0) return null;
+
+    return (await fetchExerciseMedia(wgerId)).imageUrl;
   }
 
   Future<String?> _fetchExerciseImage(int exerciseId) async {

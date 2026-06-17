@@ -137,6 +137,7 @@ class _ExerciseListRow extends StatelessWidget {
                     ExerciseThumbnail(
                       imageUrl: exercise.imageUrl,
                       exerciseId: exercise.exerciseId,
+                      exerciseName: exercise.exerciseName,
                       width: 56,
                       height: 56,
                     ),

@@ -9,6 +9,7 @@ class Exercise {
   final String? imageUrl;
   final String? videoUrl;
   final bool isCustom;
+  final List<String> aliases;
 
   const Exercise({
     this.wgerId,
@@ -21,7 +22,30 @@ class Exercise {
     this.imageUrl,
     this.videoUrl,
     this.isCustom = false,
+    this.aliases = const [],
   });
+
+  bool matchesName(String label) {
+    final query = _normalize(label);
+    if (query.isEmpty) return false;
+    if (_normalize(name) == query) return true;
+    for (final alias in aliases) {
+      if (_normalize(alias) == query) return true;
+    }
+    return false;
+  }
+
+  static String _normalize(String input) {
+    return input
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ñ', 'n')
+        .trim();
+  }
 
   factory Exercise.fromWgerJson(Map<String, dynamic> json) {
     final translations = json['translations'] as List? ?? [];

@@ -41,7 +41,11 @@ abstract final class ExerciseMatcher {
     var bestScore = 0;
 
     for (final exercise in catalog) {
-      final score = _score(query, _normalize(exercise.name));
+      var score = _score(query, _normalize(exercise.name));
+      for (final alias in exercise.aliases) {
+        final aliasScore = _score(query, _normalize(alias));
+        if (aliasScore > score) score = aliasScore;
+      }
       if (score > bestScore) {
         bestScore = score;
         best = exercise;

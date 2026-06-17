@@ -10,6 +10,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
+import '../../services/exercise_service.dart';
 import '../../widgets/exercise_history_sheet.dart';
 import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -115,9 +116,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     if (picked == null || !mounted) return;
 
     var imageUrl = picked.imageUrl;
-    if ((imageUrl == null || imageUrl.isEmpty) && picked.wgerId != null && picked.wgerId! > 0) {
-      final media = await ref.read(exerciseServiceProvider).fetchExerciseMedia(picked.wgerId!);
-      imageUrl = media.imageUrl;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      imageUrl = await ref.read(exerciseServiceProvider).resolveImageUrl(
+            ExerciseImageLookup(
+              exerciseId: picked.id,
+              exerciseName: picked.name,
+              imageUrl: picked.imageUrl,
+            ),
+          );
     }
 
     await ref.read(workoutServiceProvider).addExerciseToWorkout(
@@ -179,9 +185,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     if (picked == null || !mounted) return;
 
     var imageUrl = picked.imageUrl;
-    if ((imageUrl == null || imageUrl.isEmpty) && picked.wgerId != null && picked.wgerId! > 0) {
-      final media = await ref.read(exerciseServiceProvider).fetchExerciseMedia(picked.wgerId!);
-      imageUrl = media.imageUrl;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      imageUrl = await ref.read(exerciseServiceProvider).resolveImageUrl(
+            ExerciseImageLookup(
+              exerciseId: picked.id,
+              exerciseName: picked.name,
+              imageUrl: picked.imageUrl,
+            ),
+          );
     }
 
     await ref.read(workoutServiceProvider).swapExerciseInWorkout(
@@ -313,6 +324,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     ExerciseThumbnail(
                       imageUrl: exercise.imageUrl,
                       exerciseId: exercise.exerciseId,
+                      exerciseName: exercise.exerciseName,
                       height: 160,
                       fullWidth: true,
                       borderRadius: BorderRadius.circular(16),
