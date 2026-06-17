@@ -1,5 +1,5 @@
-import '../core/utils/unit_converter.dart';
-import '../models/workout_summary.dart';
+import 'unit_converter.dart';
+import '../../models/workout_summary.dart';
 
 abstract final class WorkoutSummaryShare {
   static String formatText(WorkoutSummaryData summary, String unitSystem) {
@@ -16,12 +16,13 @@ abstract final class WorkoutSummaryShare {
     buffer.writeln('📊 Volumen: ${UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem)}');
 
     if (summary.brokenRecords.isNotEmpty) {
-      buffer.writeln()
-        ..writeln('🏆 ¡Nuevos récords vs última vez!')
-        ..writeln(summary.brokenRecords.map((r) => '• $r').join('\n'));
+      buffer.writeln();
+      buffer.writeln('🏆 ¡Nuevos récords vs última vez!');
+      buffer.writeln(summary.brokenRecords.map((r) => '• $r').join('\n'));
     }
 
-    buffer.writeln().writeln('Ejercicios:');
+    buffer.writeln();
+    buffer.writeln('Ejercicios:');
     for (final ex in summary.exercises) {
       final weight = ex.bestWeightKg != null
           ? ' · ${UnitConverter.formatMass(ex.bestWeightKg, unitSystem)}'
@@ -29,7 +30,8 @@ abstract final class WorkoutSummaryShare {
       buffer.writeln('• ${ex.exerciseName}: ${ex.completedSets}× · ${ex.totalReps} reps$weight');
     }
 
-    buffer.writeln().writeln('#FitForge #Entrenamiento');
+    buffer.writeln();
+    buffer.writeln('#FitForge #Entrenamiento');
     return buffer.toString().trim();
   }
 }
