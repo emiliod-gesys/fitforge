@@ -62,7 +62,7 @@ class _SetLogTileState extends State<SetLogTile> {
       _lastUnitSystem = widget.unitSystem;
     } else if (oldWidget.set.weight != widget.set.weight ||
         oldWidget.set.completed != widget.set.completed) {
-      if (! _editing) _syncWeightField();
+      if (!_editing) _syncWeightField();
       if (widget.set.completed) _editing = false;
     }
     if (oldWidget.set.reps != widget.set.reps && !_editing) {
@@ -92,26 +92,7 @@ class _SetLogTileState extends State<SetLogTile> {
     setState(() => _editing = false);
   }
 
-  Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar serie'),
-        content: Text('¿Eliminar la serie ${widget.set.setNumber}?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) widget.onDelete?.call();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTile(BuildContext context) {
     final unitLabel = UnitConverter.massLabel(widget.unitSystem);
 
     return Card(
@@ -153,30 +134,44 @@ class _SetLogTileState extends State<SetLogTile> {
                 ),
               ),
             ),
-            if (widget.set.completed && !_editing) ...[
+            if (widget.set.completed && !_editing)
               IconButton(
                 tooltip: 'Editar',
                 onPressed: () => setState(() => _editing = true),
                 icon: const Icon(Icons.edit_outlined, size: 22),
-              ),
-              if (widget.onDelete != null)
-                IconButton(
-                  tooltip: 'Eliminar',
-                  onPressed: _confirmDelete,
-                  icon: const Icon(Icons.delete_outline, size: 22, color: AppColors.error),
-                ),
-            ] else
+              )
+            else
               IconButton(
                 tooltip: widget.set.completed ? 'Guardar' : 'Completar serie',
                 onPressed: _submit,
-                icon: Icon(
-                  Icons.check_circle,
-                  color: AppColors.orange,
-                ),
+                icon: const Icon(Icons.check_circle, color: AppColors.orange),
               ),
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tile = _buildTile(context);
+    if (widget.onDelete == null) return tile;
+
+    return Dismissible(
+      key: widget.key ?? ValueKey(widget.set.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: AppColors.error,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.delete_outline, color: Colors.white),
+      ),
+      onDismissed: (_) => widget.onDelete?.call(),
+      child: tile,
     );
   }
 }

@@ -126,11 +126,12 @@ class WorkoutService {
           .from('workout_sets')
           .select()
           .eq('workout_exercise_id', exMap['id'])
-          .order('set_number');
+          .order('set_number', ascending: true);
 
       final sets = (setsData as List)
           .map((s) => WorkoutSet.fromJson(s as Map<String, dynamic>))
-          .toList();
+          .toList()
+        ..sort((a, b) => a.setNumber.compareTo(b.setNumber));
 
       exercises.add(WorkoutExercise.fromJson(exMap, sets: sets));
     }
@@ -288,6 +289,71 @@ class WorkoutService {
     return source.where((s) => s.weight != null || s.reps > 0).toList();
   }
 
+  Future<WorkoutExercise> addExerciseToWorkout(
+    String workoutId, {
+    required String exerciseId,
+    required String exerciseName,
+    String? imageUrl,
+    int defaultSets = 3,
+    int defaultReps = 10,
+  }) async {
+    final existing = await _getWorkoutExercises(workoutId);
+    final nextOrder = existing.isEmpty
+        ? 0
+        : existing.map((e) => e.orderIndex).reduce((a, b) => a > b ? a : b) + 1;
+
+    final previous = await getPreviousSetsForExercise(exerciseId, excludeWorkoutId: workoutId);
+    final sets = List.generate(defaultSets, (i) {
+      final prev = previous != null && previous.isNotEmpty
+          ? (i < previous.length ? previous[i] : previous.last)
+          : null;
+      return WorkoutSet(
+        id: '',
+        setNumber: i + 1,
+        weight: prev?.weight,
+        reps: (prev?.reps ?? 0) > 0 ? prev!.reps : defaultReps,
+      );
+    });
+
+    final exercise = WorkoutExercise(
+      id: _uuid.v4(),
+      exerciseId: exerciseId,
+      exerciseName: exerciseName,
+      imageUrl: imageUrl,
+      orderIndex: nextOrder,
+      sets: sets,
+    );
+
+    await _addExerciseToWorkout(workoutId, exercise);
+    return exercise;
+  }
+
+  Future<void> removeExerciseFromWorkout(String workoutExerciseId) async {
+    final row = await _client
+        .from('workout_exercises')
+        .select('workout_id')
+        .eq('id', workoutExerciseId)
+        .maybeSingle();
+    if (row == null) return;
+
+    final workoutId = row['workout_id'] as String;
+    await _client.from('workout_exercises').delete().eq('id', workoutExerciseId);
+
+    final remaining = await _client
+        .from('workout_exercises')
+        .select('id')
+        .eq('workout_id', workoutId)
+        .order('order_index', ascending: true);
+
+    final rows = remaining as List;
+    for (var i = 0; i < rows.length; i++) {
+      await _client
+          .from('workout_exercises')
+          .update({'order_index': i})
+          .eq('id', (rows[i] as Map<String, dynamic>)['id'] as String);
+    }
+  }
+
   Future<void> _addExerciseToWorkout(String workoutId, WorkoutExercise exercise) async {
     final exId = exercise.id.isEmpty ? _uuid.v4() : exercise.id;
     await _client.from('workout_exercises').insert({
@@ -366,7 +432,7 @@ class WorkoutService {
         .from('workout_sets')
         .select('id')
         .eq('workout_exercise_id', workoutExerciseId)
-        .order('set_number');
+        .order('set_number', ascending: true);
 
     final rows = data as List;
     for (var i = 0; i < rows.length; i++) {
