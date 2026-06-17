@@ -5,16 +5,20 @@ abstract final class ExerciseLoad {
   /// Muestra la etiqueta «(por brazo)» en la UI de series.
   static bool isPerArmWeight(String exerciseName) {
     final n = _normalize(exerciseName);
-    if (!_usesDumbbell(n)) return false;
     if (_singleDumbbellBothHands(n)) return false;
-    return true;
+    if (_usesDumbbell(n)) return true;
+    if (_isPerArmCable(n)) return true;
+    return false;
   }
 
-  /// Multiplicador de volumen: 2× para mancuernas bilaterales simultáneas.
+  /// Multiplicador de volumen respecto al peso registrado por serie.
   static double volumeMultiplier(String exerciseName) {
+    final n = _normalize(exerciseName);
     if (!isPerArmWeight(exerciseName)) return 1;
-    if (_isUnilateral(n: _normalize(exerciseName))) return 1;
-    return 2;
+    if (_isUnilateral(n: n)) return 1;
+    if (_usesDumbbell(n)) return 2;
+    if (_usesCable(n) && _cableBilateralSimultaneous(n)) return 2;
+    return 1;
   }
 
   static double setVolumeKg(WorkoutSet set, {required String exerciseName}) {
@@ -45,6 +49,101 @@ abstract final class ExerciseLoad {
         n.contains('dumbbell') ||
         n.contains('kettlebell') ||
         n.contains('pesa rusa');
+  }
+
+  static bool _usesCable(String n) {
+    return n.contains('polea') ||
+        n.contains('poleas') ||
+        n.contains('cable') ||
+        n.contains('pulley');
+  }
+
+  static bool _isPerArmCable(String n) {
+    if (!_usesCable(n)) return false;
+    if (_cableUsesTotalWeight(n)) return false;
+    return _cableArmIsolation(n);
+  }
+
+  /// Polea con peso total de la pila (no por brazo): jalones, remos, pushdown con barra/cuerda, etc.
+  static bool _cableUsesTotalWeight(String n) {
+    if (_isUnilateral(n: n)) return false;
+
+    if (_usesCable(n) &&
+        (n.contains('triceps') || n.contains('tricep')) &&
+        (n.contains('extension') || n.contains('pushdown') || n.contains('press down'))) {
+      return true;
+    }
+
+    const patterns = [
+      'jalon',
+      'pulldown',
+      'lat pull',
+      'remo sentado',
+      'seated row',
+      'remo bajo',
+      'low row',
+      'remo alto',
+      'high row',
+      'face pull',
+      'traccion al pecho',
+      'dominada asistida',
+      'assisted pull',
+      'woodchop',
+      'pallof',
+      'crunch',
+      'abdominal',
+      'pushdown',
+      'press down',
+      'encogimiento',
+      'shrug',
+      'remo en polea baja',
+      'remo en polea',
+      'pull through',
+    ];
+    return patterns.any(n.contains);
+  }
+
+  /// Aislamiento de brazos/hombros con polea: elevaciones, curls, extensiones unilaterales, etc.
+  static bool _cableArmIsolation(String n) {
+    const patterns = [
+      'lateral',
+      'frontal',
+      'front raise',
+      'elevacion',
+      'raise',
+      'curl',
+      'biceps',
+      'bicep',
+      'triceps',
+      'tricep',
+      'extension',
+      'fly',
+      'apertura',
+      'cruce',
+      'crossover',
+      'kickback',
+      'patada',
+      'reverse fly',
+      'pajarita',
+      'pull over',
+      'pullover',
+      'external rotation',
+      'rotacion externa',
+      'internal rotation',
+      'rotacion interna',
+    ];
+    return patterns.any(n.contains);
+  }
+
+  static bool _cableBilateralSimultaneous(String n) {
+    const patterns = [
+      'cruce',
+      'crossover',
+      'iron cross',
+      'apertura en polea',
+      'fly en polea',
+    ];
+    return patterns.any(n.contains);
   }
 
   static bool _singleDumbbellBothHands(String n) {
