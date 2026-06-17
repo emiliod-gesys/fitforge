@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
-import '../../models/exercise.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
