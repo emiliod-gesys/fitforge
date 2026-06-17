@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
+import '../core/l10n/app_locale.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/youtube_thumbnail.dart';
 import '../data/supplemental_exercises.dart';
@@ -41,9 +42,16 @@ class ExerciseService {
   final _http = http.Client();
   List<Exercise>? _cache;
   final _mediaCache = <int, ExerciseMedia>{};
+  String _preferredLanguage = 'es';
 
-  static const _spanishLang = 4;
-  static const _englishLang = 2;
+  void configure({required String language}) {
+    if (_preferredLanguage != language) {
+      _preferredLanguage = language;
+      clearCache();
+      _mediaCache.clear();
+    }
+  }
+
   static const _pageSize = 100;
   static const _maxExercises = 1500;
 
@@ -85,7 +93,7 @@ class ExerciseService {
       offset += _pageSize;
     }
 
-    final merged = SupplementalExercises.mergeWith(exercises);
+    final merged = SupplementalExercises.mergeWith(exercises, locale: _preferredLanguage);
 
     if (search == null && category == null) {
       _cache = merged;
@@ -108,13 +116,19 @@ class ExerciseService {
         .trim();
 
     final muscles = (json['muscles'] as List? ?? [])
-        .map((m) => m is Map ? Exercise.translateMuscle(m['name_en'] as String? ?? m['name'] as String? ?? '') : '')
+        .map((m) => m is Map
+            ? Exercise.localizeMuscle(
+                m['name_en'] as String? ?? m['name'] as String? ?? '',
+                locale: _preferredLanguage,
+              )
+            : '')
         .where((s) => s.isNotEmpty)
         .toList();
 
-    final category = json['category'] is Map
-        ? Exercise.translateCategory((json['category'] as Map)['name'] as String? ?? 'Otros')
-        : 'Otros';
+    final categoryRaw = json['category'] is Map
+        ? (json['category'] as Map)['name'] as String? ?? 'Other'
+        : 'Other';
+    final category = Exercise.localizeCategoryFromWger(categoryRaw, locale: _preferredLanguage);
 
     final aliases = <String>[];
     for (final t in json['translations'] as List? ?? []) {
@@ -153,18 +167,20 @@ class ExerciseService {
   }
 
   Map<String, dynamic>? _pickTranslation(List translations) {
-    Map<String, dynamic>? english;
-    Map<String, dynamic>? fallback;
+    final preferred = AppLocale.wgerLanguageId(_preferredLanguage);
+    final fallback = AppLocale.wgerFallbackLanguageId(_preferredLanguage);
+    Map<String, dynamic>? fallbackT;
+    Map<String, dynamic>? any;
 
     for (final t in translations) {
       if (t is! Map<String, dynamic>) continue;
       final lang = t['language'];
-      if (lang == _spanishLang) return t;
-      if (lang == _englishLang) english = t;
-      fallback ??= t;
+      if (lang == preferred) return t;
+      if (lang == fallback) fallbackT = t;
+      any ??= t;
     }
 
-    return english ?? fallback;
+    return fallbackT ?? any;
   }
 
   Future<ExerciseMedia> fetchExerciseMedia(int wgerId) async {
@@ -231,40 +247,10 @@ class ExerciseService {
       }
     }
 
-    return _borrowImageUrl(match, catalog);
-  }
-
-  String? _borrowImageUrl(Exercise exercise, List<Exercise> catalog) {
-    final category = exercise.category;
-    final primaryMuscle = exercise.muscles.isNotEmpty ? exercise.muscles.first : null;
-
-    String? pick(Iterable<Exercise> candidates) {
-      for (final e in candidates) {
-        if (e.wgerId == exercise.wgerId && e.name == exercise.name) continue;
-        if (e.imageUrl != null && e.imageUrl!.isNotEmpty) return e.imageUrl;
-      }
-      return null;
-    }
-
-    if (primaryMuscle != null) {
-      final sameGroup = catalog.where(
-        (e) => e.category == category && e.muscles.contains(primaryMuscle),
-      );
-      final borrowed = pick(sameGroup);
-      if (borrowed != null) return borrowed;
-    }
-
-    final sameCategory = catalog.where((e) => e.category == category);
-    final fromCategory = pick(sameCategory);
-    if (fromCategory != null) return fromCategory;
-
-    if (primaryMuscle != null) {
-      final sameMuscle = catalog.where((e) => e.muscles.contains(primaryMuscle));
-      return pick(sameMuscle);
-    }
-
     return null;
   }
+
+  // Sin préstamo de imágenes de otros ejercicios: si no hay foto propia, la UI muestra el logo FitForge.
 
   Future<String?> _fetchExerciseImage(int exerciseId) async {
     try {

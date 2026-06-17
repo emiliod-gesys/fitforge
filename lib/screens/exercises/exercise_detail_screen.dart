@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../services/exercise_service.dart';
 import '../../models/exercise.dart';
 import '../../providers/app_providers.dart';
@@ -15,10 +16,11 @@ class ExerciseDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Ejercicio'),
+      appBar: FitForgeAppBar(title: l10n.exerciseDetailTitle),
       body: exercisesAsync.when(
         data: (exercises) {
           final exercise = exercises.cast<Exercise?>().firstWhere(
@@ -27,7 +29,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
               );
 
           if (exercise == null) {
-            return const Center(child: Text('Ejercicio no encontrado'));
+            return Center(child: Text(l10n.exerciseNotFound));
           }
 
           final wgerId = exercise.wgerId;
@@ -42,7 +44,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
       ),
     );
   }
@@ -59,6 +61,7 @@ class _ExerciseBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,7 +94,7 @@ class _ExerciseBody extends StatelessWidget {
                 ),
                 if (exercise.description.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text('Instrucciones', style: Theme.of(context).textTheme.titleMedium),
+                  Text(l10n.instructions, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text(exercise.description),
                 ],
@@ -100,14 +103,12 @@ class _ExerciseBody extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: () => launchUrl(Uri.parse(media.videoUrl!)),
                     icon: const Icon(Icons.play_circle),
-                    label: const Text('Ver video demostrativo'),
+                    label: Text(l10n.watchDemoVideo),
                   ),
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  exercise.isCustom
-                      ? 'Ejercicio del catálogo FitForge'
-                      : 'Imágenes y videos de wger.de (CC-BY-SA)',
+                  exercise.isCustom ? l10n.fitforgeCatalog : l10n.wgerAttribution,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38),
                 ),
               ],

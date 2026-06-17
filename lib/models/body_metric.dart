@@ -13,7 +13,7 @@ class BodyMetricDefinition {
     required this.kind,
   });
 
-  String unitLabel(String unitSystem) {
+  String unitLabel(String unitSystem, {String yearsLabel = 'años'}) {
     switch (kind) {
       case BodyMetricKind.mass:
         return unitSystem == 'lb' ? 'lb' : 'kg';
@@ -24,7 +24,7 @@ class BodyMetricDefinition {
       case BodyMetricKind.kcal:
         return 'kcal';
       case BodyMetricKind.years:
-        return 'años';
+        return yearsLabel;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import 'exercise_thumbnail.dart';
 
@@ -61,6 +62,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final filtered = _filtered;
     final inRoutineCount = widget.selectedExerciseIds.length;
 
@@ -80,13 +82,13 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Añadir ejercicio', style: Theme.of(context).textTheme.titleLarge),
+              Text(l10n.addExercise, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 12),
               TextField(
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Buscar por nombre, músculo o categoría…',
+                  hintText: l10n.searchByMuscle,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _search.isNotEmpty
                       ? IconButton(
@@ -106,19 +108,19 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                 child: Row(
                   children: [
                     FilterChip(
-                      label: const Text('Todos'),
+                      label: Text(l10n.all),
                       selected: _filter == ExercisePickerFilter.all,
                       onSelected: (_) => setState(() => _filter = ExercisePickerFilter.all),
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
-                      label: Text('En rutina ($inRoutineCount)'),
+                      label: Text(l10n.inRoutine(inRoutineCount)),
                       selected: _filter == ExercisePickerFilter.inRoutine,
                       onSelected: (_) => setState(() => _filter = ExercisePickerFilter.inRoutine),
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
-                      label: const Text('Todos los grupos'),
+                      label: Text(l10n.allGroups),
                       selected: _category == null,
                       onSelected: (_) => setState(() => _category = null),
                     ),
@@ -137,7 +139,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${filtered.length} ejercicios',
+                l10n.exerciseCount(filtered.length),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
               ),
             ],
@@ -151,8 +153,8 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                     padding: const EdgeInsets.all(24),
                     child: Text(
                       _filter == ExercisePickerFilter.inRoutine
-                          ? 'Ningún ejercicio coincide con la búsqueda en tu rutina.'
-                          : 'No se encontraron ejercicios.',
+                          ? l10n.noSearchInRoutine
+                          : l10n.noExercisesFound,
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.textMuted),
                     ),

@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../core/utils/workout_summary_share.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -34,7 +36,9 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
 
     try {
       final unit = ref.read(unitSystemProvider);
-      final text = WorkoutSummaryShare.formatText(summary, unit);
+      final l10n = context.l10n;
+      final displayName = l10n.workoutDisplayName(summary.workout.name);
+      final text = WorkoutSummaryShare.formatText(l10n, summary, unit, displayName: displayName);
 
       final boundary =
           _shareCardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -52,13 +56,13 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
               ),
             ],
             text: text,
-            subject: summary.workout.name,
+            subject: displayName,
           );
           return;
         }
       }
 
-      await Share.share(text, subject: summary.workout.name);
+      await Share.share(text, subject: displayName);
     } finally {
       if (mounted) setState(() => _sharing = false);
     }
@@ -74,11 +78,12 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final unit = ref.watch(unitSystemProvider);
 
     return Scaffold(
       appBar: FitForgeAppBar(
-        title: 'Resumen',
+        title: l10n.summaryTitle,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: _close,
@@ -92,22 +97,22 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
               children: [
                 RepaintBoundary(
                   key: _shareCardKey,
-                  child: _ShareCard(summary: summary, unitSystem: unit),
+                  child: _ShareCard(summary: summary, unitSystem: unit, l10n: l10n),
                 ),
                 const SizedBox(height: 20),
                 if (summary.hasPreviousComparison) ...[
                   Text(
-                    'vs última vez (${summary.previousSameRoutine!.name})',
+                    l10n.vsLastTime(l10n.workoutDisplayName(summary.previousSameRoutine!.name)),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 12),
-                  _ComparisonSection(summary: summary, unitSystem: unit),
+                  _ComparisonSection(summary: summary, unitSystem: unit, l10n: l10n),
                   const SizedBox(height: 20),
                 ],
                 Text(
-                  'Ejercicios realizados',
+                  l10n.exercisesCompleted,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -119,8 +124,13 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                     child: ListTile(
                       title: Text(ex.exerciseName),
                       subtitle: Text(
-                        '${ex.completedSets} series · ${ex.totalReps} reps'
-                        '${ex.bestWeightKg != null ? ' · mejor: ${UnitConverter.formatMass(ex.bestWeightKg, unit)}' : ''}',
+                        ex.bestWeightKg != null
+                            ? l10n.setsRepsBest(
+                                ex.completedSets,
+                                ex.totalReps,
+                                UnitConverter.formatMass(ex.bestWeightKg, unit),
+                              )
+                            : l10n.setsReps(ex.completedSets, ex.totalReps),
                       ),
                     ),
                   ),
@@ -137,7 +147,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _close,
-                      child: const Text('Cerrar'),
+                      child: Text(l10n.close),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -152,7 +162,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.share_outlined),
-                      label: const Text('Compartir'),
+                      label: Text(l10n.share),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.orange,
                         foregroundColor: Colors.white,
@@ -173,12 +183,17 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
 class _ShareCard extends StatelessWidget {
   final WorkoutSummaryData summary;
   final String unitSystem;
+  final AppLocalizations l10n;
 
-  const _ShareCard({required this.summary, required this.unitSystem});
+  const _ShareCard({required this.summary, required this.unitSystem, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
-    final records = summary.brokenRecords;
+    final records = l10n.brokenRecordLabels(
+      isVolumeRecord: summary.isVolumeRecord,
+      isRepsRecord: summary.isRepsRecord,
+      isMaxWeightRecord: summary.isMaxWeightRecord,
+    );
 
     return Container(
       width: double.infinity,
@@ -204,14 +219,14 @@ class _ShareCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            summary.workout.name,
+            l10n.workoutDisplayName(summary.workout.name),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 4),
           Text(
-            '${summary.durationMinutes} min · ${summary.exercises.length} ejercicios',
+            l10n.durationMinutesExercises(summary.durationMinutes, summary.exercises.length),
             style: const TextStyle(color: AppColors.textMuted),
           ),
           const SizedBox(height: 20),
@@ -219,14 +234,14 @@ class _ShareCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatTile(
-                  label: 'Reps',
+                  label: l10n.reps,
                   value: '${summary.totalReps}',
                   highlight: summary.isRepsRecord,
                 ),
               ),
               Expanded(
                 child: _StatTile(
-                  label: 'Peso máx',
+                  label: l10n.maxWeight,
                   value: summary.maxWeightKg != null
                       ? UnitConverter.formatMass(summary.maxWeightKg, unitSystem, decimals: 0)
                       : '—',
@@ -235,7 +250,7 @@ class _ShareCard extends StatelessWidget {
               ),
               Expanded(
                 child: _StatTile(
-                  label: 'Volumen',
+                  label: l10n.volume,
                   value: UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem),
                   highlight: summary.isVolumeRecord,
                 ),
@@ -251,7 +266,7 @@ class _ShareCard extends StatelessWidget {
                   .map(
                     (r) => Chip(
                       avatar: Icon(Icons.emoji_events, size: 16, color: AppColors.orange),
-                      label: Text('Récord: $r'),
+                      label: Text(l10n.recordLabel(r)),
                       backgroundColor: AppColors.orange.withValues(alpha: 0.15),
                       side: BorderSide(color: AppColors.orange.withValues(alpha: 0.4)),
                     ),
@@ -303,8 +318,9 @@ class _StatTile extends StatelessWidget {
 class _ComparisonSection extends StatelessWidget {
   final WorkoutSummaryData summary;
   final String unitSystem;
+  final AppLocalizations l10n;
 
-  const _ComparisonSection({required this.summary, required this.unitSystem});
+  const _ComparisonSection({required this.summary, required this.unitSystem, required this.l10n});
 
   Widget _row(String label, String current, String? previous, String? delta, bool isRecord) {
     return Padding(
@@ -358,24 +374,24 @@ class _ComparisonSection extends StatelessWidget {
             Row(
               children: [
                 const Expanded(flex: 2, child: SizedBox()),
-                const Expanded(flex: 2, child: Text('Hoy', style: TextStyle(fontWeight: FontWeight.w600))),
+                Expanded(flex: 2, child: Text(l10n.today, style: TextStyle(fontWeight: FontWeight.w600))),
                 Expanded(
                   flex: 2,
-                  child: Text('Antes', style: TextStyle(color: AppColors.textMuted)),
+                  child: Text(l10n.before, style: TextStyle(color: AppColors.textMuted)),
                 ),
                 const SizedBox(width: 40),
               ],
             ),
             const Divider(height: 16),
             _row(
-              'Reps',
+              l10n.reps,
               '${summary.totalReps}',
               summary.previousTotalReps?.toString(),
               _delta(summary.totalReps, summary.previousTotalReps),
               summary.isRepsRecord,
             ),
             _row(
-              'Peso máx',
+              l10n.maxWeight,
               summary.maxWeightKg != null
                   ? UnitConverter.formatMass(summary.maxWeightKg, unitSystem, decimals: 0)
                   : '—',
@@ -386,7 +402,7 @@ class _ComparisonSection extends StatelessWidget {
               summary.isMaxWeightRecord,
             ),
             _row(
-              'Volumen',
+              l10n.volume,
               UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem),
               summary.previousTotalVolumeKg != null
                   ? UnitConverter.formatVolume(summary.previousTotalVolumeKg!, unitSystem)

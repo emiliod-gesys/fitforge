@@ -1,11 +1,50 @@
 enum AiProvider { none, openai, gemini }
 
+enum Gender {
+  male,
+  female,
+  nonBinary,
+  preferNotToSay;
+
+  static Gender? fromCode(String? value) {
+    switch (value) {
+      case 'male':
+        return Gender.male;
+      case 'female':
+        return Gender.female;
+      case 'non_binary':
+        return Gender.nonBinary;
+      case 'prefer_not_to_say':
+        return Gender.preferNotToSay;
+      default:
+        return null;
+    }
+  }
+
+  String get code {
+    switch (this) {
+      case Gender.male:
+        return 'male';
+      case Gender.female:
+        return 'female';
+      case Gender.nonBinary:
+        return 'non_binary';
+      case Gender.preferNotToSay:
+        return 'prefer_not_to_say';
+    }
+  }
+}
+
 class UserProfile {
   final String id;
   final String? displayName;
   final String? avatarUrl;
   final String unitSystem;
   final double? bodyWeight;
+  final int? age;
+  final Gender? gender;
+  final double? heightCm;
+  final String preferredLanguage;
   final String? fitnessGoal;
   final String? experienceLevel;
   final AiProvider aiProvider;
@@ -18,6 +57,10 @@ class UserProfile {
     this.avatarUrl,
     this.unitSystem = 'kg',
     this.bodyWeight,
+    this.age,
+    this.gender,
+    this.heightCm,
+    this.preferredLanguage = 'es',
     this.fitnessGoal,
     this.experienceLevel,
     this.aiProvider = AiProvider.none,
@@ -32,6 +75,10 @@ class UserProfile {
       avatarUrl: json['avatar_url'] as String?,
       unitSystem: json['unit_system'] as String? ?? 'kg',
       bodyWeight: (json['body_weight'] as num?)?.toDouble(),
+      age: json['age'] as int?,
+      gender: Gender.fromCode(json['gender'] as String?),
+      heightCm: (json['height_cm'] as num?)?.toDouble(),
+      preferredLanguage: json['preferred_language'] as String? ?? 'es',
       fitnessGoal: json['fitness_goal'] as String?,
       experienceLevel: json['experience_level'] as String?,
       aiProvider: _parseProvider(json['ai_provider'] as String?),
@@ -56,6 +103,10 @@ class UserProfile {
         'avatar_url': avatarUrl,
         'unit_system': unitSystem,
         'body_weight': bodyWeight,
+        'age': age,
+        'gender': gender?.code,
+        'height_cm': heightCm,
+        'preferred_language': preferredLanguage,
         'fitness_goal': fitnessGoal,
         'experience_level': experienceLevel,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,

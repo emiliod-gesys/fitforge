@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
 import '../models/exercise_history.dart';
 import '../models/profile.dart';
@@ -39,6 +41,15 @@ final unitSystemProvider = Provider<String>((ref) {
   return ref.watch(profileProvider).value?.unitSystem ?? 'kg';
 });
 
+/// Idioma preferido del usuario (es / en).
+final preferredLanguageProvider = Provider<String>((ref) {
+  return ref.watch(profileProvider).value?.preferredLanguage ?? AppLocale.defaultCode;
+});
+
+final appLocaleProvider = Provider<Locale>((ref) {
+  return AppLocale.toLocale(ref.watch(preferredLanguageProvider));
+});
+
 final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
   ref.watch(profileProvider);
@@ -46,7 +57,10 @@ final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
 });
 
 final exercisesProvider = FutureProvider((ref) async {
-  return ref.watch(exerciseServiceProvider).fetchExercises();
+  final lang = ref.watch(preferredLanguageProvider);
+  final service = ref.read(exerciseServiceProvider);
+  service.configure(language: lang);
+  return service.fetchExercises();
 });
 
 final exerciseMediaProvider = FutureProvider.family<ExerciseMedia, int>((ref, wgerId) async {
@@ -107,7 +121,11 @@ final bodyMeasurementsProvider = FutureProvider((ref) async {
 
 final muscleRecoveryProvider = FutureProvider((ref) async {
   final workouts = await ref.watch(workoutsProvider.future);
-  return ref.watch(workoutServiceProvider).calculateMuscleRecovery(workouts);
+  final catalog = await ref.watch(exercisesProvider.future);
+  return ref.watch(workoutServiceProvider).calculateMuscleRecovery(
+        workouts,
+        catalog: catalog,
+      );
 });
 
 final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistory>, ExerciseHistoryQuery>(

@@ -19,7 +19,7 @@ abstract final class SimilarExercises {
 
     final muscles = match?.muscles.isNotEmpty == true
         ? match!.muscles
-        : MuscleInference.fromExerciseName(exerciseName);
+        : MuscleInference.resolve(exerciseName: exerciseName);
     final category = match?.category ?? '';
 
     final scored = <(Exercise exercise, int score)>[];
@@ -32,7 +32,7 @@ abstract final class SimilarExercises {
 
       final candidateMuscles = candidate.muscles.isNotEmpty
           ? candidate.muscles
-          : MuscleInference.fromExerciseName(candidate.name);
+          : MuscleInference.resolve(exerciseName: candidate.name);
 
       for (final muscle in muscles) {
         final m = muscle.toLowerCase();
@@ -46,7 +46,7 @@ abstract final class SimilarExercises {
       }
 
       if (score == 0 && muscles.isNotEmpty) {
-        final inferred = MuscleInference.fromExerciseName(candidate.name);
+        final inferred = MuscleInference.resolve(exerciseName: candidate.name);
         for (final muscle in muscles) {
           if (inferred.contains(muscle)) score += 5;
         }

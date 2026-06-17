@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/unit_converter.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/workout.dart';
 
 class SetLogTile extends StatefulWidget {
@@ -99,13 +100,14 @@ class _SetLogTileState extends State<SetLogTile> {
   }
 
   bool _validateForComplete() {
+    final l10n = context.l10n;
     if (_parsedWeightKg() == null) {
-      widget.onValidationError?.call('Indica el peso antes de marcar la serie como hecha');
+      widget.onValidationError?.call(l10n.weightRequired);
       return false;
     }
     final reps = int.tryParse(_repsController.text);
     if (reps == null || reps <= 0) {
-      widget.onValidationError?.call('Indica las repeticiones');
+      widget.onValidationError?.call(l10n.repsRequired);
       return false;
     }
     return true;
@@ -151,6 +153,7 @@ class _SetLogTileState extends State<SetLogTile> {
   }
 
   Widget _buildTile(BuildContext context) {
+    final l10n = context.l10n;
     final unitLabel = UnitConverter.massLabel(widget.unitSystem);
     final weightLabel = ExerciseLoad.weightLabel(unitLabel, widget.exerciseName);
     final isDone = widget.set.completed && !_editing;
@@ -237,7 +240,7 @@ class _SetLogTileState extends State<SetLogTile> {
                                 fontWeight: FontWeight.w600,
                               ),
                           decoration: _fieldDecoration(
-                            label: 'Reps',
+                            label: l10n.reps,
                             emphasize: isActive,
                           ),
                         ),
@@ -245,7 +248,7 @@ class _SetLogTileState extends State<SetLogTile> {
                       const SizedBox(width: 10),
                       if (isDone)
                         IconButton(
-                          tooltip: 'Editar',
+                          tooltip: l10n.edit,
                           onPressed: () => setState(() => _editing = true),
                           icon: const Icon(Icons.edit_outlined, size: 22),
                         )
@@ -260,7 +263,7 @@ class _SetLogTileState extends State<SetLogTile> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('Hecho'),
+                          child: Text(l10n.done),
                         ),
                     ],
                   ),

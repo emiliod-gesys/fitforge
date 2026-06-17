@@ -1,37 +1,59 @@
-import 'unit_converter.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/workout_summary.dart';
+import 'unit_converter.dart';
 
 abstract final class WorkoutSummaryShare {
-  static String formatText(WorkoutSummaryData summary, String unitSystem) {
+  static String formatText(
+    AppLocalizations l10n,
+    WorkoutSummaryData summary,
+    String unitSystem, {
+    String? displayName,
+  }) {
     final w = summary.workout;
+    final name = displayName ?? l10n.workoutDisplayName(w.name);
     final buffer = StringBuffer()
-      ..writeln('💪 ${w.name} — FitForge')
-      ..writeln('⏱ ${summary.durationMinutes} min')
-      ..writeln('🏋️ ${summary.exercises.length} ejercicios')
-      ..writeln('🔁 ${summary.totalReps} reps totales');
+      ..writeln(l10n.shareWorkoutTitle(name))
+      ..writeln(l10n.shareDuration(summary.durationMinutes))
+      ..writeln(l10n.shareExerciseCount(summary.exercises.length))
+      ..writeln(l10n.shareTotalReps(summary.totalReps));
 
     if (summary.maxWeightKg != null) {
-      buffer.writeln('📈 Peso máx: ${UnitConverter.formatMass(summary.maxWeightKg, unitSystem)}');
+      buffer.writeln(
+        l10n.shareMaxWeight(UnitConverter.formatMass(summary.maxWeightKg, unitSystem)),
+      );
     }
-    buffer.writeln('📊 Volumen: ${UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem)}');
+    buffer.writeln(
+      l10n.shareVolume(UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem)),
+    );
 
-    if (summary.brokenRecords.isNotEmpty) {
-      buffer.writeln();
-      buffer.writeln('🏆 ¡Nuevos récords vs última vez!');
-      buffer.writeln(summary.brokenRecords.map((r) => '• $r').join('\n'));
+    final records = l10n.brokenRecordLabels(
+      isVolumeRecord: summary.isVolumeRecord,
+      isRepsRecord: summary.isRepsRecord,
+      isMaxWeightRecord: summary.isMaxWeightRecord,
+    );
+    if (records.isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.shareNewRecords)
+        ..writeln(records.map((r) => '• $r').join('\n'));
     }
 
-    buffer.writeln();
-    buffer.writeln('Ejercicios:');
+    buffer
+      ..writeln()
+      ..writeln(l10n.shareExercisesHeader);
     for (final ex in summary.exercises) {
       final weight = ex.bestWeightKg != null
           ? ' · ${UnitConverter.formatMass(ex.bestWeightKg, unitSystem)}'
           : '';
-      buffer.writeln('• ${ex.exerciseName}: ${ex.completedSets}× · ${ex.totalReps} reps$weight');
+      buffer.writeln(
+        l10n.shareExerciseLine(ex.exerciseName, ex.completedSets, ex.totalReps, weight),
+      );
     }
 
-    buffer.writeln();
-    buffer.writeln('#FitForge #Entrenamiento');
+    buffer
+      ..writeln()
+      ..writeln(l10n.shareHashtags);
     return buffer.toString().trim();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/similar_exercises.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../models/workout.dart';
 import '../providers/app_providers.dart';
@@ -42,6 +43,7 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Column(
@@ -63,9 +65,9 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Intercambiar por similar',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    Text(
+                      l10n.swapSimilar,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -87,7 +89,7 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
         Expanded(
           child: exercisesAsync.when(
             loading: () => const Center(child: FitForgeLoadingIndicator(size: 48)),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
             data: (catalog) {
               final similar = SimilarExercises.find(
                 exerciseName: current.exerciseName,
@@ -97,13 +99,13 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
               );
 
               if (similar.isEmpty) {
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(24),
                     child: Text(
-                      'No encontramos ejercicios similares.\nPrueba añadir uno manualmente.',
+                      l10n.noSimilarFound,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textMuted),
+                      style: const TextStyle(color: AppColors.textMuted),
                     ),
                   ),
                 );

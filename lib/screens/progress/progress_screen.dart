@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/muscle_inference.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
@@ -32,17 +33,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   bool _matchesMuscleFilter(PersonalRecord pr) {
     if (_muscleFilter == null) return true;
-    return MuscleInference.fromExerciseName(pr.exerciseName).contains(_muscleFilter);
+    return MuscleInference.resolve(exerciseName: pr.exerciseName).contains(_muscleFilter);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final prsAsync = ref.watch(personalRecordsProvider);
     final workoutsAsync = ref.watch(progressWorkoutsProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Progreso'),
+      appBar: FitForgeAppBar(title: l10n.progressTitle),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(personalRecordsProvider);
@@ -58,11 +60,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 final totalVolume = last30.fold<double>(0, (s, w) => s + w.totalVolume);
                 return Row(
                   children: [
-                    Expanded(child: _StatBox('Entrenos (30 d)', '$completed')),
+                    Expanded(child: _StatBox(l10n.workouts30d, '$completed')),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _StatBox(
-                        'Volumen (30 d)',
+                        l10n.volume30d,
                         UnitConverter.formatVolume(totalVolume, unitSystem),
                       ),
                     ),
@@ -73,10 +75,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
-            Text('Volumen por entrenamiento', style: Theme.of(context).textTheme.titleLarge),
+            Text(l10n.volumePerWorkout, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 4),
             Text(
-              'Últimos 30 días',
+              l10n.last30Days,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: 12),
@@ -84,11 +86,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               data: (workouts) {
                 final last30 = _workoutsLast30Days(workouts);
                 if (last30.isEmpty) {
-                  return const Card(
+                  return Card(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Center(
-                        child: Text('Completa entrenamientos para ver tu volumen'),
+                        child: Text(l10n.completeWorkoutsForVolume),
                       ),
                     ),
                   );
@@ -96,10 +98,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 return _VolumeChart(workouts: last30, unitSystem: unitSystem);
               },
               loading: () => const FitForgeLoadingIndicator(size: 80),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(l10n.errorGeneric(e.toString())),
             ),
             const SizedBox(height: 24),
-            Text('Records personales', style: Theme.of(context).textTheme.titleLarge),
+            Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             SizedBox(
               height: 40,
@@ -109,7 +111,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: const Text('Todos'),
+                      label: Text(l10n.all),
                       selected: _muscleFilter == null,
                       onSelected: (_) => setState(() => _muscleFilter = null),
                     ),
@@ -120,7 +122,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                         (muscle) => Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: FilterChip(
-                            label: Text(muscle),
+                            label: Text(l10n.muscleLabel(muscle)),
                             selected: _muscleFilter == muscle,
                             onSelected: (_) => setState(() => _muscleFilter = muscle),
                           ),
@@ -136,8 +138,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 if (filtered.isEmpty) {
                   return Text(
                     _muscleFilter == null
-                        ? 'Completa entrenamientos para registrar PRs'
-                        : 'Sin records para $_muscleFilter',
+                        ? l10n.noRecordsYet
+                        : l10n.noRecordsForMuscle(l10n.muscleLabel(_muscleFilter!)),
                   );
                 }
                 return Column(
@@ -149,7 +151,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                         title: Text(pr.exerciseName),
                         subtitle: Text(UnitConverter.formatSetLine(pr.weight, pr.reps, unitSystem)),
                         trailing: Text(
-                          '1RM: ${UnitConverter.formatMass(pr.oneRepMax, unitSystem)}',
+                          '${l10n.oneRm}: ${UnitConverter.formatMass(pr.oneRepMax, unitSystem)}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -158,7 +160,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 );
               },
               loading: () => const FitForgeLoadingIndicator(size: 80),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(l10n.errorGeneric(e.toString())),
             ),
           ],
         ),

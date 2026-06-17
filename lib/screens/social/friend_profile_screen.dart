@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/social.dart';
 import '../../providers/app_providers.dart';
@@ -16,20 +18,22 @@ class FriendProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final profileAsync = ref.watch(friendProfileProvider(friendId));
     final unitSystem = ref.watch(unitSystemProvider);
+    final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Perfil'),
+      appBar: FitForgeAppBar(title: l10n.profileTitle),
       body: profileAsync.when(
         loading: () => const Center(child: FitForgeLoadingIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
         data: (view) {
           if (view == null) {
-            return const Center(
+            return Center(
               child: Text(
-                'No tienes acceso a este perfil o no sois amigos.',
-                style: TextStyle(color: AppColors.textMuted),
+                l10n.noProfileAccess,
+                style: const TextStyle(color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             );
@@ -39,17 +43,17 @@ class FriendProfileScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _ProfileHeader(user: view.user, profile: view.profile),
+              _ProfileHeader(user: view.user, profile: view.profile, l10n: l10n),
               const SizedBox(height: 24),
-              const Text(
-                'Records personales',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              Text(
+                l10n.personalRecords,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               if (prs.isEmpty)
-                const Text(
-                  'Aún no tiene records registrados.',
-                  style: TextStyle(color: AppColors.textMuted),
+                Text(
+                  l10n.noRecordsFriend,
+                  style: const TextStyle(color: AppColors.textMuted),
                 )
               else
                 ...prs.map((pr) {
@@ -62,10 +66,10 @@ class FriendProfileScreen extends ConsumerWidget {
                     child: ListTile(
                       title: Text(pr.exerciseName),
                       subtitle: Text(
-                        '${weight.toStringAsFixed(1)} $label × ${pr.reps} reps · 1RM ~${orm.toStringAsFixed(1)} $label',
+                        '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label',
                       ),
                       trailing: Text(
-                        DateFormat('d MMM', 'es').format(pr.achievedAt),
+                        DateFormat('d MMM', locale).format(pr.achievedAt),
                         style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                       ),
                     ),
@@ -82,8 +86,9 @@ class FriendProfileScreen extends ConsumerWidget {
 class _ProfileHeader extends StatelessWidget {
   final FriendUser user;
   final UserProfile profile;
+  final AppLocalizations l10n;
 
-  const _ProfileHeader({required this.user, required this.profile});
+  const _ProfileHeader({required this.user, required this.profile, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +117,7 @@ class _ProfileHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  'Nivel: ${profile.experienceLevel}',
+                  l10n.levelLabel(l10n.experienceLabel(profile.experienceLevel)),
                   style: const TextStyle(color: AppColors.textMuted),
                 ),
               ),
@@ -120,7 +125,7 @@ class _ProfileHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  profile.fitnessGoal!,
+                  l10n.goalLabel(profile.fitnessGoal),
                   style: const TextStyle(color: AppColors.orange),
                   textAlign: TextAlign.center,
                 ),

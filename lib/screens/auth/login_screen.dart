@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/turnstile_config.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_logo.dart';
 import '../../widgets/turnstile_captcha.dart';
@@ -39,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _validateCaptcha() {
     if (!TurnstileConfig.isEnabled) return true;
     if (_captchaToken != null && _captchaToken!.isNotEmpty) return true;
-    setState(() => _error = 'Completa la verificación de seguridad');
+    setState(() => _error = context.l10n.completeSecurityVerification);
     return false;
   }
 
@@ -69,7 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _resetCaptcha();
     } catch (e) {
       _resetCaptcha();
-      setState(() => _error = 'Error de autenticación. Revisa tus datos e inténtalo de nuevo.');
+      if (mounted) setState(() => _error = context.l10n.authError);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -78,9 +79,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _resetPassword() async {
     if (!_validateCaptcha()) return;
 
+    final l10n = context.l10n;
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() => _error = 'Introduce tu email primero');
+      setState(() => _error = l10n.enterEmailFirst);
       return;
     }
     setState(() {
@@ -95,12 +97,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _resetCaptcha();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Te enviamos un enlace para restablecer la contraseña')),
+          SnackBar(content: Text(l10n.passwordResetSent)),
         );
       }
     } catch (_) {
       _resetCaptcha();
-      setState(() => _error = 'No se pudo enviar el email de recuperación');
+      if (mounted) setState(() => _error = l10n.passwordResetFailed);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -108,6 +110,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: AppColors.black,
       body: SafeArea(
@@ -120,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const Center(child: FitForgeLogo.full(height: 140)),
               const SizedBox(height: 12),
               Text(
-                'Forja tu mejor versión',
+                l10n.loginTagline,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textMuted,
@@ -139,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      _isSignUp ? 'Crear cuenta' : 'Iniciar sesión',
+                      _isSignUp ? l10n.createAccount : l10n.signIn,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -148,20 +152,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     if (_isSignUp)
                       TextField(
                         controller: _nameController,
-                        decoration: const InputDecoration(labelText: 'Nombre'),
+                        decoration: InputDecoration(labelText: l10n.name),
                       ),
                     if (_isSignUp) const SizedBox(height: 12),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: InputDecoration(labelText: l10n.email),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Contraseña'),
+                      decoration: InputDecoration(labelText: l10n.password),
                     ),
                     const SizedBox(height: 16),
                     TurnstileCaptcha(
@@ -181,13 +185,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : Text(_isSignUp ? 'Crear cuenta' : 'Entrar'),
+                          : Text(_isSignUp ? l10n.createAccount : l10n.enter),
                     ),
                     if (!_isSignUp) ...[
                       const SizedBox(height: 4),
                       TextButton(
                         onPressed: _loading ? null : _resetPassword,
-                        child: const Text('¿Olvidaste tu contraseña?'),
+                        child: Text(l10n.forgotPassword),
                       ),
                     ],
                   ],
@@ -200,9 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   _error = null;
                   _resetCaptcha();
                 }),
-                child: Text(
-                  _isSignUp ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate',
-                ),
+                child: Text(_isSignUp ? l10n.haveAccountSignIn : l10n.noAccountSignUp),
               ),
             ],
           ),

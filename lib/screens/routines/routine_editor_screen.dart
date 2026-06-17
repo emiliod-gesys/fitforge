@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
@@ -106,7 +108,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
       if (alreadyAdded) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('"${selected.name}" ya está en la rutina')),
+            SnackBar(content: Text(context.l10n.alreadyInRoutine(selected.name))),
           );
         }
         return;
@@ -129,6 +131,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_loading) {
       return const Scaffold(body: FitForgeLoadingScreen());
     }
@@ -137,13 +141,13 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
     return Scaffold(
       appBar: FitForgeAppBar(
-        title: widget.routineId != null ? 'Editar' : 'Nueva rutina',
+        title: widget.routineId != null ? l10n.edit : l10n.newRoutine,
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Guardar'),
+                : Text(l10n.save),
           ),
         ],
       ),
@@ -152,12 +156,12 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         children: [
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Nombre de la rutina'),
+            decoration: InputDecoration(labelText: l10n.routineName),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _descController,
-            decoration: const InputDecoration(labelText: 'Descripción'),
+            decoration: InputDecoration(labelText: l10n.description),
             maxLines: 2,
           ),
           const SizedBox(height: 16),
@@ -166,7 +170,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
             children: AppConstants.muscleGroups.map((m) {
               final selected = _targetMuscles.contains(m);
               return FilterChip(
-                label: Text(m),
+                label: Text(l10n.muscleLabel(m)),
                 selected: selected,
                 onSelected: (v) {
                   setState(() {
@@ -184,11 +188,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Ejercicios (${_exercises.length})', style: Theme.of(context).textTheme.titleMedium),
+              Text(l10n.exercisesSection(_exercises.length), style: Theme.of(context).textTheme.titleMedium),
               TextButton.icon(
                 onPressed: _addExercise,
                 icon: const Icon(Icons.add),
-                label: const Text('Añadir'),
+                label: Text(l10n.add),
               ),
             ],
           ),
@@ -201,7 +205,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                     ? Image.network(ex.imageUrl!, width: 48, height: 48, fit: BoxFit.cover)
                     : const Icon(Icons.fitness_center),
                 title: Text(ex.exerciseName),
-                subtitle: Text(_exerciseSubtitle(ex, unitSystem)),
+                subtitle: Text(_exerciseSubtitle(ex, unitSystem, l10n)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => setState(() => _exercises.removeAt(i)),
@@ -218,11 +222,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     );
   }
 
-  String _exerciseSubtitle(RoutineExercise ex, String unitSystem) {
+  String _exerciseSubtitle(RoutineExercise ex, String unitSystem, AppLocalizations l10n) {
     final weightPart = ex.targetWeight != null
         ? ' · ${UnitConverter.formatMass(ex.targetWeight, unitSystem)}'
         : '';
-    return '${ex.targetSets}×${ex.targetReps}$weightPart · ${ex.restSeconds}s descanso';
+    return '${ex.targetSets}×${ex.targetReps}$weightPart · ${l10n.restPeriod(ex.restSeconds)}';
   }
 
   @override

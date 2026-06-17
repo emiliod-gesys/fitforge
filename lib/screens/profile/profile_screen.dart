@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/l10n/app_locale.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
@@ -20,12 +22,13 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final profileAsync = ref.watch(profileProvider);
     final metricsAsync = ref.watch(bodyMetricSnapshotsProvider);
 
     return Scaffold(
       appBar: FitForgeAppBar(
-        title: 'Perfil',
+        title: l10n.profileTitle,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -60,11 +63,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 12),
                 Center(
                   child: Text(
-                    profile?.displayName ?? 'Usuario',
+                    profile?.displayName ?? l10n.user,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
                 const SizedBox(height: 20),
+                _SectionTitle(l10n.personalData),
+                const SizedBox(height: 4),
+                ListTile(
+                  leading: const Icon(Icons.cake_outlined, color: AppColors.orange),
+                  title: Text(l10n.age),
+                  subtitle: Text(profile?.age != null ? '${profile!.age} ${l10n.years}' : l10n.notDefined),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editAge(profile),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.wc_outlined, color: AppColors.orange),
+                  title: Text(l10n.gender),
+                  subtitle: Text(l10n.genderLabel(profile?.gender)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editGender(profile),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.height, color: AppColors.orange),
+                  title: Text(l10n.height),
+                  subtitle: Text(
+                    profile?.heightCm != null
+                        ? UnitConverter.formatHeight(profile!.heightCm)
+                        : l10n.notDefined,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editHeight(profile),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.language, color: AppColors.orange),
+                  title: Text(l10n.preferredLanguage),
+                  subtitle: Text(l10n.languageLabel(profile?.preferredLanguage ?? 'es')),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editLanguage(profile),
+                ),
+                const SizedBox(height: 16),
+                _SectionTitle(l10n.unitSystem),
+                const SizedBox(height: 8),
                 _UnitSelector(
                   unitSystem: unitSystem,
                   onChanged: (unit) async {
@@ -73,7 +113,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const _SectionTitle('Métricas corporales'),
+                _SectionTitle(l10n.bodyMetrics),
                 const SizedBox(height: 8),
                 metricsAsync.when(
                   data: (snapshots) => _MetricsGrid(
@@ -85,39 +125,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     padding: EdgeInsets.all(32),
                     child: Center(child: FitForgeLoadingIndicator(size: 100)),
                   ),
-                  error: (e, _) => Text('Error al cargar métricas: $e'),
+                  error: (e, _) => Text(l10n.errorGeneric(e.toString())),
                 ),
                 const SizedBox(height: 24),
-                const _SectionTitle('Configuración de entrenamiento'),
+                _SectionTitle(l10n.trainingConfig),
                 ListTile(
                   leading: const Icon(Icons.flag, color: AppColors.orange),
-                  title: const Text('Objetivo'),
-                  subtitle: Text(profile?.fitnessGoal ?? 'No definido'),
+                  title: Text(l10n.goal),
+                  subtitle: Text(l10n.goalLabel(profile?.fitnessGoal)),
                   onTap: () => _editGoal(profile),
                 ),
                 ListTile(
                   leading: const Icon(Icons.trending_up, color: AppColors.orange),
-                  title: const Text('Nivel de experiencia'),
-                  subtitle: Text(profile?.experienceLevel ?? 'intermedio'),
+                  title: Text(l10n.experienceLevel),
+                  subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
                   onTap: () => _editExperience(profile),
                 ),
                 const SizedBox(height: 16),
-                const _SectionTitle('Inteligencia artificial'),
+                _SectionTitle(l10n.aiSection),
                 ListTile(
                   leading: const Icon(Icons.key, color: AppColors.orange),
-                  title: const Text('API Keys (OpenAI / Gemini)'),
+                  title: Text(l10n.apiKeys),
                   subtitle: Text(
                     profile?.hasAiKey == true
-                        ? 'Configurado (${profile?.aiProvider.name})'
-                        : 'No configurado',
+                        ? l10n.apiKeysConfigured(profile?.aiProvider.name ?? '')
+                        : l10n.apiKeysNotConfigured,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/api-keys'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.auto_awesome, color: AppColors.orange),
-                  title: const Text('Coach IA'),
-                  subtitle: const Text('Recomendaciones personalizadas'),
+                  title: Text(l10n.coachAi),
+                  subtitle: Text(l10n.aiCoachSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ai-coach'),
                 ),
@@ -126,41 +166,152 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           );
         },
         loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
       ),
     );
   }
 
-  Future<void> _editGoal(UserProfile? profile) async {
-    const goals = ['Hipertrofia', 'Fuerza', 'Pérdida de grasa', 'Resistencia', 'Mantenimiento'];
+  Future<void> _editAge(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: profile?.age?.toString() ?? '');
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.ageTitle),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: InputDecoration(suffixText: l10n.years),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text.trim())),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result > 0 && result < 120) {
+      await ref.read(profileServiceProvider).updateProfile({'age': result});
+      ref.invalidate(profileProvider);
+    }
+  }
+
+  Future<void> _editGender(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final selected = await showDialog<Gender>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.genderTitle),
+        children: Gender.values
+            .map(
+              (g) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, g),
+                child: Text(l10n.genderLabel(g)),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (selected != null) {
+      await ref.read(profileServiceProvider).updateProfile({'gender': selected.code});
+      ref.invalidate(profileProvider);
+    }
+  }
+
+  Future<void> _editHeight(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final cmController = TextEditingController(
+      text: profile?.heightCm != null ? profile!.heightCm!.toStringAsFixed(0) : '',
+    );
+
+    final result = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.heightTitle),
+        content: TextField(
+          controller: cmController,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(suffixText: 'cm'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          ElevatedButton(
+            onPressed: () =>
+                Navigator.pop(ctx, double.tryParse(cmController.text.replaceAll(',', '.'))),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result > 50 && result < 280) {
+      await ref.read(profileServiceProvider).updateProfile({'height_cm': result});
+      ref.invalidate(profileProvider);
+    }
+  }
+
+  Future<void> _editLanguage(UserProfile? profile) async {
+    final l10n = context.l10n;
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Objetivo fitness'),
-        children: goals
+        title: Text(l10n.languageTitle),
+        children: AppLocale.supportedCodes
+            .map(
+              (code) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, code),
+                child: Text(l10n.languageLabel(code)),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (selected != null && selected != profile?.preferredLanguage) {
+      await ref.read(profileServiceProvider).updateProfile({'preferred_language': selected});
+      ref.read(exerciseServiceProvider).configure(language: selected);
+      ref.invalidate(profileProvider);
+      ref.invalidate(exercisesProvider);
+    }
+  }
+
+  Future<void> _editGoal(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.fitnessGoalTitle),
+        children: l10n.fitnessGoals
             .map((g) => SimpleDialogOption(onPressed: () => Navigator.pop(ctx, g), child: Text(g)))
             .toList(),
       ),
     );
     if (selected != null) {
-      await ref.read(profileServiceProvider).updateProfile({'fitness_goal': selected});
+      await ref.read(profileServiceProvider).updateProfile({
+        'fitness_goal': l10n.canonicalGoal(selected),
+      });
       ref.invalidate(profileProvider);
     }
   }
 
   Future<void> _editExperience(UserProfile? profile) async {
-    const levels = ['principiante', 'intermedio', 'avanzado'];
+    final l10n = context.l10n;
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Nivel de experiencia'),
-        children: levels
+        title: Text(l10n.experienceTitle),
+        children: l10n.experienceLevels
             .map((l) => SimpleDialogOption(onPressed: () => Navigator.pop(ctx, l), child: Text(l)))
             .toList(),
       ),
     );
     if (selected != null) {
-      await ref.read(profileServiceProvider).updateProfile({'experience_level': selected});
+      await ref.read(profileServiceProvider).updateProfile({
+        'experience_level': l10n.canonicalExperience(selected),
+      });
       ref.invalidate(profileProvider);
     }
   }
@@ -171,6 +322,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     BodyMetricSnapshot? snapshot,
     String unitSystem,
   ) async {
+    final l10n = context.l10n;
     String initialText = '';
     if (snapshot?.hasValue == true) {
       if (def.kind == BodyMetricKind.mass) {
@@ -184,26 +336,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final controller = TextEditingController(text: initialText);
     final suffix = def.kind == BodyMetricKind.mass
         ? UnitConverter.massLabel(unitSystem)
-        : def.unitLabel(unitSystem);
+        : def.unitLabel(unitSystem, yearsLabel: l10n.years);
 
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(def.label),
+        title: Text(l10n.bodyMetricLabel(def.key)),
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           autofocus: true,
           decoration: InputDecoration(
             suffixText: suffix.isEmpty ? null : suffix,
-            hintText: 'Ingresa el valor',
+            hintText: l10n.enterValue,
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, double.tryParse(controller.text.replaceAll(',', '.'))),
-            child: const Text('Guardar'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -230,6 +382,7 @@ class _UnitSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -241,7 +394,7 @@ class _UnitSelector extends StatelessWidget {
         children: [
           Expanded(
             child: _UnitChip(
-              label: 'Kilogramos',
+              label: l10n.kilograms,
               shortLabel: 'kg',
               selected: unitSystem == 'kg',
               onTap: () => onChanged('kg'),
@@ -250,7 +403,7 @@ class _UnitSelector extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: _UnitChip(
-              label: 'Libras',
+              label: l10n.pounds,
               shortLabel: 'lb',
               selected: unitSystem == 'lb',
               onTap: () => onChanged('lb'),
@@ -323,6 +476,7 @@ class _MetricsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -338,8 +492,10 @@ class _MetricsGrid extends StatelessWidget {
         final snapshot = snapshots[def.key] ?? BodyMetricSnapshot(type: def.key);
         return BodyMetricCard(
           definition: def,
+          displayLabel: l10n.bodyMetricLabel(def.key),
           snapshot: snapshot,
           unitSystem: unitSystem,
+          yearsLabel: l10n.years,
           onTap: () => onEdit(def),
         );
       },

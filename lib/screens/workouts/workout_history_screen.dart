@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -10,20 +11,21 @@ class WorkoutHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final historyAsync = ref.watch(workoutHistoryProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Historial'),
+      appBar: FitForgeAppBar(title: l10n.historyTitle),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(workoutHistoryProvider),
         child: historyAsync.when(
           data: (workouts) {
             if (workouts.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: Text('Sin entrenamientos registrados')),
+                children: [
+                  const SizedBox(height: 120),
+                  Center(child: Text(l10n.noWorkoutsRegistered)),
                 ],
               );
             }
@@ -35,7 +37,7 @@ class WorkoutHistoryScreen extends ConsumerWidget {
             );
           },
           loading: () => const FitForgeLoadingScreen(),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
         ),
       ),
     );

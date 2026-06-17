@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 
 /// Escucha notificaciones sociales en tiempo real y muestra un aviso breve.
@@ -11,6 +12,8 @@ class SocialNotificationListener extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
     ref.listen<AsyncValue<String>>(socialRealtimeProvider, (prev, next) {
       next.whenData((message) {
         ref.invalidate(socialNotificationsProvider);
@@ -21,7 +24,7 @@ class SocialNotificationListener extends ConsumerWidget {
           SnackBar(
             content: Text(message),
             action: SnackBarAction(
-              label: 'Ver',
+              label: l10n.view,
               onPressed: () => context.go('/social'),
             ),
             duration: const Duration(seconds: 5),

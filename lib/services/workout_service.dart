@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/muscle_inference.dart';
+import '../models/exercise.dart';
 import '../models/exercise_history.dart';
 import '../models/profile.dart';
 import '../core/utils/supabase_datetime.dart';
@@ -558,7 +559,10 @@ class WorkoutService {
     });
   }
 
-  Map<String, double> calculateMuscleRecovery(List<Workout> recentWorkouts) {
+  Map<String, double> calculateMuscleRecovery(
+    List<Workout> recentWorkouts, {
+    List<Exercise>? catalog,
+  }) {
     final recovery = <String, double>{};
     final now = DateTime.now();
 
@@ -574,7 +578,11 @@ class WorkoutService {
         final completedSets = ex.sets.where((s) => s.completed).length;
         if (completedSets == 0) continue;
 
-        final muscles = MuscleInference.fromExerciseName(ex.exerciseName);
+        final muscles = MuscleInference.resolve(
+          exerciseName: ex.exerciseName,
+          exerciseId: ex.exerciseId,
+          catalog: catalog,
+        );
         if (muscles.isEmpty) continue;
 
         // Más series = mayor fatiga inicial (mín. 50 %, máx. 100 %).

@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
@@ -104,7 +106,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo finalizar: $e')),
+          SnackBar(content: Text(context.l10n.finishFailed('$e'))),
         );
       }
     } finally {
@@ -165,7 +167,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       _showExerciseList = true;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${picked.name} añadido')),
+      SnackBar(content: Text(context.l10n.exerciseAdded(picked.name))),
     );
   }
 
@@ -181,14 +183,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           );
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ejercicio eliminado')),
+          SnackBar(content: Text(context.l10n.exerciseRemoved)),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _removedExerciseIds.remove(exercise.id));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo eliminar: $e')),
+          SnackBar(content: Text(context.l10n.exerciseDeleteFailed('$e'))),
         );
       }
     }
@@ -229,7 +231,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     ref.invalidate(activeWorkoutProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cambiado a ${picked.name}')),
+        SnackBar(content: Text(context.l10n.changedTo(picked.name))),
       );
     }
   }
@@ -243,6 +245,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final activeAsync = ref.watch(activeWorkoutProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
@@ -255,19 +258,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           final inExerciseView = !_showExerciseList && visibleCount > 0;
 
           return FitForgeAppBar(
-            title: 'Entrenando',
+            title: l10n.training,
             showWordmark: !inExerciseView,
             leading: inExerciseView
                 ? IconButton(
                     icon: const Icon(Icons.list),
-                    tooltip: 'Ver lista',
+                    tooltip: l10n.viewList,
                     onPressed: () => setState(() => _showExerciseList = true),
                   )
                 : null,
             actions: [
               if (!_showExerciseList)
                 IconButton(
-                  tooltip: 'Lista de ejercicios',
+                  tooltip: l10n.exerciseList,
                   onPressed: () => setState(() => _showExerciseList = true),
                   icon: const Icon(Icons.view_list_outlined),
                 ),
@@ -279,16 +282,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Finalizar'),
+                    : Text(l10n.finish),
               ),
             ],
           );
         },
-      ) ?? const FitForgeAppBar(title: 'Entrenando'),
+      ) ?? FitForgeAppBar(title: l10n.training),
       body: activeAsync.when(
         data: (workout) {
           if (workout == null) {
-            return const Center(child: Text('No hay entrenamiento activo'));
+            return Center(child: Text(l10n.noActiveWorkout));
           }
 
           final visibleExercises = workout.exercises
@@ -380,7 +383,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 22),
                           child: IconButton.filledTonal(
-                            tooltip: 'Historial del ejercicio',
+                            tooltip: l10n.exerciseHistory,
                             onPressed: () => ExerciseHistorySheet.show(
                               context,
                               exerciseId: exercise.exerciseId,
@@ -421,7 +424,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     OutlinedButton.icon(
                       onPressed: () => _addSet(workout, exercise),
                       icon: const Icon(Icons.add),
-                      label: const Text('Añadir serie'),
+                      label: Text(l10n.addSet),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         side: const BorderSide(color: AppColors.orange),
@@ -432,6 +435,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                 ),
               ),
               _ExerciseNavigator(
+                l10n: l10n,
                 currentIndex: visibleExercises.indexOf(exercise).clamp(0, visibleExercises.length - 1),
                 total: visibleExercises.length,
                 onPrevious: () {
@@ -457,7 +461,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           );
         },
         loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
       ),
     );
   }
@@ -472,7 +476,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       if (set.weight == null || set.weight! <= 0) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Indica el peso antes de marcar la serie como hecha')),
+            SnackBar(content: Text(context.l10n.weightRequired)),
           );
         }
         return;
@@ -480,7 +484,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       if (set.reps <= 0) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Indica las repeticiones')),
+            SnackBar(content: Text(context.l10n.repsRequired)),
           );
         }
         return;
@@ -510,7 +514,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       if (mounted) {
         setState(() => _removedSetIds.remove(set.id));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo eliminar la serie: $e')),
+          SnackBar(content: Text(context.l10n.setDeleteFailed('$e'))),
         );
       }
     }
@@ -541,6 +545,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 }
 
 class _ExerciseNavigator extends StatelessWidget {
+  final AppLocalizations l10n;
   final int currentIndex;
   final int total;
   final VoidCallback? onPrevious;
@@ -549,6 +554,7 @@ class _ExerciseNavigator extends StatelessWidget {
   final bool hasNext;
 
   const _ExerciseNavigator({
+    required this.l10n,
     required this.currentIndex,
     required this.total,
     required this.hasPrevious,
@@ -571,7 +577,7 @@ class _ExerciseNavigator extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Ejercicio ${currentIndex + 1} de $total',
+              l10n.exerciseProgress(currentIndex + 1, total),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: 10),
@@ -581,7 +587,7 @@ class _ExerciseNavigator extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: hasPrevious ? onPrevious : null,
                     icon: const Icon(Icons.arrow_back, size: 18),
-                    label: const Text('Anterior'),
+                    label: Text(l10n.previous),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -589,7 +595,7 @@ class _ExerciseNavigator extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: hasNext ? onNext : null,
                     icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: const Text('Siguiente'),
+                    label: Text(l10n.next),
                     iconAlignment: IconAlignment.end,
                   ),
                 ),

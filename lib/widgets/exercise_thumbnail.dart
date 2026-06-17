@@ -5,7 +5,7 @@ import '../providers/app_providers.dart';
 import '../services/exercise_service.dart';
 import 'exercise_placeholder.dart';
 
-/// Miniatura de ejercicio: URL guardada, ID wger, búsqueda por nombre, video o imagen similar.
+/// Miniatura de ejercicio: URL guardada, ID wger, búsqueda por nombre o video.
 class ExerciseThumbnail extends ConsumerWidget {
   final String? imageUrl;
   final String exerciseId;
@@ -36,43 +36,17 @@ class ExerciseThumbnail extends ConsumerWidget {
         imageUrl: imageUrl,
       );
 
-  ({String? category, List<String> muscles}) _placeholderMeta(WidgetRef ref) {
-    var resolvedCategory = category;
-    var resolvedMuscles = muscles;
-
-    if (resolvedCategory == null || resolvedMuscles.isEmpty) {
-      final catalog = ref.watch(exercisesProvider).valueOrNull;
-      if (catalog != null) {
-        final match = ref.read(exerciseServiceProvider).findInCatalog(
-              exerciseId: exerciseId,
-              exerciseName: exerciseName,
-              catalog: catalog,
-            );
-        resolvedCategory ??= match?.category;
-        if (resolvedMuscles.isEmpty) {
-          resolvedMuscles = match?.muscles ?? const [];
-        }
-      }
-    }
-
-    return (category: resolvedCategory, muscles: resolvedMuscles);
-  }
-
-  Widget _placeholder(WidgetRef ref, {bool loading = false}) {
-    final meta = _placeholderMeta(ref);
+  Widget _placeholder({bool loading = false}) {
     return ExercisePlaceholder(
-      category: meta.category,
-      muscles: meta.muscles,
       width: width,
       height: height,
       borderRadius: borderRadius,
       fullWidth: fullWidth,
       loading: loading,
-      iconSize: fullWidth ? 64 : 26,
     );
   }
 
-  Widget _networkImage(String url, WidgetRef ref) {
+  Widget _networkImage(String url) {
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
@@ -80,8 +54,8 @@ class ExerciseThumbnail extends ConsumerWidget {
         width: fullWidth ? double.infinity : width,
         height: height,
         fit: BoxFit.cover,
-        placeholder: (_, __) => _placeholder(ref, loading: true),
-        errorWidget: (_, __, ___) => _placeholder(ref),
+        placeholder: (_, __) => _placeholder(loading: true),
+        errorWidget: (_, __, ___) => _placeholder(),
       ),
     );
   }
@@ -90,9 +64,9 @@ class ExerciseThumbnail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final urlAsync = ref.watch(exerciseImageUrlProvider(_lookup));
     return urlAsync.when(
-      data: (url) => url != null ? _networkImage(url, ref) : _placeholder(ref),
-      loading: () => _placeholder(ref, loading: true),
-      error: (_, __) => _placeholder(ref),
+      data: (url) => url != null ? _networkImage(url) : _placeholder(),
+      loading: () => _placeholder(loading: true),
+      error: (_, __) => _placeholder(),
     );
   }
 }

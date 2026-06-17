@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -21,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final unread = ref.watch(socialUnreadCountProvider).valueOrNull ?? 0;
 
     return Scaffold(
@@ -29,7 +31,7 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/ai-coach'),
         icon: const Icon(Icons.auto_awesome_outlined),
-        label: const Text('Coach IA'),
+        label: Text(l10n.coachAi),
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -55,25 +57,25 @@ class HomeScreen extends ConsumerWidget {
             }
           },
           destinations: [
-            const NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined),
-              selectedIcon: Icon(Icons.fitness_center),
-              label: 'Entreno',
+            NavigationDestination(
+              icon: const Icon(Icons.fitness_center_outlined),
+              selectedIcon: const Icon(Icons.fitness_center),
+              label: l10n.navWorkout,
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.list_alt_outlined),
-              selectedIcon: Icon(Icons.list_alt),
-              label: 'Rutinas',
+            NavigationDestination(
+              icon: const Icon(Icons.list_alt_outlined),
+              selectedIcon: const Icon(Icons.list_alt),
+              label: l10n.navRoutines,
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.sports_gymnastics_outlined),
-              selectedIcon: Icon(Icons.sports_gymnastics),
-              label: 'Ejercicios',
+            NavigationDestination(
+              icon: const Icon(Icons.sports_gymnastics_outlined),
+              selectedIcon: const Icon(Icons.sports_gymnastics),
+              label: l10n.navExercises,
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.show_chart_outlined),
-              selectedIcon: Icon(Icons.show_chart),
-              label: 'Progreso',
+            NavigationDestination(
+              icon: const Icon(Icons.show_chart_outlined),
+              selectedIcon: const Icon(Icons.show_chart),
+              label: l10n.navProgress,
             ),
             NavigationDestination(
               icon: Badge(
@@ -86,12 +88,12 @@ class HomeScreen extends ConsumerWidget {
                 label: Text(unread > 9 ? '9+' : '$unread'),
                 child: const Icon(Icons.people),
               ),
-              label: 'Social',
+              label: l10n.navSocial,
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Perfil',
+            NavigationDestination(
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: l10n.navProfile,
             ),
           ],
         ),

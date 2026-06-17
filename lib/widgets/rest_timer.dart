@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../services/rest_sound_service.dart';
 
 class RestTimer extends StatefulWidget {
@@ -91,6 +92,7 @@ class _RestTimerState extends State<RestTimer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final progress = _total > 0 ? _remaining / _total : 0.0;
 
     return Container(
@@ -113,22 +115,22 @@ class _RestTimerState extends State<RestTimer> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Descanso', style: TextStyle(fontWeight: FontWeight.w600)),
-                Text('${_remaining}s restantes'),
+                Text(l10n.rest, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.restRemaining(_remaining)),
               ],
             ),
           ),
           IconButton(
-            tooltip: '-15s',
+            tooltip: l10n.minus15s,
             onPressed: () => _adjust(-15),
             icon: const Icon(Icons.remove_circle_outline),
           ),
           IconButton(
-            tooltip: '+15s',
+            tooltip: l10n.plus15s,
             onPressed: () => _adjust(15),
             icon: const Icon(Icons.add_circle_outline),
           ),
-          TextButton(onPressed: _skip, child: const Text('Saltar')),
+          TextButton(onPressed: _skip, child: Text(l10n.skip)),
         ],
       ),
     );

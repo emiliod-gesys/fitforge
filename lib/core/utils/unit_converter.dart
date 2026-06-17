@@ -33,4 +33,16 @@ abstract final class UnitConverter {
     final w = kgToDisplay(weightKg, unitSystem).toStringAsFixed(1);
     return '$w ${massLabel(unitSystem)} × $reps';
   }
+
+  static String heightLabel(String unitSystem) => isLb(unitSystem) ? 'ft/in' : 'cm';
+
+  static double cmToDisplay(double cm, String unitSystem) => cm;
+
+  static double displayToCm(double value, String unitSystem) => value;
+
+  /// Altura siempre en centímetros (independiente del sistema de peso).
+  static String formatHeight(double? cm, [String? unitSystem]) {
+    if (cm == null) return '—';
+    return '${cm.toStringAsFixed(0)} cm';
+  }
 }

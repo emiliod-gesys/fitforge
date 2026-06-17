@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/exercise_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -20,18 +21,19 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Ejercicios'),
+      appBar: FitForgeAppBar(title: l10n.exercisesTitle),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Buscar ejercicio...',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: l10n.searchExercises,
+                prefixIcon: const Icon(Icons.search),
               ),
               onChanged: (v) => setState(() => _search = v),
             ),
@@ -54,7 +56,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        '${filtered.length} ejercicios',
+                        l10n.exerciseCount(filtered.length),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
                       ),
                     ),
@@ -66,7 +68,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
                           FilterChip(
-                            label: const Text('Todos'),
+                            label: Text(l10n.allCategories),
                             selected: _category == null,
                             onSelected: (_) => setState(() => _category = null),
                           ),
@@ -98,7 +100,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
               );
             },
             loading: () => const Expanded(child: FitForgeLoadingScreen()),
-            error: (e, _) => Expanded(child: Center(child: Text('Error: $e'))),
+            error: (e, _) => Expanded(child: Center(child: Text(l10n.errorGeneric(e.toString())))),
           ),
         ],
       ),

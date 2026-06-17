@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/unit_converter.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/exercise_history.dart';
 import '../providers/app_providers.dart';
 import 'fitforge_loading_indicator.dart';
@@ -47,7 +48,9 @@ class ExerciseHistorySheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final unitSystem = ref.watch(unitSystemProvider);
+    final locale = Localizations.localeOf(context).toString();
     final historyAsync = ref.watch(
       exerciseHistoryProvider(
         ExerciseHistoryQuery(exerciseId: exerciseId, excludeWorkoutId: excludeWorkoutId),
@@ -76,7 +79,7 @@ class ExerciseHistorySheet extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Historial', style: Theme.of(context).textTheme.titleLarge),
+                      Text(l10n.historyTitle, style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 4),
                       Text(
                         exerciseName,
@@ -97,11 +100,11 @@ class ExerciseHistorySheet extends ConsumerWidget {
             child: historyAsync.when(
               data: (sessions) {
                 if (sessions.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
-                        'Sin historial previo para este ejercicio.',
+                        l10n.noExerciseHistory,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -114,7 +117,7 @@ class ExerciseHistorySheet extends ConsumerWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, i) {
                     final session = sessions[i];
-                    final date = DateFormat('dd MMM yyyy').format(session.date.toLocal());
+                    final date = DateFormat('dd MMM yyyy', locale).format(session.date.toLocal());
 
                     return Card(
                       child: Padding(
@@ -133,7 +136,12 @@ class ExerciseHistorySheet extends ConsumerWidget {
                               (set) => Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Text(
-                                  'Serie ${set.setNumber}: ${set.weight != null ? UnitConverter.formatSetLine(set.weight!, set.reps, unitSystem) : '${set.reps} reps'}',
+                                  l10n.setLine(
+                                    set.setNumber,
+                                    set.weight != null
+                                        ? UnitConverter.formatSetLine(set.weight!, set.reps, unitSystem)
+                                        : l10n.repsOnly(set.reps),
+                                  ),
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
@@ -145,8 +153,8 @@ class ExerciseHistorySheet extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const FitForgeLoadingScreen(message: 'Cargando historial…'),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => FitForgeLoadingScreen(message: l10n.loadingHistory),
+              error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
             ),
           ),
         ],

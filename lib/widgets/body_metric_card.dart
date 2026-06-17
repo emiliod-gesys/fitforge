@@ -5,15 +5,19 @@ import '../models/body_metric.dart';
 
 class BodyMetricCard extends StatelessWidget {
   final BodyMetricDefinition definition;
+  final String displayLabel;
   final BodyMetricSnapshot snapshot;
   final String unitSystem;
+  final String yearsLabel;
   final VoidCallback onTap;
 
   const BodyMetricCard({
     super.key,
     required this.definition,
+    required this.displayLabel,
     required this.snapshot,
     required this.unitSystem,
+    this.yearsLabel = 'años',
     required this.onTap,
   });
 
@@ -39,7 +43,7 @@ class BodyMetricCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                definition.label,
+                displayLabel,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -88,7 +92,7 @@ class BodyMetricCard extends StatelessWidget {
       case BodyMetricKind.kcal:
         return '${snapshot.rawValue!.toStringAsFixed(0)} kcal';
       case BodyMetricKind.years:
-        return '${snapshot.rawValue!.toStringAsFixed(0)} años';
+        return '${snapshot.rawValue!.toStringAsFixed(0)} $yearsLabel';
     }
   }
 

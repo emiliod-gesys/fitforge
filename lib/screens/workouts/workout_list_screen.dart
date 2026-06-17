@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
@@ -17,6 +18,7 @@ class WorkoutListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final recentAsync = ref.watch(recentWorkoutsProvider);
     final activeAsync = ref.watch(activeWorkoutProvider);
     final recoveryAsync = ref.watch(muscleRecoveryProvider);
@@ -51,14 +53,14 @@ class WorkoutListScreen extends ConsumerWidget {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
-            Text('Historial', style: Theme.of(context).textTheme.titleLarge),
+            Text(l10n.history, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             recentAsync.when(
               data: (workouts) {
                 if (workouts.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(child: Text('Sin entrenamientos aún. ¡Empieza hoy!')),
+                  return Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(child: Text(l10n.noWorkoutsYet)),
                   );
                 }
                 final preview = workouts.take(_previewCount).toList();
@@ -75,7 +77,7 @@ class WorkoutListScreen extends ConsumerWidget {
                         child: TextButton.icon(
                           onPressed: () => context.push('/workouts/history'),
                           icon: const Icon(Icons.history),
-                          label: const Text('Ver historial completo'),
+                          label: Text(l10n.viewFullHistory),
                         ),
                       ),
                     ],
@@ -83,7 +85,7 @@ class WorkoutListScreen extends ConsumerWidget {
                 );
               },
               loading: () => const FitForgeLoadingScreen(),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(l10n.errorGeneric('$e')),
             ),
           ],
         ),
@@ -99,12 +101,14 @@ class _ActiveWorkoutBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Card(
       color: AppColors.orange.withValues(alpha: 0.12),
       child: ListTile(
         leading: Icon(Icons.play_circle_fill, size: 40, color: AppColors.orange),
-        title: Text(workout.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text('Entrenamiento en curso'),
+        title: Text(l10n.workoutDisplayName(workout.name), style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(l10n.activeWorkout),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/workout/active'),
       ),
@@ -119,6 +123,7 @@ class _StartWorkoutSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final statsAsync = ref.watch(workoutWeeklyStatsProvider);
 
     return Column(
@@ -130,41 +135,41 @@ class _StartWorkoutSection extends ConsumerWidget {
               Expanded(
                 child: StatCard(
                   icon: Icons.local_fire_department,
-                  label: 'Racha (≥4/sem)',
-                  value: stats.streakLabel,
+                  label: l10n.streakWeekly,
+                  value: l10n.streakWeeksLabel(stats.streakWeeks),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: StatCard(
                   icon: Icons.fitness_center,
-                  label: 'Esta semana',
+                  label: l10n.thisWeek,
                   value: stats.weekProgressLabel,
                 ),
               ),
             ],
           ),
-          loading: () => const Row(
+          loading: () => Row(
             children: [
-              Expanded(child: StatCard(icon: Icons.local_fire_department, label: 'Racha', value: '…')),
-              SizedBox(width: 12),
-              Expanded(child: StatCard(icon: Icons.fitness_center, label: 'Esta semana', value: '…')),
+              Expanded(child: StatCard(icon: Icons.local_fire_department, label: l10n.streakLabel, value: '…')),
+              const SizedBox(width: 12),
+              Expanded(child: StatCard(icon: Icons.fitness_center, label: l10n.thisWeek, value: '…')),
             ],
           ),
-          error: (_, __) => const Row(
+          error: (_, __) => Row(
             children: [
               Expanded(
                 child: StatCard(
                   icon: Icons.local_fire_department,
-                  label: 'Racha (≥4/sem)',
-                  value: '0 semanas',
+                  label: l10n.streakWeekly,
+                  value: '0',
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: StatCard(
                   icon: Icons.fitness_center,
-                  label: 'Esta semana',
+                  label: l10n.thisWeek,
                   value: '0/4',
                 ),
               ),
@@ -175,7 +180,7 @@ class _StartWorkoutSection extends ConsumerWidget {
         ElevatedButton.icon(
           onPressed: () => _showStartOptions(context, ref),
           icon: const Icon(Icons.add),
-          label: const Text('Iniciar entrenamiento'),
+          label: Text(l10n.startWorkout),
           style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ],
@@ -187,12 +192,13 @@ class _StartWorkoutSection extends ConsumerWidget {
     WidgetRef ref,
     Future<void> Function() start,
   ) async {
+    final l10n = context.l10n;
     if (!context.mounted) return;
 
     try {
       await FitForgeLoadingOverlay.run(
         context,
-        message: 'Iniciando entrenamiento…',
+        message: l10n.startingWorkout,
         task: () async {
           await start();
           ref.invalidate(activeWorkoutProvider);
@@ -203,13 +209,15 @@ class _StartWorkoutSection extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al iniciar entrenamiento: $e')),
+          SnackBar(content: Text(l10n.startWorkoutError('$e'))),
         );
       }
     }
   }
 
   void _showStartOptions(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -218,12 +226,12 @@ class _StartWorkoutSection extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.flash_on),
-              title: const Text('Entrenamiento libre'),
+              title: Text(l10n.freeWorkout),
               onTap: () async {
                 Navigator.pop(ctx);
                 await _startAndOpenWorkout(context, ref, () async {
                   await ref.read(workoutServiceProvider).startWorkout(
-                        name: 'Entrenamiento libre',
+                        name: l10n.freeWorkout,
                       );
                 });
               },
@@ -235,7 +243,7 @@ class _StartWorkoutSection extends ConsumerWidget {
                       (r) => ListTile(
                         leading: const Icon(Icons.list_alt),
                         title: Text(r.name),
-                        subtitle: Text('${r.exercises.length} ejercicios'),
+                        subtitle: Text(l10n.exercisesInRoutine(r.exercises.length)),
                         onTap: () async {
                           Navigator.pop(ctx);
                           final exercises = r.exercises
@@ -270,7 +278,7 @@ class _StartWorkoutSection extends ConsumerWidget {
                     )
                     .toList(),
               ),
-              loading: () => const ListTile(title: Text('Cargando rutinas...')),
+              loading: () => ListTile(title: Text(l10n.loadingRoutines)),
               error: (_, __) => const SizedBox.shrink(),
             ),
           ],

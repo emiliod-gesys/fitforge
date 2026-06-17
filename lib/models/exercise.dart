@@ -114,6 +114,11 @@ class Exercise {
 
   String get id => supabaseId ?? wgerId?.toString() ?? name;
 
+  static String localizeCategoryFromWger(String cat, {String locale = 'es'}) {
+    if (locale == 'en') return cat;
+    return translateCategory(cat);
+  }
+
   static String translateCategory(String cat) {
     const map = {
       'Arms': 'Brazos',
@@ -126,6 +131,21 @@ class Exercise {
       'Cardio': 'Cardio',
     };
     return map[cat] ?? cat;
+  }
+
+  static String localizeMuscle(String m, {String locale = 'es'}) {
+    if (locale == 'es') return translateMuscle(m);
+    const enMap = {
+      'Biceps brachii': 'Biceps',
+      'Triceps brachii': 'Triceps',
+      'Pectoralis major': 'Chest',
+      'Latissimus dorsi': 'Back',
+      'Deltoid': 'Shoulders',
+      'Quadriceps femoris': 'Quadriceps',
+      'Gluteus maximus': 'Glutes',
+      'Rectus abdominis': 'Abs',
+    };
+    return enMap[m] ?? m;
   }
 
   static String translateMuscle(String m) {

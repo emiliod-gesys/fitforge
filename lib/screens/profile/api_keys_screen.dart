@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -41,7 +41,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
       ref.invalidate(profileProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('API key guardada de forma segura en el dispositivo')),
+          SnackBar(content: Text(context.l10n.apiKeySaved)),
         );
       }
     } finally {
@@ -55,25 +55,26 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
     _keyController.clear();
     ref.invalidate(profileProvider);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API key eliminada')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.apiKeyDeleted)),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'API Keys'),
+      appBar: FitForgeAppBar(title: l10n.apiKeysTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
             color: Colors.amber.withValues(alpha: 0.1),
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Tu API key se guarda solo en este dispositivo (almacenamiento seguro). '
-                'Nunca se envía a nuestros servidores. Las llamadas a IA van directamente a OpenAI o Google.',
-              ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.apiKeyPrivacy),
             ),
           ),
           const SizedBox(height: 24),
@@ -90,7 +91,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
             controller: _keyController,
             obscureText: _obscure,
             decoration: InputDecoration(
-              labelText: _provider == AiProvider.openai ? 'OpenAI API Key' : 'Gemini API Key',
+              labelText: _provider == AiProvider.openai ? l10n.openAiKey : l10n.geminiKey,
               suffixIcon: IconButton(
                 icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                 onPressed: () => setState(() => _obscure = !_obscure),
@@ -99,9 +100,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _provider == AiProvider.openai
-                ? 'Obtén tu key en platform.openai.com'
-                : 'Obtén tu key en aistudio.google.com',
+            _provider == AiProvider.openai ? l10n.openAiHint : l10n.geminiHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white54),
           ),
           const SizedBox(height: 24),
@@ -109,13 +108,13 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Guardar API Key'),
+                : Text(l10n.saveApiKey),
           ),
           const SizedBox(height: 12),
           OutlinedButton(
             onPressed: _delete,
             style: OutlinedButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: const Text('Eliminar API Key'),
+            child: Text(l10n.deleteApiKey),
           ),
         ],
       ),

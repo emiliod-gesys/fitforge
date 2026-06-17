@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
 import 'exercise_card.dart';
@@ -59,6 +60,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Column(
@@ -76,10 +78,10 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Añadir ejercicio',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  l10n.addExercise,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),
               IconButton(
@@ -92,9 +94,9 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Buscar ejercicio…',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              hintText: l10n.searchExercise,
+              prefixIcon: const Icon(Icons.search),
             ),
             onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
           ),
@@ -102,7 +104,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
         const SizedBox(height: 8),
         exercisesAsync.when(
           loading: () => const Expanded(child: Center(child: FitForgeLoadingIndicator(size: 48))),
-          error: (e, _) => Expanded(child: Center(child: Text('Error: $e'))),
+          error: (e, _) => Expanded(child: Center(child: Text(l10n.errorGeneric('$e')))),
           data: (exercises) {
             final filtered = _filterExercises(exercises);
 
@@ -113,7 +115,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      '${filtered.length} ejercicios',
+                      l10n.exerciseCount(filtered.length),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
                     ),
                   ),
@@ -125,7 +127,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
                         FilterChip(
-                          label: const Text('Todos'),
+                          label: Text(l10n.all),
                           selected: _muscleFilter == null,
                           onSelected: (_) => setState(() => _muscleFilter = null),
                         ),
@@ -133,7 +135,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                           (muscle) => Padding(
                             padding: const EdgeInsets.only(left: 8),
                             child: FilterChip(
-                              label: Text(muscle),
+                              label: Text(l10n.muscleLabel(muscle)),
                               selected: _muscleFilter == muscle,
                               onSelected: (_) => setState(() => _muscleFilter = muscle),
                             ),
@@ -145,8 +147,8 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                   const SizedBox(height: 8),
                   Expanded(
                     child: filtered.isEmpty
-                        ? const Center(
-                            child: Text('Sin resultados', style: TextStyle(color: AppColors.textMuted)),
+                        ? Center(
+                            child: Text(l10n.noResults, style: const TextStyle(color: AppColors.textMuted)),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),

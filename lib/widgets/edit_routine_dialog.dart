@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
 
 class EditRoutineDialog extends StatefulWidget {
@@ -74,10 +75,11 @@ class _EditRoutineDialogState extends State<EditRoutineDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final listHeight = (_exercises.length * 56.0).clamp(56.0, 280.0);
 
     return AlertDialog(
-      title: const Text('Editar rutina'),
+      title: Text(l10n.editRoutine),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -85,7 +87,7 @@ class _EditRoutineDialogState extends State<EditRoutineDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
+              decoration: InputDecoration(labelText: l10n.routineName),
               textCapitalization: TextCapitalization.sentences,
             ),
             const SizedBox(height: 12),
@@ -116,10 +118,10 @@ class _EditRoutineDialogState extends State<EditRoutineDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
         ElevatedButton(
           onPressed: _exercises.isEmpty ? null : _apply,
-          child: const Text('Aplicar'),
+          child: Text(l10n.apply),
         ),
       ],
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/utils/unit_converter.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/workout.dart';
 import 'exercise_thumbnail.dart';
 
@@ -30,27 +32,35 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
       .toList()
     ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
-  String _subtitle(WorkoutExercise exercise) {
+  String _subtitle(WorkoutExercise exercise, AppLocalizations l10n) {
     final total = exercise.sets.length;
     final done = exercise.sets.where((s) => s.completed).length;
-    if (total == 0) return 'Sin series';
-    if (done == total) return '$total series · Completado';
+    if (total == 0) return l10n.noSets;
+    if (done == total) return l10n.seriesCompleted(total);
 
     final lastCompleted = exercise.sets.where((s) => s.completed && s.weight != null).lastOrNull;
     if (lastCompleted != null) {
       final w = UnitConverter.kgToDisplay(lastCompleted.weight!, unitSystem);
       final label = UnitConverter.massLabel(unitSystem);
-      return '$total series · ${w.toStringAsFixed(0)} $label × ${lastCompleted.reps}';
+      return l10n.seriesWithWeight(
+        total,
+        '${w.toStringAsFixed(0)} $label',
+        lastCompleted.reps,
+      );
     }
 
-    return '$total series · $done/$total hechas';
+    return l10n.seriesProgress(total, done);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final exercises = _visibleExercises;
     final muscleCount = exercises
-        .expand((e) => MuscleInference.fromExerciseName(e.exerciseName))
+        .expand((e) => MuscleInference.resolve(
+              exerciseName: e.exerciseName,
+              exerciseId: e.exerciseId,
+            ))
         .toSet()
         .length;
 
@@ -58,14 +68,16 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         Text(
-          workout.name,
+          l10n.workoutDisplayName(workout.name),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 4),
         Text(
-          '${exercises.length} ejercicios${muscleCount > 0 ? ' · $muscleCount músculos' : ''}',
+          muscleCount > 0
+              ? l10n.exercisesAndMuscles(exercises.length, muscleCount)
+              : l10n.exercisesInRoutine(exercises.length),
           style: const TextStyle(color: AppColors.textMuted),
         ),
         const SizedBox(height: 20),
@@ -75,7 +87,7 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
 
           return _ExerciseListRow(
             exercise: exercise,
-            subtitle: _subtitle(exercise),
+            subtitle: _subtitle(exercise, l10n),
             showConnector: !isLast,
             onTap: () => onOpenExercise(workout.exercises.indexOf(exercise)),
             onSwap: () => onSwapExercise(exercise),
@@ -108,6 +120,8 @@ class _ExerciseListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Dismissible(
       key: ValueKey('workout-ex-${exercise.id}'),
       direction: DismissDirection.endToStart,
@@ -180,21 +194,21 @@ class _ExerciseListRow extends StatelessWidget {
                       onRemove();
                   }
                 },
-                itemBuilder: (_) => const [
+                itemBuilder: (_) => [
                   PopupMenuItem(
                     value: 'swap',
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.swap_horiz, color: AppColors.orange),
-                      title: Text('Intercambiar por similar'),
+                      leading: const Icon(Icons.swap_horiz, color: AppColors.orange),
+                      title: Text(l10n.swapSimilar),
                     ),
                   ),
                   PopupMenuItem(
                     value: 'remove',
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.delete_outline, color: AppColors.error),
-                      title: Text('Eliminar'),
+                      leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                      title: Text(l10n.remove),
                     ),
                   ),
                 ],
@@ -214,6 +228,8 @@ class _AddExerciseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -231,9 +247,9 @@ class _AddExerciseRow extends StatelessWidget {
               child: const Icon(Icons.add, color: AppColors.orange),
             ),
             const SizedBox(width: 16),
-            const Text(
-              'Añadir ejercicio',
-              style: TextStyle(
+            Text(
+              l10n.addExercise,
+              style: const TextStyle(
                 color: AppColors.orange,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,

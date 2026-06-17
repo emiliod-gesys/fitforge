@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/coach_message.dart';
 import '../../providers/app_providers.dart';
 import '../../services/ai_coach_service.dart';
@@ -22,13 +23,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   final _messages = <CoachMessage>[];
   bool _loading = false;
 
-  final _suggestions = [
-    'Crea una rutina de piernas de 45 minutos',
-    '¿Qué ejercicios me recomiendas para pecho hoy?',
-    'Hazme una rutina de espalda y bíceps para guardar',
-    '¿Cuándo debería descansar cada grupo muscular?',
-  ];
-
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -42,6 +36,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 
   Future<void> _send(String text) async {
     if (text.trim().isEmpty || _loading) return;
+
+    final l10n = context.l10n;
 
     setState(() {
       _messages.add(CoachMessage(text: text, isUser: true));
@@ -69,14 +65,14 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           if (routine != null) {
             _messages.add(
               CoachMessage(
-                text: 'Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.',
+                text: l10n.coachRoutineReady,
                 routinePreview: routine,
               ),
             );
           } else {
             _messages.add(
-              const CoachMessage(
-                text: 'No pude generar la rutina. Intenta ser más específico (músculos y duración).',
+              CoachMessage(
+                text: l10n.coachRoutineFailed,
                 isError: true,
               ),
             );
@@ -96,7 +92,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       }
     } catch (e) {
       setState(() {
-        _messages.add(CoachMessage(text: 'Error: $e', isError: true));
+        _messages.add(CoachMessage(text: l10n.errorGeneric('$e'), isError: true));
       });
     } finally {
       setState(() => _loading = false);
@@ -105,6 +101,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   }
 
   Future<void> _saveRoutine(int messageIndex) async {
+    final l10n = context.l10n;
     final message = _messages[messageIndex];
     final routine = message.routinePreview;
     if (routine == null || message.isRoutineSaved) return;
@@ -119,13 +116,13 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('"${routine.name}" guardada en Rutinas')),
+          SnackBar(content: Text(l10n.routineSavedNamed(routine.name))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo guardar: $e')),
+          SnackBar(content: Text(l10n.saveFailed('$e'))),
         );
       }
     }
@@ -153,8 +150,11 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final suggestions = l10n.coachSuggestions;
+
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Coach IA'),
+      appBar: FitForgeAppBar(title: l10n.coachTitle),
       body: Column(
         children: [
           if (_messages.isEmpty)
@@ -165,18 +165,18 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   const Icon(Icons.auto_awesome_outlined, size: 64, color: AppColors.orange),
                   const SizedBox(height: 16),
                   Text(
-                    'Tu entrenador personal con IA',
+                    l10n.coachWelcome,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Pídele una rutina y la guardarás cuando estés listo.\nConfigura tu API key en Perfil.',
+                  Text(
+                    l10n.coachWelcomeHint,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textMuted),
+                    style: const TextStyle(color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 24),
-                  ..._suggestions.map(
+                  ...suggestions.map(
                     (s) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: ActionChip(
@@ -219,8 +219,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      decoration: const InputDecoration(
-                        hintText: 'Pregunta o pide una rutina…',
+                      decoration: InputDecoration(
+                        hintText: l10n.coachAskHint,
                       ),
                       onSubmitted: _send,
                       enabled: !_loading,

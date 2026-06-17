@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/social.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -25,19 +26,20 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
   }
 
   Future<void> _sendRequest(String userId) async {
+    final l10n = context.l10n;
     try {
       await ref.read(socialServiceProvider).sendFriendRequest(userId);
       ref.invalidate(friendshipsProvider);
       ref.invalidate(userSearchProvider(_query));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Solicitud enviada')),
+          SnackBar(content: Text(l10n.requestSent)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo enviar: $e')),
+          SnackBar(content: Text(l10n.requestFailed('$e'))),
         );
       }
     }
@@ -55,16 +57,17 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final friendshipsAsync = ref.watch(friendshipsProvider);
     final searchAsync = _query.length >= 2 ? ref.watch(userSearchProvider(_query)) : null;
     final notificationsAsync = ref.watch(socialNotificationsProvider);
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
 
     return Scaffold(
-      appBar: const FitForgeAppBar(title: 'Social'),
+      appBar: FitForgeAppBar(title: l10n.socialTitle),
       body: friendshipsAsync.when(
         loading: () => const Center(child: FitForgeLoadingIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
         data: (friendships) {
           final pending = friendships.where((f) => f.status == FriendshipStatus.pending).toList();
           final friends = friendships.where((f) => f.status == FriendshipStatus.accepted).toList();
@@ -79,6 +82,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 _SearchCard(
+                  hintText: l10n.searchFriendsHint,
                   controller: _searchController,
                   showClear: _query.isNotEmpty,
                   onChanged: (v) => setState(() => _query = v.trim()),
@@ -94,10 +98,10 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                       padding: EdgeInsets.all(16),
                       child: Center(child: FitForgeLoadingIndicator(size: 32)),
                     ),
-                    error: (e, _) => Text('Búsqueda falló: $e', style: const TextStyle(color: AppColors.error)),
+                    error: (e, _) => Text(l10n.searchFailed('$e'), style: const TextStyle(color: AppColors.error)),
                     data: (users) {
                       if (users.isEmpty) {
-                        return const Text('Sin resultados', style: TextStyle(color: AppColors.textMuted));
+                        return Text(l10n.noResults, style: const TextStyle(color: AppColors.textMuted));
                       }
                       return Column(
                         children: users
@@ -122,7 +126,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                 ],
                 const SizedBox(height: 24),
                 _SectionHeader(
-                  title: 'Notificaciones',
+                  title: l10n.notifications,
                   trailing: notificationsAsync.maybeWhen(
                     data: (list) {
                       if (list.any((n) => n.isUnread)) {
@@ -132,7 +136,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                             ref.invalidate(socialNotificationsProvider);
                             ref.invalidate(socialUnreadCountProvider);
                           },
-                          child: const Text('Marcar leídas'),
+                          child: Text(l10n.markRead),
                         );
                       }
                       return null;
@@ -142,14 +146,14 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                 ),
                 notificationsAsync.when(
                   loading: () => const FitForgeLoadingIndicator(size: 32),
-                  error: (e, _) => Text('Error: $e'),
+                  error: (e, _) => Text(l10n.errorGeneric('$e')),
                   data: (notifications) {
                     if (notifications.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Cuando un amigo complete un entreno, te avisaremos aquí.',
-                          style: TextStyle(color: AppColors.textMuted),
+                          l10n.friendWorkoutNotify,
+                          style: const TextStyle(color: AppColors.textMuted),
                         ),
                       );
                     }
@@ -172,7 +176,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                             ),
                           ),
                           subtitle: Text(
-                            _formatTime(n.createdAt),
+                            l10n.timeAgo(n.createdAt),
                             style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                           ),
                           onTap: () async {
@@ -192,7 +196,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                 ),
                 if (pending.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  const _SectionHeader(title: 'Solicitudes pendientes'),
+                  _SectionHeader(title: l10n.pendingRequests),
                   ...pending.map((f) {
                     final friend = uid != null ? f.friendFor(uid) : FriendUser(id: f.addresseeId);
                     final incoming = uid != null && f.isIncoming(uid);
@@ -201,7 +205,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                       child: ListTile(
                         leading: CircleAvatar(child: Text(friend.label[0].toUpperCase())),
                         title: Text(friend.label),
-                        subtitle: Text(incoming ? 'Quiere ser tu amigo' : 'Solicitud enviada'),
+                        subtitle: Text(incoming ? l10n.wantsToBeFriend : l10n.requestSentLabel),
                         trailing: incoming
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -225,13 +229,13 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                   }),
                 ],
                 const SizedBox(height: 24),
-                _SectionHeader(title: 'Amigos (${friends.length})'),
+                _SectionHeader(title: l10n.friendsCount(friends.length)),
                 if (friends.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
-                      'Busca por correo o nombre para agregar amigos.',
-                      style: TextStyle(color: AppColors.textMuted),
+                      l10n.searchFriendsEmpty,
+                      style: const TextStyle(color: AppColors.textMuted),
                     ),
                   )
                 else
@@ -264,32 +268,24 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
   }
 
   void _confirmRemove(BuildContext context, String name, VoidCallback onConfirm) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar amigo'),
-        content: Text('¿Quitar a $name de tu lista?'),
+        title: Text(l10n.removeFriendTitle),
+        content: Text(l10n.removeFriendBody(name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               onConfirm();
             },
-            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
+            child: Text(l10n.delete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
     );
-  }
-
-  String _formatTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'Ahora';
-    if (diff.inHours < 1) return 'Hace ${diff.inMinutes} min';
-    if (diff.inDays < 1) return 'Hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'Hace ${diff.inDays} d';
-    return '${dt.day}/${dt.month}/${dt.year}';
   }
 }
 
@@ -319,12 +315,14 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _SearchCard extends StatelessWidget {
+  final String hintText;
   final TextEditingController controller;
   final bool showClear;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
 
   const _SearchCard({
+    required this.hintText,
     required this.controller,
     required this.showClear,
     required this.onChanged,
@@ -341,7 +339,7 @@ class _SearchCard extends StatelessWidget {
           controller: controller,
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: 'Buscar por correo o nombre…',
+            hintText: hintText,
             hintStyle: const TextStyle(color: AppColors.textMuted),
             border: InputBorder.none,
             prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),

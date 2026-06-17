@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
 
 class AiRoutinePreviewCard extends StatelessWidget {
@@ -22,18 +23,20 @@ class AiRoutinePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (isDiscarded) {
-      return const _StatusBanner(
+      return _StatusBanner(
         icon: Icons.delete_outline,
-        text: 'Rutina descartada',
+        text: l10n.routineDiscarded,
         color: AppColors.textMuted,
       );
     }
 
     if (isSaved) {
-      return const _StatusBanner(
+      return _StatusBanner(
         icon: Icons.check_circle,
-        text: 'Rutina guardada en Mis rutinas',
+        text: l10n.routineSaved,
         color: AppColors.orange,
       );
     }
@@ -80,7 +83,7 @@ class AiRoutinePreviewCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                '+ ${routine.exercises.length - 8} ejercicios más',
+                l10n.moreExercises(routine.exercises.length - 8),
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
               ),
             ),
@@ -90,14 +93,14 @@ class AiRoutinePreviewCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onDiscard,
-                  child: const Text('Descartar'),
+                  child: Text(l10n.discard),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton(
                   onPressed: onEdit,
-                  child: const Text('Editar'),
+                  child: Text(l10n.edit),
                 ),
               ),
               const SizedBox(width: 8),
@@ -105,7 +108,7 @@ class AiRoutinePreviewCard extends StatelessWidget {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: onSave,
-                  child: const Text('Guardar'),
+                  child: Text(l10n.save),
                 ),
               ),
             ],
