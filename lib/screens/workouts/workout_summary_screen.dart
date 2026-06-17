@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/player_level.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
@@ -272,6 +273,63 @@ class _ShareCard extends StatelessWidget {
                     ),
                   )
                   .toList(),
+            ),
+          ],
+          if (summary.xpAward != null) ...[
+            const SizedBox(height: 16),
+            _XpAwardBanner(xpAward: summary.xpAward!, l10n: l10n),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _XpAwardBanner extends StatelessWidget {
+  final XpAwardResult xpAward;
+  final AppLocalizations l10n;
+
+  const _XpAwardBanner({required this.xpAward, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.orange.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.bolt, color: AppColors.orange, size: 22),
+              const SizedBox(width: 8),
+              Text(
+                l10n.xpEarned(xpAward.xpEarned),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.orange,
+                ),
+              ),
+            ],
+          ),
+          if (xpAward.streakWeeks > 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              l10n.streakXpBonus(xpAward.streakMultiplier.toStringAsFixed(2)),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+            ),
+          ],
+          if (xpAward.leveledUp) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${l10n.levelUp} ${l10n.playerLevelTitle(xpAward.after.level)}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],
         ],

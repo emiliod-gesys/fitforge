@@ -49,6 +49,7 @@ class UserProfile {
   final String? experienceLevel;
   final AiProvider aiProvider;
   final bool hasAiKey;
+  final int totalXp;
   final DateTime createdAt;
 
   const UserProfile({
@@ -65,6 +66,7 @@ class UserProfile {
     this.experienceLevel,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
+    this.totalXp = 0,
     required this.createdAt,
   });
 
@@ -83,6 +85,7 @@ class UserProfile {
       experienceLevel: json['experience_level'] as String?,
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
+      totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

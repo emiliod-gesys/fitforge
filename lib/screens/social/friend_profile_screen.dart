@@ -7,9 +7,14 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/social.dart';
+import '../../core/utils/player_level.dart';
+import '../../core/utils/workout_streak.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/profile_avatar.dart';
+import '../../widgets/player_level_card.dart';
+import '../../widgets/stat_card.dart';
 
 class FriendProfileScreen extends ConsumerWidget {
   final String friendId;
@@ -43,7 +48,12 @@ class FriendProfileScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _ProfileHeader(user: view.user, profile: view.profile, l10n: l10n),
+              _ProfileHeader(
+                user: view.user,
+                profile: view.profile,
+                weeklyStats: view.weeklyStats,
+                l10n: l10n,
+              ),
               const SizedBox(height: 24),
               Text(
                 l10n.personalRecords,
@@ -86,9 +96,15 @@ class FriendProfileScreen extends ConsumerWidget {
 class _ProfileHeader extends StatelessWidget {
   final FriendUser user;
   final UserProfile profile;
+  final WorkoutWeeklyStats weeklyStats;
   final AppLocalizations l10n;
 
-  const _ProfileHeader({required this.user, required this.profile, required this.l10n});
+  const _ProfileHeader({
+    required this.user,
+    required this.profile,
+    required this.weeklyStats,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,38 +114,50 @@ class _ProfileHeader extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            CircleAvatar(
+            ProfileAvatar(
+              avatarUrl: user.avatarUrl,
               radius: 40,
-              backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-              child: user.avatarUrl == null
-                  ? Text(
-                      user.label[0].toUpperCase(),
-                      style: const TextStyle(fontSize: 28),
-                    )
-                  : null,
+              fallbackLetter: user.label,
             ),
             const SizedBox(height: 12),
             Text(
               user.label,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            if (profile.experienceLevel != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  l10n.levelLabel(l10n.experienceLabel(profile.experienceLevel)),
-                  style: const TextStyle(color: AppColors.textMuted),
-                ),
-              ),
+            const SizedBox(height: 12),
+            PlayerLevelCard(
+              progress: PlayerLevelCalculator.fromTotalXp(profile.totalXp),
+              l10n: l10n,
+            ),
             if (profile.fitnessGoal != null)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   l10n.goalLabel(profile.fitnessGoal),
                   style: const TextStyle(color: AppColors.orange),
                   textAlign: TextAlign.center,
                 ),
               ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: StatCard(
+                    icon: Icons.local_fire_department,
+                    label: l10n.streakWeekly,
+                    value: l10n.streakWeeksLabel(weeklyStats.streakWeeks),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StatCard(
+                    icon: Icons.fitness_center,
+                    label: l10n.thisWeek,
+                    value: weeklyStats.weekProgressLabel,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

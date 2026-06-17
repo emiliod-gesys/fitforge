@@ -7,6 +7,8 @@ import '../../models/social.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/friends_ranking_card.dart';
+import '../../widgets/profile_avatar.dart';
 
 class SocialScreen extends ConsumerStatefulWidget {
   const SocialScreen({super.key});
@@ -30,6 +32,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
     try {
       await ref.read(socialServiceProvider).sendFriendRequest(userId);
       ref.invalidate(friendshipsProvider);
+      ref.invalidate(friendRankingProvider);
       ref.invalidate(userSearchProvider(_query));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,17 +51,20 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
   Future<void> _accept(Friendship f) async {
     await ref.read(socialServiceProvider).acceptFriendRequest(f.id);
     ref.invalidate(friendshipsProvider);
+    ref.invalidate(friendRankingProvider);
   }
 
   Future<void> _remove(Friendship f) async {
     await ref.read(socialServiceProvider).removeFriendship(f.id);
     ref.invalidate(friendshipsProvider);
+    ref.invalidate(friendRankingProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final friendshipsAsync = ref.watch(friendshipsProvider);
+    final rankingAsync = ref.watch(friendRankingProvider);
     final searchAsync = _query.length >= 2 ? ref.watch(userSearchProvider(_query)) : null;
     final notificationsAsync = ref.watch(socialNotificationsProvider);
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
@@ -75,6 +81,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(friendshipsProvider);
+              ref.invalidate(friendRankingProvider);
               ref.invalidate(socialNotificationsProvider);
               ref.invalidate(socialUnreadCountProvider);
             },
@@ -107,9 +114,10 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                         children: users
                             .map(
                               (u) => ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: u.avatarUrl != null ? NetworkImage(u.avatarUrl!) : null,
-                                  child: u.avatarUrl == null ? Text(u.label[0].toUpperCase()) : null,
+                                leading: ProfileAvatar(
+                                  avatarUrl: u.avatarUrl,
+                                  radius: 20,
+                                  fallbackLetter: u.label,
                                 ),
                                 title: Text(u.label),
                                 subtitle: u.email != null ? Text(u.email!, style: const TextStyle(color: AppColors.textMuted)) : null,
@@ -122,6 +130,18 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                             .toList(),
                       );
                     },
+                  ),
+                ],
+                if (friends.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _SectionHeader(title: l10n.friendsRanking),
+                  rankingAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: FitForgeLoadingIndicator(size: 32)),
+                    ),
+                    error: (e, _) => Text(l10n.errorGeneric('$e')),
+                    data: (entries) => FriendsRankingCard(entries: entries, l10n: l10n),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -203,7 +223,11 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                     return Card(
                       color: AppColors.card,
                       child: ListTile(
-                        leading: CircleAvatar(child: Text(friend.label[0].toUpperCase())),
+                        leading: ProfileAvatar(
+                          avatarUrl: friend.avatarUrl,
+                          radius: 20,
+                          fallbackLetter: friend.label,
+                        ),
                         title: Text(friend.label),
                         subtitle: Text(incoming ? l10n.wantsToBeFriend : l10n.requestSentLabel),
                         trailing: incoming
@@ -245,14 +269,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                       color: AppColors.card,
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: friend.avatarUrl != null ? NetworkImage(friend.avatarUrl!) : null,
-                          child: friend.avatarUrl == null ? Text(friend.label[0].toUpperCase()) : null,
+                        leading: ProfileAvatar(
+                          avatarUrl: friend.avatarUrl,
+                          radius: 20,
+                          fallbackLetter: friend.label,
                         ),
                         title: Text(friend.label),
-                        subtitle: friend.email != null
-                            ? Text(friend.email!, style: const TextStyle(color: AppColors.textMuted, fontSize: 12))
-                            : null,
+                        subtitle: Text(
+                          l10n.playerLevelTitle(friend.level),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.push('/social/friend/${friend.id}'),
                         onLongPress: () => _confirmRemove(context, friend.label, () => _remove(f)),

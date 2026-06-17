@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/muscle_inference.dart';
+import '../../core/utils/player_level.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
@@ -12,6 +13,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/player_level_card.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -41,6 +43,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final l10n = context.l10n;
     final prsAsync = ref.watch(personalRecordsProvider);
     final workoutsAsync = ref.watch(progressWorkoutsProvider);
+    final profileAsync = ref.watch(profileProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
@@ -49,10 +52,28 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         onRefresh: () async {
           ref.invalidate(personalRecordsProvider);
           ref.invalidate(progressWorkoutsProvider);
+          ref.invalidate(profileProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            profileAsync.when(
+              data: (profile) {
+                if (profile == null) return const SizedBox.shrink();
+                final progress = PlayerLevelCalculator.fromTotalXp(profile.totalXp);
+                return Column(
+                  children: [
+                    PlayerLevelCard(progress: progress, l10n: l10n),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: FitForgeLoadingIndicator(size: 48),
+              ),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             workoutsAsync.when(
               data: (workouts) {
                 final last30 = _workoutsLast30Days(workouts);

@@ -49,6 +49,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.3
+  pdf: ^3.11.3
 
 dependency_overrides:
   flutter_inappwebview: 6.2.0-beta.3
@@ -75,5 +76,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/avatars/
     - assets/sounds/
     - assets/animations/
+    - assets/docs/

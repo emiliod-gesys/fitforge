@@ -216,6 +216,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get progressTitle => 'Progreso';
 
   @override
+  String playerLevelTitle(int level) {
+    return 'Nivel $level';
+  }
+
+  @override
+  String playerXpProgress(int current, int total) {
+    return '$current / $total XP';
+  }
+
+  @override
+  String get playerLevelMax => 'Nivel máximo alcanzado';
+
+  @override
+  String xpEarned(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String get levelUp => '¡Subiste de nivel!';
+
+  @override
+  String streakXpBonus(String multiplier) {
+    return 'Bonus racha ×$multiplier';
+  }
+
+  @override
   String get workouts30d => 'Entrenos (30 d)';
 
   @override
@@ -366,6 +392,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get socialTitle => 'Social';
+
+  @override
+  String get friendsRanking => 'Ranking de amigos';
+
+  @override
+  String rankYou(String name) {
+    return '$name (tú)';
+  }
 
   @override
   String get loginTagline => 'Forja tu mejor versión';
@@ -871,6 +905,87 @@ class AppLocalizationsEs extends AppLocalizations {
   String get geminiKey => 'Gemini API Key';
 
   @override
+  String get apiGuidesTitle => 'Guías paso a paso';
+
+  @override
+  String get apiGuidesSubtitle =>
+      'Si es tu primera vez, sigue estos instructivos. También puedes abrir el PDF completo.';
+
+  @override
+  String get apiGuideOpenPortal => 'Abrir sitio oficial';
+
+  @override
+  String get apiGuideOpenPdf => 'Ver instructivo PDF';
+
+  @override
+  String get openAiGuideTitle => 'Cómo obtener tu API Key de OpenAI';
+
+  @override
+  String get openAiGuidePortal => 'platform.openai.com/api-keys';
+
+  @override
+  String get openAiGuideStep1 =>
+      'Abre platform.openai.com en tu navegador y crea una cuenta o inicia sesión con tu correo.';
+
+  @override
+  String get openAiGuideStep2 =>
+      'Verifica tu correo si es la primera vez. OpenAI puede pedir un número de teléfono para seguridad.';
+
+  @override
+  String get openAiGuideStep3 =>
+      'Entra a la sección API keys: platform.openai.com/api-keys (menú lateral → API keys).';
+
+  @override
+  String get openAiGuideStep4 =>
+      'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FitForge».';
+
+  @override
+  String get openAiGuideStep5 =>
+      'Copia la clave en cuanto aparezca. Solo se muestra una vez; si la pierdes, tendrás que crear otra.';
+
+  @override
+  String get openAiGuideStep6 =>
+      'OpenAI puede pedir agregar un método de pago en Billing antes de usar la API (suele ser pago por uso).';
+
+  @override
+  String get openAiGuideStep7 =>
+      'Vuelve a FitForge, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».';
+
+  @override
+  String get geminiGuideTitle => 'Cómo obtener tu API Key de Gemini (Google)';
+
+  @override
+  String get geminiGuidePortal => 'aistudio.google.com/apikey';
+
+  @override
+  String get geminiGuideStep1 =>
+      'Abre aistudio.google.com en tu navegador e inicia sesión con tu cuenta de Google.';
+
+  @override
+  String get geminiGuideStep2 =>
+      'Si es la primera vez, acepta los términos de Google AI Studio cuando te lo pida.';
+
+  @override
+  String get geminiGuideStep3 =>
+      'Ve a la sección de API keys: aistudio.google.com/apikey (menú «Get API key»).';
+
+  @override
+  String get geminiGuideStep4 =>
+      'Pulsa «Create API key». Puedes crear un proyecto nuevo de Google Cloud o usar uno existente.';
+
+  @override
+  String get geminiGuideStep5 =>
+      'Copia la API key generada. Guárdala en un lugar seguro; no la compartas con nadie.';
+
+  @override
+  String get geminiGuideStep6 =>
+      'Google ofrece un nivel gratuito con límites de uso. Revisa los límites en la consola si lo necesitas.';
+
+  @override
+  String get geminiGuideStep7 =>
+      'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».';
+
+  @override
   String setsRepsBest(int sets, int reps, String weight) {
     return '$sets series · $reps reps · mejor: $weight';
   }
@@ -1009,4 +1124,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bodyBack => 'Espalda';
+
+  @override
+  String get chooseAvatar => 'Elige tu avatar';
+
+  @override
+  String get chooseAvatarHint => 'Selecciona un avatar del catálogo FitForge';
+
+  @override
+  String get changeAvatar => 'Cambiar avatar';
 }

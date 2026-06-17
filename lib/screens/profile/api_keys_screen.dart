@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/api_key_guides.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/api_key_guide_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
 
 class ApiKeysScreen extends ConsumerStatefulWidget {
@@ -116,6 +118,37 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
             style: OutlinedButton.styleFrom(foregroundColor: Colors.redAccent),
             child: Text(l10n.deleteApiKey),
           ),
+          const SizedBox(height: 32),
+          Text(
+            l10n.apiGuidesTitle,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.apiGuidesSubtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white54),
+          ),
+          const SizedBox(height: 12),
+          ApiKeyGuideCard(
+            title: l10n.openAiGuideTitle,
+            portalLabel: l10n.openAiGuidePortal,
+            portalUrl: Uri.parse(ApiKeyGuides.openAiPortal),
+            steps: ApiKeyGuides.openAiSteps(l10n),
+            pdfAssetPath: ApiKeyGuides.openAiPdfAsset,
+            pdfFileName: 'fitforge-openai-api-key.pdf',
+            l10n: l10n,
+          ),
+          const SizedBox(height: 8),
+          ApiKeyGuideCard(
+            title: l10n.geminiGuideTitle,
+            portalLabel: l10n.geminiGuidePortal,
+            portalUrl: Uri.parse(ApiKeyGuides.geminiPortal),
+            steps: ApiKeyGuides.geminiSteps(l10n),
+            pdfAssetPath: ApiKeyGuides.geminiPdfAsset,
+            pdfFileName: 'fitforge-gemini-api-key.pdf',
+            l10n: l10n,
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

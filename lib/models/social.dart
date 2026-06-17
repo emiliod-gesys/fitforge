@@ -1,4 +1,6 @@
 import 'profile.dart';
+import '../core/utils/player_level.dart';
+import '../core/utils/workout_streak.dart';
 
 enum FriendshipStatus { pending, accepted }
 
@@ -7,15 +9,19 @@ class FriendUser {
   final String? displayName;
   final String? avatarUrl;
   final String? email;
+  final int totalXp;
 
   const FriendUser({
     required this.id,
     this.displayName,
     this.avatarUrl,
     this.email,
+    this.totalXp = 0,
   });
 
   String get label => displayName ?? email?.split('@').first ?? 'Usuario';
+
+  int get level => PlayerLevelCalculator.fromTotalXp(totalXp).level;
 
   factory FriendUser.fromJson(Map<String, dynamic> json) {
     return FriendUser(
@@ -23,6 +29,7 @@ class FriendUser {
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       email: json['email'] as String?,
+      totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -112,10 +119,24 @@ class FriendProfileView {
   final FriendUser user;
   final UserProfile profile;
   final List<PersonalRecord> personalRecords;
+  final WorkoutWeeklyStats weeklyStats;
 
   const FriendProfileView({
     required this.user,
     required this.profile,
     required this.personalRecords,
+    required this.weeklyStats,
+  });
+}
+
+class FriendRankingEntry {
+  final FriendUser user;
+  final bool isCurrentUser;
+  final int rank;
+
+  const FriendRankingEntry({
+    required this.user,
+    required this.isCurrentUser,
+    required this.rank,
   });
 }

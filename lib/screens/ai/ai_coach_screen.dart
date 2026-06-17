@@ -51,6 +51,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       final workouts = await ref.read(workoutsProvider.future);
       final routines = await ref.read(routinesProvider.future);
       final catalog = await ref.read(exercisesProvider.future);
+      final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+      final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
+      final personalRecords = await ref.read(personalRecordsProvider.future);
       final coach = ref.read(aiCoachServiceProvider);
 
       if (AiCoachService.isRoutineCreationRequest(text)) {
@@ -59,6 +62,10 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           catalog: catalog,
           profile: profile,
           recentWorkouts: workouts,
+          bodyMetrics: bodyMetrics,
+          weeklyStats: weeklyStats,
+          personalRecords: personalRecords,
+          routines: routines,
         );
 
         setState(() {
@@ -84,6 +91,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           recentWorkouts: workouts,
           routines: routines,
           profile: profile,
+          bodyMetrics: bodyMetrics,
+          weeklyStats: weeklyStats,
+          personalRecords: personalRecords,
         );
 
         setState(() {

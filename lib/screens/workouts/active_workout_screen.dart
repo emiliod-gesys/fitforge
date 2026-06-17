@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
+import '../../core/utils/workout_streak.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/workout.dart';
@@ -74,10 +75,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         (sum, ex) => sum + ex.totalVolume,
       );
 
+      final completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
+      final streakWeeks = WorkoutStreakCalculator.weeklyStreak([
+        DateTime.now(),
+        ...completedDates,
+      ]);
+
       await ref.read(workoutServiceProvider).completeWorkout(
             workout.id,
             durationMinutes: duration,
             totalVolume: volume,
+          );
+
+      final xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
+            workoutId: workout.id,
+            totalVolumeKg: volume,
+            streakWeeks: streakWeeks,
           );
 
       final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
@@ -89,6 +102,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         workout: workout,
         durationMinutes: duration,
         previousSameRoutine: previous,
+        xpAward: xpAward,
       );
 
       ref.invalidate(workoutsProvider);
@@ -99,6 +113,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       ref.invalidate(personalRecordsProvider);
       ref.invalidate(muscleRecoveryProvider);
       ref.invalidate(workoutWeeklyStatsProvider);
+      ref.invalidate(profileProvider);
+      ref.invalidate(friendRankingProvider);
 
       if (mounted) {
         context.pushReplacement('/workout/summary', extra: summary);

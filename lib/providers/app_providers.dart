@@ -143,6 +143,12 @@ final friendshipsProvider = FutureProvider<List<Friendship>>((ref) async {
   return ref.watch(socialServiceProvider).getFriendships();
 });
 
+final friendRankingProvider = FutureProvider<List<FriendRankingEntry>>((ref) async {
+  ref.watch(authStateProvider);
+  ref.watch(profileProvider);
+  return ref.watch(socialServiceProvider).getFriendsRanking();
+});
+
 final userSearchProvider = FutureProvider.family<List<FriendUser>, String>((ref, query) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).searchUsers(query);

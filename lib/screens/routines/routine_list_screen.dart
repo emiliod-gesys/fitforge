@@ -112,6 +112,10 @@ class RoutineListScreen extends ConsumerWidget {
                 final profile = await ref.read(profileProvider.future);
                 final workouts = await ref.read(workoutsProvider.future);
                 final catalog = await ref.read(exercisesProvider.future);
+                final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+                final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
+                final personalRecords = await ref.read(personalRecordsProvider.future);
+                final routines = await ref.read(routinesProvider.future);
 
                 if (!context.mounted) return;
 
@@ -125,6 +129,10 @@ class RoutineListScreen extends ConsumerWidget {
                           profile: profile,
                           recentWorkouts: workouts,
                           catalog: catalog,
+                          bodyMetrics: bodyMetrics,
+                          weeklyStats: weeklyStats,
+                          personalRecords: personalRecords,
+                          routines: routines,
                         ),
                   );
 

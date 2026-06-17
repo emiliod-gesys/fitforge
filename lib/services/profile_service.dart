@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import '../core/utils/player_level.dart';
 import '../core/utils/unit_converter.dart';
 import '../models/body_metric.dart';
 import '../models/profile.dart';
@@ -165,5 +166,55 @@ class ProfileService {
 
   Future<void> updateUnitSystem(String unitSystem) async {
     await updateProfile({'unit_system': unitSystem});
+  }
+
+  Future<XpAwardResult?> awardWorkoutXp({
+    required String workoutId,
+    required double totalVolumeKg,
+    required int streakWeeks,
+  }) async {
+    final user = _client.auth.currentUser;
+    if (user == null) return null;
+
+    final workoutRow = await _client
+        .from('workouts')
+        .select('xp_awarded, user_id')
+        .eq('id', workoutId)
+        .maybeSingle();
+
+    if (workoutRow == null || workoutRow['user_id'] != user.id) return null;
+    if (workoutRow['xp_awarded'] != null) return null;
+
+    final xpEarned = PlayerLevelCalculator.xpFromWorkoutVolume(
+      volumeKg: totalVolumeKg,
+      streakWeeks: streakWeeks,
+    );
+    final multiplier = PlayerLevelCalculator.streakMultiplier(streakWeeks);
+
+    final profileRow = await _client
+        .from('profiles')
+        .select('total_xp')
+        .eq('id', user.id)
+        .single();
+
+    final previousTotal = (profileRow['total_xp'] as num?)?.toInt() ?? 0;
+    final before = PlayerLevelCalculator.fromTotalXp(previousTotal);
+    final newTotal = previousTotal + xpEarned;
+    final after = PlayerLevelCalculator.fromTotalXp(newTotal);
+
+    await _client.from('profiles').update({
+      'total_xp': newTotal,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', user.id);
+
+    await _client.from('workouts').update({'xp_awarded': xpEarned}).eq('id', workoutId);
+
+    return XpAwardResult(
+      xpEarned: xpEarned,
+      streakWeeks: streakWeeks,
+      streakMultiplier: multiplier,
+      before: before,
+      after: after,
+    );
   }
 }

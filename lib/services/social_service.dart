@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/utils/supabase_datetime.dart';
+import '../core/utils/workout_streak.dart';
 import '../models/profile.dart';
 import '../models/social.dart';
 import 'supabase_service.dart';
@@ -64,7 +66,7 @@ class SocialService {
 
     final profilesData = await _client
         .from('profiles')
-        .select('id, display_name, avatar_url, email')
+        .select('id, display_name, avatar_url, email, total_xp')
         .inFilter('id', profileIds.toList());
 
     final profiles = {
@@ -111,11 +113,21 @@ class SocialService {
         .eq('user_id', friendId)
         .order('one_rep_max', ascending: false);
 
+    final datesData = await _client.rpc(
+      'get_friend_workout_completion_dates',
+      params: {'p_friend_id': friendId},
+    );
+    final completedDates = (datesData as List)
+        .map((d) => SupabaseDateTime.parse(d as String))
+        .toList();
+    final weeklyStats = WorkoutStreakCalculator.fromCompletedDates(completedDates);
+
     final user = FriendUser.fromJson({
       'id': friendId,
       'display_name': profileData['display_name'],
       'avatar_url': profileData['avatar_url'],
       'email': profileData['email'],
+      'total_xp': profileData['total_xp'],
     });
 
     return FriendProfileView(
@@ -124,7 +136,53 @@ class SocialService {
       personalRecords: (prData as List)
           .map((r) => PersonalRecord.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList(),
+      weeklyStats: weeklyStats,
     );
+  }
+
+  Future<List<FriendRankingEntry>> getFriendsRanking() async {
+    final uid = _userId;
+    if (uid == null) return [];
+
+    final myRow = await _client
+        .from('profiles')
+        .select('id, display_name, avatar_url, email, total_xp')
+        .eq('id', uid)
+        .maybeSingle();
+
+    if (myRow == null) return [];
+
+    final friendships = await getFriendships();
+    final friends = friendships
+        .where((f) => f.status == FriendshipStatus.accepted)
+        .map((f) => f.friendFor(uid))
+        .toList();
+
+    final entries = [
+      FriendRankingEntry(
+        user: FriendUser.fromJson(Map<String, dynamic>.from(myRow)),
+        isCurrentUser: true,
+        rank: 0,
+      ),
+      ...friends.map(
+        (user) => FriendRankingEntry(user: user, isCurrentUser: false, rank: 0),
+      ),
+    ];
+
+    entries.sort((a, b) {
+      final byXp = b.user.totalXp.compareTo(a.user.totalXp);
+      if (byXp != 0) return byXp;
+      return a.user.label.toLowerCase().compareTo(b.user.label.toLowerCase());
+    });
+
+    return [
+      for (var i = 0; i < entries.length; i++)
+        FriendRankingEntry(
+          user: entries[i].user,
+          isCurrentUser: entries[i].isCurrentUser,
+          rank: i + 1,
+        ),
+    ];
   }
 
   Future<List<SocialNotification>> getNotifications({int limit = 50}) async {

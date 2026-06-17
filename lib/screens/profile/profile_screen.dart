@@ -8,9 +8,11 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/avatar_picker_sheet.dart';
 import '../../widgets/body_metric_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/profile_avatar.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -50,14 +52,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 Center(
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.card,
-                    backgroundImage:
-                        profile?.avatarUrl != null ? NetworkImage(profile!.avatarUrl!) : null,
-                    child: profile?.avatarUrl == null
-                        ? const Icon(Icons.person, size: 40, color: AppColors.textMuted)
-                        : null,
+                  child: Column(
+                    children: [
+                      Stack(
+                        children: [
+                          ProfileAvatar(
+                            avatarUrl: profile?.avatarUrl,
+                            radius: 44,
+                            fallbackLetter: profile?.displayName,
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Material(
+                              color: AppColors.orange,
+                              shape: const CircleBorder(),
+                              child: InkWell(
+                                onTap: () => _pickAvatar(profile),
+                                customBorder: const CircleBorder(),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6),
+                                  child: Icon(Icons.edit, size: 16, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => _pickAvatar(profile),
+                        child: Text(l10n.changeAvatar),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -169,6 +196,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
       ),
     );
+  }
+
+  Future<void> _pickAvatar(UserProfile? profile) async {
+    final selected = await showAvatarPickerSheet(
+      context,
+      selectedId: profile?.avatarUrl,
+    );
+    if (selected == null) return;
+
+    await ref.read(profileServiceProvider).updateProfile({'avatar_url': selected});
+    ref.invalidate(profileProvider);
   }
 
   Future<void> _editAge(UserProfile? profile) async {

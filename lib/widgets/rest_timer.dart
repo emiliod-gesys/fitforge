@@ -22,11 +22,12 @@ class RestTimer extends StatefulWidget {
   State<RestTimer> createState() => _RestTimerState();
 }
 
-class _RestTimerState extends State<RestTimer> {
+class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   static int? _activeSessionId;
 
-  late int _remaining;
+  late DateTime _endsAt;
   late int _total;
+  late int _remaining;
   Timer? _timer;
   bool _finished = false;
   bool _cancelled = false;
@@ -37,15 +38,32 @@ class _RestTimerState extends State<RestTimer> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _activeSessionId = widget.sessionId;
-    _total = widget.seconds;
-    _remaining = widget.seconds;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    _resetClock(widget.seconds);
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _syncFromClock());
+  }
+
+  @override
+  void didUpdateWidget(RestTimer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId || oldWidget.seconds != widget.seconds) {
+      _finished = false;
+      _activeSessionId = widget.sessionId;
+      _resetClock(widget.seconds);
+    }
+  }
+
+  void _resetClock(int seconds) {
+    _total = seconds;
+    _endsAt = DateTime.now().add(Duration(seconds: seconds));
+    _remaining = seconds;
   }
 
   @override
   void dispose() {
     _cancelled = true;
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     if (_activeSessionId == widget.sessionId) {
       _activeSessionId = null;
@@ -53,32 +71,45 @@ class _RestTimerState extends State<RestTimer> {
     super.dispose();
   }
 
-  Future<void> _tick() async {
-    if (!_isActiveSession) return;
-
-    if (_remaining <= 1) {
-      _timer?.cancel();
-      if (_finished || !_isActiveSession) return;
-
-      _finished = true;
-      await RestSoundService.playRestCompleteBell();
-      if (!_isActiveSession) return;
-      widget.onComplete();
-    } else {
-      if (!_isActiveSession) return;
-      setState(() => _remaining--);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _syncFromClock();
     }
   }
 
-  void _adjust(int delta) {
+  Future<void> _syncFromClock() async {
+    if (!_isActiveSession || _finished) return;
+
+    final remaining = _endsAt.difference(DateTime.now()).inSeconds;
+    if (remaining <= 0) {
+      await _complete();
+    } else if (remaining != _remaining) {
+      setState(() => _remaining = remaining);
+    }
+  }
+
+  Future<void> _complete() async {
+    if (_finished || !_isActiveSession) return;
+
+    _timer?.cancel();
+    _finished = true;
+    await RestSoundService.playRestCompleteBell();
     if (!_isActiveSession) return;
-    setState(() {
-      _remaining = (_remaining + delta).clamp(0, 600);
-      _total = _total < _remaining ? _remaining : _total;
-    });
-    if (_remaining == 0) {
-      _timer?.cancel();
-      _tick();
+    widget.onComplete();
+  }
+
+  void _adjust(int delta) {
+    if (!_isActiveSession || _finished) return;
+
+    _endsAt = _endsAt.add(Duration(seconds: delta));
+    final remaining = _endsAt.difference(DateTime.now()).inSeconds.clamp(0, 600);
+    if (remaining > _total) _total = remaining;
+
+    if (remaining <= 0) {
+      unawaited(_complete());
+    } else {
+      setState(() => _remaining = remaining);
     }
   }
 

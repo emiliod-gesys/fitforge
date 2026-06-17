@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
+import '../core/utils/ai_coach_context.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/unit_converter.dart';
+import '../core/utils/workout_streak.dart';
+import '../models/body_metric.dart';
 import '../models/exercise.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
@@ -105,6 +108,9 @@ class AiCoachService {
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
     UserProfile? profile,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+    WorkoutWeeklyStats? weeklyStats,
+    List<PersonalRecord>? personalRecords,
   }) async {
     final aiProvider = profile?.aiProvider ?? AiProvider.none;
     if (aiProvider == AiProvider.none) {
@@ -116,13 +122,23 @@ class AiCoachService {
       throw Exception('Configura tu API key en el perfil');
     }
 
-    final context = _buildContext(recentWorkouts, routines, profile);
+    final metrics = bodyMetrics ?? await _profileService.getBodyMetricSnapshots();
+    final context = AiCoachContextBuilder.build(
+      profile: profile,
+      bodyMetrics: metrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      recentWorkouts: recentWorkouts,
+      routines: routines,
+    );
     final usesLb = profile != null && UnitConverter.isLb(profile.unitSystem);
     final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
     final progressionHint = usesLb ? '+5 lb o +5%' : '+2.5 kg o +5%';
     final systemPrompt = '''
 Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
 Responde siempre en español. Sé conciso pero útil.
+Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records y historial.
+Usa esa información para personalizar ejercicios, volumen, series, reps y progresión según su propósito y estado actual.
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
@@ -147,19 +163,32 @@ $context
     required List<Exercise> catalog,
     UserProfile? profile,
     List<Workout>? recentWorkouts,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+    WorkoutWeeklyStats? weeklyStats,
+    List<PersonalRecord>? personalRecords,
+    List<Routine>? routines,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
     final names = _catalogNamesForMuscles(catalog, targetMuscles);
+    final userContext = await _loadUserContext(
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      recentWorkouts: recentWorkouts,
+      routines: routines,
+    );
 
     final prompt = '''
 El usuario pidió lo siguiente:
 "$userMessage"
 
 Genera una rutina de gimnasio de $duration minutos.
-Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje' : targetMuscles.join(', ')}.
-Nivel: ${profile?.experienceLevel ?? 'intermedio'}.
-Objetivo: ${profile?.fitnessGoal ?? 'hipertrofia'}.
+Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y el perfil' : targetMuscles.join(', ')}.
+
+Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
+$userContext
 
 IMPORTANTE: usa SOLO nombres de ejercicio de esta lista (copia el nombre exacto):
 ${names.take(100).join('\n')}
@@ -200,8 +229,20 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
     UserProfile? profile,
     List<Workout>? recentWorkouts,
     List<Exercise>? catalog,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+    WorkoutWeeklyStats? weeklyStats,
+    List<PersonalRecord>? personalRecords,
+    List<Routine>? routines,
   }) async {
     final names = catalog != null ? _catalogNamesForMuscles(catalog, targetMuscles) : <String>[];
+    final userContext = await _loadUserContext(
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      recentWorkouts: recentWorkouts,
+      routines: routines,
+    );
 
     final catalogHint = names.isEmpty
         ? ''
@@ -209,8 +250,9 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 
     final prompt = '''
 Genera una rutina de gimnasio de $durationMinutes minutos enfocada en: ${targetMuscles.join(', ')}.
-Nivel: ${profile?.experienceLevel ?? 'intermedio'}.
-Objetivo: ${profile?.fitnessGoal ?? 'hipertrofia'}.
+
+Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
+$userContext
 $catalogHint
 
 Responde SOLO con JSON válido (sin markdown):
@@ -341,41 +383,23 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
     return matches.isEmpty ? catalog.map((e) => e.name).toList() : matches;
   }
 
-  String _buildContext(
-    List<Workout>? workouts,
-    List<Routine>? routines,
+  Future<String> _loadUserContext({
     UserProfile? profile,
-  ) {
-    final buffer = StringBuffer();
-    if (profile != null) {
-      final weightText = profile.bodyWeight != null
-          ? UnitConverter.formatMass(profile.bodyWeight, profile.unitSystem)
-          : 'no registrado';
-      buffer.writeln('Peso corporal: $weightText');
-      buffer.writeln('Unidades preferidas: ${profile.unitSystem == 'lb' ? 'libras' : 'kilogramos'}');
-      buffer.writeln('Objetivo: ${profile.fitnessGoal ?? 'no definido'}');
-      buffer.writeln('Experiencia: ${profile.experienceLevel ?? 'intermedio'}');
-    }
-    if (workouts != null && workouts.isNotEmpty) {
-      final unit = profile?.unitSystem ?? 'kg';
-      buffer.writeln('\nÚltimos entrenamientos:');
-      for (final w in workouts.take(5)) {
-        buffer.writeln(
-          '- ${w.name} (${w.durationMinutes} min, volumen: ${UnitConverter.formatVolume(w.totalVolume, unit)})',
-        );
-        for (final ex in w.exercises.take(3)) {
-          final sets = ex.sets
-              .where((s) => s.completed && s.weight != null)
-              .map((s) => UnitConverter.formatSetLine(s.weight!, s.reps, unit))
-              .join(', ');
-          buffer.writeln('  ${ex.exerciseName}: $sets');
-        }
-      }
-    }
-    if (routines != null && routines.isNotEmpty) {
-      buffer.writeln('\nRutinas guardadas: ${routines.map((r) => r.name).join(', ')}');
-    }
-    return buffer.toString();
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+    WorkoutWeeklyStats? weeklyStats,
+    List<PersonalRecord>? personalRecords,
+    List<Workout>? recentWorkouts,
+    List<Routine>? routines,
+  }) async {
+    final metrics = bodyMetrics ?? await _profileService.getBodyMetricSnapshots();
+    return AiCoachContextBuilder.build(
+      profile: profile,
+      bodyMetrics: metrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      recentWorkouts: recentWorkouts,
+      routines: routines,
+    );
   }
 
   Future<String> _callOpenAI(String apiKey, String system, String user) async {

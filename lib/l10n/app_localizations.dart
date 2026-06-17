@@ -500,6 +500,42 @@ abstract class AppLocalizations {
   /// **'Progreso'**
   String get progressTitle;
 
+  /// No description provided for @playerLevelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel {level}'**
+  String playerLevelTitle(int level);
+
+  /// No description provided for @playerXpProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{current} / {total} XP'**
+  String playerXpProgress(int current, int total);
+
+  /// No description provided for @playerLevelMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel máximo alcanzado'**
+  String get playerLevelMax;
+
+  /// No description provided for @xpEarned.
+  ///
+  /// In es, this message translates to:
+  /// **'+{xp} XP'**
+  String xpEarned(int xp);
+
+  /// No description provided for @levelUp.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Subiste de nivel!'**
+  String get levelUp;
+
+  /// No description provided for @streakXpBonus.
+  ///
+  /// In es, this message translates to:
+  /// **'Bonus racha ×{multiplier}'**
+  String streakXpBonus(String multiplier);
+
   /// No description provided for @workouts30d.
   ///
   /// In es, this message translates to:
@@ -793,6 +829,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Social'**
   String get socialTitle;
+
+  /// No description provided for @friendsRanking.
+  ///
+  /// In es, this message translates to:
+  /// **'Ranking de amigos'**
+  String get friendsRanking;
+
+  /// No description provided for @rankYou.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} (tú)'**
+  String rankYou(String name);
 
   /// No description provided for @loginTagline.
   ///
@@ -1652,6 +1700,138 @@ abstract class AppLocalizations {
   /// **'Gemini API Key'**
   String get geminiKey;
 
+  /// No description provided for @apiGuidesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guías paso a paso'**
+  String get apiGuidesTitle;
+
+  /// No description provided for @apiGuidesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Si es tu primera vez, sigue estos instructivos. También puedes abrir el PDF completo.'**
+  String get apiGuidesSubtitle;
+
+  /// No description provided for @apiGuideOpenPortal.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir sitio oficial'**
+  String get apiGuideOpenPortal;
+
+  /// No description provided for @apiGuideOpenPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver instructivo PDF'**
+  String get apiGuideOpenPdf;
+
+  /// No description provided for @openAiGuideTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo obtener tu API Key de OpenAI'**
+  String get openAiGuideTitle;
+
+  /// No description provided for @openAiGuidePortal.
+  ///
+  /// In es, this message translates to:
+  /// **'platform.openai.com/api-keys'**
+  String get openAiGuidePortal;
+
+  /// No description provided for @openAiGuideStep1.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre platform.openai.com en tu navegador y crea una cuenta o inicia sesión con tu correo.'**
+  String get openAiGuideStep1;
+
+  /// No description provided for @openAiGuideStep2.
+  ///
+  /// In es, this message translates to:
+  /// **'Verifica tu correo si es la primera vez. OpenAI puede pedir un número de teléfono para seguridad.'**
+  String get openAiGuideStep2;
+
+  /// No description provided for @openAiGuideStep3.
+  ///
+  /// In es, this message translates to:
+  /// **'Entra a la sección API keys: platform.openai.com/api-keys (menú lateral → API keys).'**
+  String get openAiGuideStep3;
+
+  /// No description provided for @openAiGuideStep4.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FitForge».'**
+  String get openAiGuideStep4;
+
+  /// No description provided for @openAiGuideStep5.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia la clave en cuanto aparezca. Solo se muestra una vez; si la pierdes, tendrás que crear otra.'**
+  String get openAiGuideStep5;
+
+  /// No description provided for @openAiGuideStep6.
+  ///
+  /// In es, this message translates to:
+  /// **'OpenAI puede pedir agregar un método de pago en Billing antes de usar la API (suele ser pago por uso).'**
+  String get openAiGuideStep6;
+
+  /// No description provided for @openAiGuideStep7.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelve a FitForge, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».'**
+  String get openAiGuideStep7;
+
+  /// No description provided for @geminiGuideTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo obtener tu API Key de Gemini (Google)'**
+  String get geminiGuideTitle;
+
+  /// No description provided for @geminiGuidePortal.
+  ///
+  /// In es, this message translates to:
+  /// **'aistudio.google.com/apikey'**
+  String get geminiGuidePortal;
+
+  /// No description provided for @geminiGuideStep1.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre aistudio.google.com en tu navegador e inicia sesión con tu cuenta de Google.'**
+  String get geminiGuideStep1;
+
+  /// No description provided for @geminiGuideStep2.
+  ///
+  /// In es, this message translates to:
+  /// **'Si es la primera vez, acepta los términos de Google AI Studio cuando te lo pida.'**
+  String get geminiGuideStep2;
+
+  /// No description provided for @geminiGuideStep3.
+  ///
+  /// In es, this message translates to:
+  /// **'Ve a la sección de API keys: aistudio.google.com/apikey (menú «Get API key»).'**
+  String get geminiGuideStep3;
+
+  /// No description provided for @geminiGuideStep4.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa «Create API key». Puedes crear un proyecto nuevo de Google Cloud o usar uno existente.'**
+  String get geminiGuideStep4;
+
+  /// No description provided for @geminiGuideStep5.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia la API key generada. Guárdala en un lugar seguro; no la compartas con nadie.'**
+  String get geminiGuideStep5;
+
+  /// No description provided for @geminiGuideStep6.
+  ///
+  /// In es, this message translates to:
+  /// **'Google ofrece un nivel gratuito con límites de uso. Revisa los límites en la consola si lo necesitas.'**
+  String get geminiGuideStep6;
+
+  /// No description provided for @geminiGuideStep7.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».'**
+  String get geminiGuideStep7;
+
   /// No description provided for @setsRepsBest.
   ///
   /// In es, this message translates to:
@@ -1861,6 +2041,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Espalda'**
   String get bodyBack;
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu avatar'**
+  String get chooseAvatar;
+
+  /// No description provided for @chooseAvatarHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un avatar del catálogo FitForge'**
+  String get chooseAvatarHint;
+
+  /// No description provided for @changeAvatar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar avatar'**
+  String get changeAvatar;
 }
 
 class _AppLocalizationsDelegate

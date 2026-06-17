@@ -1,4 +1,5 @@
 import 'workout.dart';
+import '../core/utils/player_level.dart';
 
 class ExerciseSummaryLine {
   final String exerciseName;
@@ -28,6 +29,7 @@ class WorkoutSummaryData {
   final bool isVolumeRecord;
   final bool isRepsRecord;
   final bool isMaxWeightRecord;
+  final XpAwardResult? xpAward;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -43,6 +45,7 @@ class WorkoutSummaryData {
     this.isVolumeRecord = false,
     this.isRepsRecord = false,
     this.isMaxWeightRecord = false,
+    this.xpAward,
   });
 
   bool get hasPreviousComparison => previousSameRoutine != null;
@@ -61,6 +64,7 @@ abstract final class WorkoutSummaryBuilder {
     required Workout workout,
     required int durationMinutes,
     Workout? previousSameRoutine,
+    XpAwardResult? xpAward,
   }) {
     final totalVolumeKg = workout.exercises.fold<double>(
       0,
@@ -92,6 +96,7 @@ abstract final class WorkoutSummaryBuilder {
       isMaxWeightRecord: prevMax != null &&
           maxWeightKg != null &&
           maxWeightKg > prevMax,
+      xpAward: xpAward,
     );
   }
 
