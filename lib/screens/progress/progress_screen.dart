@@ -20,57 +20,7 @@ class ProgressScreen extends ConsumerStatefulWidget {
 }
 
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
-  final _weightController = TextEditingController();
   String? _muscleFilter;
-
-  @override
-  void dispose() {
-    _weightController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _addWeight() async {
-    final unitSystem = ref.read(unitSystemProvider);
-    final value = double.tryParse(_weightController.text.replaceAll(',', '.'));
-    if (value == null) return;
-
-    await ref.read(profileServiceProvider).saveBodyMetric(
-          type: 'weight',
-          displayValue: value,
-          unitSystem: unitSystem,
-        );
-
-    _weightController.clear();
-    ref.invalidate(bodyMeasurementsProvider);
-    ref.invalidate(bodyMetricSnapshotsProvider);
-    ref.invalidate(profileProvider);
-    if (mounted) Navigator.pop(context);
-  }
-
-  void _showAddWeight() {
-    final unitLabel = UnitConverter.massLabel(ref.read(unitSystemProvider));
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Registrar peso'),
-        content: TextField(
-          controller: _weightController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: 'Peso ($unitLabel)', suffixText: unitLabel),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _addWeight();
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
-  }
 
   List<Workout> _workoutsLast30Days(List<Workout> workouts) {
     final cutoff = DateTime.now().subtract(const Duration(days: 30));
@@ -92,16 +42,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
-      appBar: FitForgeAppBar(
-        title: 'Progreso',
-        actions: [
-          IconButton(icon: const Icon(Icons.add), onPressed: _showAddWeight),
-        ],
-      ),
+      appBar: const FitForgeAppBar(title: 'Progreso'),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(personalRecordsProvider);
-          ref.invalidate(bodyMeasurementsProvider);
           ref.invalidate(progressWorkoutsProvider);
         },
         child: ListView(
