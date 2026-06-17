@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/youtube_thumbnail.dart';
 import '../data/supplemental_exercises.dart';
 import '../models/exercise.dart';
 
@@ -170,9 +171,12 @@ class ExerciseService {
     if (wgerId < 0) return const ExerciseMedia();
     if (_mediaCache.containsKey(wgerId)) return _mediaCache[wgerId]!;
 
+    final videoUrl = await _fetchExerciseVideo(wgerId);
+    final imageUrl =
+        await _fetchExerciseImage(wgerId) ?? YoutubeThumbnail.urlFromVideo(videoUrl);
     final media = ExerciseMedia(
-      imageUrl: await _fetchExerciseImage(wgerId),
-      videoUrl: await _fetchExerciseVideo(wgerId),
+      imageUrl: imageUrl,
+      videoUrl: videoUrl,
     );
     _mediaCache[wgerId] = media;
     return media;
@@ -220,9 +224,46 @@ class ExerciseService {
     }
 
     final wgerId = match.wgerId;
-    if (wgerId == null || wgerId < 0) return null;
+    if (wgerId != null && wgerId >= 0) {
+      final media = await fetchExerciseMedia(wgerId);
+      if (media.imageUrl != null && media.imageUrl!.isNotEmpty) {
+        return media.imageUrl;
+      }
+    }
 
-    return (await fetchExerciseMedia(wgerId)).imageUrl;
+    return _borrowImageUrl(match, catalog);
+  }
+
+  String? _borrowImageUrl(Exercise exercise, List<Exercise> catalog) {
+    final category = exercise.category;
+    final primaryMuscle = exercise.muscles.isNotEmpty ? exercise.muscles.first : null;
+
+    String? pick(Iterable<Exercise> candidates) {
+      for (final e in candidates) {
+        if (e.wgerId == exercise.wgerId && e.name == exercise.name) continue;
+        if (e.imageUrl != null && e.imageUrl!.isNotEmpty) return e.imageUrl;
+      }
+      return null;
+    }
+
+    if (primaryMuscle != null) {
+      final sameGroup = catalog.where(
+        (e) => e.category == category && e.muscles.contains(primaryMuscle),
+      );
+      final borrowed = pick(sameGroup);
+      if (borrowed != null) return borrowed;
+    }
+
+    final sameCategory = catalog.where((e) => e.category == category);
+    final fromCategory = pick(sameCategory);
+    if (fromCategory != null) return fromCategory;
+
+    if (primaryMuscle != null) {
+      final sameMuscle = catalog.where((e) => e.muscles.contains(primaryMuscle));
+      return pick(sameMuscle);
+    }
+
+    return null;
   }
 
   Future<String?> _fetchExerciseImage(int exerciseId) async {

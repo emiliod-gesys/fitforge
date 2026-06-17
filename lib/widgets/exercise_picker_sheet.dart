@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../models/exercise.dart';
+import 'exercise_thumbnail.dart';
 
 enum ExercisePickerFilter { all, inRoutine }
 
@@ -163,18 +164,16 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                     final ex = filtered[i];
                     final inRoutine = widget.selectedExerciseIds.contains(ex.id);
                     return ListTile(
-                      leading: ex.imageUrl != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                ex.imageUrl!,
-                                width: 48,
-                                height: 48,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => _leadingIcon(inRoutine),
-                              ),
-                            )
-                          : _leadingIcon(inRoutine),
+                      leading: ExerciseThumbnail(
+                        imageUrl: ex.imageUrl,
+                        exerciseId: ex.id,
+                        exerciseName: ex.name,
+                        category: ex.category,
+                        muscles: ex.muscles,
+                        width: 48,
+                        height: 48,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       title: Text(ex.name),
                       subtitle: Text(
                         [
@@ -191,17 +190,6 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                 ),
         ),
       ],
-    );
-  }
-
-  Widget _leadingIcon(bool inRoutine) {
-    return CircleAvatar(
-      backgroundColor: inRoutine ? AppColors.orange.withValues(alpha: 0.15) : AppColors.card,
-      child: Icon(
-        Icons.fitness_center,
-        color: inRoutine ? AppColors.orange : AppColors.textMuted,
-        size: 22,
-      ),
     );
   }
 }

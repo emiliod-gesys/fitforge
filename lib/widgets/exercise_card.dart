@@ -1,15 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/exercise.dart';
+import 'exercise_thumbnail.dart';
 
-class ExerciseCard extends StatelessWidget {
+class ExerciseCard extends ConsumerWidget {
   final Exercise exercise;
   final VoidCallback? onTap;
 
   const ExerciseCard({super.key, required this.exercise, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -19,33 +20,15 @@ class ExerciseCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              ClipRRect(
+              ExerciseThumbnail(
+                imageUrl: exercise.imageUrl,
+                exerciseId: exercise.id,
+                exerciseName: exercise.name,
+                category: exercise.category,
+                muscles: exercise.muscles,
+                width: 56,
+                height: 56,
                 borderRadius: BorderRadius.circular(8),
-                child: exercise.imageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: exercise.imageUrl!,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(
-                          width: 56,
-                          height: 56,
-                          color: Colors.white12,
-                          child: const Icon(Icons.fitness_center),
-                        ),
-                        errorWidget: (_, __, ___) => Container(
-                          width: 56,
-                          height: 56,
-                          color: Colors.white12,
-                          child: const Icon(Icons.fitness_center),
-                        ),
-                      )
-                    : Container(
-                        width: 56,
-                        height: 56,
-                        color: Colors.white12,
-                        child: const Icon(Icons.fitness_center),
-                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

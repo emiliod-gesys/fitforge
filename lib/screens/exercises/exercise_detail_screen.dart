@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../services/exercise_service.dart';
 import '../../models/exercise.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 
@@ -36,7 +37,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
 
           return mediaAsync.when(
             data: (media) => _ExerciseBody(exercise: exercise, media: media),
-            loading: () => _ExerciseBody(exercise: exercise, media: const ExerciseMedia(), loadingMedia: true),
+            loading: () => const FitForgeLoadingScreen(),
             error: (_, __) => _ExerciseBody(exercise: exercise, media: const ExerciseMedia()),
           );
         },
@@ -50,12 +51,10 @@ class ExerciseDetailScreen extends ConsumerWidget {
 class _ExerciseBody extends StatelessWidget {
   final Exercise exercise;
   final ExerciseMedia media;
-  final bool loadingMedia;
 
   const _ExerciseBody({
     required this.exercise,
     required this.media,
-    this.loadingMedia = false,
   });
 
   @override
@@ -64,27 +63,16 @@ class _ExerciseBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (media.imageUrl != null)
-            Image.network(
-              media.imageUrl!,
-              height: 250,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _placeholder(),
-            )
-          else if (loadingMedia)
-            SizedBox(
-              height: 200,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const FitForgeLoadingIndicator(size: 80, message: 'Cargando imagen…'),
-                  ],
-                ),
-              ),
-            )
-          else
-            _placeholder(),
+          ExerciseThumbnail(
+            imageUrl: exercise.imageUrl,
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            category: exercise.category,
+            muscles: exercise.muscles,
+            height: 250,
+            fullWidth: true,
+            borderRadius: BorderRadius.zero,
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -127,14 +115,6 @@ class _ExerciseBody extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _placeholder() {
-    return Container(
-      height: 200,
-      color: Colors.white12,
-      child: const Icon(Icons.fitness_center, size: 64),
     );
   }
 }
