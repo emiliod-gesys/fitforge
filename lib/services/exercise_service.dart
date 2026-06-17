@@ -96,7 +96,24 @@ class ExerciseService {
       description: description,
       category: category,
       muscles: muscles,
+      imageUrl: _pickImageUrl(json),
     );
+  }
+
+  String? _pickImageUrl(Map<String, dynamic> json) {
+    final images = json['images'] as List? ?? [];
+    if (images.isEmpty) return null;
+
+    Map<String, dynamic>? chosen;
+    for (final item in images) {
+      if (item is Map<String, dynamic> && item['is_main'] == true) {
+        chosen = item;
+        break;
+      }
+    }
+    chosen ??= images.first is Map ? images.first as Map<String, dynamic> : null;
+    final url = chosen?['image'] as String?;
+    return url != null && url.isNotEmpty ? url : null;
   }
 
   Map<String, dynamic>? _pickTranslation(List translations) {
@@ -128,16 +145,27 @@ class ExerciseService {
 
   Future<String?> _fetchExerciseImage(int exerciseId) async {
     try {
-      final uri = Uri.parse('${AppConstants.wgerApiBase}/exerciseimage/').replace(
-        queryParameters: {'exercise': exerciseId.toString(), 'is_main': 'true'},
-      );
-      final response = await _http.get(uri);
-      if (response.statusCode != 200) return null;
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final results = data['results'] as List? ?? [];
-      if (results.isEmpty) return null;
-      final image = results.first as Map<String, dynamic>;
-      return image['image'] as String?;
+      // wger renombró el filtro `exercise` → `exercise_base`.
+      for (final param in ['exercise_base', 'exercise']) {
+        final uri = Uri.parse('${AppConstants.wgerApiBase}/exerciseimage/').replace(
+          queryParameters: {param: exerciseId.toString(), 'is_main': 'true'},
+        );
+        final response = await _http.get(uri);
+        if (response.statusCode != 200) continue;
+
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final results = data['results'] as List? ?? [];
+        if (results.isEmpty) continue;
+
+        for (final item in results) {
+          if (item is Map<String, dynamic> && item['is_main'] == true) {
+            return item['image'] as String?;
+          }
+        }
+        final first = results.first;
+        if (first is Map<String, dynamic>) return first['image'] as String?;
+      }
+      return null;
     } catch (_) {
       return null;
     }

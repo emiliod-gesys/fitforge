@@ -11,6 +11,7 @@ import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
 import '../../widgets/exercise_history_sheet.dart';
+import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
@@ -113,11 +114,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
+    var imageUrl = picked.imageUrl;
+    if ((imageUrl == null || imageUrl.isEmpty) && picked.wgerId != null && picked.wgerId! > 0) {
+      final media = await ref.read(exerciseServiceProvider).fetchExerciseMedia(picked.wgerId!);
+      imageUrl = media.imageUrl;
+    }
+
     await ref.read(workoutServiceProvider).addExerciseToWorkout(
           workout.id,
           exerciseId: picked.id,
           exerciseName: picked.name,
-          imageUrl: picked.imageUrl,
+          imageUrl: imageUrl,
         );
 
     ref.invalidate(activeWorkoutProvider);
@@ -171,12 +178,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
+    var imageUrl = picked.imageUrl;
+    if ((imageUrl == null || imageUrl.isEmpty) && picked.wgerId != null && picked.wgerId! > 0) {
+      final media = await ref.read(exerciseServiceProvider).fetchExerciseMedia(picked.wgerId!);
+      imageUrl = media.imageUrl;
+    }
+
     await ref.read(workoutServiceProvider).swapExerciseInWorkout(
           exercise.id,
           workout.id,
           newExerciseId: picked.id,
           newExerciseName: picked.name,
-          newImageUrl: picked.imageUrl,
+          newImageUrl: imageUrl,
         );
 
     ref.invalidate(activeWorkoutProvider);
@@ -297,18 +310,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
-                    if (exercise.imageUrl != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          exercise.imageUrl!,
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                        ),
-                      ),
-                    if (exercise.imageUrl != null) const SizedBox(height: 16),
+                    ExerciseThumbnail(
+                      imageUrl: exercise.imageUrl,
+                      exerciseId: exercise.exerciseId,
+                      height: 160,
+                      fullWidth: true,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       exercise.exerciseName,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(

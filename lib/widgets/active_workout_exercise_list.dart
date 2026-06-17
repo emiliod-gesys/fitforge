@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/utils/unit_converter.dart';
 import '../models/workout.dart';
+import 'exercise_thumbnail.dart';
 
 class ActiveWorkoutExerciseList extends StatelessWidget {
   final Workout workout;
@@ -134,18 +134,11 @@ class _ExerciseListRow extends StatelessWidget {
                 width: 64,
                 child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: exercise.imageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: exercise.imageUrl!,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => _thumbPlaceholder(),
-                              errorWidget: (_, __, ___) => _thumbPlaceholder(),
-                            )
-                          : _thumbPlaceholder(),
+                    ExerciseThumbnail(
+                      imageUrl: exercise.imageUrl,
+                      exerciseId: exercise.exerciseId,
+                      width: 56,
+                      height: 56,
                     ),
                     if (showConnector)
                       Container(
@@ -209,15 +202,6 @@ class _ExerciseListRow extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _thumbPlaceholder() {
-    return Container(
-      width: 56,
-      height: 56,
-      color: AppColors.cardElevated,
-      child: const Icon(Icons.fitness_center, color: AppColors.textMuted),
     );
   }
 }
