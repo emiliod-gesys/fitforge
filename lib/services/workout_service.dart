@@ -428,6 +428,37 @@ class WorkoutService {
     await _updatePersonalRecords(workoutId);
   }
 
+  /// Último entrenamiento completado de la misma rutina (excluye el actual).
+  Future<Workout?> getPreviousRoutineWorkout({
+    required String? routineId,
+    required String excludeWorkoutId,
+  }) async {
+    if (routineId == null || routineId.isEmpty) return null;
+
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return null;
+
+    final rows = await _client
+        .from('workouts')
+        .select('*, routines(name)')
+        .eq('user_id', userId)
+        .eq('routine_id', routineId)
+        .not('completed_at', 'is', null)
+        .neq('id', excludeWorkoutId)
+        .order('completed_at', ascending: false)
+        .limit(1);
+
+    final list = rows as List;
+    if (list.isEmpty) return null;
+
+    final map = Map<String, dynamic>.from(list.first as Map);
+    if (map['routines'] != null) {
+      map['routine_name'] = (map['routines'] as Map)['name'];
+    }
+    final exercises = await _getWorkoutExercises(map['id'] as String);
+    return Workout.fromJson(map, exercises: exercises);
+  }
+
   Future<void> _updatePersonalRecords(String workoutId) async {
     final userId = SupabaseService.currentUser!.id;
     final exercises = await _getWorkoutExercises(workoutId);

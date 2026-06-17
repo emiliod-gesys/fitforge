@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../models/workout.dart';
+import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
@@ -38,6 +39,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   int _restTimerKey = 0;
   final Set<String> _removedSetIds = {};
   final Set<String> _removedExerciseIds = {};
+  bool _completing = false;
 
   @override
   void initState() {
@@ -60,32 +62,53 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Future<void> _completeWorkout(Workout workout) async {
-    final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
-    final volume = workout.exercises.fold<double>(
-      0,
-      (sum, ex) => sum + ex.totalVolume,
-    );
+    if (_completing) return;
+    setState(() => _completing = true);
 
-    await ref.read(workoutServiceProvider).completeWorkout(
-          workout.id,
-          durationMinutes: duration,
-          totalVolume: volume,
-        );
-
-    ref.invalidate(workoutsProvider);
-    ref.invalidate(recentWorkoutsProvider);
-    ref.invalidate(workoutHistoryProvider);
-    ref.invalidate(progressWorkoutsProvider);
-    ref.invalidate(activeWorkoutProvider);
-    ref.invalidate(personalRecordsProvider);
-    ref.invalidate(muscleRecoveryProvider);
-    ref.invalidate(workoutWeeklyStatsProvider);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Entrenamiento completado!')),
+    try {
+      final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
+      final volume = workout.exercises.fold<double>(
+        0,
+        (sum, ex) => sum + ex.totalVolume,
       );
-      context.pop();
+
+      await ref.read(workoutServiceProvider).completeWorkout(
+            workout.id,
+            durationMinutes: duration,
+            totalVolume: volume,
+          );
+
+      final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
+            routineId: workout.routineId,
+            excludeWorkoutId: workout.id,
+          );
+
+      final summary = WorkoutSummaryBuilder.build(
+        workout: workout,
+        durationMinutes: duration,
+        previousSameRoutine: previous,
+      );
+
+      ref.invalidate(workoutsProvider);
+      ref.invalidate(recentWorkoutsProvider);
+      ref.invalidate(workoutHistoryProvider);
+      ref.invalidate(progressWorkoutsProvider);
+      ref.invalidate(activeWorkoutProvider);
+      ref.invalidate(personalRecordsProvider);
+      ref.invalidate(muscleRecoveryProvider);
+      ref.invalidate(workoutWeeklyStatsProvider);
+
+      if (mounted) {
+        context.pushReplacement('/workout/summary', extra: summary);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo finalizar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _completing = false);
     }
   }
 
@@ -249,8 +272,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   icon: const Icon(Icons.view_list_outlined),
                 ),
               TextButton(
-                onPressed: () => _completeWorkout(workout),
-                child: const Text('Finalizar'),
+                onPressed: _completing ? null : () => _completeWorkout(workout),
+                child: _completing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Finalizar'),
               ),
             ],
           );

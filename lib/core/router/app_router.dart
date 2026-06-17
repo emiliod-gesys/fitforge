@@ -12,7 +12,9 @@ import '../../screens/progress/progress_screen.dart';
 import '../../screens/routines/routine_editor_screen.dart';
 import '../../screens/social/friend_profile_screen.dart';
 import '../../screens/social/social_screen.dart';
+import '../../models/workout_summary.dart';
 import '../../screens/workouts/active_workout_screen.dart';
+import '../../screens/workouts/workout_summary_screen.dart';
 import '../../screens/workouts/workout_history_screen.dart';
 import '../../screens/routines/routine_list_screen.dart';
 import '../../screens/workouts/workout_list_screen.dart';
@@ -74,6 +76,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/workout/active',
         builder: (_, __) => const ActiveWorkoutScreen(),
+      ),
+      GoRoute(
+        path: '/workout/summary',
+        builder: (_, state) => WorkoutSummaryScreen(
+          summary: state.extra! as WorkoutSummaryData,
+        ),
       ),
       GoRoute(
         path: '/workouts/history',
