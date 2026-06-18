@@ -2,12 +2,14 @@ import 'workout.dart';
 import '../core/utils/player_level.dart';
 
 class ExerciseSummaryLine {
+  final String exerciseId;
   final String exerciseName;
   final int completedSets;
   final int totalReps;
   final double? bestWeightKg;
 
   const ExerciseSummaryLine({
+    required this.exerciseId,
     required this.exerciseName,
     required this.completedSets,
     required this.totalReps,
@@ -135,6 +137,7 @@ abstract final class WorkoutSummaryBuilder {
       }
 
       lines.add(ExerciseSummaryLine(
+        exerciseId: ex.exerciseId,
         exerciseName: ex.exerciseName,
         completedSets: completed.length,
         totalReps: reps,

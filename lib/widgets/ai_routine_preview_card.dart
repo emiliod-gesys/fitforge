@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
+import '../providers/app_providers.dart';
 
-class AiRoutinePreviewCard extends StatelessWidget {
+class AiRoutinePreviewCard extends ConsumerWidget {
   final Routine routine;
   final bool isSaved;
   final bool isDiscarded;
+  final bool isSaving;
   final VoidCallback onSave;
   final VoidCallback onEdit;
   final VoidCallback onDiscard;
@@ -16,13 +19,14 @@ class AiRoutinePreviewCard extends StatelessWidget {
     required this.routine,
     required this.isSaved,
     required this.isDiscarded,
+    this.isSaving = false,
     required this.onSave,
     required this.onEdit,
     required this.onDiscard,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
     if (isDiscarded) {
@@ -78,7 +82,7 @@ class AiRoutinePreviewCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          ...routine.exercises.take(8).map(_exerciseLine),
+            ...routine.exercises.take(8).map((ex) => _exerciseLine(ref, ex)),
           if (routine.exercises.length > 8)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -107,8 +111,14 @@ class AiRoutinePreviewCard extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: onSave,
-                  child: Text(l10n.save),
+                  onPressed: isSaving ? null : onSave,
+                  child: isSaving
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.save),
                 ),
               ),
             ],
@@ -118,8 +128,15 @@ class AiRoutinePreviewCard extends StatelessWidget {
     );
   }
 
-  Widget _exerciseLine(RoutineExercise ex) {
+  Widget _exerciseLine(WidgetRef ref, RoutineExercise ex) {
     final weight = ex.targetWeight != null ? ' · ${ex.targetWeight!.toStringAsFixed(0)} kg' : '';
+    final name = ref.watch(exercisesProvider).maybeWhen(
+          data: (_) => ref.read(exerciseServiceProvider).localizedName(
+                exerciseId: ex.exerciseId,
+                fallback: ex.exerciseName,
+              ),
+          orElse: () => ex.exerciseName,
+        );
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -128,7 +145,7 @@ class AiRoutinePreviewCard extends StatelessWidget {
           const Text('• ', style: TextStyle(color: AppColors.orange)),
           Expanded(
             child: Text(
-              '${ex.exerciseName} — ${ex.targetSets}×${ex.targetReps}$weight',
+              '$name — ${ex.targetSets}×${ex.targetReps}$weight',
               style: const TextStyle(fontSize: 13),
             ),
           ),

@@ -13,6 +13,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/player_level_card.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
@@ -169,7 +170,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         leading: const Icon(Icons.emoji_events, color: Colors.amber),
-                        title: Text(pr.exerciseName),
+                        title: LocalizedExerciseName(
+                          pr.exerciseName,
+                          exerciseId: pr.exerciseId,
+                        ),
                         subtitle: Text(UnitConverter.formatSetLine(pr.weight, pr.reps, unitSystem)),
                         trailing: Text(
                           '${l10n.oneRm}: ${UnitConverter.formatMass(pr.oneRepMax, unitSystem)}',

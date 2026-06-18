@@ -223,6 +223,7 @@
   "coachAskHint": "Ask a question or request a routine…",
   "coachRoutineReady": "Here is your routine. Review it and tap Save when ready.",
   "coachRoutineFailed": "Could not generate the routine. Try being more specific (muscles and duration).",
+  "coachNoRoutineToSave": "There is no pending routine to save. Ask me to create one first.",
   "coachSuggestion1": "Create a 45-minute leg routine",
   "coachSuggestion2": "What exercises do you recommend for chest today?",
   "coachSuggestion3": "Make me a back and biceps routine to save",

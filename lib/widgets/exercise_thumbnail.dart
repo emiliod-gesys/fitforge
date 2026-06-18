@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import '../services/exercise_service.dart';
-import 'exercise_placeholder.dart';
+import 'exercise_category_mannequin.dart';
 
-/// Miniatura de ejercicio: URL guardada, ID wger, búsqueda por nombre o video.
+/// Miniatura: foto wger (`exerciseinfo`) → maniquí por categoría → isotipo FitForge.
 class ExerciseThumbnail extends ConsumerWidget {
-  final String? imageUrl;
   final String exerciseId;
   final String exerciseName;
   final String? category;
@@ -19,7 +18,6 @@ class ExerciseThumbnail extends ConsumerWidget {
 
   const ExerciseThumbnail({
     super.key,
-    this.imageUrl,
     required this.exerciseId,
     required this.exerciseName,
     this.category,
@@ -33,11 +31,33 @@ class ExerciseThumbnail extends ConsumerWidget {
   ExerciseImageLookup get _lookup => ExerciseImageLookup(
         exerciseId: exerciseId,
         exerciseName: exerciseName,
-        imageUrl: imageUrl,
       );
 
-  Widget _placeholder({bool loading = false}) {
-    return ExercisePlaceholder(
+  Widget _categoryFallback({
+    required WidgetRef ref,
+    bool loading = false,
+  }) {
+    var resolvedCategory = category;
+    var resolvedMuscles = muscles;
+
+    if (resolvedCategory == null || resolvedMuscles.isEmpty) {
+      final catalog = ref.watch(exercisesProvider).valueOrNull;
+      if (catalog != null) {
+        final match = ref.read(exerciseServiceProvider).findInCatalog(
+              exerciseId: exerciseId,
+              exerciseName: exerciseName,
+              catalog: catalog,
+            );
+        if (match != null) {
+          resolvedCategory ??= match.category;
+          if (resolvedMuscles.isEmpty) resolvedMuscles = match.muscles;
+        }
+      }
+    }
+
+    return ExerciseCategoryMannequin(
+      category: resolvedCategory,
+      muscles: resolvedMuscles,
       width: width,
       height: height,
       borderRadius: borderRadius,
@@ -46,7 +66,11 @@ class ExerciseThumbnail extends ConsumerWidget {
     );
   }
 
-  Widget _networkImage(String url) {
+  Widget _placeholder({required WidgetRef ref, bool loading = false}) {
+    return _categoryFallback(ref: ref, loading: loading);
+  }
+
+  Widget _networkImage(String url, WidgetRef ref) {
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
@@ -54,8 +78,8 @@ class ExerciseThumbnail extends ConsumerWidget {
         width: fullWidth ? double.infinity : width,
         height: height,
         fit: BoxFit.cover,
-        placeholder: (_, __) => _placeholder(loading: true),
-        errorWidget: (_, __, ___) => _placeholder(),
+        placeholder: (_, __) => _placeholder(ref: ref, loading: true),
+        errorWidget: (_, __, ___) => _placeholder(ref: ref),
       ),
     );
   }
@@ -64,9 +88,9 @@ class ExerciseThumbnail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final urlAsync = ref.watch(exerciseImageUrlProvider(_lookup));
     return urlAsync.when(
-      data: (url) => url != null ? _networkImage(url) : _placeholder(),
-      loading: () => _placeholder(loading: true),
-      error: (_, __) => _placeholder(),
+      data: (url) => url != null ? _networkImage(url, ref) : _categoryFallback(ref: ref),
+      loading: () => _categoryFallback(ref: ref, loading: true),
+      error: (_, __) => _categoryFallback(ref: ref),
     );
   }
 }

@@ -17,6 +17,7 @@ import '../../services/rest_sound_service.dart';
 import '../../services/exercise_service.dart';
 import '../../widgets/exercise_history_sheet.dart';
 import '../../widgets/exercise_thumbnail.dart';
+import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
@@ -156,16 +157,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
-    var imageUrl = picked.imageUrl;
-    if (imageUrl == null || imageUrl.isEmpty) {
-      imageUrl = await ref.read(exerciseServiceProvider).resolveImageUrl(
-            ExerciseImageLookup(
-              exerciseId: picked.id,
-              exerciseName: picked.name,
-              imageUrl: picked.imageUrl,
-            ),
-          );
-    }
+    final imageUrl = picked.imageUrl ??
+        await ref.read(exerciseServiceProvider).resolveImageUrl(
+              ExerciseImageLookup(
+                exerciseId: picked.id,
+                exerciseName: picked.name,
+              ),
+            );
 
     await ref.read(workoutServiceProvider).addExerciseToWorkout(
           workout.id,
@@ -225,16 +223,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
-    var imageUrl = picked.imageUrl;
-    if (imageUrl == null || imageUrl.isEmpty) {
-      imageUrl = await ref.read(exerciseServiceProvider).resolveImageUrl(
-            ExerciseImageLookup(
-              exerciseId: picked.id,
-              exerciseName: picked.name,
-              imageUrl: picked.imageUrl,
-            ),
-          );
-    }
+    final imageUrl = picked.imageUrl ??
+        await ref.read(exerciseServiceProvider).resolveImageUrl(
+              ExerciseImageLookup(
+                exerciseId: picked.id,
+                exerciseName: picked.name,
+              ),
+            );
 
     await ref.read(workoutServiceProvider).swapExerciseInWorkout(
           exercise.id,
@@ -370,7 +365,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
                     ExerciseThumbnail(
-                      imageUrl: exercise.imageUrl,
                       exerciseId: exercise.exerciseId,
                       exerciseName: exercise.exerciseName,
                       height: 160,
@@ -378,8 +372,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    LocalizedExerciseName(
                       exercise.exerciseName,
+                      exerciseId: exercise.exerciseId,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             height: 1.15,

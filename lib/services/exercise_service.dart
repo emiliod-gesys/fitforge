@@ -3,39 +3,35 @@ import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/utils/exercise_matcher.dart';
-import '../core/utils/youtube_thumbnail.dart';
 import '../data/supplemental_exercises.dart';
+import '../data/exercise_translation_store.dart';
 import '../models/exercise.dart';
 
 class ExerciseMedia {
-  final String? imageUrl;
   final String? videoUrl;
 
-  const ExerciseMedia({this.imageUrl, this.videoUrl});
+  const ExerciseMedia({this.videoUrl});
 }
 
 /// Clave para resolver la imagen de un ejercicio en entrenos/rutinas.
 class ExerciseImageLookup {
   final String exerciseId;
   final String exerciseName;
-  final String? imageUrl;
 
   const ExerciseImageLookup({
     required this.exerciseId,
     required this.exerciseName,
-    this.imageUrl,
   });
 
   @override
   bool operator ==(Object other) {
     return other is ExerciseImageLookup &&
         other.exerciseId == exerciseId &&
-        other.exerciseName == exerciseName &&
-        other.imageUrl == imageUrl;
+        other.exerciseName == exerciseName;
   }
 
   @override
-  int get hashCode => Object.hash(exerciseId, exerciseName, imageUrl);
+  int get hashCode => Object.hash(exerciseId, exerciseName);
 }
 
 class ExerciseService {
@@ -43,6 +39,11 @@ class ExerciseService {
   List<Exercise>? _cache;
   final _mediaCache = <int, ExerciseMedia>{};
   String _preferredLanguage = 'es';
+  ExerciseTranslationStore? _translationStore;
+
+  void setTranslationStore(ExerciseTranslationStore store) {
+    _translationStore = store;
+  }
 
   void configure({required String language}) {
     if (_preferredLanguage != language) {
@@ -93,7 +94,9 @@ class ExerciseService {
       offset += _pageSize;
     }
 
-    final merged = SupplementalExercises.mergeWith(exercises, locale: _preferredLanguage);
+    final merged = SupplementalExercises.mergeWith(exercises, locale: _preferredLanguage)
+        .map(_applyStoredTranslation)
+        .toList();
 
     if (search == null && category == null) {
       _cache = merged;
@@ -139,14 +142,40 @@ class ExerciseService {
       }
     }
 
+    return _applyStoredTranslation(
+      Exercise(
+        wgerId: id,
+        name: name,
+        description: description,
+        category: category,
+        muscles: muscles,
+        imageUrl: _pickImageUrl(json),
+        aliases: aliases,
+      ),
+    );
+  }
+
+  Exercise _applyStoredTranslation(Exercise exercise) {
+    final store = _translationStore;
+    if (store == null || !store.isLoaded || exercise.wgerId == null) {
+      return exercise;
+    }
+
+    final t = store.get(exercise.wgerId, _preferredLanguage);
+    if (t == null || t.name.isEmpty) return exercise;
+
     return Exercise(
-      wgerId: id,
-      name: name,
-      description: description,
-      category: category,
-      muscles: muscles,
-      imageUrl: _pickImageUrl(json),
-      aliases: aliases,
+      wgerId: exercise.wgerId,
+      supabaseId: exercise.supabaseId,
+      name: t.name,
+      description: t.description.isNotEmpty ? t.description : exercise.description,
+      category: exercise.category,
+      muscles: exercise.muscles,
+      equipment: exercise.equipment,
+      imageUrl: exercise.imageUrl,
+      videoUrl: exercise.videoUrl,
+      isCustom: exercise.isCustom,
+      aliases: exercise.aliases,
     );
   }
 
@@ -188,12 +217,7 @@ class ExerciseService {
     if (_mediaCache.containsKey(wgerId)) return _mediaCache[wgerId]!;
 
     final videoUrl = await _fetchExerciseVideo(wgerId);
-    final imageUrl =
-        await _fetchExerciseImage(wgerId) ?? YoutubeThumbnail.urlFromVideo(videoUrl);
-    final media = ExerciseMedia(
-      imageUrl: imageUrl,
-      videoUrl: videoUrl,
-    );
+    final media = ExerciseMedia(videoUrl: videoUrl);
     _mediaCache[wgerId] = media;
     return media;
   }
@@ -222,11 +246,9 @@ class ExerciseService {
         ExerciseMatcher.findBest(exerciseId, catalog);
   }
 
+/// Prioridad de imagen en UI:
+/// 1. `exerciseinfo` (wger embebido) · 2. maniquí por categoría · 3. isotipo FitForge.
   Future<String?> resolveImageUrl(ExerciseImageLookup lookup) async {
-    if (lookup.imageUrl != null && lookup.imageUrl!.isNotEmpty) {
-      return lookup.imageUrl;
-    }
-
     final catalog = await fetchExercises();
     final match = findInCatalog(
       exerciseId: lookup.exerciseId,
@@ -235,49 +257,10 @@ class ExerciseService {
     );
     if (match == null) return null;
 
-    if (match.imageUrl != null && match.imageUrl!.isNotEmpty) {
-      return match.imageUrl;
-    }
-
-    final wgerId = match.wgerId;
-    if (wgerId != null && wgerId >= 0) {
-      final media = await fetchExerciseMedia(wgerId);
-      if (media.imageUrl != null && media.imageUrl!.isNotEmpty) {
-        return media.imageUrl;
-      }
-    }
+    final catalogUrl = match.imageUrl;
+    if (catalogUrl != null && catalogUrl.isNotEmpty) return catalogUrl;
 
     return null;
-  }
-
-  // Sin préstamo de imágenes de otros ejercicios: si no hay foto propia, la UI muestra el logo FitForge.
-
-  Future<String?> _fetchExerciseImage(int exerciseId) async {
-    try {
-      // wger renombró el filtro `exercise` → `exercise_base`.
-      for (final param in ['exercise_base', 'exercise']) {
-        final uri = Uri.parse('${AppConstants.wgerApiBase}/exerciseimage/').replace(
-          queryParameters: {param: exerciseId.toString(), 'is_main': 'true'},
-        );
-        final response = await _http.get(uri);
-        if (response.statusCode != 200) continue;
-
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final results = data['results'] as List? ?? [];
-        if (results.isEmpty) continue;
-
-        for (final item in results) {
-          if (item is Map<String, dynamic> && item['is_main'] == true) {
-            return item['image'] as String?;
-          }
-        }
-        final first = results.first;
-        if (first is Map<String, dynamic>) return first['image'] as String?;
-      }
-      return null;
-    } catch (_) {
-      return null;
-    }
   }
 
   Future<String?> _fetchExerciseVideo(int exerciseId) async {
@@ -304,6 +287,33 @@ class ExerciseService {
     } catch (_) {
       return null;
     }
+  }
+
+  String localizedName({
+    required String exerciseId,
+    required String fallback,
+  }) {
+    final store = _translationStore;
+    if (store != null && store.isLoaded) {
+      final fromStore = store.resolveName(
+        exerciseId: exerciseId,
+        fallback: fallback,
+        locale: _preferredLanguage,
+      );
+      if (fromStore != fallback) return fromStore;
+    }
+
+    final catalog = _cache;
+    if (catalog != null) {
+      final match = findInCatalog(
+        exerciseId: exerciseId,
+        exerciseName: fallback,
+        catalog: catalog,
+      );
+      if (match != null) return match.name;
+    }
+
+    return fallback;
   }
 
   List<String> getCategories(List<Exercise> exercises) {

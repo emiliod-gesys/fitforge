@@ -698,6 +698,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not generate the routine. Try being more specific (muscles and duration).';
 
   @override
+  String get coachNoRoutineToSave =>
+      'There is no pending routine to save. Ask me to create one first.';
+
+  @override
   String get coachSuggestion1 => 'Create a 45-minute leg routine';
 
   @override

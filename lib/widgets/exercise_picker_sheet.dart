@@ -167,7 +167,6 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                     final inRoutine = widget.selectedExerciseIds.contains(ex.id);
                     return ListTile(
                       leading: ExerciseThumbnail(
-                        imageUrl: ex.imageUrl,
                         exerciseId: ex.id,
                         exerciseName: ex.name,
                         category: ex.category,

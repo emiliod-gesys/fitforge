@@ -11,7 +11,9 @@ import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/localized_exercise_name.dart';
 
 class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
@@ -134,7 +136,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     final l10n = context.l10n;
 
     if (_loading) {
-      return const Scaffold(body: FitForgeLoadingScreen());
+      return Scaffold(body: FitForgeLoadingScreen());
     }
 
     final unitSystem = ref.watch(unitSystemProvider);
@@ -201,10 +203,17 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
             final ex = entry.value;
             return Card(
               child: ListTile(
-                leading: ex.imageUrl != null
-                    ? Image.network(ex.imageUrl!, width: 48, height: 48, fit: BoxFit.cover)
-                    : const Icon(Icons.fitness_center),
-                title: Text(ex.exerciseName),
+                leading: ExerciseThumbnail(
+                  exerciseId: ex.exerciseId,
+                  exerciseName: ex.exerciseName,
+                  width: 48,
+                  height: 48,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                title: LocalizedExerciseName(
+                  ex.exerciseName,
+                  exerciseId: ex.exerciseId,
+                ),
                 subtitle: Text(_exerciseSubtitle(ex, unitSystem, l10n)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),

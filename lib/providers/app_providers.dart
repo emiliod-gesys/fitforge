@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
+import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
 import '../models/profile.dart';
 import '../services/ai_coach_service.dart';
@@ -18,6 +19,7 @@ import '../services/push_notification_service.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
 final exerciseServiceProvider = Provider((ref) => ExerciseService());
+final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationStore());
 final routineServiceProvider = Provider((ref) => RoutineService());
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final profileServiceProvider = Provider((ref) => ProfileService());
@@ -58,8 +60,11 @@ final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
 
 final exercisesProvider = FutureProvider((ref) async {
   final lang = ref.watch(preferredLanguageProvider);
+  final store = ref.read(exerciseTranslationStoreProvider);
+  await store.load();
   final service = ref.read(exerciseServiceProvider);
   service.configure(language: lang);
+  service.setTranslationStore(store);
   return service.fetchExercises();
 });
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/utils/unit_converter.dart';
@@ -6,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/workout.dart';
 import 'exercise_thumbnail.dart';
+import 'localized_exercise_name.dart';
 
 class ActiveWorkoutExerciseList extends StatelessWidget {
   final Workout workout;
@@ -101,7 +103,7 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
   }
 }
 
-class _ExerciseListRow extends StatelessWidget {
+class _ExerciseListRow extends ConsumerWidget {
   final WorkoutExercise exercise;
   final String subtitle;
   final bool showConnector;
@@ -119,7 +121,7 @@ class _ExerciseListRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
     return Dismissible(
@@ -149,7 +151,6 @@ class _ExerciseListRow extends StatelessWidget {
                 child: Column(
                   children: [
                     ExerciseThumbnail(
-                      imageUrl: exercise.imageUrl,
                       exerciseId: exercise.exerciseId,
                       exerciseName: exercise.exerciseName,
                       width: 56,
@@ -171,8 +172,9 @@ class _ExerciseListRow extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedExerciseName(
                         exercise.exerciseName,
+                        exerciseId: exercise.exerciseId,
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                       const SizedBox(height: 4),

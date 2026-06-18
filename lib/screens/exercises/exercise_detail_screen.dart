@@ -67,7 +67,6 @@ class _ExerciseBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ExerciseThumbnail(
-            imageUrl: exercise.imageUrl,
             exerciseId: exercise.id,
             exerciseName: exercise.name,
             category: exercise.category,

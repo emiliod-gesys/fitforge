@@ -12,6 +12,7 @@ import '../../core/utils/workout_streak.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/player_level_card.dart';
 import '../../widgets/stat_card.dart';
@@ -74,7 +75,10 @@ class FriendProfileScreen extends ConsumerWidget {
                     color: AppColors.card,
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
-                      title: Text(pr.exerciseName),
+                      title: LocalizedExerciseName(
+                        pr.exerciseName,
+                        exerciseId: pr.exerciseId,
+                      ),
                       subtitle: Text(
                         '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label',
                       ),

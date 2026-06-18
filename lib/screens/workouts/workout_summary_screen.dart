@@ -15,6 +15,7 @@ import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_logo.dart';
+import '../../widgets/localized_exercise_name.dart';
 
 class WorkoutSummaryScreen extends ConsumerStatefulWidget {
   final WorkoutSummaryData summary;
@@ -123,7 +124,10 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                   (ex) => Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
-                      title: Text(ex.exerciseName),
+                      title: LocalizedExerciseName(
+                        ex.exerciseName,
+                        exerciseId: ex.exerciseId,
+                      ),
                       subtitle: Text(
                         ex.bestWeightKg != null
                             ? l10n.setsRepsBest(

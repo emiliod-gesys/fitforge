@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
+import '../providers/app_providers.dart';
+import 'localized_exercise_name.dart';
+import 'localized_exercise_name.dart';
 
-class EditRoutineDialog extends StatefulWidget {
+class EditRoutineDialog extends ConsumerStatefulWidget {
   final Routine routine;
 
   const EditRoutineDialog({super.key, required this.routine});
@@ -16,10 +20,10 @@ class EditRoutineDialog extends StatefulWidget {
   }
 
   @override
-  State<EditRoutineDialog> createState() => _EditRoutineDialogState();
+  ConsumerState<EditRoutineDialog> createState() => _EditRoutineDialogState();
 }
 
-class _EditRoutineDialogState extends State<EditRoutineDialog> {
+class _EditRoutineDialogState extends ConsumerState<EditRoutineDialog> {
   late final TextEditingController _nameController;
   late List<RoutineExercise> _exercises;
 
@@ -100,7 +104,11 @@ class _EditRoutineDialogState extends State<EditRoutineDialog> {
                   final ex = _exercises[i];
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(ex.exerciseName, style: const TextStyle(fontSize: 14)),
+                    title: LocalizedExerciseName(
+                      ex.exerciseName,
+                      exerciseId: ex.exerciseId,
+                      style: const TextStyle(fontSize: 14),
+                    ),
                     subtitle: Text('${ex.targetSets}×${ex.targetReps}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.close, size: 18, color: AppColors.error),

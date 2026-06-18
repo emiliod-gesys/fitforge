@@ -1352,6 +1352,12 @@ abstract class AppLocalizations {
   /// **'No pude generar la rutina. Intenta ser más específico (músculos y duración).'**
   String get coachRoutineFailed;
 
+  /// No description provided for @coachNoRoutineToSave.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay ninguna rutina pendiente por guardar. Primero pídeme que cree una.'**
+  String get coachNoRoutineToSave;
+
   /// No description provided for @coachSuggestion1.
   ///
   /// In es, this message translates to:

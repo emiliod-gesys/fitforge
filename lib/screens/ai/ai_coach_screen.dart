@@ -22,6 +22,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   final _scrollController = ScrollController();
   final _messages = <CoachMessage>[];
   bool _loading = false;
+  int? _savingRoutineIndex;
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,7 +57,21 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       final personalRecords = await ref.read(personalRecordsProvider.future);
       final coach = ref.read(aiCoachServiceProvider);
 
-      if (AiCoachService.isRoutineCreationRequest(text)) {
+      if (AiCoachService.isRoutineSaveIntent(text)) {
+        final pendingIndex = _messages.lastIndexWhere((m) => m.hasActiveRoutinePreview);
+        if (pendingIndex >= 0) {
+          await _saveRoutine(pendingIndex);
+        } else {
+          setState(() {
+            _messages.add(
+              CoachMessage(
+                text: l10n.coachNoRoutineToSave,
+                isError: true,
+              ),
+            );
+          });
+        }
+      } else if (AiCoachService.isRoutineCreationRequest(text)) {
         final routine = await coach.generateRoutineFromMessage(
           userMessage: text,
           catalog: catalog,
@@ -68,6 +83,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           routines: routines,
         );
 
+        int? savedIndex;
         setState(() {
           if (routine != null) {
             _messages.add(
@@ -76,6 +92,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                 routinePreview: routine,
               ),
             );
+            savedIndex = _messages.length - 1;
           } else {
             _messages.add(
               CoachMessage(
@@ -85,6 +102,12 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             );
           }
         });
+
+        if (routine != null &&
+            savedIndex != null &&
+            AiCoachService.requestsRoutineAutoSave(text)) {
+          await _saveRoutine(savedIndex!);
+        }
       } else {
         final response = await coach.getRecommendation(
           userMessage: text,
@@ -114,26 +137,40 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     final l10n = context.l10n;
     final message = _messages[messageIndex];
     final routine = message.routinePreview;
-    if (routine == null || message.isRoutineSaved) return;
+    if (routine == null ||
+        message.isRoutineSaved ||
+        message.isRoutineDiscarded ||
+        _savingRoutineIndex == messageIndex) {
+      return;
+    }
+
+    setState(() => _savingRoutineIndex = messageIndex);
 
     try {
       await ref.read(routineServiceProvider).createRoutine(routine);
       ref.invalidate(routinesProvider);
 
+      if (!mounted) return;
       setState(() {
         _messages[messageIndex] = message.copyWith(isRoutineSaved: true);
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.routineSavedNamed(routine.name))),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.routineSavedNamed(routine.name))),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.saveFailed('$e'))),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (_savingRoutineIndex == messageIndex) {
+            _savingRoutineIndex = null;
+          }
+        });
       }
     }
   }
@@ -214,6 +251,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   return _MessageBubble(
                     message: _messages[i],
                     index: i,
+                    isSavingRoutine: _savingRoutineIndex == i,
                     onSaveRoutine: _saveRoutine,
                     onEditRoutine: _editRoutine,
                     onDiscardRoutine: _discardRoutine,
@@ -260,6 +298,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 class _MessageBubble extends StatelessWidget {
   final CoachMessage message;
   final int index;
+  final bool isSavingRoutine;
   final void Function(int index) onSaveRoutine;
   final void Function(int index) onEditRoutine;
   final void Function(int index) onDiscardRoutine;
@@ -267,6 +306,7 @@ class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.message,
     required this.index,
+    required this.isSavingRoutine,
     required this.onSaveRoutine,
     required this.onEditRoutine,
     required this.onDiscardRoutine,
@@ -295,6 +335,7 @@ class _MessageBubble extends StatelessWidget {
                 routine: message.routinePreview!,
                 isSaved: message.isRoutineSaved,
                 isDiscarded: message.isRoutineDiscarded,
+                isSaving: isSavingRoutine,
                 onSave: () => onSaveRoutine(index),
                 onEdit: () => onEditRoutine(index),
                 onDiscard: () => onDiscardRoutine(index),

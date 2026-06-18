@@ -240,6 +240,7 @@
   "coachAskHint": "Pregunta o pide una rutina…",
   "coachRoutineReady": "Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.",
   "coachRoutineFailed": "No pude generar la rutina. Intenta ser más específico (músculos y duración).",
+  "coachNoRoutineToSave": "No hay ninguna rutina pendiente por guardar. Primero pídeme que cree una.",
   "coachSuggestion1": "Crea una rutina de piernas de 45 minutos",
   "coachSuggestion2": "¿Qué ejercicios me recomiendas para pecho hoy?",
   "coachSuggestion3": "Hazme una rutina de espalda y bíceps para guardar",

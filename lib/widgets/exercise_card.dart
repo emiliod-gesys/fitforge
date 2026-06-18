@@ -21,7 +21,6 @@ class ExerciseCard extends ConsumerWidget {
           child: Row(
             children: [
               ExerciseThumbnail(
-                imageUrl: exercise.imageUrl,
                 exerciseId: exercise.id,
                 exerciseName: exercise.name,
                 category: exercise.category,

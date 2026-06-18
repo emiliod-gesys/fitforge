@@ -17,7 +17,47 @@ class AiCoachService {
 
   final ProfileService _profileService;
 
+  static bool isRoutineSaveIntent(String message) {
+    final m = message.toLowerCase().trim();
+    final hasCreateVerb = _hasRoutineCreateVerb(m);
+    if (hasCreateVerb) return false;
+
+    const savePhrases = [
+      'guarda la rutina',
+      'guardar rutina',
+      'guárdala como rutina',
+      'guardala como rutina',
+      'guárdala',
+      'guardala',
+      'save the routine',
+      'save routine',
+    ];
+    if (savePhrases.any(m.contains)) return true;
+
+    return m == 'guarda' || m == 'guardar' || m == 'save';
+  }
+
+  static bool requestsRoutineAutoSave(String message) {
+    final m = message.toLowerCase();
+    return _hasRoutineCreateVerb(m) && (m.contains('guarda') || m.contains('save'));
+  }
+
+  static bool _hasRoutineCreateVerb(String m) {
+    return m.contains('crea') ||
+        m.contains('haz') ||
+        m.contains('genera') ||
+        m.contains('arma') ||
+        m.contains('diseña') ||
+        m.contains('disena') ||
+        m.contains('muéstrame') ||
+        m.contains('muestrame') ||
+        m.contains('necesito') ||
+        m.contains('quiero');
+  }
+
   static bool isRoutineCreationRequest(String message) {
+    if (isRoutineSaveIntent(message)) return false;
+
     final m = message.toLowerCase();
     const triggers = [
       'crea una rutina',
@@ -35,22 +75,11 @@ class AiCoachService {
       'muestrame una rutina',
       'necesito una rutina',
       'quiero una rutina',
-      'guarda la rutina',
-      'guardar rutina',
-      'guárdala como rutina',
-      'guardala como rutina',
     ];
 
     if (triggers.any(m.contains)) return true;
 
-    return m.contains('rutina') &&
-        (m.contains('crea') ||
-            m.contains('haz') ||
-            m.contains('genera') ||
-            m.contains('arma') ||
-            m.contains('diseña') ||
-            m.contains('disena') ||
-            m.contains('guarda'));
+    return m.contains('rutina') && _hasRoutineCreateVerb(m);
   }
 
   static int parseDurationMinutes(String message) {
