@@ -92,11 +92,16 @@ class WorkoutExercise {
     );
   }
 
-  double get totalVolume => sets
+  double totalVolume({bool? perArmWeight}) => sets
       .where((s) => s.completed)
       .fold(
         0.0,
-        (sum, s) => sum + ExerciseLoad.setVolumeKg(s, exerciseName: exerciseName),
+        (sum, s) => sum +
+            ExerciseLoad.setVolumeKg(
+              s,
+              exerciseName: exerciseName,
+              perArmWeight: perArmWeight,
+            ),
       );
 }
 

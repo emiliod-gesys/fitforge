@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/create_custom_exercise_sheet.dart';
 import '../../widgets/exercise_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -18,6 +19,7 @@ class ExerciseLibraryScreen extends ConsumerStatefulWidget {
 class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   String _search = '';
   String? _category;
+  bool _customOnly = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +31,31 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: l10n.searchExercises,
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (v) => setState(() => _search = v),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: l10n.searchExercises,
+                    prefixIcon: const Icon(Icons.search),
+                  ),
+                  onChanged: (v) => setState(() => _search = v),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => openCreateCustomExerciseSheet(context, ref),
+                  icon: const Icon(Icons.add_a_photo_outlined),
+                  label: Text(l10n.createCustomExercise),
+                ),
+              ],
             ),
           ),
           exercisesAsync.when(
             data: (exercises) {
               final categories = ref.read(exerciseServiceProvider).getCategories(exercises);
               final filtered = exercises.where((e) {
+                if (_customOnly && !e.isUserCustom) return false;
                 if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search.toLowerCase())) {
                   return false;
                 }
@@ -69,8 +83,22 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                         children: [
                           FilterChip(
                             label: Text(l10n.allCategories),
-                            selected: _category == null,
-                            onSelected: (_) => setState(() => _category = null),
+                            selected: _category == null && !_customOnly,
+                            onSelected: (_) => setState(() {
+                              _category = null;
+                              _customOnly = false;
+                            }),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: FilterChip(
+                              label: Text(l10n.myCustomExercises),
+                              selected: _customOnly,
+                              onSelected: (_) => setState(() {
+                                _customOnly = true;
+                                _category = null;
+                              }),
+                            ),
                           ),
                           ...categories.map(
                             (c) => Padding(

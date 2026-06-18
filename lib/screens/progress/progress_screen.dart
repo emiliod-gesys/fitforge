@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/muscle_inference.dart';
 import '../../core/utils/player_level.dart';
+import '../../core/utils/progress_stats.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
@@ -45,6 +46,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final prsAsync = ref.watch(personalRecordsProvider);
     final workoutsAsync = ref.watch(progressWorkoutsProvider);
     final profileAsync = ref.watch(profileProvider);
+    final bodyMetricsAsync = ref.watch(bodyMetricSnapshotsProvider);
     final unitSystem = ref.watch(unitSystemProvider);
 
     return Scaffold(
@@ -54,6 +56,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           ref.invalidate(personalRecordsProvider);
           ref.invalidate(progressWorkoutsProvider);
           ref.invalidate(profileProvider);
+          ref.invalidate(bodyMetricSnapshotsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -77,23 +80,82 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             workoutsAsync.when(
               data: (workouts) {
-                final last30 = _workoutsLast30Days(workouts);
-                final completed = last30.length;
-                final totalVolume = last30.fold<double>(0, (s, w) => s + w.totalVolume);
-                return Row(
+                final profile = profileAsync.valueOrNull;
+                final bodyMetrics = bodyMetricsAsync.valueOrNull;
+                final stats = ProgressStatsCalculator.compute(
+                  workouts,
+                  profile: profile,
+                  bodyMetrics: bodyMetrics,
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(child: _StatBox(l10n.workouts30d, '$completed')),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatBox(
-                        l10n.volume30d,
-                        UnitConverter.formatVolume(totalVolume, unitSystem),
-                      ),
+                    Text(
+                      l10n.progressLast7Days,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatBox(l10n.progressWorkoutsLabel, '${stats.workouts7d}'),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _StatBox(
+                            l10n.progressVolumeLabel,
+                            UnitConverter.formatVolume(stats.volume7dKg, unitSystem),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _StatBox(
+                            l10n.progressCaloriesLabel,
+                            l10n.caloriesKcal(stats.calories7d),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.progressAllTime,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatBox(l10n.progressWorkoutsLabel, '${stats.workoutsTotal}'),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _StatBox(
+                            l10n.progressVolumeLabel,
+                            UnitConverter.formatVolume(stats.volumeTotalKg, unitSystem),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _StatBox(
+                            l10n.progressCaloriesLabel,
+                            l10n.caloriesKcal(stats.caloriesTotal),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 );
               },
-              loading: () => const SizedBox.shrink(),
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: FitForgeLoadingIndicator(size: 48),
+              ),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
@@ -292,11 +354,26 @@ class _StatBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         child: Column(
           children: [
-            Text(value, style: Theme.of(context).textTheme.headlineSmall),
-            Text(label, style: const TextStyle(color: Colors.white54)),
+            Text(
+              value,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
+            ),
           ],
         ),
       ),

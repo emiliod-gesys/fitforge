@@ -188,6 +188,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ai-coach'),
                 ),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    8,
+                    0,
+                    8,
+                    16 + MediaQuery.paddingOf(context).bottom,
+                  ),
+                  child: Text(
+                    l10n.profileDedication,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted.withValues(alpha: 0.75),
+                          height: 1.45,
+                          fontSize: 11,
+                        ),
+                  ),
+                ),
               ],
             ),
           );

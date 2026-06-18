@@ -1,9 +1,26 @@
+import '../../models/exercise.dart';
 import '../../models/workout.dart';
 
 /// Cómo interpretar el peso registrado en una serie (total vs. por brazo).
 abstract final class ExerciseLoad {
+  /// Override explícito desde ejercicio personalizado (`null` = inferir del nombre).
+  static bool? perArmWeightOverride(Exercise? exercise) {
+    if (exercise == null || !exercise.isUserCustom) return null;
+    return exercise.perArmWeight;
+  }
+
+  static bool? perArmWeightForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+    for (final exercise in catalog) {
+      if (exercise.id == exerciseId) return perArmWeightOverride(exercise);
+    }
+    return null;
+  }
+
   /// Muestra la etiqueta «(por brazo)» en la UI de series.
-  static bool isPerArmWeight(String exerciseName) {
+  static bool isPerArmWeight(String exerciseName, {bool? perArmWeight}) {
+    if (perArmWeight == true) return true;
+    if (perArmWeight == false) return false;
+
     final n = _normalize(exerciseName);
     if (_singleDumbbellBothHands(n)) return false;
     if (_usesDumbbell(n)) return true;
@@ -12,8 +29,14 @@ abstract final class ExerciseLoad {
   }
 
   /// Multiplicador de volumen respecto al peso registrado por serie.
-  static double volumeMultiplier(String exerciseName) {
+  static double volumeMultiplier(String exerciseName, {bool? perArmWeight}) {
     final n = _normalize(exerciseName);
+    if (perArmWeight == true) {
+      if (_isUnilateral(n: n)) return 1;
+      return 2;
+    }
+    if (perArmWeight == false) return 1;
+
     if (!isPerArmWeight(exerciseName)) return 1;
     if (_isUnilateral(n: n)) return 1;
     if (_usesDumbbell(n)) return 2;
@@ -21,13 +44,17 @@ abstract final class ExerciseLoad {
     return 1;
   }
 
-  static double setVolumeKg(WorkoutSet set, {required String exerciseName}) {
+  static double setVolumeKg(
+    WorkoutSet set, {
+    required String exerciseName,
+    bool? perArmWeight,
+  }) {
     if (!set.completed || set.weight == null || set.weight! <= 0) return 0;
-    return set.weight! * set.reps * volumeMultiplier(exerciseName);
+    return set.weight! * set.reps * volumeMultiplier(exerciseName, perArmWeight: perArmWeight);
   }
 
-  static String weightLabel(String unitLabel, String exerciseName) {
-    if (isPerArmWeight(exerciseName)) {
+  static String weightLabel(String unitLabel, String exerciseName, {bool? perArmWeight}) {
+    if (isPerArmWeight(exerciseName, perArmWeight: perArmWeight)) {
       return '$unitLabel (por brazo)';
     }
     return unitLabel;

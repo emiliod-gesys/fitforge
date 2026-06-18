@@ -253,6 +253,11 @@ class _ShareCard extends StatelessWidget {
                   highlight: summary.isMaxWeightRecord,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
               Expanded(
                 child: _StatTile(
                   label: l10n.volume,
@@ -260,8 +265,25 @@ class _ShareCard extends StatelessWidget {
                   highlight: summary.isVolumeRecord,
                 ),
               ),
+              Expanded(
+                child: _StatTile(
+                  label: l10n.caloriesBurned,
+                  value: summary.hasCalorieEstimate
+                      ? l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)
+                      : '—',
+                ),
+              ),
             ],
           ),
+          if (summary.hasCalorieEstimate) ...[
+            const SizedBox(height: 8),
+            Text(
+              summary.calorieEstimate.usedDefaultWeight
+                  ? l10n.caloriesEstimateDefaultWeight
+                  : l10n.caloriesEstimateNote,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
+            ),
+          ],
           if (records.isNotEmpty) ...[
             const SizedBox(height: 16),
             Wrap(

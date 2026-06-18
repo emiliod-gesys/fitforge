@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,6 +72,23 @@ class ExerciseThumbnail extends ConsumerWidget {
     return _categoryFallback(ref: ref, loading: loading);
   }
 
+  bool _isLocalPath(String url) {
+    return !url.startsWith('http://') && !url.startsWith('https://');
+  }
+
+  Widget _localImage(String path, WidgetRef ref) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Image.file(
+        File(path),
+        width: fullWidth ? double.infinity : width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _categoryFallback(ref: ref),
+      ),
+    );
+  }
+
   Widget _networkImage(String url, WidgetRef ref) {
     return ClipRRect(
       borderRadius: borderRadius,
@@ -88,7 +107,11 @@ class ExerciseThumbnail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final urlAsync = ref.watch(exerciseImageUrlProvider(_lookup));
     return urlAsync.when(
-      data: (url) => url != null ? _networkImage(url, ref) : _categoryFallback(ref: ref),
+      data: (url) {
+        if (url != null && _isLocalPath(url)) return _localImage(url, ref);
+        if (url != null) return _networkImage(url, ref);
+        return _categoryFallback(ref: ref);
+      },
       loading: () => _categoryFallback(ref: ref, loading: true),
       error: (_, __) => _categoryFallback(ref: ref),
     );

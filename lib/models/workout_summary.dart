@@ -1,5 +1,10 @@
 import 'workout.dart';
 import '../core/utils/player_level.dart';
+import '../core/utils/exercise_load.dart';
+import '../core/utils/workout_calorie_estimator.dart';
+import 'body_metric.dart';
+import 'exercise.dart';
+import 'profile.dart';
 
 class ExerciseSummaryLine {
   final String exerciseId;
@@ -32,6 +37,7 @@ class WorkoutSummaryData {
   final bool isRepsRecord;
   final bool isMaxWeightRecord;
   final XpAwardResult? xpAward;
+  final WorkoutCalorieEstimate calorieEstimate;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -48,7 +54,10 @@ class WorkoutSummaryData {
     this.isRepsRecord = false,
     this.isMaxWeightRecord = false,
     this.xpAward,
+    this.calorieEstimate = const WorkoutCalorieEstimate.unavailable(),
   });
+
+  bool get hasCalorieEstimate => calorieEstimate.isAvailable;
 
   bool get hasPreviousComparison => previousSameRoutine != null;
 
@@ -67,20 +76,50 @@ abstract final class WorkoutSummaryBuilder {
     required int durationMinutes,
     Workout? previousSameRoutine,
     XpAwardResult? xpAward,
+    List<Exercise>? exerciseCatalog,
+    UserProfile? profile,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
   }) {
     final totalVolumeKg = workout.exercises.fold<double>(
       0,
-      (sum, ex) => sum + ex.totalVolume,
+      (sum, ex) => sum +
+          ex.totalVolume(
+            perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
+              ex.exerciseId,
+              exerciseCatalog ?? const [],
+            ),
+          ),
     );
     final totalReps = _totalReps(workout);
     final maxWeightKg = _maxWeightKg(workout);
     final exercises = _exerciseLines(workout);
 
     final prevReps = previousSameRoutine != null ? _totalReps(previousSameRoutine) : null;
-    final prevVolume = previousSameRoutine != null
-        ? previousSameRoutine.exercises.fold<double>(0, (s, e) => s + e.totalVolume)
-        : null;
+    final prevVolume = previousSameRoutine?.exercises.fold<double>(
+      0,
+      (s, e) => s +
+          e.totalVolume(
+            perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
+              e.exerciseId,
+              exerciseCatalog ?? const [],
+            ),
+          ),
+    );
     final prevMax = previousSameRoutine != null ? _maxWeightKg(previousSameRoutine) : null;
+
+    final completedSets = workout.exercises.fold<int>(
+      0,
+      (sum, ex) => sum + ex.sets.where((s) => s.completed).length,
+    );
+
+    final calorieEstimate = WorkoutCalorieEstimator.estimate(
+      durationMinutes: durationMinutes,
+      totalVolumeKg: totalVolumeKg,
+      completedSets: completedSets,
+      totalReps: totalReps,
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+    );
 
     return WorkoutSummaryData(
       workout: workout,
@@ -99,6 +138,7 @@ abstract final class WorkoutSummaryBuilder {
           maxWeightKg != null &&
           maxWeightKg > prevMax,
       xpAward: xpAward,
+      calorieEstimate: calorieEstimate,
     );
   }
 

@@ -1,3 +1,5 @@
+import 'custom_exercise.dart';
+
 class Exercise {
   final int? wgerId;
   final String? supabaseId;
@@ -9,6 +11,9 @@ class Exercise {
   final String? imageUrl;
   final String? videoUrl;
   final bool isCustom;
+  final bool isUserCustom;
+  /// Solo ejercicios personalizados: peso registrado por brazo/mancuerna.
+  final bool perArmWeight;
   final List<String> aliases;
 
   const Exercise({
@@ -22,6 +27,8 @@ class Exercise {
     this.imageUrl,
     this.videoUrl,
     this.isCustom = false,
+    this.isUserCustom = false,
+    this.perArmWeight = false,
     this.aliases = const [],
   });
 
@@ -112,7 +119,12 @@ class Exercise {
         'is_custom': isCustom,
       };
 
-  String get id => supabaseId ?? wgerId?.toString() ?? name;
+  String get id {
+    if (isUserCustom && supabaseId != null) {
+      return '${CustomExercise.idPrefix}$supabaseId';
+    }
+    return supabaseId ?? wgerId?.toString() ?? name;
+  }
 
   static String localizeCategoryFromWger(String cat, {String locale = 'es'}) {
     if (locale == 'en') return cat;

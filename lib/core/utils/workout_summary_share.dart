@@ -26,6 +26,11 @@ abstract final class WorkoutSummaryShare {
     buffer.writeln(
       l10n.shareVolume(UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem)),
     );
+    if (summary.hasCalorieEstimate) {
+      buffer.writeln(
+        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+      );
+    }
 
     final records = l10n.brokenRecordLabels(
       isVolumeRecord: summary.isVolumeRecord,

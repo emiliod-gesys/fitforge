@@ -94,6 +94,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileTitle => 'Perfil';
 
   @override
+  String get profileDedication =>
+      'Esta app nunca hubiera existido sin la motivación de mis hermanos Diego y Rodrigo, que me inspiraron a buscar un estilo de vida más saludable, LIGHT WEIGHT BABY!';
+
+  @override
   String get personalData => 'Datos personales';
 
   @override
@@ -248,6 +252,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get volume30d => 'Volumen (30 d)';
 
   @override
+  String get progressLast7Days => 'Últimos 7 días';
+
+  @override
+  String get progressAllTime => 'Histórico';
+
+  @override
+  String get progressWorkoutsLabel => 'Entrenos';
+
+  @override
+  String get progressVolumeLabel => 'Volumen';
+
+  @override
+  String get progressCaloriesLabel => 'Calorías';
+
+  @override
   String get volumePerWorkout => 'Volumen por entrenamiento';
 
   @override
@@ -302,6 +321,70 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get fitforgeCatalog => 'Ejercicio del catálogo FitForge';
+
+  @override
+  String get customExerciseTag => 'Personalizado';
+
+  @override
+  String get customExerciseAttribution =>
+      'Ejercicio creado por ti en este dispositivo';
+
+  @override
+  String get createCustomExercise => 'Crear ejercicio personalizado';
+
+  @override
+  String get myCustomExercises => 'Mis ejercicios';
+
+  @override
+  String get customExerciseName => 'Nombre del ejercicio';
+
+  @override
+  String get customExerciseMuscles => 'Músculos trabajados';
+
+  @override
+  String get customExercisePhoto => 'Foto de la máquina (opcional)';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get chooseFromGallery => 'Galería';
+
+  @override
+  String get customExerciseSaved => 'Ejercicio personalizado guardado';
+
+  @override
+  String get customExerciseDeleted => 'Ejercicio personalizado eliminado';
+
+  @override
+  String get deleteCustomExercise => 'Eliminar ejercicio';
+
+  @override
+  String get deleteCustomExerciseConfirm =>
+      '¿Eliminar este ejercicio personalizado? Las rutinas guardadas conservarán el nombre.';
+
+  @override
+  String get customExerciseNameRequired =>
+      'Escribe un nombre para el ejercicio';
+
+  @override
+  String get customExerciseMusclesRequired => 'Selecciona al menos un músculo';
+
+  @override
+  String get customExerciseLimitReached =>
+      'Límite de ejercicios personalizados alcanzado (100)';
+
+  @override
+  String get customExercisePerArmWeight => 'Peso por brazo';
+
+  @override
+  String get customExercisePerArmWeightHint =>
+      'Registra el peso de cada mancuerna o lado. El volumen suma ambos brazos (×2).';
+
+  @override
+  String weightPerArm(String unit) {
+    return '$unit (por brazo)';
+  }
 
   @override
   String get wgerAttribution => 'Imágenes y videos de wger.de (CC-BY-SA)';
@@ -535,6 +618,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String durationMinutesExercises(int minutes, int count) {
     return '$minutes min · $count ejercicios';
   }
+
+  @override
+  String get caloriesBurned => 'Calorías';
+
+  @override
+  String caloriesKcal(int value) {
+    return '$value kcal';
+  }
+
+  @override
+  String get caloriesEstimateNote =>
+      'Estimación según duración, volumen, peso y perfil metabólico.';
+
+  @override
+  String get caloriesEstimateDefaultWeight =>
+      'Estimación con peso de referencia (70 kg). Añade tu peso en el perfil para mayor precisión.';
 
   @override
   String get training => 'Entrenando';
@@ -1074,6 +1173,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String shareVolume(String value) {
     return '📊 Volumen: $value';
+  }
+
+  @override
+  String shareCalories(String value) {
+    return '🔥 Calorías (est.): $value';
   }
 
   @override

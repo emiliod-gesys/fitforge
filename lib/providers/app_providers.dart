@@ -9,6 +9,7 @@ import '../models/exercise_history.dart';
 import '../models/profile.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
+import '../services/custom_exercise_repository.dart';
 import '../services/exercise_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
@@ -58,13 +59,18 @@ final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
   return ref.watch(profileServiceProvider).getBodyMetricSnapshots();
 });
 
+final customExerciseRepositoryProvider = Provider((ref) => CustomExerciseRepository());
+
 final exercisesProvider = FutureProvider((ref) async {
   final lang = ref.watch(preferredLanguageProvider);
   final store = ref.read(exerciseTranslationStoreProvider);
   await store.load();
+  final customRepo = ref.read(customExerciseRepositoryProvider);
+  await customRepo.loadAll();
   final service = ref.read(exerciseServiceProvider);
   service.configure(language: lang);
   service.setTranslationStore(store);
+  service.setCustomExerciseRepository(customRepo);
   return service.fetchExercises();
 });
 
@@ -100,7 +106,7 @@ final workoutHistoryProvider = FutureProvider((ref) async {
 
 final progressWorkoutsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
-  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 60);
+  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 500);
 });
 
 final workoutWeeklyStatsProvider = FutureProvider<WorkoutWeeklyStats>((ref) async {

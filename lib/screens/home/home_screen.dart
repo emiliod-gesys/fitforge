@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../widgets/draggable_ai_coach_fab.dart';
 import '../../providers/app_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -27,11 +28,17 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.black,
-      body: child,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/ai-coach'),
-        icon: const Icon(Icons.auto_awesome_outlined),
-        label: Text(l10n.coachAi),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final areaSize = Size(constraints.maxWidth, constraints.maxHeight);
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(child: child),
+              DraggableAiCoachFab(areaSize: areaSize),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(

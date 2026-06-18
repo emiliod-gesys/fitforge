@@ -122,7 +122,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           exerciseId: selected.id,
           exerciseName: selected.name,
           orderIndex: _exercises.length,
-          imageUrl: selected.imageUrl,
+          imageUrl: selected.isUserCustom ? null : selected.imageUrl,
         ));
         for (final m in selected.muscles) {
           if (!_targetMuscles.contains(m)) _targetMuscles.add(m);

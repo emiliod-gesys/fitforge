@@ -9,6 +9,7 @@ class SetLogTile extends StatefulWidget {
   final WorkoutSet set;
   final String unitSystem;
   final String exerciseName;
+  final bool? perArmWeight;
   final bool isLast;
   final void Function(WorkoutSet set) onChanged;
   final VoidCallback? onDelete;
@@ -19,6 +20,7 @@ class SetLogTile extends StatefulWidget {
     required this.set,
     required this.unitSystem,
     required this.exerciseName,
+    this.perArmWeight,
     this.isLast = true,
     required this.onChanged,
     this.onDelete,
@@ -155,7 +157,11 @@ class _SetLogTileState extends State<SetLogTile> {
   Widget _buildTile(BuildContext context) {
     final l10n = context.l10n;
     final unitLabel = UnitConverter.massLabel(widget.unitSystem);
-    final weightLabel = ExerciseLoad.weightLabel(unitLabel, widget.exerciseName);
+    final perArm = ExerciseLoad.isPerArmWeight(
+      widget.exerciseName,
+      perArmWeight: widget.perArmWeight,
+    );
+    final weightLabel = perArm ? l10n.weightPerArm(unitLabel) : unitLabel;
     final isDone = widget.set.completed && !_editing;
     final isActive = _fieldsEnabled && !isDone;
 

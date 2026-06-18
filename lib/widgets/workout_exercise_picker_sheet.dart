@@ -5,6 +5,7 @@ import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
+import 'create_custom_exercise_sheet.dart';
 import 'exercise_card.dart';
 import 'fitforge_loading_indicator.dart';
 
@@ -38,6 +39,7 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
 class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePickerSheet> {
   String _search = '';
   String? _muscleFilter;
+  bool _customOnly = false;
 
   bool _matchesMuscleFilter(Exercise exercise, String muscle) {
     if (exercise.category == muscle) return true;
@@ -52,6 +54,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
   List<Exercise> _filterExercises(List<Exercise> exercises) {
     return exercises.where((e) {
       if (widget.excludeExerciseIds.contains(e.id)) return false;
+      if (_customOnly && !e.isUserCustom) return false;
       if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search)) return false;
       if (_muscleFilter != null && !_matchesMuscleFilter(e, _muscleFilter!)) return false;
       return true;
@@ -93,12 +96,23 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: l10n.searchExercise,
-              prefixIcon: const Icon(Icons.search),
-            ),
-            onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => openCreateCustomExerciseSheet(context, ref),
+                icon: const Icon(Icons.add_a_photo_outlined),
+                label: Text(l10n.createCustomExercise),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: l10n.searchExercise,
+                  prefixIcon: const Icon(Icons.search),
+                ),
+                onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -128,8 +142,22 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                       children: [
                         FilterChip(
                           label: Text(l10n.all),
-                          selected: _muscleFilter == null,
-                          onSelected: (_) => setState(() => _muscleFilter = null),
+                          selected: _muscleFilter == null && !_customOnly,
+                          onSelected: (_) => setState(() {
+                            _muscleFilter = null;
+                            _customOnly = false;
+                          }),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: FilterChip(
+                            label: Text(l10n.myCustomExercises),
+                            selected: _customOnly,
+                            onSelected: (_) => setState(() {
+                              _customOnly = true;
+                              _muscleFilter = null;
+                            }),
+                          ),
                         ),
                         ...AppConstants.muscleGroups.map(
                           (muscle) => Padding(

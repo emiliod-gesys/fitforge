@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
+import '../providers/app_providers.dart';
+import 'create_custom_exercise_sheet.dart';
 import 'exercise_thumbnail.dart';
 
-enum ExercisePickerFilter { all, inRoutine }
+enum ExercisePickerFilter { all, inRoutine, custom }
 
-class ExercisePickerSheet extends StatefulWidget {
+class ExercisePickerSheet extends ConsumerStatefulWidget {
   final List<Exercise> exercises;
   final Set<String> selectedExerciseIds;
 
@@ -17,10 +20,10 @@ class ExercisePickerSheet extends StatefulWidget {
   });
 
   @override
-  State<ExercisePickerSheet> createState() => _ExercisePickerSheetState();
+  ConsumerState<ExercisePickerSheet> createState() => _ExercisePickerSheetState();
 }
 
-class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
+class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
   final _searchController = TextEditingController();
   String _search = '';
   String? _category;
@@ -33,14 +36,17 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
   }
 
   List<String> get _categories {
-    return widget.exercises.map((e) => e.category).toSet().toList()..sort();
+    final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
+    return exercises.map((e) => e.category).toSet().toList()..sort();
   }
 
-  List<Exercise> get _filtered {
-    Iterable<Exercise> list = widget.exercises;
+  List<Exercise> _filteredFrom(List<Exercise> source) {
+    Iterable<Exercise> list = source;
 
     if (_filter == ExercisePickerFilter.inRoutine) {
       list = list.where((e) => widget.selectedExerciseIds.contains(e.id));
+    } else if (_filter == ExercisePickerFilter.custom) {
+      list = list.where((e) => e.isUserCustom);
     }
 
     if (_category != null) {
@@ -63,7 +69,8 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final filtered = _filtered;
+    final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
+    final filtered = _filteredFrom(exercises);
     final inRoutineCount = widget.selectedExerciseIds.length;
 
     return Column(
@@ -83,6 +90,15 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(l10n.addExercise, style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: () => openCreateCustomExerciseSheet(context, ref),
+                  icon: const Icon(Icons.add_a_photo_outlined),
+                  label: Text(l10n.createCustomExercise),
+                ),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: _searchController,
@@ -117,6 +133,12 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                       label: Text(l10n.inRoutine(inRoutineCount)),
                       selected: _filter == ExercisePickerFilter.inRoutine,
                       onSelected: (_) => setState(() => _filter = ExercisePickerFilter.inRoutine),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: Text(l10n.myCustomExercises),
+                      selected: _filter == ExercisePickerFilter.custom,
+                      onSelected: (_) => setState(() => _filter = ExercisePickerFilter.custom),
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
@@ -175,7 +197,21 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                         height: 48,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      title: Text(ex.name),
+                      title: Row(
+                        children: [
+                          Expanded(child: Text(ex.name)),
+                          if (ex.isUserCustom)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: Chip(
+                                label: Text(l10n.customExerciseTag, style: const TextStyle(fontSize: 10)),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
+                        ],
+                      ),
                       subtitle: Text(
                         [
                           ex.category,

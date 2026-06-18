@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'Perfil'**
   String get profileTitle;
 
+  /// No description provided for @profileDedication.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta app nunca hubiera existido sin la motivación de mis hermanos Diego y Rodrigo, que me inspiraron a buscar un estilo de vida más saludable, LIGHT WEIGHT BABY!'**
+  String get profileDedication;
+
   /// No description provided for @personalData.
   ///
   /// In es, this message translates to:
@@ -548,6 +554,36 @@ abstract class AppLocalizations {
   /// **'Volumen (30 d)'**
   String get volume30d;
 
+  /// No description provided for @progressLast7Days.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos 7 días'**
+  String get progressLast7Days;
+
+  /// No description provided for @progressAllTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Histórico'**
+  String get progressAllTime;
+
+  /// No description provided for @progressWorkoutsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenos'**
+  String get progressWorkoutsLabel;
+
+  /// No description provided for @progressVolumeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen'**
+  String get progressVolumeLabel;
+
+  /// No description provided for @progressCaloriesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías'**
+  String get progressCaloriesLabel;
+
   /// No description provided for @volumePerWorkout.
   ///
   /// In es, this message translates to:
@@ -649,6 +685,120 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ejercicio del catálogo FitForge'**
   String get fitforgeCatalog;
+
+  /// No description provided for @customExerciseTag.
+  ///
+  /// In es, this message translates to:
+  /// **'Personalizado'**
+  String get customExerciseTag;
+
+  /// No description provided for @customExerciseAttribution.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejercicio creado por ti en este dispositivo'**
+  String get customExerciseAttribution;
+
+  /// No description provided for @createCustomExercise.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear ejercicio personalizado'**
+  String get createCustomExercise;
+
+  /// No description provided for @myCustomExercises.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis ejercicios'**
+  String get myCustomExercises;
+
+  /// No description provided for @customExerciseName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del ejercicio'**
+  String get customExerciseName;
+
+  /// No description provided for @customExerciseMuscles.
+  ///
+  /// In es, this message translates to:
+  /// **'Músculos trabajados'**
+  String get customExerciseMuscles;
+
+  /// No description provided for @customExercisePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto de la máquina (opcional)'**
+  String get customExercisePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Galería'**
+  String get chooseFromGallery;
+
+  /// No description provided for @customExerciseSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejercicio personalizado guardado'**
+  String get customExerciseSaved;
+
+  /// No description provided for @customExerciseDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejercicio personalizado eliminado'**
+  String get customExerciseDeleted;
+
+  /// No description provided for @deleteCustomExercise.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar ejercicio'**
+  String get deleteCustomExercise;
+
+  /// No description provided for @deleteCustomExerciseConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar este ejercicio personalizado? Las rutinas guardadas conservarán el nombre.'**
+  String get deleteCustomExerciseConfirm;
+
+  /// No description provided for @customExerciseNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para el ejercicio'**
+  String get customExerciseNameRequired;
+
+  /// No description provided for @customExerciseMusclesRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona al menos un músculo'**
+  String get customExerciseMusclesRequired;
+
+  /// No description provided for @customExerciseLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite de ejercicios personalizados alcanzado (100)'**
+  String get customExerciseLimitReached;
+
+  /// No description provided for @customExercisePerArmWeight.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso por brazo'**
+  String get customExercisePerArmWeight;
+
+  /// No description provided for @customExercisePerArmWeightHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Registra el peso de cada mancuerna o lado. El volumen suma ambos brazos (×2).'**
+  String get customExercisePerArmWeightHint;
+
+  /// No description provided for @weightPerArm.
+  ///
+  /// In es, this message translates to:
+  /// **'{unit} (por brazo)'**
+  String weightPerArm(String unit);
 
   /// No description provided for @wgerAttribution.
   ///
@@ -1075,6 +1225,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{minutes} min · {count} ejercicios'**
   String durationMinutesExercises(int minutes, int count);
+
+  /// No description provided for @caloriesBurned.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías'**
+  String get caloriesBurned;
+
+  /// No description provided for @caloriesKcal.
+  ///
+  /// In es, this message translates to:
+  /// **'{value} kcal'**
+  String caloriesKcal(int value);
+
+  /// No description provided for @caloriesEstimateNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Estimación según duración, volumen, peso y perfil metabólico.'**
+  String get caloriesEstimateNote;
+
+  /// No description provided for @caloriesEstimateDefaultWeight.
+  ///
+  /// In es, this message translates to:
+  /// **'Estimación con peso de referencia (70 kg). Añade tu peso en el perfil para mayor precisión.'**
+  String get caloriesEstimateDefaultWeight;
 
   /// No description provided for @training.
   ///
@@ -1951,6 +2125,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'📊 Volumen: {value}'**
   String shareVolume(String value);
+
+  /// No description provided for @shareCalories.
+  ///
+  /// In es, this message translates to:
+  /// **'🔥 Calorías (est.): {value}'**
+  String shareCalories(String value);
 
   /// No description provided for @shareNewRecords.
   ///

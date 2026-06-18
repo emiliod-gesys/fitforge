@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/theme/app_colors.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import 'exercise_thumbnail.dart';
 
@@ -11,6 +13,7 @@ class ExerciseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -34,7 +37,22 @@ class ExerciseCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(exercise.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(exercise.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        ),
+                        if (exercise.isUserCustom) ...[
+                          const SizedBox(width: 6),
+                          Chip(
+                            label: Text(l10n.customExerciseTag, style: const TextStyle(fontSize: 11)),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '${exercise.category}${exercise.muscles.isNotEmpty ? ' · ${exercise.muscles.first}' : ''}',

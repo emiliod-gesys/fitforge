@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
 import '../core/l10n/app_locale.dart';
@@ -6,6 +8,7 @@ import '../core/utils/exercise_matcher.dart';
 import '../data/supplemental_exercises.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise.dart';
+import 'custom_exercise_repository.dart';
 
 class ExerciseMedia {
   final String? videoUrl;
@@ -40,9 +43,14 @@ class ExerciseService {
   final _mediaCache = <int, ExerciseMedia>{};
   String _preferredLanguage = 'es';
   ExerciseTranslationStore? _translationStore;
+  CustomExerciseRepository? _customExerciseRepository;
 
   void setTranslationStore(ExerciseTranslationStore store) {
     _translationStore = store;
+  }
+
+  void setCustomExerciseRepository(CustomExerciseRepository repository) {
+    _customExerciseRepository = repository;
   }
 
   void configure({required String language}) {
@@ -58,7 +66,7 @@ class ExerciseService {
 
   Future<List<Exercise>> fetchExercises({String? search, String? category}) async {
     if (_cache != null && search == null && category == null) {
-      return _cache!;
+      return _withFreshUserCustom(_cache!);
     }
 
     final exercises = <Exercise>[];
@@ -97,6 +105,10 @@ class ExerciseService {
     final merged = SupplementalExercises.mergeWith(exercises, locale: _preferredLanguage)
         .map(_applyStoredTranslation)
         .toList();
+
+    final userCustom = await _loadUserCustomExercises();
+    merged.addAll(userCustom);
+    merged.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     if (search == null && category == null) {
       _cache = merged;
@@ -155,6 +167,30 @@ class ExerciseService {
     );
   }
 
+  Future<List<Exercise>> _loadUserCustomExercises() async {
+    final repo = _customExerciseRepository;
+    if (repo == null) return [];
+    final custom = await repo.loadAll();
+    return custom.map((c) => c.toExercise()).toList();
+  }
+
+  /// Vuelve a mezclar ejercicios personalizados sin refetch del catálogo wger.
+  Future<List<Exercise>> _withFreshUserCustom(List<Exercise> base) async {
+    final userCustom = await _loadUserCustomExercises();
+    final catalog = base.where((e) => !e.isUserCustom).toList();
+    catalog.addAll(userCustom);
+    catalog.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    _cache = catalog;
+    return catalog;
+  }
+
+  String? _localImageIfExists(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return null;
+    final file = File(path);
+    return file.existsSync() ? path : null;
+  }
+
   Exercise _applyStoredTranslation(Exercise exercise) {
     final store = _translationStore;
     if (store == null || !store.isLoaded || exercise.wgerId == null) {
@@ -175,6 +211,8 @@ class ExerciseService {
       imageUrl: exercise.imageUrl,
       videoUrl: exercise.videoUrl,
       isCustom: exercise.isCustom,
+      isUserCustom: exercise.isUserCustom,
+      perArmWeight: exercise.perArmWeight,
       aliases: exercise.aliases,
     );
   }
@@ -256,6 +294,10 @@ class ExerciseService {
       catalog: catalog,
     );
     if (match == null) return null;
+
+    if (CustomExerciseRepository.isCustomExerciseId(lookup.exerciseId)) {
+      return _localImageIfExists(match.imageUrl);
+    }
 
     final catalogUrl = match.imageUrl;
     if (catalogUrl != null && catalogUrl.isNotEmpty) return catalogUrl;

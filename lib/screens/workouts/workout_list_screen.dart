@@ -220,70 +220,95 @@ class _StartWorkoutSection extends ConsumerWidget {
 
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.flash_on),
-              title: Text(l10n.freeWorkout),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _startAndOpenWorkout(context, ref, () async {
-                  await ref.read(workoutServiceProvider).startWorkout(
-                        name: l10n.freeWorkout,
-                      );
-                });
-              },
-            ),
-            routinesAsync.when(
-              data: (routines) => Column(
-                children: routines
-                    .map(
-                      (r) => ListTile(
-                        leading: const Icon(Icons.list_alt),
-                        title: Text(r.name),
-                        subtitle: Text(l10n.exercisesInRoutine(r.exercises.length)),
-                        onTap: () async {
-                          Navigator.pop(ctx);
-                          final exercises = r.exercises
-                              .map(
-                                (e) => WorkoutExercise(
-                                  id: '',
-                                  exerciseId: e.exerciseId,
-                                  exerciseName: e.exerciseName,
-                                  imageUrl: e.imageUrl,
-                                  orderIndex: e.orderIndex,
-                                  sets: List.generate(
-                                    e.targetSets,
-                                    (i) => WorkoutSet(
-                                      id: '',
-                                      setNumber: i + 1,
-                                      weight: e.targetWeight,
-                                      reps: e.targetReps,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList();
-                          await _startAndOpenWorkout(context, ref, () async {
-                            await ref.read(workoutServiceProvider).startWorkout(
-                                  name: r.name,
-                                  routineId: r.id,
-                                  exercises: exercises,
-                                );
-                          });
-                        },
-                      ),
-                    )
-                    .toList(),
+      isScrollControlled: true,
+      builder: (ctx) {
+        final maxHeight = MediaQuery.sizeOf(ctx).height * 0.85;
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.flash_on),
+                    title: Text(l10n.freeWorkout),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await _startAndOpenWorkout(context, ref, () async {
+                        await ref.read(workoutServiceProvider).startWorkout(
+                              name: l10n.freeWorkout,
+                            );
+                      });
+                    },
+                  ),
+                  const Divider(height: 1),
+                  Flexible(
+                    child: routinesAsync.when(
+                      data: (routines) {
+                        if (routines.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              l10n.noRoutines,
+                              style: const TextStyle(color: AppColors.textMuted),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: routines.length,
+                          itemBuilder: (context, index) {
+                            final r = routines[index];
+                            return ListTile(
+                              leading: const Icon(Icons.list_alt),
+                              title: Text(r.name),
+                              subtitle: Text(l10n.exercisesInRoutine(r.exercises.length)),
+                              onTap: () async {
+                                Navigator.pop(ctx);
+                                final exercises = r.exercises
+                                    .map(
+                                      (e) => WorkoutExercise(
+                                        id: '',
+                                        exerciseId: e.exerciseId,
+                                        exerciseName: e.exerciseName,
+                                        imageUrl: e.imageUrl,
+                                        orderIndex: e.orderIndex,
+                                        sets: List.generate(
+                                          e.targetSets,
+                                          (i) => WorkoutSet(
+                                            id: '',
+                                            setNumber: i + 1,
+                                            weight: e.targetWeight,
+                                            reps: e.targetReps,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList();
+                                await _startAndOpenWorkout(context, ref, () async {
+                                  await ref.read(workoutServiceProvider).startWorkout(
+                                        name: r.name,
+                                        routineId: r.id,
+                                        exercises: exercises,
+                                      );
+                                });
+                              },
+                            );
+                          },
+                        );
+                      },
+                      loading: () => ListTile(title: Text(l10n.loadingRoutines)),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
               ),
-              loading: () => ListTile(title: Text(l10n.loadingRoutines)),
-              error: (_, __) => const SizedBox.shrink(),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

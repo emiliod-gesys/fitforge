@@ -66,6 +66,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>FitForge usa la cámara para fotografiar tus máquinas y ejercicios personalizados.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FitForge accede a tu galería para elegir fotos de ejercicios personalizados.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_streak.dart';
+import '../../core/utils/exercise_load.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/workout.dart';
@@ -71,9 +72,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
     try {
       final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
+      final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
       final volume = workout.exercises.fold<double>(
         0,
-        (sum, ex) => sum + ex.totalVolume,
+        (sum, ex) => sum +
+            ex.totalVolume(
+              perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
+            ),
       );
 
       final completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
@@ -99,11 +104,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             excludeWorkoutId: workout.id,
           );
 
+      final profile = ref.read(profileProvider).valueOrNull;
+      final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+
       final summary = WorkoutSummaryBuilder.build(
         workout: workout,
         durationMinutes: duration,
         previousSameRoutine: previous,
         xpAward: xpAward,
+        exerciseCatalog: catalog,
+        profile: profile,
+        bodyMetrics: bodyMetrics,
       );
 
       ref.invalidate(workoutsProvider);
@@ -157,13 +168,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
-    final imageUrl = picked.imageUrl ??
-        await ref.read(exerciseServiceProvider).resolveImageUrl(
-              ExerciseImageLookup(
-                exerciseId: picked.id,
-                exerciseName: picked.name,
-              ),
-            );
+    String? imageUrl;
+    if (!picked.isUserCustom) {
+      imageUrl = picked.imageUrl ??
+          await ref.read(exerciseServiceProvider).resolveImageUrl(
+                ExerciseImageLookup(
+                  exerciseId: picked.id,
+                  exerciseName: picked.name,
+                ),
+              );
+    }
 
     await ref.read(workoutServiceProvider).addExerciseToWorkout(
           workout.id,
@@ -223,13 +237,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
-    final imageUrl = picked.imageUrl ??
-        await ref.read(exerciseServiceProvider).resolveImageUrl(
-              ExerciseImageLookup(
-                exerciseId: picked.id,
-                exerciseName: picked.name,
-              ),
-            );
+    String? imageUrl;
+    if (!picked.isUserCustom) {
+      imageUrl = picked.imageUrl ??
+          await ref.read(exerciseServiceProvider).resolveImageUrl(
+                ExerciseImageLookup(
+                  exerciseId: picked.id,
+                  exerciseName: picked.name,
+                ),
+              );
+    }
 
     await ref.read(workoutServiceProvider).swapExerciseInWorkout(
           exercise.id,
@@ -259,6 +276,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     final l10n = context.l10n;
     final activeAsync = ref.watch(activeWorkoutProvider);
     final unitSystem = ref.watch(unitSystemProvider);
+    final exerciseCatalog = ref.watch(exercisesProvider).valueOrNull ?? [];
 
     return Scaffold(
       appBar: activeAsync.whenOrNull(
@@ -413,6 +431,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         set: entry.value,
                         unitSystem: unitSystem,
                         exerciseName: exercise.exerciseName,
+                        perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
+                          exercise.exerciseId,
+                          exerciseCatalog,
+                        ),
                         isLast: entry.key == sortedSets.length - 1,
                         onValidationError: (message) {
                           ScaffoldMessenger.of(context).showSnackBar(
