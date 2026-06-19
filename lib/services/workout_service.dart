@@ -1,8 +1,11 @@
 import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
+import '../core/utils/exercise_logging_resolver.dart';
 import '../core/utils/muscle_inference.dart';
+import '../core/utils/milestones.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
+import '../models/exercise_logging.dart';
 import '../models/profile.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../models/workout.dart';
@@ -32,6 +35,84 @@ class WorkoutService {
     }).toList();
   }
 
+  /// Totales acumulados para milestones (incluye reps y distancia de todas las series).
+  Future<MilestoneTotals> getMilestoneTotals({UserProfile? profile}) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return MilestoneTotals.empty;
+
+    final workoutsData = await _client
+        .from('workouts')
+        .select('id, duration_minutes, total_volume, completed_at')
+        .eq('user_id', userId)
+        .not('completed_at', 'is', null);
+
+    final workoutRows = (workoutsData as List).cast<Map<String, dynamic>>();
+    if (workoutRows.isEmpty) return MilestoneTotals.empty;
+
+    final workoutIds = workoutRows.map((w) => w['id'] as String).toList();
+    var totalReps = 0;
+    var totalDistance = 0.0;
+
+    for (final workoutChunk in _chunkIds(workoutIds)) {
+      final exercisesData = await _client
+          .from('workout_exercises')
+          .select('id')
+          .inFilter('workout_id', workoutChunk);
+
+      final exerciseIds = (exercisesData as List)
+          .map((row) => (row as Map<String, dynamic>)['id'] as String)
+          .toList();
+      if (exerciseIds.isEmpty) continue;
+
+      for (final exerciseChunk in _chunkIds(exerciseIds, size: 200)) {
+        final setsData = await _client
+            .from('workout_sets')
+            .select('reps, distance_meters, logging_type, completed')
+            .inFilter('workout_exercise_id', exerciseChunk);
+
+        for (final row in setsData as List) {
+          final map = row as Map<String, dynamic>;
+          if (map['completed'] != true) continue;
+          final loggingType = ExerciseLoggingType.fromJson(map['logging_type'] as String?);
+          if (loggingType == ExerciseLoggingType.strength) {
+            totalReps += map['reps'] as int? ?? 0;
+          } else {
+            final distance = (map['distance_meters'] as num?)?.toDouble();
+            if (distance != null && distance > 0) {
+              totalDistance += distance;
+            }
+          }
+        }
+      }
+    }
+
+    return MilestonesCalculator.fromFriendData(
+      {
+        'workouts': workoutRows
+            .map(
+              (w) => {
+                'duration_minutes': w['duration_minutes'],
+                'total_volume': w['total_volume'],
+                'completed_at': w['completed_at'],
+              },
+            )
+            .toList(),
+        'total_reps': totalReps,
+        'total_distance_meters': totalDistance,
+      },
+      profile: profile,
+    );
+  }
+
+  static List<List<String>> _chunkIds(List<String> ids, {int size = 100}) {
+    if (ids.isEmpty) return const [];
+    final chunks = <List<String>>[];
+    for (var i = 0; i < ids.length; i += size) {
+      chunks.add(ids.sublist(i, i + size > ids.length ? ids.length : i + size));
+    }
+    return chunks;
+  }
+
   Future<List<Workout>> getWorkouts({int limit = 20}) async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return [];
@@ -53,6 +134,85 @@ class WorkoutService {
       workouts.add(Workout.fromJson(map, exercises: exercises));
     }
     return workouts;
+  }
+
+  /// Solo entrenos completados recientes, con consultas en lote (para recuperación muscular).
+  Future<List<Workout>> getWorkoutsForMuscleRecovery({int limit = 10}) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final workoutsData = await _client
+        .from('workouts')
+        .select(
+          'id, user_id, routine_id, name, started_at, completed_at, duration_minutes, total_volume, notes',
+        )
+        .eq('user_id', userId)
+        .not('completed_at', 'is', null)
+        .order('completed_at', ascending: false)
+        .limit(limit);
+
+    final workoutRows = workoutsData as List;
+    if (workoutRows.isEmpty) return [];
+
+    final workoutIds = workoutRows.map((w) => (w as Map)['id'] as String).toList();
+
+    final exercisesData = await _client
+        .from('workout_exercises')
+        .select('id, workout_id, exercise_id, exercise_name, order_index')
+        .inFilter('workout_id', workoutIds);
+
+    final exerciseRows = exercisesData as List;
+    if (exerciseRows.isEmpty) {
+      return workoutRows
+          .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map), exercises: const []))
+          .toList();
+    }
+
+    final exerciseIds = exerciseRows.map((e) => (e as Map)['id'] as String).toList();
+
+    final setsData = await _client
+        .from('workout_sets')
+        .select('workout_exercise_id, set_number, completed')
+        .inFilter('workout_exercise_id', exerciseIds);
+
+    final setsByExercise = <String, List<WorkoutSet>>{};
+    for (final row in setsData as List) {
+      final map = row as Map<String, dynamic>;
+      final exId = map['workout_exercise_id'] as String;
+      setsByExercise.putIfAbsent(exId, () => []).add(
+            WorkoutSet(
+              id: '',
+              setNumber: map['set_number'] as int? ?? 1,
+              completed: map['completed'] as bool? ?? false,
+            ),
+          );
+    }
+
+    final exercisesByWorkout = <String, List<WorkoutExercise>>{};
+    for (final row in exerciseRows) {
+      final map = row as Map<String, dynamic>;
+      final workoutId = map['workout_id'] as String;
+      final exRowId = map['id'] as String;
+      exercisesByWorkout.putIfAbsent(workoutId, () => []).add(
+            WorkoutExercise(
+              id: exRowId,
+              exerciseId: map['exercise_id'] as String,
+              exerciseName: map['exercise_name'] as String? ?? '',
+              orderIndex: map['order_index'] as int? ?? 0,
+              sets: setsByExercise[exRowId] ?? const [],
+            ),
+          );
+    }
+
+    for (final list in exercisesByWorkout.values) {
+      list.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+    }
+
+    return workoutRows.map((w) {
+      final map = Map<String, dynamic>.from(w as Map);
+      final id = map['id'] as String;
+      return Workout.fromJson(map, exercises: exercisesByWorkout[id] ?? const []);
+    }).toList();
   }
 
   Future<List<DateTime>> getCompletedWorkoutTimestamps() async {
@@ -195,14 +355,35 @@ class WorkoutService {
         continue;
       }
 
+      final isCardio = ExerciseLoggingResolver.isCardioExercise(
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+        sets: ex.sets,
+      );
+
       final sets = List.generate(ex.sets.length, (i) {
         final template = ex.sets[i];
         final prev = i < previous.length ? previous[i] : previous.last;
         return WorkoutSet(
           id: '',
           setNumber: template.setNumber,
-          weight: prev.weight ?? template.weight,
-          reps: prev.reps > 0 ? prev.reps : template.reps,
+          weight: isCardio ? null : (prev.weight ?? template.weight),
+          reps: isCardio ? 0 : (prev.reps > 0 ? prev.reps : template.reps),
+          durationSeconds: isCardio
+              ? (prev.durationSeconds ?? template.durationSeconds)
+              : null,
+          distanceMeters: isCardio
+              ? (prev.distanceMeters ?? template.distanceMeters)
+              : null,
+          inclinePercent: isCardio
+              ? (prev.inclinePercent ?? template.inclinePercent)
+              : null,
+          steps: isCardio ? (prev.steps ?? template.steps) : null,
+          loggingType: isCardio
+              ? ExerciseLoggingType.cardio
+              : (prev.loggingType != ExerciseLoggingType.strength
+                  ? prev.loggingType
+                  : template.loggingType),
         );
       });
 
@@ -298,7 +479,14 @@ class WorkoutService {
     String? imageUrl,
     int defaultSets = 3,
     int defaultReps = 10,
+    ExerciseLoggingType loggingType = ExerciseLoggingType.strength,
   }) async {
+    final resolvedType = ExerciseLoggingResolver.resolveLoggingType(
+      exerciseId: exerciseId,
+      exerciseName: exerciseName,
+      explicit: loggingType,
+    );
+    final isCardio = resolvedType == ExerciseLoggingType.cardio;
     final existing = await _getWorkoutExercises(workoutId);
     final nextOrder = existing.isEmpty
         ? 0
@@ -312,8 +500,13 @@ class WorkoutService {
       return WorkoutSet(
         id: '',
         setNumber: i + 1,
-        weight: prev?.weight,
-        reps: (prev?.reps ?? 0) > 0 ? prev!.reps : defaultReps,
+        weight: isCardio ? null : prev?.weight,
+        reps: isCardio ? 0 : ((prev?.reps ?? 0) > 0 ? prev!.reps : defaultReps),
+        durationSeconds: isCardio ? prev?.durationSeconds : null,
+        distanceMeters: isCardio ? prev?.distanceMeters : null,
+        inclinePercent: isCardio ? prev?.inclinePercent : null,
+        steps: isCardio ? prev?.steps : null,
+        loggingType: resolvedType,
       );
     });
 
@@ -350,6 +543,10 @@ class WorkoutService {
     await _client.from('workout_sets').delete().eq('workout_exercise_id', workoutExerciseId);
 
     final previous = await getPreviousSetsForExercise(newExerciseId, excludeWorkoutId: workoutId);
+    final isCardio = ExerciseLoggingResolver.isCardioExercise(
+      exerciseId: newExerciseId,
+      exerciseName: newExerciseName,
+    );
     final sets = List.generate(setCount, (i) {
       final prev = previous != null && previous.isNotEmpty
           ? (i < previous.length ? previous[i] : previous.last)
@@ -358,8 +555,13 @@ class WorkoutService {
       return WorkoutSet(
         id: _uuid.v4(),
         setNumber: i + 1,
-        weight: prev?.weight ?? oldSet?.weight,
-        reps: (prev?.reps ?? 0) > 0 ? prev!.reps : (oldSet?.reps ?? 10),
+        weight: isCardio ? null : (prev?.weight ?? oldSet?.weight),
+        reps: isCardio ? 0 : ((prev?.reps ?? 0) > 0 ? prev!.reps : (oldSet?.reps ?? 10)),
+        durationSeconds: isCardio ? prev?.durationSeconds : null,
+        distanceMeters: isCardio ? prev?.distanceMeters : null,
+        inclinePercent: isCardio ? prev?.inclinePercent : null,
+        steps: isCardio ? prev?.steps : null,
+        loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
       );
     });
 
@@ -410,12 +612,17 @@ class WorkoutService {
       'notes': exercise.notes,
     });
 
-    for (final set in exercise.sets) {
-      await _client.from('workout_sets').insert({
-        'id': set.id.isEmpty ? _uuid.v4() : set.id,
-        'workout_exercise_id': exId,
-        ...set.toJson(),
-      });
+    if (exercise.sets.isNotEmpty) {
+      final setRows = exercise.sets
+          .map(
+            (set) => {
+              'id': set.id.isEmpty ? _uuid.v4() : set.id,
+              'workout_exercise_id': exId,
+              ...set.toJson(),
+            },
+          )
+          .toList();
+      await _client.from('workout_sets').insert(setRows);
     }
   }
 
@@ -465,31 +672,154 @@ class WorkoutService {
     final exercises = await _getWorkoutExercises(workoutId);
 
     for (final ex in exercises) {
-      for (final set in ex.sets.where((s) => s.completed && s.weight != null)) {
-        final oneRm = PersonalRecord.calculate1RM(set.weight!, set.reps);
-        final existing = await _client
-            .from('personal_records')
-            .select()
-            .eq('user_id', userId)
-            .eq('exercise_id', ex.exerciseId)
-            .maybeSingle();
+      final completedSets = ex.sets.where((s) => s.completed).toList();
+      if (completedSets.isEmpty) continue;
 
-        if (existing == null || (existing['one_rep_max'] as num) < oneRm) {
-          await _client.from('personal_records').upsert(
-            {
-              'user_id': userId,
-              'exercise_id': ex.exerciseId,
-              'exercise_name': ex.exerciseName,
-              'weight': set.weight,
-              'reps': set.reps,
-              'one_rep_max': oneRm,
-              'achieved_at': SupabaseDateTime.nowUtc.toIso8601String(),
-            },
-            onConflict: 'user_id,exercise_id',
+      final strengthSets = completedSets.where((s) => !s.isCardio && s.weight != null).toList();
+      for (final set in strengthSets) {
+        final oneRm = PersonalRecord.calculate1RM(set.weight!, set.reps);
+        await _upsertPersonalRecord(
+          userId: userId,
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          recordType: PersonalRecordType.strength,
+          payload: {
+            'weight': set.weight,
+            'reps': set.reps,
+            'one_rep_max': oneRm,
+          },
+          isBetter: (existing) =>
+              existing == null ||
+              ((existing['one_rep_max'] as num?)?.toDouble() ?? 0) < oneRm,
+        );
+      }
+
+      final cardioSets = completedSets.where((s) => s.isCardio).toList();
+      if (cardioSets.isEmpty) continue;
+
+      final maxDistance = cardioSets
+          .map((s) => s.distanceMeters)
+          .whereType<double>()
+          .fold<double?>(null, (best, v) => best == null || v > best ? v : best);
+      if (maxDistance != null) {
+        await _upsertPersonalRecord(
+          userId: userId,
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          recordType: PersonalRecordType.cardioDistance,
+          payload: {'distance_meters': maxDistance},
+          isBetter: (existing) =>
+              existing == null ||
+              (existing['distance_meters'] as num?)?.toDouble() == null ||
+              (existing['distance_meters'] as num).toDouble() < maxDistance,
+        );
+      }
+
+      final maxDuration = cardioSets
+          .map((s) => s.durationSeconds)
+          .whereType<int>()
+          .fold<int?>(null, (best, v) => best == null || v > best ? v : best);
+      if (maxDuration != null) {
+        await _upsertPersonalRecord(
+          userId: userId,
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          recordType: PersonalRecordType.cardioDuration,
+          payload: {'duration_seconds': maxDuration},
+          isBetter: (existing) =>
+              existing == null ||
+              (existing['duration_seconds'] as int?) == null ||
+              (existing['duration_seconds'] as int) < maxDuration,
+        );
+      }
+
+      final maxSteps = cardioSets
+          .map((s) => s.steps)
+          .whereType<int>()
+          .fold<int?>(null, (best, v) => best == null || v > best ? v : best);
+      if (maxSteps != null) {
+        await _upsertPersonalRecord(
+          userId: userId,
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          recordType: PersonalRecordType.cardioSteps,
+          payload: {'steps': maxSteps},
+          isBetter: (existing) =>
+              existing == null ||
+              (existing['steps'] as int?) == null ||
+              (existing['steps'] as int) < maxSteps,
+        );
+      }
+
+      final maxIncline = cardioSets
+          .map((s) => s.inclinePercent)
+          .whereType<double>()
+          .fold<double?>(null, (best, v) => best == null || v > best ? v : best);
+      if (maxIncline != null) {
+        final config = ExerciseLoggingResolver.cardioConfigFor(
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+        );
+        if (config.tracksDifficulty) {
+          await _upsertPersonalRecord(
+            userId: userId,
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            recordType: PersonalRecordType.cardioDifficulty,
+            payload: {'incline_percent': maxIncline},
+            isBetter: (existing) =>
+                existing == null ||
+                (existing['incline_percent'] as num?)?.toDouble() == null ||
+                (existing['incline_percent'] as num).toDouble() < maxIncline,
+          );
+        } else if (config.tracksIncline) {
+          await _upsertPersonalRecord(
+            userId: userId,
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            recordType: PersonalRecordType.cardioIncline,
+            payload: {'incline_percent': maxIncline},
+            isBetter: (existing) =>
+                existing == null ||
+                (existing['incline_percent'] as num?)?.toDouble() == null ||
+                (existing['incline_percent'] as num).toDouble() < maxIncline,
           );
         }
       }
     }
+  }
+
+  Future<void> _upsertPersonalRecord({
+    required String userId,
+    required String exerciseId,
+    required String exerciseName,
+    required PersonalRecordType recordType,
+    required Map<String, dynamic> payload,
+    required bool Function(Map<String, dynamic>? existing) isBetter,
+  }) async {
+    final existing = await _client
+        .from('personal_records')
+        .select()
+        .eq('user_id', userId)
+        .eq('exercise_id', exerciseId)
+        .eq('record_type', recordType.toJson())
+        .maybeSingle();
+
+    if (!isBetter(existing == null ? null : Map<String, dynamic>.from(existing))) {
+      return;
+    }
+
+    await _client.from('personal_records').upsert(
+      {
+        'user_id': userId,
+        'exercise_id': exerciseId,
+        'exercise_name': exerciseName,
+        'record_type': recordType.toJson(),
+        'achieved_at': SupabaseDateTime.nowUtc.toIso8601String(),
+        ...payload,
+      },
+      onConflict: 'user_id,exercise_id,record_type',
+    );
   }
 
   Future<void> logSet(String workoutExerciseId, WorkoutSet set) async {
@@ -526,7 +856,7 @@ class WorkoutService {
         .from('personal_records')
         .select()
         .eq('user_id', userId)
-        .order('one_rep_max', ascending: false);
+        .order('achieved_at', ascending: false);
 
     return (data as List)
         .map((r) => PersonalRecord.fromJson(r as Map<String, dynamic>))

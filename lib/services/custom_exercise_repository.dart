@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/custom_exercise.dart';
+import '../models/exercise_logging.dart';
 
 /// Persistencia local de ejercicios personalizados (sync-ready).
 class CustomExerciseRepository {
@@ -72,6 +73,8 @@ class CustomExerciseRepository {
     required List<String> muscles,
     String? category,
     bool perArmWeight = false,
+    ExerciseLoggingType loggingType = ExerciseLoggingType.strength,
+    CardioLoggingConfig? cardioConfig,
     XFile? photo,
   }) async {
     final all = await loadAll(includeDeleted: true);
@@ -92,8 +95,10 @@ class CustomExerciseRepository {
       id: id,
       name: name.trim(),
       muscles: muscles,
-      category: category,
-      perArmWeight: perArmWeight,
+      category: category ?? (loggingType == ExerciseLoggingType.cardio ? 'Cardio' : null),
+      perArmWeight: loggingType == ExerciseLoggingType.strength && perArmWeight,
+      loggingType: loggingType,
+      cardioConfig: cardioConfig,
       localImagePath: imagePath,
       createdAt: now,
       updatedAt: now,

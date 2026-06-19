@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/unit_converter.dart';
+import '../core/utils/cardio_format.dart';
+import '../core/utils/exercise_logging_resolver.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_history.dart';
 import '../providers/app_providers.dart';
@@ -133,18 +135,39 @@ class ExerciseHistorySheet extends ConsumerWidget {
                             ),
                             const SizedBox(height: 10),
                             ...session.sets.map(
-                              (set) => Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Text(
-                                  l10n.setLine(
-                                    set.setNumber,
-                                    set.weight != null
+                              (set) {
+                                final catalog = ref.watch(exercisesProvider).valueOrNull ?? [];
+                                final isCardio = set.isCardio ||
+                                    ExerciseLoggingResolver.isCardioExercise(
+                                      exerciseId: exerciseId,
+                                      exerciseName: exerciseName,
+                                      catalog: catalog,
+                                      sets: [set],
+                                    );
+                                final line = isCardio
+                                    ? CardioFormat.setSummary(
+                                        config: ExerciseLoggingResolver.cardioConfigFor(
+                                          exerciseId: exerciseId,
+                                          exerciseName: exerciseName,
+                                          catalog: catalog,
+                                        ),
+                                        unitSystem: unitSystem,
+                                        durationSeconds: set.durationSeconds,
+                                        distanceMeters: set.distanceMeters,
+                                        inclinePercent: set.inclinePercent,
+                                        stepCount: set.steps,
+                                      )
+                                    : (set.weight != null
                                         ? UnitConverter.formatSetLine(set.weight!, set.reps, unitSystem)
-                                        : l10n.repsOnly(set.reps),
+                                        : l10n.repsOnly(set.reps));
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    l10n.setLine(set.setNumber, line),
+                                    style: Theme.of(context).textTheme.bodyMedium,
                                   ),
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
+                                );
+                              },
                             ),
                           ],
                         ),

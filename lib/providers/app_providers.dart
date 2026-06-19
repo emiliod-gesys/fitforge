@@ -6,6 +6,7 @@ import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
+import '../core/utils/milestones.dart';
 import '../models/profile.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
@@ -104,9 +105,10 @@ final workoutHistoryProvider = FutureProvider((ref) async {
   return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 100);
 });
 
-final progressWorkoutsProvider = FutureProvider((ref) async {
+final milestoneTotalsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
-  return ref.watch(workoutServiceProvider).getWorkoutSummaries(limit: 500);
+  final profile = await ref.watch(profileProvider.future);
+  return ref.watch(workoutServiceProvider).getMilestoneTotals(profile: profile);
 });
 
 final workoutWeeklyStatsProvider = FutureProvider<WorkoutWeeklyStats>((ref) async {
@@ -131,12 +133,16 @@ final bodyMeasurementsProvider = FutureProvider((ref) async {
 });
 
 final muscleRecoveryProvider = FutureProvider((ref) async {
-  final workouts = await ref.watch(workoutsProvider.future);
-  final catalog = await ref.watch(exercisesProvider.future);
-  return ref.watch(workoutServiceProvider).calculateMuscleRecovery(
-        workouts,
-        catalog: catalog,
-      );
+  ref.keepAlive();
+  ref.watch(authStateProvider);
+
+  final service = ref.watch(workoutServiceProvider);
+  final customRepo = ref.read(customExerciseRepositoryProvider);
+  final customs = await customRepo.loadAll();
+  final catalog = customs.map((c) => c.toExercise()).toList();
+
+  final workouts = await service.getWorkoutsForMuscleRecovery();
+  return service.calculateMuscleRecovery(workouts, catalog: catalog);
 });
 
 final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistory>, ExerciseHistoryQuery>(
@@ -180,16 +186,16 @@ final socialUnreadCountProvider = FutureProvider<int>((ref) async {
   return ref.watch(socialServiceProvider).getUnreadCount();
 });
 
-final socialRealtimeProvider = StreamProvider<String>((ref) {
+final socialRealtimeProvider = StreamProvider<SocialRealtimeEvent>((ref) {
   final auth = ref.watch(authStateProvider).valueOrNull;
   if (auth?.session == null) return const Stream.empty();
 
   final service = ref.watch(socialServiceProvider);
-  final controller = StreamController<String>();
+  final controller = StreamController<SocialRealtimeEvent>();
 
   final channel = service.subscribeToNotifications((payload) {
-    final message = payload.newRecord['message'] as String?;
-    if (message != null) controller.add(message);
+    final event = SocialRealtimeEvent.fromRecord(payload.newRecord);
+    if (event.message.isNotEmpty) controller.add(event);
   });
 
   ref.onDispose(() {

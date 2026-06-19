@@ -17,6 +17,7 @@ class ExerciseThumbnail extends ConsumerWidget {
   final double height;
   final BorderRadius borderRadius;
   final bool fullWidth;
+  final VoidCallback? onTap;
 
   const ExerciseThumbnail({
     super.key,
@@ -28,6 +29,7 @@ class ExerciseThumbnail extends ConsumerWidget {
     this.height = 56,
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.fullWidth = false,
+    this.onTap,
   });
 
   ExerciseImageLookup get _lookup => ExerciseImageLookup(
@@ -106,7 +108,7 @@ class ExerciseThumbnail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final urlAsync = ref.watch(exerciseImageUrlProvider(_lookup));
-    return urlAsync.when(
+    final content = urlAsync.when(
       data: (url) {
         if (url != null && _isLocalPath(url)) return _localImage(url, ref);
         if (url != null) return _networkImage(url, ref);
@@ -114,6 +116,13 @@ class ExerciseThumbnail extends ConsumerWidget {
       },
       loading: () => _categoryFallback(ref: ref, loading: true),
       error: (_, __) => _categoryFallback(ref: ref),
+    );
+
+    if (onTap == null) return content;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: content,
     );
   }
 }

@@ -49,6 +49,7 @@ abstract final class ExerciseLoad {
     required String exerciseName,
     bool? perArmWeight,
   }) {
+    if (set.isCardio) return 0;
     if (!set.completed || set.weight == null || set.weight! <= 0) return 0;
     return set.weight! * set.reps * volumeMultiplier(exerciseName, perArmWeight: perArmWeight);
   }

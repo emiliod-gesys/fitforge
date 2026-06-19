@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/player_level.dart';
+import '../core/utils/player_level_badge.dart';
 import '../l10n/app_localizations.dart';
 
 class PlayerLevelCard extends StatelessWidget {
@@ -26,15 +27,7 @@ class PlayerLevelCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.orange.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.military_tech, color: AppColors.orange),
-                ),
+                _LevelBadgeIcon(level: progress.level),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -75,6 +68,35 @@ class PlayerLevelCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LevelBadgeIcon extends StatelessWidget {
+  final int level;
+
+  const _LevelBadgeIcon({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    final assetPath = PlayerLevelBadge.assetForLevel(level);
+
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: assetPath != null
+          ? Image.asset(
+              assetPath,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: AppColors.orange.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.military_tech, color: AppColors.orange),
+            ),
     );
   }
 }

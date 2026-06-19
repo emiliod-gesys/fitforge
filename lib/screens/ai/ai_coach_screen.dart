@@ -83,16 +83,21 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           routines: routines,
         );
 
-        int? savedIndex;
         setState(() {
-          if (routine != null) {
+          if (routine != null && routine.exercises.length >= 2) {
             _messages.add(
               CoachMessage(
                 text: l10n.coachRoutineReady,
                 routinePreview: routine,
               ),
             );
-            savedIndex = _messages.length - 1;
+          } else if (routine != null) {
+            _messages.add(
+              CoachMessage(
+                text: l10n.coachRoutineTooFewExercises,
+                isError: true,
+              ),
+            );
           } else {
             _messages.add(
               CoachMessage(
@@ -102,12 +107,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             );
           }
         });
-
-        if (routine != null &&
-            savedIndex != null &&
-            AiCoachService.requestsRoutineAutoSave(text)) {
-          await _saveRoutine(savedIndex!);
-        }
       } else {
         final response = await coach.getRecommendation(
           userMessage: text,
@@ -119,8 +118,25 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           personalRecords: personalRecords,
         );
 
+        final muscles = AiCoachService.parseTargetMuscles(text);
+        final parsedRoutine = coach.tryParseRoutineFromResponse(
+          response,
+          targetMuscles: muscles,
+          profile: profile,
+          catalog: catalog,
+        );
+
         setState(() {
-          _messages.add(CoachMessage(text: response, isUser: false));
+          if (parsedRoutine != null && parsedRoutine.exercises.isNotEmpty) {
+            _messages.add(
+              CoachMessage(
+                text: l10n.coachRoutineReady,
+                routinePreview: parsedRoutine,
+              ),
+            );
+          } else {
+            _messages.add(CoachMessage(text: response, isUser: false));
+          }
         });
       }
     } catch (e) {

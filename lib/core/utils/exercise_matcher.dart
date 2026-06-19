@@ -1,46 +1,30 @@
 import '../../models/exercise.dart';
+import '../../models/exercise_logging.dart';
 import '../../models/routine.dart';
+import 'ai_routine_sanitizer.dart';
 
 abstract final class ExerciseMatcher {
   static Routine enrich(Routine routine, List<Exercise> catalog) {
-    final exercises = routine.exercises.asMap().entries.map((entry) {
-      final re = entry.value;
-      final match = findBest(re.exerciseName, catalog);
-      if (match == null) return re;
-      return RoutineExercise(
-        id: re.id,
-        exerciseId: match.id,
-        exerciseName: match.name,
-        orderIndex: entry.key,
-        targetSets: re.targetSets,
-        targetReps: re.targetReps,
-        targetWeight: re.targetWeight,
-        restSeconds: re.restSeconds,
-        imageUrl: match.imageUrl,
-      );
-    }).toList();
-
-    return Routine(
-      id: routine.id,
-      userId: routine.userId,
-      name: routine.name,
-      description: routine.description,
+    return AiRoutineSanitizer.enrichAndSanitize(
+      routine,
+      catalog,
       targetMuscles: routine.targetMuscles,
-      exercises: exercises,
-      createdAt: routine.createdAt,
-      updatedAt: routine.updatedAt,
-      isAiGenerated: routine.isAiGenerated,
     );
   }
 
   static Exercise? findBest(String name, List<Exercise> catalog) {
     final query = _normalize(name);
-    if (query.isEmpty) return null;
+    if (query.isEmpty ||
+        AiRoutineSanitizer.isLowQualityExerciseName(name) ||
+        AiRoutineSanitizer.isVagueExerciseName(name)) {
+      return null;
+    }
 
     Exercise? best;
     var bestScore = 0;
 
     for (final exercise in catalog) {
+      if (!AiRoutineSanitizer.isEligibleForAi(exercise)) continue;
       var score = _score(query, _normalize(exercise.name));
       for (final alias in exercise.aliases) {
         final aliasScore = _score(query, _normalize(alias));

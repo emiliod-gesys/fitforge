@@ -1,4 +1,5 @@
 import 'exercise.dart';
+import 'exercise_logging.dart';
 
 /// Estado de sincronización (futuro sync opcional a Supabase).
 enum CustomExerciseSyncState {
@@ -19,23 +20,29 @@ class CustomExercise {
   final String? localImagePath;
   /// Si true, el peso registrado es por brazo/mancuerna (volumen ×2 salvo unilateral).
   final bool perArmWeight;
+  final ExerciseLoggingType loggingType;
+  final CardioLoggingConfig cardioConfig;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final CustomExerciseSyncState syncState;
 
-  const CustomExercise({
+  CustomExercise({
     required this.id,
     required this.name,
     required this.muscles,
     this.category,
     this.localImagePath,
     this.perArmWeight = false,
+    this.loggingType = ExerciseLoggingType.strength,
+    CardioLoggingConfig? cardioConfig,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
     this.syncState = CustomExerciseSyncState.local,
-  });
+  }) : cardioConfig = cardioConfig ?? CardioLoggingConfig.fromPreset(CardioPreset.treadmill);
+
+  bool get isCardio => loggingType == ExerciseLoggingType.cardio;
 
   String get exerciseId => '$idPrefix$id';
 
@@ -51,6 +58,8 @@ class CustomExercise {
       isCustom: true,
       isUserCustom: true,
       perArmWeight: perArmWeight,
+      loggingType: loggingType,
+      cardioConfig: isCardio ? cardioConfig : null,
     );
   }
 
@@ -65,6 +74,8 @@ class CustomExercise {
     String? category,
     String? localImagePath,
     bool? perArmWeight,
+    ExerciseLoggingType? loggingType,
+    CardioLoggingConfig? cardioConfig,
     DateTime? updatedAt,
     DateTime? deletedAt,
     CustomExerciseSyncState? syncState,
@@ -76,6 +87,8 @@ class CustomExercise {
       category: category ?? this.category,
       localImagePath: localImagePath ?? this.localImagePath,
       perArmWeight: perArmWeight ?? this.perArmWeight,
+      loggingType: loggingType ?? this.loggingType,
+      cardioConfig: cardioConfig ?? this.cardioConfig,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -90,6 +103,8 @@ class CustomExercise {
         if (category != null) 'category': category,
         if (localImagePath != null) 'local_image_path': localImagePath,
         'per_arm_weight': perArmWeight,
+        'logging_type': loggingType.toJson(),
+        'cardio_metrics': cardioConfig.toJsonList(),
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
         if (deletedAt != null) 'deleted_at': deletedAt!.toIso8601String(),
@@ -104,6 +119,8 @@ class CustomExercise {
       category: json['category'] as String?,
       localImagePath: json['local_image_path'] as String?,
       perArmWeight: json['per_arm_weight'] as bool? ?? false,
+      loggingType: ExerciseLoggingType.fromJson(json['logging_type'] as String?),
+      cardioConfig: CardioLoggingConfig.fromJson(json['cardio_metrics'] as List?),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       deletedAt: json['deleted_at'] != null

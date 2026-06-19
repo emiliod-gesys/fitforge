@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/muscle_inference.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/exercise.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/create_custom_exercise_sheet.dart';
 import '../../widgets/exercise_card.dart';
@@ -18,8 +21,22 @@ class ExerciseLibraryScreen extends ConsumerStatefulWidget {
 
 class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   String _search = '';
-  String? _category;
+  String? _muscleFilter;
   bool _customOnly = false;
+
+  List<Exercise> _filterExercises(List<Exercise> exercises) {
+    return exercises.where((e) {
+      if (_customOnly && !e.isUserCustom) return false;
+      if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search.toLowerCase())) {
+        return false;
+      }
+      if (_muscleFilter != null &&
+          !MuscleInference.matchesMuscleGroup(exercise: e, muscleGroup: _muscleFilter!)) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +70,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
           ),
           exercisesAsync.when(
             data: (exercises) {
-              final categories = ref.read(exerciseServiceProvider).getCategories(exercises);
-              final filtered = exercises.where((e) {
-                if (_customOnly && !e.isUserCustom) return false;
-                if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search.toLowerCase())) {
-                  return false;
-                }
-                if (_category != null && e.category != _category) return false;
-                return true;
-              }).toList();
+              final filtered = _filterExercises(exercises);
 
               return Expanded(
                 child: Column(
@@ -83,9 +92,9 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                         children: [
                           FilterChip(
                             label: Text(l10n.allCategories),
-                            selected: _category == null && !_customOnly,
+                            selected: _muscleFilter == null && !_customOnly,
                             onSelected: (_) => setState(() {
-                              _category = null;
+                              _muscleFilter = null;
                               _customOnly = false;
                             }),
                           ),
@@ -94,19 +103,22 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                             child: FilterChip(
                               label: Text(l10n.myCustomExercises),
                               selected: _customOnly,
-                              onSelected: (_) => setState(() {
-                                _customOnly = true;
-                                _category = null;
+                              onSelected: (selected) => setState(() {
+                                _customOnly = selected;
+                                if (selected) _muscleFilter = null;
                               }),
                             ),
                           ),
-                          ...categories.map(
-                            (c) => Padding(
+                          ...AppConstants.muscleGroups.map(
+                            (muscle) => Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: FilterChip(
-                                label: Text(c),
-                                selected: _category == c,
-                                onSelected: (_) => setState(() => _category = c),
+                                label: Text(l10n.muscleLabel(muscle)),
+                                selected: _muscleFilter == muscle,
+                                onSelected: (selected) => setState(() {
+                                  _muscleFilter = selected ? muscle : null;
+                                  if (selected) _customOnly = false;
+                                }),
                               ),
                             ),
                           ),

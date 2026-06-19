@@ -1,5 +1,6 @@
 import '../../data/supplemental_exercises.dart';
 import '../../models/exercise.dart';
+import 'exercise_logging_resolver.dart';
 
 /// Infiere grupos musculares para recuperación a partir del catálogo o del nombre.
 abstract final class MuscleInference {
@@ -9,22 +10,31 @@ abstract final class MuscleInference {
     String? exerciseId,
     List<Exercise>? catalog,
   }) {
+    final inferred = fromExerciseName(exerciseName);
+
     final fromCatalog = _lookupCatalog(
       exerciseName: exerciseName,
       exerciseId: exerciseId,
       catalog: catalog,
     );
-    if (fromCatalog != null && fromCatalog.isNotEmpty) {
-      return fromCatalog;
+    if (fromCatalog != null) {
+      return _uniqueGroups([...fromCatalog, ...inferred]);
     }
 
     for (final extra in SupplementalExercises.all()) {
       if (_matchesExercise(extra, exerciseId: exerciseId, exerciseName: exerciseName)) {
-        return fromExerciseMuscles(extra.muscles, extra.category);
+        return _uniqueGroups([
+          ...fromExerciseMuscles(extra.muscles, extra.category),
+          ...inferred,
+        ]);
       }
     }
 
-    return fromExerciseName(exerciseName);
+    return inferred;
+  }
+
+  static List<String> _uniqueGroups(Iterable<String> groups) {
+    return groups.toSet().toList();
   }
 
   static List<String>? _lookupCatalog({
@@ -70,11 +80,27 @@ abstract final class MuscleInference {
     return groups.toList();
   }
 
+  /// Indica si un ejercicio pertenece a un grupo muscular de la app (p. ej. Glúteos).
+  static bool matchesMuscleGroup({
+    required Exercise exercise,
+    required String muscleGroup,
+  }) {
+    if (muscleGroup == 'Cardio') {
+      return exercise.isCardio ||
+          exercise.category.toLowerCase().contains('cardio') ||
+          ExerciseLoggingResolver.inferFromName(exercise.name);
+    }
+
+    final fromMeta = fromExerciseMuscles(exercise.muscles, exercise.category);
+    if (fromMeta.contains(muscleGroup)) return true;
+    return fromExerciseName(exercise.name).contains(muscleGroup);
+  }
+
   static String? _mapToRecoveryGroup(String muscle) {
     final m = _normalize(muscle);
     if (m.isEmpty) return null;
 
-    if (_containsAny(m, ['biceps', 'bíceps'])) return 'Bíceps';
+    if (_containsAny(m, ['biceps', 'bíceps', 'bicep', 'brachialis'])) return 'Bíceps';
     if (_containsAny(m, ['triceps', 'tríceps'])) return 'Tríceps';
     if (_containsAny(m, ['pecho', 'chest', 'pectoral'])) return 'Pecho';
     if (_containsAny(m, ['espalda', 'back', 'latissimus', 'dorsal', 'trapecio', 'romboid'])) {
@@ -92,12 +118,27 @@ abstract final class MuscleInference {
       'pantorrilla',
       'calf',
       'gemelo',
+      'gastrocnemius',
+      'gastrocnemio',
+      'soleus',
+      'soleo',
+      'sóleo',
     ])) {
       return 'Piernas';
     }
     if (_containsAny(m, ['gluteo', 'glúteo', 'glute'])) return 'Glúteos';
     if (_containsAny(m, ['abdominal', 'abs', 'core', 'oblicuo'])) return 'Abdominales';
-    if (_containsAny(m, ['antebrazo', 'forearm'])) return 'Antebrazos';
+    if (_containsAny(m, [
+      'antebrazo',
+      'forearm',
+      'brachioradialis',
+      'flexor carpi',
+      'extensor carpi',
+      'wrist',
+      'muneca',
+    ])) {
+      return 'Antebrazos';
+    }
 
     return null;
   }
@@ -107,9 +148,12 @@ abstract final class MuscleInference {
     if (_containsAny(c, ['pecho', 'chest'])) return 'Pecho';
     if (_containsAny(c, ['espalda', 'back'])) return 'Espalda';
     if (_containsAny(c, ['hombro', 'shoulder'])) return 'Hombros';
-    if (_containsAny(c, ['pierna', 'leg', 'pantorrilla', 'calf'])) return 'Piernas';
+    if (_containsAny(c, ['pierna', 'leg', 'pantorrilla', 'calf', 'gemelo'])) return 'Piernas';
     if (_containsAny(c, ['gluteo', 'glúteo', 'glute'])) return 'Glúteos';
     if (_containsAny(c, ['abdominal', 'abs'])) return 'Abdominales';
+    if (_containsAny(c, ['biceps', 'bíceps', 'bicep'])) return 'Bíceps';
+    if (_containsAny(c, ['triceps', 'tríceps'])) return 'Tríceps';
+    if (_containsAny(c, ['antebrazo', 'forearm'])) return 'Antebrazos';
     if (_containsAny(c, ['brazo', 'arm'])) return null;
     if (_containsAny(c, ['cardio'])) return null;
     return null;
@@ -152,7 +196,39 @@ abstract final class MuscleInference {
   }
 
   static bool _isBicepsExercise(String name) {
-    return _hasAny(name, ['curl', 'bicep', 'bícep', 'martillo', 'hammer curl']);
+    if (_isLegCurl(name)) return false;
+
+    return _hasAny(name, [
+      'curl',
+      'bicep',
+      'bícep',
+      'martillo',
+      'hammer curl',
+      'predicador',
+      'preacher',
+      'scott',
+      'concentrado',
+      'concentration',
+      'spider curl',
+      'drag curl',
+      'curl de biceps',
+      'curl de bíceps',
+      'chin-up',
+      'chin up',
+      'chinup',
+      'dominada supina',
+    ]);
+  }
+
+  static bool _isLegCurl(String name) {
+    return _hasAny(name, [
+      'leg curl',
+      'curl femoral',
+      'curl de pierna',
+      'hamstring curl',
+      'femoral sentado',
+      'femoral acostado',
+    ]);
   }
 
   static bool _isShoulderExercise(String name) {
@@ -320,7 +396,14 @@ abstract final class MuscleInference {
   }
 
   static bool _isGluteExercise(String name) {
-    return _hasAny(name, ['gluteo', 'glúteo', 'hip thrust', 'puente de gluteo', 'glute bridge']);
+    return _hasAny(name, [
+      'gluteo',
+      'glúteo',
+      'hip thrust',
+      'empuje de cadera',
+      'puente de gluteo',
+      'glute bridge',
+    ]);
   }
 
   static bool _isCoreExercise(String name) {
@@ -328,7 +411,34 @@ abstract final class MuscleInference {
   }
 
   static bool _isForearmExercise(String name) {
-    return _hasAny(name, ['antebrazo', 'forearm', 'wrist curl']);
+    if (_hasAny(name, ['leg extension', 'extension de cuadriceps', 'extensión de cuádriceps'])) {
+      return false;
+    }
+
+    return _hasAny(name, [
+      'antebrazo',
+      'forearm',
+      'wrist curl',
+      'curl de muneca',
+      'curl de muñeca',
+      'muñeca',
+      'muneca',
+      'hand grip',
+      'agarre de mano',
+      'pinch',
+      'pinza',
+      'farmer walk',
+      'farmer s walk',
+      'caminata del granjero',
+      'wrist roller',
+      'extensor de muneca',
+      'extensor de muñeca',
+      'flexor de muneca',
+      'flexor de muñeca',
+      'reverse curl',
+      'curl inverso',
+      'curl de predicador inverso',
+    ]);
   }
 
   static bool _hasWord(String name, String word) {

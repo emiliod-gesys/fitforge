@@ -1,4 +1,5 @@
 import 'custom_exercise.dart';
+import 'exercise_logging.dart';
 
 class Exercise {
   final int? wgerId;
@@ -15,6 +16,8 @@ class Exercise {
   /// Solo ejercicios personalizados: peso registrado por brazo/mancuerna.
   final bool perArmWeight;
   final List<String> aliases;
+  final ExerciseLoggingType loggingType;
+  final CardioLoggingConfig? cardioConfig;
 
   const Exercise({
     this.wgerId,
@@ -30,7 +33,11 @@ class Exercise {
     this.isUserCustom = false,
     this.perArmWeight = false,
     this.aliases = const [],
+    this.loggingType = ExerciseLoggingType.strength,
+    this.cardioConfig,
   });
+
+  bool get isCardio => loggingType == ExerciseLoggingType.cardio;
 
   bool matchesName(String label) {
     final query = _normalize(label);
@@ -79,31 +86,45 @@ class Exercise {
     final category = json['category'] is Map
         ? (json['category']['name'] as String? ?? 'Otros')
         : 'Otros';
+    final localizedCategory = translateCategory(category);
 
     return Exercise(
       wgerId: json['id'] as int?,
       name: name,
       description: description.replaceAll(RegExp(r'<[^>]*>'), '').trim(),
-      category: translateCategory(category),
+      category: localizedCategory,
       muscles: muscles.map(translateMuscle).toList(),
       equipment: equipment,
       imageUrl: json['image_url'] as String?,
       videoUrl: json['video_url'] as String?,
+      loggingType: _inferLoggingType(localizedCategory, name: name),
+      cardioConfig: _inferLoggingType(localizedCategory, name: name) == ExerciseLoggingType.cardio
+          ? CardioLoggingConfig.fromPreset(CardioPreset.inferFromExerciseName(name))
+          : null,
     );
   }
 
   factory Exercise.fromSupabase(Map<String, dynamic> json) {
+    final category = json['category'] as String? ?? 'Otros';
+    final name = json['name'] as String? ?? '';
+    final loggingType = _inferLoggingType(category, name: name);
     return Exercise(
       supabaseId: json['id'] as String?,
       wgerId: json['wger_id'] as int?,
-      name: json['name'] as String? ?? '',
+      name: name,
       description: json['description'] as String? ?? '',
-      category: json['category'] as String? ?? 'Otros',
+      category: category,
       muscles: List<String>.from(json['muscles'] ?? []),
       equipment: List<String>.from(json['equipment'] ?? []),
       imageUrl: json['image_url'] as String?,
       videoUrl: json['video_url'] as String?,
       isCustom: json['is_custom'] as bool? ?? false,
+      loggingType: loggingType,
+      cardioConfig: loggingType == ExerciseLoggingType.cardio
+          ? CardioLoggingConfig.fromPreset(
+              CardioPreset.inferFromExerciseName(name),
+            )
+          : null,
     );
   }
 
@@ -172,5 +193,15 @@ class Exercise {
       'Rectus abdominis': 'Abdominales',
     };
     return map[m] ?? m;
+  }
+
+  static ExerciseLoggingType _inferLoggingType(String category, {String name = ''}) {
+    if (category.toLowerCase().contains('cardio')) {
+      return ExerciseLoggingType.cardio;
+    }
+    if (CardioNameMatcher.matches(name)) {
+      return ExerciseLoggingType.cardio;
+    }
+    return ExerciseLoggingType.strength;
   }
 }

@@ -1,3 +1,5 @@
+import 'exercise_logging.dart';
+
 enum AiProvider { none, openai, gemini }
 
 enum Gender {
@@ -152,34 +154,52 @@ class BodyMeasurement {
       });
 }
 
+
 class PersonalRecord {
   final String id;
   final String exerciseId;
   final String exerciseName;
-  final double weight;
+  final double? weight;
   final int reps;
-  final double oneRepMax;
+  final double? oneRepMax;
   final DateTime achievedAt;
+  final PersonalRecordType recordType;
+  final int? durationSeconds;
+  final double? distanceMeters;
+  final double? inclinePercent;
+  final int? steps;
 
   const PersonalRecord({
     required this.id,
     required this.exerciseId,
     required this.exerciseName,
-    required this.weight,
-    required this.reps,
-    required this.oneRepMax,
+    this.weight,
+    this.reps = 1,
+    this.oneRepMax,
     required this.achievedAt,
+    this.recordType = PersonalRecordType.strength,
+    this.durationSeconds,
+    this.distanceMeters,
+    this.inclinePercent,
+    this.steps,
   });
+
+  bool get isCardio => recordType != PersonalRecordType.strength;
 
   factory PersonalRecord.fromJson(Map<String, dynamic> json) {
     return PersonalRecord(
       id: json['id'] as String,
       exerciseId: json['exercise_id'] as String,
       exerciseName: json['exercise_name'] as String? ?? '',
-      weight: (json['weight'] as num).toDouble(),
+      weight: (json['weight'] as num?)?.toDouble(),
       reps: json['reps'] as int? ?? 1,
-      oneRepMax: (json['one_rep_max'] as num?)?.toDouble() ?? 0,
+      oneRepMax: (json['one_rep_max'] as num?)?.toDouble(),
       achievedAt: DateTime.parse(json['achieved_at'] as String),
+      recordType: PersonalRecordType.fromJson(json['record_type'] as String?),
+      durationSeconds: json['duration_seconds'] as int?,
+      distanceMeters: (json['distance_meters'] as num?)?.toDouble(),
+      inclinePercent: (json['incline_percent'] as num?)?.toDouble(),
+      steps: json['steps'] as int?,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'profile.dart';
+import '../core/utils/milestones.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/workout_streak.dart';
 
@@ -115,17 +116,40 @@ class SocialNotification {
   }
 }
 
+/// Evento en tiempo real al insertar una fila en social_notifications.
+class SocialRealtimeEvent {
+  final String notificationId;
+  final String actorId;
+  final String message;
+
+  const SocialRealtimeEvent({
+    required this.notificationId,
+    required this.actorId,
+    required this.message,
+  });
+
+  factory SocialRealtimeEvent.fromRecord(Map<String, dynamic> record) {
+    return SocialRealtimeEvent(
+      notificationId: record['id'] as String,
+      actorId: record['actor_id'] as String? ?? '',
+      message: record['message'] as String? ?? '',
+    );
+  }
+}
+
 class FriendProfileView {
   final FriendUser user;
   final UserProfile profile;
   final List<PersonalRecord> personalRecords;
   final WorkoutWeeklyStats weeklyStats;
+  final MilestoneTotals milestoneTotals;
 
   const FriendProfileView({
     required this.user,
     required this.profile,
     required this.personalRecords,
     required this.weeklyStats,
+    required this.milestoneTotals,
   });
 }
 

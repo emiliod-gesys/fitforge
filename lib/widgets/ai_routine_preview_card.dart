@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/utils/cardio_format.dart';
+import '../core/utils/exercise_logging_resolver.dart';
+import '../models/exercise_logging.dart';
 import '../models/routine.dart';
 import '../providers/app_providers.dart';
 
@@ -129,7 +132,6 @@ class AiRoutinePreviewCard extends ConsumerWidget {
   }
 
   Widget _exerciseLine(WidgetRef ref, RoutineExercise ex) {
-    final weight = ex.targetWeight != null ? ' · ${ex.targetWeight!.toStringAsFixed(0)} kg' : '';
     final name = ref.watch(exercisesProvider).maybeWhen(
           data: (_) => ref.read(exerciseServiceProvider).localizedName(
                 exerciseId: ex.exerciseId,
@@ -137,6 +139,9 @@ class AiRoutinePreviewCard extends ConsumerWidget {
               ),
           orElse: () => ex.exerciseName,
         );
+    final detail = ex.isCardio
+        ? _cardioDetail(ref, ex)
+        : '${ex.targetSets}×${ex.targetReps}${ex.targetWeight != null ? ' · ${ex.targetWeight!.toStringAsFixed(0)} kg' : ''}';
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -145,13 +150,40 @@ class AiRoutinePreviewCard extends ConsumerWidget {
           const Text('• ', style: TextStyle(color: AppColors.orange)),
           Expanded(
             child: Text(
-              '$name — ${ex.targetSets}×${ex.targetReps}$weight',
+              '$name — $detail',
               style: const TextStyle(fontSize: 13),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _cardioDetail(WidgetRef ref, RoutineExercise ex) {
+    final unitSystem = ref.watch(unitSystemProvider);
+    final parts = <String>[];
+    if (ex.targetDurationSeconds != null) {
+      parts.add(CardioFormat.duration(ex.targetDurationSeconds));
+    }
+    if (ex.targetDistanceMeters != null) {
+      parts.add(CardioFormat.distance(ex.targetDistanceMeters, unitSystem));
+    }
+    if (ex.targetInclinePercent != null) {
+      final config = ExerciseLoggingResolver.cardioConfigFor(
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+      );
+      if (config.tracksDifficulty) {
+        parts.add('${CardioFormat.difficulty(ex.targetInclinePercent)} lvl');
+      } else {
+        parts.add(CardioFormat.incline(ex.targetInclinePercent));
+      }
+    }
+    if (ex.targetSteps != null) {
+      parts.add(CardioFormat.steps(ex.targetSteps));
+    }
+    if (parts.isEmpty) return 'cardio';
+    return parts.join(' · ');
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/exercise_load.dart';
 import 'package:fitforge/models/custom_exercise.dart';
 import 'package:fitforge/models/exercise.dart';
+import 'package:fitforge/models/exercise_logging.dart';
 import 'package:fitforge/models/workout.dart';
 import 'package:fitforge/services/custom_exercise_repository.dart';
 
@@ -53,5 +54,25 @@ void main() {
       ExerciseLoad.setVolumeKg(set, exerciseName: exercise.name, perArmWeight: true),
       160,
     );
+  });
+
+  test('CustomExercise cardio logging se serializa', () {
+    final custom = CustomExercise(
+      id: 'treadmill',
+      name: 'Cinta club',
+      muscles: ['Cardio'],
+      loggingType: ExerciseLoggingType.cardio,
+      cardioConfig: CardioLoggingConfig.fromPreset(CardioPreset.treadmill),
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    );
+
+    final json = custom.toJson();
+    expect(json['logging_type'], 'cardio');
+    expect(json['cardio_metrics'], contains('duration'));
+
+    final restored = CustomExercise.fromJson(json);
+    expect(restored.isCardio, isTrue);
+    expect(restored.toExercise().isCardio, isTrue);
   });
 }

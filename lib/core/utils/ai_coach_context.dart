@@ -1,7 +1,9 @@
 import '../../models/body_metric.dart';
+import '../../models/exercise_logging.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
+import 'cardio_format.dart';
 import 'player_level.dart';
 import 'unit_converter.dart';
 import 'workout_streak.dart';
@@ -96,13 +98,52 @@ abstract final class AiCoachContextBuilder {
   ) {
     if (records == null || records.isEmpty) return;
 
-    buffer.writeln('\n=== RECORDS PERSONALES (top 12 por 1RM) ===');
-    final sorted = [...records]..sort((a, b) => b.oneRepMax.compareTo(a.oneRepMax));
+    buffer.writeln('\n=== RECORDS PERSONALES (top 12) ===');
+    final sorted = [...records]
+      ..sort((a, b) => _recordSortValue(b).compareTo(_recordSortValue(a)));
     for (final pr in sorted.take(12)) {
-      buffer.writeln(
-        '- ${pr.exerciseName}: ${UnitConverter.formatSetLine(pr.weight, pr.reps, unitSystem)} '
-        '(1RM ~${UnitConverter.formatMass(pr.oneRepMax, unitSystem)})',
-      );
+      if (pr.recordType == PersonalRecordType.strength) {
+        buffer.writeln(
+          '- ${pr.exerciseName}: ${UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem)} '
+          '(1RM ~${UnitConverter.formatMass(pr.oneRepMax ?? 0, unitSystem)})',
+        );
+      } else {
+        buffer.writeln('- ${pr.exerciseName}: ${_cardioRecordLine(pr, unitSystem)}');
+      }
+    }
+  }
+
+  static double _recordSortValue(PersonalRecord pr) {
+    switch (pr.recordType) {
+      case PersonalRecordType.strength:
+        return pr.oneRepMax ?? 0;
+      case PersonalRecordType.cardioDistance:
+        return pr.distanceMeters ?? 0;
+      case PersonalRecordType.cardioDuration:
+        return (pr.durationSeconds ?? 0).toDouble();
+      case PersonalRecordType.cardioSteps:
+        return (pr.steps ?? 0).toDouble();
+      case PersonalRecordType.cardioIncline:
+        return pr.inclinePercent ?? 0;
+      case PersonalRecordType.cardioDifficulty:
+        return pr.inclinePercent ?? 0;
+    }
+  }
+
+  static String _cardioRecordLine(PersonalRecord pr, String unitSystem) {
+    switch (pr.recordType) {
+      case PersonalRecordType.cardioDistance:
+        return 'distancia ${CardioFormat.distance(pr.distanceMeters, unitSystem)}';
+      case PersonalRecordType.cardioDuration:
+        return 'tiempo ${CardioFormat.duration(pr.durationSeconds)}';
+      case PersonalRecordType.cardioSteps:
+        return '${pr.steps ?? 0} pasos';
+      case PersonalRecordType.cardioIncline:
+        return 'inclinación ${CardioFormat.incline(pr.inclinePercent)}';
+      case PersonalRecordType.cardioDifficulty:
+        return 'dificultad ${CardioFormat.difficulty(pr.inclinePercent)}';
+      case PersonalRecordType.strength:
+        return '';
     }
   }
 

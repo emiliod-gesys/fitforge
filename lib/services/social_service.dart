@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/utils/milestones.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../core/utils/workout_streak.dart';
 import '../models/profile.dart';
@@ -122,6 +123,19 @@ class SocialService {
         .toList();
     final weeklyStats = WorkoutStreakCalculator.fromCompletedDates(completedDates);
 
+    final profile = UserProfile.fromJson(Map<String, dynamic>.from(profileData));
+
+    final milestoneRaw = await _client.rpc(
+      'get_friend_milestone_data',
+      params: {'p_friend_id': friendId},
+    );
+    final milestoneTotals = milestoneRaw != null
+        ? MilestonesCalculator.fromFriendData(
+            Map<String, dynamic>.from(milestoneRaw as Map),
+            profile: profile,
+          )
+        : MilestoneTotals.empty;
+
     final user = FriendUser.fromJson({
       'id': friendId,
       'display_name': profileData['display_name'],
@@ -132,11 +146,12 @@ class SocialService {
 
     return FriendProfileView(
       user: user,
-      profile: UserProfile.fromJson(Map<String, dynamic>.from(profileData)),
+      profile: profile,
       personalRecords: (prData as List)
           .map((r) => PersonalRecord.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList(),
       weeklyStats: weeklyStats,
+      milestoneTotals: milestoneTotals,
     );
   }
 

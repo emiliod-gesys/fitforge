@@ -1,6 +1,7 @@
 import '../../models/workout.dart';
+import 'workout_day_utils.dart';
 
-/// Meta semanal y cálculo de racha (lunes–domingo, mínimo 4 entrenos).
+/// Meta semanal y cálculo de racha (lunes–domingo, mínimo 4 días con entreno).
 abstract final class WorkoutStreakCalculator {
   static const weeklyGoal = 4;
 
@@ -12,10 +13,12 @@ abstract final class WorkoutStreakCalculator {
 
   static int countInWeek(Iterable<DateTime> completedAt, DateTime weekStart) {
     final weekEnd = weekStart.add(const Duration(days: 7));
-    return completedAt.where((t) {
-      final local = t.toLocal();
-      return !local.isBefore(weekStart) && local.isBefore(weekEnd);
-    }).length;
+    return WorkoutDayUtils.uniqueDayCount(
+      completedAt.where((t) {
+        final local = t.toLocal();
+        return !local.isBefore(weekStart) && local.isBefore(weekEnd);
+      }),
+    );
   }
 
   static int currentWeekCount(Iterable<DateTime> completedAt, [DateTime? now]) {

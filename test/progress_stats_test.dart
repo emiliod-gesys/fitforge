@@ -35,4 +35,38 @@ void main() {
     expect(stats.volumeTotalKg, 8000);
     expect(stats.caloriesTotal, greaterThan(stats.calories7d));
   });
+
+  test('volumeByDayLastDays suma entrenamientos del mismo día y rellena la ventana', () {
+    final today = DateTime.now();
+    final dayStart = DateTime(today.year, today.month, today.day);
+    final workouts = [
+      Workout(
+        id: '1',
+        userId: 'u',
+        name: 'A',
+        startedAt: dayStart,
+        completedAt: dayStart,
+        durationMinutes: 45,
+        totalVolume: 3000,
+      ),
+      Workout(
+        id: '2',
+        userId: 'u',
+        name: 'B',
+        startedAt: dayStart.add(const Duration(hours: 2)),
+        completedAt: dayStart.add(const Duration(hours: 2)),
+        durationMinutes: 30,
+        totalVolume: 2000,
+      ),
+    ];
+
+    final daily = ProgressStatsCalculator.volumeByDayLastDays(
+      workouts,
+      dayCount: 3,
+    );
+
+    expect(daily.length, 3);
+    expect(daily.last.volumeKg, 5000);
+    expect(daily.where((d) => d.volumeKg == 0).length, 2);
+  });
 }

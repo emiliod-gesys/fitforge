@@ -1,6 +1,7 @@
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/workout_summary.dart';
+import '../../widgets/milestones_section.dart';
 import 'unit_converter.dart';
 
 abstract final class WorkoutSummaryShare {
@@ -42,6 +43,31 @@ abstract final class WorkoutSummaryShare {
         ..writeln()
         ..writeln(l10n.shareNewRecords)
         ..writeln(records.map((r) => '• $r').join('\n'));
+    }
+
+    if (summary.hasAchievements) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.shareAchievementsHeader);
+      if (summary.leveledUp && summary.xpAward != null) {
+        buffer.writeln(
+          l10n.shareLevelUp(summary.xpAward!.after.level),
+        );
+      }
+      for (final unlock in summary.newMilestoneUnlocks) {
+        buffer.writeln(
+          l10n.shareMilestoneUnlocked(
+            MilestonesSection.categoryLabel(l10n, unlock.category),
+            unlock.tier,
+          ),
+        );
+      }
+    }
+
+    if (summary.xpAward != null && summary.xpAward!.xpEarned > 0) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.shareXpEarned(summary.xpAward!.xpEarned));
     }
 
     buffer

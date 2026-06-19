@@ -267,14 +267,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progressCaloriesLabel => 'Calories';
 
   @override
-  String get volumePerWorkout => 'Volume per workout';
+  String get volumePerWorkout => 'Volume per day';
 
   @override
-  String get last30Days => 'Last 30 days';
+  String get last10Days => 'Last 10 days';
 
   @override
   String get completeWorkoutsForVolume =>
       'Complete workouts to see your volume';
+
+  @override
+  String get milestonesTitle => 'Milestones';
+
+  @override
+  String get milestonesSubtitle => 'Unlock badges as you hit cumulative goals';
+
+  @override
+  String get milestoneCategoryReps => 'Reps';
+
+  @override
+  String get milestoneCategoryVolume => 'Volume';
+
+  @override
+  String get milestoneCategoryDistance => 'Distance';
+
+  @override
+  String get milestoneCategoryCalories => 'Calories';
+
+  @override
+  String get milestoneCategoryWorkouts => 'Workouts';
+
+  @override
+  String milestoneTotal(String value) {
+    return 'Total: $value';
+  }
+
+  @override
+  String milestoneUnlockedCount(int unlocked, int total) {
+    return '$unlocked/$total';
+  }
+
+  @override
+  String milestoneNextTarget(String target) {
+    return 'Next goal: $target';
+  }
+
+  @override
+  String milestoneDetailRemaining(String remaining, String target) {
+    return '$remaining to reach $target';
+  }
+
+  @override
+  String get milestoneAllUnlocked => 'All badges unlocked!';
 
   @override
   String get personalRecords => 'Personal records';
@@ -639,6 +683,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get finish => 'Finish';
 
   @override
+  String get leaveActiveWorkoutTitle => 'Leave workout?';
+
+  @override
+  String get leaveActiveWorkoutMessage =>
+      'Your progress is saved. You can resume from Workouts.';
+
+  @override
+  String get leaveActiveWorkoutConfirm => 'Leave';
+
+  @override
   String get viewList => 'View list';
 
   @override
@@ -665,6 +719,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String exerciseAdded(String name) {
     return '$name added';
   }
+
+  @override
+  String get addingExercise => 'Adding exercise…';
 
   @override
   String get exerciseRemoved => 'Exercise removed';
@@ -792,6 +849,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Here is your routine. Review it and tap Save when ready.';
 
   @override
+  String get coachRoutineTooFewExercises =>
+      'Could not build a varied routine from the catalog. Try again or specify target muscles.';
+
+  @override
   String get coachRoutineFailed =>
       'Could not generate the routine. Try being more specific (muscles and duration).';
 
@@ -897,6 +958,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customRest => 'Custom rest';
+
+  @override
+  String get cardioDuration => 'Time (mm:ss)';
+
+  @override
+  String get cardioDistance => 'Distance';
+
+  @override
+  String get cardioIncline => 'Incline %';
+
+  @override
+  String get cardioDifficulty => 'Difficulty level';
+
+  @override
+  String get cardioSteps => 'Steps';
+
+  @override
+  String get cardioMetricRequired => 'Enter at least one cardio metric';
+
+  @override
+  String cardioSetLabel(int number) {
+    return 'Interval $number';
+  }
+
+  @override
+  String get cardioPrDistance => 'Max distance';
+
+  @override
+  String get cardioPrDuration => 'Max duration';
+
+  @override
+  String get cardioPrSteps => 'Max steps';
+
+  @override
+  String get cardioPrIncline => 'Max incline';
+
+  @override
+  String get cardioPrDifficulty => 'Max difficulty';
+
+  @override
+  String get exerciseTypeStrength => 'Strength';
+
+  @override
+  String get exerciseTypeCardio => 'Cardio';
+
+  @override
+  String get cardioPresetTreadmill => 'Treadmill';
+
+  @override
+  String get cardioPresetElliptical => 'Elliptical';
+
+  @override
+  String get cardioPresetBike => 'Bike / spinning';
+
+  @override
+  String get cardioPresetStair => 'Stair climber';
+
+  @override
+  String get cardioPresetRowing => 'Rowing';
+
+  @override
+  String get cardioPresetCustom => 'Custom';
+
+  @override
+  String get cardioMetricsLabel => 'Metrics to log';
 
   @override
   String get secondsLabel => 'Seconds';
@@ -1174,6 +1300,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareNewRecords => '🏆 New records vs last time!';
+
+  @override
+  String get shareAchievementsHeader => '🎉 Achievements unlocked!';
+
+  @override
+  String shareLevelUp(int level) {
+    return '⭐ Level up to $level!';
+  }
+
+  @override
+  String shareMilestoneUnlocked(String category, int tier) {
+    return '🏅 $category badge — tier $tier';
+  }
+
+  @override
+  String shareXpEarned(int xp) {
+    return '⚡ +$xp XP';
+  }
+
+  @override
+  String get summaryAchievementsTitle => 'Achievements unlocked!';
+
+  @override
+  String get summaryMilestoneUnlocked => 'New badge';
+
+  @override
+  String summaryMilestoneDetail(String category, int tier) {
+    return '$category · Tier $tier';
+  }
 
   @override
   String get shareExercisesHeader => 'Exercises:';

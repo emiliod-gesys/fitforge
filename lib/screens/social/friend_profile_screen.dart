@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/cardio_format.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/exercise_logging.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/social.dart';
+import '../../core/utils/milestones.dart';
 import '../../core/utils/player_level.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/localized_exercise_name.dart';
+import '../../widgets/milestones_section.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/player_level_card.dart';
 import '../../widgets/stat_card.dart';
@@ -56,6 +60,12 @@ class FriendProfileScreen extends ConsumerWidget {
                 l10n: l10n,
               ),
               const SizedBox(height: 24),
+              MilestonesSection(
+                totals: view.milestoneTotals,
+                l10n: l10n,
+                unitSystem: unitSystem,
+              ),
+              const SizedBox(height: 24),
               Text(
                 l10n.personalRecords,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -68,8 +78,21 @@ class FriendProfileScreen extends ConsumerWidget {
                 )
               else
                 ...prs.map((pr) {
-                  final weight = UnitConverter.kgToDisplay(pr.weight, unitSystem);
-                  final orm = UnitConverter.kgToDisplay(pr.oneRepMax, unitSystem);
+                  if (pr.isCardio) {
+                    return Card(
+                      color: AppColors.card,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        title: LocalizedExerciseName(
+                          pr.exerciseName,
+                          exerciseId: pr.exerciseId,
+                        ),
+                        subtitle: Text(_friendCardioPrLine(pr, unitSystem, l10n)),
+                      ),
+                    );
+                  }
+                  final weight = UnitConverter.kgToDisplay(pr.weight ?? 0, unitSystem);
+                  final orm = UnitConverter.kgToDisplay(pr.oneRepMax ?? 0, unitSystem);
                   final label = UnitConverter.massLabel(unitSystem);
                   return Card(
                     color: AppColors.card,
@@ -94,6 +117,23 @@ class FriendProfileScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+}
+
+String _friendCardioPrLine(PersonalRecord pr, String unitSystem, AppLocalizations l10n) {
+  switch (pr.recordType) {
+    case PersonalRecordType.cardioDistance:
+      return '${l10n.cardioPrDistance}: ${CardioFormat.distance(pr.distanceMeters, unitSystem)}';
+    case PersonalRecordType.cardioDuration:
+      return '${l10n.cardioPrDuration}: ${CardioFormat.duration(pr.durationSeconds)}';
+    case PersonalRecordType.cardioSteps:
+      return '${l10n.cardioPrSteps}: ${CardioFormat.steps(pr.steps)}';
+    case PersonalRecordType.cardioIncline:
+      return '${l10n.cardioPrIncline}: ${CardioFormat.incline(pr.inclinePercent)}';
+    case PersonalRecordType.cardioDifficulty:
+      return '${l10n.cardioPrDifficulty}: ${CardioFormat.difficulty(pr.inclinePercent)}';
+    case PersonalRecordType.strength:
+      return '';
   }
 }
 

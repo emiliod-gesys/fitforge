@@ -1,6 +1,7 @@
+import 'package:fitforge/models/exercise.dart';
+import 'package:fitforge/models/exercise_logging.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/muscle_inference.dart';
-
 void main() {
   group('MuscleInference.fromExerciseName', () {
     test('chest exercises do not tag back', () {
@@ -49,6 +50,133 @@ void main() {
       );
       expect(muscles, contains('Pecho'));
       expect(muscles, isNot(contains('Espalda')));
+    });
+  });
+
+  group('MuscleInference.matchesMuscleGroup', () {
+    test('hip thrust de wger en piernas aparece en filtro de gluteos', () {
+      const exercise = Exercise(
+        wgerId: 1234,
+        name: 'Hip Thrust con Barra',
+        category: 'Piernas',
+        muscles: ['Cuádriceps', 'Glúteos'],
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Glúteos'),
+        isTrue,
+      );
+    });
+
+    test('hip thrust sin metadatos de gluteos se infiere por nombre', () {
+      const exercise = Exercise(
+        wgerId: 1235,
+        name: 'Barbell Hip Thrust',
+        category: 'Piernas',
+        muscles: ['Cuádriceps'],
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Glúteos'),
+        isTrue,
+      );
+    });
+
+    test('biceps en categoria Brazos aparece en filtro Biceps', () {
+      const exercise = Exercise(
+        wgerId: 98,
+        name: 'Curl con barra',
+        category: 'Brazos',
+        muscles: ['Bíceps'],
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Bíceps'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Tríceps'),
+        isFalse,
+      );
+    });
+
+    test('triceps en categoria Brazos aparece en filtro Triceps', () {
+      const exercise = Exercise(
+        wgerId: 101,
+        name: 'Extension de triceps en polea',
+        category: 'Brazos',
+        muscles: ['Tríceps'],
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Tríceps'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Bíceps'),
+        isFalse,
+      );
+    });
+
+    test('pantorrillas en categoria Pantorrillas aparece en filtro Piernas', () {
+      const exercise = Exercise(
+        wgerId: 102,
+        name: 'Elevacion de gemelos de pie',
+        category: 'Pantorrillas',
+        muscles: ['Gastrocnemius'],
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Piernas'),
+        isTrue,
+      );
+    });
+
+    test('ejercicios cardio aparecen en filtro Cardio', () {
+      const exercise = Exercise(
+        name: 'Cardio en cinta',
+        category: 'Cardio',
+        loggingType: ExerciseLoggingType.cardio,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Cardio'),
+        isTrue,
+      );
+    });
+  });
+
+  group('MuscleInference.resolve recovery tags', () {
+    test('ejercicio Brazos sin músculos mapeados infiere bíceps por nombre', () {
+      const catalog = [
+        Exercise(
+          wgerId: 99,
+          name: 'Curl de predicador',
+          category: 'Brazos',
+          muscles: ['Brachialis'],
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Curl de predicador',
+        exerciseId: '99',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Bíceps'));
+    });
+
+    test('curl femoral no etiqueta bíceps', () {
+      expect(MuscleInference.fromExerciseName('Curl femoral sentado'), isNot(contains('Bíceps')));
+      expect(MuscleInference.fromExerciseName('Curl femoral sentado'), contains('Piernas'));
+    });
+
+    test('hand grip registra antebrazos', () {
+      expect(MuscleInference.fromExerciseName('Hand grip'), contains('Antebrazos'));
+    });
+
+    test('antebrazo de cuerda registra antebrazos', () {
+      expect(MuscleInference.fromExerciseName('Antebrazo de cuerda de pie'), contains('Antebrazos'));
     });
   });
 }

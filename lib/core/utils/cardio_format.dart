@@ -1,0 +1,84 @@
+import '../../models/exercise_logging.dart';
+
+abstract final class CardioFormat {
+  static String duration(int? seconds) {
+    if (seconds == null || seconds <= 0) return '—';
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  static int? parseDuration(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed.contains(':')) {
+      final parts = trimmed.split(':');
+      if (parts.length != 2) return null;
+      final m = int.tryParse(parts[0]);
+      final s = int.tryParse(parts[1]);
+      if (m == null || s == null || m < 0 || s < 0 || s >= 60) return null;
+      return m * 60 + s;
+    }
+    return int.tryParse(trimmed);
+  }
+
+  static String distance(double? meters, String unitSystem) {
+    if (meters == null || meters <= 0) return '—';
+    if (unitSystem == 'imperial') {
+      final miles = meters / 1609.344;
+      return '${miles.toStringAsFixed(2)} mi';
+    }
+    final km = meters / 1000;
+    return '${km.toStringAsFixed(2)} km';
+  }
+
+  static double? parseDistanceMeters(String input, String unitSystem) {
+    final parsed = double.tryParse(input.replaceAll(',', '.'));
+    if (parsed == null || parsed <= 0) return null;
+    if (unitSystem == 'imperial') return parsed * 1609.344;
+    return parsed * 1000;
+  }
+
+  static String distanceInputLabel(String unitSystem) {
+    return unitSystem == 'imperial' ? 'mi' : 'km';
+  }
+
+  static String incline(double? percent) {
+    if (percent == null || percent <= 0) return '—';
+    return '${percent.toStringAsFixed(1)}%';
+  }
+
+  static String difficulty(double? level) {
+    if (level == null || level <= 0) return '—';
+    if (level % 1 == 0) return level.toInt().toString();
+    return level.toStringAsFixed(1);
+  }
+
+  static String steps(int? count) {
+    if (count == null || count <= 0) return '—';
+    return count.toString();
+  }
+
+  static String setSummary({
+    required CardioLoggingConfig config,
+    required String unitSystem,
+    int? durationSeconds,
+    double? distanceMeters,
+    double? inclinePercent,
+    int? stepCount,
+  }) {
+    final parts = <String>[];
+    if (config.tracksDuration) parts.add(duration(durationSeconds));
+    if (config.tracksDistance) parts.add(distance(distanceMeters, unitSystem));
+    if (config.tracksIncline) parts.add(incline(inclinePercent));
+    if (config.tracksDifficulty) {
+      final level = difficulty(inclinePercent);
+      if (level != '—') parts.add('$level lvl');
+    }
+    if (config.tracksSteps) {
+      final stepsText = CardioFormat.steps(stepCount);
+      if (stepsText != '—') parts.add('$stepsText pasos');
+    }
+    return parts.where((p) => p != '—').join(' · ');
+  }
+}

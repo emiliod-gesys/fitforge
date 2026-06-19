@@ -1,4 +1,5 @@
 import 'workout.dart';
+import '../core/utils/milestones.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/workout_calorie_estimator.dart';
@@ -38,6 +39,7 @@ class WorkoutSummaryData {
   final bool isMaxWeightRecord;
   final XpAwardResult? xpAward;
   final WorkoutCalorieEstimate calorieEstimate;
+  final List<MilestoneUnlock> newMilestoneUnlocks;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -55,11 +57,16 @@ class WorkoutSummaryData {
     this.isMaxWeightRecord = false,
     this.xpAward,
     this.calorieEstimate = const WorkoutCalorieEstimate.unavailable(),
+    this.newMilestoneUnlocks = const [],
   });
 
   bool get hasCalorieEstimate => calorieEstimate.isAvailable;
 
   bool get hasPreviousComparison => previousSameRoutine != null;
+
+  bool get leveledUp => xpAward?.leveledUp ?? false;
+
+  bool get hasAchievements => leveledUp || newMilestoneUnlocks.isNotEmpty;
 
   List<String> get brokenRecords {
     final records = <String>[];
@@ -79,6 +86,7 @@ abstract final class WorkoutSummaryBuilder {
     List<Exercise>? exerciseCatalog,
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
+    List<MilestoneUnlock> newMilestoneUnlocks = const [],
   }) {
     final totalVolumeKg = workout.exercises.fold<double>(
       0,
@@ -111,6 +119,11 @@ abstract final class WorkoutSummaryBuilder {
       0,
       (sum, ex) => sum + ex.sets.where((s) => s.completed).length,
     );
+    final cardioDurationSeconds = workout.exercises
+        .expand((ex) => ex.sets)
+        .where((s) => s.completed && s.isCardio)
+        .map((s) => s.durationSeconds ?? 0)
+        .fold<int>(0, (sum, seconds) => sum + seconds);
 
     final calorieEstimate = WorkoutCalorieEstimator.estimate(
       durationMinutes: durationMinutes,
@@ -119,6 +132,7 @@ abstract final class WorkoutSummaryBuilder {
       totalReps: totalReps,
       profile: profile,
       bodyMetrics: bodyMetrics,
+      cardioDurationSeconds: cardioDurationSeconds,
     );
 
     return WorkoutSummaryData(
@@ -139,6 +153,7 @@ abstract final class WorkoutSummaryBuilder {
           maxWeightKg > prevMax,
       xpAward: xpAward,
       calorieEstimate: calorieEstimate,
+      newMilestoneUnlocks: newMilestoneUnlocks,
     );
   }
 

@@ -5,6 +5,8 @@ import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/ai_routine_preview_card.dart';
+import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 
@@ -136,14 +138,8 @@ class RoutineListScreen extends ConsumerWidget {
                         ),
                   );
 
-                  if (routine != null) {
-                    await ref.read(routineServiceProvider).createRoutine(routine);
-                    ref.invalidate(routinesProvider);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.routineGenerated)),
-                      );
-                    }
+                  if (routine != null && context.mounted) {
+                    await _showRoutinePreview(context, ref, routine);
                   }
                 } catch (e) {
                   if (context.mounted) {
@@ -157,6 +153,77 @@ class RoutineListScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _showRoutinePreview(
+    BuildContext context,
+    WidgetRef ref,
+    Routine routine,
+  ) async {
+    final l10n = context.l10n;
+    var preview = routine;
+    var isSaved = false;
+    var isDiscarded = false;
+    var isSaving = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          if (isSaved || isDiscarded) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (ctx.mounted) Navigator.pop(ctx);
+            });
+          }
+
+          return AlertDialog(
+            title: Text(l10n.generateAiRoutineTitle),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Consumer(
+                  builder: (_, ref, __) => AiRoutinePreviewCard(
+                    routine: preview,
+                    isSaved: isSaved,
+                    isDiscarded: isDiscarded,
+                    isSaving: isSaving,
+                    onSave: () async {
+                      if (isSaving) return;
+                      setDialogState(() => isSaving = true);
+                      try {
+                        await ref.read(routineServiceProvider).createRoutine(preview);
+                        ref.invalidate(routinesProvider);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.routineSavedNamed(preview.name))),
+                          );
+                        }
+                        setDialogState(() => isSaved = true);
+                      } catch (e) {
+                        setDialogState(() => isSaving = false);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.saveFailed('$e'))),
+                          );
+                        }
+                      }
+                    },
+                    onEdit: () async {
+                      final updated = await EditRoutineDialog.show(context, preview);
+                      if (updated != null) {
+                        setDialogState(() => preview = updated);
+                      }
+                    },
+                    onDiscard: () => setDialogState(() => isDiscarded = true),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

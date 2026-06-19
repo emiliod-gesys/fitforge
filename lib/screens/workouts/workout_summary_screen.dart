@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/player_level.dart';
+import '../../core/utils/player_level_badge.dart';
+import '../../core/utils/milestone_badge.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
@@ -16,6 +18,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_logo.dart';
 import '../../widgets/localized_exercise_name.dart';
+import '../../widgets/milestones_section.dart';
 
 class WorkoutSummaryScreen extends ConsumerStatefulWidget {
   final WorkoutSummaryData summary;
@@ -301,6 +304,10 @@ class _ShareCard extends StatelessWidget {
                   .toList(),
             ),
           ],
+          if (summary.hasAchievements) ...[
+            const SizedBox(height: 16),
+            _AchievementsSection(summary: summary, l10n: l10n),
+          ],
           if (summary.xpAward != null) ...[
             const SizedBox(height: 16),
             _XpAwardBanner(xpAward: summary.xpAward!, l10n: l10n),
@@ -351,15 +358,140 @@ class _XpAwardBanner extends StatelessWidget {
               style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
           ],
-          if (xpAward.leveledUp) ...[
-            const SizedBox(height: 8),
-            Text(
-              '${l10n.levelUp} ${l10n.playerLevelTitle(xpAward.after.level)}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
         ],
       ),
+    );
+  }
+}
+
+class _AchievementsSection extends StatelessWidget {
+  final WorkoutSummaryData summary;
+  final AppLocalizations l10n;
+
+  const _AchievementsSection({required this.summary, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.orange.withValues(alpha: 0.18),
+            AppColors.orange.withValues(alpha: 0.06),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.45)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.celebration, color: AppColors.orange, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.summaryAchievementsTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.orange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (summary.leveledUp && summary.xpAward != null)
+            _AchievementRow(
+              image: _LevelBadgeImage(level: summary.xpAward!.after.level),
+              title: l10n.levelUp,
+              subtitle: l10n.playerLevelTitle(summary.xpAward!.after.level),
+            ),
+          ...summary.newMilestoneUnlocks.map(
+            (unlock) => _AchievementRow(
+              image: Image.asset(
+                MilestoneBadge.assetPathForTier(unlock.tier),
+                width: 48,
+                height: 48,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.emoji_events,
+                  color: AppColors.orange,
+                  size: 36,
+                ),
+              ),
+              title: l10n.summaryMilestoneUnlocked,
+              subtitle: l10n.summaryMilestoneDetail(
+                MilestonesSection.categoryLabel(l10n, unlock.category),
+                unlock.tier,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AchievementRow extends StatelessWidget {
+  final Widget image;
+  final String title;
+  final String subtitle;
+
+  const _AchievementRow({
+    required this.image,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          SizedBox(width: 48, height: 48, child: image),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelBadgeImage extends StatelessWidget {
+  final int level;
+
+  const _LevelBadgeImage({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = PlayerLevelBadge.assetForLevel(level);
+    if (asset == null) {
+      return const Icon(Icons.military_tech, color: AppColors.orange, size: 36);
+    }
+    return Image.asset(
+      asset,
+      width: 48,
+      height: 48,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.military_tech, color: AppColors.orange, size: 36),
     );
   }
 }

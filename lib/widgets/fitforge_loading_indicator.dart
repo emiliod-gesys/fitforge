@@ -69,6 +69,7 @@ abstract final class FitForgeLoadingOverlay {
       throw StateError('Context is not mounted');
     }
 
+    final navigator = Navigator.of(context, rootNavigator: true);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -88,13 +89,16 @@ abstract final class FitForgeLoadingOverlay {
     try {
       return await task();
     } finally {
-      dismiss(context);
+      _dismissNavigator(navigator);
     }
   }
 
   static void dismiss(BuildContext context) {
     if (!context.mounted) return;
-    final navigator = Navigator.of(context, rootNavigator: true);
+    _dismissNavigator(Navigator.of(context, rootNavigator: true));
+  }
+
+  static void _dismissNavigator(NavigatorState navigator) {
     if (navigator.canPop()) {
       navigator.pop();
     }

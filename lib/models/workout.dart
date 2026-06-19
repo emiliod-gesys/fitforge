@@ -1,6 +1,10 @@
 import '../core/utils/supabase_datetime.dart';
 import '../core/utils/exercise_load.dart';
 
+import '../core/utils/supabase_datetime.dart';
+import '../core/utils/exercise_load.dart';
+import 'exercise_logging.dart';
+
 class WorkoutSet {
   final String id;
   final int setNumber;
@@ -9,6 +13,11 @@ class WorkoutSet {
   final int? rir;
   final bool completed;
   final Duration? restTaken;
+  final int? durationSeconds;
+  final double? distanceMeters;
+  final double? inclinePercent;
+  final int? steps;
+  final ExerciseLoggingType loggingType;
 
   const WorkoutSet({
     required this.id,
@@ -18,7 +27,14 @@ class WorkoutSet {
     this.rir,
     this.completed = false,
     this.restTaken,
+    this.durationSeconds,
+    this.distanceMeters,
+    this.inclinePercent,
+    this.steps,
+    this.loggingType = ExerciseLoggingType.strength,
   });
+
+  bool get isCardio => loggingType == ExerciseLoggingType.cardio;
 
   factory WorkoutSet.fromJson(Map<String, dynamic> json) {
     return WorkoutSet(
@@ -31,6 +47,11 @@ class WorkoutSet {
       restTaken: json['rest_seconds'] != null
           ? Duration(seconds: json['rest_seconds'] as int)
           : null,
+      durationSeconds: json['duration_seconds'] as int?,
+      distanceMeters: (json['distance_meters'] as num?)?.toDouble(),
+      inclinePercent: (json['incline_percent'] as num?)?.toDouble(),
+      steps: json['steps'] as int?,
+      loggingType: ExerciseLoggingType.fromJson(json['logging_type'] as String?),
     );
   }
 
@@ -41,6 +62,11 @@ class WorkoutSet {
         'rir': rir,
         'completed': completed,
         'rest_seconds': restTaken?.inSeconds,
+        if (durationSeconds != null) 'duration_seconds': durationSeconds,
+        if (distanceMeters != null) 'distance_meters': distanceMeters,
+        if (inclinePercent != null) 'incline_percent': inclinePercent,
+        if (steps != null) 'steps': steps,
+        'logging_type': loggingType.toJson(),
       };
 
   WorkoutSet copyWith({
@@ -48,6 +74,11 @@ class WorkoutSet {
     int? reps,
     int? rir,
     bool? completed,
+    int? durationSeconds,
+    double? distanceMeters,
+    double? inclinePercent,
+    int? steps,
+    ExerciseLoggingType? loggingType,
   }) {
     return WorkoutSet(
       id: id,
@@ -57,6 +88,11 @@ class WorkoutSet {
       rir: rir ?? this.rir,
       completed: completed ?? this.completed,
       restTaken: restTaken,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      distanceMeters: distanceMeters ?? this.distanceMeters,
+      inclinePercent: inclinePercent ?? this.inclinePercent,
+      steps: steps ?? this.steps,
+      loggingType: loggingType ?? this.loggingType,
     );
   }
 }

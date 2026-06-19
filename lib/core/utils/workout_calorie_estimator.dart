@@ -19,6 +19,7 @@ abstract final class WorkoutCalorieEstimator {
     required int totalReps,
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
+    int cardioDurationSeconds = 0,
   }) {
     return _estimateInternal(
       durationMinutes: durationMinutes,
@@ -27,6 +28,7 @@ abstract final class WorkoutCalorieEstimator {
       totalReps: totalReps,
       profile: profile,
       bodyMetrics: bodyMetrics,
+      cardioDurationSeconds: cardioDurationSeconds,
     );
   }
 
@@ -61,8 +63,10 @@ abstract final class WorkoutCalorieEstimator {
     required int totalReps,
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
+    int cardioDurationSeconds = 0,
   }) {
-    if (durationMinutes < 1 || completedSets < 1) {
+    if (durationMinutes < 1 ||
+        (completedSets < 1 && cardioDurationSeconds < 60)) {
       return const WorkoutCalorieEstimate.unavailable();
     }
 
@@ -71,12 +75,18 @@ abstract final class WorkoutCalorieEstimator {
     final weightKg = weight.kg;
 
     final bmr = _resolveBmr(profile, bodyMetrics, weightKg);
-    final met = _intensityMet(
+    var met = _intensityMet(
       totalVolumeKg: totalVolumeKg,
       durationMinutes: durationMinutes,
       completedSets: completedSets,
       totalReps: totalReps,
     );
+    if (cardioDurationSeconds >= 60) {
+      const cardioMet = 7.0;
+      final cardioFraction =
+          ((cardioDurationSeconds / 60) / durationMinutes).clamp(0.0, 1.0);
+      met = met * (1 - cardioFraction) + cardioMet * cardioFraction;
+    }
 
     final durationHours = durationMinutes / 60.0;
     var kcal = met * weightKg * durationHours;

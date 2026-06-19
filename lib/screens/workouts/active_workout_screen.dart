@@ -8,8 +8,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/exercise_load.dart';
+import '../../core/utils/exercise_logging_resolver.dart';
+import '../../core/utils/milestones.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/exercise_logging.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
@@ -17,12 +20,14 @@ import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
 import '../../services/exercise_service.dart';
 import '../../widgets/exercise_history_sheet.dart';
+import '../../widgets/exercise_image_viewer.dart';
 import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
 import '../../widgets/rest_timer.dart';
+import '../../widgets/cardio_set_log_tile.dart';
 import '../../widgets/set_log_tile.dart';
 import '../../widgets/workout_elapsed_timer.dart';
 import '../../widgets/active_workout_exercise_list.dart';
@@ -45,6 +50,47 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   final Set<String> _removedSetIds = {};
   final Set<String> _removedExerciseIds = {};
   bool _completing = false;
+  int _workoutSyncGeneration = 0;
+
+  Future<void> _syncActiveWorkout() async {
+    final generation = ++_workoutSyncGeneration;
+    ref.invalidate(activeWorkoutProvider);
+    await ref.read(activeWorkoutProvider.future);
+    if (!mounted || generation != _workoutSyncGeneration) return;
+    _pruneRemovedIds(ref.read(activeWorkoutProvider).valueOrNull);
+  }
+
+  void _pruneRemovedIds(Workout? workout) {
+    if (workout == null) return;
+    final exerciseIds = workout.exercises.map((e) => e.id).toSet();
+    final setIds = workout.exercises.expand((e) => e.sets).map((s) => s.id).toSet();
+    setState(() {
+      _removedExerciseIds.removeWhere((id) => !exerciseIds.contains(id));
+      _removedSetIds.removeWhere((id) => !setIds.contains(id));
+    });
+  }
+
+  Future<bool> _confirmLeaveActiveWorkout() async {
+    final l10n = context.l10n;
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.leaveActiveWorkoutTitle),
+        content: Text(l10n.leaveActiveWorkoutMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.leaveActiveWorkoutConfirm),
+          ),
+        ],
+      ),
+    );
+    return leave == true;
+  }
 
   @override
   void initState() {
@@ -87,6 +133,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         ...completedDates,
       ]);
 
+      final profile = ref.read(profileProvider).valueOrNull;
+      final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+      final milestoneTotalsBefore = await ref
+          .read(workoutServiceProvider)
+          .getMilestoneTotals(profile: profile);
+
       await ref.read(workoutServiceProvider).completeWorkout(
             workout.id,
             durationMinutes: duration,
@@ -99,13 +151,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             streakWeeks: streakWeeks,
           );
 
+      final milestoneTotalsAfter = await ref
+          .read(workoutServiceProvider)
+          .getMilestoneTotals(profile: profile);
+      final newMilestones = MilestonesCalculator.newlyUnlocked(
+        milestoneTotalsBefore,
+        milestoneTotalsAfter,
+      );
+
       final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
             routineId: workout.routineId,
             excludeWorkoutId: workout.id,
           );
-
-      final profile = ref.read(profileProvider).valueOrNull;
-      final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
 
       final summary = WorkoutSummaryBuilder.build(
         workout: workout,
@@ -115,12 +172,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         exerciseCatalog: catalog,
         profile: profile,
         bodyMetrics: bodyMetrics,
+        newMilestoneUnlocks: newMilestones,
       );
 
       ref.invalidate(workoutsProvider);
       ref.invalidate(recentWorkoutsProvider);
       ref.invalidate(workoutHistoryProvider);
-      ref.invalidate(progressWorkoutsProvider);
+      ref.invalidate(milestoneTotalsProvider);
       ref.invalidate(activeWorkoutProvider);
       ref.invalidate(personalRecordsProvider);
       ref.invalidate(muscleRecoveryProvider);
@@ -168,44 +226,64 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
     if (picked == null || !mounted) return;
 
-    String? imageUrl;
-    if (!picked.isUserCustom) {
-      imageUrl = picked.imageUrl ??
-          await ref.read(exerciseServiceProvider).resolveImageUrl(
-                ExerciseImageLookup(
-                  exerciseId: picked.id,
-                  exerciseName: picked.name,
-                ),
+    final l10n = context.l10n;
+    Workout? updated;
+
+    try {
+      updated = await FitForgeLoadingOverlay.run<Workout?>(
+        context,
+        message: l10n.addingExercise,
+        task: () async {
+          String? imageUrl;
+          if (!picked.isUserCustom) {
+            imageUrl = picked.imageUrl ??
+                await ref.read(exerciseServiceProvider).resolveImageUrl(
+                      ExerciseImageLookup(
+                        exerciseId: picked.id,
+                        exerciseName: picked.name,
+                      ),
+                    );
+          }
+
+          await ref.read(workoutServiceProvider).addExerciseToWorkout(
+                workout.id,
+                exerciseId: picked.id,
+                exerciseName: picked.name,
+                imageUrl: imageUrl,
+                loggingType: picked.loggingType,
               );
+
+          await _syncActiveWorkout();
+          return ref.read(activeWorkoutProvider).valueOrNull;
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorGeneric('$e'))),
+        );
+      }
+      return;
     }
 
-    await ref.read(workoutServiceProvider).addExerciseToWorkout(
-          workout.id,
-          exerciseId: picked.id,
-          exerciseName: picked.name,
-          imageUrl: imageUrl,
-        );
-
-    ref.invalidate(activeWorkoutProvider);
-    final updated = await ref.read(activeWorkoutProvider.future);
     if (!mounted || updated == null) return;
 
+    final newIndex = updated.exercises.length - 1;
     setState(() {
-      _currentExerciseIndex = updated.exercises.length - 1;
+      _currentExerciseIndex = newIndex;
       _showExerciseList = true;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.exerciseAdded(picked.name))),
+      SnackBar(content: Text(l10n.exerciseAdded(picked.name))),
     );
   }
 
   Future<void> _removeExercise(WorkoutExercise exercise) async {
     try {
       await ref.read(workoutServiceProvider).removeExerciseFromWorkout(exercise.id);
-      ref.invalidate(activeWorkoutProvider);
+      await _syncActiveWorkout();
       if (mounted) {
         setState(() {
-          _removedExerciseIds.remove(exercise.id);
           _clampExerciseIndex(
             ref.read(activeWorkoutProvider).valueOrNull?.exercises.length ?? 0,
           );
@@ -256,7 +334,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           newImageUrl: imageUrl,
         );
 
-    ref.invalidate(activeWorkoutProvider);
+    await _syncActiveWorkout();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.changedTo(picked.name))),
@@ -278,7 +356,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     final unitSystem = ref.watch(unitSystemProvider);
     final exerciseCatalog = ref.watch(exercisesProvider).valueOrNull ?? [];
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (await _confirmLeaveActiveWorkout() && context.mounted) {
+          context.pop();
+        }
+      },
+      child: Scaffold(
       appBar: activeAsync.whenOrNull(
         data: (workout) {
           if (workout == null) return null;
@@ -289,6 +375,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           return FitForgeAppBar(
             title: l10n.training,
             showWordmark: !inExerciseView,
+            automaticallyImplyLeading: false,
             leading: inExerciseView
                 ? IconButton(
                     icon: const Icon(Icons.list),
@@ -316,10 +403,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             ],
           );
         },
-      ) ?? FitForgeAppBar(title: l10n.training),
+      ) ?? FitForgeAppBar(title: l10n.training, automaticallyImplyLeading: false),
       body: activeAsync.when(
+        skipLoadingOnReload: true,
+        skipLoadingOnRefresh: true,
         data: (workout) {
           if (workout == null) {
+            if (activeAsync.isLoading || activeAsync.isRefreshing) {
+              return const FitForgeLoadingScreen();
+            }
             return Center(child: Text(l10n.noActiveWorkout));
           }
 
@@ -366,6 +458,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
               .where((s) => !_removedSetIds.contains(s.id))
               .toList();
           final restSession = _restTimerKey;
+          final isCardio = ExerciseLoggingResolver.isCardioExercise(
+            exerciseId: exercise.exerciseId,
+            exerciseName: exercise.exerciseName,
+            catalog: exerciseCatalog,
+            sets: sortedSets,
+          );
+          final cardioConfig = ExerciseLoggingResolver.cardioConfigFor(
+            exerciseId: exercise.exerciseId,
+            exerciseName: exercise.exerciseName,
+            catalog: exerciseCatalog,
+          );
 
           return Column(
             children: [
@@ -388,6 +491,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                       height: 160,
                       fullWidth: true,
                       borderRadius: BorderRadius.circular(16),
+                      onTap: () => ExerciseImageViewer.open(
+                        context,
+                        exerciseId: exercise.exerciseId,
+                        exerciseName: exercise.exerciseName,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     LocalizedExerciseName(
@@ -399,59 +507,83 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                           ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: RestTimeSelector(
-                            selectedSeconds: _restSeconds,
-                            onChanged: _onRestSecondsChanged,
-                          ),
+                    if (!isCardio) ...[
+                      RestTimeSelector(
+                        selectedSeconds: _restSeconds,
+                        onChanged: _onRestSecondsChanged,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton.filledTonal(
+                        tooltip: l10n.exerciseHistory,
+                        onPressed: () => ExerciseHistorySheet.show(
+                          context,
+                          exerciseId: exercise.exerciseId,
+                          exerciseName: exercise.exerciseName,
+                          excludeWorkoutId: workout.id,
                         ),
-                        const SizedBox(width: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 22),
-                          child: IconButton.filledTonal(
-                            tooltip: l10n.exerciseHistory,
-                            onPressed: () => ExerciseHistorySheet.show(
-                              context,
-                              exerciseId: exercise.exerciseId,
-                              exerciseName: exercise.exerciseName,
-                              excludeWorkoutId: workout.id,
-                            ),
-                            icon: const Icon(Icons.history),
-                          ),
-                        ),
-                      ],
+                        icon: const Icon(Icons.history),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     ...sortedSets.asMap().entries.map(
-                      (entry) => SetLogTile(
-                        key: ValueKey(entry.value.id),
-                        set: entry.value,
-                        unitSystem: unitSystem,
-                        exerciseName: exercise.exerciseName,
-                        perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
-                          exercise.exerciseId,
-                          exerciseCatalog,
-                        ),
-                        isLast: entry.key == sortedSets.length - 1,
-                        onValidationError: (message) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(message)),
+                      (entry) {
+                        if (isCardio) {
+                          return CardioSetLogTile(
+                            key: ValueKey(entry.value.id),
+                            set: entry.value,
+                            unitSystem: unitSystem,
+                            config: cardioConfig,
+                            isLast: entry.key == sortedSets.length - 1,
+                            onValidationError: (message) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                            },
+                            onChanged: (updated) => _logSet(
+                              workout,
+                              exercise,
+                              updated,
+                              wasAlreadyCompleted: entry.value.completed,
+                              isCardio: true,
+                              cardioConfig: cardioConfig,
+                            ),
+                            onDelete: () {
+                              setState(() => _removedSetIds.add(entry.value.id));
+                              unawaited(_deleteSet(workout, exercise, entry.value));
+                            },
                           );
-                        },
-                        onChanged: (updated) => _logSet(
-                          workout,
-                          exercise,
-                          updated,
-                          wasAlreadyCompleted: entry.value.completed,
-                        ),
-                        onDelete: () {
-                          setState(() => _removedSetIds.add(entry.value.id));
-                          unawaited(_deleteSet(workout, exercise, entry.value));
-                        },
-                      ),
+                        }
+                        return SetLogTile(
+                          key: ValueKey(entry.value.id),
+                          set: entry.value,
+                          unitSystem: unitSystem,
+                          exerciseName: exercise.exerciseName,
+                          perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
+                            exercise.exerciseId,
+                            exerciseCatalog,
+                          ),
+                          isLast: entry.key == sortedSets.length - 1,
+                          onValidationError: (message) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(message)),
+                            );
+                          },
+                          onChanged: (updated) => _logSet(
+                            workout,
+                            exercise,
+                            updated,
+                            wasAlreadyCompleted: entry.value.completed,
+                            isCardio: false,
+                          ),
+                          onDelete: () {
+                            setState(() => _removedSetIds.add(entry.value.id));
+                            unawaited(_deleteSet(workout, exercise, entry.value));
+                          },
+                        );
+                      },
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
@@ -496,6 +628,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         loading: () => const FitForgeLoadingScreen(),
         error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
       ),
+    ),
     );
   }
 
@@ -504,30 +637,60 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     WorkoutExercise exercise,
     WorkoutSet set, {
     required bool wasAlreadyCompleted,
+    required bool isCardio,
+    CardioLoggingConfig? cardioConfig,
   }) async {
     if (!wasAlreadyCompleted) {
-      if (set.weight == null || set.weight! <= 0) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.weightRequired)),
-          );
+      if (isCardio) {
+        final config = cardioConfig ??
+            ExerciseLoggingResolver.cardioConfigFor(
+              exerciseId: exercise.exerciseId,
+              exerciseName: exercise.exerciseName,
+              catalog: ref.read(exercisesProvider).valueOrNull ?? [],
+            );
+        if (!config.isSetComplete(
+          durationSeconds: set.durationSeconds,
+          distanceMeters: set.distanceMeters,
+          inclinePercent: set.inclinePercent,
+          steps: set.steps,
+        )) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.cardioMetricRequired)),
+            );
+          }
+          return;
         }
-        return;
-      }
-      if (set.reps <= 0) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.repsRequired)),
-          );
+      } else {
+        if (set.weight == null || set.weight! <= 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.weightRequired)),
+            );
+          }
+          return;
         }
-        return;
+        if (set.reps <= 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.repsRequired)),
+            );
+          }
+          return;
+        }
       }
     }
 
-    await ref.read(workoutServiceProvider).logSet(exercise.id, set.copyWith(completed: true));
-    ref.invalidate(activeWorkoutProvider);
+    await ref.read(workoutServiceProvider).logSet(
+          exercise.id,
+          set.copyWith(
+            completed: true,
+            loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
+          ),
+        );
+    await _syncActiveWorkout();
 
-    if (!wasAlreadyCompleted) {
+    if (!wasAlreadyCompleted && !isCardio) {
       _startRestTimer();
     }
   }
@@ -537,15 +700,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     WorkoutExercise exercise,
     WorkoutSet set,
   ) async {
+    final setId = set.id;
     try {
-      await ref.read(workoutServiceProvider).deleteSet(exercise.id, set.id);
-      ref.invalidate(activeWorkoutProvider);
-      if (mounted) {
-        setState(() => _removedSetIds.remove(set.id));
-      }
+      await ref.read(workoutServiceProvider).deleteSet(exercise.id, setId);
+      await _syncActiveWorkout();
     } catch (e) {
       if (mounted) {
-        setState(() => _removedSetIds.remove(set.id));
+        setState(() => _removedSetIds.remove(setId));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.setDeleteFailed('$e'))),
         );
@@ -566,14 +727,27 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             ? (setIndex < previous.length ? previous[setIndex] : previous.last)
             : null);
 
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+    final isCardio = ExerciseLoggingResolver.isCardioExercise(
+      exerciseId: exercise.exerciseId,
+      exerciseName: exercise.exerciseName,
+      catalog: catalog,
+      sets: sorted,
+    );
+
     final newSet = WorkoutSet(
       id: const Uuid().v4(),
       setNumber: sorted.length + 1,
-      weight: prevSet?.weight,
-      reps: prevSet?.reps ?? 10,
+      weight: isCardio ? null : prevSet?.weight,
+      reps: isCardio ? 0 : (prevSet?.reps ?? 10),
+      durationSeconds: isCardio ? prevSet?.durationSeconds : null,
+      distanceMeters: isCardio ? prevSet?.distanceMeters : null,
+      inclinePercent: isCardio ? prevSet?.inclinePercent : null,
+      steps: isCardio ? prevSet?.steps : null,
+      loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
     );
     await ref.read(workoutServiceProvider).logSet(exercise.id, newSet);
-    ref.invalidate(activeWorkoutProvider);
+    await _syncActiveWorkout();
   }
 }
 

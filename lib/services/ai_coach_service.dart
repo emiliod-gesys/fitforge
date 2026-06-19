@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
+import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
 import '../models/body_metric.dart';
 import '../models/exercise.dart';
+import '../models/exercise_logging.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
@@ -75,11 +77,59 @@ class AiCoachService {
       'muestrame una rutina',
       'necesito una rutina',
       'quiero una rutina',
+      'plan de entrenamiento',
+      'programa de entrenamiento',
     ];
 
     if (triggers.any(m.contains)) return true;
 
+    if (RegExp(r'rutina\s+(de|para)\b').hasMatch(m)) return true;
+
+    if ((m.contains('editable') || m.contains('editar') || m.contains('revisar')) &&
+        (m.contains('rutina') || m.contains('plan'))) {
+      return true;
+    }
+
+    final muscles = parseTargetMuscles(message);
+    if (muscles.isNotEmpty && _hasTrainingPlanIntent(m)) return true;
+
     return m.contains('rutina') && _hasRoutineCreateVerb(m);
+  }
+
+  static bool _hasTrainingPlanIntent(String m) {
+    return _hasRoutineCreateVerb(m) ||
+        m.contains('entren') ||
+        m.contains('ejercicios para') ||
+        m.contains('qué hago') ||
+        m.contains('que hago') ||
+        m.contains('rutina') ||
+        m.contains('plan');
+  }
+
+  static const _routineRules = '''
+REGLAS OBLIGATORIAS:
+- Entre 4 y 8 ejercicios DIFERENTES; nunca repitas el mismo ejercicio.
+- Usa SOLO nombres EXACTOS copiados de la lista proporcionada (todos tienen imagen ilustrativa).
+- No uses nombres genéricos de músculo (ej. "bíceps", "tríceps", "pecho") ni inventados.
+- No inventes nombres como "ejercicio de prueba" o "ejercicio 1".
+- Si el objetivo incluye varios músculos, incluye ejercicios variados para cada uno.
+- Para bíceps y tríceps: mínimo 2 ejercicios de bíceps y 2 de tríceps, todos distintos.
+''';
+
+  /// Intenta extraer una rutina JSON embebida en una respuesta de chat libre.
+  Routine? tryParseRoutineFromResponse(
+    String response, {
+    required List<String> targetMuscles,
+    UserProfile? profile,
+    List<Exercise>? catalog,
+  }) {
+    final routine = _parseRoutineJson(
+      response,
+      targetMuscles: targetMuscles,
+      profile: profile,
+    );
+    if (routine == null || catalog == null) return routine;
+    return ExerciseMatcher.enrich(routine, catalog);
   }
 
   static int parseDurationMinutes(String message) {
@@ -199,7 +249,8 @@ $context
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
-    final names = _catalogNamesForMuscles(catalog, targetMuscles);
+    final aiCatalog = AiRoutineSanitizer.catalogForAi(catalog);
+    final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
     final userContext = await _loadUserContext(
       profile: profile,
       bodyMetrics: bodyMetrics,
@@ -218,6 +269,8 @@ Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y e
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
 $userContext
+
+$_routineRules
 
 IMPORTANTE: usa SOLO nombres de ejercicio de esta lista (copia el nombre exacto):
 ${names.take(100).join('\n')}
@@ -238,6 +291,7 @@ Responde SOLO con JSON válido (sin markdown ni texto extra):
       systemPrompt: '''
 Eres un generador de rutinas de gimnasio para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+$_routineRules
 ''',
       userPrompt: prompt,
     );
@@ -263,7 +317,9 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
   }) async {
-    final names = catalog != null ? _catalogNamesForMuscles(catalog, targetMuscles) : <String>[];
+    final names = catalog != null
+        ? AiRoutineSanitizer.namesForMuscles(AiRoutineSanitizer.catalogForAi(catalog), targetMuscles)
+        : <String>[];
     final userContext = await _loadUserContext(
       profile: profile,
       bodyMetrics: bodyMetrics,
@@ -284,13 +340,16 @@ Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificul
 $userContext
 $catalogHint
 
+$_routineRules
+
 Responde SOLO con JSON válido (sin markdown):
 {
   "name": "nombre de la rutina",
   "description": "breve descripción",
   "target_muscles": ${jsonEncode(targetMuscles)},
   "exercises": [
-    {"name": "nombre ejercicio", "sets": 3, "reps": 10, "weight_kg": null, "rest_seconds": 90}
+    {"name": "nombre ejercicio", "sets": 3, "reps": 10, "weight_kg": null, "rest_seconds": 90, "logging_type": "strength"},
+    {"name": "cinta", "sets": 1, "logging_type": "cardio", "duration_seconds": 1200, "distance_meters": 3000, "incline_percent": 5, "rest_seconds": 0}
   ]
 }
 ''';
@@ -300,6 +359,7 @@ Responde SOLO con JSON válido (sin markdown):
       systemPrompt: '''
 Eres un generador de rutinas de gimnasio para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+$_routineRules
 ''',
       userPrompt: prompt,
     );
@@ -359,15 +419,22 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 
       final exercises = (json['exercises'] as List? ?? []).asMap().entries.map((e) {
         final ex = e.value as Map<String, dynamic>;
+        final loggingType = ExerciseLoggingType.fromJson(ex['logging_type'] as String?);
+        final isCardio = loggingType == ExerciseLoggingType.cardio;
         return RoutineExercise(
           id: '',
           exerciseId: ex['name'] as String? ?? '',
           exerciseName: ex['name'] as String? ?? '',
           orderIndex: e.key,
           targetSets: ex['sets'] as int? ?? AppConstants.defaultSets,
-          targetReps: ex['reps'] as int? ?? AppConstants.defaultReps,
-          targetWeight: (ex['weight_kg'] as num?)?.toDouble(),
-          restSeconds: ex['rest_seconds'] as int? ?? AppConstants.defaultRestSeconds,
+          targetReps: isCardio ? 0 : (ex['reps'] as int? ?? AppConstants.defaultReps),
+          targetWeight: isCardio ? null : (ex['weight_kg'] as num?)?.toDouble(),
+          restSeconds: isCardio ? 0 : (ex['rest_seconds'] as int? ?? AppConstants.defaultRestSeconds),
+          loggingType: loggingType,
+          targetDurationSeconds: ex['duration_seconds'] as int?,
+          targetDistanceMeters: (ex['distance_meters'] as num?)?.toDouble(),
+          targetInclinePercent: (ex['incline_percent'] as num?)?.toDouble(),
+          targetSteps: ex['steps'] as int?,
         );
       }).toList();
 
@@ -390,26 +457,10 @@ Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
   }
 
   List<String> _catalogNamesForMuscles(List<Exercise> catalog, List<String> targetMuscles) {
-    if (targetMuscles.isEmpty) {
-      return catalog.map((e) => e.name).toList();
-    }
-
-    final matches = catalog.where((e) {
-      final category = e.category.toLowerCase();
-      final muscles = e.muscles.map((m) => m.toLowerCase()).join(' ');
-      for (final target in targetMuscles) {
-        final t = target.toLowerCase();
-        if (category.contains(t) || muscles.contains(t)) return true;
-        if (t == 'piernas' && (category.contains('pierna') || category.contains('leg'))) {
-          return true;
-        }
-        if (t == 'pecho' && category.contains('pecho')) return true;
-        if (t == 'espalda' && category.contains('espalda')) return true;
-      }
-      return false;
-    }).map((e) => e.name).toList();
-
-    return matches.isEmpty ? catalog.map((e) => e.name).toList() : matches;
+    return AiRoutineSanitizer.namesForMuscles(
+      AiRoutineSanitizer.catalogForAi(catalog),
+      targetMuscles,
+    );
   }
 
   Future<String> _loadUserContext({

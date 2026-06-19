@@ -79,6 +79,10 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/player_levels/
+    - assets/images/player_levels/transparent/
+    - assets/images/milestones/
+    - assets/images/milestones/transparent/
     - assets/images/avatars/
     - assets/sounds/
     - assets/animations/

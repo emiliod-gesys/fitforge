@@ -1,3 +1,5 @@
+import 'exercise_logging.dart';
+
 class RoutineExercise {
   final String id;
   final String exerciseId;
@@ -8,6 +10,11 @@ class RoutineExercise {
   final double? targetWeight;
   final int restSeconds;
   final String? imageUrl;
+  final ExerciseLoggingType loggingType;
+  final int? targetDurationSeconds;
+  final double? targetDistanceMeters;
+  final double? targetInclinePercent;
+  final int? targetSteps;
 
   const RoutineExercise({
     required this.id,
@@ -19,7 +26,14 @@ class RoutineExercise {
     this.targetWeight,
     this.restSeconds = 90,
     this.imageUrl,
+    this.loggingType = ExerciseLoggingType.strength,
+    this.targetDurationSeconds,
+    this.targetDistanceMeters,
+    this.targetInclinePercent,
+    this.targetSteps,
   });
+
+  bool get isCardio => loggingType == ExerciseLoggingType.cardio;
 
   factory RoutineExercise.fromJson(Map<String, dynamic> json) {
     return RoutineExercise(
@@ -32,6 +46,11 @@ class RoutineExercise {
       targetWeight: (json['target_weight'] as num?)?.toDouble(),
       restSeconds: json['rest_seconds'] as int? ?? 90,
       imageUrl: json['image_url'] as String?,
+      loggingType: ExerciseLoggingType.fromJson(json['logging_type'] as String?),
+      targetDurationSeconds: json['target_duration_seconds'] as int?,
+      targetDistanceMeters: (json['target_distance_meters'] as num?)?.toDouble(),
+      targetInclinePercent: (json['target_incline_percent'] as num?)?.toDouble(),
+      targetSteps: json['target_steps'] as int?,
     );
   }
 
@@ -45,7 +64,45 @@ class RoutineExercise {
         'target_weight': targetWeight,
         'rest_seconds': restSeconds,
         'image_url': imageUrl,
+        'logging_type': loggingType.toJson(),
+        if (targetDurationSeconds != null) 'target_duration_seconds': targetDurationSeconds,
+        if (targetDistanceMeters != null) 'target_distance_meters': targetDistanceMeters,
+        if (targetInclinePercent != null) 'target_incline_percent': targetInclinePercent,
+        if (targetSteps != null) 'target_steps': targetSteps,
       };
+
+  RoutineExercise copyWith({
+    String? exerciseId,
+    String? exerciseName,
+    int? orderIndex,
+    int? targetSets,
+    int? targetReps,
+    double? targetWeight,
+    int? restSeconds,
+    String? imageUrl,
+    ExerciseLoggingType? loggingType,
+    int? targetDurationSeconds,
+    double? targetDistanceMeters,
+    double? targetInclinePercent,
+    int? targetSteps,
+  }) {
+    return RoutineExercise(
+      id: id,
+      exerciseId: exerciseId ?? this.exerciseId,
+      exerciseName: exerciseName ?? this.exerciseName,
+      orderIndex: orderIndex ?? this.orderIndex,
+      targetSets: targetSets ?? this.targetSets,
+      targetReps: targetReps ?? this.targetReps,
+      targetWeight: targetWeight ?? this.targetWeight,
+      restSeconds: restSeconds ?? this.restSeconds,
+      imageUrl: imageUrl ?? this.imageUrl,
+      loggingType: loggingType ?? this.loggingType,
+      targetDurationSeconds: targetDurationSeconds ?? this.targetDurationSeconds,
+      targetDistanceMeters: targetDistanceMeters ?? this.targetDistanceMeters,
+      targetInclinePercent: targetInclinePercent ?? this.targetInclinePercent,
+      targetSteps: targetSteps ?? this.targetSteps,
+    );
+  }
 }
 
 class Routine {
@@ -91,4 +148,24 @@ class Routine {
         'target_muscles': targetMuscles,
         'is_ai_generated': isAiGenerated,
       };
+
+  Routine copyWith({
+    String? name,
+    String? description,
+    List<String>? targetMuscles,
+    List<RoutineExercise>? exercises,
+    bool? isAiGenerated,
+  }) {
+    return Routine(
+      id: id,
+      userId: userId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      targetMuscles: targetMuscles ?? this.targetMuscles,
+      exercises: exercises ?? this.exercises,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      isAiGenerated: isAiGenerated ?? this.isAiGenerated,
+    );
+  }
 }

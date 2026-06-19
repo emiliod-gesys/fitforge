@@ -2,6 +2,14 @@ import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
 import 'workout_calorie_estimator.dart';
+import 'workout_day_utils.dart';
+
+class DailyVolume {
+  final DateTime date;
+  final double volumeKg;
+
+  const DailyVolume({required this.date, required this.volumeKg});
+}
 
 class ProgressStats {
   final int workouts7d;
@@ -43,10 +51,10 @@ abstract final class ProgressStatsCalculator {
     final last7d = completed.where((w) => w.completedAt!.isAfter(cutoff7d));
 
     return ProgressStats(
-      workouts7d: last7d.length,
+      workouts7d: WorkoutDayUtils.uniqueDayCountFromWorkouts(last7d),
       volume7dKg: _sumVolume(last7d),
       calories7d: _sumCalories(last7d, profile: profile, bodyMetrics: bodyMetrics),
-      workoutsTotal: completed.length,
+      workoutsTotal: WorkoutDayUtils.uniqueDayCountFromWorkouts(completed),
       volumeTotalKg: _sumVolume(completed),
       caloriesTotal: _sumCalories(completed, profile: profile, bodyMetrics: bodyMetrics),
     );
@@ -54,6 +62,34 @@ abstract final class ProgressStatsCalculator {
 
   static double _sumVolume(Iterable<Workout> workouts) {
     return workouts.fold<double>(0, (sum, w) => sum + w.totalVolume);
+  }
+
+  /// Suma el volumen por día dentro de una ventana fija de [dayCount] días (incluye hoy).
+  static List<DailyVolume> volumeByDayLastDays(
+    Iterable<Workout> workouts, {
+    required int dayCount,
+  }) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = today.subtract(Duration(days: dayCount - 1));
+
+    final byDay = <DateTime, double>{
+      for (var i = 0; i < dayCount; i++) start.add(Duration(days: i)): 0,
+    };
+
+    for (final workout in workouts) {
+      final completed = workout.completedAt;
+      if (completed == null) continue;
+      final local = completed.toLocal();
+      final day = DateTime(local.year, local.month, local.day);
+      if (day.isBefore(start) || day.isAfter(today)) continue;
+      byDay[day] = (byDay[day] ?? 0) + workout.totalVolume;
+    }
+
+    return byDay.entries
+        .map((e) => DailyVolume(date: e.key, volumeKg: e.value))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
   }
 
   static int _sumCalories(

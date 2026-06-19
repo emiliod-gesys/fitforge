@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
+import '../models/exercise_logging.dart';
 import '../providers/app_providers.dart';
 
 class CreateCustomExerciseSheet extends ConsumerStatefulWidget {
@@ -37,6 +38,13 @@ class _CreateCustomExerciseSheetState extends ConsumerState<CreateCustomExercise
   final _selectedMuscles = <String>{};
   XFile? _photo;
   bool _perArmWeight = false;
+  ExerciseLoggingType _loggingType = ExerciseLoggingType.strength;
+  CardioPreset _cardioPreset = CardioPreset.treadmill;
+  final _enabledMetrics = <CardioMetric>{
+    CardioMetric.duration,
+    CardioMetric.distance,
+    CardioMetric.incline,
+  };
   bool _saving = false;
 
   @override
@@ -69,6 +77,12 @@ class _CreateCustomExerciseSheetState extends ConsumerState<CreateCustomExercise
         name: name,
         muscles: _selectedMuscles.toList()..sort(),
         perArmWeight: _perArmWeight,
+        loggingType: _loggingType,
+        cardioConfig: _loggingType == ExerciseLoggingType.cardio
+            ? (_cardioPreset == CardioPreset.custom
+                ? CardioLoggingConfig(_enabledMetrics)
+                : CardioLoggingConfig.fromPreset(_cardioPreset))
+            : null,
         photo: _photo,
       );
       repo.clearCache();
@@ -161,16 +175,81 @@ class _CreateCustomExerciseSheetState extends ConsumerState<CreateCustomExercise
             decoration: InputDecoration(labelText: l10n.customExerciseName),
           ),
           const SizedBox(height: 8),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.customExercisePerArmWeight),
-            subtitle: Text(
-              l10n.customExercisePerArmWeightHint,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
-            ),
-            value: _perArmWeight,
-            onChanged: _saving ? null : (v) => setState(() => _perArmWeight = v),
+          SegmentedButton<ExerciseLoggingType>(
+            segments: [
+              ButtonSegment(value: ExerciseLoggingType.strength, label: Text(l10n.exerciseTypeStrength)),
+              ButtonSegment(value: ExerciseLoggingType.cardio, label: Text(l10n.exerciseTypeCardio)),
+            ],
+            selected: {_loggingType},
+            onSelectionChanged: _saving
+                ? null
+                : (selection) => setState(() {
+                      _loggingType = selection.first;
+                      if (_loggingType == ExerciseLoggingType.cardio) {
+                        _perArmWeight = false;
+                      }
+                    }),
           ),
+          if (_loggingType == ExerciseLoggingType.strength) ...[
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.customExercisePerArmWeight),
+              subtitle: Text(
+                l10n.customExercisePerArmWeightHint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+              ),
+              value: _perArmWeight,
+              onChanged: _saving ? null : (v) => setState(() => _perArmWeight = v),
+            ),
+          ],
+          if (_loggingType == ExerciseLoggingType.cardio) ...[
+            const SizedBox(height: 12),
+            DropdownButtonFormField<CardioPreset>(
+              value: _cardioPreset,
+              decoration: InputDecoration(labelText: l10n.exerciseTypeCardio),
+              items: [
+                DropdownMenuItem(value: CardioPreset.treadmill, child: Text(l10n.cardioPresetTreadmill)),
+                DropdownMenuItem(value: CardioPreset.elliptical, child: Text(l10n.cardioPresetElliptical)),
+                DropdownMenuItem(value: CardioPreset.bike, child: Text(l10n.cardioPresetBike)),
+                DropdownMenuItem(value: CardioPreset.stairClimber, child: Text(l10n.cardioPresetStair)),
+                DropdownMenuItem(value: CardioPreset.rowing, child: Text(l10n.cardioPresetRowing)),
+                DropdownMenuItem(value: CardioPreset.custom, child: Text(l10n.cardioPresetCustom)),
+              ],
+              onChanged: _saving
+                  ? null
+                  : (v) => setState(() {
+                        _cardioPreset = v ?? CardioPreset.treadmill;
+                        if (_cardioPreset != CardioPreset.custom) {
+                          _enabledMetrics
+                            ..clear()
+                            ..addAll(CardioLoggingConfig.fromPreset(_cardioPreset).enabledMetrics);
+                        }
+                      }),
+            ),
+            if (_cardioPreset == CardioPreset.custom) ...[
+              const SizedBox(height: 8),
+              Text(l10n.cardioMetricsLabel, style: Theme.of(context).textTheme.labelLarge),
+              Wrap(
+                spacing: 8,
+                children: CardioMetric.values.map((metric) {
+                  final selected = _enabledMetrics.contains(metric);
+                  return FilterChip(
+                    label: Text(_metricLabel(l10n, metric)),
+                    selected: selected,
+                    onSelected: _saving
+                        ? null
+                        : (_) => setState(() {
+                              if (selected) {
+                                _enabledMetrics.remove(metric);
+                              } else {
+                                _enabledMetrics.add(metric);
+                              }
+                            }),
+                  );
+                }).toList(),
+              ),
+            ],
+          ],
           const SizedBox(height: 16),
           Text(l10n.customExerciseMuscles, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 8),
@@ -224,6 +303,21 @@ class _CreateCustomExerciseSheetState extends ConsumerState<CreateCustomExercise
         ],
       ),
     );
+  }
+
+  String _metricLabel(dynamic l10n, CardioMetric metric) {
+    switch (metric) {
+      case CardioMetric.duration:
+        return l10n.cardioDuration;
+      case CardioMetric.distance:
+        return l10n.cardioDistance;
+      case CardioMetric.incline:
+        return l10n.cardioIncline;
+      case CardioMetric.difficulty:
+        return l10n.cardioDifficulty;
+      case CardioMetric.steps:
+        return l10n.cardioSteps;
+    }
   }
 }
 

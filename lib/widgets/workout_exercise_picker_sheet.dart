@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../core/utils/muscle_inference.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -41,22 +42,15 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
   String? _muscleFilter;
   bool _customOnly = false;
 
-  bool _matchesMuscleFilter(Exercise exercise, String muscle) {
-    if (exercise.category == muscle) return true;
-
-    final group = muscle.toLowerCase();
-    return exercise.muscles.any((m) {
-      final value = m.toLowerCase();
-      return value.contains(group) || group.contains(value);
-    });
-  }
-
   List<Exercise> _filterExercises(List<Exercise> exercises) {
     return exercises.where((e) {
       if (widget.excludeExerciseIds.contains(e.id)) return false;
       if (_customOnly && !e.isUserCustom) return false;
       if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search)) return false;
-      if (_muscleFilter != null && !_matchesMuscleFilter(e, _muscleFilter!)) return false;
+      if (_muscleFilter != null &&
+          !MuscleInference.matchesMuscleGroup(exercise: e, muscleGroup: _muscleFilter!)) {
+        return false;
+      }
       return true;
     }).toList();
   }
@@ -153,9 +147,9 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                           child: FilterChip(
                             label: Text(l10n.myCustomExercises),
                             selected: _customOnly,
-                            onSelected: (_) => setState(() {
-                              _customOnly = true;
-                              _muscleFilter = null;
+                            onSelected: (selected) => setState(() {
+                              _customOnly = selected;
+                              if (selected) _muscleFilter = null;
                             }),
                           ),
                         ),
@@ -165,7 +159,10 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                             child: FilterChip(
                               label: Text(l10n.muscleLabel(muscle)),
                               selected: _muscleFilter == muscle,
-                              onSelected: (_) => setState(() => _muscleFilter = muscle),
+                              onSelected: (selected) => setState(() {
+                                _muscleFilter = selected ? muscle : null;
+                                if (selected) _customOnly = false;
+                              }),
                             ),
                           ),
                         ),

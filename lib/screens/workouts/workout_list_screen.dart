@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
+import '../../models/exercise_logging.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -11,6 +12,7 @@ import '../../core/theme/app_colors.dart';
 import '../../widgets/muscle_recovery_map.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/workout_tile.dart';
+import '../../core/router/app_router.dart';
 
 class WorkoutListScreen extends ConsumerWidget {
   static const _previewCount = 7;
@@ -43,13 +45,13 @@ class WorkoutListScreen extends ConsumerWidget {
                 }
                 return _StartWorkoutSection(routinesAsync: routinesAsync);
               },
-              loading: () => const FitForgeLoadingScreen(),
+              loading: () => _StartWorkoutSection(routinesAsync: routinesAsync),
               error: (_, __) => _StartWorkoutSection(routinesAsync: routinesAsync),
             ),
             const SizedBox(height: 20),
             recoveryAsync.when(
               data: (recovery) => MuscleRecoveryMap(recovery: recovery),
-              loading: () => const SizedBox.shrink(),
+              loading: () => MuscleRecoveryMap(recovery: fullMuscleRecoveryMap()),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
@@ -195,6 +197,9 @@ class _StartWorkoutSection extends ConsumerWidget {
     final l10n = context.l10n;
     if (!context.mounted) return;
 
+    final router = ref.read(routerProvider);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
     try {
       await FitForgeLoadingOverlay.run(
         context,
@@ -205,13 +210,11 @@ class _StartWorkoutSection extends ConsumerWidget {
           await ref.read(activeWorkoutProvider.future);
         },
       );
-      if (context.mounted) context.push('/workout/active');
+      router.push('/workout/active');
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.startWorkoutError('$e'))),
-        );
-      }
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l10n.startWorkoutError('$e'))),
+      );
     }
   }
 
@@ -280,8 +283,13 @@ class _StartWorkoutSection extends ConsumerWidget {
                                           (i) => WorkoutSet(
                                             id: '',
                                             setNumber: i + 1,
-                                            weight: e.targetWeight,
-                                            reps: e.targetReps,
+                                            weight: e.isCardio ? null : e.targetWeight,
+                                            reps: e.isCardio ? 0 : e.targetReps,
+                                            loggingType: e.loggingType,
+                                            durationSeconds: e.targetDurationSeconds,
+                                            distanceMeters: e.targetDistanceMeters,
+                                            inclinePercent: e.targetInclinePercent,
+                                            steps: e.targetSteps,
                                           ),
                                         ),
                                       ),

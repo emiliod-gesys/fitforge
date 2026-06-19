@@ -587,20 +587,92 @@ abstract class AppLocalizations {
   /// No description provided for @volumePerWorkout.
   ///
   /// In es, this message translates to:
-  /// **'Volumen por entrenamiento'**
+  /// **'Volumen por día'**
   String get volumePerWorkout;
 
-  /// No description provided for @last30Days.
+  /// No description provided for @last10Days.
   ///
   /// In es, this message translates to:
-  /// **'Últimos 30 días'**
-  String get last30Days;
+  /// **'Últimos 10 días'**
+  String get last10Days;
 
   /// No description provided for @completeWorkoutsForVolume.
   ///
   /// In es, this message translates to:
   /// **'Completa entrenamientos para ver tu volumen'**
   String get completeWorkoutsForVolume;
+
+  /// No description provided for @milestonesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Medallas'**
+  String get milestonesTitle;
+
+  /// No description provided for @milestonesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea medallas al alcanzar metas acumuladas'**
+  String get milestonesSubtitle;
+
+  /// No description provided for @milestoneCategoryReps.
+  ///
+  /// In es, this message translates to:
+  /// **'Reps'**
+  String get milestoneCategoryReps;
+
+  /// No description provided for @milestoneCategoryVolume.
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen'**
+  String get milestoneCategoryVolume;
+
+  /// No description provided for @milestoneCategoryDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Distancia'**
+  String get milestoneCategoryDistance;
+
+  /// No description provided for @milestoneCategoryCalories.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías'**
+  String get milestoneCategoryCalories;
+
+  /// No description provided for @milestoneCategoryWorkouts.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenos'**
+  String get milestoneCategoryWorkouts;
+
+  /// No description provided for @milestoneTotal.
+  ///
+  /// In es, this message translates to:
+  /// **'Total: {value}'**
+  String milestoneTotal(String value);
+
+  /// No description provided for @milestoneUnlockedCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{unlocked}/{total}'**
+  String milestoneUnlockedCount(int unlocked, int total);
+
+  /// No description provided for @milestoneNextTarget.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente meta: {target}'**
+  String milestoneNextTarget(String target);
+
+  /// No description provided for @milestoneDetailRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan {remaining} para {target}'**
+  String milestoneDetailRemaining(String remaining, String target);
+
+  /// No description provided for @milestoneAllUnlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Todas las medallas desbloqueadas!'**
+  String get milestoneAllUnlocked;
 
   /// No description provided for @personalRecords.
   ///
@@ -1262,6 +1334,24 @@ abstract class AppLocalizations {
   /// **'Finalizar'**
   String get finish;
 
+  /// No description provided for @leaveActiveWorkoutTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Salir del entrenamiento?'**
+  String get leaveActiveWorkoutTitle;
+
+  /// No description provided for @leaveActiveWorkoutMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu progreso se guarda. Puedes volver a entrar desde Entrenar.'**
+  String get leaveActiveWorkoutMessage;
+
+  /// No description provided for @leaveActiveWorkoutConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get leaveActiveWorkoutConfirm;
+
   /// No description provided for @viewList.
   ///
   /// In es, this message translates to:
@@ -1309,6 +1399,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{name} añadido'**
   String exerciseAdded(String name);
+
+  /// No description provided for @addingExercise.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadiendo ejercicio…'**
+  String get addingExercise;
 
   /// No description provided for @exerciseRemoved.
   ///
@@ -1520,6 +1616,12 @@ abstract class AppLocalizations {
   /// **'Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.'**
   String get coachRoutineReady;
 
+  /// No description provided for @coachRoutineTooFewExercises.
+  ///
+  /// In es, this message translates to:
+  /// **'No pude armar una rutina variada con ejercicios del catálogo. Prueba pidiéndola de nuevo o elige músculos concretos.'**
+  String get coachRoutineTooFewExercises;
+
   /// No description provided for @coachRoutineFailed.
   ///
   /// In es, this message translates to:
@@ -1699,6 +1801,132 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Descanso personalizado'**
   String get customRest;
+
+  /// No description provided for @cardioDuration.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo (mm:ss)'**
+  String get cardioDuration;
+
+  /// No description provided for @cardioDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Distancia'**
+  String get cardioDistance;
+
+  /// No description provided for @cardioIncline.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación %'**
+  String get cardioIncline;
+
+  /// No description provided for @cardioDifficulty.
+  ///
+  /// In es, this message translates to:
+  /// **'Grado de dificultad'**
+  String get cardioDifficulty;
+
+  /// No description provided for @cardioSteps.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasos'**
+  String get cardioSteps;
+
+  /// No description provided for @cardioMetricRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica al menos una métrica de cardio'**
+  String get cardioMetricRequired;
+
+  /// No description provided for @cardioSetLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Intervalo {number}'**
+  String cardioSetLabel(int number);
+
+  /// No description provided for @cardioPrDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Distancia máx.'**
+  String get cardioPrDistance;
+
+  /// No description provided for @cardioPrDuration.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo máx.'**
+  String get cardioPrDuration;
+
+  /// No description provided for @cardioPrSteps.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasos máx.'**
+  String get cardioPrSteps;
+
+  /// No description provided for @cardioPrIncline.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación máx.'**
+  String get cardioPrIncline;
+
+  /// No description provided for @cardioPrDifficulty.
+  ///
+  /// In es, this message translates to:
+  /// **'Dificultad máx.'**
+  String get cardioPrDifficulty;
+
+  /// No description provided for @exerciseTypeStrength.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuerza'**
+  String get exerciseTypeStrength;
+
+  /// No description provided for @exerciseTypeCardio.
+  ///
+  /// In es, this message translates to:
+  /// **'Cardio'**
+  String get exerciseTypeCardio;
+
+  /// No description provided for @cardioPresetTreadmill.
+  ///
+  /// In es, this message translates to:
+  /// **'Cinta'**
+  String get cardioPresetTreadmill;
+
+  /// No description provided for @cardioPresetElliptical.
+  ///
+  /// In es, this message translates to:
+  /// **'Elíptica'**
+  String get cardioPresetElliptical;
+
+  /// No description provided for @cardioPresetBike.
+  ///
+  /// In es, this message translates to:
+  /// **'Bici / spinning'**
+  String get cardioPresetBike;
+
+  /// No description provided for @cardioPresetStair.
+  ///
+  /// In es, this message translates to:
+  /// **'Escaladora'**
+  String get cardioPresetStair;
+
+  /// No description provided for @cardioPresetRowing.
+  ///
+  /// In es, this message translates to:
+  /// **'Remo'**
+  String get cardioPresetRowing;
+
+  /// No description provided for @cardioPresetCustom.
+  ///
+  /// In es, this message translates to:
+  /// **'Personalizado'**
+  String get cardioPresetCustom;
+
+  /// No description provided for @cardioMetricsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Métricas a registrar'**
+  String get cardioMetricsLabel;
 
   /// No description provided for @secondsLabel.
   ///
@@ -2137,6 +2365,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'🏆 ¡Nuevos récords vs última vez!'**
   String get shareNewRecords;
+
+  /// No description provided for @shareAchievementsHeader.
+  ///
+  /// In es, this message translates to:
+  /// **'🎉 ¡Logros desbloqueados!'**
+  String get shareAchievementsHeader;
+
+  /// No description provided for @shareLevelUp.
+  ///
+  /// In es, this message translates to:
+  /// **'⭐ ¡Subiste a nivel {level}!'**
+  String shareLevelUp(int level);
+
+  /// No description provided for @shareMilestoneUnlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'🏅 Medalla {category} — tier {tier}'**
+  String shareMilestoneUnlocked(String category, int tier);
+
+  /// No description provided for @shareXpEarned.
+  ///
+  /// In es, this message translates to:
+  /// **'⚡ +{xp} XP'**
+  String shareXpEarned(int xp);
+
+  /// No description provided for @summaryAchievementsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Logros desbloqueados!'**
+  String get summaryAchievementsTitle;
+
+  /// No description provided for @summaryMilestoneUnlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva medalla'**
+  String get summaryMilestoneUnlocked;
+
+  /// No description provided for @summaryMilestoneDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'{category} · Tier {tier}'**
+  String summaryMilestoneDetail(String category, int tier);
 
   /// No description provided for @shareExercisesHeader.
   ///

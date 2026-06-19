@@ -6,6 +6,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showWordmark;
   final Widget? leading;
+  final bool automaticallyImplyLeading;
 
   const FitForgeAppBar({
     super.key,
@@ -13,6 +14,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.showWordmark = true,
     this.leading,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -21,6 +23,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: automaticallyImplyLeading,
       leading: leading,
       title: Row(
         children: [
