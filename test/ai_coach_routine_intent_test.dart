@@ -46,6 +46,36 @@ void main() {
     });
   });
 
+  group('language instruction', () {
+    test('english prompt allows bilingual responses', () {
+      final instruction = AiCoachService.languageInstruction('en');
+      expect(instruction, contains('English'));
+      expect(instruction, contains('Spanish'));
+    });
+
+    test('spanish prompt allows bilingual responses', () {
+      final instruction = AiCoachService.languageInstruction('es');
+      expect(instruction, contains('español'));
+      expect(instruction, contains('inglés'));
+    });
+  });
+
+  group('fitness scope instruction', () {
+    test('english scope limits to fitness topics', () {
+      final instruction = AiCoachService.fitnessScopeInstruction('en');
+      expect(instruction, contains('ONLY'));
+      expect(instruction, contains('fitness'));
+      expect(instruction, contains('decline'));
+    });
+
+    test('spanish scope limits to fitness topics', () {
+      final instruction = AiCoachService.fitnessScopeInstruction('es');
+      expect(instruction, contains('ÚNICAMENTE'));
+      expect(instruction, contains('fitness'));
+      expect(instruction, contains('Rechaza'));
+    });
+  });
+
   group('AiRoutineSanitizer', () {
     final catalog = [
       const Exercise(

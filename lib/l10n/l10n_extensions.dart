@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/profile.dart';
+import '../models/rest_timer_alert_mode.dart';
 import 'app_localizations.dart';
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -139,5 +140,13 @@ extension ProfileL10n on AppLocalizations {
     if (isRepsRecord) records.add(recordReps);
     if (isMaxWeightRecord) records.add(recordMaxWeight);
     return records;
+  }
+
+  String restTimerAlertModeLabel(RestTimerAlertMode mode) {
+    return switch (mode) {
+      RestTimerAlertMode.sound => restTimerAlertSound,
+      RestTimerAlertMode.vibration => restTimerAlertVibration,
+      RestTimerAlertMode.both => restTimerAlertBoth,
+    };
   }
 }

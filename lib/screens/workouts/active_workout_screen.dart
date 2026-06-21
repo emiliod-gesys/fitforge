@@ -10,6 +10,7 @@ import '../../core/utils/workout_streak.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
 import '../../core/utils/milestones.dart';
+import '../../core/utils/session_personal_records.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise_logging.dart';
@@ -112,6 +113,55 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     }
   }
 
+  Future<void> _cancelWorkout(Workout workout) async {
+    if (_completing) return;
+
+    final l10n = context.l10n;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cancelWorkoutTitle),
+        content: Text(l10n.cancelWorkoutMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(l10n.cancelWorkoutConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _completing = true);
+    try {
+      await ref.read(workoutServiceProvider).cancelWorkout(workout.id);
+      ref.invalidate(activeWorkoutProvider);
+      ref.invalidate(workoutsProvider);
+      ref.invalidate(recentWorkoutsProvider);
+      ref.invalidate(workoutHistoryProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.workoutCancelled)),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.cancelWorkoutFailed('$e'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _completing = false);
+    }
+  }
+
   Future<void> _completeWorkout(Workout workout) async {
     if (_completing) return;
     setState(() => _completing = true);
@@ -138,6 +188,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       final milestoneTotalsBefore = await ref
           .read(workoutServiceProvider)
           .getMilestoneTotals(profile: profile);
+      final personalRecordsBefore = await ref.read(personalRecordsProvider.future);
 
       await ref.read(workoutServiceProvider).completeWorkout(
             workout.id,
@@ -163,6 +214,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             routineId: workout.routineId,
             excludeWorkoutId: workout.id,
           );
+      final newPersonalRecords = SessionPersonalRecords.detect(
+        workout: workout,
+        existing: personalRecordsBefore,
+      );
 
       final summary = WorkoutSummaryBuilder.build(
         workout: workout,
@@ -173,6 +228,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         profile: profile,
         bodyMetrics: bodyMetrics,
         newMilestoneUnlocks: newMilestones,
+        newPersonalRecords: newPersonalRecords,
       );
 
       ref.invalidate(workoutsProvider);
@@ -349,6 +405,25 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     });
   }
 
+  Future<void> _reorderExercises(Workout workout, List<String> orderedExerciseIds) async {
+    if (orderedExerciseIds.isEmpty) return;
+
+    try {
+      await ref.read(workoutServiceProvider).reorderWorkoutExercises(
+            workout.id,
+            orderedExerciseIds,
+          );
+      await _syncActiveWorkout();
+    } catch (e) {
+      await _syncActiveWorkout();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -384,11 +459,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   )
                 : null,
             actions: [
-              if (!_showExerciseList)
-                IconButton(
-                  tooltip: l10n.exerciseList,
-                  onPressed: () => setState(() => _showExerciseList = true),
-                  icon: const Icon(Icons.view_list_outlined),
+              if (!inExerciseView)
+                TextButton(
+                  onPressed: _completing ? null : () => _cancelWorkout(workout),
+                  child: Text(
+                    l10n.cancelWorkout,
+                    style: const TextStyle(color: AppColors.textMuted),
+                  ),
                 ),
               TextButton(
                 onPressed: _completing ? null : () => _completeWorkout(workout),
@@ -435,6 +512,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                       unawaited(_removeExercise(exercise));
                     },
                     onSwapExercise: (exercise) => _swapExercise(workout, exercise),
+                    onReorderExercises: (orderedIds) =>
+                        _reorderExercises(workout, orderedIds),
                   ),
                 ),
               ],
@@ -720,11 +799,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           exercise.exerciseId,
           excludeWorkoutId: workout.id,
         );
-    final setIndex = sorted.length;
+    final setNumber = sorted.length + 1;
     final prevSet = sorted.isNotEmpty
         ? sorted.last
-        : (previous != null && previous.isNotEmpty
-            ? (setIndex < previous.length ? previous[setIndex] : previous.last)
+        : (previous != null
+            ? ref.read(workoutServiceProvider).previousSetForNumber(previous, setNumber)
             : null);
 
     final catalog = ref.read(exercisesProvider).valueOrNull ?? [];

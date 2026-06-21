@@ -9,6 +9,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/friends_ranking_card.dart';
 import '../../widgets/profile_avatar.dart';
+import '../../widgets/social_notifications_sheet.dart';
 
 class SocialScreen extends ConsumerStatefulWidget {
   const SocialScreen({super.key});
@@ -66,11 +67,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
     final friendshipsAsync = ref.watch(friendshipsProvider);
     final rankingAsync = ref.watch(friendRankingProvider);
     final searchAsync = _query.length >= 2 ? ref.watch(userSearchProvider(_query)) : null;
-    final notificationsAsync = ref.watch(socialNotificationsProvider);
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
 
     return Scaffold(
-      appBar: FitForgeAppBar(title: l10n.socialTitle),
+      appBar: FitForgeAppBar(
+        title: l10n.socialTitle,
+        automaticallyImplyLeading: false,
+        actions: const [
+          SocialNotificationsBellButton(),
+        ],
+      ),
       body: friendshipsAsync.when(
         loading: () => const Center(child: FitForgeLoadingIndicator()),
         error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
@@ -144,76 +150,6 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                     data: (entries) => FriendsRankingCard(entries: entries, l10n: l10n),
                   ),
                 ],
-                const SizedBox(height: 24),
-                _SectionHeader(
-                  title: l10n.notifications,
-                  trailing: notificationsAsync.maybeWhen(
-                    data: (list) {
-                      if (list.any((n) => n.isUnread)) {
-                        return TextButton(
-                          onPressed: () async {
-                            await ref.read(socialServiceProvider).markAllNotificationsRead();
-                            ref.invalidate(socialNotificationsProvider);
-                            ref.invalidate(socialUnreadCountProvider);
-                          },
-                          child: Text(l10n.markRead),
-                        );
-                      }
-                      return null;
-                    },
-                    orElse: () => null,
-                  ),
-                ),
-                notificationsAsync.when(
-                  loading: () => const FitForgeLoadingIndicator(size: 32),
-                  error: (e, _) => Text(l10n.errorGeneric('$e')),
-                  data: (notifications) {
-                    if (notifications.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          l10n.friendWorkoutNotify,
-                          style: const TextStyle(color: AppColors.textMuted),
-                        ),
-                      );
-                    }
-                    return Column(
-                      children: notifications.take(10).map((n) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(
-                            backgroundColor: n.isUnread ? AppColors.orange.withValues(alpha: 0.2) : AppColors.cardElevated,
-                            child: Icon(
-                              Icons.fitness_center,
-                              color: n.isUnread ? AppColors.orange : AppColors.textMuted,
-                              size: 20,
-                            ),
-                          ),
-                          title: Text(
-                            n.message,
-                            style: TextStyle(
-                              fontWeight: n.isUnread ? FontWeight.w600 : FontWeight.normal,
-                            ),
-                          ),
-                          subtitle: Text(
-                            l10n.timeAgo(n.createdAt),
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                          ),
-                          onTap: () async {
-                            if (n.isUnread) {
-                              await ref.read(socialServiceProvider).markNotificationRead(n.id);
-                              ref.invalidate(socialNotificationsProvider);
-                              ref.invalidate(socialUnreadCountProvider);
-                            }
-                            if (n.actorId.isNotEmpty && context.mounted) {
-                              context.push('/social/friend/${n.actorId}');
-                            }
-                          },
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
                 if (pending.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   _SectionHeader(title: l10n.pendingRequests),
@@ -317,24 +253,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-  final Widget? trailing;
 
-  const _SectionHeader({required this.title, this.trailing});
+  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-            ),
-          ),
-          if (trailing != null) trailing!,
-        ],
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
       ),
     );
   }

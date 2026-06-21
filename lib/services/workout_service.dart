@@ -3,6 +3,7 @@ import '../core/constants/app_constants.dart';
 import '../core/utils/exercise_logging_resolver.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/utils/milestones.dart';
+import '../core/utils/previous_set_utils.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
 import '../models/exercise_logging.dart';
@@ -304,6 +305,10 @@ class WorkoutService {
     required String name,
     String? routineId,
     List<WorkoutExercise>? exercises,
+    Future<List<WorkoutExercise>> Function(
+      List<WorkoutExercise> locallyEnriched,
+      String workoutId,
+    )? applyProactiveSuggestions,
   }) async {
     final userId = SupabaseService.currentUser!.id;
     await _closeStaleActiveWorkouts(userId);
@@ -320,10 +325,17 @@ class WorkoutService {
 
     var workoutExercises = exercises;
     if (workoutExercises != null) {
-      final enriched = await _applyPreviousSetSuggestions(
+      var enriched = await _applyPreviousSetSuggestions(
         workoutExercises,
         excludeWorkoutId: workoutId,
       );
+      if (applyProactiveSuggestions != null) {
+        try {
+          enriched = await applyProactiveSuggestions(enriched, workoutId);
+        } catch (_) {
+          // Mantiene sugerencias locales si la IA falla.
+        }
+      }
       for (final ex in enriched) {
         await _addExerciseToWorkout(workoutId, ex);
       }
@@ -361,29 +373,37 @@ class WorkoutService {
         sets: ex.sets,
       );
 
-      final sets = List.generate(ex.sets.length, (i) {
-        final template = ex.sets[i];
-        final prev = i < previous.length ? previous[i] : previous.last;
+      final templates = [...ex.sets]..sort((a, b) => a.setNumber.compareTo(b.setNumber));
+      final setCount = PreviousSetUtils.resolveSetCount(
+        templateCount: templates.length,
+        previous: previous,
+      );
+
+      final sets = List.generate(setCount, (i) {
+        final setNumber = i + 1;
+        final template = PreviousSetUtils.forSetNumber(templates, setNumber) ??
+            (templates.isNotEmpty ? templates.last : null);
+        final prev = PreviousSetUtils.forSetNumber(previous, setNumber);
         return WorkoutSet(
           id: '',
-          setNumber: template.setNumber,
-          weight: isCardio ? null : (prev.weight ?? template.weight),
-          reps: isCardio ? 0 : (prev.reps > 0 ? prev.reps : template.reps),
+          setNumber: setNumber,
+          weight: isCardio ? null : (prev?.weight ?? template?.weight),
+          reps: isCardio ? 0 : ((prev?.reps ?? 0) > 0 ? prev!.reps : (template?.reps ?? 10)),
           durationSeconds: isCardio
-              ? (prev.durationSeconds ?? template.durationSeconds)
+              ? (prev?.durationSeconds ?? template?.durationSeconds)
               : null,
           distanceMeters: isCardio
-              ? (prev.distanceMeters ?? template.distanceMeters)
+              ? (prev?.distanceMeters ?? template?.distanceMeters)
               : null,
           inclinePercent: isCardio
-              ? (prev.inclinePercent ?? template.inclinePercent)
+              ? (prev?.inclinePercent ?? template?.inclinePercent)
               : null,
-          steps: isCardio ? (prev.steps ?? template.steps) : null,
+          steps: isCardio ? (prev?.steps ?? template?.steps) : null,
           loggingType: isCardio
               ? ExerciseLoggingType.cardio
-              : (prev.loggingType != ExerciseLoggingType.strength
+              : (prev != null && prev.loggingType != ExerciseLoggingType.strength
                   ? prev.loggingType
-                  : template.loggingType),
+                  : template?.loggingType ?? ExerciseLoggingType.strength),
         );
       });
 
@@ -435,12 +455,12 @@ class WorkoutService {
           .from('workout_sets')
           .select()
           .eq('workout_exercise_id', entry.weId)
-          .order('set_number');
+          .order('set_number', ascending: true);
 
       final sets = (setsData as List)
           .map((s) => WorkoutSet.fromJson(s as Map<String, dynamic>))
           .toList();
-      final meaningful = _meaningfulSets(sets);
+      final meaningful = PreviousSetUtils.sortedMeaningfulSets(sets);
       if (meaningful.isEmpty) continue;
 
       history.add(ExerciseSessionHistory(
@@ -457,19 +477,61 @@ class WorkoutService {
     String exerciseId, {
     String? excludeWorkoutId,
   }) async {
-    final history = await getExerciseHistory(
+    final entry = await _lastCompletedWorkoutExerciseEntry(
       exerciseId,
-      limit: 1,
       excludeWorkoutId: excludeWorkoutId,
     );
-    if (history.isEmpty) return null;
-    return history.first.sets;
+    if (entry == null) return null;
+
+    final setsData = await _client
+        .from('workout_sets')
+        .select()
+        .eq('workout_exercise_id', entry.weId)
+        .order('set_number', ascending: true);
+
+    final sets = (setsData as List)
+        .map((s) => WorkoutSet.fromJson(s as Map<String, dynamic>))
+        .toList();
+    if (sets.isEmpty) return null;
+    return PreviousSetUtils.sortedBySetNumber(sets);
   }
 
-  List<WorkoutSet> _meaningfulSets(List<WorkoutSet> sets) {
-    final completed = sets.where((s) => s.completed).toList();
-    final source = completed.isNotEmpty ? completed : sets;
-    return source.where((s) => s.weight != null || s.reps > 0).toList();
+  Future<({String weId, Map<String, dynamic> workout})?> _lastCompletedWorkoutExerciseEntry(
+    String exerciseId, {
+    String? excludeWorkoutId,
+  }) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return null;
+
+    final data = await _client
+        .from('workout_exercises')
+        .select('id, workouts!inner(id, name, completed_at)')
+        .eq('exercise_id', exerciseId)
+        .not('workouts.completed_at', 'is', null);
+
+    final entries = <({String weId, Map<String, dynamic> workout})>[];
+    for (final row in data as List) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final workout = Map<String, dynamic>.from(map['workouts'] as Map);
+      final wId = workout['id'] as String;
+      if (excludeWorkoutId != null && wId == excludeWorkoutId) continue;
+      entries.add((weId: map['id'] as String, workout: workout));
+    }
+
+    if (entries.isEmpty) return null;
+
+    entries.sort((a, b) {
+      final aDate = SupabaseDateTime.parse(a.workout['completed_at'] as String);
+      final bDate = SupabaseDateTime.parse(b.workout['completed_at'] as String);
+      return bDate.compareTo(aDate);
+    });
+
+    return entries.first;
+  }
+
+  /// Expuesto para pantallas que añaden series durante el entreno.
+  WorkoutSet? previousSetForNumber(List<WorkoutSet> previous, int setNumber) {
+    return PreviousSetUtils.forSetNumber(previous, setNumber);
   }
 
   Future<WorkoutExercise> addExerciseToWorkout(
@@ -493,9 +555,14 @@ class WorkoutService {
         : existing.map((e) => e.orderIndex).reduce((a, b) => a > b ? a : b) + 1;
 
     final previous = await getPreviousSetsForExercise(exerciseId, excludeWorkoutId: workoutId);
-    final sets = List.generate(defaultSets, (i) {
-      final prev = previous != null && previous.isNotEmpty
-          ? (i < previous.length ? previous[i] : previous.last)
+    final setCount = PreviousSetUtils.resolveSetCount(
+      templateCount: defaultSets,
+      previous: previous,
+    );
+    final sets = List.generate(setCount, (i) {
+      final setNumber = i + 1;
+      final prev = previous != null
+          ? PreviousSetUtils.forSetNumber(previous, setNumber)
           : null;
       return WorkoutSet(
         id: '',
@@ -532,7 +599,7 @@ class WorkoutService {
   }) async {
     final exercises = await _getWorkoutExercises(workoutId);
     final current = exercises.firstWhere((e) => e.id == workoutExerciseId);
-    final setCount = current.sets.isEmpty ? 3 : current.sets.length;
+    final templateSetCount = current.sets.isEmpty ? 3 : current.sets.length;
 
     await _client.from('workout_exercises').update({
       'exercise_id': newExerciseId,
@@ -547,11 +614,16 @@ class WorkoutService {
       exerciseId: newExerciseId,
       exerciseName: newExerciseName,
     );
-    final sets = List.generate(setCount, (i) {
-      final prev = previous != null && previous.isNotEmpty
-          ? (i < previous.length ? previous[i] : previous.last)
+    final resolvedSetCount = PreviousSetUtils.resolveSetCount(
+      templateCount: templateSetCount,
+      previous: previous,
+    );
+    final sets = List.generate(resolvedSetCount, (i) {
+      final setNumber = i + 1;
+      final prev = previous != null
+          ? PreviousSetUtils.forSetNumber(previous, setNumber)
           : null;
-      final oldSet = i < current.sets.length ? current.sets[i] : null;
+      final oldSet = PreviousSetUtils.forSetNumber(current.sets, setNumber);
       return WorkoutSet(
         id: _uuid.v4(),
         setNumber: i + 1,
@@ -572,6 +644,20 @@ class WorkoutService {
         ...set.toJson(),
       });
     }
+  }
+
+  Future<void> reorderWorkoutExercises(
+    String workoutId,
+    List<String> orderedExerciseIds,
+  ) async {
+    await Future.wait([
+      for (var i = 0; i < orderedExerciseIds.length; i++)
+        _client
+            .from('workout_exercises')
+            .update({'order_index': i})
+            .eq('id', orderedExerciseIds[i])
+            .eq('workout_id', workoutId),
+    ]);
   }
 
   Future<void> removeExerciseFromWorkout(String workoutExerciseId) async {
@@ -634,6 +720,11 @@ class WorkoutService {
     }).eq('id', workoutId);
 
     await _updatePersonalRecords(workoutId);
+  }
+
+  /// Elimina un entrenamiento en curso sin guardarlo en el historial.
+  Future<void> cancelWorkout(String workoutId) async {
+    await _client.from('workouts').delete().eq('id', workoutId);
   }
 
   /// Último entrenamiento completado de la misma rutina (excluye el actual).

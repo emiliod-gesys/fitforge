@@ -1,5 +1,6 @@
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
+import 'bmr_calculator.dart';
 
 /// Estimación de gasto calórico al finalizar un entrenamiento de fuerza.
 ///
@@ -9,8 +10,6 @@ import '../../models/profile.dart';
 /// - Intensidad inferida por volumen y series por minuto
 abstract final class WorkoutCalorieEstimator {
   static const _defaultWeightKg = 70.0;
-  static const _defaultHeightCm = 170.0;
-  static const _defaultAge = 30;
 
   static WorkoutCalorieEstimate estimate({
     required int durationMinutes,
@@ -74,7 +73,7 @@ abstract final class WorkoutCalorieEstimator {
     final usedDefaultWeight = weight.fromDefault;
     final weightKg = weight.kg;
 
-    final bmr = _resolveBmr(profile, bodyMetrics, weightKg);
+    final bmr = BmrCalculator.calculate(profile: profile, snapshots: bodyMetrics);
     var met = _intensityMet(
       totalVolumeKg: totalVolumeKg,
       durationMinutes: durationMinutes,
@@ -92,7 +91,7 @@ abstract final class WorkoutCalorieEstimator {
     var kcal = met * weightKg * durationHours;
 
     if (bmr != null) {
-      final referenceBmr = _mifflinStJeor(
+      final referenceBmr = BmrCalculator.mifflinStJeor(
         weightKg: 70,
         heightCm: 175,
         age: 30,
@@ -126,42 +125,6 @@ abstract final class WorkoutCalorieEstimator {
       return _WeightSource(fromProfile, fromDefault: false);
     }
     return const _WeightSource(_defaultWeightKg, fromDefault: true);
-  }
-
-  static double? _resolveBmr(
-    UserProfile? profile,
-    Map<String, BodyMetricSnapshot>? bodyMetrics,
-    double weightKg,
-  ) {
-    final stored = bodyMetrics?['bmr']?.rawValue;
-    if (stored != null && stored > 500) return stored;
-
-    final height = profile?.heightCm ?? _defaultHeightCm;
-    final age = profile?.age ?? _defaultAge;
-    final gender = profile?.gender;
-    if (height < 100 || age < 10) return null;
-
-    return _mifflinStJeor(
-      weightKg: weightKg,
-      heightCm: height,
-      age: age,
-      gender: gender,
-    );
-  }
-
-  /// Mifflin-St Jeor (kcal/día).
-  static double _mifflinStJeor({
-    required double weightKg,
-    required double heightCm,
-    required int age,
-    Gender? gender,
-  }) {
-    final base = 10 * weightKg + 6.25 * heightCm - 5 * age;
-    return switch (gender) {
-      Gender.female => base - 161,
-      Gender.male => base + 5,
-      Gender.nonBinary || Gender.preferNotToSay || null => base - 78,
-    };
   }
 
   /// MET 3.5 (moderado) – 6.0 (vigoroso) según densidad de trabajo.

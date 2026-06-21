@@ -7,77 +7,11 @@ import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
-import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../workouts/workout_start_helper.dart';
 
-class RoutineListScreen extends ConsumerWidget {
-  const RoutineListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final routinesAsync = ref.watch(routinesProvider);
-
-    return Scaffold(
-      appBar: FitForgeAppBar(
-        title: l10n.routinesTitle,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: l10n.newRoutine,
-            onPressed: () => context.push('/routines/new'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.auto_awesome_outlined),
-            tooltip: l10n.generateWithAi,
-            onPressed: () => _showAiGenerator(context, ref),
-          ),
-        ],
-      ),
-      body: routinesAsync.when(
-        data: (routines) {
-          if (routines.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.list_alt, size: 64, color: Colors.white24),
-                  const SizedBox(height: 16),
-                  Text(l10n.noRoutines),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.push('/routines/new'),
-                    child: Text(l10n.createRoutine),
-                  ),
-                ],
-              ),
-            );
-          }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => context.push('/routines/new'),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.newRoutine),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  foregroundColor: AppColors.orange,
-                  side: const BorderSide(color: AppColors.orange),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...routines.map((routine) => _RoutineCard(routine: routine)),
-            ],
-          );
-        },
-        loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
-      ),
-    );
-  }
-
-  void _showAiGenerator(BuildContext context, WidgetRef ref) {
+abstract final class RoutineListActions {
+  static void showAiGenerator(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final musclesController = TextEditingController();
     var duration = 45;
@@ -110,7 +44,11 @@ class RoutineListScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(ctx);
-                final muscles = musclesController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+                final muscles = musclesController.text
+                    .split(',')
+                    .map((s) => s.trim())
+                    .where((s) => s.isNotEmpty)
+                    .toList();
                 final profile = await ref.read(profileProvider.future);
                 final workouts = await ref.read(workoutsProvider.future);
                 final catalog = await ref.read(exercisesProvider.future);
@@ -139,7 +77,7 @@ class RoutineListScreen extends ConsumerWidget {
                   );
 
                   if (routine != null && context.mounted) {
-                    await _showRoutinePreview(context, ref, routine);
+                    await showRoutinePreview(context, ref, routine);
                   }
                 } catch (e) {
                   if (context.mounted) {
@@ -157,7 +95,7 @@ class RoutineListScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showRoutinePreview(
+  static Future<void> showRoutinePreview(
     BuildContext context,
     WidgetRef ref,
     Routine routine,
@@ -229,6 +167,57 @@ class RoutineListScreen extends ConsumerWidget {
   }
 }
 
+class RoutinesTab extends ConsumerWidget {
+  const RoutinesTab({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final routinesAsync = ref.watch(routinesProvider);
+
+    return routinesAsync.when(
+      data: (routines) {
+        if (routines.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.list_alt, size: 64, color: Colors.white24),
+                const SizedBox(height: 16),
+                Text(l10n.noRoutines),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.push('/routines/new'),
+                  child: Text(l10n.createRoutine),
+                ),
+              ],
+            ),
+          );
+        }
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => context.push('/routines/new'),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.newRoutine),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                foregroundColor: AppColors.orange,
+                side: const BorderSide(color: AppColors.orange),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...routines.map((routine) => _RoutineCard(routine: routine)),
+          ],
+        );
+      },
+      loading: () => const FitForgeLoadingScreen(),
+      error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
+    );
+  }
+}
+
 class _RoutineCard extends ConsumerWidget {
   final Routine routine;
 
@@ -245,25 +234,39 @@ class _RoutineCard extends ConsumerWidget {
           backgroundColor: routine.isAiGenerated
               ? AppColors.orange.withValues(alpha: 0.15)
               : AppColors.slate.withValues(alpha: 0.4),
-          child: Icon(routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt, color: AppColors.orange),
+          child: Icon(
+            routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt,
+            color: AppColors.orange,
+          ),
         ),
         title: Text(routine.name),
         subtitle: Text(
           '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
         ),
-        trailing: PopupMenuButton(
-          itemBuilder: (_) => [
-            PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-            PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.play_arrow),
+              tooltip: l10n.startWorkout,
+              color: AppColors.orange,
+              onPressed: () => startWorkoutFromRoutine(context, ref, routine),
+            ),
+            PopupMenuButton(
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+              ],
+              onSelected: (value) async {
+                if (value == 'edit') {
+                  context.push('/routines/${routine.id}/edit');
+                } else if (value == 'delete') {
+                  await ref.read(routineServiceProvider).deleteRoutine(routine.id);
+                  ref.invalidate(routinesProvider);
+                }
+              },
+            ),
           ],
-          onSelected: (value) async {
-            if (value == 'edit') {
-              context.push('/routines/${routine.id}/edit');
-            } else if (value == 'delete') {
-              await ref.read(routineServiceProvider).deleteRoutine(routine.id);
-              ref.invalidate(routinesProvider);
-            }
-          },
         ),
         onTap: () => context.push('/routines/${routine.id}/edit'),
       ),

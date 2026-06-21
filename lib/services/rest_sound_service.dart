@@ -2,10 +2,15 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
+
+import '../models/rest_timer_alert_mode.dart';
+import 'rest_preferences.dart';
 
 class RestSoundService {
   static const _bellDuration = Duration(seconds: 2);
   static const _bellVolume = 0.5;
+  static const _vibrationDuration = Duration(milliseconds: 1500);
 
   static final _player = AudioPlayer();
   static Timer? _stopTimer;
@@ -32,10 +37,24 @@ class RestSoundService {
     _contextConfigured = true;
   }
 
-  /// Campana mezclada con la música del sistema + vibración suave.
-  static Future<void> playRestCompleteBell() async {
-    await HapticFeedback.lightImpact();
+  static Future<void> playRestCompleteAlert([RestTimerAlertMode? mode]) async {
+    final alertMode = mode ?? await RestPreferences.getRestTimerAlertMode();
 
+    switch (alertMode) {
+      case RestTimerAlertMode.sound:
+        await _playBell();
+      case RestTimerAlertMode.vibration:
+        await _playStrongVibration();
+      case RestTimerAlertMode.both:
+        await Future.wait([
+          _playBell(),
+          _playStrongVibration(),
+        ]);
+    }
+  }
+
+  /// Campana mezclada con la música del sistema.
+  static Future<void> _playBell() async {
     _contextConfigured = false;
     await _ensureAudioContext();
 
@@ -48,9 +67,35 @@ class RestSoundService {
     });
   }
 
+  static Future<void> _playStrongVibration() async {
+    final hasVibrator = await Vibration.hasVibrator();
+    if (hasVibrator == true) {
+      final hasAmplitude = await Vibration.hasAmplitudeControl();
+      if (hasAmplitude == true) {
+        await Vibration.vibrate(
+          duration: _vibrationDuration.inMilliseconds,
+          amplitude: 255,
+        );
+        return;
+      }
+      await Vibration.vibrate(duration: _vibrationDuration.inMilliseconds);
+      return;
+    }
+
+    const pulseCount = 5;
+    const step = Duration(milliseconds: 300);
+    for (var i = 0; i < pulseCount; i++) {
+      await HapticFeedback.heavyImpact();
+      if (i < pulseCount - 1) {
+        await Future.delayed(step);
+      }
+    }
+  }
+
   static Future<void> cancelBell() async {
     _stopTimer?.cancel();
     _stopTimer = null;
     await _player.stop();
+    await Vibration.cancel();
   }
 }

@@ -7,7 +7,10 @@ import '../../core/utils/unit_converter.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
+import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
+import '../../services/rest_preferences.dart';
+import '../../services/ai_preferences.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../widgets/body_metric_card.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -98,6 +101,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _SectionTitle(l10n.personalData),
                 const SizedBox(height: 4),
                 ListTile(
+                  leading: const Icon(Icons.person_outline, color: AppColors.orange),
+                  title: Text(l10n.displayName),
+                  subtitle: Text(profile?.displayName ?? l10n.notDefined),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _editDisplayName(profile),
+                ),
+                ListTile(
                   leading: const Icon(Icons.cake_outlined, color: AppColors.orange),
                   title: Text(l10n.age),
                   subtitle: Text(profile?.age != null ? '${profile!.age} ${l10n.years}' : l10n.notDefined),
@@ -145,6 +155,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 metricsAsync.when(
                   data: (snapshots) => _MetricsGrid(
                     snapshots: snapshots,
+                    profile: profile,
                     unitSystem: unitSystem,
                     onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
                   ),
@@ -168,8 +179,53 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
                   onTap: () => _editExperience(profile),
                 ),
+                ref.watch(restTimerAlertModeProvider).when(
+                  data: (mode) => ListTile(
+                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    title: Text(l10n.restTimerAlert),
+                    subtitle: Text(l10n.restTimerAlertModeLabel(mode)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _editRestTimerAlert(mode),
+                  ),
+                  loading: () => ListTile(
+                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    title: Text(l10n.restTimerAlert),
+                    subtitle: Text(l10n.loading),
+                  ),
+                  error: (_, __) => ListTile(
+                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    title: Text(l10n.restTimerAlert),
+                    subtitle: Text(l10n.notDefined),
+                    onTap: () => _editRestTimerAlert(RestTimerAlertMode.both),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 _SectionTitle(l10n.aiSection),
+                ref.watch(aiProactiveEnabledProvider).when(
+                  data: (enabled) => SwitchListTile(
+                    secondary: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    title: Text(l10n.proactiveAi),
+                    subtitle: Text(
+                      enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff,
+                    ),
+                    value: enabled,
+                    activeThumbColor: AppColors.orange,
+                    onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled),
+                  ),
+                  loading: () => ListTile(
+                    leading: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    title: Text(l10n.proactiveAi),
+                    subtitle: Text(l10n.loading),
+                  ),
+                  error: (_, __) => SwitchListTile(
+                    secondary: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    title: Text(l10n.proactiveAi),
+                    subtitle: Text(l10n.proactiveAiSubtitleOff),
+                    value: false,
+                    activeThumbColor: AppColors.orange,
+                    onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: false),
+                  ),
+                ),
                 ListTile(
                   leading: const Icon(Icons.key, color: AppColors.orange),
                   title: Text(l10n.apiKeys),
@@ -186,7 +242,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: Text(l10n.coachAi),
                   subtitle: Text(l10n.aiCoachSubtitle),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/ai-coach'),
+                  onTap: () => context.go('/ai-coach'),
                 ),
                 const SizedBox(height: 32),
                 Padding(
@@ -225,6 +281,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     await ref.read(profileServiceProvider).updateProfile({'avatar_url': selected});
     ref.invalidate(profileProvider);
+  }
+
+  Future<void> _editDisplayName(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: profile?.displayName ?? '');
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.displayNameTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          maxLength: 50,
+          decoration: InputDecoration(hintText: l10n.displayName),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          ElevatedButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(l10n.displayNameRequired)),
+                );
+                return;
+              }
+              Navigator.pop(ctx, name);
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty) {
+      await ref.read(profileServiceProvider).updateProfile({'display_name': result});
+      ref.invalidate(profileProvider);
+      ref.invalidate(friendRankingProvider);
+    }
   }
 
   Future<void> _editAge(UserProfile? profile) async {
@@ -372,12 +467,81 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _setProactiveAi({
+    required bool enabled,
+    required bool currentlyEnabled,
+  }) async {
+    if (enabled == currentlyEnabled) return;
+
+    if (enabled) {
+      final l10n = context.l10n;
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.proactiveAiEnableTitle),
+          content: Text(l10n.proactiveAiEnableMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(l10n.proactiveAiEnableConfirm),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true || !mounted) return;
+    }
+
+    await AiPreferences.setProactiveAiEnabled(enabled);
+    ref.invalidate(aiProactiveEnabledProvider);
+  }
+
+  Future<void> _editRestTimerAlert(RestTimerAlertMode current) async {
+    final l10n = context.l10n;
+    final selected = await showDialog<RestTimerAlertMode>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.restTimerAlertTitle),
+        children: RestTimerAlertMode.values
+            .map(
+              (mode) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, mode),
+                child: Row(
+                  children: [
+                    if (mode == current)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: Icon(Icons.check, color: AppColors.orange, size: 20),
+                      ),
+                    Expanded(child: Text(l10n.restTimerAlertModeLabel(mode))),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (selected != null && selected != current) {
+      await RestPreferences.setRestTimerAlertMode(selected);
+      ref.invalidate(restTimerAlertModeProvider);
+    }
+  }
+
   Future<void> _editMetric(
     UserProfile? profile,
     BodyMetricDefinition def,
     BodyMetricSnapshot? snapshot,
     String unitSystem,
   ) async {
+    if (def.isComputed) return;
+
     final l10n = context.l10n;
     String initialText = '';
     if (snapshot?.hasValue == true) {
@@ -521,11 +685,13 @@ class _UnitChip extends StatelessWidget {
 
 class _MetricsGrid extends StatelessWidget {
   final Map<String, BodyMetricSnapshot> snapshots;
+  final UserProfile? profile;
   final String unitSystem;
   final void Function(BodyMetricDefinition def) onEdit;
 
   const _MetricsGrid({
     required this.snapshots,
+    required this.profile,
     required this.unitSystem,
     required this.onEdit,
   });
@@ -552,7 +718,10 @@ class _MetricsGrid extends StatelessWidget {
           snapshot: snapshot,
           unitSystem: unitSystem,
           yearsLabel: l10n.years,
-          onTap: () => onEdit(def),
+          profile: profile,
+          allSnapshots: snapshots,
+          computedHint: def.isComputed ? l10n.metricCalculatedAutomatically : null,
+          onTap: def.isComputed ? null : () => onEdit(def),
         );
       },
     );

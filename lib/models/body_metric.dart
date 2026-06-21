@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
-
 enum BodyMetricKind { mass, percent, score, kcal, years }
 
 class BodyMetricDefinition {
   final String key;
   final String label;
   final BodyMetricKind kind;
+  final bool isComputed;
 
   const BodyMetricDefinition({
     required this.key,
     required this.label,
     required this.kind,
+    this.isComputed = false,
   });
 
   String unitLabel(String unitSystem, {String yearsLabel = 'años'}) {
@@ -40,7 +40,7 @@ class BodyMetricDefinition {
     BodyMetricDefinition(key: 'muscle_mass', label: 'Masa muscular', kind: BodyMetricKind.mass),
     BodyMetricDefinition(key: 'bone_mass', label: 'Masa ósea', kind: BodyMetricKind.mass),
     BodyMetricDefinition(key: 'protein', label: 'Proteína', kind: BodyMetricKind.percent),
-    BodyMetricDefinition(key: 'bmr', label: 'Tasa metabólica basal', kind: BodyMetricKind.kcal),
+    BodyMetricDefinition(key: 'bmr', label: 'Tasa metabólica basal', kind: BodyMetricKind.kcal, isComputed: true),
     BodyMetricDefinition(key: 'metabolic_age', label: 'Edad metabólica', kind: BodyMetricKind.years),
   ];
 
@@ -70,19 +70,4 @@ class BodyMetricSnapshot {
   });
 
   bool get hasValue => valueKg != null || rawValue != null;
-
-  Color valueColor(BodyMetricDefinition def) {
-    if (!hasValue) return Colors.white38;
-    switch (def.kind) {
-      case BodyMetricKind.mass:
-      case BodyMetricKind.percent:
-      case BodyMetricKind.kcal:
-        return const Color(0xFF4CAF50);
-      case BodyMetricKind.score:
-        if (def.key == 'bmi') return const Color(0xFFFFB300);
-        return const Color(0xFF4CAF50);
-      case BodyMetricKind.years:
-        return const Color(0xFFFFB300);
-    }
-  }
 }

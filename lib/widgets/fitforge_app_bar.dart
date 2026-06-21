@@ -7,6 +7,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showWordmark;
   final Widget? leading;
   final bool automaticallyImplyLeading;
+  final PreferredSizeWidget? bottom;
 
   const FitForgeAppBar({
     super.key,
@@ -15,10 +16,13 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showWordmark = true,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.bottom,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(
+        kToolbarHeight + (bottom?.preferredSize.height ?? 0),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +48,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: actions,
+      bottom: bottom,
     );
   }
 }

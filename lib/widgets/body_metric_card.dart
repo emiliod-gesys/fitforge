@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../core/utils/body_metric_health.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/unit_converter.dart';
 import '../models/body_metric.dart';
+import '../models/profile.dart';
 
 class BodyMetricCard extends StatelessWidget {
   final BodyMetricDefinition definition;
@@ -9,7 +11,11 @@ class BodyMetricCard extends StatelessWidget {
   final BodyMetricSnapshot snapshot;
   final String unitSystem;
   final String yearsLabel;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final String? computedHint;
+
+  final UserProfile? profile;
+  final Map<String, BodyMetricSnapshot>? allSnapshots;
 
   const BodyMetricCard({
     super.key,
@@ -18,14 +24,22 @@ class BodyMetricCard extends StatelessWidget {
     required this.snapshot,
     required this.unitSystem,
     this.yearsLabel = 'años',
-    required this.onTap,
+    this.onTap,
+    this.computedHint,
+    this.profile,
+    this.allSnapshots,
   });
 
   @override
   Widget build(BuildContext context) {
     final valueText = _formatValue();
     final deltaText = _formatDelta();
-    final valueColor = snapshot.valueColor(definition);
+    final valueColor = BodyMetricHealthEvaluator.colorFor(
+      key: definition.key,
+      snapshot: snapshot,
+      profile: profile,
+      snapshots: allSnapshots,
+    );
 
     return Material(
       color: AppColors.card,
@@ -52,6 +66,18 @@ class BodyMetricCard extends StatelessWidget {
                   height: 1.2,
                 ),
               ),
+              if (computedHint != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  computedHint!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
               const Spacer(),
               Text(
                 valueText,

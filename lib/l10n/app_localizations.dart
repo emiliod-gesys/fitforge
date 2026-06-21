@@ -218,17 +218,35 @@ abstract class AppLocalizations {
   /// **'Entreno'**
   String get navWorkout;
 
+  /// No description provided for @navTrain.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenar'**
+  String get navTrain;
+
   /// No description provided for @navRoutines.
   ///
   /// In es, this message translates to:
   /// **'Rutinas'**
   String get navRoutines;
 
-  /// No description provided for @navExercises.
+  /// No description provided for @trainTabToday.
   ///
   /// In es, this message translates to:
-  /// **'Ejercicios'**
-  String get navExercises;
+  /// **'Entrenamiento'**
+  String get trainTabToday;
+
+  /// No description provided for @trainTabRoutines.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas'**
+  String get trainTabRoutines;
+
+  /// No description provided for @navCoach.
+  ///
+  /// In es, this message translates to:
+  /// **'Coach'**
+  String get navCoach;
 
   /// No description provided for @navProgress.
   ///
@@ -271,6 +289,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Datos personales'**
   String get personalData;
+
+  /// No description provided for @displayName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get displayName;
+
+  /// No description provided for @displayNameTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu nombre'**
+  String get displayNameTitle;
+
+  /// No description provided for @displayNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre'**
+  String get displayNameRequired;
 
   /// No description provided for @age.
   ///
@@ -338,6 +374,36 @@ abstract class AppLocalizations {
   /// **'Nivel de experiencia'**
   String get experienceLevel;
 
+  /// No description provided for @restTimerAlert.
+  ///
+  /// In es, this message translates to:
+  /// **'Aviso de descanso'**
+  String get restTimerAlert;
+
+  /// No description provided for @restTimerAlertTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fin del descanso'**
+  String get restTimerAlertTitle;
+
+  /// No description provided for @restTimerAlertSound.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido'**
+  String get restTimerAlertSound;
+
+  /// No description provided for @restTimerAlertVibration.
+  ///
+  /// In es, this message translates to:
+  /// **'Vibración'**
+  String get restTimerAlertVibration;
+
+  /// No description provided for @restTimerAlertBoth.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido y vibración'**
+  String get restTimerAlertBoth;
+
   /// No description provided for @aiSection.
   ///
   /// In es, this message translates to:
@@ -367,6 +433,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Recomendaciones personalizadas'**
   String get aiCoachSubtitle;
+
+  /// No description provided for @proactiveAi.
+  ///
+  /// In es, this message translates to:
+  /// **'IA proactiva'**
+  String get proactiveAi;
+
+  /// No description provided for @proactiveAiSubtitleOff.
+  ///
+  /// In es, this message translates to:
+  /// **'La IA solo responde cuando le escribes'**
+  String get proactiveAiSubtitleOff;
+
+  /// No description provided for @proactiveAiSubtitleOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Activada · puede consumir más tokens'**
+  String get proactiveAiSubtitleOn;
+
+  /// No description provided for @proactiveAiEnableTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Activar IA proactiva?'**
+  String get proactiveAiEnableTitle;
+
+  /// No description provided for @proactiveAiEnableMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'FitForge podrá usar tu API key para enviarte sugerencias sin que las pidas. Esto puede aumentar el consumo de tokens.'**
+  String get proactiveAiEnableMessage;
+
+  /// No description provided for @proactiveAiEnableConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get proactiveAiEnableConfirm;
+
+  /// No description provided for @aiCalculatingWorkoutSuggestions.
+  ///
+  /// In es, this message translates to:
+  /// **'Calculando sugerencias de IA…'**
+  String get aiCalculatingWorkoutSuggestions;
+
+  /// No description provided for @aiWorkoutSuggestionsApplied.
+  ///
+  /// In es, this message translates to:
+  /// **'Series sugeridas por IA según tu historial y objetivo'**
+  String get aiWorkoutSuggestionsApplied;
 
   /// No description provided for @fitnessGoalTitle.
   ///
@@ -956,6 +1070,12 @@ abstract class AppLocalizations {
   /// **'Tasa metabólica basal'**
   String get metricBmr;
 
+  /// No description provided for @metricCalculatedAutomatically.
+  ///
+  /// In es, this message translates to:
+  /// **'Calculado automáticamente'**
+  String get metricCalculatedAutomatically;
+
   /// No description provided for @metricMetabolicAge.
   ///
   /// In es, this message translates to:
@@ -1250,6 +1370,42 @@ abstract class AppLocalizations {
   /// **'Resumen'**
   String get summaryTitle;
 
+  /// No description provided for @summaryWorkoutComplete.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Entreno completado!'**
+  String get summaryWorkoutComplete;
+
+  /// No description provided for @summaryVolumeUp.
+  ///
+  /// In es, this message translates to:
+  /// **'+{percent}% volumen vs última vez'**
+  String summaryVolumeUp(String percent);
+
+  /// No description provided for @summaryMusclesTrained.
+  ///
+  /// In es, this message translates to:
+  /// **'Músculos trabajados'**
+  String get summaryMusclesTrained;
+
+  /// No description provided for @summaryPersonalRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Récords personales nuevos'**
+  String get summaryPersonalRecords;
+
+  /// No description provided for @summaryPersonalRecordBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'PR'**
+  String get summaryPersonalRecordBadge;
+
+  /// No description provided for @summaryExerciseImproved.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor que la última vez'**
+  String get summaryExerciseImproved;
+
   /// No description provided for @vsLastTime.
   ///
   /// In es, this message translates to:
@@ -1333,6 +1489,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Finalizar'**
   String get finish;
+
+  /// No description provided for @cancelWorkout.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get cancelWorkout;
+
+  /// No description provided for @cancelWorkoutTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar entrenamiento?'**
+  String get cancelWorkoutTitle;
+
+  /// No description provided for @cancelWorkoutMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminará este entrenamiento y no aparecerá en tu historial. No se puede deshacer.'**
+  String get cancelWorkoutMessage;
+
+  /// No description provided for @cancelWorkoutConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar entrenamiento'**
+  String get cancelWorkoutConfirm;
+
+  /// No description provided for @workoutCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenamiento cancelado'**
+  String get workoutCancelled;
+
+  /// No description provided for @cancelWorkoutFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cancelar el entrenamiento: {message}'**
+  String cancelWorkoutFailed(String message);
 
   /// No description provided for @leaveActiveWorkoutTitle.
   ///
@@ -1952,6 +2144,12 @@ abstract class AppLocalizations {
   /// **'Añadir ejercicio'**
   String get addExercise;
 
+  /// No description provided for @reorderExercise.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrastrar para reordenar'**
+  String get reorderExercise;
+
   /// No description provided for @searchByMuscle.
   ///
   /// In es, this message translates to:
@@ -2365,6 +2563,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'🏆 ¡Nuevos récords vs última vez!'**
   String get shareNewRecords;
+
+  /// No description provided for @shareMusclesTrained.
+  ///
+  /// In es, this message translates to:
+  /// **'💪 Músculos: {muscles}'**
+  String shareMusclesTrained(String muscles);
+
+  /// No description provided for @sharePersonalRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'🏆 Récords personales:'**
+  String get sharePersonalRecords;
+
+  /// No description provided for @shareVolumeUp.
+  ///
+  /// In es, this message translates to:
+  /// **'📈 +{percent}% volumen vs última vez'**
+  String shareVolumeUp(String percent);
 
   /// No description provided for @shareAchievementsHeader.
   ///

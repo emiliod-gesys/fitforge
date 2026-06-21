@@ -9,7 +9,7 @@ import '../models/workout.dart';
 import 'exercise_thumbnail.dart';
 import 'localized_exercise_name.dart';
 
-class ActiveWorkoutExerciseList extends StatelessWidget {
+class ActiveWorkoutExerciseList extends StatefulWidget {
   final Workout workout;
   final Set<String> removedExerciseIds;
   final String unitSystem;
@@ -17,6 +17,7 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
   final VoidCallback onAddExercise;
   final void Function(WorkoutExercise exercise) onRemoveExercise;
   final void Function(WorkoutExercise exercise) onSwapExercise;
+  final void Function(List<String> orderedExerciseIds)? onReorderExercises;
 
   const ActiveWorkoutExerciseList({
     super.key,
@@ -27,12 +28,101 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
     required this.onAddExercise,
     required this.onRemoveExercise,
     required this.onSwapExercise,
+    this.onReorderExercises,
   });
 
-  List<WorkoutExercise> get _visibleExercises => workout.exercises
-      .where((e) => !removedExerciseIds.contains(e.id))
-      .toList()
-    ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+  @override
+  State<ActiveWorkoutExerciseList> createState() => _ActiveWorkoutExerciseListState();
+}
+
+class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
+  late List<WorkoutExercise> _orderedExercises;
+  List<String>? _pendingOrderIds;
+
+  @override
+  void initState() {
+    super.initState();
+    _orderedExercises = _visibleFromWidget();
+  }
+
+  @override
+  void didUpdateWidget(ActiveWorkoutExerciseList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final fromWorkout = _visibleFromWidget();
+    final workoutIds = fromWorkout.map((e) => e.id).toList();
+    final localIds = _orderedExercises.map((e) => e.id).toList();
+
+    if (_exerciseIdsChanged(localIds, workoutIds)) {
+      setState(() {
+        _orderedExercises = fromWorkout;
+        _pendingOrderIds = null;
+      });
+      return;
+    }
+
+    if (_pendingOrderIds != null) {
+      if (_idsEqual(workoutIds, _pendingOrderIds!)) {
+        setState(() {
+          _pendingOrderIds = null;
+          _orderedExercises = fromWorkout;
+        });
+      }
+      return;
+    }
+
+    if (!_idsEqual(workoutIds, localIds)) {
+      setState(() => _orderedExercises = fromWorkout);
+    } else {
+      final merged = _mergeExerciseData(fromWorkout);
+      if (merged != _orderedExercises) {
+        setState(() => _orderedExercises = merged);
+      }
+    }
+  }
+
+  List<WorkoutExercise> _mergeExerciseData(List<WorkoutExercise> fromWorkout) {
+    final byId = {for (final e in fromWorkout) e.id: e};
+    return _orderedExercises
+        .map((e) => byId[e.id])
+        .whereType<WorkoutExercise>()
+        .toList();
+  }
+
+  List<WorkoutExercise> _visibleFromWidget() {
+    return widget.workout.exercises
+        .where((e) => !widget.removedExerciseIds.contains(e.id))
+        .toList()
+      ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+  }
+
+  bool _idsEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  bool _exerciseIdsChanged(List<String> localIds, List<String> workoutIds) {
+    final localSet = localIds.toSet();
+    final workoutSet = workoutIds.toSet();
+    return localSet.length != workoutSet.length ||
+        !localSet.containsAll(workoutSet) ||
+        !workoutSet.containsAll(localSet);
+  }
+
+  void _handleReorder(int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) return;
+
+    // onReorderItem (Flutter 3.41+) already adjusts newIndex after removal.
+    setState(() {
+      final moved = _orderedExercises.removeAt(oldIndex);
+      _orderedExercises.insert(newIndex, moved);
+      _pendingOrderIds = _orderedExercises.map((e) => e.id).toList();
+    });
+
+    widget.onReorderExercises?.call(_pendingOrderIds!);
+  }
 
   String _subtitle(WorkoutExercise exercise, AppLocalizations l10n) {
     final total = exercise.sets.length;
@@ -42,8 +132,8 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
 
     final lastCompleted = exercise.sets.where((s) => s.completed && s.weight != null).lastOrNull;
     if (lastCompleted != null) {
-      final w = UnitConverter.kgToDisplay(lastCompleted.weight!, unitSystem);
-      final label = UnitConverter.massLabel(unitSystem);
+      final w = UnitConverter.kgToDisplay(lastCompleted.weight!, widget.unitSystem);
+      final label = UnitConverter.massLabel(widget.unitSystem);
       return l10n.seriesWithWeight(
         total,
         '${w.toStringAsFixed(0)} $label',
@@ -57,7 +147,7 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final exercises = _visibleExercises;
+    final exercises = _orderedExercises;
     final muscleCount = exercises
         .expand((e) => MuscleInference.resolve(
               exerciseName: e.exerciseName,
@@ -65,56 +155,119 @@ class ActiveWorkoutExerciseList extends StatelessWidget {
             ))
         .toSet()
         .length;
+    final canReorder = widget.onReorderExercises != null && exercises.length > 1;
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.workoutDisplayName(workout.name),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.workoutDisplayName(widget.workout.name),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
+              const SizedBox(height: 4),
+              Text(
+                muscleCount > 0
+                    ? l10n.exercisesAndMuscles(exercises.length, muscleCount)
+                    : l10n.exercisesInRoutine(exercises.length),
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
+              if (canReorder) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l10n.reorderExercise,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                ),
+              ],
+            ],
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          muscleCount > 0
-              ? l10n.exercisesAndMuscles(exercises.length, muscleCount)
-              : l10n.exercisesInRoutine(exercises.length),
-          style: const TextStyle(color: AppColors.textMuted),
+        const SizedBox(height: 12),
+        Expanded(
+          child: canReorder
+              ? ReorderableListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  buildDefaultDragHandles: false,
+                  proxyDecorator: (child, index, animation) {
+                    return Material(
+                      color: AppColors.card,
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      child: child,
+                    );
+                  },
+                  itemCount: exercises.length,
+                  onReorderItem: _handleReorder,
+                  itemBuilder: (context, index) {
+                    final exercise = exercises[index];
+                    final isLast = index == exercises.length - 1;
+                    return _ExerciseListRow(
+                      key: ValueKey(exercise.id),
+                      listIndex: index,
+                      exercise: exercise,
+                      subtitle: _subtitle(exercise, l10n),
+                      showConnector: !isLast,
+                      showDragHandle: true,
+                      onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
+                      onSwap: () => widget.onSwapExercise(exercise),
+                      onRemove: () => widget.onRemoveExercise(exercise),
+                    );
+                  },
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  itemCount: exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = exercises[index];
+                    final isLast = index == exercises.length - 1;
+                    return _ExerciseListRow(
+                      key: ValueKey(exercise.id),
+                      listIndex: index,
+                      exercise: exercise,
+                      subtitle: _subtitle(exercise, l10n),
+                      showConnector: !isLast,
+                      showDragHandle: false,
+                      onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
+                      onSwap: () => widget.onSwapExercise(exercise),
+                      onRemove: () => widget.onRemoveExercise(exercise),
+                    );
+                  },
+                ),
         ),
-        const SizedBox(height: 20),
-        ...List.generate(exercises.length, (index) {
-          final exercise = exercises[index];
-          final isLast = index == exercises.length - 1;
-
-          return _ExerciseListRow(
-            exercise: exercise,
-            subtitle: _subtitle(exercise, l10n),
-            showConnector: !isLast,
-            onTap: () => onOpenExercise(workout.exercises.indexOf(exercise)),
-            onSwap: () => onSwapExercise(exercise),
-            onRemove: () => onRemoveExercise(exercise),
-          );
-        }),
-        const SizedBox(height: 8),
-        _AddExerciseRow(onTap: onAddExercise),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: _AddExerciseRow(onTap: widget.onAddExercise),
+        ),
       ],
     );
   }
 }
 
 class _ExerciseListRow extends ConsumerWidget {
+  final int listIndex;
   final WorkoutExercise exercise;
   final String subtitle;
   final bool showConnector;
+  final bool showDragHandle;
   final VoidCallback onTap;
   final VoidCallback onSwap;
   final VoidCallback onRemove;
 
   const _ExerciseListRow({
+    super.key,
+    required this.listIndex,
     required this.exercise,
     required this.subtitle,
     required this.showConnector,
+    required this.showDragHandle,
     required this.onTap,
     required this.onSwap,
     required this.onRemove,
@@ -124,20 +277,8 @@ class _ExerciseListRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
-    return Dismissible(
-      key: ValueKey('workout-ex-${exercise.id}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          color: AppColors.error,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete_outline, color: Colors.white),
-      ),
-      onDismissed: (_) => onRemove(),
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -146,6 +287,17 @@ class _ExerciseListRow extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (showDragHandle)
+                ReorderableDragStartListener(
+                  index: listIndex,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16, right: 4),
+                    child: Icon(
+                      Icons.drag_handle,
+                      color: AppColors.textMuted.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ),
               SizedBox(
                 width: 64,
                 child: Column(

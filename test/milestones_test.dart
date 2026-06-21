@@ -97,16 +97,89 @@ void main() {
     expect(totals.totalCalories, greaterThan(0));
   });
 
+  test('entriesFor volumen usa umbrales escalados', () {
+    const totals = MilestoneTotals(
+      totalReps: 0,
+      totalVolumeKg: 150000,
+      totalDistanceMeters: 0,
+      totalCalories: 0,
+      totalWorkouts: 0,
+    );
+
+    final entries = MilestonesCalculator.entriesFor(MilestoneCategory.volume, totals);
+
+    expect(entries[0].unlocked, isTrue);
+    expect(entries[1].unlocked, isTrue);
+    expect(entries[2].unlocked, isFalse);
+    expect(MilestonesCalculator.currentTier(MilestoneCategory.volume, totals), 2);
+    expect(MilestonesCalculator.nextDefinition(MilestoneCategory.volume, totals)?.threshold, 200000);
+    expect(MilestonesCalculator.definitionsFor(MilestoneCategory.volume).last.threshold, 10000000);
+  });
+
+  test('entriesFor reps usa umbrales escalados x5', () {
+    const totals = MilestoneTotals(
+      totalReps: 3000,
+      totalVolumeKg: 0,
+      totalDistanceMeters: 0,
+      totalCalories: 0,
+      totalWorkouts: 0,
+    );
+
+    final entries = MilestonesCalculator.entriesFor(MilestoneCategory.reps, totals);
+
+    expect(entries[0].unlocked, isTrue);
+    expect(entries[1].unlocked, isTrue);
+    expect(entries[2].unlocked, isFalse);
+    expect(MilestonesCalculator.currentTier(MilestoneCategory.reps, totals), 2);
+    expect(MilestonesCalculator.definitionsFor(MilestoneCategory.reps).last.threshold, 500000);
+  });
+
+  test('entriesFor distancia usa umbrales escalados x5', () {
+    const totals = MilestoneTotals(
+      totalReps: 0,
+      totalVolumeKg: 0,
+      totalDistanceMeters: 30000,
+      totalCalories: 0,
+      totalWorkouts: 0,
+    );
+
+    final entries = MilestonesCalculator.entriesFor(MilestoneCategory.distance, totals);
+
+    expect(entries[0].unlocked, isTrue);
+    expect(entries[1].unlocked, isTrue);
+    expect(entries[2].unlocked, isFalse);
+    expect(MilestonesCalculator.currentTier(MilestoneCategory.distance, totals), 2);
+    expect(MilestonesCalculator.definitionsFor(MilestoneCategory.distance).last.threshold, 5000000);
+  });
+
+  test('entriesFor calorias usa umbrales escalados x3', () {
+    const totals = MilestoneTotals(
+      totalReps: 0,
+      totalVolumeKg: 0,
+      totalDistanceMeters: 0,
+      totalCalories: 8000,
+      totalWorkouts: 0,
+    );
+
+    final entries = MilestonesCalculator.entriesFor(MilestoneCategory.calories, totals);
+
+    expect(entries[0].unlocked, isTrue);
+    expect(entries[1].unlocked, isTrue);
+    expect(entries[2].unlocked, isFalse);
+    expect(MilestonesCalculator.currentTier(MilestoneCategory.calories, totals), 2);
+    expect(MilestonesCalculator.definitionsFor(MilestoneCategory.calories).last.threshold, 750000);
+  });
+
   test('newlyUnlocked detecta medallas nuevas', () {
     const before = MilestoneTotals(
-      totalReps: 90,
+      totalReps: 490,
       totalVolumeKg: 0,
       totalDistanceMeters: 0,
       totalCalories: 0,
       totalWorkouts: 0,
     );
     const after = MilestoneTotals(
-      totalReps: 150,
+      totalReps: 510,
       totalVolumeKg: 0,
       totalDistanceMeters: 0,
       totalCalories: 0,

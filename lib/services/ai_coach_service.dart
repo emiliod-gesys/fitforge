@@ -6,6 +6,7 @@ import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
+import '../core/utils/workout_suggestion_context.dart';
 import '../models/body_metric.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
@@ -182,6 +183,42 @@ REGLAS OBLIGATORIAS:
     return found.toList();
   }
 
+  static String languageInstruction(String languageCode) {
+    final normalized = languageCode == 'en' ? 'en' : 'es';
+    if (normalized == 'en') {
+      return 'Respond in the same language the user writes in. '
+          'Default to English when the language is unclear. '
+          'If the user asks about languages, confirm you can communicate in English and Spanish.';
+    }
+    return 'Responde en el mismo idioma en que escribe el usuario. '
+        'Por defecto usa español si no está claro. '
+        'Si preguntan por idiomas, confirma que puedes comunicarte en español e inglés.';
+  }
+
+  static String fitnessScopeInstruction(String languageCode) {
+    final normalized = languageCode == 'en' ? 'en' : 'es';
+    if (normalized == 'en') {
+      return 'ONLY answer questions related to fitness: training, exercise technique, '
+          'workout programming, sports nutrition, recovery, physical health tied to exercise, '
+          'and using FitForge. Politely decline off-topic requests (general knowledge, coding, '
+          'politics, homework, etc.) and offer to help with fitness instead.';
+    }
+    return 'Responde ÚNICAMENTE preguntas relacionadas con fitness: entrenamiento, técnica de '
+        'ejercicios, programación de rutinas, nutrición deportiva, recuperación, salud física '
+        'vinculada al ejercicio y uso de FitForge. Rechaza amablemente temas ajenos (cultura '
+        'general, programación, política, deberes, etc.) y ofrece ayuda con fitness.';
+  }
+
+  static String _resolveLanguageCode({
+    String? languageCode,
+    UserProfile? profile,
+  }) {
+    final fromProfile = profile?.preferredLanguage;
+    if (fromProfile != null && fromProfile.isNotEmpty) return fromProfile;
+    if (languageCode != null && languageCode.isNotEmpty) return languageCode;
+    return 'es';
+  }
+
   Future<String> getRecommendation({
     required String userMessage,
     List<Workout>? recentWorkouts,
@@ -190,6 +227,7 @@ REGLAS OBLIGATORIAS:
     Map<String, BodyMetricSnapshot>? bodyMetrics,
     WorkoutWeeklyStats? weeklyStats,
     List<PersonalRecord>? personalRecords,
+    String? languageCode,
   }) async {
     final aiProvider = profile?.aiProvider ?? AiProvider.none;
     if (aiProvider == AiProvider.none) {
@@ -213,9 +251,11 @@ REGLAS OBLIGATORIAS:
     final usesLb = profile != null && UnitConverter.isLb(profile.unitSystem);
     final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
     final progressionHint = usesLb ? '+5 lb o +5%' : '+2.5 kg o +5%';
+    final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
     final systemPrompt = '''
 Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
-Responde siempre en español. Sé conciso pero útil.
+${languageInstruction(lang)} Sé conciso pero útil.
+${fitnessScopeInstruction(lang)}
 Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records y historial.
 Usa esa información para personalizar ejercicios, volumen, series, reps y progresión según su propósito y estado actual.
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
@@ -246,9 +286,14 @@ $context
     WorkoutWeeklyStats? weeklyStats,
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
+    String? languageCode,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
+    final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
+    final routineLanguageHint = lang == 'en'
+        ? 'Write the routine name and description in English.'
+        : 'Escribe el nombre y la descripción de la rutina en español.';
     final aiCatalog = AiRoutineSanitizer.catalogForAi(catalog);
     final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
     final userContext = await _loadUserContext(
@@ -269,6 +314,8 @@ Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y e
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
 $userContext
+
+$routineLanguageHint
 
 $_routineRules
 
@@ -291,6 +338,7 @@ Responde SOLO con JSON válido (sin markdown ni texto extra):
       systemPrompt: '''
 Eres un generador de rutinas de gimnasio para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+${fitnessScopeInstruction(lang)}
 $_routineRules
 ''',
       userPrompt: prompt,
@@ -354,11 +402,13 @@ Responde SOLO con JSON válido (sin markdown):
 }
 ''';
 
+    final lang = _resolveLanguageCode(profile: profile);
     final response = await _complete(
       profile: profile,
       systemPrompt: '''
 Eres un generador de rutinas de gimnasio para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+${fitnessScopeInstruction(lang)}
 $_routineRules
 ''',
       userPrompt: prompt,
@@ -538,5 +588,67 @@ $_routineRules
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     return data['candidates'][0]['content']['parts'][0]['text'] as String;
+  }
+
+  /// Sugiere peso/reps (o cardio) para todos los ejercicios de un entreno en una sola llamada.
+  Future<AiWorkoutSuggestions?> suggestWorkoutSets({
+    required UserProfile profile,
+    required String payloadJson,
+  }) async {
+    if (!profile.hasAiKey || profile.aiProvider == AiProvider.none) return null;
+
+    final lang = _resolveLanguageCode(profile: profile);
+    final usesLb = UnitConverter.isLb(profile.unitSystem);
+    final weightNote = usesLb
+        ? 'El usuario ve libras en la app, pero responde pesos en weight_kg (kilogramos, como en el historial).'
+        : 'Express strength weights as weight_kg (kilograms).';
+
+    final systemPrompt = '''
+Eres un programador de entrenamiento de FitForge.
+${languageInstruction(lang)}
+Responde ÚNICAMENTE con JSON válido. Sin markdown ni texto extra.
+$weightNote
+
+Reglas:
+- Usa el historial (máx. 5 sesiones), objetivo y experiencia del usuario.
+- recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce ligeramente; puedes reducir series.
+- days_since_last: días desde la última sesión de ese ejercicio.
+- set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. Puedes ajustar el número de series según objetivo (no estás obligado a mantener set_count).
+- Series permitidas: fuerza 1-8 por ejercicio; cardio 1-3. Usa set_number consecutivos 1..N donde N = cantidad de series que decidas.
+- Hipertrofia: 3-5 series, 8-12 reps. Fuerza: 3-6 series, 3-6 reps, más peso. Pérdida de grasa/resistencia: 2-4 series, más reps. Mantenimiento: similar al historial o micro-progresión.
+- Si el músculo está poco recuperado (recovery_pct < 60), prioriza menos series o mismo peso.
+- Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps.
+- Si no hay historial, usa valores conservadores razonables según objetivo y experiencia.
+''';
+
+    final userPrompt = '''
+Datos del entrenamiento a iniciar:
+$payloadJson
+
+Responde SOLO con este JSON:
+{
+  "exercises": [
+    {
+      "exercise_id": "id del ejercicio",
+      "sets": [
+        {"set_number": 1, "weight_kg": 80, "reps": 10},
+        {"set_number": 2, "weight_kg": 80, "reps": 10},
+        {"set_number": 3, "weight_kg": 77.5, "reps": 10}
+      ]
+    }
+  ]
+}
+''';
+
+    try {
+      final response = await _complete(
+        profile: profile,
+        systemPrompt: systemPrompt,
+        userPrompt: userPrompt,
+      );
+      return AiWorkoutSuggestionsParser.parse(response);
+    } catch (_) {
+      return null;
+    }
   }
 }

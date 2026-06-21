@@ -32,9 +32,6 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   bool _finished = false;
   bool _cancelled = false;
 
-  bool get _isActiveSession =>
-      !_cancelled && _activeSessionId == widget.sessionId && mounted;
-
   @override
   void initState() {
     super.initState();
@@ -79,42 +76,50 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   }
 
   Future<void> _syncFromClock() async {
-    if (!_isActiveSession || _finished) return;
+    if (_finished || _cancelled || !mounted) return;
 
-    final remaining = _endsAt.difference(DateTime.now()).inSeconds;
-    if (remaining <= 0) {
+    final remainingMs = _endsAt.difference(DateTime.now()).inMilliseconds;
+    if (remainingMs <= 0) {
       await _complete();
-    } else if (remaining != _remaining) {
+      return;
+    }
+
+    final remaining = ((remainingMs + 999) ~/ 1000).clamp(1, _total);
+    if (remaining != _remaining) {
       setState(() => _remaining = remaining);
     }
   }
 
   Future<void> _complete() async {
-    if (_finished || !_isActiveSession) return;
+    if (_finished) return;
 
     _timer?.cancel();
     _finished = true;
-    await RestSoundService.playRestCompleteBell();
-    if (!_isActiveSession) return;
+    if (mounted) setState(() => _remaining = 0);
+
+    // Cierra el banner de inmediato; el sonido no debe bloquear el dismiss.
     widget.onComplete();
+    unawaited(RestSoundService.playRestCompleteAlert());
   }
 
   void _adjust(int delta) {
-    if (!_isActiveSession || _finished) return;
+    if (_finished || _cancelled || !mounted) return;
 
     _endsAt = _endsAt.add(Duration(seconds: delta));
-    final remaining = _endsAt.difference(DateTime.now()).inSeconds.clamp(0, 600);
-    if (remaining > _total) _total = remaining;
+    final remainingMs = _endsAt.difference(DateTime.now()).inMilliseconds;
 
-    if (remaining <= 0) {
+    if (remainingMs <= 0) {
       unawaited(_complete());
-    } else {
-      setState(() => _remaining = remaining);
+      return;
     }
+
+    final remaining = ((remainingMs + 999) ~/ 1000).clamp(0, 600);
+    if (remaining > _total) _total = remaining;
+    setState(() => _remaining = remaining);
   }
 
   void _skip() {
-    if (!_isActiveSession) return;
+    if (_finished || _cancelled || !mounted) return;
     _timer?.cancel();
     _finished = true;
     unawaited(RestSoundService.cancelBell());

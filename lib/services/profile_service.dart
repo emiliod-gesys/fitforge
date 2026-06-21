@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/unit_converter.dart';
+import '../core/utils/bmr_calculator.dart';
 import '../models/body_metric.dart';
 import '../models/profile.dart';
 import 'supabase_service.dart';
@@ -143,7 +144,7 @@ class ProfileService {
     if (user == null) return;
 
     final def = BodyMetricDefinition.forKey(type);
-    if (def == null) return;
+    if (def == null || def.isComputed) return;
 
     final storedValue = def.kind == BodyMetricKind.mass
         ? UnitConverter.displayToKg(displayValue, unitSystem)

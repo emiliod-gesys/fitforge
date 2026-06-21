@@ -73,10 +73,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navWorkout => 'Entreno';
 
   @override
+  String get navTrain => 'Entrenar';
+
+  @override
   String get navRoutines => 'Rutinas';
 
   @override
-  String get navExercises => 'Ejercicios';
+  String get trainTabToday => 'Entrenamiento';
+
+  @override
+  String get trainTabRoutines => 'Rutinas';
+
+  @override
+  String get navCoach => 'Coach';
 
   @override
   String get navProgress => 'Progreso';
@@ -99,6 +108,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get personalData => 'Datos personales';
+
+  @override
+  String get displayName => 'Nombre';
+
+  @override
+  String get displayNameTitle => 'Tu nombre';
+
+  @override
+  String get displayNameRequired => 'Escribe un nombre';
 
   @override
   String get age => 'Edad';
@@ -134,6 +152,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get experienceLevel => 'Nivel de experiencia';
 
   @override
+  String get restTimerAlert => 'Aviso de descanso';
+
+  @override
+  String get restTimerAlertTitle => 'Fin del descanso';
+
+  @override
+  String get restTimerAlertSound => 'Sonido';
+
+  @override
+  String get restTimerAlertVibration => 'Vibración';
+
+  @override
+  String get restTimerAlertBoth => 'Sonido y vibración';
+
+  @override
   String get aiSection => 'Inteligencia artificial';
 
   @override
@@ -149,6 +182,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiCoachSubtitle => 'Recomendaciones personalizadas';
+
+  @override
+  String get proactiveAi => 'IA proactiva';
+
+  @override
+  String get proactiveAiSubtitleOff => 'La IA solo responde cuando le escribes';
+
+  @override
+  String get proactiveAiSubtitleOn => 'Activada · puede consumir más tokens';
+
+  @override
+  String get proactiveAiEnableTitle => '¿Activar IA proactiva?';
+
+  @override
+  String get proactiveAiEnableMessage =>
+      'FitForge podrá usar tu API key para enviarte sugerencias sin que las pidas. Esto puede aumentar el consumo de tokens.';
+
+  @override
+  String get proactiveAiEnableConfirm => 'Activar';
+
+  @override
+  String get aiCalculatingWorkoutSuggestions => 'Calculando sugerencias de IA…';
+
+  @override
+  String get aiWorkoutSuggestionsApplied =>
+      'Series sugeridas por IA según tu historial y objetivo';
 
   @override
   String get fitnessGoalTitle => 'Objetivo fitness';
@@ -474,6 +533,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get metricBmr => 'Tasa metabólica basal';
 
   @override
+  String get metricCalculatedAutomatically => 'Calculado automáticamente';
+
+  @override
   String get metricMetabolicAge => 'Edad metabólica';
 
   @override
@@ -631,6 +693,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get summaryTitle => 'Resumen';
 
   @override
+  String get summaryWorkoutComplete => '¡Entreno completado!';
+
+  @override
+  String summaryVolumeUp(String percent) {
+    return '+$percent% volumen vs última vez';
+  }
+
+  @override
+  String get summaryMusclesTrained => 'Músculos trabajados';
+
+  @override
+  String get summaryPersonalRecords => 'Récords personales nuevos';
+
+  @override
+  String get summaryPersonalRecordBadge => 'PR';
+
+  @override
+  String get summaryExerciseImproved => 'Mejor que la última vez';
+
+  @override
   String vsLastTime(String name) {
     return 'vs última vez ($name)';
   }
@@ -685,6 +767,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get finish => 'Finalizar';
+
+  @override
+  String get cancelWorkout => 'Cancelar';
+
+  @override
+  String get cancelWorkoutTitle => '¿Cancelar entrenamiento?';
+
+  @override
+  String get cancelWorkoutMessage =>
+      'Se eliminará este entrenamiento y no aparecerá en tu historial. No se puede deshacer.';
+
+  @override
+  String get cancelWorkoutConfirm => 'Cancelar entrenamiento';
+
+  @override
+  String get workoutCancelled => 'Entrenamiento cancelado';
+
+  @override
+  String cancelWorkoutFailed(String message) {
+    return 'No se pudo cancelar el entrenamiento: $message';
+  }
 
   @override
   String get leaveActiveWorkoutTitle => '¿Salir del entrenamiento?';
@@ -1047,6 +1150,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addExercise => 'Añadir ejercicio';
 
   @override
+  String get reorderExercise => 'Arrastrar para reordenar';
+
+  @override
   String get searchByMuscle => 'Buscar por nombre, músculo o categoría…';
 
   @override
@@ -1309,6 +1415,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shareNewRecords => '🏆 ¡Nuevos récords vs última vez!';
+
+  @override
+  String shareMusclesTrained(String muscles) {
+    return '💪 Músculos: $muscles';
+  }
+
+  @override
+  String get sharePersonalRecords => '🏆 Récords personales:';
+
+  @override
+  String shareVolumeUp(String percent) {
+    return '📈 +$percent% volumen vs última vez';
+  }
 
   @override
   String get shareAchievementsHeader => '🎉 ¡Logros desbloqueados!';

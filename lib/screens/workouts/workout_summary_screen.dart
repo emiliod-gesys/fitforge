@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/cardio_format.dart';
 import '../../core/utils/player_level.dart';
 import '../../core/utils/player_level_badge.dart';
 import '../../core/utils/milestone_badge.dart';
@@ -13,6 +14,8 @@ import '../../core/utils/unit_converter.dart';
 import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/exercise_logging.dart';
+import '../../models/profile.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -127,18 +130,43 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                   (ex) => Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
-                      title: LocalizedExerciseName(
-                        ex.exerciseName,
-                        exerciseId: ex.exerciseId,
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: LocalizedExerciseName(
+                              ex.exerciseName,
+                              exerciseId: ex.exerciseId,
+                            ),
+                          ),
+                          if (ex.isNewPersonalRecord)
+                            _PrBadge(label: l10n.summaryPersonalRecordBadge),
+                        ],
                       ),
-                      subtitle: Text(
-                        ex.bestWeightKg != null
-                            ? l10n.setsRepsBest(
-                                ex.completedSets,
-                                ex.totalReps,
-                                UnitConverter.formatMass(ex.bestWeightKg, unit),
-                              )
-                            : l10n.setsReps(ex.completedSets, ex.totalReps),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ex.bestWeightKg != null
+                                ? l10n.setsRepsBest(
+                                    ex.completedSets,
+                                    ex.totalReps,
+                                    UnitConverter.formatMass(ex.bestWeightKg, unit),
+                                  )
+                                : l10n.setsReps(ex.completedSets, ex.totalReps),
+                          ),
+                          if (ex.improvedBestWeight || ex.improvedVolume)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                l10n.summaryExerciseImproved,
+                                style: const TextStyle(
+                                  color: AppColors.orange,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -226,6 +254,8 @@ class _ShareCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          _HeroBanner(summary: summary, l10n: l10n),
+          const SizedBox(height: 16),
           Text(
             l10n.workoutDisplayName(summary.workout.name),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -302,6 +332,39 @@ class _ShareCard extends StatelessWidget {
                     ),
                   )
                   .toList(),
+            ),
+          ],
+          if (summary.hasTrainedMuscles) ...[
+            const SizedBox(height: 16),
+            Text(
+              l10n.summaryMusclesTrained,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: summary.trainedMuscleGroups
+                  .map(
+                    (muscle) => Chip(
+                      label: Text(
+                        l10n.muscleLabel(muscle),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: AppColors.cardElevated,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+          if (summary.hasNewPersonalRecords) ...[
+            const SizedBox(height: 16),
+            _PersonalRecordsSection(
+              records: summary.newPersonalRecords,
+              unitSystem: unitSystem,
+              l10n: l10n,
             ),
           ],
           if (summary.hasAchievements) ...[
@@ -626,7 +689,172 @@ class _ComparisonSection extends StatelessWidget {
               _delta(summary.totalVolumeKg, summary.previousTotalVolumeKg, isWeight: true),
               summary.isVolumeRecord,
             ),
+            _row(
+              l10n.durationMin,
+              '${summary.durationMinutes}',
+              summary.previousDurationMinutes?.toString(),
+              _delta(summary.durationMinutes, summary.previousDurationMinutes),
+              false,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroBanner extends StatelessWidget {
+  final WorkoutSummaryData summary;
+  final AppLocalizations l10n;
+
+  const _HeroBanner({required this.summary, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = summary.volumeImprovementPercent;
+    final showCelebration =
+        summary.hasNewPersonalRecords || summary.brokenRecords.isNotEmpty || summary.hasAchievements;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.orange.withValues(alpha: showCelebration ? 0.22 : 0.12),
+            AppColors.orange.withValues(alpha: 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.orange.withValues(alpha: showCelebration ? 0.5 : 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Text(
+            showCelebration ? '🎉' : '💪',
+            style: const TextStyle(fontSize: 28),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.summaryWorkoutComplete,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                if (percent != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.summaryVolumeUp(percent.toStringAsFixed(0)),
+                    style: const TextStyle(color: AppColors.orange, fontSize: 13),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalRecordsSection extends StatelessWidget {
+  final List<PersonalRecord> records;
+  final String unitSystem;
+  final AppLocalizations l10n;
+
+  const _PersonalRecordsSection({
+    required this.records,
+    required this.unitSystem,
+    required this.l10n,
+  });
+
+  String _value(PersonalRecord pr) {
+    switch (pr.recordType) {
+      case PersonalRecordType.strength:
+        return UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem);
+      case PersonalRecordType.cardioDistance:
+        return CardioFormat.distance(pr.distanceMeters, unitSystem);
+      case PersonalRecordType.cardioDuration:
+        return CardioFormat.duration(pr.durationSeconds);
+      case PersonalRecordType.cardioSteps:
+        return CardioFormat.steps(pr.steps);
+      case PersonalRecordType.cardioIncline:
+        return CardioFormat.incline(pr.inclinePercent);
+      case PersonalRecordType.cardioDifficulty:
+        return CardioFormat.difficulty(pr.inclinePercent);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.emoji_events, color: AppColors.orange, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              l10n.summaryPersonalRecords,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...records.map(
+          (pr) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: LocalizedExerciseName(
+                    pr.exerciseName,
+                    exerciseId: pr.exerciseId,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+                Text(
+                  _value(pr),
+                  style: const TextStyle(
+                    color: AppColors.orange,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PrBadge extends StatelessWidget {
+  final String label;
+
+  const _PrBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.orange.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

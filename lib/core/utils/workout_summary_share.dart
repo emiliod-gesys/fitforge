@@ -33,6 +33,16 @@ abstract final class WorkoutSummaryShare {
       );
     }
 
+    final volumePercent = summary.volumeImprovementPercent;
+    if (volumePercent != null) {
+      buffer.writeln(l10n.shareVolumeUp(volumePercent.toStringAsFixed(0)));
+    }
+
+    if (summary.hasTrainedMuscles) {
+      final muscles = summary.trainedMuscleGroups.map(l10n.muscleLabel).join(', ');
+      buffer.writeln(l10n.shareMusclesTrained(muscles));
+    }
+
     final records = l10n.brokenRecordLabels(
       isVolumeRecord: summary.isVolumeRecord,
       isRepsRecord: summary.isRepsRecord,
@@ -43,6 +53,15 @@ abstract final class WorkoutSummaryShare {
         ..writeln()
         ..writeln(l10n.shareNewRecords)
         ..writeln(records.map((r) => '• $r').join('\n'));
+    }
+
+    if (summary.hasNewPersonalRecords) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.sharePersonalRecords);
+      for (final pr in summary.newPersonalRecords) {
+        buffer.writeln('• ${pr.exerciseName}');
+      }
     }
 
     if (summary.hasAchievements) {

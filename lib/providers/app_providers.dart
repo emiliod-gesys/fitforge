@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/utils/bmr_calculator.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
@@ -17,6 +18,9 @@ import '../services/routine_service.dart';
 import '../services/workout_service.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
+import '../models/rest_timer_alert_mode.dart';
+import '../services/rest_preferences.dart';
+import '../services/ai_preferences.dart';
 import '../services/push_notification_service.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
@@ -56,8 +60,17 @@ final appLocaleProvider = Provider<Locale>((ref) {
 
 final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
-  ref.watch(profileProvider);
-  return ref.watch(profileServiceProvider).getBodyMetricSnapshots();
+  final profile = await ref.watch(profileProvider.future);
+  final snapshots = await ref.watch(profileServiceProvider).getBodyMetricSnapshots();
+  return BodyMetricCalculator.enrich(snapshots, profile);
+});
+
+final restTimerAlertModeProvider = FutureProvider<RestTimerAlertMode>((ref) async {
+  return RestPreferences.getRestTimerAlertMode();
+});
+
+final aiProactiveEnabledProvider = FutureProvider<bool>((ref) async {
+  return AiPreferences.isProactiveAiEnabled();
 });
 
 final customExerciseRepositoryProvider = Provider((ref) => CustomExerciseRepository());

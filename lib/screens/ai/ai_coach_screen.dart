@@ -81,6 +81,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           weeklyStats: weeklyStats,
           personalRecords: personalRecords,
           routines: routines,
+          languageCode: Localizations.localeOf(context).languageCode,
         );
 
         setState(() {
@@ -116,6 +117,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           bodyMetrics: bodyMetrics,
           weeklyStats: weeklyStats,
           personalRecords: personalRecords,
+          languageCode: Localizations.localeOf(context).languageCode,
         );
 
         final muscles = AiCoachService.parseTargetMuscles(text);

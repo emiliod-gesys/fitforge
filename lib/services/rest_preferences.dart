@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/rest_timer_alert_mode.dart';
 
 class RestPreferences {
   static const _restSecondsKey = 'default_rest_seconds';
+  static const _restAlertModeKey = 'rest_timer_alert_mode';
 
   static Future<int> getDefaultRestSeconds() async {
     final prefs = await SharedPreferences.getInstance();
@@ -11,5 +13,15 @@ class RestPreferences {
   static Future<void> setDefaultRestSeconds(int seconds) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_restSecondsKey, seconds);
+  }
+
+  static Future<RestTimerAlertMode> getRestTimerAlertMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return RestTimerAlertMode.fromCode(prefs.getString(_restAlertModeKey));
+  }
+
+  static Future<void> setRestTimerAlertMode(RestTimerAlertMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_restAlertModeKey, mode.storageCode);
   }
 }
