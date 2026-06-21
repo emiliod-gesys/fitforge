@@ -88,6 +88,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navCoach => 'Coach';
 
   @override
+  String get navFood => 'Comida';
+
+  @override
   String get navProgress => 'Progreso';
 
   @override
@@ -1516,4 +1519,140 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get changeAvatar => 'Cambiar avatar';
+
+  @override
+  String get foodTitle => 'Nutrición';
+
+  @override
+  String get foodEaten => 'Consumidas';
+
+  @override
+  String get foodBurned => 'Quemadas';
+
+  @override
+  String foodCaloriesLeft(int count) {
+    return '$count kcal restantes';
+  }
+
+  @override
+  String foodWorkoutBonus(int count) {
+    return '+$count kcal por entrenamiento hoy';
+  }
+
+  @override
+  String get foodMealsTitle => 'Comidas del día';
+
+  @override
+  String get mealBreakfast => 'Desayuno';
+
+  @override
+  String get mealLunch => 'Almuerzo';
+
+  @override
+  String get mealDinner => 'Cena';
+
+  @override
+  String get mealSnack => 'Otros';
+
+  @override
+  String get foodBmrMissingHint =>
+      'Completa tu peso y datos en Perfil para calcular tu objetivo calórico personalizado.';
+
+  @override
+  String get foodSearchHint => 'Filtrar alimentos registrados';
+
+  @override
+  String get foodModeBarcode => 'Código';
+
+  @override
+  String get foodModeSearch => 'Buscar';
+
+  @override
+  String get foodModePhoto => 'Foto';
+
+  @override
+  String get foodModeQuick => 'Rápido';
+
+  @override
+  String get foodRecentSearches => 'Alimentos recientes';
+
+  @override
+  String get foodNoRecent => 'Aún no has registrado alimentos.';
+
+  @override
+  String get foodAiFailed =>
+      'No se pudo estimar el alimento. Revisa tu API key o intenta de nuevo.';
+
+  @override
+  String get foodBarcodeNotFound =>
+      'Producto no encontrado en la base de datos.';
+
+  @override
+  String get foodBarcodeHint =>
+      'Apunta la cámara al código de barras del empaque.';
+
+  @override
+  String get foodPer100gNote =>
+      'Los valores nutricionales se calculan por cada 100 g/ml.';
+
+  @override
+  String get foodQuickAddHint =>
+      'Describe lo que estás comiendo y la IA calculará calorías y macros.';
+
+  @override
+  String get foodQuickAddPlaceholder =>
+      'Ej.: 2 huevos revueltos con queso y pan integral';
+
+  @override
+  String get foodQuickAddAction => 'Estimar con IA';
+
+  @override
+  String get foodPhotoHint =>
+      'Toma una foto de tu plato. La IA identificará los alimentos y sugerirá los macros.';
+
+  @override
+  String get foodPhotoAction => 'Tomar foto';
+
+  @override
+  String foodQuantityLabel(String unit) {
+    return 'Cantidad ($unit)';
+  }
+
+  @override
+  String get foodAnalyzing => 'Analizando…';
+
+  @override
+  String get foodDetailTitle => 'Detalle nutricional';
+
+  @override
+  String get foodAddThis => 'Añadir alimento';
+
+  @override
+  String get foodNameLabel => 'Nombre';
+
+  @override
+  String get foodServingLabel => 'Porción';
+
+  @override
+  String get foodCaloriesLabel => 'Calorías (kcal)';
+
+  @override
+  String get foodIngredients => 'Ingredientes';
+
+  @override
+  String get macroProtein => 'Proteína';
+
+  @override
+  String get macroFat => 'Grasa';
+
+  @override
+  String get macroCarbs => 'Carbohidratos';
+
+  @override
+  String get macroFiber => 'Fibra';
+
+  @override
+  String foodMealGoalPlaceholder(int eaten, int goal) {
+    return '$eaten / $goal kcal';
+  }
 }

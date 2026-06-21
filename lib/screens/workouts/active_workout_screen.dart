@@ -241,6 +241,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       ref.invalidate(workoutWeeklyStatsProvider);
       ref.invalidate(profileProvider);
       ref.invalidate(friendRankingProvider);
+      ref.invalidate(dailyNutritionProvider);
+      ref.invalidate(foodEntriesProvider);
 
       if (mounted) {
         context.pushReplacement('/workout/summary', extra: summary);

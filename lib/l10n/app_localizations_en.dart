@@ -88,6 +88,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navCoach => 'Coach';
 
   @override
+  String get navFood => 'Food';
+
+  @override
   String get navProgress => 'Progress';
 
   @override
@@ -1506,4 +1509,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changeAvatar => 'Change avatar';
+
+  @override
+  String get foodTitle => 'Nutrition';
+
+  @override
+  String get foodEaten => 'Eaten';
+
+  @override
+  String get foodBurned => 'Burned';
+
+  @override
+  String foodCaloriesLeft(int count) {
+    return '$count Cal left';
+  }
+
+  @override
+  String foodWorkoutBonus(int count) {
+    return '+$count Cal from today\'s workout';
+  }
+
+  @override
+  String get foodMealsTitle => 'Today\'s meals';
+
+  @override
+  String get mealBreakfast => 'Breakfast';
+
+  @override
+  String get mealLunch => 'Lunch';
+
+  @override
+  String get mealDinner => 'Dinner';
+
+  @override
+  String get mealSnack => 'Other';
+
+  @override
+  String get foodBmrMissingHint =>
+      'Complete your weight and profile details to get a personalized calorie goal.';
+
+  @override
+  String get foodSearchHint => 'Filter logged foods';
+
+  @override
+  String get foodModeBarcode => 'Barcode';
+
+  @override
+  String get foodModeSearch => 'Search';
+
+  @override
+  String get foodModePhoto => 'Photo';
+
+  @override
+  String get foodModeQuick => 'Quick add';
+
+  @override
+  String get foodRecentSearches => 'Recent foods';
+
+  @override
+  String get foodNoRecent => 'No foods logged yet.';
+
+  @override
+  String get foodAiFailed =>
+      'Could not estimate this food. Check your API key or try again.';
+
+  @override
+  String get foodBarcodeNotFound => 'Product not found in the database.';
+
+  @override
+  String get foodBarcodeHint => 'Point the camera at the product barcode.';
+
+  @override
+  String get foodPer100gNote => 'Nutrition values scale per 100 g/ml consumed.';
+
+  @override
+  String get foodQuickAddHint =>
+      'Describe what you are eating and AI will estimate calories and macros.';
+
+  @override
+  String get foodQuickAddPlaceholder =>
+      'E.g. 2 scrambled eggs with cheese and whole wheat toast';
+
+  @override
+  String get foodQuickAddAction => 'Estimate with AI';
+
+  @override
+  String get foodPhotoHint =>
+      'Take a photo of your meal. AI will identify foods and suggest macros.';
+
+  @override
+  String get foodPhotoAction => 'Take photo';
+
+  @override
+  String foodQuantityLabel(String unit) {
+    return 'Amount ($unit)';
+  }
+
+  @override
+  String get foodAnalyzing => 'Analyzing…';
+
+  @override
+  String get foodDetailTitle => 'Nutrition details';
+
+  @override
+  String get foodAddThis => 'Add this food';
+
+  @override
+  String get foodNameLabel => 'Name';
+
+  @override
+  String get foodServingLabel => 'Serving';
+
+  @override
+  String get foodCaloriesLabel => 'Calories (kcal)';
+
+  @override
+  String get foodIngredients => 'Ingredients';
+
+  @override
+  String get macroProtein => 'Protein';
+
+  @override
+  String get macroFat => 'Fat';
+
+  @override
+  String get macroCarbs => 'Carbs';
+
+  @override
+  String get macroFiber => 'Fiber';
+
+  @override
+  String foodMealGoalPlaceholder(int eaten, int goal) {
+    return '$eaten / $goal Cal';
+  }
 }

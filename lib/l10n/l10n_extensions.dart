@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/profile.dart';
+import '../models/food_entry.dart';
 import '../models/rest_timer_alert_mode.dart';
 import 'app_localizations.dart';
 extension AppLocalizationsX on BuildContext {
@@ -147,6 +148,15 @@ extension ProfileL10n on AppLocalizations {
       RestTimerAlertMode.sound => restTimerAlertSound,
       RestTimerAlertMode.vibration => restTimerAlertVibration,
       RestTimerAlertMode.both => restTimerAlertBoth,
+    };
+  }
+
+  String mealLabel(MealType meal) {
+    return switch (meal) {
+      MealType.breakfast => mealBreakfast,
+      MealType.lunch => mealLunch,
+      MealType.dinner => mealDinner,
+      MealType.snack => mealSnack,
     };
   }
 }

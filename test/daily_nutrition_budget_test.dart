@@ -1,0 +1,69 @@
+import 'package:fitforge/core/utils/daily_nutrition_budget.dart';
+import 'package:fitforge/models/food_entry.dart';
+import 'package:fitforge/models/profile.dart';
+import 'package:fitforge/models/workout.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('DailyNutritionBudget', () {
+    test('adds workout calories to daily budget', () {
+      final day = DateTime(2026, 6, 15);
+      final profile = UserProfile(
+        id: 'u1',
+        bodyWeight: 80,
+        fitnessGoal: 'Mantenimiento',
+        createdAt: DateTime(2026, 1, 1),
+      );
+      final workout = Workout(
+        id: 'w1',
+        userId: 'u1',
+        name: 'Push',
+        startedAt: day.add(const Duration(hours: 9)),
+        completedAt: day.add(const Duration(hours: 10)),
+        durationMinutes: 60,
+        totalVolume: 5000,
+      );
+
+      final summary = DailyNutritionBudget.build(
+        day: day,
+        entries: const [],
+        workoutsCompletedOnDay: [workout],
+        profile: profile,
+        bodyMetrics: null,
+      );
+
+      expect(summary.workoutCaloriesBurned, greaterThan(0));
+      expect(summary.calorieBudget, greaterThan(summary.baseCalorieGoal));
+    });
+
+    test('sums eaten macros from entries on the same day', () {
+      final day = DateTime(2026, 6, 15);
+      final entries = [
+        FoodEntry(
+          id: '1',
+          userId: 'u1',
+          loggedAt: day.add(const Duration(hours: 8)),
+          mealType: MealType.breakfast,
+          name: 'Avena',
+          caloriesKcal: 300,
+          proteinG: 10,
+          carbsG: 40,
+          fatG: 8,
+          fiberG: 5,
+        ),
+      ];
+
+      final summary = DailyNutritionBudget.build(
+        day: day,
+        entries: entries,
+        workoutsCompletedOnDay: const [],
+        profile: null,
+        bodyMetrics: null,
+      );
+
+      expect(summary.caloriesEaten, 300);
+      expect(summary.eaten.proteinG, 10);
+      expect(summary.eaten.fiberG, 5);
+    });
+  });
+}

@@ -3,16 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/bmr_calculator.dart';
+import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
-import '../core/utils/milestones.dart';
+import '../models/food_entry.dart';
 import '../models/profile.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/custom_exercise_repository.dart';
 import '../services/exercise_service.dart';
+import '../services/food_service.dart';
+import '../services/open_food_facts_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
 import '../services/workout_service.dart';
@@ -217,4 +220,41 @@ final socialRealtimeProvider = StreamProvider<SocialRealtimeEvent>((ref) {
   });
 
   return controller.stream;
+});
+
+final foodServiceProvider = Provider((ref) => FoodService());
+
+final openFoodFactsServiceProvider = Provider((ref) => OpenFoodFactsService());
+
+final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
+final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
+  ref.watch(authStateProvider);
+  final day = ref.watch(foodSelectedDayProvider);
+  return ref.watch(foodServiceProvider).getEntriesForDay(day);
+});
+
+final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async {
+  ref.watch(authStateProvider);
+  final day = ref.watch(foodSelectedDayProvider);
+  final profile = await ref.watch(profileProvider.future);
+  final metrics = await ref.watch(bodyMetricSnapshotsProvider.future);
+  final entries = await ref.watch(foodEntriesProvider.future);
+  final workouts = await ref.watch(workoutsProvider.future);
+
+  final completedOnDay = workouts.where((w) {
+    final completed = w.completedAt;
+    return completed != null && DailyNutritionBudget.isSameCalendarDay(completed, day);
+  }).toList();
+
+  return DailyNutritionBudget.build(
+    day: day,
+    entries: entries,
+    workoutsCompletedOnDay: completedOnDay,
+    profile: profile,
+    bodyMetrics: metrics,
+  );
 });

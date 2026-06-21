@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Coach'**
   String get navCoach;
 
+  /// No description provided for @navFood.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida'**
+  String get navFood;
+
   /// No description provided for @navProgress.
   ///
   /// In es, this message translates to:
@@ -2731,6 +2737,246 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cambiar avatar'**
   String get changeAvatar;
+
+  /// No description provided for @foodTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nutrición'**
+  String get foodTitle;
+
+  /// No description provided for @foodEaten.
+  ///
+  /// In es, this message translates to:
+  /// **'Consumidas'**
+  String get foodEaten;
+
+  /// No description provided for @foodBurned.
+  ///
+  /// In es, this message translates to:
+  /// **'Quemadas'**
+  String get foodBurned;
+
+  /// No description provided for @foodCaloriesLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} kcal restantes'**
+  String foodCaloriesLeft(int count);
+
+  /// No description provided for @foodWorkoutBonus.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} kcal por entrenamiento hoy'**
+  String foodWorkoutBonus(int count);
+
+  /// No description provided for @foodMealsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comidas del día'**
+  String get foodMealsTitle;
+
+  /// No description provided for @mealBreakfast.
+  ///
+  /// In es, this message translates to:
+  /// **'Desayuno'**
+  String get mealBreakfast;
+
+  /// No description provided for @mealLunch.
+  ///
+  /// In es, this message translates to:
+  /// **'Almuerzo'**
+  String get mealLunch;
+
+  /// No description provided for @mealDinner.
+  ///
+  /// In es, this message translates to:
+  /// **'Cena'**
+  String get mealDinner;
+
+  /// No description provided for @mealSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Otros'**
+  String get mealSnack;
+
+  /// No description provided for @foodBmrMissingHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tu peso y datos en Perfil para calcular tu objetivo calórico personalizado.'**
+  String get foodBmrMissingHint;
+
+  /// No description provided for @foodSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Filtrar alimentos registrados'**
+  String get foodSearchHint;
+
+  /// No description provided for @foodModeBarcode.
+  ///
+  /// In es, this message translates to:
+  /// **'Código'**
+  String get foodModeBarcode;
+
+  /// No description provided for @foodModeSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get foodModeSearch;
+
+  /// No description provided for @foodModePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto'**
+  String get foodModePhoto;
+
+  /// No description provided for @foodModeQuick.
+  ///
+  /// In es, this message translates to:
+  /// **'Rápido'**
+  String get foodModeQuick;
+
+  /// No description provided for @foodRecentSearches.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimentos recientes'**
+  String get foodRecentSearches;
+
+  /// No description provided for @foodNoRecent.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has registrado alimentos.'**
+  String get foodNoRecent;
+
+  /// No description provided for @foodAiFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo estimar el alimento. Revisa tu API key o intenta de nuevo.'**
+  String get foodAiFailed;
+
+  /// No description provided for @foodBarcodeNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto no encontrado en la base de datos.'**
+  String get foodBarcodeNotFound;
+
+  /// No description provided for @foodBarcodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Apunta la cámara al código de barras del empaque.'**
+  String get foodBarcodeHint;
+
+  /// No description provided for @foodPer100gNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Los valores nutricionales se calculan por cada 100 g/ml.'**
+  String get foodPer100gNote;
+
+  /// No description provided for @foodQuickAddHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Describe lo que estás comiendo y la IA calculará calorías y macros.'**
+  String get foodQuickAddHint;
+
+  /// No description provided for @foodQuickAddPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: 2 huevos revueltos con queso y pan integral'**
+  String get foodQuickAddPlaceholder;
+
+  /// No description provided for @foodQuickAddAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Estimar con IA'**
+  String get foodQuickAddAction;
+
+  /// No description provided for @foodPhotoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Toma una foto de tu plato. La IA identificará los alimentos y sugerirá los macros.'**
+  String get foodPhotoHint;
+
+  /// No description provided for @foodPhotoAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get foodPhotoAction;
+
+  /// No description provided for @foodQuantityLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad ({unit})'**
+  String foodQuantityLabel(String unit);
+
+  /// No description provided for @foodAnalyzing.
+  ///
+  /// In es, this message translates to:
+  /// **'Analizando…'**
+  String get foodAnalyzing;
+
+  /// No description provided for @foodDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle nutricional'**
+  String get foodDetailTitle;
+
+  /// No description provided for @foodAddThis.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir alimento'**
+  String get foodAddThis;
+
+  /// No description provided for @foodNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get foodNameLabel;
+
+  /// No description provided for @foodServingLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Porción'**
+  String get foodServingLabel;
+
+  /// No description provided for @foodCaloriesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías (kcal)'**
+  String get foodCaloriesLabel;
+
+  /// No description provided for @foodIngredients.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingredientes'**
+  String get foodIngredients;
+
+  /// No description provided for @macroProtein.
+  ///
+  /// In es, this message translates to:
+  /// **'Proteína'**
+  String get macroProtein;
+
+  /// No description provided for @macroFat.
+  ///
+  /// In es, this message translates to:
+  /// **'Grasa'**
+  String get macroFat;
+
+  /// No description provided for @macroCarbs.
+  ///
+  /// In es, this message translates to:
+  /// **'Carbohidratos'**
+  String get macroCarbs;
+
+  /// No description provided for @macroFiber.
+  ///
+  /// In es, this message translates to:
+  /// **'Fibra'**
+  String get macroFiber;
+
+  /// No description provided for @foodMealGoalPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'{eaten} / {goal} kcal'**
+  String foodMealGoalPlaceholder(int eaten, int goal);
 }
 
 class _AppLocalizationsDelegate

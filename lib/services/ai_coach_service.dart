@@ -4,12 +4,14 @@ import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
 import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/food_serving_parser.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
 import '../core/utils/workout_suggestion_context.dart';
 import '../models/body_metric.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
+import '../models/food_entry.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
@@ -650,5 +652,166 @@ Responde SOLO con este JSON:
     } catch (_) {
       return null;
     }
+  }
+
+  /// Estima macros de un alimento por texto (búsqueda / descripción).
+  Future<FoodNutritionEstimate?> estimateFoodFromText({
+    required String query,
+    UserProfile? profile,
+  }) async {
+    final lang = _resolveLanguageCode(profile: profile);
+    final system = '''
+Eres un nutricionista de FitForge. ${languageInstruction(lang)}
+Responde SOLO JSON válido sin markdown.
+Estima porción típica de consumo si no se especifica cantidad.
+''';
+    final user = '''
+Alimento: "$query"
+
+JSON:
+{
+  "name": "nombre del plato",
+  "brand": null,
+  "calories_kcal": 0,
+  "protein_g": 0,
+  "carbs_g": 0,
+  "fat_g": 0,
+  "fiber_g": 0,
+  "serving_description": "1 porción (120 g)",
+  "ingredients": ["ingrediente 1"]
+}
+''';
+    try {
+      final response = await _complete(profile: profile, systemPrompt: system, userPrompt: user);
+      return _parseFoodEstimate(response);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Estima macros desde foto (OpenAI vision o Gemini).
+  Future<FoodNutritionEstimate?> estimateFoodFromImage({
+    required List<int> imageBytes,
+    UserProfile? profile,
+  }) async {
+    final aiProvider = profile?.aiProvider ?? AiProvider.none;
+    if (aiProvider == AiProvider.none || profile?.hasAiKey != true) return null;
+
+    final apiKey = await _profileService.getApiKey(aiProvider);
+    if (apiKey == null || apiKey.isEmpty) return null;
+
+    final lang = _resolveLanguageCode(profile: profile);
+    final prompt = '''
+Identifica la comida en la imagen y estima nutrición de la porción visible.
+${languageInstruction(lang)}
+Responde SOLO JSON:
+{"name":"","brand":null,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"serving_description":"","ingredients":[]}
+''';
+
+    try {
+      final String response;
+      switch (aiProvider) {
+        case AiProvider.openai:
+          response = await _callOpenAIVision(apiKey, prompt, imageBytes);
+        case AiProvider.gemini:
+          response = await _callGeminiVision(apiKey, prompt, imageBytes);
+        case AiProvider.none:
+          return null;
+      }
+      return _parseFoodEstimate(response);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  FoodNutritionEstimate? _parseFoodEstimate(String response) {
+    try {
+      final cleaned = response.replaceAll(RegExp(r'```json|```'), '').trim();
+      final start = cleaned.indexOf('{');
+      final end = cleaned.lastIndexOf('}');
+      if (start < 0 || end <= start) return null;
+
+      final json = jsonDecode(cleaned.substring(start, end + 1)) as Map<String, dynamic>;
+      final name = json['name'] as String?;
+      if (name == null || name.isEmpty) return null;
+
+      return FoodNutritionEstimate(
+        name: name,
+        brand: json['brand'] as String?,
+        caloriesKcal: (json['calories_kcal'] as num?)?.round().clamp(0, 9999) ?? 0,
+        proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0,
+        carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0,
+        fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,
+        fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
+        servingDescription: json['serving_description'] as String?,
+        ingredients: (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+        referenceAmount: FoodServingParser.amountFromDescription(
+              json['serving_description'] as String?,
+            ) ??
+            100,
+        amountUnit: FoodServingParser.unitFromDescription(json['serving_description'] as String?),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String> _callOpenAIVision(String apiKey, String prompt, List<int> imageBytes) async {
+    final b64 = base64Encode(imageBytes);
+    final response = await http.post(
+      Uri.parse('https://api.openai.com/v1/chat/completions'),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': 'gpt-4o-mini',
+        'messages': [
+          {
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': prompt},
+              {
+                'type': 'image_url',
+                'image_url': {'url': 'data:image/jpeg;base64,$b64'},
+              },
+            ],
+          },
+        ],
+        'max_tokens': 800,
+        'temperature': 0.3,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error OpenAI vision: ${response.statusCode}');
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return data['choices'][0]['message']['content'] as String;
+  }
+
+  Future<String> _callGeminiVision(String apiKey, String prompt, List<int> imageBytes) async {
+    final b64 = base64Encode(imageBytes);
+    final response = await http.post(
+      Uri.parse(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'contents': [
+          {
+            'parts': [
+              {'text': prompt},
+              {'inline_data': {'mime_type': 'image/jpeg', 'data': b64}},
+            ],
+          },
+        ],
+        'generationConfig': {'maxOutputTokens': 800, 'temperature': 0.3},
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error Gemini vision: ${response.statusCode}');
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return data['candidates'][0]['content']['parts'][0]['text'] as String;
   }
 }

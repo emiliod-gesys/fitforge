@@ -12,7 +12,11 @@ import '../../screens/progress/progress_screen.dart';
 import '../../screens/routines/routine_editor_screen.dart';
 import '../../screens/social/friend_profile_screen.dart';
 import '../../screens/social/social_screen.dart';
+import '../../screens/food/food_screen.dart';
+import '../../screens/food/food_add_screen.dart';
+import '../../screens/food/food_detail_screen.dart';
 import '../../models/workout_summary.dart';
+import '../../models/food_entry.dart';
 import '../../screens/training/training_hub_screen.dart';
 import '../../screens/workouts/active_workout_screen.dart';
 import '../../screens/workouts/workout_summary_screen.dart';
@@ -62,6 +66,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (_, __) => const NoTransitionPage(child: AiCoachScreen()),
           ),
           GoRoute(
+            path: '/food',
+            pageBuilder: (_, __) => const NoTransitionPage(child: FoodScreen()),
+          ),
+          GoRoute(
             path: '/progress',
             pageBuilder: (_, __) => const NoTransitionPage(child: ProgressScreen()),
           ),
@@ -108,6 +116,29 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/api-keys',
         builder: (_, __) => const ApiKeysScreen(),
+      ),
+      GoRoute(
+        path: '/food/add',
+        builder: (_, state) {
+          final extra = state.extra! as Map<String, dynamic>;
+          return FoodAddScreen(
+            mealType: extra['meal'] as MealType,
+            day: extra['day'] as DateTime,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/food/detail',
+        builder: (_, state) {
+          final extra = state.extra! as Map<String, dynamic>;
+          return FoodDetailScreen(
+            estimate: extra['estimate'] as FoodNutritionEstimate,
+            mealType: extra['meal'] as MealType,
+            day: extra['day'] as DateTime,
+            source: extra['source'] as FoodEntrySource? ?? FoodEntrySource.manual,
+            manual: extra['manual'] as bool? ?? false,
+          );
+        },
       ),
     ],
   );
