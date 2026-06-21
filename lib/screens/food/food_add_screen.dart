@@ -51,7 +51,11 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
   String get _mealTitle => context.l10n.mealLabel(widget.mealType);
 
-  void _openDetail(FoodNutritionEstimate estimate, FoodEntrySource source) {
+  void _openDetail(
+    FoodNutritionEstimate estimate,
+    FoodEntrySource source, {
+    String? originalQuery,
+  }) {
     context.push(
       '/food/detail',
       extra: {
@@ -59,6 +63,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
         'meal': widget.mealType,
         'day': widget.day,
         'source': source,
+        if (originalQuery != null) 'originalQuery': originalQuery,
       },
     );
   }
@@ -85,7 +90,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
         );
         return;
       }
-      _openDetail(estimate, FoodEntrySource.quick);
+      _openDetail(estimate, FoodEntrySource.quick, originalQuery: description);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

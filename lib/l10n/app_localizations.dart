@@ -380,6 +380,36 @@ abstract class AppLocalizations {
   /// **'Nivel de experiencia'**
   String get experienceLevel;
 
+  /// No description provided for @activityLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad diaria'**
+  String get activityLevel;
+
+  /// No description provided for @activityLevelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel de actividad'**
+  String get activityLevelTitle;
+
+  /// No description provided for @activitySedentary.
+  ///
+  /// In es, this message translates to:
+  /// **'Sedentario'**
+  String get activitySedentary;
+
+  /// No description provided for @activityModerate.
+  ///
+  /// In es, this message translates to:
+  /// **'Moderado'**
+  String get activityModerate;
+
+  /// No description provided for @activityHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Alto'**
+  String get activityHigh;
+
   /// No description provided for @restTimerAlert.
   ///
   /// In es, this message translates to:
@@ -1475,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @caloriesEstimateNote.
   ///
   /// In es, this message translates to:
-  /// **'Estimación según duración, volumen, peso y perfil metabólico.'**
+  /// **'Calorías activas estimadas (extra del entreno; el reposo basal ya está en tu meta diaria).'**
   String get caloriesEstimateNote;
 
   /// No description provided for @caloriesEstimateDefaultWeight.
@@ -2765,7 +2795,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodWorkoutBonus.
   ///
   /// In es, this message translates to:
-  /// **'+{count} kcal por entrenamiento hoy'**
+  /// **'+{count} kcal activas por entrenamiento hoy'**
   String foodWorkoutBonus(int count);
 
   /// No description provided for @foodMealsTitle.
@@ -2905,6 +2935,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cantidad ({unit})'**
   String foodQuantityLabel(String unit);
+
+  /// No description provided for @foodMacrosAutoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta los gramos; calorías y macros se recalculan solos.'**
+  String get foodMacrosAutoHint;
+
+  /// No description provided for @foodAiCorrectionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'¿La IA se equivocó?'**
+  String get foodAiCorrectionHint;
+
+  /// No description provided for @foodAiCorrectionPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: eran 3 tortillas, no 2, y cada una tiene 56 kcal'**
+  String get foodAiCorrectionPlaceholder;
+
+  /// No description provided for @foodAiCorrectionAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Recalcular con IA'**
+  String get foodAiCorrectionAction;
 
   /// No description provided for @foodAnalyzing.
   ///

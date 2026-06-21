@@ -155,6 +155,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get experienceLevel => 'Experience level';
 
   @override
+  String get activityLevel => 'Daily activity';
+
+  @override
+  String get activityLevelTitle => 'Activity level';
+
+  @override
+  String get activitySedentary => 'Sedentary';
+
+  @override
+  String get activityModerate => 'Moderate';
+
+  @override
+  String get activityHigh => 'High';
+
+  @override
   String get restTimerAlert => 'Rest timer alert';
 
   @override
@@ -755,7 +770,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caloriesEstimateNote =>
-      'Estimate based on duration, volume, weight, and metabolic profile.';
+      'Estimated active calories (workout extra; basal rest is already in your daily goal).';
 
   @override
   String get caloriesEstimateDefaultWeight =>
@@ -1526,7 +1541,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String foodWorkoutBonus(int count) {
-    return '+$count Cal from today\'s workout';
+    return '+$count active Cal from today\'s workout';
   }
 
   @override
@@ -1604,6 +1619,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String foodQuantityLabel(String unit) {
     return 'Amount ($unit)';
   }
+
+  @override
+  String get foodMacrosAutoHint =>
+      'Adjust grams; calories and macros update automatically.';
+
+  @override
+  String get foodAiCorrectionHint => 'AI got it wrong?';
+
+  @override
+  String get foodAiCorrectionPlaceholder =>
+      'E.g. it was 3 tortillas, not 2, each 56 kcal';
+
+  @override
+  String get foodAiCorrectionAction => 'Recalculate with AI';
 
   @override
   String get foodAnalyzing => 'Analyzing…';

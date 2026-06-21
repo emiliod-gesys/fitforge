@@ -8,7 +8,6 @@ import 'workout_calorie_estimator.dart';
 /// Calcula objetivo calórico diario, macros y balance con entrenos del día.
 abstract final class DailyNutritionBudget {
   static const _defaultCalorieGoal = 2200;
-  static const _activityFactor = 1.55;
 
   static DailyNutritionSummary build({
     required DateTime day,
@@ -30,7 +29,12 @@ abstract final class DailyNutritionBudget {
     final weightKg = _weightKg(profile, bodyMetrics);
 
     final baseGoal = bmr != null
-        ? _baseCalorieGoal(bmr: bmr, goal: profile?.fitnessGoal, weightKg: weightKg)
+        ? _baseCalorieGoal(
+            bmr: bmr,
+            goal: profile?.fitnessGoal,
+            weightKg: weightKg,
+            activityLevel: profile?.activityLevel ?? DailyActivityLevel.moderate,
+          )
         : _defaultCalorieGoal;
 
     var workoutBurned = 0;
@@ -81,8 +85,9 @@ abstract final class DailyNutritionBudget {
     required double bmr,
     required String? goal,
     required double weightKg,
+    required DailyActivityLevel activityLevel,
   }) {
-    var tdee = (bmr * _activityFactor).round();
+    var tdee = (bmr * activityLevel.tdeeFactor).round();
     final g = (goal ?? '').toLowerCase();
 
     if (g.contains('pérdida') ||

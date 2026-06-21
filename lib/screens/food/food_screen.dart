@@ -23,19 +23,69 @@ class FoodScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: FitForgeAppBar(title: l10n.foodTitle),
-      body: summaryAsync.when(
-        data: (summary) => RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(dailyNutritionProvider);
-            ref.invalidate(foodEntriesProvider);
-          },
+      body: _FoodBody(
+        summaryAsync: summaryAsync,
+        day: day,
+        l10n: l10n,
+        onRefresh: () async {
+          ref.invalidate(dailyNutritionProvider);
+          ref.invalidate(foodEntriesProvider);
+          ref.invalidate(foodDayWorkoutsProvider);
+        },
+        onDeleteEntry: (entryId) async {
+          await ref.read(foodServiceProvider).deleteEntry(entryId);
+          ref.invalidate(dailyNutritionProvider);
+          ref.invalidate(foodEntriesProvider);
+        },
+        onAdd: (meal, selectedDay) => _openAdd(context, meal, selectedDay),
+        onDayChanged: (d) => ref.read(foodSelectedDayProvider.notifier).state = d,
+      ),
+    );
+  }
+
+  void _openAdd(BuildContext context, MealType meal, DateTime day) {
+    context.push('/food/add', extra: {'meal': meal, 'day': day});
+  }
+}
+
+class _FoodBody extends StatelessWidget {
+  final AsyncValue<DailyNutritionSummary> summaryAsync;
+  final DateTime day;
+  final AppLocalizations l10n;
+  final Future<void> Function() onRefresh;
+  final Future<void> Function(String entryId) onDeleteEntry;
+  final void Function(MealType meal, DateTime day) onAdd;
+  final ValueChanged<DateTime> onDayChanged;
+
+  const _FoodBody({
+    required this.summaryAsync,
+    required this.day,
+    required this.l10n,
+    required this.onRefresh,
+    required this.onDeleteEntry,
+    required this.onAdd,
+    required this.onDayChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (summaryAsync.hasError && !summaryAsync.hasValue) {
+      return Center(child: Text(l10n.errorGeneric('${summaryAsync.error}')));
+    }
+
+    if (!summaryAsync.hasValue) {
+      return const FitForgeLoadingScreen();
+    }
+
+    final summary = summaryAsync.value!;
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: onRefresh,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              _DaySelector(
-                day: day,
-                onChanged: (d) => ref.read(foodSelectedDayProvider.notifier).state = d,
-              ),
+              _DaySelector(day: day, onChanged: onDayChanged),
               const SizedBox(height: 16),
               _SummaryHeader(summary: summary, l10n: l10n),
               const SizedBox(height: 20),
@@ -64,7 +114,7 @@ class FoodScreen extends ConsumerWidget {
                 eatenKcal: summary.eatenForMeal(MealType.breakfast).caloriesKcal,
                 goalKcal: summary.mealCalorieGoal(MealType.breakfast),
                 entries: summary.entriesByMeal[MealType.breakfast] ?? const [],
-                onAdd: () => _openAdd(context, MealType.breakfast, day),
+                onAdd: () => onAdd(MealType.breakfast, day),
               ),
               MealCard(
                 mealType: MealType.lunch,
@@ -73,7 +123,7 @@ class FoodScreen extends ConsumerWidget {
                 eatenKcal: summary.eatenForMeal(MealType.lunch).caloriesKcal,
                 goalKcal: summary.mealCalorieGoal(MealType.lunch),
                 entries: summary.entriesByMeal[MealType.lunch] ?? const [],
-                onAdd: () => _openAdd(context, MealType.lunch, day),
+                onAdd: () => onAdd(MealType.lunch, day),
               ),
               MealCard(
                 mealType: MealType.dinner,
@@ -82,7 +132,7 @@ class FoodScreen extends ConsumerWidget {
                 eatenKcal: summary.eatenForMeal(MealType.dinner).caloriesKcal,
                 goalKcal: summary.mealCalorieGoal(MealType.dinner),
                 entries: summary.entriesByMeal[MealType.dinner] ?? const [],
-                onAdd: () => _openAdd(context, MealType.dinner, day),
+                onAdd: () => onAdd(MealType.dinner, day),
               ),
               MealCard(
                 mealType: MealType.snack,
@@ -91,34 +141,33 @@ class FoodScreen extends ConsumerWidget {
                 eatenKcal: summary.eatenForMeal(MealType.snack).caloriesKcal,
                 goalKcal: summary.mealCalorieGoal(MealType.snack),
                 entries: summary.entriesByMeal[MealType.snack] ?? const [],
-                onAdd: () => _openAdd(context, MealType.snack, day),
+                onAdd: () => onAdd(MealType.snack, day),
               ),
               const SizedBox(height: 8),
-              ..._allEntries(summary).map(
+              ..._FoodScreenHelpers.allEntries(summary).map(
                 (entry) => _FoodEntryTile(
                   entry: entry,
-                  onDelete: () async {
-                    await ref.read(foodServiceProvider).deleteEntry(entry.id);
-                    ref.invalidate(dailyNutritionProvider);
-                    ref.invalidate(foodEntriesProvider);
-                  },
+                  onDelete: () => onDeleteEntry(entry.id),
                 ),
               ),
             ],
           ),
         ),
-        loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
-      ),
+        if (summaryAsync.isLoading)
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: LinearProgressIndicator(minHeight: 2, color: AppColors.orange),
+          ),
+      ],
     );
   }
+}
 
-  static List<FoodEntry> _allEntries(DailyNutritionSummary summary) {
+abstract final class _FoodScreenHelpers {
+  static List<FoodEntry> allEntries(DailyNutritionSummary summary) {
     return summary.entriesByMeal.values.expand((list) => list).toList();
-  }
-
-  void _openAdd(BuildContext context, MealType meal, DateTime day) {
-    context.push('/food/add', extra: {'meal': meal, 'day': day});
   }
 }
 

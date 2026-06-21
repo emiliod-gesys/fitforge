@@ -174,6 +174,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => _editGoal(profile),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.directions_walk, color: AppColors.orange),
+                  title: Text(l10n.activityLevel),
+                  subtitle: Text(l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate)),
+                  onTap: () => _editActivityLevel(profile),
+                ),
+                ListTile(
                   leading: const Icon(Icons.trending_up, color: AppColors.orange),
                   title: Text(l10n.experienceLevel),
                   subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
@@ -445,6 +451,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'fitness_goal': l10n.canonicalGoal(selected),
       });
       ref.invalidate(profileProvider);
+      ref.invalidate(dailyNutritionProvider);
     }
   }
 
@@ -464,6 +471,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'experience_level': l10n.canonicalExperience(selected),
       });
       ref.invalidate(profileProvider);
+    }
+  }
+
+  Future<void> _editActivityLevel(UserProfile? profile) async {
+    final l10n = context.l10n;
+    final current = profile?.activityLevel ?? DailyActivityLevel.moderate;
+    final selected = await showDialog<DailyActivityLevel>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.activityLevelTitle),
+        children: l10n.activityLevels
+            .map(
+              (level) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, level),
+                child: Text(l10n.activityLevelLabel(level)),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (selected != null && selected != current) {
+      await ref.read(profileServiceProvider).updateProfile({
+        'activity_level': selected.code,
+      });
+      ref.invalidate(profileProvider);
+      ref.invalidate(dailyNutritionProvider);
     }
   }
 

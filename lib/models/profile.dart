@@ -37,6 +37,33 @@ enum Gender {
   }
 }
 
+/// Nivel de actividad diaria fuera del entrenamiento (factor TDEE).
+enum DailyActivityLevel {
+  sedentary,
+  moderate,
+  high;
+
+  static DailyActivityLevel fromCode(String? value) {
+    switch (value) {
+      case 'sedentary':
+        return DailyActivityLevel.sedentary;
+      case 'high':
+        return DailyActivityLevel.high;
+      default:
+        return DailyActivityLevel.moderate;
+    }
+  }
+
+  String get code => name;
+
+  /// Multiplicador sobre TMB (Mifflin-St Jeor → TDEE).
+  double get tdeeFactor => switch (this) {
+        DailyActivityLevel.sedentary => 1.2,
+        DailyActivityLevel.moderate => 1.55,
+        DailyActivityLevel.high => 1.725,
+      };
+}
+
 class UserProfile {
   final String id;
   final String? displayName;
@@ -49,6 +76,7 @@ class UserProfile {
   final String preferredLanguage;
   final String? fitnessGoal;
   final String? experienceLevel;
+  final DailyActivityLevel activityLevel;
   final AiProvider aiProvider;
   final bool hasAiKey;
   final int totalXp;
@@ -66,6 +94,7 @@ class UserProfile {
     this.preferredLanguage = 'es',
     this.fitnessGoal,
     this.experienceLevel,
+    this.activityLevel = DailyActivityLevel.moderate,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.totalXp = 0,
@@ -85,6 +114,7 @@ class UserProfile {
       preferredLanguage: json['preferred_language'] as String? ?? 'es',
       fitnessGoal: json['fitness_goal'] as String?,
       experienceLevel: json['experience_level'] as String?,
+      activityLevel: DailyActivityLevel.fromCode(json['activity_level'] as String?),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
@@ -114,6 +144,7 @@ class UserProfile {
         'preferred_language': preferredLanguage,
         'fitness_goal': fitnessGoal,
         'experience_level': experienceLevel,
+        'activity_level': activityLevel.code,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
       };
 }

@@ -65,5 +65,45 @@ void main() {
       expect(summary.eaten.proteinG, 10);
       expect(summary.eaten.fiberG, 5);
     });
+    test('sedentary fat loss yields lower goal than moderate', () {
+      final sedentary = DailyNutritionBudget.build(
+        day: DateTime(2026, 6, 15),
+        entries: const [],
+        workoutsCompletedOnDay: const [],
+        profile: UserProfile(
+          id: 'u1',
+          bodyWeight: 82,
+          age: 28,
+          gender: Gender.male,
+          heightCm: 178,
+          fitnessGoal: 'Pérdida de grasa',
+          activityLevel: DailyActivityLevel.sedentary,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        bodyMetrics: null,
+      );
+      final moderate = DailyNutritionBudget.build(
+        day: DateTime(2026, 6, 15),
+        entries: const [],
+        workoutsCompletedOnDay: const [],
+        profile: UserProfile(
+          id: 'u1',
+          bodyWeight: 82,
+          age: 28,
+          gender: Gender.male,
+          heightCm: 178,
+          fitnessGoal: 'Pérdida de grasa',
+          activityLevel: DailyActivityLevel.moderate,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        bodyMetrics: null,
+      );
+
+      expect(sedentary.baseCalorieGoal, lessThan(moderate.baseCalorieGoal));
+      expect(
+        sedentary.baseCalorieGoal / moderate.baseCalorieGoal,
+        closeTo(1.2 / 1.55, 0.01),
+      );
+    });
   });
 }

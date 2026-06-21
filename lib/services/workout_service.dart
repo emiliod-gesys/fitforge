@@ -36,6 +36,34 @@ class WorkoutService {
     }).toList();
   }
 
+  /// Entrenos completados en un día (sin ejercicios/series — para presupuesto calórico de Comida).
+  Future<List<Workout>> getCompletedWorkoutsOnDay(DateTime day) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final start = DateTime(day.year, day.month, day.day);
+    final end = start.add(const Duration(days: 1));
+
+    final workoutsData = await _client
+        .from('workouts')
+        .select(
+          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, notes',
+        )
+        .eq('user_id', userId)
+        .gte('completed_at', start.toUtc().toIso8601String())
+        .lt('completed_at', end.toUtc().toIso8601String())
+        .order('completed_at', ascending: true);
+
+    return (workoutsData as List)
+        .map(
+          (w) => Workout.fromJson(
+            Map<String, dynamic>.from(w as Map),
+            exercises: const [],
+          ),
+        )
+        .toList();
+  }
+
   /// Totales acumulados para milestones (incluye reps y distancia de todas las series).
   Future<MilestoneTotals> getMilestoneTotals({UserProfile? profile}) async {
     final userId = SupabaseService.currentUser?.id;

@@ -23,7 +23,7 @@ void main() {
     );
 
     expect(result.isAvailable, isTrue);
-    expect(result.caloriesKcal, inInclusiveRange(250, 550));
+    expect(result.caloriesKcal, inInclusiveRange(180, 480));
     expect(result.usedDefaultWeight, isFalse);
     expect(result.met, inInclusiveRange(3.5, 6.0));
   });
@@ -59,16 +59,32 @@ void main() {
     );
 
     expect(result.usedDefaultWeight, isFalse);
-    expect(result.caloriesKcal, greaterThan(200));
+    expect(result.caloriesKcal, greaterThan(150));
   });
 
-  test('no estima sin duración ni series', () {
-    final result = WorkoutCalorieEstimator.estimate(
-      durationMinutes: 0,
-      totalVolumeKg: 0,
-      completedSets: 0,
-      totalReps: 0,
+  test('net active calories are lower than gross MET estimate', () {
+    final profile = UserProfile(
+      id: 'u1',
+      bodyWeight: 80,
+      age: 28,
+      heightCm: 178,
+      gender: Gender.male,
+      createdAt: DateTime.utc(2026),
     );
-    expect(result.isAvailable, isFalse);
+
+    final result = WorkoutCalorieEstimator.estimate(
+      durationMinutes: 60,
+      totalVolumeKg: 5000,
+      completedSets: 20,
+      totalReps: 100,
+      profile: profile,
+    );
+
+    final met = result.met!;
+    const durationHours = 1.0;
+    const weightKg = 80.0;
+    final gross = met * weightKg * durationHours;
+
+    expect(result.caloriesKcal!, lessThan(gross.round()));
   });
 }

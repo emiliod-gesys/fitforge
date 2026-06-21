@@ -2,11 +2,12 @@ import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import 'bmr_calculator.dart';
 
-/// Estimación de gasto calórico al finalizar un entrenamiento de fuerza.
+/// Estimación de **calorías activas netas** al finalizar un entrenamiento.
 ///
 /// Basado en:
 /// - Compendium of Physical Activities (MET para entrenamiento con pesas, 3.5–6.0)
-/// - Ecuación de Mifflin-St Jeor para ajuste metabólico (edad, sexo, peso, talla)
+/// - Resta el gasto basal de la misma ventana (TMB/24) para no duplicar lo ya
+///   incluido en la meta diaria de Comida
 /// - Intensidad inferida por volumen y series por minuto
 abstract final class WorkoutCalorieEstimator {
   static const _defaultWeightKg = 70.0;
@@ -88,25 +89,22 @@ abstract final class WorkoutCalorieEstimator {
     }
 
     final durationHours = durationMinutes / 60.0;
-    var kcal = met * weightKg * durationHours;
+    final grossKcal = met * weightKg * durationHours;
 
-    if (bmr != null) {
-      final referenceBmr = BmrCalculator.mifflinStJeor(
-        weightKg: 70,
-        heightCm: 175,
-        age: 30,
-        gender: Gender.male,
-      );
-      final factor = (bmr / referenceBmr).clamp(0.88, 1.12);
-      kcal *= factor;
-    }
+    // Reposo durante la sesión: ya cubierto por TMB/TDEE en la meta diaria.
+    final restingDuringSession = bmr != null
+        ? (bmr / 24.0) * durationHours
+        : weightKg * durationHours;
+
+    var activeKcal = grossKcal - restingDuringSession;
+    if (activeKcal < 0) activeKcal = 0;
 
     // Componente mecánico menor (trabajo de desplazamiento de carga).
-    final mechanical = (totalVolumeKg * 0.00045).clamp(0.0, kcal * 0.12);
-    kcal += mechanical;
+    final mechanical = (totalVolumeKg * 0.00045).clamp(0.0, grossKcal * 0.12);
+    activeKcal += mechanical;
 
     return WorkoutCalorieEstimate(
-      caloriesKcal: kcal.round().clamp(1, 9999),
+      caloriesKcal: activeKcal.round().clamp(1, 9999),
       usedDefaultWeight: usedDefaultWeight,
       met: met,
     );

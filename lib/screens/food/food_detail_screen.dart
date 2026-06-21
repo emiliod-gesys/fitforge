@@ -6,14 +6,14 @@ import '../../core/utils/food_serving_parser.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
-import '../../widgets/food/macro_progress_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
 
 class FoodDetailScreen extends ConsumerStatefulWidget {
   final FoodNutritionEstimate estimate;
   final MealType mealType;
   final DateTime day;
   final FoodEntrySource source;
-  final bool manual;
+  final String? originalQuery;
 
   const FoodDetailScreen({
     super.key,
@@ -21,7 +21,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
     required this.mealType,
     required this.day,
     required this.source,
-    this.manual = false,
+    this.originalQuery,
   });
 
   @override
@@ -29,30 +29,28 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
-  late final FoodNutritionEstimate _baseEstimate;
-  late final TextEditingController _nameController;
-  late final TextEditingController _kcalController;
-  late final TextEditingController _proteinController;
-  late final TextEditingController _carbsController;
-  late final TextEditingController _fatController;
-  late final TextEditingController _fiberController;
-  late final TextEditingController _amountController;
+  late FoodNutritionEstimate _baseEstimate;
+  late double _amount;
+  late String? _originalQuery;
+  final _amountController = TextEditingController();
+  final _correctionController = TextEditingController();
   bool _saving = false;
+  bool _revising = false;
+
+  FoodNutritionEstimate get _scaled => _baseEstimate.scaledTo(_amount);
+
+  bool get _showAiCorrection =>
+      widget.source == FoodEntrySource.quick ||
+      widget.source == FoodEntrySource.aiText ||
+      widget.source == FoodEntrySource.aiPhoto;
 
   @override
   void initState() {
     super.initState();
     _baseEstimate = widget.estimate;
-    final e = widget.estimate;
-    _nameController = TextEditingController(text: e.name);
-    _amountController = TextEditingController(
-      text: _formatAmount(e.referenceAmount),
-    );
-    _kcalController = TextEditingController(text: '${e.caloriesKcal}');
-    _proteinController = TextEditingController(text: e.proteinG.toStringAsFixed(0));
-    _carbsController = TextEditingController(text: e.carbsG.toStringAsFixed(0));
-    _fatController = TextEditingController(text: e.fatG.toStringAsFixed(0));
-    _fiberController = TextEditingController(text: e.fiberG.toStringAsFixed(0));
+    _amount = widget.estimate.referenceAmount;
+    _originalQuery = widget.originalQuery;
+    _amountController.text = _formatAmount(_amount);
   }
 
   String _formatAmount(double value) {
@@ -61,44 +59,59 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _kcalController.dispose();
-    _proteinController.dispose();
-    _carbsController.dispose();
-    _fatController.dispose();
-    _fiberController.dispose();
     _amountController.dispose();
+    _correctionController.dispose();
     super.dispose();
   }
 
   double _parseDouble(String text) => double.tryParse(text.replaceAll(',', '.')) ?? 0;
 
-  void _applyScaledAmount(double amount) {
-    if (amount <= 0) return;
-    final scaled = _baseEstimate.scaledTo(amount);
-    _kcalController.text = '${scaled.caloriesKcal}';
-    _proteinController.text = scaled.proteinG.toStringAsFixed(1);
-    _carbsController.text = scaled.carbsG.toStringAsFixed(1);
-    _fatController.text = scaled.fatG.toStringAsFixed(1);
-    _fiberController.text = scaled.fiberG.toStringAsFixed(1);
-  }
-
   void _onAmountChanged(String text) {
     final amount = _parseDouble(text);
     if (amount <= 0) return;
-    _applyScaledAmount(amount);
-    setState(() {});
+    setState(() => _amount = amount);
+  }
+
+  Future<void> _reviseWithAi() async {
+    final correction = _correctionController.text.trim();
+    if (correction.isEmpty) return;
+
+    final query = _originalQuery != null && _originalQuery!.isNotEmpty
+        ? '$_originalQuery. Corrección: $correction'
+        : correction;
+
+    setState(() => _revising = true);
+    try {
+      final profile = await ref.read(profileProvider.future);
+      final estimate = await ref.read(aiCoachServiceProvider).estimateFoodFromText(
+            query: query,
+            profile: profile,
+          );
+      if (!mounted) return;
+      if (estimate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.foodAiFailed)),
+        );
+        return;
+      }
+      setState(() {
+        _baseEstimate = estimate;
+        _amount = estimate.referenceAmount;
+        _originalQuery = query;
+        _amountController.text = _formatAmount(_amount);
+        _correctionController.clear();
+      });
+    } finally {
+      if (mounted) setState(() => _revising = false);
+    }
   }
 
   Future<void> _save() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    final scaled = _scaled;
+    final name = scaled.name.trim();
+    if (name.isEmpty || _amount <= 0) return;
 
-    final amount = _parseDouble(_amountController.text);
-    final unit = _baseEstimate.amountUnit;
-    final serving = amount > 0
-        ? FoodServingParser.formatAmount(amount, unit)
-        : _baseEstimate.servingDescription;
+    final serving = FoodServingParser.formatAmount(_amount, _baseEstimate.amountUnit);
 
     setState(() => _saving = true);
     try {
@@ -106,11 +119,11 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
             mealType: widget.mealType,
             name: name,
             brand: _baseEstimate.brand,
-            caloriesKcal: int.tryParse(_kcalController.text) ?? 0,
-            proteinG: _parseDouble(_proteinController.text),
-            carbsG: _parseDouble(_carbsController.text),
-            fatG: _parseDouble(_fatController.text),
-            fiberG: _parseDouble(_fiberController.text),
+            caloriesKcal: scaled.caloriesKcal,
+            proteinG: scaled.proteinG,
+            carbsG: scaled.carbsG,
+            fatG: scaled.fatG,
+            fiberG: scaled.fiberG,
             servingDescription: serving,
             source: widget.source,
             loggedAt: widget.day,
@@ -128,10 +141,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final protein = _parseDouble(_proteinController.text);
-    final carbs = _parseDouble(_carbsController.text);
-    final fat = _parseDouble(_fatController.text);
-    final fiber = _parseDouble(_fiberController.text);
+    final scaled = _scaled;
     final unit = _baseEstimate.amountUnit;
 
     return Scaffold(
@@ -142,118 +152,114 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
         ),
         title: Text(l10n.foodDetailTitle),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Stack(
         children: [
-          if (!widget.manual && widget.estimate.ingredients.isNotEmpty) ...[
-            Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppColors.cardElevated,
-                borderRadius: BorderRadius.circular(16),
+          ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (_baseEstimate.ingredients.isNotEmpty) ...[
+                Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.cardElevated,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.restaurant, size: 56, color: AppColors.orange),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Text(
+                scaled.name,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
-              child: const Center(
-                child: Icon(Icons.restaurant, size: 64, color: AppColors.orange),
+              if (_baseEstimate.brand != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _baseEstimate.brand!,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+              ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: _onAmountChanged,
+                decoration: InputDecoration(
+                  labelText: l10n.foodQuantityLabel(unit),
+                  suffixText: unit,
+                  helperText: widget.source == FoodEntrySource.barcode
+                      ? l10n.foodPer100gNote
+                      : l10n.foodMacrosAutoHint,
+                ),
               ),
+              const SizedBox(height: 20),
+              _NutrientCard(
+                label: l10n.foodCaloriesLabel,
+                value: '${scaled.caloriesKcal} kcal',
+                prominent: true,
+              ),
+              const SizedBox(height: 12),
+              _NutrientCard(
+                label: l10n.macroProtein,
+                value: '${scaled.proteinG.toStringAsFixed(1)} g',
+              ),
+              _NutrientCard(
+                label: l10n.macroFat,
+                value: '${scaled.fatG.toStringAsFixed(1)} g',
+              ),
+              _NutrientCard(
+                label: l10n.macroCarbs,
+                value: '${scaled.carbsG.toStringAsFixed(1)} g',
+              ),
+              _NutrientCard(
+                label: l10n.macroFiber,
+                value: '${scaled.fiberG.toStringAsFixed(1)} g',
+              ),
+              if (_baseEstimate.ingredients.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(l10n.foodIngredients, style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                Text(
+                  _baseEstimate.ingredients.join(', '),
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+              ],
+              if (_showAiCorrection) ...[
+                const SizedBox(height: 24),
+                Text(l10n.foodAiCorrectionHint, style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _correctionController,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: l10n.foodAiCorrectionPlaceholder,
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: _revising ? null : _reviseWithAi,
+                  icon: const Icon(Icons.auto_awesome, color: AppColors.orange),
+                  label: Text(l10n.foodAiCorrectionAction),
+                ),
+              ],
+            ],
+          ),
+          if (_revising)
+            const ColoredBox(
+              color: Colors.black54,
+              child: Center(child: FitForgeLoadingIndicator(size: 72)),
             ),
-            const SizedBox(height: 16),
-          ],
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(labelText: l10n.foodNameLabel),
-          ),
-          if (_baseEstimate.brand != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              _baseEstimate.brand!,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ],
-          const SizedBox(height: 16),
-          TextField(
-            controller: _amountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: _onAmountChanged,
-            decoration: InputDecoration(
-              labelText: l10n.foodQuantityLabel(unit),
-              suffixText: unit,
-              helperText: widget.source == FoodEntrySource.barcode ? l10n.foodPer100gNote : null,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _kcalController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l10n.foodCaloriesLabel),
-          ),
-          const SizedBox(height: 16),
-          MacroProgressBar(
-            label: l10n.macroProtein,
-            current: protein,
-            target: protein > 0 ? protein : 1,
-            color: const Color(0xFFE85D75),
-          ),
-          TextField(
-            controller: _proteinController,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(labelText: '${l10n.macroProtein} (g)'),
-          ),
-          const SizedBox(height: 12),
-          MacroProgressBar(
-            label: l10n.macroFat,
-            current: fat,
-            target: fat > 0 ? fat : 1,
-            color: const Color(0xFFF5B942),
-          ),
-          TextField(
-            controller: _fatController,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(labelText: '${l10n.macroFat} (g)'),
-          ),
-          const SizedBox(height: 12),
-          MacroProgressBar(
-            label: l10n.macroCarbs,
-            current: carbs,
-            target: carbs > 0 ? carbs : 1,
-            color: const Color(0xFF5BB8F0),
-          ),
-          TextField(
-            controller: _carbsController,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(labelText: '${l10n.macroCarbs} (g)'),
-          ),
-          const SizedBox(height: 12),
-          MacroProgressBar(
-            label: l10n.macroFiber,
-            current: fiber,
-            target: fiber > 0 ? fiber : 1,
-            color: const Color(0xFF9E7B5A),
-          ),
-          TextField(
-            controller: _fiberController,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(labelText: '${l10n.macroFiber} (g)'),
-          ),
-          if (widget.estimate.ingredients.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(l10n.foodIngredients, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Text(
-              widget.estimate.ingredients.join(', '),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
-          ],
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton(
-            onPressed: _saving ? null : _save,
+            onPressed: _saving || _amount <= 0 ? null : _save,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.orange,
               foregroundColor: Colors.white,
@@ -268,6 +274,46 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                 : Text(l10n.foodAddThis),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NutrientCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool prominent;
+
+  const _NutrientCard({
+    required this.label,
+    required this.value,
+    this.prominent = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: prominent ? 14 : 13,
+              fontWeight: prominent ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: prominent ? 18 : 15,
+              color: prominent ? AppColors.orange : null,
+            ),
+          ),
+        ],
       ),
     );
   }

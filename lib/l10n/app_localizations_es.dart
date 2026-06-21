@@ -155,6 +155,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get experienceLevel => 'Nivel de experiencia';
 
   @override
+  String get activityLevel => 'Actividad diaria';
+
+  @override
+  String get activityLevelTitle => 'Nivel de actividad';
+
+  @override
+  String get activitySedentary => 'Sedentario';
+
+  @override
+  String get activityModerate => 'Moderado';
+
+  @override
+  String get activityHigh => 'Alto';
+
+  @override
   String get restTimerAlert => 'Aviso de descanso';
 
   @override
@@ -759,7 +774,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get caloriesEstimateNote =>
-      'Estimación según duración, volumen, peso y perfil metabólico.';
+      'Calorías activas estimadas (extra del entreno; el reposo basal ya está en tu meta diaria).';
 
   @override
   String get caloriesEstimateDefaultWeight =>
@@ -1536,7 +1551,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String foodWorkoutBonus(int count) {
-    return '+$count kcal por entrenamiento hoy';
+    return '+$count kcal activas por entrenamiento hoy';
   }
 
   @override
@@ -1617,6 +1632,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String foodQuantityLabel(String unit) {
     return 'Cantidad ($unit)';
   }
+
+  @override
+  String get foodMacrosAutoHint =>
+      'Ajusta los gramos; calorías y macros se recalculan solos.';
+
+  @override
+  String get foodAiCorrectionHint => '¿La IA se equivocó?';
+
+  @override
+  String get foodAiCorrectionPlaceholder =>
+      'Ej.: eran 3 tortillas, no 2, y cada una tiene 56 kcal';
+
+  @override
+  String get foodAiCorrectionAction => 'Recalcular con IA';
 
   @override
   String get foodAnalyzing => 'Analizando…';

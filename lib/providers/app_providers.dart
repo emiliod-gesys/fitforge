@@ -8,8 +8,10 @@ import '../core/l10n/app_locale.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
+import '../models/body_metric.dart';
 import '../models/food_entry.dart';
 import '../models/profile.dart';
+import '../models/workout.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/custom_exercise_repository.dart';
@@ -232,29 +234,41 @@ final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
 });
 
 final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
+  ref.keepAlive();
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
   return ref.watch(foodServiceProvider).getEntriesForDay(day);
 });
 
+final foodDayWorkoutsProvider = FutureProvider.family<List<Workout>, DateTime>((ref, day) async {
+  ref.watch(authStateProvider);
+  final normalized = DateTime(day.year, day.month, day.day);
+  return ref.watch(workoutServiceProvider).getCompletedWorkoutsOnDay(normalized);
+});
+
 final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async {
+  ref.keepAlive();
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
-  final profile = await ref.watch(profileProvider.future);
-  final metrics = await ref.watch(bodyMetricSnapshotsProvider.future);
-  final entries = await ref.watch(foodEntriesProvider.future);
-  final workouts = await ref.watch(workoutsProvider.future);
+  final normalizedDay = DateTime(day.year, day.month, day.day);
 
-  final completedOnDay = workouts.where((w) {
-    final completed = w.completedAt;
-    return completed != null && DailyNutritionBudget.isSameCalendarDay(completed, day);
-  }).toList();
+  final profileFuture = ref.watch(profileProvider.future);
+  final metricsFuture = ref.watch(bodyMetricSnapshotsProvider.future);
+  final entriesFuture = ref.watch(foodEntriesProvider.future);
+  final workoutsFuture = ref.watch(foodDayWorkoutsProvider(normalizedDay).future);
+
+  final results = await Future.wait([
+    profileFuture,
+    metricsFuture,
+    entriesFuture,
+    workoutsFuture,
+  ]);
 
   return DailyNutritionBudget.build(
-    day: day,
-    entries: entries,
-    workoutsCompletedOnDay: completedOnDay,
-    profile: profile,
-    bodyMetrics: metrics,
+    day: normalizedDay,
+    entries: results[2] as List<FoodEntry>,
+    workoutsCompletedOnDay: results[3] as List<Workout>,
+    profile: results[0] as UserProfile?,
+    bodyMetrics: results[1] as Map<String, BodyMetricSnapshot>,
   );
 });

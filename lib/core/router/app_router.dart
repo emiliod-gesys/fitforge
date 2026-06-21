@@ -136,7 +136,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             mealType: extra['meal'] as MealType,
             day: extra['day'] as DateTime,
             source: extra['source'] as FoodEntrySource? ?? FoodEntrySource.manual,
-            manual: extra['manual'] as bool? ?? false,
+            originalQuery: extra['originalQuery'] as String?,
           );
         },
       ),

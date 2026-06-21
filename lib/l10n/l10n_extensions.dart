@@ -103,6 +103,16 @@ extension ProfileL10n on AppLocalizations {
 
   List<String> get experienceLevels => [expBeginner, expIntermediate, expAdvanced];
 
+  String activityLevelLabel(DailyActivityLevel level) {
+    return switch (level) {
+      DailyActivityLevel.sedentary => activitySedentary,
+      DailyActivityLevel.moderate => activityModerate,
+      DailyActivityLevel.high => activityHigh,
+    };
+  }
+
+  List<DailyActivityLevel> get activityLevels => DailyActivityLevel.values;
+
   String timeAgo(DateTime dt) {
     final diff = DateTime.now().difference(dt);
     if (diff.inMinutes < 1) return timeNow;

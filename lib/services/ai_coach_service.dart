@@ -4,6 +4,7 @@ import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
 import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/food_query_hints.dart';
 import '../core/utils/food_serving_parser.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
@@ -663,27 +664,49 @@ Responde SOLO con este JSON:
     final system = '''
 Eres un nutricionista de FitForge. ${languageInstruction(lang)}
 Responde SOLO JSON válido sin markdown.
-Estima porción típica de consumo si no se especifica cantidad.
-''';
-    final user = '''
-Alimento: "$query"
 
+Reglas:
+- Si el usuario lista varios alimentos, SUMA cada uno por separado.
+- Si da calorías explícitas (ej. "56 kcal cada una"), usa ese valor exacto para ese ítem.
+- "Sin aceite" en huevos = sin grasa añadida, pero conserva la grasa natural del huevo (~5 g grasa por huevo grande).
+- serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
+- reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
+- Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
+''';
+    final hints = FoodQueryHints.labeledKcalTotal(query);
+    final eggs = FoodQueryHints.eggCount(query);
+    final hintsBlock = (hints > 0 || eggs > 0)
+        ? '''
+
+DATOS OBLIGATORIOS del usuario (debes respetarlos en el total):
+${eggs > 0 ? '- $eggs huevo(s) grande(s) sin aceite añadido: ~${eggs * FoodQueryHints.eggKcal} kcal' : ''}
+${hints > 0 ? '- Ítems con kcal explícitas en el texto: mínimo $hints kcal (suma exacta de lo indicado)' : ''}
+- calories_kcal DEBE ser >= ${(hints + eggs * FoodQueryHints.eggKcal)} kcal
+'''
+        : '';
+
+    final user = '''
+Comida descrita: "$query"
+$hintsBlock
 JSON:
 {
-  "name": "nombre del plato",
+  "name": "nombre corto del plato",
   "brand": null,
   "calories_kcal": 0,
   "protein_g": 0,
   "carbs_g": 0,
   "fat_g": 0,
   "fiber_g": 0,
-  "serving_description": "1 porción (120 g)",
+  "serving_description": "2 huevos + 2 tortillas",
+  "reference_amount_g": 180,
   "ingredients": ["ingrediente 1"]
 }
 ''';
     try {
       final response = await _complete(profile: profile, systemPrompt: system, userPrompt: user);
-      return _parseFoodEstimate(response);
+      final parsed = _parseFoodEstimate(response);
+      if (parsed == null) return null;
+      return FoodQueryHints.reconcile(query, parsed);
     } catch (_) {
       return null;
     }
@@ -745,9 +768,8 @@ Responde SOLO JSON:
         fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
         servingDescription: json['serving_description'] as String?,
         ingredients: (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [],
-        referenceAmount: FoodServingParser.amountFromDescription(
-              json['serving_description'] as String?,
-            ) ??
+        referenceAmount: (json['reference_amount_g'] as num?)?.toDouble() ??
+            FoodServingParser.amountFromDescription(json['serving_description'] as String?) ??
             100,
         amountUnit: FoodServingParser.unitFromDescription(json['serving_description'] as String?),
       );
