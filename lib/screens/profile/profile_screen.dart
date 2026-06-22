@@ -25,6 +25,14 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -44,6 +52,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
       body: profileAsync.when(
+        skipLoadingOnReload: true,
         data: (profile) {
           final unitSystem = ref.watch(unitSystemProvider);
           return RefreshIndicator(
@@ -52,6 +61,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ref.invalidate(bodyMetricSnapshotsProvider);
             },
             child: ListView(
+              key: const PageStorageKey<String>('profile_scroll'),
+              controller: _scrollController,
               padding: const EdgeInsets.all(16),
               children: [
                 Center(
@@ -153,6 +164,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _SectionTitle(l10n.bodyMetrics),
                 const SizedBox(height: 8),
                 metricsAsync.when(
+                  skipLoadingOnReload: true,
                   data: (snapshots) => _MetricsGrid(
                     snapshots: snapshots,
                     profile: profile,
@@ -186,6 +198,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => _editExperience(profile),
                 ),
                 ref.watch(restTimerAlertModeProvider).when(
+                  skipLoadingOnReload: true,
                   data: (mode) => ListTile(
                     leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
                     title: Text(l10n.restTimerAlert),
@@ -208,6 +221,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 16),
                 _SectionTitle(l10n.aiSection),
                 ref.watch(aiProactiveEnabledProvider).when(
+                  skipLoadingOnReload: true,
                   data: (enabled) => SwitchListTile(
                     secondary: const Icon(Icons.psychology_outlined, color: AppColors.orange),
                     title: Text(l10n.proactiveAi),
@@ -324,7 +338,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (result != null && result.isNotEmpty) {
       await ref.read(profileServiceProvider).updateProfile({'display_name': result});
       ref.invalidate(profileProvider);
-      ref.invalidate(friendRankingProvider);
+      ref.invalidate(leaderboardProvider);
     }
   }
 

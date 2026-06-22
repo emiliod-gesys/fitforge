@@ -6,6 +6,8 @@ import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/food_query_hints.dart';
 import '../core/utils/food_serving_parser.dart';
+import '../core/utils/gym_weight.dart';
+import '../core/utils/proactive_workout_ai_rules.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
 import '../core/utils/workout_suggestion_context.dart';
@@ -275,6 +277,8 @@ $context
         return _callOpenAI(apiKey, systemPrompt, userMessage);
       case AiProvider.gemini:
         return _callGemini(apiKey, systemPrompt, userMessage);
+      case AiProvider.anthropic:
+        return _callAnthropic(apiKey, systemPrompt, userMessage);
       case AiProvider.none:
         throw Exception('Proveedor no configurado');
     }
@@ -447,6 +451,8 @@ $_routineRules
         return _callOpenAI(apiKey, systemPrompt, userPrompt);
       case AiProvider.gemini:
         return _callGemini(apiKey, systemPrompt, userPrompt);
+      case AiProvider.anthropic:
+        return _callAnthropic(apiKey, systemPrompt, userPrompt);
       case AiProvider.none:
         throw Exception('Proveedor no configurado');
     }
@@ -481,7 +487,12 @@ $_routineRules
           orderIndex: e.key,
           targetSets: ex['sets'] as int? ?? AppConstants.defaultSets,
           targetReps: isCardio ? 0 : (ex['reps'] as int? ?? AppConstants.defaultReps),
-          targetWeight: isCardio ? null : (ex['weight_kg'] as num?)?.toDouble(),
+          targetWeight: isCardio
+              ? null
+              : GymWeight.snapKgOrNull(
+                  (ex['weight_kg'] as num?)?.toDouble(),
+                  profile?.unitSystem ?? 'kg',
+                ),
           restSeconds: isCardio ? 0 : (ex['rest_seconds'] as int? ?? AppConstants.defaultRestSeconds),
           loggingType: loggingType,
           targetDurationSeconds: ex['duration_seconds'] as int?,
@@ -593,6 +604,34 @@ $_routineRules
     return data['candidates'][0]['content']['parts'][0]['text'] as String;
   }
 
+  Future<String> _callAnthropic(String apiKey, String system, String user) async {
+    final response = await http.post(
+      Uri.parse('https://api.anthropic.com/v1/messages'),
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': 'claude-3-5-haiku-latest',
+        'max_tokens': 2000,
+        'system': system,
+        'messages': [
+          {'role': 'user', 'content': user},
+        ],
+        'temperature': 0.7,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error Anthropic: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final content = data['content'] as List<dynamic>;
+    return content.first['text'] as String;
+  }
+
   /// Sugiere peso/reps (o cardio) para todos los ejercicios de un entreno en una sola llamada.
   Future<AiWorkoutSuggestions?> suggestWorkoutSets({
     required UserProfile profile,
@@ -603,8 +642,10 @@ $_routineRules
     final lang = _resolveLanguageCode(profile: profile);
     final usesLb = UnitConverter.isLb(profile.unitSystem);
     final weightNote = usesLb
-        ? 'El usuario ve libras en la app, pero responde pesos en weight_kg (kilogramos, como en el historial).'
-        : 'Express strength weights as weight_kg (kilograms).';
+        ? 'El usuario ve libras en la app, pero responde pesos en weight_kg (kilogramos, como en el historial). Usa incrementos de gimnasio: pesos que en lb sean múltiplos de 2.5 (ej. 10, 12.5, 15 lb por mancuerna).'
+        : 'Express strength weights as weight_kg (kilograms). Use gym increments: multiples of 0.5 kg (e.g. 10, 12.5, 20 kg).';
+
+    final goalBlock = ProactiveWorkoutAiRules.goalProgrammingBlock(profile);
 
     final systemPrompt = '''
 Eres un programador de entrenamiento de FitForge.
@@ -612,31 +653,34 @@ ${languageInstruction(lang)}
 Responde ÚNICAMENTE con JSON válido. Sin markdown ni texto extra.
 $weightNote
 
-Reglas:
+$goalBlock
+
+Reglas generales:
 - Usa el historial (máx. 5 sesiones), objetivo y experiencia del usuario.
-- recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce ligeramente; puedes reducir series.
+- recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce; reduce series de trabajo.
 - days_since_last: días desde la última sesión de ese ejercicio.
-- set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. Puedes ajustar el número de series según objetivo (no estás obligado a mantener set_count).
-- Series permitidas: fuerza 1-8 por ejercicio; cardio 1-3. Usa set_number consecutivos 1..N donde N = cantidad de series que decidas.
-- Hipertrofia: 3-5 series, 8-12 reps. Fuerza: 3-6 series, 3-6 reps, más peso. Pérdida de grasa/resistencia: 2-4 series, más reps. Mantenimiento: similar al historial o micro-progresión.
-- Si el músculo está poco recuperado (recovery_pct < 60), prioriza menos series o mismo peso.
+- set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo.
 - Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps.
-- Si no hay historial, usa valores conservadores razonables según objetivo y experiencia.
+- Si no hay historial, usa valores conservadores según objetivo y experiencia.
+- Devuelve TODOS los ejercicios del payload con su exercise_id exacto.
+- En el historial, rir = repeticiones en reserva (0 = al fallo, 3 = fácil). Si el último set tuvo rir 0-1, no subas peso salvo objetivo Fuerza con buena recuperación. Si rir ≥ 2, puedes progresar.
 ''';
 
     final userPrompt = '''
 Datos del entrenamiento a iniciar:
 $payloadJson
 
-Responde SOLO con este JSON:
+Responde SOLO con este JSON (ejemplo con aproximaciones + trabajo en un compuesto):
 {
   "exercises": [
     {
       "exercise_id": "id del ejercicio",
       "sets": [
-        {"set_number": 1, "weight_kg": 80, "reps": 10},
-        {"set_number": 2, "weight_kg": 80, "reps": 10},
-        {"set_number": 3, "weight_kg": 77.5, "reps": 10}
+        {"set_number": 1, "weight_kg": 40, "reps": 10},
+        {"set_number": 2, "weight_kg": 60, "reps": 5},
+        {"set_number": 3, "weight_kg": 80, "reps": 5},
+        {"set_number": 4, "weight_kg": 80, "reps": 5},
+        {"set_number": 5, "weight_kg": 80, "reps": 5}
       ]
     }
   ]
@@ -671,6 +715,8 @@ Reglas:
 - "Sin aceite" en huevos = sin grasa añadida, pero conserva la grasa natural del huevo (~5 g grasa por huevo grande).
 - serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
 - reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
+- calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
+- Frutas por peso: manzana ~52 kcal/100g, plátano ~89 kcal/100g.
 - Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
 ''';
     final hints = FoodQueryHints.labeledKcalTotal(query);
@@ -738,6 +784,8 @@ Responde SOLO JSON:
           response = await _callOpenAIVision(apiKey, prompt, imageBytes);
         case AiProvider.gemini:
           response = await _callGeminiVision(apiKey, prompt, imageBytes);
+        case AiProvider.anthropic:
+          response = await _callAnthropicVision(apiKey, prompt, imageBytes);
         case AiProvider.none:
           return null;
       }
@@ -835,5 +883,44 @@ Responde SOLO JSON:
     }
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     return data['candidates'][0]['content']['parts'][0]['text'] as String;
+  }
+
+  Future<String> _callAnthropicVision(String apiKey, String prompt, List<int> imageBytes) async {
+    final b64 = base64Encode(imageBytes);
+    final response = await http.post(
+      Uri.parse('https://api.anthropic.com/v1/messages'),
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': 'claude-3-5-haiku-latest',
+        'max_tokens': 800,
+        'messages': [
+          {
+            'role': 'user',
+            'content': [
+              {
+                'type': 'image',
+                'source': {
+                  'type': 'base64',
+                  'media_type': 'image/jpeg',
+                  'data': b64,
+                },
+              },
+              {'type': 'text', 'text': prompt},
+            ],
+          },
+        ],
+        'temperature': 0.3,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error Anthropic vision: ${response.statusCode}');
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final content = data['content'] as List<dynamic>;
+    return content.first['text'] as String;
   }
 }

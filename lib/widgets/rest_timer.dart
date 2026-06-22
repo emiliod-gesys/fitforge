@@ -4,18 +4,35 @@ import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/rest_sound_service.dart';
 
+/// Allows external controllers (e.g. watch companion) to adjust or skip rest.
+class RestTimerController {
+  _RestTimerState? _state;
+
+  void adjust(int deltaSeconds) => _state?.adjustFromController(deltaSeconds);
+
+  void skip() => _state?.skipFromController();
+}
+
 class RestTimer extends StatefulWidget {
   final int sessionId;
   final int seconds;
+  final DateTime? endsAt;
+  final int? totalSeconds;
   final VoidCallback onComplete;
   final VoidCallback onSkip;
+  final RestTimerController? controller;
+  final void Function(DateTime endsAt, int totalSeconds)? onClockStarted;
 
   const RestTimer({
     super.key,
     required this.sessionId,
     required this.seconds,
+    this.endsAt,
+    this.totalSeconds,
     required this.onComplete,
     required this.onSkip,
+    this.controller,
+    this.onClockStarted,
   });
 
   @override
@@ -37,19 +54,63 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _activeSessionId = widget.sessionId;
-    _resetClock(widget.seconds);
+    _initClock();
+    widget.controller?._state = this;
+    if (widget.endsAt == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onClockStarted?.call(_endsAt, _total);
+      });
+    }
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _syncFromClock());
   }
 
   @override
   void didUpdateWidget(RestTimer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.sessionId != widget.sessionId || oldWidget.seconds != widget.seconds) {
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._state = null;
+      widget.controller?._state = this;
+    }
+    final sessionChanged = oldWidget.sessionId != widget.sessionId;
+    final durationChanged = oldWidget.seconds != widget.seconds;
+    final resumeChanged = oldWidget.endsAt != widget.endsAt;
+    if (sessionChanged || (durationChanged && widget.endsAt == null) || resumeChanged) {
       _finished = false;
       _activeSessionId = widget.sessionId;
-      _resetClock(widget.seconds);
+      _initClock();
+      if (widget.endsAt == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.onClockStarted?.call(_endsAt, _total);
+        });
+      }
     }
   }
+
+  void _initClock() {
+    final resumeAt = widget.endsAt;
+    final resumeTotal = widget.totalSeconds;
+    if (resumeAt != null && resumeTotal != null && resumeTotal > 0) {
+      _total = resumeTotal;
+      _endsAt = resumeAt;
+      final remainingMs = _endsAt.difference(DateTime.now()).inMilliseconds;
+      _remaining = remainingMs <= 0
+          ? 0
+          : ((remainingMs + 999) ~/ 1000).clamp(1, _total);
+      if (_remaining <= 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_complete());
+        });
+      }
+      return;
+    }
+    _resetClock(widget.seconds);
+  }
+
+  void adjustFromController(int delta) => _adjust(delta);
+
+  void skipFromController() => _skip();
 
   void _resetClock(int seconds) {
     _total = seconds;
@@ -62,6 +123,9 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
     _cancelled = true;
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    if (widget.controller?._state == this) {
+      widget.controller?._state = null;
+    }
     if (_activeSessionId == widget.sessionId) {
       _activeSessionId = null;
     }

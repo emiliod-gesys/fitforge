@@ -5,6 +5,7 @@ import '../../models/exercise_history.dart';
 import '../../models/exercise_logging.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
+import 'gym_weight.dart';
 import 'muscle_inference.dart';
 
 /// Contexto compacto para sugerencias de IA al iniciar un entrenamiento.
@@ -17,6 +18,7 @@ class WorkoutSuggestionExerciseContext {
   final List<String> muscleGroups;
   final double recoveryPercent;
   final int? daysSinceLastSession;
+  final bool isCompound;
   final List<WorkoutSuggestionHistorySession> history;
 
   const WorkoutSuggestionExerciseContext({
@@ -28,6 +30,7 @@ class WorkoutSuggestionExerciseContext {
     required this.muscleGroups,
     required this.recoveryPercent,
     this.daysSinceLastSession,
+    this.isCompound = false,
     this.history = const [],
   });
 
@@ -35,6 +38,7 @@ class WorkoutSuggestionExerciseContext {
         'exercise_id': exerciseId,
         'name': exerciseName,
         'is_cardio': isCardio,
+        'is_compound': isCompound,
         'set_count': setCount,
         if (historyAvgSetCount != null) 'history_avg_set_count': historyAvgSetCount,
         'muscles': muscleGroups,
@@ -96,6 +100,7 @@ abstract final class WorkoutSuggestionContextBuilder {
         muscleGroups: muscles,
         recoveryPercent: recovery,
         daysSinceLastSession: daysSince,
+        isCompound: !isCardio && _isCompoundLift(ex.exerciseName),
         history: history
             .take(historyLimit)
             .map((session) => _historySession(session, isCardio))
@@ -127,6 +132,26 @@ abstract final class WorkoutSuggestionContextBuilder {
       if (value != null && value < min) min = value;
     }
     return min;
+  }
+
+  static bool _isCompoundLift(String name) {
+    final n = name.toLowerCase();
+    const patterns = [
+      'press',
+      'sentadilla',
+      'squat',
+      'peso muerto',
+      'deadlift',
+      'remo',
+      'row',
+      'dominada',
+      'pull-up',
+      'pull up',
+      'chin-up',
+      'fondos',
+      'dip',
+    ];
+    return patterns.any(n.contains);
   }
 
   static WorkoutSuggestionHistorySession _historySession(
@@ -261,12 +286,13 @@ abstract final class AiWorkoutSuggestionsParser {
 
 abstract final class AiWorkoutSuggestionsMerger {
   static const minSets = 1;
-  static const maxStrengthSets = 8;
+  static const maxStrengthSets = 10;
   static const maxCardioSets = 3;
 
   static List<WorkoutExercise> apply({
     required List<WorkoutExercise> exercises,
     required AiWorkoutSuggestions suggestions,
+    String unitSystem = 'kg',
   }) {
     return exercises.map((ex) {
       final suggested = suggestions.forExercise(ex.exerciseId);
@@ -305,7 +331,12 @@ abstract final class AiWorkoutSuggestionsMerger {
           id: existing?.id ?? '',
           setNumber: setNumber,
           loggingType: loggingType,
-          weight: match.weightKg ?? existing?.weight ?? templateSet?.weight,
+          weight: GymWeight.snapKgOrNull(
+                match.weightKg ?? existing?.weight ?? templateSet?.weight,
+                unitSystem,
+              ) ??
+              existing?.weight ??
+              templateSet?.weight,
           reps: match.reps > 0 ? match.reps : (existing?.reps ?? templateSet?.reps ?? 10),
         );
       }).toList();

@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/utils/milestones.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../core/utils/workout_streak.dart';
+import '../models/leaderboard.dart';
 import '../models/profile.dart';
 import '../models/social.dart';
 import 'supabase_service.dart';
@@ -155,49 +156,30 @@ class SocialService {
     );
   }
 
-  Future<List<FriendRankingEntry>> getFriendsRanking() async {
+  Future<LeaderboardResult> getLeaderboard({
+    required LeaderboardMetric metric,
+    required LeaderboardScope scope,
+    required LeaderboardPeriod period,
+  }) async {
     final uid = _userId;
-    if (uid == null) return [];
+    if (uid == null) {
+      return const LeaderboardResult(entries: []);
+    }
 
-    final myRow = await _client
-        .from('profiles')
-        .select('id, display_name, avatar_url, email, total_xp')
-        .eq('id', uid)
-        .maybeSingle();
+    final data = await _client.rpc(
+      'get_leaderboard',
+      params: {
+        'p_metric': metric.apiValue,
+        'p_scope': scope.name,
+        'p_period': period.apiValue,
+      },
+    );
 
-    if (myRow == null) return [];
+    if (data == null) {
+      return const LeaderboardResult(entries: []);
+    }
 
-    final friendships = await getFriendships();
-    final friends = friendships
-        .where((f) => f.status == FriendshipStatus.accepted)
-        .map((f) => f.friendFor(uid))
-        .toList();
-
-    final entries = [
-      FriendRankingEntry(
-        user: FriendUser.fromJson(Map<String, dynamic>.from(myRow)),
-        isCurrentUser: true,
-        rank: 0,
-      ),
-      ...friends.map(
-        (user) => FriendRankingEntry(user: user, isCurrentUser: false, rank: 0),
-      ),
-    ];
-
-    entries.sort((a, b) {
-      final byXp = b.user.totalXp.compareTo(a.user.totalXp);
-      if (byXp != 0) return byXp;
-      return a.user.label.toLowerCase().compareTo(b.user.label.toLowerCase());
-    });
-
-    return [
-      for (var i = 0; i < entries.length; i++)
-        FriendRankingEntry(
-          user: entries[i].user,
-          isCurrentUser: entries[i].isCurrentUser,
-          rank: i + 1,
-        ),
-    ];
+    return LeaderboardResult.fromJson(Map<String, dynamic>.from(data as Map));
   }
 
   Future<List<SocialNotification>> getNotifications({int limit = 50}) async {

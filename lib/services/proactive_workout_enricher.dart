@@ -65,6 +65,7 @@ class ProactiveWorkoutEnricher {
     final merged = AiWorkoutSuggestionsMerger.apply(
       exercises: exercises,
       suggestions: suggestions,
+      unitSystem: profile.unitSystem,
     );
 
     final changed = _hasChanges(exercises, merged);

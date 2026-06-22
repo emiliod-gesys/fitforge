@@ -189,6 +189,8 @@ class Exercise {
       'Latissimus dorsi': 'Espalda',
       'Deltoid': 'Hombros',
       'Quadriceps femoris': 'Cuádriceps',
+      'Biceps femoris': 'Isquios',
+      'Triceps surae': 'Pantorrillas',
       'Gluteus maximus': 'Glúteos',
       'Rectus abdominis': 'Abdominales',
     };

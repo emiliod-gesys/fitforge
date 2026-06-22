@@ -14,6 +14,14 @@ class ProfileService {
 
   static const _openAiKeyStorage = 'openai_api_key';
   static const _geminiKeyStorage = 'gemini_api_key';
+  static const _anthropicKeyStorage = 'anthropic_api_key';
+
+  static String _storageKeyFor(AiProvider provider) => switch (provider) {
+        AiProvider.openai => _openAiKeyStorage,
+        AiProvider.gemini => _geminiKeyStorage,
+        AiProvider.anthropic => _anthropicKeyStorage,
+        AiProvider.none => throw ArgumentError('AiProvider.none has no storage key'),
+      };
 
   Future<UserProfile?> getProfile() async {
     final user = _client.auth.currentUser;
@@ -54,29 +62,30 @@ class ProfileService {
   }
 
   Future<void> saveApiKey(AiProvider provider, String apiKey) async {
-    final key = provider == AiProvider.openai ? _openAiKeyStorage : _geminiKeyStorage;
-    await _secureStorage.write(key: key, value: apiKey);
+    await _secureStorage.write(key: _storageKeyFor(provider), value: apiKey);
     await updateProfile({'ai_provider': provider.name});
   }
 
   Future<String?> getApiKey(AiProvider provider) async {
-    final key = provider == AiProvider.openai ? _openAiKeyStorage : _geminiKeyStorage;
-    return _secureStorage.read(key: key);
+    if (provider == AiProvider.none) return null;
+    return _secureStorage.read(key: _storageKeyFor(provider));
   }
 
   Future<void> deleteApiKey(AiProvider provider) async {
-    final key = provider == AiProvider.openai ? _openAiKeyStorage : _geminiKeyStorage;
-    await _secureStorage.delete(key: key);
+    if (provider == AiProvider.none) return;
+    await _secureStorage.delete(key: _storageKeyFor(provider));
   }
 
   Future<bool> _hasKeyForProvider(String? provider) async {
-    if (provider == 'openai') {
-      return (await _secureStorage.read(key: _openAiKeyStorage))?.isNotEmpty ?? false;
-    }
-    if (provider == 'gemini') {
-      return (await _secureStorage.read(key: _geminiKeyStorage))?.isNotEmpty ?? false;
-    }
-    return false;
+    return switch (provider) {
+      'openai' =>
+        (await _secureStorage.read(key: _openAiKeyStorage))?.isNotEmpty ?? false,
+      'gemini' =>
+        (await _secureStorage.read(key: _geminiKeyStorage))?.isNotEmpty ?? false,
+      'anthropic' =>
+        (await _secureStorage.read(key: _anthropicKeyStorage))?.isNotEmpty ?? false,
+      _ => false,
+    };
   }
 
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshots() async {

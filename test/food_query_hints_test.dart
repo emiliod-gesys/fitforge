@@ -27,5 +27,21 @@ void main() {
       expect(fixed.caloriesKcal, greaterThanOrEqualTo(260));
       expect(fixed.proteinG, greaterThan(14));
     });
+
+    test('anchored estimate corrects green apple per 100g', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Manzana verde',
+        caloriesKcal: 96,
+        proteinG: 0.5,
+        carbsG: 25,
+        fatG: 0.3,
+        referenceAmount: 100,
+      );
+
+      final fixed = FoodQueryHints.reconcile('manzana verde 100g', ai);
+
+      expect(fixed.caloriesKcal, 52);
+      expect(fixed.carbsG, closeTo(14, 0.5));
+    });
   });
 }

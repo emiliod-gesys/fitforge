@@ -600,7 +600,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialTitle => 'Social';
 
   @override
-  String get friendsRanking => 'Friends ranking';
+  String get leaderboardsTitle => 'Leaderboards';
+
+  @override
+  String get leaderboardScopeFriends => 'Friends';
+
+  @override
+  String get leaderboardScopeGlobal => 'Global';
+
+  @override
+  String get leaderboardMetricLevel => 'Level';
+
+  @override
+  String get leaderboardEmpty => 'No data in this leaderboard yet.';
+
+  @override
+  String get leaderboardYourPosition => 'Your position';
+
+  @override
+  String get leaderboardPeriodWeek => 'Week';
+
+  @override
+  String get leaderboardPeriodMonth => 'Month';
+
+  @override
+  String get leaderboardPeriodAll => 'All time';
+
+  @override
+  String leaderboardPeriodXp(int xp) {
+    return '$xp XP';
+  }
 
   @override
   String rankYou(String name) {
@@ -796,6 +825,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelWorkoutConfirm => 'Cancel workout';
 
   @override
+  String get cancelWorkoutBack => 'Back';
+
+  @override
   String get workoutCancelled => 'Workout cancelled';
 
   @override
@@ -881,6 +913,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get done => 'Done';
+
+  @override
+  String get rirPickerTitle => 'How many more reps could you have done?';
+
+  @override
+  String get rirPickerSubtitle =>
+      'Reps in reserve (RIR) for this set. The AI uses this to tune your next workout.';
+
+  @override
+  String get rirPickerRepsLeft => 'reps left';
+
+  @override
+  String get rirPickerSkip => 'Skip';
 
   @override
   String get newRoutine => 'New routine';
@@ -1250,6 +1295,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get geminiKey => 'Gemini API Key';
 
   @override
+  String get claudeKey => 'Claude API Key';
+
+  @override
+  String get claudeHint =>
+      'Get your key at console.anthropic.com (API billing, not Claude Pro).';
+
+  @override
+  String get claudeApiNote =>
+      'Claude Pro chat subscription does not include an API key. Create one in Anthropic Console and pay per use.';
+
+  @override
   String get apiGuidesTitle => 'Step-by-step guides';
 
   @override
@@ -1329,6 +1385,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get geminiGuideStep7 =>
       'Return to FitForge, paste the key above, select Gemini, and tap «Save API Key».';
+
+  @override
+  String get claudeGuideTitle => 'How to get your Claude API Key (Anthropic)';
+
+  @override
+  String get claudeGuidePortal => 'console.anthropic.com/settings/keys';
+
+  @override
+  String get claudeGuideStep1 =>
+      'Open console.anthropic.com and sign in (separate from claude.ai chat if you only use the chat app).';
+
+  @override
+  String get claudeGuideStep2 =>
+      'Go to Settings → API Keys (console.anthropic.com/settings/keys).';
+
+  @override
+  String get claudeGuideStep3 =>
+      'Click «Create Key», name it (e.g. FitForge), and confirm.';
+
+  @override
+  String get claudeGuideStep4 =>
+      'Copy the generated key. It is shown only once; store it safely.';
+
+  @override
+  String get claudeGuideStep5 =>
+      'Anthropic bills API usage separately (your Claude Pro chat plan does not cover API calls).';
+
+  @override
+  String get claudeGuideStep6 =>
+      'Return to FitForge, paste the key, select Claude, and tap «Save API Key».';
 
   @override
   String setsRepsBest(int sets, int reps, String weight) {
@@ -1593,6 +1679,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foodBarcodeHint => 'Point the camera at the product barcode.';
+
+  @override
+  String get foodBarcodeCameraDenied =>
+      'Camera permission is required to scan barcodes.';
+
+  @override
+  String get foodBarcodeUnsupported =>
+      'This device does not have a compatible camera for scanning.';
+
+  @override
+  String get foodBarcodeGenericError =>
+      'Could not open the camera. Check permissions or try a physical device.';
+
+  @override
+  String get foodBarcodeRetry => 'Retry';
+
+  @override
+  String get foodBarcodeLookupFailed =>
+      'Could not look up the barcode. Check your connection.';
 
   @override
   String get foodPer100gNote => 'Nutrition values scale per 100 g/ml consumed.';

@@ -169,114 +169,111 @@ class _SetLogTileState extends State<SetLogTile> {
       opacity: isDone ? 0.72 : 1,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                width: 36,
-                child: Column(
-                  children: [
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 36,
+              child: Column(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDone
+                          ? AppColors.orange.withValues(alpha: 0.2)
+                          : isActive
+                              ? AppColors.cardElevated
+                              : AppColors.card,
+                      border: Border.all(
+                        color: isDone || isActive ? AppColors.orange : AppColors.border,
+                        width: isActive ? 2 : 1,
+                      ),
+                    ),
+                    child: isDone
+                        ? const Icon(Icons.check, size: 16, color: AppColors.orange)
+                        : Text(
+                            '${widget.set.setNumber}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isActive ? AppColors.textPrimary : AppColors.textMuted,
+                            ),
+                          ),
+                  ),
+                  if (!widget.isLast)
                     Container(
-                      width: 32,
-                      height: 32,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isDone
-                            ? AppColors.orange.withValues(alpha: 0.2)
-                            : isActive
-                                ? AppColors.cardElevated
-                                : AppColors.card,
-                        border: Border.all(
-                          color: isDone || isActive ? AppColors.orange : AppColors.border,
-                          width: isActive ? 2 : 1,
+                      width: 2,
+                      height: 56,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: AppColors.border,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _weightController,
+                        enabled: _fieldsEnabled,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        decoration: _fieldDecoration(
+                          label: weightLabel,
+                          emphasize: isActive,
                         ),
                       ),
-                      child: isDone
-                          ? const Icon(Icons.check, size: 16, color: AppColors.orange)
-                          : Text(
-                              '${widget.set.setNumber}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isActive ? AppColors.textPrimary : AppColors.textMuted,
-                              ),
-                            ),
                     ),
-                    if (!widget.isLast)
-                      Expanded(
-                        child: Container(
-                          width: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          color: AppColors.border,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _repsController,
+                        enabled: _fieldsEnabled,
+                        keyboardType: TextInputType.number,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        decoration: _fieldDecoration(
+                          label: l10n.reps,
+                          emphasize: isActive,
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (isDone)
+                      IconButton(
+                        tooltip: l10n.edit,
+                        onPressed: () => setState(() => _editing = true),
+                        icon: const Icon(Icons.edit_outlined, size: 22),
+                      )
+                    else
+                      FilledButton(
+                        onPressed: _submit,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(l10n.done),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _weightController,
-                          enabled: _fieldsEnabled,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                          decoration: _fieldDecoration(
-                            label: weightLabel,
-                            emphasize: isActive,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          controller: _repsController,
-                          enabled: _fieldsEnabled,
-                          keyboardType: TextInputType.number,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                          decoration: _fieldDecoration(
-                            label: l10n.reps,
-                            emphasize: isActive,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      if (isDone)
-                        IconButton(
-                          tooltip: l10n.edit,
-                          onPressed: () => setState(() => _editing = true),
-                          icon: const Icon(Icons.edit_outlined, size: 22),
-                        )
-                      else
-                        FilledButton(
-                          onPressed: _submit,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.orange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(l10n.done),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

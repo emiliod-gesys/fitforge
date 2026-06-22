@@ -99,6 +99,42 @@ void main() {
       expect(merged.first.sets, hasLength(2));
       expect(merged.first.sets.first.weight, 105);
     });
+
+    test('supports warmup plus working sets up to 10', () {
+      const exercises = [
+        WorkoutExercise(
+          id: 'we1',
+          exerciseId: 'bench',
+          exerciseName: 'Bench Press',
+          orderIndex: 0,
+          sets: [
+            WorkoutSet(id: 's1', setNumber: 1, weight: 70, reps: 10),
+            WorkoutSet(id: 's2', setNumber: 2, weight: 70, reps: 10),
+            WorkoutSet(id: 's3', setNumber: 3, weight: 70, reps: 10),
+          ],
+        ),
+      ];
+
+      const suggestions = AiWorkoutSuggestions(byExerciseId: {
+        'bench': [
+          AiExerciseSetSuggestion(setNumber: 1, weightKg: 40, reps: 10),
+          AiExerciseSetSuggestion(setNumber: 2, weightKg: 55, reps: 6),
+          AiExerciseSetSuggestion(setNumber: 3, weightKg: 70, reps: 5),
+          AiExerciseSetSuggestion(setNumber: 4, weightKg: 75, reps: 5),
+          AiExerciseSetSuggestion(setNumber: 5, weightKg: 75, reps: 5),
+        ],
+      });
+
+      final merged = AiWorkoutSuggestionsMerger.apply(
+        exercises: exercises,
+        suggestions: suggestions,
+      );
+
+      expect(merged.first.sets, hasLength(5));
+      expect(merged.first.sets.first.weight, 40);
+      expect(merged.first.sets.first.reps, 10);
+      expect(merged.first.sets.last.weight, 75);
+    });
   });
 
   group('AiWorkoutSuggestionsParser', () {

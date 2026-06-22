@@ -18,15 +18,20 @@ abstract final class MuscleInference {
       catalog: catalog,
     );
     if (fromCatalog != null) {
-      return _uniqueGroups([...fromCatalog, ...inferred]);
+      return _uniqueGroups(
+        _mergeCatalogWithInferred(exerciseName, fromCatalog, inferred),
+      );
     }
 
     for (final extra in SupplementalExercises.all()) {
       if (_matchesExercise(extra, exerciseId: exerciseId, exerciseName: exerciseName)) {
-        return _uniqueGroups([
-          ...fromExerciseMuscles(extra.muscles, extra.category),
-          ...inferred,
-        ]);
+        return _uniqueGroups(
+          _mergeCatalogWithInferred(
+            exerciseName,
+            fromExerciseMuscles(extra.muscles, extra.category),
+            inferred,
+          ),
+        );
       }
     }
 
@@ -35,6 +40,51 @@ abstract final class MuscleInference {
 
   static List<String> _uniqueGroups(Iterable<String> groups) {
     return groups.toSet().toList();
+  }
+
+  static List<String> _mergeCatalogWithInferred(
+    String exerciseName,
+    List<String> catalog,
+    List<String> inferred,
+  ) {
+    final merged = <String>{...catalog};
+    final catalogBiceps = catalog.contains('Bíceps');
+    final catalogTriceps = catalog.contains('Tríceps');
+
+    for (final group in inferred) {
+      if (catalogTriceps && !catalogBiceps && group == 'Bíceps') continue;
+      if (catalogBiceps && !catalogTriceps && group == 'Tríceps') continue;
+      merged.add(group);
+    }
+
+    return _resolveArmAntagonistConflictByName(exerciseName, merged);
+  }
+
+  static List<String> _resolveArmAntagonistConflictByName(
+    String name,
+    Set<String> muscles,
+  ) {
+    if (!muscles.contains('Bíceps') || !muscles.contains('Tríceps')) {
+      return muscles.toList();
+    }
+
+    final n = _normalize(name);
+    final tricepsNamed = _hasAny(n, ['tricep', 'triceps', 'trícep', 'tríceps']);
+    final bicepsNamed = _hasAny(n, ['bicep', 'biceps', 'bícep', 'bíceps']);
+
+    if (tricepsNamed && !bicepsNamed) {
+      muscles.remove('Bíceps');
+    } else if (bicepsNamed && !tricepsNamed) {
+      muscles.remove('Tríceps');
+    } else if (_hasWord(n, 'curl') && !tricepsNamed) {
+      muscles.remove('Tríceps');
+    } else if (tricepsNamed) {
+      muscles.remove('Bíceps');
+    } else {
+      muscles.remove('Tríceps');
+    }
+
+    return muscles.toList();
   }
 
   static List<String>? _lookupCatalog({
@@ -100,8 +150,18 @@ abstract final class MuscleInference {
     final m = _normalize(muscle);
     if (m.isEmpty) return null;
 
-    if (_containsAny(m, ['biceps', 'bíceps', 'bicep', 'brachialis'])) return 'Bíceps';
-    if (_containsAny(m, ['triceps', 'tríceps'])) return 'Tríceps';
+    // Nombres latinos de pierna/pantorrilla (p. ej. bíceps femoral, tríceps sural).
+    if (_containsAny(m, ['biceps femoris', 'triceps surae'])) return 'Piernas';
+    if (_hasMuscleToken(m, 'surae')) return 'Piernas';
+    if (_hasMuscleToken(m, 'femoris') && _hasMuscleToken(m, 'biceps')) return 'Piernas';
+
+    if (_hasMuscleToken(m, 'triceps') || _hasMuscleToken(m, 'tríceps')) return 'Tríceps';
+    if (_hasMuscleToken(m, 'biceps') ||
+        _hasMuscleToken(m, 'bíceps') ||
+        _hasMuscleToken(m, 'bicep') ||
+        _hasMuscleToken(m, 'brachialis')) {
+      return 'Bíceps';
+    }
     if (_containsAny(m, ['pecho', 'chest', 'pectoral'])) return 'Pecho';
     if (_containsAny(m, ['espalda', 'back', 'latissimus', 'dorsal', 'trapecio', 'romboid'])) {
       return 'Espalda';
@@ -176,27 +236,38 @@ abstract final class MuscleInference {
     if (_isCoreExercise(name)) muscles.add('Abdominales');
     if (_isForearmExercise(name)) muscles.add('Antebrazos');
 
-    return muscles.toList();
+    return _resolveArmAntagonistConflictByName(exerciseName, muscles);
   }
 
   static bool _isTricepsExercise(String name) {
+    if (_hasAny(name, ['gluteo', 'glúteo', 'gluteo', 'glute', 'cadera', 'hip']) &&
+        _hasWord(name, 'kickback')) {
+      return false;
+    }
+
     return _hasAny(name, [
       'tricep',
       'triceps',
       'trícep',
+      'tríceps',
       'pushdown',
       'push down',
       'skull crusher',
-      'skull',
+      'rompecraneos',
+      'rompecráneos',
       'patada de tricep',
-      'kickback',
       'extension de tricep',
       'extensión de tríceps',
-    ]);
+      'fondos de tricep',
+    ]) ||
+        (_hasWord(name, 'skull') && _hasWord(name, 'crusher')) ||
+        (_hasWord(name, 'kickback') &&
+            _hasAny(name, ['tricep', 'triceps', 'trícep', 'tríceps']));
   }
 
   static bool _isBicepsExercise(String name) {
     if (_isLegCurl(name)) return false;
+    if (_hasAny(name, ['tricep', 'triceps', 'trícep', 'tríceps'])) return false;
 
     return _hasAny(name, [
       'curl',
@@ -282,6 +353,10 @@ abstract final class MuscleInference {
       return;
     }
     if (_hasAny(name, ['pierna', 'leg', 'prensa de pierna', 'leg press'])) return;
+    if (_hasWord(name, 'curl') &&
+        _hasAny(name, ['bicep', 'biceps', 'bícep', 'bíceps', 'martillo', 'hammer'])) {
+      return;
+    }
 
     if (_hasAny(name, ['militar', 'hombro', 'shoulder', 'overhead', 'arnold'])) {
       muscles.add('Hombros');
@@ -466,6 +541,12 @@ abstract final class MuscleInference {
       if (value.contains(_normalize(term))) return true;
     }
     return false;
+  }
+
+  static bool _hasMuscleToken(String value, String token) {
+    final t = _normalize(token);
+    if (t.isEmpty) return false;
+    return RegExp(r'(^|[^a-z])' + RegExp.escape(t) + r'([^a-z]|$)').hasMatch(value);
   }
 
   static String _normalize(String input) {

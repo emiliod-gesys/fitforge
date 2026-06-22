@@ -178,5 +178,57 @@ void main() {
     test('antebrazo de cuerda registra antebrazos', () {
       expect(MuscleInference.fromExerciseName('Antebrazo de cuerda de pie'), contains('Antebrazos'));
     });
+
+    test('curl de triceps no etiqueta biceps', () {
+      expect(MuscleInference.fromExerciseName('Curl de triceps en polea'), contains('Tríceps'));
+      expect(MuscleInference.fromExerciseName('Curl de triceps en polea'), isNot(contains('Bíceps')));
+    });
+
+    test('curl de biceps no etiqueta triceps', () {
+      expect(MuscleInference.fromExerciseName('Curl de biceps alterno'), contains('Bíceps'));
+      expect(MuscleInference.fromExerciseName('Curl de biceps alterno'), isNot(contains('Tríceps')));
+    });
+
+    test('biceps femoris del catalogo no etiqueta biceps del brazo', () {
+      expect(
+        MuscleInference.fromExerciseMuscles(['Biceps femoris'], 'Piernas'),
+        contains('Piernas'),
+      );
+      expect(
+        MuscleInference.fromExerciseMuscles(['Biceps femoris'], 'Piernas'),
+        isNot(contains('Bíceps')),
+      );
+    });
+
+    test('triceps sural del catalogo no etiqueta triceps del brazo', () {
+      expect(
+        MuscleInference.fromExerciseMuscles(['Triceps surae'], 'Pantorrillas'),
+        contains('Piernas'),
+      );
+      expect(
+        MuscleInference.fromExerciseMuscles(['Triceps surae'], 'Pantorrillas'),
+        isNot(contains('Tríceps')),
+      );
+    });
+
+    test('catalogo triceps no mezcla biceps inferido por curl', () {
+      const catalog = [
+        Exercise(
+          wgerId: 101,
+          name: 'Extension de triceps en polea',
+          category: 'Brazos',
+          muscles: ['Tríceps'],
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Curl de triceps en polea',
+        exerciseId: '101',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
   });
 }

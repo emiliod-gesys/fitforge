@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FitForge</string>
+    <string name="waiting_for_phone">Inicia un entreno en el teléfono</string>
+    <string name="complete_set">Completar set</string>
+    <string name="skip_rest">Saltar descanso</string>
+    <string name="minus_15">-15s</string>
+    <string name="plus_15">+15s</string>
+    <string name="rest_label">Descanso</string>
+    <string name="set_label">Set %1$d</string>
+    <string name="cardio_unsupported">Cardio solo en el teléfono</string>
+</resources>

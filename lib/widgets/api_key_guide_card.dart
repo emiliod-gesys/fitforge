@@ -10,8 +10,8 @@ class ApiKeyGuideCard extends StatelessWidget {
   final String portalLabel;
   final Uri portalUrl;
   final List<String> steps;
-  final String pdfAssetPath;
-  final String pdfFileName;
+  final String? pdfAssetPath;
+  final String? pdfFileName;
   final AppLocalizations l10n;
 
   const ApiKeyGuideCard({
@@ -20,8 +20,8 @@ class ApiKeyGuideCard extends StatelessWidget {
     required this.portalLabel,
     required this.portalUrl,
     required this.steps,
-    required this.pdfAssetPath,
-    required this.pdfFileName,
+    this.pdfAssetPath,
+    this.pdfFileName,
     required this.l10n,
   });
 
@@ -30,13 +30,16 @@ class ApiKeyGuideCard extends StatelessWidget {
   }
 
   Future<void> _sharePdf() async {
-    final data = await rootBundle.load(pdfAssetPath);
+    final asset = pdfAssetPath;
+    final fileName = pdfFileName;
+    if (asset == null || fileName == null) return;
+    final data = await rootBundle.load(asset);
     await Share.shareXFiles(
       [
         XFile.fromData(
           data.buffer.asUint8List(),
           mimeType: 'application/pdf',
-          name: pdfFileName,
+          name: fileName,
         ),
       ],
       subject: title,
@@ -106,12 +109,13 @@ class ApiKeyGuideCard extends StatelessWidget {
                   icon: const Icon(Icons.open_in_new, size: 18),
                   label: Text(l10n.apiGuideOpenPortal),
                 ),
-                FilledButton.icon(
-                  onPressed: _sharePdf,
-                  style: FilledButton.styleFrom(backgroundColor: AppColors.orange),
-                  icon: const Icon(Icons.picture_as_pdf, size: 18),
-                  label: Text(l10n.apiGuideOpenPdf),
-                ),
+                if (pdfAssetPath != null && pdfFileName != null)
+                  FilledButton.icon(
+                    onPressed: _sharePdf,
+                    style: FilledButton.styleFrom(backgroundColor: AppColors.orange),
+                    icon: const Icon(Icons.picture_as_pdf, size: 18),
+                    label: Text(l10n.apiGuideOpenPdf),
+                  ),
               ],
             ),
           ],

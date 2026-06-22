@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/api_key_guides.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
@@ -63,6 +66,31 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
     }
   }
 
+  Future<void> _switchProvider(AiProvider provider) async {
+    setState(() {
+      _provider = provider;
+      _keyController.clear();
+    });
+    final key = await ref.read(profileServiceProvider).getApiKey(provider);
+    if (key != null && mounted) {
+      setState(() => _keyController.text = key);
+    }
+  }
+
+  String _keyLabel(AppLocalizations l10n) => switch (_provider) {
+        AiProvider.openai => l10n.openAiKey,
+        AiProvider.gemini => l10n.geminiKey,
+        AiProvider.anthropic => l10n.claudeKey,
+        AiProvider.none => l10n.openAiKey,
+      };
+
+  String _keyHint(AppLocalizations l10n) => switch (_provider) {
+        AiProvider.openai => l10n.openAiHint,
+        AiProvider.gemini => l10n.geminiHint,
+        AiProvider.anthropic => l10n.claudeHint,
+        AiProvider.none => l10n.openAiHint,
+      };
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -84,16 +112,24 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
             segments: const [
               ButtonSegment(value: AiProvider.openai, label: Text('OpenAI')),
               ButtonSegment(value: AiProvider.gemini, label: Text('Gemini')),
+              ButtonSegment(value: AiProvider.anthropic, label: Text('Claude')),
             ],
             selected: {_provider},
-            onSelectionChanged: (s) => setState(() => _provider = s.first),
+            onSelectionChanged: (s) => unawaited(_switchProvider(s.first)),
           ),
+          if (_provider == AiProvider.anthropic) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.claudeApiNote,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white54),
+            ),
+          ],
           const SizedBox(height: 16),
           TextField(
             controller: _keyController,
             obscureText: _obscure,
             decoration: InputDecoration(
-              labelText: _provider == AiProvider.openai ? l10n.openAiKey : l10n.geminiKey,
+              labelText: _keyLabel(l10n),
               suffixIcon: IconButton(
                 icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                 onPressed: () => setState(() => _obscure = !_obscure),
@@ -102,7 +138,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _provider == AiProvider.openai ? l10n.openAiHint : l10n.geminiHint,
+            _keyHint(l10n),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white54),
           ),
           const SizedBox(height: 24),
@@ -146,6 +182,14 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
             steps: ApiKeyGuides.geminiSteps(l10n),
             pdfAssetPath: ApiKeyGuides.geminiPdfAsset,
             pdfFileName: 'fitforge-gemini-api-key.pdf',
+            l10n: l10n,
+          ),
+          const SizedBox(height: 8),
+          ApiKeyGuideCard(
+            title: l10n.claudeGuideTitle,
+            portalLabel: l10n.claudeGuidePortal,
+            portalUrl: Uri.parse(ApiKeyGuides.claudePortal),
+            steps: ApiKeyGuides.claudeSteps(l10n),
             l10n: l10n,
           ),
           const SizedBox(height: 24),

@@ -3,6 +3,7 @@ import '../l10n/app_localizations.dart';
 abstract final class ApiKeyGuides {
   static const openAiPortal = 'https://platform.openai.com/api-keys';
   static const geminiPortal = 'https://aistudio.google.com/apikey';
+  static const claudePortal = 'https://console.anthropic.com/settings/keys';
 
   static const openAiPdfAsset = 'assets/docs/openai_api_key_guide.pdf';
   static const geminiPdfAsset = 'assets/docs/gemini_api_key_guide.pdf';
@@ -25,5 +26,14 @@ abstract final class ApiKeyGuides {
         l10n.geminiGuideStep5,
         l10n.geminiGuideStep6,
         l10n.geminiGuideStep7,
+      ];
+
+  static List<String> claudeSteps(AppLocalizations l10n) => [
+        l10n.claudeGuideStep1,
+        l10n.claudeGuideStep2,
+        l10n.claudeGuideStep3,
+        l10n.claudeGuideStep4,
+        l10n.claudeGuideStep5,
+        l10n.claudeGuideStep6,
       ];
 }

@@ -1,6 +1,6 @@
 import 'exercise_logging.dart';
 
-enum AiProvider { none, openai, gemini }
+enum AiProvider { none, openai, gemini, anthropic }
 
 enum Gender {
   male,
@@ -128,6 +128,8 @@ class UserProfile {
         return AiProvider.openai;
       case 'gemini':
         return AiProvider.gemini;
+      case 'anthropic':
+        return AiProvider.anthropic;
       default:
         return AiProvider.none;
     }

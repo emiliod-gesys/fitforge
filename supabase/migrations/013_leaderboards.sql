@@ -1,0 +1,181 @@
+-- Leaderboards: amigos (lista completa) y global (top 25 + posición propia)
+
+CREATE OR REPLACE FUNCTION public.get_leaderboard(
+  p_metric TEXT,
+  p_scope TEXT DEFAULT 'friends'
+)
+RETURNS JSON
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_result JSON;
+BEGIN
+  IF v_uid IS NULL THEN
+    RETURN json_build_object('entries', '[]'::json, 'current_user_outside_top', NULL);
+  END IF;
+
+  IF p_metric NOT IN ('level', 'volume', 'workouts', 'distance', 'calories', 'reps') THEN
+    RAISE EXCEPTION 'Invalid metric: %', p_metric;
+  END IF;
+
+  IF p_scope NOT IN ('friends', 'global') THEN
+    RAISE EXCEPTION 'Invalid scope: %', p_scope;
+  END IF;
+
+  WITH friend_ids AS (
+    SELECT v_uid AS user_id
+    UNION
+    SELECT CASE
+      WHEN f.requester_id = v_uid THEN f.addressee_id
+      ELSE f.requester_id
+    END
+    FROM public.friendships f
+    WHERE f.status = 'accepted'
+      AND (f.requester_id = v_uid OR f.addressee_id = v_uid)
+  ),
+  scope_users AS (
+    SELECT p.id AS user_id, p.display_name, p.avatar_url, p.total_xp, p.body_weight
+    FROM public.profiles p
+    WHERE p_scope = 'global'
+       OR p.id IN (SELECT user_id FROM friend_ids)
+  ),
+  workout_stats AS (
+    SELECT
+      w.user_id,
+      COALESCE(SUM(w.total_volume), 0)::double precision AS total_volume,
+      COUNT(DISTINCT (w.completed_at AT TIME ZONE 'UTC')::date)::bigint AS total_workouts,
+      COALESCE(SUM(
+        CASE
+          WHEN w.duration_minutes >= 1 THEN
+            GREATEST(1, ROUND(
+              (
+                3.5 + LEAST(
+                  1.0,
+                  GREATEST(
+                    0.0,
+                    (COALESCE(w.total_volume, 0) / NULLIF(w.duration_minutes, 0) - 40) / 150.0
+                  )
+                ) * 2.5
+              )
+              * COALESCE(NULLIF(su.body_weight, 0), 70)
+              * (w.duration_minutes::double precision / 60.0) * 0.55
+              + COALESCE(w.total_volume, 0) * 0.00045
+            )::bigint)
+          ELSE 0
+        END
+      ), 0)::bigint AS total_calories
+    FROM public.workouts w
+    INNER JOIN scope_users su ON su.user_id = w.user_id
+    WHERE w.completed_at IS NOT NULL
+    GROUP BY w.user_id
+  ),
+  set_stats AS (
+    SELECT
+      w.user_id,
+      COALESCE(SUM(ws.reps) FILTER (
+        WHERE ws.completed = TRUE AND COALESCE(ws.logging_type, 'strength') = 'strength'
+      ), 0)::bigint AS total_reps,
+      COALESCE(SUM(ws.distance_meters) FILTER (
+        WHERE ws.completed = TRUE
+          AND ws.logging_type = 'cardio'
+          AND ws.distance_meters IS NOT NULL
+          AND ws.distance_meters > 0
+      ), 0)::double precision AS total_distance
+    FROM public.workouts w
+    INNER JOIN scope_users su ON su.user_id = w.user_id
+    INNER JOIN public.workout_exercises we ON we.workout_id = w.id
+    INNER JOIN public.workout_sets ws ON ws.workout_exercise_id = we.id
+    WHERE w.completed_at IS NOT NULL
+    GROUP BY w.user_id
+  ),
+  ranked AS (
+    SELECT
+      su.user_id,
+      su.display_name,
+      su.avatar_url,
+      su.total_xp,
+      COALESCE(wst.total_volume, 0) AS total_volume,
+      COALESCE(wst.total_workouts, 0) AS total_workouts,
+      COALESCE(wst.total_calories, 0) AS total_calories,
+      COALESCE(ss.total_reps, 0) AS total_reps,
+      COALESCE(ss.total_distance, 0) AS total_distance,
+      CASE p_metric
+        WHEN 'level' THEN su.total_xp::double precision
+        WHEN 'volume' THEN COALESCE(wst.total_volume, 0)
+        WHEN 'workouts' THEN COALESCE(wst.total_workouts, 0)::double precision
+        WHEN 'distance' THEN COALESCE(ss.total_distance, 0)
+        WHEN 'calories' THEN COALESCE(wst.total_calories, 0)::double precision
+        WHEN 'reps' THEN COALESCE(ss.total_reps, 0)::double precision
+      END AS metric_value,
+      ROW_NUMBER() OVER (
+        ORDER BY
+          CASE p_metric
+            WHEN 'level' THEN su.total_xp::double precision
+            WHEN 'volume' THEN COALESCE(wst.total_volume, 0)
+            WHEN 'workouts' THEN COALESCE(wst.total_workouts, 0)::double precision
+            WHEN 'distance' THEN COALESCE(ss.total_distance, 0)
+            WHEN 'calories' THEN COALESCE(wst.total_calories, 0)::double precision
+            WHEN 'reps' THEN COALESCE(ss.total_reps, 0)::double precision
+          END DESC,
+          lower(COALESCE(su.display_name, ''))
+      )::int AS rank
+    FROM scope_users su
+    LEFT JOIN workout_stats wst ON wst.user_id = su.user_id
+    LEFT JOIN set_stats ss ON ss.user_id = su.user_id
+  )
+  SELECT json_build_object(
+    'entries', COALESCE((
+      SELECT json_agg(
+        json_build_object(
+          'rank', r.rank,
+          'user_id', r.user_id,
+          'display_name', r.display_name,
+          'avatar_url', r.avatar_url,
+          'total_xp', r.total_xp,
+          'metric_value', r.metric_value,
+          'total_reps', r.total_reps,
+          'total_volume', r.total_volume,
+          'total_distance', r.total_distance,
+          'total_calories', r.total_calories,
+          'total_workouts', r.total_workouts,
+          'is_current_user', r.user_id = v_uid
+        )
+        ORDER BY r.rank
+      )
+      FROM ranked r
+      WHERE p_scope = 'friends' OR r.rank <= 25
+    ), '[]'::json),
+    'current_user_outside_top', (
+      SELECT json_build_object(
+        'rank', r.rank,
+        'user_id', r.user_id,
+        'display_name', r.display_name,
+        'avatar_url', r.avatar_url,
+        'total_xp', r.total_xp,
+        'metric_value', r.metric_value,
+        'total_reps', r.total_reps,
+        'total_volume', r.total_volume,
+        'total_distance', r.total_distance,
+        'total_calories', r.total_calories,
+        'total_workouts', r.total_workouts,
+        'is_current_user', TRUE
+      )
+      FROM ranked r
+      WHERE r.user_id = v_uid
+        AND p_scope = 'global'
+        AND r.rank > 25
+      LIMIT 1
+    )
+  )
+  INTO v_result;
+
+  RETURN v_result;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.get_leaderboard(TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_leaderboard(TEXT, TEXT) TO authenticated;

@@ -1,4 +1,5 @@
 import '../../models/food_entry.dart';
+import 'food_serving_parser.dart';
 
 /// Extrae pistas numéricas del texto del usuario para corregir estimaciones de IA.
 abstract final class FoodQueryHints {
@@ -71,12 +72,64 @@ abstract final class FoodQueryHints {
     return (kcal: kcal, p: p, f: f, c: c);
   }
 
+  /// Extrae gramos del texto del usuario (ej. "100g", "100 gramos").
+  static double? parseGrams(String query) {
+    final match = RegExp(
+      r'(\d+(?:[.,]\d+)?)\s*g(?:ramos?)?\b',
+      caseSensitive: false,
+    ).firstMatch(query);
+    if (match == null) return null;
+    return double.tryParse(match.group(1)!.replaceAll(',', '.'));
+  }
+
+  static const _anchorPer100g = {
+    'manzana verde': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
+    'manzana': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
+    'apple': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
+    'plátano': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
+    'platano': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
+    'banana': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
+  };
+
+  static FoodNutritionEstimate? anchoredEstimateForQuery(
+    String query,
+    FoodNutritionEstimate ai,
+  ) {
+    final grams = parseGrams(query);
+    if (grams == null || grams <= 0) return null;
+
+    final lower = query.toLowerCase();
+    final sortedKeys = _anchorPer100g.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final token in sortedKeys) {
+      if (!lower.contains(token)) continue;
+      final anchor = _anchorPer100g[token]!;
+      final factor = grams / 100;
+      return FoodNutritionEstimate(
+        name: ai.name,
+        brand: ai.brand,
+        caloriesKcal: (anchor.kcal * factor).round(),
+        proteinG: double.parse((anchor.protein * factor).toStringAsFixed(1)),
+        carbsG: double.parse((anchor.carbs * factor).toStringAsFixed(1)),
+        fatG: double.parse((anchor.fat * factor).toStringAsFixed(1)),
+        fiberG: double.parse((anchor.fiber * factor).toStringAsFixed(1)),
+        servingDescription: FoodServingParser.formatAmount(grams, 'g'),
+        ingredients: ai.ingredients,
+        referenceAmount: grams,
+        amountUnit: 'g',
+      );
+    }
+    return null;
+  }
+
   /// Ajusta la estimación de IA si el usuario dio calorías explícitas o cantidades claras.
   static FoodNutritionEstimate reconcile(String query, FoodNutritionEstimate ai) {
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
 
-    if (labeledKcal == 0 && eggs == 0) return ai;
+    if (labeledKcal == 0 && eggs == 0) {
+      return anchoredEstimateForQuery(query, ai) ?? ai;
+    }
 
     var kcal = labeledKcal + eggs * eggKcal;
     var protein = eggs * eggProteinG;

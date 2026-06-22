@@ -1208,11 +1208,65 @@ abstract class AppLocalizations {
   /// **'Social'**
   String get socialTitle;
 
-  /// No description provided for @friendsRanking.
+  /// No description provided for @leaderboardsTitle.
   ///
   /// In es, this message translates to:
-  /// **'Ranking de amigos'**
-  String get friendsRanking;
+  /// **'Leaderboards'**
+  String get leaderboardsTitle;
+
+  /// No description provided for @leaderboardScopeFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get leaderboardScopeFriends;
+
+  /// No description provided for @leaderboardScopeGlobal.
+  ///
+  /// In es, this message translates to:
+  /// **'Global'**
+  String get leaderboardScopeGlobal;
+
+  /// No description provided for @leaderboardMetricLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel'**
+  String get leaderboardMetricLevel;
+
+  /// No description provided for @leaderboardEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay datos en este ranking.'**
+  String get leaderboardEmpty;
+
+  /// No description provided for @leaderboardYourPosition.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu posición'**
+  String get leaderboardYourPosition;
+
+  /// No description provided for @leaderboardPeriodWeek.
+  ///
+  /// In es, this message translates to:
+  /// **'Semana'**
+  String get leaderboardPeriodWeek;
+
+  /// No description provided for @leaderboardPeriodMonth.
+  ///
+  /// In es, this message translates to:
+  /// **'Mes'**
+  String get leaderboardPeriodMonth;
+
+  /// No description provided for @leaderboardPeriodAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Histórico'**
+  String get leaderboardPeriodAll;
+
+  /// No description provided for @leaderboardPeriodXp.
+  ///
+  /// In es, this message translates to:
+  /// **'{xp} XP'**
+  String leaderboardPeriodXp(int xp);
 
   /// No description provided for @rankYou.
   ///
@@ -1550,6 +1604,12 @@ abstract class AppLocalizations {
   /// **'Cancelar entrenamiento'**
   String get cancelWorkoutConfirm;
 
+  /// No description provided for @cancelWorkoutBack.
+  ///
+  /// In es, this message translates to:
+  /// **'Atrás'**
+  String get cancelWorkoutBack;
+
   /// No description provided for @workoutCancelled.
   ///
   /// In es, this message translates to:
@@ -1693,6 +1753,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Hecho'**
   String get done;
+
+  /// No description provided for @rirPickerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuántas repeticiones más pudiste haber hecho?'**
+  String get rirPickerTitle;
+
+  /// No description provided for @rirPickerSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reps en reserva (RIR) del último set. La IA usará esto para ajustar tu próximo entreno.'**
+  String get rirPickerSubtitle;
+
+  /// No description provided for @rirPickerRepsLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'reps más'**
+  String get rirPickerRepsLeft;
+
+  /// No description provided for @rirPickerSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir'**
+  String get rirPickerSkip;
 
   /// No description provided for @newRoutine.
   ///
@@ -2342,6 +2426,24 @@ abstract class AppLocalizations {
   /// **'Gemini API Key'**
   String get geminiKey;
 
+  /// No description provided for @claudeKey.
+  ///
+  /// In es, this message translates to:
+  /// **'Claude API Key'**
+  String get claudeKey;
+
+  /// No description provided for @claudeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Obtén tu key en console.anthropic.com (API, no Claude Pro).'**
+  String get claudeHint;
+
+  /// No description provided for @claudeApiNote.
+  ///
+  /// In es, this message translates to:
+  /// **'La suscripción Claude Pro no incluye API key. Necesitas crear una en Anthropic Console y pagar por uso.'**
+  String get claudeApiNote;
+
   /// No description provided for @apiGuidesTitle.
   ///
   /// In es, this message translates to:
@@ -2473,6 +2575,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».'**
   String get geminiGuideStep7;
+
+  /// No description provided for @claudeGuideTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo obtener tu API Key de Claude (Anthropic)'**
+  String get claudeGuideTitle;
+
+  /// No description provided for @claudeGuidePortal.
+  ///
+  /// In es, this message translates to:
+  /// **'console.anthropic.com/settings/keys'**
+  String get claudeGuidePortal;
+
+  /// No description provided for @claudeGuideStep1.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre console.anthropic.com e inicia sesión (cuenta distinta a claude.ai si solo usas el chat).'**
+  String get claudeGuideStep1;
+
+  /// No description provided for @claudeGuideStep2.
+  ///
+  /// In es, this message translates to:
+  /// **'Ve a Settings → API Keys (console.anthropic.com/settings/keys).'**
+  String get claudeGuideStep2;
+
+  /// No description provided for @claudeGuideStep3.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa «Create Key», ponle un nombre (ej. FitForge) y confirma.'**
+  String get claudeGuideStep3;
+
+  /// No description provided for @claudeGuideStep4.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia la key generada. Solo se muestra una vez; guárdala en un lugar seguro.'**
+  String get claudeGuideStep4;
+
+  /// No description provided for @claudeGuideStep5.
+  ///
+  /// In es, this message translates to:
+  /// **'Anthropic cobra por uso en la API (no usa tu suscripción Claude Pro del chat).'**
+  String get claudeGuideStep5;
+
+  /// No description provided for @claudeGuideStep6.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelve a FitForge, pega la clave, elige Claude y pulsa «Guardar API Key».'**
+  String get claudeGuideStep6;
 
   /// No description provided for @setsRepsBest.
   ///
@@ -2893,6 +3043,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Apunta la cámara al código de barras del empaque.'**
   String get foodBarcodeHint;
+
+  /// No description provided for @foodBarcodeCameraDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Se necesita permiso de cámara para escanear códigos.'**
+  String get foodBarcodeCameraDenied;
+
+  /// No description provided for @foodBarcodeUnsupported.
+  ///
+  /// In es, this message translates to:
+  /// **'Este dispositivo no tiene cámara compatible con el escáner.'**
+  String get foodBarcodeUnsupported;
+
+  /// No description provided for @foodBarcodeGenericError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir la cámara. Revisa permisos o prueba en un dispositivo físico.'**
+  String get foodBarcodeGenericError;
+
+  /// No description provided for @foodBarcodeRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get foodBarcodeRetry;
+
+  /// No description provided for @foodBarcodeLookupFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al consultar el código. Revisa tu conexión.'**
+  String get foodBarcodeLookupFailed;
 
   /// No description provided for @foodPer100gNote.
   ///

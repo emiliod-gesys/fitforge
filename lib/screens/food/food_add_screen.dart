@@ -25,6 +25,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   FoodAddMode _mode = FoodAddMode.search;
   final _filterController = TextEditingController();
   final _quickController = TextEditingController();
+  final _barcodeScannerKey = GlobalKey<FoodBarcodeScannerViewState>();
   bool _loading = false;
   List<FoodEntry> _recent = const [];
 
@@ -134,7 +135,13 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
         return;
       }
       _openDetail(estimate, FoodEntrySource.barcode);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.foodBarcodeLookupFailed)),
+      );
     } finally {
+      _barcodeScannerKey.currentState?.unlock();
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -184,7 +191,10 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                     onSubmit: _quickAddWithAi,
                   ),
                 FoodAddMode.photo => _PhotoPane(onTakePhoto: _pickPhoto),
-                FoodAddMode.barcode => _BarcodePane(onDetected: _lookupBarcode),
+                FoodAddMode.barcode => _BarcodePane(
+                    scannerKey: _barcodeScannerKey,
+                    onDetected: _lookupBarcode,
+                  ),
               },
             ],
           ),
@@ -364,9 +374,13 @@ class _PhotoPane extends StatelessWidget {
 }
 
 class _BarcodePane extends StatelessWidget {
-  final ValueChanged<String> onDetected;
+  final GlobalKey<FoodBarcodeScannerViewState> scannerKey;
+  final Future<void> Function(String code) onDetected;
 
-  const _BarcodePane({required this.onDetected});
+  const _BarcodePane({
+    required this.scannerKey,
+    required this.onDetected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +394,10 @@ class _BarcodePane extends StatelessWidget {
           style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         const SizedBox(height: 12),
-        FoodBarcodeScannerView(onDetected: onDetected),
+        FoodBarcodeScannerView(
+          key: scannerKey,
+          onDetected: onDetected,
+        ),
         const SizedBox(height: 12),
         Text(
           l10n.foodPer100gNote,

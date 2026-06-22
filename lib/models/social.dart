@@ -152,15 +152,3 @@ class FriendProfileView {
     required this.milestoneTotals,
   });
 }
-
-class FriendRankingEntry {
-  final FriendUser user;
-  final bool isCurrentUser;
-  final int rank;
-
-  const FriendRankingEntry({
-    required this.user,
-    required this.isCurrentUser,
-    required this.rank,
-  });
-}

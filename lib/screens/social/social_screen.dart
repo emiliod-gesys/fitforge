@@ -7,7 +7,7 @@ import '../../models/social.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
-import '../../widgets/friends_ranking_card.dart';
+import '../../widgets/leaderboards_section.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/social_notifications_sheet.dart';
 
@@ -33,7 +33,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
     try {
       await ref.read(socialServiceProvider).sendFriendRequest(userId);
       ref.invalidate(friendshipsProvider);
-      ref.invalidate(friendRankingProvider);
+      ref.invalidate(leaderboardProvider);
       ref.invalidate(userSearchProvider(_query));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,20 +52,19 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
   Future<void> _accept(Friendship f) async {
     await ref.read(socialServiceProvider).acceptFriendRequest(f.id);
     ref.invalidate(friendshipsProvider);
-    ref.invalidate(friendRankingProvider);
+    ref.invalidate(leaderboardProvider);
   }
 
   Future<void> _remove(Friendship f) async {
     await ref.read(socialServiceProvider).removeFriendship(f.id);
     ref.invalidate(friendshipsProvider);
-    ref.invalidate(friendRankingProvider);
+    ref.invalidate(leaderboardProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final friendshipsAsync = ref.watch(friendshipsProvider);
-    final rankingAsync = ref.watch(friendRankingProvider);
     final searchAsync = _query.length >= 2 ? ref.watch(userSearchProvider(_query)) : null;
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
 
@@ -87,7 +86,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(friendshipsProvider);
-              ref.invalidate(friendRankingProvider);
+              ref.invalidate(leaderboardProvider);
               ref.invalidate(socialNotificationsProvider);
               ref.invalidate(socialUnreadCountProvider);
             },
@@ -138,18 +137,8 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                     },
                   ),
                 ],
-                if (friends.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  _SectionHeader(title: l10n.friendsRanking),
-                  rankingAsync.when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: FitForgeLoadingIndicator(size: 32)),
-                    ),
-                    error: (e, _) => Text(l10n.errorGeneric('$e')),
-                    data: (entries) => FriendsRankingCard(entries: entries, l10n: l10n),
-                  ),
-                ],
+                const SizedBox(height: 24),
+                const LeaderboardsSection(),
                 if (pending.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   _SectionHeader(title: l10n.pendingRequests),

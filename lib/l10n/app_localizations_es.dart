@@ -602,7 +602,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get socialTitle => 'Social';
 
   @override
-  String get friendsRanking => 'Ranking de amigos';
+  String get leaderboardsTitle => 'Leaderboards';
+
+  @override
+  String get leaderboardScopeFriends => 'Amigos';
+
+  @override
+  String get leaderboardScopeGlobal => 'Global';
+
+  @override
+  String get leaderboardMetricLevel => 'Nivel';
+
+  @override
+  String get leaderboardEmpty => 'Aún no hay datos en este ranking.';
+
+  @override
+  String get leaderboardYourPosition => 'Tu posición';
+
+  @override
+  String get leaderboardPeriodWeek => 'Semana';
+
+  @override
+  String get leaderboardPeriodMonth => 'Mes';
+
+  @override
+  String get leaderboardPeriodAll => 'Histórico';
+
+  @override
+  String leaderboardPeriodXp(int xp) {
+    return '$xp XP';
+  }
 
   @override
   String rankYou(String name) {
@@ -800,6 +829,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cancelWorkoutConfirm => 'Cancelar entrenamiento';
 
   @override
+  String get cancelWorkoutBack => 'Atrás';
+
+  @override
   String get workoutCancelled => 'Entrenamiento cancelado';
 
   @override
@@ -886,6 +918,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get done => 'Hecho';
+
+  @override
+  String get rirPickerTitle => '¿Cuántas repeticiones más pudiste haber hecho?';
+
+  @override
+  String get rirPickerSubtitle =>
+      'Reps en reserva (RIR) del último set. La IA usará esto para ajustar tu próximo entreno.';
+
+  @override
+  String get rirPickerRepsLeft => 'reps más';
+
+  @override
+  String get rirPickerSkip => 'Omitir';
 
   @override
   String get newRoutine => 'Nueva rutina';
@@ -1259,6 +1304,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get geminiKey => 'Gemini API Key';
 
   @override
+  String get claudeKey => 'Claude API Key';
+
+  @override
+  String get claudeHint =>
+      'Obtén tu key en console.anthropic.com (API, no Claude Pro).';
+
+  @override
+  String get claudeApiNote =>
+      'La suscripción Claude Pro no incluye API key. Necesitas crear una en Anthropic Console y pagar por uso.';
+
+  @override
   String get apiGuidesTitle => 'Guías paso a paso';
 
   @override
@@ -1338,6 +1394,37 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get geminiGuideStep7 =>
       'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».';
+
+  @override
+  String get claudeGuideTitle =>
+      'Cómo obtener tu API Key de Claude (Anthropic)';
+
+  @override
+  String get claudeGuidePortal => 'console.anthropic.com/settings/keys';
+
+  @override
+  String get claudeGuideStep1 =>
+      'Abre console.anthropic.com e inicia sesión (cuenta distinta a claude.ai si solo usas el chat).';
+
+  @override
+  String get claudeGuideStep2 =>
+      'Ve a Settings → API Keys (console.anthropic.com/settings/keys).';
+
+  @override
+  String get claudeGuideStep3 =>
+      'Pulsa «Create Key», ponle un nombre (ej. FitForge) y confirma.';
+
+  @override
+  String get claudeGuideStep4 =>
+      'Copia la key generada. Solo se muestra una vez; guárdala en un lugar seguro.';
+
+  @override
+  String get claudeGuideStep5 =>
+      'Anthropic cobra por uso en la API (no usa tu suscripción Claude Pro del chat).';
+
+  @override
+  String get claudeGuideStep6 =>
+      'Vuelve a FitForge, pega la clave, elige Claude y pulsa «Guardar API Key».';
 
   @override
   String setsRepsBest(int sets, int reps, String weight) {
@@ -1605,6 +1692,25 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get foodBarcodeHint =>
       'Apunta la cámara al código de barras del empaque.';
+
+  @override
+  String get foodBarcodeCameraDenied =>
+      'Se necesita permiso de cámara para escanear códigos.';
+
+  @override
+  String get foodBarcodeUnsupported =>
+      'Este dispositivo no tiene cámara compatible con el escáner.';
+
+  @override
+  String get foodBarcodeGenericError =>
+      'No se pudo abrir la cámara. Revisa permisos o prueba en un dispositivo físico.';
+
+  @override
+  String get foodBarcodeRetry => 'Reintentar';
+
+  @override
+  String get foodBarcodeLookupFailed =>
+      'Error al consultar el código. Revisa tu conexión.';
 
   @override
   String get foodPer100gNote =>

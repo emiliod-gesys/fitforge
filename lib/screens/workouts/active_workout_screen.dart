@@ -14,6 +14,7 @@ import '../../core/utils/session_personal_records.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise_logging.dart';
+import '../../models/watch_session.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
@@ -28,6 +29,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/rest_time_selector.dart';
 import '../../widgets/rest_timer.dart';
+import '../../widgets/rir_picker_sheet.dart';
 import '../../widgets/cardio_set_log_tile.dart';
 import '../../widgets/set_log_tile.dart';
 import '../../widgets/workout_elapsed_timer.dart';
@@ -52,23 +54,139 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   final Set<String> _removedExerciseIds = {};
   bool _completing = false;
   int _workoutSyncGeneration = 0;
+  final RestTimerController _restTimerController = RestTimerController();
+  DateTime? _restEndsAt;
+  int? _restTotalSeconds;
+
+  Future<void> _publishWatchSession([Workout? workout]) async {
+    final coordinator = ref.read(watchWorkoutCoordinatorProvider);
+    workout ??= ref.read(activeWorkoutProvider).valueOrNull;
+    if (workout == null || _showExerciseList) {
+      await coordinator.clear();
+      return;
+    }
+
+    if (workout.exercises.isEmpty) {
+      await coordinator.clear();
+      return;
+    }
+
+    final exerciseIndex =
+        _currentExerciseIndex.clamp(0, workout.exercises.length - 1);
+    final exercise = workout.exercises[exerciseIndex];
+    if (_removedExerciseIds.contains(exercise.id)) {
+      await coordinator.clear();
+      return;
+    }
+
+    await coordinator.syncFromWorkout(
+      workout: workout,
+      exercise: exercise,
+      unitSystem: ref.read(unitSystemProvider),
+      removedSetIds: _removedSetIds,
+      restEndsAt: _showRestTimer ? _restEndsAt : null,
+      restTotalSeconds: _showRestTimer ? _restTotalSeconds : null,
+    );
+  }
+
+  Future<void> _handleWatchAction(WatchWorkoutAction action) async {
+    if (!mounted) return;
+    final workout = ref.read(activeWorkoutProvider).valueOrNull;
+    if (workout == null) return;
+
+    switch (action.type) {
+      case WatchActionType.skipRest:
+        if (_showRestTimer) _restTimerController.skip();
+      case WatchActionType.adjustRest:
+        final delta = action.deltaSeconds;
+        if (_showRestTimer && delta != null) {
+          _restTimerController.adjust(delta);
+          setState(() {
+            _restEndsAt = (_restEndsAt ?? DateTime.now()).add(Duration(seconds: delta));
+          });
+          await _publishWatchSession(workout);
+        }
+      case WatchActionType.completeSet:
+        await _completeSetFromWatch(workout);
+      case WatchActionType.updateSet:
+        break;
+    }
+  }
+
+  Future<void> _completeSetFromWatch(Workout workout) async {
+    final setId = ref.read(watchWorkoutCoordinatorProvider).lastSnapshot?.setId;
+    if (setId == null) return;
+
+    for (final exercise in workout.exercises) {
+      for (final set in exercise.sets) {
+        if (set.id != setId || set.completed) continue;
+
+        final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+        final isCardio = ExerciseLoggingResolver.isCardioExercise(
+          exerciseId: exercise.exerciseId,
+          exerciseName: exercise.exerciseName,
+          catalog: catalog,
+          sets: _sortedSets(exercise),
+        );
+        if (isCardio) return;
+
+        final sorted = _sortedSets(exercise);
+        final isLastSet = sorted.isNotEmpty && sorted.last.id == set.id;
+
+        await _logSet(
+          workout,
+          exercise,
+          set,
+          wasAlreadyCompleted: false,
+          isCardio: false,
+          isLastSet: isLastSet,
+        );
+        return;
+      }
+    }
+  }
 
   Future<void> _syncActiveWorkout() async {
     final generation = ++_workoutSyncGeneration;
     ref.invalidate(activeWorkoutProvider);
     await ref.read(activeWorkoutProvider.future);
     if (!mounted || generation != _workoutSyncGeneration) return;
-    _pruneRemovedIds(ref.read(activeWorkoutProvider).valueOrNull);
+    final workout = ref.read(activeWorkoutProvider).valueOrNull;
+    _pruneRemovedIds(workout);
+    await _publishWatchSession(workout);
   }
 
   void _pruneRemovedIds(Workout? workout) {
     if (workout == null) return;
     final exerciseIds = workout.exercises.map((e) => e.id).toSet();
     final setIds = workout.exercises.expand((e) => e.sets).map((s) => s.id).toSet();
-    setState(() {
-      _removedExerciseIds.removeWhere((id) => !exerciseIds.contains(id));
-      _removedSetIds.removeWhere((id) => !setIds.contains(id));
+    final staleExercises = _removedExerciseIds.any((id) => !exerciseIds.contains(id));
+    final staleSets = _removedSetIds.any((id) => !setIds.contains(id));
+    if (!staleExercises && !staleSets) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _removedExerciseIds.removeWhere((id) => !exerciseIds.contains(id));
+        _removedSetIds.removeWhere((id) => !setIds.contains(id));
+      });
     });
+  }
+
+  void _invalidateWorkoutProviders() {
+    ref.invalidate(workoutsProvider);
+    ref.invalidate(recentWorkoutsProvider);
+    ref.invalidate(workoutHistoryProvider);
+    ref.invalidate(milestoneTotalsProvider);
+    ref.invalidate(activeWorkoutProvider);
+    ref.invalidate(personalRecordsProvider);
+    ref.invalidate(muscleRecoveryProvider);
+    ref.invalidate(workoutWeeklyStatsProvider);
+    ref.invalidate(profileProvider);
+    ref.invalidate(leaderboardProvider);
+    ref.invalidate(dailyNutritionProvider);
+    ref.invalidate(foodEntriesProvider);
+    ref.invalidate(foodDayWorkoutsProvider);
   }
 
   Future<bool> _confirmLeaveActiveWorkout() async {
@@ -99,6 +217,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(watchWorkoutCoordinatorProvider).attach(_handleWatchAction);
+      unawaited(_publishWatchSession());
+    });
+  }
+
+  @override
+  void dispose() {
+    ref.read(watchWorkoutCoordinatorProvider).detach();
+    super.dispose();
   }
 
   List<WorkoutSet> _sortedSets(WorkoutExercise exercise) {
@@ -125,7 +254,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
+            child: Text(l10n.cancelWorkoutBack),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -140,6 +269,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     setState(() => _completing = true);
     try {
       await ref.read(workoutServiceProvider).cancelWorkout(workout.id);
+      await ref.read(watchWorkoutCoordinatorProvider).clear();
       ref.invalidate(activeWorkoutProvider);
       ref.invalidate(workoutsProvider);
       ref.invalidate(recentWorkoutsProvider);
@@ -195,6 +325,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             durationMinutes: duration,
             totalVolume: volume,
           );
+      await ref.read(watchWorkoutCoordinatorProvider).clear();
 
       final xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
             workoutId: workout.id,
@@ -231,31 +362,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         newPersonalRecords: newPersonalRecords,
       );
 
-      ref.invalidate(workoutsProvider);
-      ref.invalidate(recentWorkoutsProvider);
-      ref.invalidate(workoutHistoryProvider);
-      ref.invalidate(milestoneTotalsProvider);
-      ref.invalidate(activeWorkoutProvider);
-      ref.invalidate(personalRecordsProvider);
-      ref.invalidate(muscleRecoveryProvider);
-      ref.invalidate(workoutWeeklyStatsProvider);
-      ref.invalidate(profileProvider);
-      ref.invalidate(friendRankingProvider);
-      ref.invalidate(dailyNutritionProvider);
-      ref.invalidate(foodEntriesProvider);
-      ref.invalidate(foodDayWorkoutsProvider);
-
-      if (mounted) {
-        context.pushReplacement('/workout/summary', extra: summary);
-      }
+      if (!mounted) return;
+      context.pushReplacement('/workout/summary', extra: summary);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _invalidateWorkoutProviders();
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.finishFailed('$e'))),
         );
+        setState(() => _completing = false);
       }
-    } finally {
-      if (mounted) setState(() => _completing = false);
     }
   }
 
@@ -274,7 +392,38 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
   void _dismissRestTimer(int sessionId) {
     if (sessionId != _restTimerKey) return;
-    setState(() => _showRestTimer = false);
+    setState(() {
+      _showRestTimer = false;
+      _restEndsAt = null;
+      _restTotalSeconds = null;
+    });
+    unawaited(_publishWatchSession());
+  }
+
+  void _onRestClockStarted(DateTime endsAt, int totalSeconds) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _restEndsAt = endsAt;
+        _restTotalSeconds = totalSeconds;
+      });
+      unawaited(_publishWatchSession());
+    });
+  }
+
+  Widget _buildActiveRestTimer() {
+    final sessionId = _restTimerKey;
+    return RestTimer(
+      key: ValueKey('rest-$sessionId'),
+      sessionId: sessionId,
+      seconds: _restSeconds,
+      endsAt: _restEndsAt,
+      totalSeconds: _restTotalSeconds,
+      controller: _restTimerController,
+      onClockStarted: _onRestClockStarted,
+      onComplete: () => _dismissRestTimer(sessionId),
+      onSkip: () => _dismissRestTimer(sessionId),
+    );
   }
 
   Future<void> _pickAndAddExercise(Workout workout) async {
@@ -406,6 +555,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       _currentExerciseIndex = index;
       _showExerciseList = false;
     });
+    unawaited(_publishWatchSession());
   }
 
   Future<void> _reorderExercises(Workout workout, List<String> orderedExerciseIds) async {
@@ -503,6 +653,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             return Column(
               children: [
                 WorkoutElapsedTimer(startedAt: workout.startedAt),
+                if (_showRestTimer) _buildActiveRestTimer(),
                 Expanded(
                   child: ActiveWorkoutExerciseList(
                     workout: workout,
@@ -539,7 +690,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           final sortedSets = _sortedSets(exercise)
               .where((s) => !_removedSetIds.contains(s.id))
               .toList();
-          final restSession = _restTimerKey;
           final isCardio = ExerciseLoggingResolver.isCardioExercise(
             exerciseId: exercise.exerciseId,
             exerciseName: exercise.exerciseName,
@@ -555,14 +705,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           return Column(
             children: [
               WorkoutElapsedTimer(startedAt: workout.startedAt),
-              if (_showRestTimer)
-                RestTimer(
-                  key: ValueKey(restSession),
-                  sessionId: restSession,
-                  seconds: _restSeconds,
-                  onComplete: () => _dismissRestTimer(restSession),
-                  onSkip: () => _dismissRestTimer(restSession),
-                ),
+              if (_showRestTimer) _buildActiveRestTimer(),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -630,6 +773,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                               updated,
                               wasAlreadyCompleted: entry.value.completed,
                               isCardio: true,
+                              isLastSet: entry.key == sortedSets.length - 1,
                               cardioConfig: cardioConfig,
                             ),
                             onDelete: () {
@@ -659,6 +803,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                             updated,
                             wasAlreadyCompleted: entry.value.completed,
                             isCardio: false,
+                            isLastSet: entry.key == sortedSets.length - 1,
                           ),
                           onDelete: () {
                             setState(() => _removedSetIds.add(entry.value.id));
@@ -720,6 +865,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     WorkoutSet set, {
     required bool wasAlreadyCompleted,
     required bool isCardio,
+    required bool isLastSet,
     CardioLoggingConfig? cardioConfig,
   }) async {
     if (!wasAlreadyCompleted) {
@@ -763,10 +909,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       }
     }
 
+    int? rir;
+    if (!wasAlreadyCompleted && !isCardio && isLastSet && mounted) {
+      rir = await RirPickerSheet.show(context);
+    }
+
     await ref.read(workoutServiceProvider).logSet(
           exercise.id,
           set.copyWith(
             completed: true,
+            rir: rir,
             loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
           ),
         );

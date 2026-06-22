@@ -10,6 +10,7 @@ import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
 import '../models/body_metric.dart';
 import '../models/food_entry.dart';
+import '../models/leaderboard.dart';
 import '../models/profile.dart';
 import '../models/workout.dart';
 import '../services/ai_coach_service.dart';
@@ -27,6 +28,8 @@ import '../models/rest_timer_alert_mode.dart';
 import '../services/rest_preferences.dart';
 import '../services/ai_preferences.dart';
 import '../services/push_notification_service.dart';
+import '../services/watch_session_bridge.dart';
+import '../services/watch_workout_coordinator.dart';
 
 final authServiceProvider = Provider((ref) => AuthService());
 final exerciseServiceProvider = Provider((ref) => ExerciseService());
@@ -178,10 +181,14 @@ final friendshipsProvider = FutureProvider<List<Friendship>>((ref) async {
   return ref.watch(socialServiceProvider).getFriendships();
 });
 
-final friendRankingProvider = FutureProvider<List<FriendRankingEntry>>((ref) async {
+final leaderboardProvider = FutureProvider.family<LeaderboardResult, LeaderboardKey>((ref, key) async {
   ref.watch(authStateProvider);
   ref.watch(profileProvider);
-  return ref.watch(socialServiceProvider).getFriendsRanking();
+  return ref.watch(socialServiceProvider).getLeaderboard(
+        metric: key.metric,
+        scope: key.scope,
+        period: key.period,
+      );
 });
 
 final userSearchProvider = FutureProvider.family<List<FriendUser>, String>((ref, query) async {
@@ -271,4 +278,12 @@ final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async
     profile: results[0] as UserProfile?,
     bodyMetrics: results[1] as Map<String, BodyMetricSnapshot>,
   );
+});
+
+final watchSessionBridgeProvider = Provider((ref) => WatchSessionBridge());
+
+final watchWorkoutCoordinatorProvider = Provider((ref) {
+  final coordinator = WatchWorkoutCoordinator(ref.watch(watchSessionBridgeProvider));
+  ref.onDispose(coordinator.detach);
+  return coordinator;
 });
