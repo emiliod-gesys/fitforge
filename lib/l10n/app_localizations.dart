@@ -3068,6 +3068,30 @@ abstract class AppLocalizations {
   /// **'Reintentar'**
   String get foodBarcodeRetry;
 
+  /// No description provided for @foodBarcodeOpenSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ajustes de la app'**
+  String get foodBarcodeOpenSettings;
+
+  /// No description provided for @foodBarcodePhotoAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotografiar código del empaque'**
+  String get foodBarcodePhotoAction;
+
+  /// No description provided for @foodBarcodePhotoFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'Si el visor en vivo no arranca, usa el botón de arriba (misma cámara que en Foto).'**
+  String get foodBarcodePhotoFallback;
+
+  /// No description provided for @foodBarcodeNotDetectedInPhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'No se detectó código de barras en la imagen. Acerca más el empaque e intenta de nuevo.'**
+  String get foodBarcodeNotDetectedInPhoto;
+
   /// No description provided for @foodBarcodeLookupFailed.
   ///
   /// In es, this message translates to:

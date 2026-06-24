@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
+import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
@@ -315,6 +316,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
       final profile = ref.read(profileProvider).valueOrNull;
       final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+      final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
+        workout: workout,
+        durationMinutes: duration,
+        totalVolumeKg: volume,
+        profile: profile,
+        bodyMetrics: bodyMetrics,
+      );
+
       final milestoneTotalsBefore = await ref
           .read(workoutServiceProvider)
           .getMilestoneTotals(profile: profile);
@@ -324,6 +333,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             workout.id,
             durationMinutes: duration,
             totalVolume: volume,
+            activeCaloriesKcal: calorieEstimate.caloriesKcal,
           );
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
@@ -791,6 +801,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                             exercise.exerciseId,
                             exerciseCatalog,
                           ),
+                          weightOptional: ExerciseLoad.weightOptionalForExerciseId(
+                            exercise.exerciseId,
+                            exerciseCatalog,
+                          ),
                           isLast: entry.key == sortedSets.length - 1,
                           onValidationError: (message) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -890,7 +904,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           return;
         }
       } else {
-        if (set.weight == null || set.weight! <= 0) {
+        final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+        final weightOptional =
+            ExerciseLoad.weightOptionalForExerciseId(exercise.exerciseId, catalog) ?? false;
+        if (!weightOptional && (set.weight == null || set.weight! <= 0)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n.weightRequired)),

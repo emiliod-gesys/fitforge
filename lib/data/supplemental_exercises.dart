@@ -1,6 +1,8 @@
 import '../models/exercise.dart';
 
-/// Ejercicios habituales en gimnasio que a veces faltan o tienen nombre poco claro en wger.
+/// Ejercicios habituales en gimnasio — **solo catálogo wger legacy**.
+///
+/// Con `ExerciseCatalogSource.bundled` el catálogo activo es `assets/data/exercise_catalog.json`.
 abstract final class SupplementalExercises {
   static const _id = -1000;
 

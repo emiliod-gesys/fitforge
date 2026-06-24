@@ -173,9 +173,12 @@ class _ExerciseBody extends StatelessWidget {
                 Text(
                   exercise.isUserCustom
                       ? l10n.customExerciseAttribution
-                      : exercise.isCustom
-                          ? l10n.fitforgeCatalog
-                          : l10n.wgerAttribution,
+                      : exercise.imageUrl != null &&
+                              exercise.imageUrl!.contains('exercisedb.dev')
+                          ? l10n.wgerAttribution
+                          : exercise.isBundled
+                              ? l10n.fitforgeCatalog
+                              : l10n.wgerAttribution,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38),
                 ),
               ],

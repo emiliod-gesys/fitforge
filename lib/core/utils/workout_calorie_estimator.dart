@@ -1,3 +1,4 @@
+import '../../models/workout.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import 'bmr_calculator.dart';
@@ -30,6 +31,59 @@ abstract final class WorkoutCalorieEstimator {
       bodyMetrics: bodyMetrics,
       cardioDurationSeconds: cardioDurationSeconds,
     );
+  }
+
+  static WorkoutCalorieEstimate estimateForWorkout({
+    required Workout workout,
+    required int durationMinutes,
+    required double totalVolumeKg,
+    UserProfile? profile,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+  }) {
+    final completedSets = workout.exercises.fold<int>(
+      0,
+      (sum, ex) => sum + ex.sets.where((s) => s.completed).length,
+    );
+    final totalReps = workout.exercises.fold<int>(
+      0,
+      (sum, ex) => sum +
+          ex.sets
+              .where((s) => s.completed)
+              .fold<int>(0, (setSum, s) => setSum + s.reps),
+    );
+    final cardioDurationSeconds = workout.exercises
+        .expand((ex) => ex.sets)
+        .where((s) => s.completed && s.isCardio)
+        .map((s) => s.durationSeconds ?? 0)
+        .fold<int>(0, (sum, seconds) => sum + seconds);
+
+    return estimate(
+      durationMinutes: durationMinutes,
+      totalVolumeKg: totalVolumeKg,
+      completedSets: completedSets,
+      totalReps: totalReps,
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+      cardioDurationSeconds: cardioDurationSeconds,
+    );
+  }
+
+  /// Usa kcal guardadas al completar el entreno; si no hay, estima desde resumen.
+  static int resolvedActiveCalories({
+    required Workout workout,
+    UserProfile? profile,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+  }) {
+    final stored = workout.activeCaloriesKcal;
+    if (stored != null && stored > 0) return stored;
+
+    return estimateFromSummary(
+      durationMinutes: workout.durationMinutes,
+      totalVolumeKg: workout.totalVolume,
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+    ).caloriesKcal ??
+        0;
   }
 
   /// Estimación a partir del resumen guardado (sin detalle de series).

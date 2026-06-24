@@ -1,0 +1,8426 @@
+{
+  "version": 2,
+  "exerciseCount": 179,
+  "exercises": [
+    {
+      "id": "ff_cardio_air_bike",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "bike",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Legs",
+          "Hombros",
+          "Brazos"
+        ],
+        "en": [
+          "Legs",
+          "Shoulders",
+          "Arms"
+        ]
+      },
+      "names": {
+        "es": "Bicicleta de aire",
+        "en": "Air Bike"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/1ZFqTDN.gif",
+      "exercisedbId": "1ZFqTDN",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_legs_air_squat",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla libre sin peso",
+        "en": "Air Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/QpXqiq8.gif",
+      "exercisedbId": "QpXqiq8",
+      "matchConfidence": "high",
+      "matchScore": 0.9029
+    },
+    {
+      "id": "ff_biceps_alternating_dumbbell_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl alterno con mancuernas",
+        "en": "Alternating Dumbbell Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Zwiw7XR.gif",
+      "exercisedbId": "Zwiw7XR",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cardio_arc_trainer",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "elliptical",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Arc Trainer",
+        "en": "Arc Trainer"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/XSCHmiI.gif",
+      "exercisedbId": "XSCHmiI",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_chest_archer_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior",
+          "Core"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Flexión arquero",
+        "en": "Archer Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/A9qxk2F.gif",
+      "exercisedbId": "A9qxk2F",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_arnold_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides lateral",
+          "Tríceps"
+        ],
+        "en": [
+          "Side delts",
+          "Triceps"
+        ]
+      },
+      "names": {
+        "es": "Press Arnold",
+        "en": "Arnold Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Xy4jlWA.gif",
+      "exercisedbId": "Xy4jlWA",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_back_assisted_chin_up_machine",
+      "loggingType": "strength",
+      "loadMode": "assisted_bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Chin up asistido en máquina",
+        "en": "Assisted Chin Up Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/MaMuGH6.gif",
+      "exercisedbId": "MaMuGH6",
+      "matchConfidence": "high",
+      "matchScore": 0.8692
+    },
+    {
+      "id": "ff_triceps_assisted_dip_machine",
+      "loggingType": "strength",
+      "loadMode": "assisted_bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Fondos asistidos en máquina",
+        "en": "Assisted Dip Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/J60bN17.gif",
+      "exercisedbId": "J60bN17",
+      "matchConfidence": "medium",
+      "matchScore": 0.8185
+    },
+    {
+      "id": "ff_back_assisted_pull_up_machine",
+      "loggingType": "strength",
+      "loadMode": "assisted_bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada asistida en máquina",
+        "en": "Assisted Pull Up Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/kiJ4Z2K.gif",
+      "exercisedbId": "kiJ4Z2K",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_back_australian_pull_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Dominada australiana",
+        "en": "Australian Pull Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/lBDjFxJ.gif",
+      "exercisedbId": "lBDjFxJ",
+      "matchConfidence": "high",
+      "matchScore": 0.94
+    },
+    {
+      "id": "ff_legs_back_squat",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Core"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla trasera con barra",
+        "en": "Back Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/DhMl549.gif",
+      "exercisedbId": "DhMl549",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_chest_barbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca con barra",
+        "en": "Barbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/EIeI8Vf.gif",
+      "exercisedbId": "EIeI8Vf",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_barbell_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl de bíceps con barra",
+        "en": "Barbell Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Yza7XrQ.gif",
+      "exercisedbId": "Yza7XrQ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_barbell_glute_bridge",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Puente de glúteo con barra",
+        "en": "Barbell Glute Bridge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/qKBpF7I.gif",
+      "exercisedbId": "qKBpF7I",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_barbell_hip_thrust",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Cuádriceps"
+        ],
+        "en": [
+          "Hamstrings",
+          "Quads"
+        ]
+      },
+      "names": {
+        "es": "Hip thrust con barra",
+        "en": "Barbell Hip Thrust"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/t8iSghb.gif",
+      "exercisedbId": "t8iSghb",
+      "matchConfidence": "high",
+      "matchScore": 0.869
+    },
+    {
+      "id": "ff_shoulders_barbell_overhead_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral",
+          "Pecho superior"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts",
+          "Upper chest"
+        ]
+      },
+      "names": {
+        "es": "Press militar con barra",
+        "en": "Barbell Overhead Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/kTbSH9h.gif",
+      "exercisedbId": "kTbSH9h",
+      "matchConfidence": "high",
+      "matchScore": 0.934
+    },
+    {
+      "id": "ff_chest_barbell_pullover",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Serratus",
+          "Tríceps"
+        ],
+        "en": [
+          "Lats",
+          "Serratus",
+          "Triceps"
+        ]
+      },
+      "names": {
+        "es": "Pullover con barra",
+        "en": "Barbell Pullover"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/cA9FuWG.gif",
+      "exercisedbId": "cA9FuWG",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_back_barbell_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Upper back",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo con barra",
+        "en": "Barbell Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/eZyBC3j.gif",
+      "exercisedbId": "eZyBC3j",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_calves_barbell_standing_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla con barra",
+        "en": "Barbell Standing Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/8ozhUIZ.gif",
+      "exercisedbId": "8ozhUIZ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_bayesian_cable_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl bayesiano en polea",
+        "en": "Bayesian Cable Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+      "exercisedbId": "G08RZcQ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_legs_belt_squat_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla con cinturón en máquina",
+        "en": "Belt Squat Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.8453
+    },
+    {
+      "id": "ff_triceps_bench_dip",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Fondos en banco",
+        "en": "Bench Dip"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/RrLske5.gif",
+      "exercisedbId": "RrLske5",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_bodyweight_biceps_curl",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos",
+          "Core"
+        ],
+        "en": [
+          "Forearms",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Curl de bíceps con peso corporal",
+        "en": "Bodyweight Biceps Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/gscGLOU.gif",
+      "exercisedbId": "gscGLOU",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_triceps_bodyweight_triceps_extension",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Core",
+          "Hombros"
+        ],
+        "en": [
+          "Core",
+          "Shoulders"
+        ]
+      },
+      "names": {
+        "es": "Extensión de tríceps con peso corporal",
+        "en": "Bodyweight Triceps Extension"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/s0HKO2I.gif",
+      "exercisedbId": "s0HKO2I",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_legs_bulgarian_split_squat",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla búlgara",
+        "en": "Bulgarian Split Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/QjE2DcA.gif",
+      "exercisedbId": "QjE2DcA",
+      "matchConfidence": "medium",
+      "matchScore": 0.8146
+    },
+    {
+      "id": "ff_biceps_cable_curl",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl de bíceps en polea",
+        "en": "Cable Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/NvfE43H.gif",
+      "exercisedbId": "NvfE43H",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_cable_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Aperturas en polea",
+        "en": "Cable Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+      "exercisedbId": "FVmZVhk",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_cable_front_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho superior"
+        ],
+        "en": [
+          "Upper chest"
+        ]
+      },
+      "names": {
+        "es": "Elevación frontal en polea",
+        "en": "Cable Front Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/u2X71Np.gif",
+      "exercisedbId": "u2X71Np",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_cable_kickback",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Patada de glúteo en polea",
+        "en": "Cable Kickback"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
+      "exercisedbId": "HEJ6DIX",
+      "matchConfidence": "high",
+      "matchScore": 0.8895
+    },
+    {
+      "id": "ff_shoulders_cable_lateral_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides lateral",
+        "en": "Side delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Upper Traps"
+        ],
+        "en": [
+          "Upper Traps"
+        ]
+      },
+      "names": {
+        "es": "Elevación lateral en polea",
+        "en": "Cable Lateral Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/goJ6ezq.gif",
+      "exercisedbId": "goJ6ezq",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_cable_pull_through",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Erector Spinae"
+        ],
+        "en": [
+          "Hamstrings",
+          "Erector Spinae"
+        ]
+      },
+      "names": {
+        "es": "Pull through en polea",
+        "en": "Cable Pull Through"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/OM46QHm.gif",
+      "exercisedbId": "OM46QHm",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_cable_pullover",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Serratus",
+          "Tríceps"
+        ],
+        "en": [
+          "Chest",
+          "Serratus",
+          "Triceps"
+        ]
+      },
+      "names": {
+        "es": "Pullover en polea",
+        "en": "Cable Pullover"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Q2Eu1Ax.gif",
+      "exercisedbId": "Q2Eu1Ax",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_cable_rear_delt_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides posterior",
+        "en": "Rear delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Trapecios"
+        ],
+        "en": [
+          "Upper back",
+          "Traps"
+        ]
+      },
+      "names": {
+        "es": "Apertura posterior en polea",
+        "en": "Cable Rear Delt Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/yUdIGNs.gif",
+      "exercisedbId": "yUdIGNs",
+      "matchConfidence": "high",
+      "matchScore": 0.9529
+    },
+    {
+      "id": "ff_triceps_cable_triceps_kickback",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Patada de tríceps en polea",
+        "en": "Cable Triceps Kickback"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
+      "exercisedbId": "HEJ6DIX",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_chest_press_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press de pecho en máquina",
+        "en": "Chest Press Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "exercisedbId": "wDN97Ca",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_chest_supported_dumbbell_row",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo con mancuernas pecho apoyado",
+        "en": "Chest Supported Dumbbell Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/BJ0Hz5L.gif",
+      "exercisedbId": "BJ0Hz5L",
+      "matchConfidence": "high",
+      "matchScore": 0.846
+    },
+    {
+      "id": "ff_back_chest_supported_row_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo con pecho apoyado en máquina",
+        "en": "Chest Supported Row Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "exercisedbId": "wDN97Ca",
+      "matchConfidence": "medium",
+      "matchScore": 0.734
+    },
+    {
+      "id": "ff_back_chin_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada supina",
+        "en": "Chin Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/T2mxWqc.gif",
+      "exercisedbId": "T2mxWqc",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_chin_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada supina",
+        "en": "Chin Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/T2mxWqc.gif",
+      "exercisedbId": "T2mxWqc",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_triceps_close_grip_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca agarre cerrado",
+        "en": "Close Grip Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/da4cXST.gif",
+      "exercisedbId": "da4cXST",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_close_grip_chin_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Espalda alta"
+        ],
+        "en": [
+          "Lats",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada supina cerrada",
+        "en": "Close Grip Chin Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/VnfUNW7.gif",
+      "exercisedbId": "VnfUNW7",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_back_close_grip_lat_pulldown_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón cerrado al pecho en máquina",
+        "en": "Close Grip Lat Pulldown Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+      "exercisedbId": "ecpY0rH",
+      "matchConfidence": "high",
+      "matchScore": 0.8531
+    },
+    {
+      "id": "ff_biceps_concentration_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl de concentración",
+        "en": "Concentration Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/gvsWLQw.gif",
+      "exercisedbId": "gvsWLQw",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_cossack_squat",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Aductores",
+        "en": "Adductors"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla Cossack",
+        "en": "Cossack Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/GWoKnIm.gif",
+      "exercisedbId": "GWoKnIm",
+      "matchConfidence": "high",
+      "matchScore": 0.9143
+    },
+    {
+      "id": "ff_glutes_curtsy_lunge",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Aductores"
+        ],
+        "en": [
+          "Quads",
+          "Adductors"
+        ]
+      },
+      "names": {
+        "es": "Zancada cruzada",
+        "en": "Curtsy Lunge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/gUjqdei.gif",
+      "exercisedbId": "gUjqdei",
+      "matchConfidence": "high",
+      "matchScore": 0.835
+    },
+    {
+      "id": "ff_back_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Trapecios",
+          "Antebrazos"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Traps",
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto",
+        "en": "Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ila4NZS.gif",
+      "exercisedbId": "ila4NZS",
+      "matchConfidence": "high",
+      "matchScore": 0.891
+    },
+    {
+      "id": "ff_chest_decline_barbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho inferior",
+        "en": "Lower chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca declinado con barra",
+        "en": "Decline Barbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/GrO65fd.gif",
+      "exercisedbId": "GrO65fd",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_decline_chest_press_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho inferior",
+        "en": "Lower chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press declinado en máquina",
+        "en": "Decline Chest Press Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/vsVoPHt.gif",
+      "exercisedbId": "vsVoPHt",
+      "matchConfidence": "high",
+      "matchScore": 0.881
+    },
+    {
+      "id": "ff_chest_decline_dumbbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho inferior",
+        "en": "Lower chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca declinado con mancuernas",
+        "en": "Decline Dumbbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/DwhEmmE.gif",
+      "exercisedbId": "DwhEmmE",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_decline_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Flexión declinada",
+        "en": "Decline Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/i5cEhka.gif",
+      "exercisedbId": "i5cEhka",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_diamond_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Flexión diamante",
+        "en": "Diamond Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/soIB2rj.gif",
+      "exercisedbId": "soIB2rj",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_calves_donkey_calf_raise_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación burro en máquina",
+        "en": "Donkey Calf Raise Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/C9LuR4A.gif",
+      "exercisedbId": "C9LuR4A",
+      "matchConfidence": "high",
+      "matchScore": 0.8735
+    },
+    {
+      "id": "ff_glutes_donkey_kick",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Patada de burro",
+        "en": "Donkey Kick"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/u5ESqzH.gif",
+      "exercisedbId": "u5ESqzH",
+      "matchConfidence": "high",
+      "matchScore": 0.8482
+    },
+    {
+      "id": "ff_chest_dumbbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca con mancuernas",
+        "en": "Dumbbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/SpYC0Kp.gif",
+      "exercisedbId": "SpYC0Kp",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_dumbbell_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl de bíceps con mancuernas",
+        "en": "Dumbbell Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/BU15nH4.gif",
+      "exercisedbId": "BU15nH4",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_dumbbell_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides anterior",
+          "Biceps stabilizers"
+        ],
+        "en": [
+          "Front delts",
+          "Biceps stabilizers"
+        ]
+      },
+      "names": {
+        "es": "Aperturas con mancuernas",
+        "en": "Dumbbell Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/yz9nUhF.gif",
+      "exercisedbId": "yz9nUhF",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_dumbbell_front_raise",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho superior",
+          "Trapecios"
+        ],
+        "en": [
+          "Upper chest",
+          "Traps"
+        ]
+      },
+      "names": {
+        "es": "Elevación frontal con mancuernas",
+        "en": "Dumbbell Front Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/3eGE2JC.gif",
+      "exercisedbId": "3eGE2JC",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_dumbbell_hip_thrust",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Hip thrust con mancuerna",
+        "en": "Dumbbell Hip Thrust"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/7Hg55JG.gif",
+      "exercisedbId": "7Hg55JG",
+      "matchConfidence": "high",
+      "matchScore": 0.8804
+    },
+    {
+      "id": "ff_triceps_dumbbell_kickback",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Patada de tríceps con mancuernas",
+        "en": "Dumbbell Kickback"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/W6PxUkg.gif",
+      "exercisedbId": "W6PxUkg",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_dumbbell_lateral_raise",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides lateral",
+        "en": "Side delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Upper Traps"
+        ],
+        "en": [
+          "Upper Traps"
+        ]
+      },
+      "names": {
+        "es": "Elevación lateral con mancuernas",
+        "en": "Dumbbell Lateral Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/AQ0mC4Y.gif",
+      "exercisedbId": "AQ0mC4Y",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_dumbbell_pullover",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Serratus",
+          "Tríceps"
+        ],
+        "en": [
+          "Lats",
+          "Serratus",
+          "Triceps"
+        ]
+      },
+      "names": {
+        "es": "Pullover con mancuerna",
+        "en": "Dumbbell Pullover"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/vi8EhoE.gif",
+      "exercisedbId": "vi8EhoE",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_dumbbell_shoulder_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts"
+        ]
+      },
+      "names": {
+        "es": "Press de hombro con mancuernas",
+        "en": "Dumbbell Shoulder Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/vmwLyCg.gif",
+      "exercisedbId": "vmwLyCg",
+      "matchConfidence": "high",
+      "matchScore": 0.9633
+    },
+    {
+      "id": "ff_calves_dumbbell_standing_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla con mancuernas",
+        "en": "Dumbbell Standing Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/dPmaUaU.gif",
+      "exercisedbId": "dPmaUaU",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_calves_elevated_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla en escalón",
+        "en": "Elevated Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/u5ESqzH.gif",
+      "exercisedbId": "u5ESqzH",
+      "matchConfidence": "high",
+      "matchScore": 0.9052
+    },
+    {
+      "id": "ff_cardio_elliptical_trainer",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "elliptical",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Elíptica",
+        "en": "Elliptical Trainer"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/rjtuP6X.gif",
+      "exercisedbId": "rjtuP6X",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_biceps_ez_bar_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl de bíceps con barra EZ",
+        "en": "EZ Bar Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/tJ5nYqo.gif",
+      "exercisedbId": "tJ5nYqo",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_triceps_ez_bar_skull_crusher",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Rompecráneos con barra EZ",
+        "en": "EZ Bar Skull Crusher"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/h8LFzo9.gif",
+      "exercisedbId": "h8LFzo9",
+      "matchConfidence": "high",
+      "matchScore": 0.8589
+    },
+    {
+      "id": "ff_shoulders_face_pull",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides posterior",
+        "en": "Rear delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Trapecios",
+          "Rotator Cuff"
+        ],
+        "en": [
+          "Traps",
+          "Rotator Cuff"
+        ]
+      },
+      "names": {
+        "es": "Face pull en polea",
+        "en": "Face Pull"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/RVwzP10.gif",
+      "exercisedbId": "RVwzP10",
+      "matchConfidence": "low",
+      "matchScore": 0.617
+    },
+    {
+      "id": "ff_glutes_fire_hydrant",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteo medio",
+        "en": "Glute medius"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Core"
+        ],
+        "en": [
+          "Glutes",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Fire hydrant",
+        "en": "Fire Hydrant"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/OrETs32.gif",
+      "exercisedbId": "OrETs32",
+      "matchConfidence": "low",
+      "matchScore": 0.5802
+    },
+    {
+      "id": "ff_glutes_frog_pump",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Aductores"
+        ],
+        "en": [
+          "Adductors"
+        ]
+      },
+      "names": {
+        "es": "Frog pump",
+        "en": "Frog Pump"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/2Dk4xQV.gif",
+      "exercisedbId": "2Dk4xQV",
+      "matchConfidence": "medium",
+      "matchScore": 0.7885
+    },
+    {
+      "id": "ff_legs_front_squat",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Espalda alta",
+          "Core"
+        ],
+        "en": [
+          "Glutes",
+          "Upper back",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla frontal con barra",
+        "en": "Front Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Y7YcmIJ.gif",
+      "exercisedbId": "Y7YcmIJ",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_glutes_glute_bridge",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Puente de glúteo",
+        "en": "Glute Bridge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/GibBPPg.gif",
+      "exercisedbId": "GibBPPg",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_glute_drive_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Cuádriceps"
+        ],
+        "en": [
+          "Hamstrings",
+          "Quads"
+        ]
+      },
+      "names": {
+        "es": "Glute drive en máquina",
+        "en": "Glute Drive Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "medium",
+      "matchScore": 0.7162
+    },
+    {
+      "id": "ff_legs_goblet_squat",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Core"
+        ],
+        "en": [
+          "Glutes",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla goblet",
+        "en": "Goblet Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/yn8yg1r.gif",
+      "exercisedbId": "yn8yg1r",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_hack_squat_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Hack squat en máquina",
+        "en": "Hack Squat Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.8453
+    },
+    {
+      "id": "ff_biceps_hammer_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Braquial",
+        "en": "Brachialis"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Antebrazos"
+        ],
+        "en": [
+          "Biceps",
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl martillo con mancuernas",
+        "en": "Hammer Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/fy7Tgy4.gif",
+      "exercisedbId": "fy7Tgy4",
+      "matchConfidence": "high",
+      "matchScore": 0.906
+    },
+    {
+      "id": "ff_shoulders_handstand_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts"
+        ]
+      },
+      "names": {
+        "es": "Flexión vertical de manos",
+        "en": "Handstand Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/XooAdhl.gif",
+      "exercisedbId": "XooAdhl",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_chest_hex_dumbbell_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press hexagonal con mancuernas",
+        "en": "Hex Dumbbell Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/SpYC0Kp.gif",
+      "exercisedbId": "SpYC0Kp",
+      "matchConfidence": "high",
+      "matchScore": 0.9313
+    },
+    {
+      "id": "ff_biceps_high_cable_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl alto en polea",
+        "en": "High Cable Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+      "exercisedbId": "G08RZcQ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_high_row_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo alto en máquina",
+        "en": "High Row Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/nZZZy9m.gif",
+      "exercisedbId": "nZZZy9m",
+      "matchConfidence": "medium",
+      "matchScore": 0.806
+    },
+    {
+      "id": "ff_chest_high_to_low_cable_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Pecho inferior",
+        "en": "Lower chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Cruce alto a bajo en polea",
+        "en": "High To Low Cable Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+      "exercisedbId": "FVmZVhk",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_hiking",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "treadmill",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Legs",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Legs",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Senderismo",
+        "en": "Hiking"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Trekking",
+          "Montaña"
+        ],
+        "en": [
+          "Trekking"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/rjiM4L3.gif",
+      "exercisedbId": "rjiM4L3",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_glutes_hip_abductor_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Glúteo medio",
+        "en": "Glute medius"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Tensor Fasciae Latae"
+        ],
+        "en": [
+          "Glutes",
+          "Tensor Fasciae Latae"
+        ]
+      },
+      "names": {
+        "es": "Abducción de cadera en máquina",
+        "en": "Hip Abductor Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/CHpahtl.gif",
+      "exercisedbId": "CHpahtl",
+      "matchConfidence": "medium",
+      "matchScore": 0.7309
+    },
+    {
+      "id": "ff_glutes_hip_thrust_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Cuádriceps"
+        ],
+        "en": [
+          "Hamstrings",
+          "Quads"
+        ]
+      },
+      "names": {
+        "es": "Hip thrust en máquina",
+        "en": "Hip Thrust Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "medium",
+      "matchScore": 0.7093
+    },
+    {
+      "id": "ff_chest_incline_barbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca inclinado con barra",
+        "en": "Incline Barbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/3TZduzM.gif",
+      "exercisedbId": "3TZduzM",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_incline_chest_press_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press inclinado en máquina",
+        "en": "Incline Chest Press Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "exercisedbId": "wDN97Ca",
+      "matchConfidence": "high",
+      "matchScore": 0.8917
+    },
+    {
+      "id": "ff_chest_incline_dumbbell_bench_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca inclinado con mancuernas",
+        "en": "Incline Dumbbell Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ns0SIbU.gif",
+      "exercisedbId": "ns0SIbU",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_incline_dumbbell_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl inclinado con mancuernas",
+        "en": "Incline Dumbbell Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/F3xgbjF.gif",
+      "exercisedbId": "F3xgbjF",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_incline_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pecho inferior",
+        "en": "Lower chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Flexión inclinada",
+        "en": "Incline Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/CB8WET1.gif",
+      "exercisedbId": "CB8WET1",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_inverted_row",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo invertido",
+        "en": "Inverted Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/bZGHsAZ.gif",
+      "exercisedbId": "bZGHsAZ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_triceps_jm_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "JM press",
+        "en": "JM Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ZsiqXYa.gif",
+      "exercisedbId": "ZsiqXYa",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_jump_rope",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "custom",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pantorrillas",
+          "Legs"
+        ],
+        "en": [
+          "Calves",
+          "Legs"
+        ]
+      },
+      "names": {
+        "es": "Saltar cuerda",
+        "en": "Jump Rope"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Comba",
+          "Cuerda"
+        ],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/e1e76I2.gif",
+      "exercisedbId": "e1e76I2",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_legs_jump_squat",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla con salto",
+        "en": "Jump Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/LIlE5Tn.gif",
+      "exercisedbId": "LIlE5Tn",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_lat_pulldown_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón al pecho en máquina",
+        "en": "Lat Pulldown Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+      "exercisedbId": "ecpY0rH",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_leg_extension_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Extensión de piernas en máquina",
+        "en": "Leg Extension Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/my33uHU.gif",
+      "exercisedbId": "my33uHU",
+      "matchConfidence": "high",
+      "matchScore": 0.8529
+    },
+    {
+      "id": "ff_calves_leg_press_calf_raise_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla en prensa",
+        "en": "Leg Press Calf Raise Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.934
+    },
+    {
+      "id": "ff_legs_leg_press_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Prensa de piernas",
+        "en": "Leg Press Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.934
+    },
+    {
+      "id": "ff_chest_low_to_high_cable_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Cruce bajo a alto en polea",
+        "en": "Low To High Cable Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+      "exercisedbId": "FVmZVhk",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_lying_leg_curl_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pantorrillas"
+        ],
+        "en": [
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Curl femoral acostado en máquina",
+        "en": "Lying Leg Curl Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/17lJ1kr.gif",
+      "exercisedbId": "17lJ1kr",
+      "matchConfidence": "high",
+      "matchScore": 0.8589
+    },
+    {
+      "id": "ff_triceps_machine_dip",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Fondos en máquina",
+        "en": "Machine Dip"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "exercisedbId": "wDN97Ca",
+      "matchConfidence": "high",
+      "matchScore": 0.88
+    },
+    {
+      "id": "ff_shoulders_machine_lateral_raise",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides lateral",
+        "en": "Side delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Upper Traps"
+        ],
+        "en": [
+          "Upper Traps"
+        ]
+      },
+      "names": {
+        "es": "Elevación lateral en máquina",
+        "en": "Machine Lateral Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/dRTfGZT.gif",
+      "exercisedbId": "dRTfGZT",
+      "matchConfidence": "high",
+      "matchScore": 0.8913
+    },
+    {
+      "id": "ff_back_machine_pullover",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Serratus"
+        ],
+        "en": [
+          "Chest",
+          "Serratus"
+        ]
+      },
+      "names": {
+        "es": "Pullover en máquina",
+        "en": "Machine Pullover"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/4U7iLb5.gif",
+      "exercisedbId": "4U7iLb5",
+      "matchConfidence": "high",
+      "matchScore": 0.8643
+    },
+    {
+      "id": "ff_back_meadows_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Upper back",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo Meadows",
+        "en": "Meadows Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/X3cqyXz.gif",
+      "exercisedbId": "X3cqyXz",
+      "matchConfidence": "low",
+      "matchScore": 0.636
+    },
+    {
+      "id": "ff_back_neutral_grip_pull_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada agarre neutro",
+        "en": "Neutral Grip Pull Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/0V2YQjW.gif",
+      "exercisedbId": "0V2YQjW",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cardio_outdoor_cycling",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "bike",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Ciclismo al aire libre",
+        "en": "Outdoor Cycling"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Bicicleta",
+          "Bici",
+          "Ciclismo"
+        ],
+        "en": [
+          "Cycling",
+          "Road bike"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/km2Ljzj.gif",
+      "exercisedbId": "km2Ljzj",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cardio_outdoor_running",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "treadmill",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Legs",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Legs",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Correr al aire libre",
+        "en": "Outdoor Running"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Correr",
+          "Trote",
+          "Jogging"
+        ],
+        "en": [
+          "Running",
+          "Jogging"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/oLrKqDH.gif",
+      "exercisedbId": "oLrKqDH",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cardio_outdoor_walking",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "treadmill",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Legs",
+          "Glúteos"
+        ],
+        "en": [
+          "Legs",
+          "Glutes"
+        ]
+      },
+      "names": {
+        "es": "Caminar al aire libre",
+        "en": "Outdoor Walking"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Caminata",
+          "Caminar"
+        ],
+        "en": [
+          "Walking",
+          "Brisk walk"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/CcWEoWV.gif",
+      "exercisedbId": "CcWEoWV",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_triceps_overhead_cable_extension",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Shoulders stabilizers"
+        ],
+        "en": [
+          "Shoulders stabilizers"
+        ]
+      },
+      "names": {
+        "es": "Extensión sobre cabeza en polea",
+        "en": "Overhead Cable Extension"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/1xHyxys.gif",
+      "exercisedbId": "1xHyxys",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_triceps_overhead_dumbbell_extension",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Shoulders stabilizers"
+        ],
+        "en": [
+          "Shoulders stabilizers"
+        ]
+      },
+      "names": {
+        "es": "Extensión sobre cabeza con mancuerna",
+        "en": "Overhead Dumbbell Extension"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/XalXcvM.gif",
+      "exercisedbId": "XalXcvM",
+      "matchConfidence": "high",
+      "matchScore": 0.89
+    },
+    {
+      "id": "ff_triceps_parallel_bar_dip",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Chest",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Fondos en paralelas",
+        "en": "Parallel Bar Dip"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/K1vlode.gif",
+      "exercisedbId": "K1vlode",
+      "matchConfidence": "high",
+      "matchScore": 0.8857
+    },
+    {
+      "id": "ff_chest_pec_deck_fly_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Aperturas en Pec Deck",
+        "en": "Pec Deck Fly Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+      "exercisedbId": "wDN97Ca",
+      "matchConfidence": "medium",
+      "matchScore": 0.7678
+    },
+    {
+      "id": "ff_back_pendlay_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Bíceps",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Lats",
+          "Biceps",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo Pendlay",
+        "en": "Pendlay Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/r0z6xzQ.gif",
+      "exercisedbId": "r0z6xzQ",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_pendulum_squat_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla péndulo en máquina",
+        "en": "Pendulum Squat Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "medium",
+      "matchScore": 0.7926
+    },
+    {
+      "id": "ff_shoulders_pike_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Pecho superior"
+        ],
+        "en": [
+          "Triceps",
+          "Upper chest"
+        ]
+      },
+      "names": {
+        "es": "Flexión pike",
+        "en": "Pike Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/XPUDTt7.gif",
+      "exercisedbId": "XPUDTt7",
+      "matchConfidence": "high",
+      "matchScore": 0.935
+    },
+    {
+      "id": "ff_legs_pistol_squat",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Core"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla pistol",
+        "en": "Pistol Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/QpXqiq8.gif",
+      "exercisedbId": "QpXqiq8",
+      "matchConfidence": "high",
+      "matchScore": 0.9
+    },
+    {
+      "id": "ff_calves_pogo_jump",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos"
+        ],
+        "en": [
+          "Quads",
+          "Glutes"
+        ]
+      },
+      "names": {
+        "es": "Saltos pogo",
+        "en": "Pogo Jump"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/uZKq7lo.gif",
+      "exercisedbId": "uZKq7lo",
+      "matchConfidence": "medium",
+      "matchScore": 0.7779
+    },
+    {
+      "id": "ff_biceps_preacher_curl_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl predicador en máquina",
+        "en": "Preacher Curl Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/b6hQYMb.gif",
+      "exercisedbId": "b6hQYMb",
+      "matchConfidence": "high",
+      "matchScore": 0.8529
+    },
+    {
+      "id": "ff_back_pull_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Dominada prona",
+        "en": "Pull Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/mExgrF9.gif",
+      "exercisedbId": "mExgrF9",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior",
+          "Core"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Flexión de pecho",
+        "en": "Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/7E06s6d.gif",
+      "exercisedbId": "7E06s6d",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_rear_delt_dumbbell_fly",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides posterior",
+        "en": "Rear delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Trapecios"
+        ],
+        "en": [
+          "Upper back",
+          "Traps"
+        ]
+      },
+      "names": {
+        "es": "Apertura posterior con mancuernas",
+        "en": "Rear Delt Dumbbell Fly"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/8DiFDVA.gif",
+      "exercisedbId": "8DiFDVA",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cardio_recumbent_bike",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "bike",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Bicicleta reclinada",
+        "en": "Recumbent Bike"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/a8VDgLw.gif",
+      "exercisedbId": "a8VDgLw",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_biceps_reverse_cable_curl",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Braquial",
+          "Bíceps"
+        ],
+        "en": [
+          "Brachialis",
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Curl inverso en polea",
+        "en": "Reverse Cable Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/eOG0r6v.gif",
+      "exercisedbId": "eOG0r6v",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_reverse_hyper_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Erector Spinae"
+        ],
+        "en": [
+          "Hamstrings",
+          "Erector Spinae"
+        ]
+      },
+      "names": {
+        "es": "Reverse hyper en máquina",
+        "en": "Reverse Hyper Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+      "exercisedbId": "ecpY0rH",
+      "matchConfidence": "medium",
+      "matchScore": 0.8005
+    },
+    {
+      "id": "ff_legs_reverse_lunge",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Zancada inversa",
+        "en": "Reverse Lunge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/SSsBDwB.gif",
+      "exercisedbId": "SSsBDwB",
+      "matchConfidence": "medium",
+      "matchScore": 0.7264
+    },
+    {
+      "id": "ff_shoulders_reverse_pec_deck_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides posterior",
+        "en": "Rear delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Trapecios"
+        ],
+        "en": [
+          "Upper back",
+          "Traps"
+        ]
+      },
+      "names": {
+        "es": "Pec Deck invertido",
+        "en": "Reverse Pec Deck Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+      "exercisedbId": "ecpY0rH",
+      "matchConfidence": "medium",
+      "matchScore": 0.7957
+    },
+    {
+      "id": "ff_biceps_ring_curl",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos",
+          "Core"
+        ],
+        "en": [
+          "Forearms",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Curl en anillas",
+        "en": "Ring Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/sJFIDIp.gif",
+      "exercisedbId": "sJFIDIp",
+      "matchConfidence": "high",
+      "matchScore": 0.9029
+    },
+    {
+      "id": "ff_triceps_ring_dip",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Deltoides anterior",
+          "Core"
+        ],
+        "en": [
+          "Chest",
+          "Front delts",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Fondos en anillas",
+        "en": "Ring Dip"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ezTvXcr.gif",
+      "exercisedbId": "ezTvXcr",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_chest_ring_push_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior",
+          "Core"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Flexión en anillas",
+        "en": "Ring Push Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/I4hDWkc.gif",
+      "exercisedbId": "I4hDWkc",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_romanian_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Erector Spinae",
+          "Espalda"
+        ],
+        "en": [
+          "Glutes",
+          "Erector Spinae",
+          "Back"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto rumano",
+        "en": "Romanian Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+      "exercisedbId": "wQ2c4XD",
+      "matchConfidence": "high",
+      "matchScore": 0.891
+    },
+    {
+      "id": "ff_legs_romanian_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Erector Spinae"
+        ],
+        "en": [
+          "Glutes",
+          "Erector Spinae"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto rumano",
+        "en": "Romanian Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+      "exercisedbId": "wQ2c4XD",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_glutes_romanian_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Erector Spinae"
+        ],
+        "en": [
+          "Glutes",
+          "Erector Spinae"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto rumano",
+        "en": "Romanian Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+      "exercisedbId": "wQ2c4XD",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_biceps_rope_hammer_curl",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Braquial",
+        "en": "Brachialis"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Antebrazos"
+        ],
+        "en": [
+          "Biceps",
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl martillo con cuerda en polea",
+        "en": "Rope Hammer Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/HPlPoQA.gif",
+      "exercisedbId": "HPlPoQA",
+      "matchConfidence": "high",
+      "matchScore": 0.906
+    },
+    {
+      "id": "ff_triceps_rope_pushdown",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Jalón de tríceps con cuerda",
+        "en": "Rope Pushdown"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/dU605di.gif",
+      "exercisedbId": "dU605di",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_rowing_machine",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "rowing",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda",
+          "Legs",
+          "Bíceps"
+        ],
+        "en": [
+          "Back",
+          "Legs",
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Remo ergómetro",
+        "en": "Rowing Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": null,
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_scapular_pull_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Trapecio inferior",
+        "en": "Lower traps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Serratus"
+        ],
+        "en": [
+          "Lats",
+          "Serratus"
+        ]
+      },
+      "names": {
+        "es": "Dominada escapular",
+        "en": "Scapular Pull Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/uTBt1HV.gif",
+      "exercisedbId": "uTBt1HV",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_shoulders_seated_barbell_overhead_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts"
+        ]
+      },
+      "names": {
+        "es": "Press militar sentado con barra",
+        "en": "Seated Barbell Overhead Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/kTbSH9h.gif",
+      "exercisedbId": "kTbSH9h",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_back_seated_cable_row",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo sentado en polea",
+        "en": "Seated Cable Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/hvV79Si.gif",
+      "exercisedbId": "hvV79Si",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_calves_seated_calf_raise_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Soleus"
+        ],
+        "en": [
+          "Soleus"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla sentado en máquina",
+        "en": "Seated Calf Raise Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_legs_seated_leg_curl_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pantorrillas"
+        ],
+        "en": [
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Curl femoral sentado en máquina",
+        "en": "Seated Leg Curl Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.9329
+    },
+    {
+      "id": "ff_shoulders_shoulder_press_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts"
+        ]
+      },
+      "names": {
+        "es": "Press de hombro en máquina",
+        "en": "Shoulder Press Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/67n3r98.gif",
+      "exercisedbId": "67n3r98",
+      "matchConfidence": "high",
+      "matchScore": 0.8589
+    },
+    {
+      "id": "ff_biceps_single_arm_cable_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl unilateral en polea",
+        "en": "Single Arm Cable Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+      "exercisedbId": "G08RZcQ",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_triceps_single_arm_cable_pushdown",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Jalón unilateral de tríceps en polea",
+        "en": "Single Arm Cable Pushdown"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/3ZflifB.gif",
+      "exercisedbId": "3ZflifB",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_shoulders_single_arm_dumbbell_lateral_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides lateral",
+        "en": "Side delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Upper Traps"
+        ],
+        "en": [
+          "Upper Traps"
+        ]
+      },
+      "names": {
+        "es": "Elevación lateral unilateral con mancuerna",
+        "en": "Single Arm Dumbbell Lateral Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/DsgkuIt.gif",
+      "exercisedbId": "DsgkuIt",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_back_single_arm_dumbbell_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo con mancuerna a una mano",
+        "en": "Single Arm Dumbbell Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/mWBtgmb.gif",
+      "exercisedbId": "mWBtgmb",
+      "matchConfidence": "high",
+      "matchScore": 0.8683
+    },
+    {
+      "id": "ff_triceps_single_arm_overhead_dumbbell_extension",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Shoulders stabilizers"
+        ],
+        "en": [
+          "Shoulders stabilizers"
+        ]
+      },
+      "names": {
+        "es": "Extensión unilateral sobre cabeza con mancuerna",
+        "en": "Single Arm Overhead Dumbbell Extension"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/6MfS53i.gif",
+      "exercisedbId": "6MfS53i",
+      "matchConfidence": "high",
+      "matchScore": 0.8971
+    },
+    {
+      "id": "ff_calves_single_leg_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación unilateral de pantorrilla",
+        "en": "Single Leg Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/9JprnPh.gif",
+      "exercisedbId": "9JprnPh",
+      "matchConfidence": "high",
+      "matchScore": 0.8929
+    },
+    {
+      "id": "ff_calves_single_leg_dumbbell_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación unilateral de pantorrilla con mancuerna",
+        "en": "Single Leg Dumbbell Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/1kB3Wmk.gif",
+      "exercisedbId": "1kB3Wmk",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_glutes_single_leg_glute_bridge",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Core"
+        ],
+        "en": [
+          "Hamstrings",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Puente de glúteo unilateral",
+        "en": "Single Leg Glute Bridge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/rmEukuS.gif",
+      "exercisedbId": "rmEukuS",
+      "matchConfidence": "high",
+      "matchScore": 0.9175
+    },
+    {
+      "id": "ff_cardio_ski_erg",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "custom",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Dorsales",
+          "Tríceps",
+          "Core"
+        ],
+        "en": [
+          "Lats",
+          "Triceps",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Ski ergómetro",
+        "en": "Ski Erg"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/vpQaQkH.gif",
+      "exercisedbId": "vpQaQkH",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_triceps_skull_crusher",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Rompecráneos con barra",
+        "en": "Skull Crusher"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/h8LFzo9.gif",
+      "exercisedbId": "h8LFzo9",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_chest_smith_machine_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press banca en máquina Smith",
+        "en": "Smith Machine Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/trqKQv2.gif",
+      "exercisedbId": "trqKQv2",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_calves_smith_machine_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla en Smith",
+        "en": "Smith Machine Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Y4QlY8z.gif",
+      "exercisedbId": "Y4QlY8z",
+      "matchConfidence": "high",
+      "matchScore": 0.8714
+    },
+    {
+      "id": "ff_glutes_smith_machine_hip_thrust",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios"
+        ],
+        "en": [
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Hip thrust en máquina Smith",
+        "en": "Smith Machine Hip Thrust"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/jFtipLl.gif",
+      "exercisedbId": "jFtipLl",
+      "matchConfidence": "medium",
+      "matchScore": 0.8113
+    },
+    {
+      "id": "ff_chest_smith_machine_incline_bench_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pecho superior",
+        "en": "Upper chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press inclinado en máquina Smith",
+        "en": "Smith Machine Incline Bench Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/5v7KYld.gif",
+      "exercisedbId": "5v7KYld",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_shoulders_smith_machine_shoulder_press",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides lateral"
+        ],
+        "en": [
+          "Triceps",
+          "Side delts"
+        ]
+      },
+      "names": {
+        "es": "Press de hombro en máquina Smith",
+        "en": "Smith Machine Shoulder Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/903mzG8.gif",
+      "exercisedbId": "903mzG8",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_smith_machine_squat",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Smith",
+        "en": "Smith Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla en máquina Smith",
+        "en": "Smith Machine Squat"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/jFtipLl.gif",
+      "exercisedbId": "jFtipLl",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_stair_climber",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "stairClimber",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Escaladora",
+        "en": "Stair Climber"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/j9Q5crt.gif",
+      "exercisedbId": "j9Q5crt",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_chest_standing_cable_chest_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Pecho",
+        "en": "Chest"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tríceps",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Triceps",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Press de pecho de pie en polea",
+        "en": "Standing Cable Chest Press"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Pr9Rhf4.gif",
+      "exercisedbId": "Pr9Rhf4",
+      "matchConfidence": "high",
+      "matchScore": 0.9313
+    },
+    {
+      "id": "ff_calves_standing_calf_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla de pie",
+        "en": "Standing Calf Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/6HmFgmx.gif",
+      "exercisedbId": "6HmFgmx",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_calves_standing_calf_raise_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "None"
+        ],
+        "en": [
+          "None"
+        ]
+      },
+      "names": {
+        "es": "Elevación de pantorrilla de pie en máquina",
+        "en": "Standing Calf Raise Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ykUOVze.gif",
+      "exercisedbId": "ykUOVze",
+      "matchConfidence": "high",
+      "matchScore": 0.881
+    },
+    {
+      "id": "ff_legs_standing_leg_curl_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pantorrillas"
+        ],
+        "en": [
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Curl femoral de pie en máquina",
+        "en": "Standing Leg Curl Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/6MaEjVA.gif",
+      "exercisedbId": "6MaEjVA",
+      "matchConfidence": "medium",
+      "matchScore": 0.7599
+    },
+    {
+      "id": "ff_cardio_stationary_bike",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "bike",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Bicicleta estática",
+        "en": "Stationary Bike"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/H1PESYI.gif",
+      "exercisedbId": "H1PESYI",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_legs_step_up",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Subida al cajón",
+        "en": "Step Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/aXtJhlg.gif",
+      "exercisedbId": "aXtJhlg",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_stepmill",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "stairClimber",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Escaleras infinitas",
+        "en": "StepMill"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/j9Q5crt.gif",
+      "exercisedbId": "j9Q5crt",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_legs_stiff_leg_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Erector Spinae"
+        ],
+        "en": [
+          "Glutes",
+          "Erector Spinae"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto piernas rígidas",
+        "en": "Stiff Leg Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/kuMiR2T.gif",
+      "exercisedbId": "kuMiR2T",
+      "matchConfidence": "high",
+      "matchScore": 0.9167
+    },
+    {
+      "id": "ff_back_straight_arm_cable_pulldown",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Teres Major",
+          "Triceps stabilizers"
+        ],
+        "en": [
+          "Teres Major",
+          "Triceps stabilizers"
+        ]
+      },
+      "names": {
+        "es": "Jalón con brazos rectos en polea",
+        "en": "Straight Arm Cable Pulldown"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/RVwzP10.gif",
+      "exercisedbId": "RVwzP10",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_triceps_straight_bar_pushdown",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Jalón de tríceps con barra recta",
+        "en": "Straight Bar Pushdown"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/3ZflifB.gif",
+      "exercisedbId": "3ZflifB",
+      "matchConfidence": "high",
+      "matchScore": 0.846
+    },
+    {
+      "id": "ff_glutes_sumo_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Cuádriceps",
+          "Aductores"
+        ],
+        "en": [
+          "Hamstrings",
+          "Quads",
+          "Adductors"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto sumo",
+        "en": "Sumo Deadlift"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/KgI0tqW.gif",
+      "exercisedbId": "KgI0tqW",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_cardio_swimming",
+      "loggingType": "cardio",
+      "loadMode": "cardio_outdoor",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "custom",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Aire libre",
+        "en": "Outdoor"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda",
+          "Hombros",
+          "Core"
+        ],
+        "en": [
+          "Back",
+          "Shoulders",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Natación",
+        "en": "Swimming"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [
+          "Nadar",
+          "Piscina"
+        ],
+        "en": [
+          "Swim"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/SP3hUez.gif",
+      "exercisedbId": "SP3hUez",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_t_bar_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Espalda alta",
+          "Bíceps"
+        ],
+        "en": [
+          "Upper back",
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Remo T-Bar",
+        "en": "T Bar Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/R5swFnc.gif",
+      "exercisedbId": "R5swFnc",
+      "matchConfidence": "high",
+      "matchScore": 0.9313
+    },
+    {
+      "id": "ff_calves_toe_walk",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Pantorrillas",
+        "en": "Calves"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Tibialis",
+          "Core"
+        ],
+        "en": [
+          "Tibialis",
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Caminata en puntas",
+        "en": "Toe Walk"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/PzNxakt.gif",
+      "exercisedbId": "PzNxakt",
+      "matchConfidence": "high",
+      "matchScore": 0.8429
+    },
+    {
+      "id": "ff_cardio_treadmill",
+      "loggingType": "cardio",
+      "loadMode": "cardio_machine",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": "treadmill",
+      "category": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "equipment": {
+        "es": "Máquina cardio",
+        "en": "Cardio machine"
+      },
+      "primaryMuscle": {
+        "es": "Cardio",
+        "en": "Cardio"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Legs",
+          "Glúteos"
+        ],
+        "en": [
+          "Legs",
+          "Glutes"
+        ]
+      },
+      "names": {
+        "es": "Caminadora",
+        "en": "Treadmill"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/rjiM4L3.gif",
+      "exercisedbId": "rjiM4L3",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_triceps_triceps_extension_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Extensión de tríceps en máquina",
+        "en": "Triceps Extension Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/Ser9eQp.gif",
+      "exercisedbId": "Ser9eQp",
+      "matchConfidence": "high",
+      "matchScore": 0.8735
+    },
+    {
+      "id": "ff_shoulders_upright_row",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides lateral",
+        "en": "Side delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Upper Traps",
+          "Bíceps"
+        ],
+        "en": [
+          "Upper Traps",
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Remo al mentón con barra",
+        "en": "Upright Row"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/UDlhcO8.gif",
+      "exercisedbId": "UDlhcO8",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_triceps_v_bar_pushdown",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Tríceps",
+        "en": "Triceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Jalón de tríceps con barra V",
+        "en": "V Bar Pushdown"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/gAwDzB3.gif",
+      "exercisedbId": "gAwDzB3",
+      "matchConfidence": "high",
+      "matchScore": 0.956
+    },
+    {
+      "id": "ff_legs_v_squat_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "V-Squat en máquina",
+        "en": "V Squat Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+      "exercisedbId": "IeDEXTe",
+      "matchConfidence": "high",
+      "matchScore": 0.8947
+    },
+    {
+      "id": "ff_legs_walking_lunge",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Zancada caminando",
+        "en": "Walking Lunge"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/IZVHb27.gif",
+      "exercisedbId": "IZVHb27",
+      "matchConfidence": "medium",
+      "matchScore": 0.8167
+    },
+    {
+      "id": "ff_shoulders_wall_walk",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Core",
+          "Tríceps",
+          "Pecho"
+        ],
+        "en": [
+          "Core",
+          "Triceps",
+          "Chest"
+        ]
+      },
+      "names": {
+        "es": "Caminata de pared",
+        "en": "Wall Walk"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/NCmbLCw.gif",
+      "exercisedbId": "NCmbLCw",
+      "matchConfidence": "low",
+      "matchScore": 0.586
+    },
+    {
+      "id": "ff_back_wide_grip_lat_pulldown_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón abierto al pecho en máquina",
+        "en": "Wide Grip Lat Pulldown Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+      "exercisedbId": "ecpY0rH",
+      "matchConfidence": "high",
+      "matchScore": 0.862
+    }
+  ]
+}

@@ -39,13 +39,11 @@ abstract final class DailyNutritionBudget {
 
     var workoutBurned = 0;
     for (final workout in workoutsCompletedOnDay) {
-      final estimate = WorkoutCalorieEstimator.estimateFromSummary(
-        durationMinutes: workout.durationMinutes,
-        totalVolumeKg: workout.totalVolume,
+      workoutBurned += WorkoutCalorieEstimator.resolvedActiveCalories(
+        workout: workout,
         profile: profile,
         bodyMetrics: bodyMetrics,
       );
-      workoutBurned += estimate.caloriesKcal ?? 0;
     }
 
     final calorieBudget = baseGoal + workoutBurned;

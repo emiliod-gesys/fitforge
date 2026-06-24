@@ -1,8 +1,5 @@
 import '../core/utils/supabase_datetime.dart';
 import '../core/utils/exercise_load.dart';
-
-import '../core/utils/supabase_datetime.dart';
-import '../core/utils/exercise_load.dart';
 import 'exercise_logging.dart';
 
 class WorkoutSet {
@@ -128,7 +125,7 @@ class WorkoutExercise {
     );
   }
 
-  double totalVolume({bool? perArmWeight}) => sets
+  double totalVolume({bool? perArmWeight, bool? unilateral}) => sets
       .where((s) => s.completed)
       .fold(
         0.0,
@@ -137,6 +134,7 @@ class WorkoutExercise {
               s,
               exerciseName: exerciseName,
               perArmWeight: perArmWeight,
+              unilateral: unilateral,
             ),
       );
 }
@@ -150,6 +148,7 @@ class Workout {
   final DateTime startedAt;
   final DateTime? completedAt;
   final int durationMinutes;
+  final int? activeCaloriesKcal;
   final List<WorkoutExercise> exercises;
   final String? notes;
   final double totalVolume;
@@ -163,6 +162,7 @@ class Workout {
     required this.startedAt,
     this.completedAt,
     this.durationMinutes = 0,
+    this.activeCaloriesKcal,
     this.exercises = const [],
     this.notes,
     this.totalVolume = 0,
@@ -180,6 +180,7 @@ class Workout {
           ? SupabaseDateTime.parse(json['completed_at'] as String)
           : null,
       durationMinutes: json['duration_minutes'] as int? ?? 0,
+      activeCaloriesKcal: json['active_calories_kcal'] as int?,
       exercises: exercises ?? [],
       notes: json['notes'] as String?,
       totalVolume: (json['total_volume'] as num?)?.toDouble() ?? 0,
@@ -194,6 +195,7 @@ class Workout {
         'started_at': startedAt.toIso8601String(),
         'completed_at': completedAt?.toIso8601String(),
         'duration_minutes': durationMinutes,
+        if (activeCaloriesKcal != null) 'active_calories_kcal': activeCaloriesKcal,
         'notes': notes,
         'total_volume': totalVolume,
       };

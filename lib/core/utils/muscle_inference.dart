@@ -162,8 +162,11 @@ abstract final class MuscleInference {
         _hasMuscleToken(m, 'brachialis')) {
       return 'Bíceps';
     }
-    if (_containsAny(m, ['pecho', 'chest', 'pectoral'])) return 'Pecho';
-    if (_containsAny(m, ['espalda', 'back', 'latissimus', 'dorsal', 'trapecio', 'romboid'])) {
+    if (_containsAny(m, ['pecho', 'chest', 'pectoral', 'dorsales', 'lats'])) {
+      if (_containsAny(m, ['dorsales', 'lats', 'espalda', 'back'])) return 'Espalda';
+      return 'Pecho';
+    }
+    if (_containsAny(m, ['espalda', 'back', 'latissimus', 'dorsal', 'trapecio', 'romboid', 'romboides'])) {
       return 'Espalda';
     }
     if (_containsAny(m, ['hombro', 'shoulder', 'deltoid', 'deltoides'])) return 'Hombros';
@@ -188,6 +191,7 @@ abstract final class MuscleInference {
     }
     if (_containsAny(m, ['gluteo', 'glúteo', 'glute'])) return 'Glúteos';
     if (_containsAny(m, ['abdominal', 'abs', 'core', 'oblicuo'])) return 'Abdominales';
+    if (_containsAny(m, ['cardio'])) return 'Cardio';
     if (_containsAny(m, [
       'antebrazo',
       'forearm',
@@ -208,14 +212,14 @@ abstract final class MuscleInference {
     if (_containsAny(c, ['pecho', 'chest'])) return 'Pecho';
     if (_containsAny(c, ['espalda', 'back'])) return 'Espalda';
     if (_containsAny(c, ['hombro', 'shoulder'])) return 'Hombros';
-    if (_containsAny(c, ['pierna', 'leg', 'pantorrilla', 'calf', 'gemelo'])) return 'Piernas';
+    if (_containsAny(c, ['pierna', 'leg', 'pantorrilla', 'calf', 'gemelo', 'calves'])) return 'Piernas';
     if (_containsAny(c, ['gluteo', 'glúteo', 'glute'])) return 'Glúteos';
     if (_containsAny(c, ['abdominal', 'abs'])) return 'Abdominales';
     if (_containsAny(c, ['biceps', 'bíceps', 'bicep'])) return 'Bíceps';
     if (_containsAny(c, ['triceps', 'tríceps'])) return 'Tríceps';
     if (_containsAny(c, ['antebrazo', 'forearm'])) return 'Antebrazos';
+    if (_containsAny(c, ['cardio'])) return 'Cardio';
     if (_containsAny(c, ['brazo', 'arm'])) return null;
-    if (_containsAny(c, ['cardio'])) return null;
     return null;
   }
 

@@ -36,6 +36,10 @@ abstract final class ExerciseLoggingResolver {
     ExerciseLoggingType explicit = ExerciseLoggingType.strength,
     String? category,
   }) {
+    if (exerciseName.isNotEmpty && CardioNameMatcher.isClearlyStrength(exerciseName)) {
+      return ExerciseLoggingType.strength;
+    }
+
     if (explicit == ExerciseLoggingType.cardio) return ExerciseLoggingType.cardio;
 
     final byId = findInCatalog(exerciseId, catalog);
@@ -67,17 +71,28 @@ abstract final class ExerciseLoggingResolver {
     Iterable<Exercise> catalog = const [],
     Iterable<WorkoutSet>? sets,
   }) {
-    if (sets != null && sets.any((s) => s.loggingType == ExerciseLoggingType.cardio)) {
-      return true;
+    if (exerciseName.isNotEmpty && CardioNameMatcher.isClearlyStrength(exerciseName)) {
+      return false;
     }
 
     final byId = findInCatalog(exerciseId, catalog);
-    if (byId != null && byId.isCardio) return true;
+    if (byId != null) {
+      final label = exerciseName.isNotEmpty ? exerciseName : byId.name;
+      if (CardioNameMatcher.isClearlyStrength(label)) return false;
+      return byId.isCardio;
+    }
 
     if (exerciseName.isNotEmpty) {
       final byName = findByName(exerciseName, catalog);
-      if (byName != null && byName.isCardio) return true;
+      if (byName != null) {
+        if (CardioNameMatcher.isClearlyStrength(byName.name)) return false;
+        return byName.isCardio;
+      }
       if (inferFromName(exerciseName)) return true;
+    }
+
+    if (sets != null && sets.any((s) => s.loggingType == ExerciseLoggingType.cardio)) {
+      return true;
     }
 
     return false;

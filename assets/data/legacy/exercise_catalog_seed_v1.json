@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "note": "Catálogo semilla FitForge (33 ejercicios) usado antes de la importación Excel+ExerciseDB v2.",
+  "restoreHint": "Reemplaza assets/data/exercise_catalog.json con este archivo para volver al catálogo semilla.",
+  "exercises": []
+}

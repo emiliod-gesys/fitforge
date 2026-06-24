@@ -47,7 +47,7 @@ class WorkoutService {
     final workoutsData = await _client
         .from('workouts')
         .select(
-          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, notes',
+          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes',
         )
         .eq('user_id', userId)
         .gte('completed_at', start.toUtc().toIso8601String())
@@ -740,11 +740,17 @@ class WorkoutService {
     }
   }
 
-  Future<void> completeWorkout(String workoutId, {int durationMinutes = 0, double totalVolume = 0}) async {
+  Future<void> completeWorkout(
+    String workoutId, {
+    int durationMinutes = 0,
+    double totalVolume = 0,
+    int? activeCaloriesKcal,
+  }) async {
     await _client.from('workouts').update({
       'completed_at': SupabaseDateTime.nowUtc.toIso8601String(),
       'duration_minutes': durationMinutes,
       'total_volume': totalVolume,
+      if (activeCaloriesKcal != null) 'active_calories_kcal': activeCaloriesKcal,
     }).eq('id', workoutId);
 
     await _updatePersonalRecords(workoutId);

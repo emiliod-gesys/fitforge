@@ -59,6 +59,80 @@ void main() {
       expect(ExerciseLoggingResolver.inferFromName('Zancadas Caminando con Barra'), isFalse);
       expect(ExerciseLoggingResolver.inferFromName('Walking Lunges'), isFalse);
     });
+
+    test('no clasifica remos de fuerza como cardio', () {
+      const rowNames = [
+        'Remo con polea',
+        'Remo con polea baja',
+        'Remo sentado en polea',
+        'Remo invertido',
+        'Remo en T',
+        'Dominadas australianas (remo invertido)',
+        'Seated cable row',
+        'Barbell row',
+        'Remo con barra',
+        'Remo inclinado con mancuerna',
+      ];
+      for (final name in rowNames) {
+        expect(ExerciseLoggingResolver.inferFromName(name), isFalse, reason: name);
+        expect(
+          ExerciseLoggingResolver.isCardioExercise(
+            exerciseId: '123',
+            exerciseName: name,
+            sets: const [
+              WorkoutSet(
+                id: 's1',
+                setNumber: 1,
+                loggingType: ExerciseLoggingType.cardio,
+                durationSeconds: 600,
+              ),
+            ],
+          ),
+          isFalse,
+          reason: '$name con sets cardio mal etiquetados',
+        );
+      }
+    });
+
+    test('no clasifica dominadas ni flexiones como cardio', () {
+      const names = [
+        'Dominadas',
+        'Dominadas supinas',
+        'Pull-ups',
+        'Flexiones',
+        'Flexiones de brazos',
+        'Push-ups',
+        'flexiones en TRX',
+      ];
+      for (final name in names) {
+        expect(ExerciseLoggingResolver.inferFromName(name), isFalse, reason: name);
+        expect(
+          ExerciseLoggingResolver.isCardioExercise(
+            exerciseId: '475',
+            exerciseName: name,
+          ),
+          isFalse,
+          reason: name,
+        );
+      }
+
+      final trx = Exercise.fromWgerJson({
+        'id': 927,
+        'translations': [
+          {'language': 4, 'name': 'flexiones en TRX', 'description': ''},
+        ],
+        'category': {'name': 'Cardio'},
+        'muscles': [],
+        'equipment': [],
+      });
+      expect(trx.isCardio, isFalse);
+    });
+
+    test('sigue detectando remo ergometro como cardio', () {
+      expect(ExerciseLoggingResolver.inferFromName('Remo'), isTrue);
+      expect(ExerciseLoggingResolver.inferFromName('Rowing machine'), isTrue);
+      expect(ExerciseLoggingResolver.inferFromName('Maquina de remo'), isTrue);
+    });
   });
 
   group('CardioLoggingConfig', () {

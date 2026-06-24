@@ -1,12 +1,12 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
-import '../core/l10n/app_locale.dart';
+import '../core/constants/exercise_catalog_source.dart';
+import '../core/utils/exercise_catalog_visibility.dart';
 import '../core/utils/exercise_matcher.dart';
-import '../data/supplemental_exercises.dart';
+import '../data/bundled_exercise_catalog.dart';
 import '../data/exercise_translation_store.dart';
+import '../data/wger_exercise_catalog.dart';
 import '../models/exercise.dart';
 import 'custom_exercise_repository.dart';
 
@@ -38,8 +38,8 @@ class ExerciseImageLookup {
 }
 
 class ExerciseService {
-  final _http = http.Client();
-  List<Exercise>? _cache;
+  final WgerExerciseCatalog _wgerCatalog = WgerExerciseCatalog();
+  List<Exercise>? _fullCache;
   final _mediaCache = <int, ExerciseMedia>{};
   String _preferredLanguage = 'es';
   ExerciseTranslationStore? _translationStore;
@@ -61,110 +61,63 @@ class ExerciseService {
     }
   }
 
-  static const _pageSize = 100;
-  static const _maxExercises = 1500;
-
   Future<List<Exercise>> fetchExercises({String? search, String? category}) async {
-    if (_cache != null && search == null && category == null) {
-      return _withFreshUserCustom(_cache!);
+    final full = await _fetchFullExercises();
+    var list = _filterFullList(full, search: search, category: category);
+    return ExerciseCatalogVisibility.filterBrowsable(list);
+  }
+
+  /// Catálogo completo en memoria + ejercicios wger resueltos bajo demanda (entrenos antiguos).
+  Future<List<Exercise>> fetchFullExercises() async {
+    await _fetchFullExercises();
+    return [...?_fullCache, ..._wgerCatalog.onDemandExercises];
+  }
+
+  Future<List<Exercise>> _fetchFullExercises() async {
+    if (_fullCache != null) {
+      return _withFreshUserCustom(_fullCache!);
     }
 
-    final exercises = <Exercise>[];
-    var offset = 0;
-
-    while (offset < _maxExercises) {
-      final uri = Uri.parse('${AppConstants.wgerApiBase}/exerciseinfo/').replace(
-        queryParameters: {
-          'limit': _pageSize.toString(),
-          'offset': offset.toString(),
-        },
-      );
-
-      final response = await _http.get(uri);
-      if (response.statusCode != 200) break;
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final results = data['results'] as List? ?? [];
-      if (results.isEmpty) break;
-
-      for (final item in results) {
-        if (item is! Map<String, dynamic>) continue;
-        final exercise = _parseExerciseInfo(item);
-        if (exercise == null) continue;
-        if (search != null && !exercise.name.toLowerCase().contains(search.toLowerCase())) {
-          continue;
-        }
-        if (category != null && exercise.category != category) continue;
-        exercises.add(exercise);
-      }
-
-      if (data['next'] == null) break;
-      offset += _pageSize;
+    final List<Exercise> catalog;
+    switch (AppConstants.exerciseCatalogSource) {
+      case ExerciseCatalogSource.bundled:
+        catalog = await BundledExerciseCatalog.load(locale: _preferredLanguage);
+      case ExerciseCatalogSource.wger:
+        catalog = await _wgerCatalog.fetchCatalog(
+          locale: _preferredLanguage,
+          translationStore: _translationStore,
+          illustratedOnly: AppConstants.catalogRequireVisualMedia,
+        );
     }
 
-    final merged = SupplementalExercises.mergeWith(exercises, locale: _preferredLanguage)
-        .map(_applyStoredTranslation)
-        .toList();
-
-    final userCustom = await _loadUserCustomExercises();
-    merged.addAll(userCustom);
+    final merged = List<Exercise>.from(catalog);
+    merged.addAll(await _loadUserCustomExercises());
     merged.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
-    if (search == null && category == null) {
-      _cache = merged;
-    }
+    _fullCache = merged;
     return merged;
   }
 
-  Exercise? _parseExerciseInfo(Map<String, dynamic> json) {
-    final id = json['id'] as int?;
-    if (id == null) return null;
-
-    final translation = _pickTranslation(json['translations'] as List? ?? []);
-    if (translation == null) return null;
-
-    final name = translation['name'] as String? ?? '';
-    if (name.isEmpty) return null;
-
-    final description = (translation['description'] as String? ?? '')
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .trim();
-
-    final muscles = (json['muscles'] as List? ?? [])
-        .map((m) => m is Map
-            ? Exercise.localizeMuscle(
-                m['name_en'] as String? ?? m['name'] as String? ?? '',
-                locale: _preferredLanguage,
-              )
-            : '')
-        .where((s) => s.isNotEmpty)
-        .toList();
-
-    final categoryRaw = json['category'] is Map
-        ? (json['category'] as Map)['name'] as String? ?? 'Other'
-        : 'Other';
-    final category = Exercise.localizeCategoryFromWger(categoryRaw, locale: _preferredLanguage);
-
-    final aliases = <String>[];
-    for (final t in json['translations'] as List? ?? []) {
-      if (t is! Map<String, dynamic>) continue;
-      final alias = t['name'] as String?;
-      if (alias != null && alias.trim().isNotEmpty) {
-        aliases.add(alias.trim());
-      }
-    }
-
-    return _applyStoredTranslation(
-      Exercise(
-        wgerId: id,
-        name: name,
-        description: description,
-        category: category,
-        muscles: muscles,
-        imageUrl: _pickImageUrl(json),
-        aliases: aliases,
-      ),
+  Future<Exercise?> _resolveLegacyWgerExercise(int wgerId) {
+    return _wgerCatalog.resolveById(
+      wgerId,
+      locale: _preferredLanguage,
+      translationStore: _translationStore,
     );
+  }
+
+  List<Exercise> _filterFullList(
+    List<Exercise> full, {
+    String? search,
+    String? category,
+  }) {
+    return full.where((exercise) {
+      if (search != null && !exercise.name.toLowerCase().contains(search.toLowerCase())) {
+        return false;
+      }
+      if (category != null && exercise.category != category) return false;
+      return true;
+    }).toList();
   }
 
   Future<List<Exercise>> _loadUserCustomExercises() async {
@@ -174,13 +127,12 @@ class ExerciseService {
     return custom.map((c) => c.toExercise()).toList();
   }
 
-  /// Vuelve a mezclar ejercicios personalizados sin refetch del catálogo wger.
   Future<List<Exercise>> _withFreshUserCustom(List<Exercise> base) async {
     final userCustom = await _loadUserCustomExercises();
     final catalog = base.where((e) => !e.isUserCustom).toList();
     catalog.addAll(userCustom);
     catalog.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    _cache = catalog;
+    _fullCache = catalog;
     return catalog;
   }
 
@@ -191,70 +143,11 @@ class ExerciseService {
     return file.existsSync() ? path : null;
   }
 
-  Exercise _applyStoredTranslation(Exercise exercise) {
-    final store = _translationStore;
-    if (store == null || !store.isLoaded || exercise.wgerId == null) {
-      return exercise;
-    }
-
-    final t = store.get(exercise.wgerId, _preferredLanguage);
-    if (t == null || t.name.isEmpty) return exercise;
-
-    return Exercise(
-      wgerId: exercise.wgerId,
-      supabaseId: exercise.supabaseId,
-      name: t.name,
-      description: t.description.isNotEmpty ? t.description : exercise.description,
-      category: exercise.category,
-      muscles: exercise.muscles,
-      equipment: exercise.equipment,
-      imageUrl: exercise.imageUrl,
-      videoUrl: exercise.videoUrl,
-      isCustom: exercise.isCustom,
-      isUserCustom: exercise.isUserCustom,
-      perArmWeight: exercise.perArmWeight,
-      aliases: exercise.aliases,
-    );
-  }
-
-  String? _pickImageUrl(Map<String, dynamic> json) {
-    final images = json['images'] as List? ?? [];
-    if (images.isEmpty) return null;
-
-    Map<String, dynamic>? chosen;
-    for (final item in images) {
-      if (item is Map<String, dynamic> && item['is_main'] == true) {
-        chosen = item;
-        break;
-      }
-    }
-    chosen ??= images.first is Map ? images.first as Map<String, dynamic> : null;
-    final url = chosen?['image'] as String?;
-    return url != null && url.isNotEmpty ? url : null;
-  }
-
-  Map<String, dynamic>? _pickTranslation(List translations) {
-    final preferred = AppLocale.wgerLanguageId(_preferredLanguage);
-    final fallback = AppLocale.wgerFallbackLanguageId(_preferredLanguage);
-    Map<String, dynamic>? fallbackT;
-    Map<String, dynamic>? any;
-
-    for (final t in translations) {
-      if (t is! Map<String, dynamic>) continue;
-      final lang = t['language'];
-      if (lang == preferred) return t;
-      if (lang == fallback) fallbackT = t;
-      any ??= t;
-    }
-
-    return fallbackT ?? any;
-  }
-
   Future<ExerciseMedia> fetchExerciseMedia(int wgerId) async {
     if (wgerId < 0) return const ExerciseMedia();
     if (_mediaCache.containsKey(wgerId)) return _mediaCache[wgerId]!;
 
-    final videoUrl = await _fetchExerciseVideo(wgerId);
+    final videoUrl = await _wgerCatalog.fetchVideoUrl(wgerId);
     final media = ExerciseMedia(videoUrl: videoUrl);
     _mediaCache[wgerId] = media;
     return media;
@@ -265,15 +158,15 @@ class ExerciseService {
     required String exerciseName,
     required List<Exercise> catalog,
   }) {
+    for (final e in catalog) {
+      if (e.id == exerciseId) return e;
+    }
+
     final parsed = int.tryParse(exerciseId);
     if (parsed != null) {
       for (final e in catalog) {
         if (e.wgerId == parsed) return e;
       }
-    }
-
-    for (final e in catalog) {
-      if (e.id == exerciseId) return e;
     }
 
     for (final e in catalog) {
@@ -284,15 +177,22 @@ class ExerciseService {
         ExerciseMatcher.findBest(exerciseId, catalog);
   }
 
-/// Prioridad de imagen en UI:
-/// 1. `exerciseinfo` (wger embebido) · 2. maniquí por categoría · 3. isotipo FitForge.
+  /// Prioridad de imagen en UI:
+  /// 1. URL del catálogo · 2. maniquí por categoría · 3. isotipo FitForge.
   Future<String?> resolveImageUrl(ExerciseImageLookup lookup) async {
-    final catalog = await fetchExercises();
-    final match = findInCatalog(
+    final catalog = await fetchFullExercises();
+    var match = findInCatalog(
       exerciseId: lookup.exerciseId,
       exerciseName: lookup.exerciseName,
       catalog: catalog,
     );
+
+    if (match == null) {
+      final wgerId = int.tryParse(lookup.exerciseId);
+      if (wgerId != null) {
+        match = await _resolveLegacyWgerExercise(wgerId);
+      }
+    }
     if (match == null) return null;
 
     if (CustomExerciseRepository.isCustomExerciseId(lookup.exerciseId)) {
@@ -305,27 +205,19 @@ class ExerciseService {
     return null;
   }
 
-  Future<String?> _fetchExerciseVideo(int exerciseId) async {
+  Future<Exercise?> getExerciseById(int wgerId) async {
+    final exercises = await fetchFullExercises();
     try {
-      final uri = Uri.parse('${AppConstants.wgerApiBase}/video/').replace(
-        queryParameters: {'exercise': exerciseId.toString()},
-      );
-      final response = await _http.get(uri);
-      if (response.statusCode != 200) return null;
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final results = data['results'] as List? ?? [];
-      if (results.isEmpty) return null;
-      final video = results.first as Map<String, dynamic>;
-      return video['video'] as String?;
+      return exercises.firstWhere((e) => e.wgerId == wgerId);
     } catch (_) {
-      return null;
+      return _resolveLegacyWgerExercise(wgerId);
     }
   }
 
-  Future<Exercise?> getExerciseById(int wgerId) async {
-    final exercises = await fetchExercises();
+  Future<Exercise?> getExerciseByCatalogId(String catalogId) async {
+    final exercises = await fetchFullExercises();
     try {
-      return exercises.firstWhere((e) => e.wgerId == wgerId);
+      return exercises.firstWhere((e) => e.catalogId == catalogId);
     } catch (_) {
       return null;
     }
@@ -345,14 +237,21 @@ class ExerciseService {
       if (fromStore != fallback) return fromStore;
     }
 
-    final catalog = _cache;
+    final catalog = _fullCache;
     if (catalog != null) {
       final match = findInCatalog(
         exerciseId: exerciseId,
         exerciseName: fallback,
-        catalog: catalog,
+        catalog: [...catalog, ..._wgerCatalog.onDemandExercises],
       );
       if (match != null) return match.name;
+    }
+
+    final wgerId = int.tryParse(exerciseId);
+    if (wgerId != null) {
+      for (final e in _wgerCatalog.onDemandExercises) {
+        if (e.wgerId == wgerId) return e.name;
+      }
     }
 
     return fallback;
@@ -362,5 +261,9 @@ class ExerciseService {
     return exercises.map((e) => e.category).toSet().toList()..sort();
   }
 
-  void clearCache() => _cache = null;
+  void clearCache() {
+    _fullCache = null;
+    BundledExerciseCatalog.clearCache();
+    _wgerCatalog.clearCache();
+  }
 }

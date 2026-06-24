@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/app_providers.dart';
 import '../services/exercise_service.dart';
@@ -99,11 +100,23 @@ class ExerciseImageViewer extends ConsumerWidget {
     );
   }
 
-  Widget _zoomableImage(Widget child) {
+  Widget _zoomableIllustration(Widget child) {
     return InteractiveViewer(
       minScale: 0.75,
       maxScale: 4,
-      child: child,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: ColoredBox(
+            color: AppColors.exerciseIllustrationBackground,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -123,7 +136,7 @@ class ExerciseImageViewer extends ConsumerWidget {
               child: urlAsync.when(
                 data: (url) {
                   if (url != null && _isLocalPath(url)) {
-                    return _zoomableImage(
+                    return _zoomableIllustration(
                       Image.file(
                         File(url),
                         fit: BoxFit.contain,
@@ -132,7 +145,7 @@ class ExerciseImageViewer extends ConsumerWidget {
                     );
                   }
                   if (url != null) {
-                    return _zoomableImage(
+                    return _zoomableIllustration(
                       CachedNetworkImage(
                         imageUrl: url,
                         fit: BoxFit.contain,

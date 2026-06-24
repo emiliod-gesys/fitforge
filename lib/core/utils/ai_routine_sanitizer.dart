@@ -1,5 +1,6 @@
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
+import 'exercise_catalog_visibility.dart';
 import 'exercise_matcher.dart';
 
 /// Limpia rutinas generadas por IA: catálogo filtrado, sin duplicados ni nombres basura.
@@ -51,16 +52,8 @@ abstract final class AiRoutineSanitizer {
   };
 
   /// Ejercicio con foto wger o imagen personalizada del usuario (no maniquí genérico).
-  static bool hasIllustration(Exercise exercise) {
-    final url = exercise.imageUrl;
-    if (url == null || url.trim().isEmpty) return false;
-
-    if (exercise.isUserCustom) {
-      return !url.startsWith('http://') && !url.startsWith('https://');
-    }
-
-    return url.startsWith('http://') || url.startsWith('https://');
-  }
+  static bool hasIllustration(Exercise exercise) =>
+      ExerciseCatalogVisibility.hasIllustration(exercise);
 
   static bool isVagueExerciseName(String name) {
     final normalized = _normalizeName(name);
@@ -85,9 +78,10 @@ abstract final class AiRoutineSanitizer {
   }
 
   static bool isEligibleForAi(Exercise exercise) {
-    return hasIllustration(exercise) &&
-        !isLowQualityExerciseName(exercise.name) &&
+    final qualityOk = !isLowQualityExerciseName(exercise.name) &&
         !isVagueExerciseName(exercise.name);
+    if (exercise.isBundled) return qualityOk;
+    return hasIllustration(exercise) && qualityOk;
   }
 
   static List<Exercise> catalogForAi(List<Exercise> catalog) {
@@ -138,7 +132,7 @@ abstract final class AiRoutineSanitizer {
       }
 
       if (match == null) continue;
-      if (!hasIllustration(match)) continue;
+      if (!isEligibleForAi(match)) continue;
 
       usedIds.add(match.id);
       final isCardio = match.isCardio;

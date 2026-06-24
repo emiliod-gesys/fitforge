@@ -1,0 +1,1122 @@
+{
+  "ff_chest_barbell_bench_press": {
+    "exerciseId": "EIeI8Vf",
+    "gifUrl": "https://static.exercisedb.dev/media/EIeI8Vf.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell bench press"
+  },
+  "ff_chest_incline_barbell_bench_press": {
+    "exerciseId": "3TZduzM",
+    "gifUrl": "https://static.exercisedb.dev/media/3TZduzM.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell incline bench press"
+  },
+  "ff_chest_decline_barbell_bench_press": {
+    "exerciseId": "GrO65fd",
+    "gifUrl": "https://static.exercisedb.dev/media/GrO65fd.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell decline bench press"
+  },
+  "ff_chest_dumbbell_bench_press": {
+    "exerciseId": "SpYC0Kp",
+    "gifUrl": "https://static.exercisedb.dev/media/SpYC0Kp.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell bench press"
+  },
+  "ff_chest_incline_dumbbell_bench_press": {
+    "exerciseId": "ns0SIbU",
+    "gifUrl": "https://static.exercisedb.dev/media/ns0SIbU.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell incline bench press"
+  },
+  "ff_chest_decline_dumbbell_bench_press": {
+    "exerciseId": "DwhEmmE",
+    "gifUrl": "https://static.exercisedb.dev/media/DwhEmmE.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell decline bench press"
+  },
+  "ff_chest_dumbbell_fly": {
+    "exerciseId": "yz9nUhF",
+    "gifUrl": "https://static.exercisedb.dev/media/yz9nUhF.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell fly"
+  },
+  "ff_chest_dumbbell_pullover": {
+    "exerciseId": "vi8EhoE",
+    "gifUrl": "https://static.exercisedb.dev/media/vi8EhoE.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell around pullover"
+  },
+  "ff_chest_barbell_pullover": {
+    "exerciseId": "cA9FuWG",
+    "gifUrl": "https://static.exercisedb.dev/media/cA9FuWG.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "barbell bent arm pullover"
+  },
+  "ff_chest_hex_dumbbell_press": {
+    "exerciseId": "SpYC0Kp",
+    "gifUrl": "https://static.exercisedb.dev/media/SpYC0Kp.gif",
+    "confidence": "high",
+    "score": 0.9313,
+    "edb_name": "dumbbell bench press"
+  },
+  "ff_chest_chest_press_machine": {
+    "exerciseId": "wDN97Ca",
+    "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "machine inner chest press"
+  },
+  "ff_chest_incline_chest_press_machine": {
+    "exerciseId": "wDN97Ca",
+    "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+    "confidence": "high",
+    "score": 0.8917,
+    "edb_name": "machine inner chest press"
+  },
+  "ff_chest_decline_chest_press_machine": {
+    "exerciseId": "vsVoPHt",
+    "gifUrl": "https://static.exercisedb.dev/media/vsVoPHt.gif",
+    "confidence": "high",
+    "score": 0.881,
+    "edb_name": "lever decline chest press"
+  },
+  "ff_chest_pec_deck_fly_machine": {
+    "exerciseId": "wDN97Ca",
+    "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+    "confidence": "medium",
+    "score": 0.7678,
+    "edb_name": "machine inner chest press"
+  },
+  "ff_chest_smith_machine_bench_press": {
+    "exerciseId": "trqKQv2",
+    "gifUrl": "https://static.exercisedb.dev/media/trqKQv2.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "smith bench press"
+  },
+  "ff_chest_smith_machine_incline_bench_press": {
+    "exerciseId": "5v7KYld",
+    "gifUrl": "https://static.exercisedb.dev/media/5v7KYld.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "smith incline bench press"
+  },
+  "ff_chest_cable_fly": {
+    "exerciseId": "FVmZVhk",
+    "gifUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable low fly"
+  },
+  "ff_chest_high_to_low_cable_fly": {
+    "exerciseId": "FVmZVhk",
+    "gifUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable low fly"
+  },
+  "ff_chest_low_to_high_cable_fly": {
+    "exerciseId": "FVmZVhk",
+    "gifUrl": "https://static.exercisedb.dev/media/FVmZVhk.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable low fly"
+  },
+  "ff_chest_standing_cable_chest_press": {
+    "exerciseId": "Pr9Rhf4",
+    "gifUrl": "https://static.exercisedb.dev/media/Pr9Rhf4.gif",
+    "confidence": "high",
+    "score": 0.9313,
+    "edb_name": "cable standing fly"
+  },
+  "ff_chest_push_up": {
+    "exerciseId": "7E06s6d",
+    "gifUrl": "https://static.exercisedb.dev/media/7E06s6d.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "chest tap push-up (male)"
+  },
+  "ff_chest_incline_push_up": {
+    "exerciseId": "CB8WET1",
+    "gifUrl": "https://static.exercisedb.dev/media/CB8WET1.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "incline push up depth jump"
+  },
+  "ff_chest_decline_push_up": {
+    "exerciseId": "i5cEhka",
+    "gifUrl": "https://static.exercisedb.dev/media/i5cEhka.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "decline push-up"
+  },
+  "ff_chest_diamond_push_up": {
+    "exerciseId": "soIB2rj",
+    "gifUrl": "https://static.exercisedb.dev/media/soIB2rj.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "diamond push-up"
+  },
+  "ff_chest_archer_push_up": {
+    "exerciseId": "A9qxk2F",
+    "gifUrl": "https://static.exercisedb.dev/media/A9qxk2F.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "archer push up"
+  },
+  "ff_chest_ring_push_up": {
+    "exerciseId": "I4hDWkc",
+    "gifUrl": "https://static.exercisedb.dev/media/I4hDWkc.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "push-up"
+  },
+  "ff_back_pull_up": {
+    "exerciseId": "mExgrF9",
+    "gifUrl": "https://static.exercisedb.dev/media/mExgrF9.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "bench pull-ups"
+  },
+  "ff_back_chin_up": {
+    "exerciseId": "T2mxWqc",
+    "gifUrl": "https://static.exercisedb.dev/media/T2mxWqc.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "chin-up"
+  },
+  "ff_back_neutral_grip_pull_up": {
+    "exerciseId": "0V2YQjW",
+    "gifUrl": "https://static.exercisedb.dev/media/0V2YQjW.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "pull up (neutral grip)"
+  },
+  "ff_back_australian_pull_up": {
+    "exerciseId": "lBDjFxJ",
+    "gifUrl": "https://static.exercisedb.dev/media/lBDjFxJ.gif",
+    "confidence": "high",
+    "score": 0.94,
+    "edb_name": "pull-up"
+  },
+  "ff_back_inverted_row": {
+    "exerciseId": "bZGHsAZ",
+    "gifUrl": "https://static.exercisedb.dev/media/bZGHsAZ.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "inverted row"
+  },
+  "ff_back_scapular_pull_up": {
+    "exerciseId": "uTBt1HV",
+    "gifUrl": "https://static.exercisedb.dev/media/uTBt1HV.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "scapular pull-up"
+  },
+  "ff_back_assisted_pull_up_machine": {
+    "exerciseId": "kiJ4Z2K",
+    "gifUrl": "https://static.exercisedb.dev/media/kiJ4Z2K.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "assisted pull-up"
+  },
+  "ff_back_assisted_chin_up_machine": {
+    "exerciseId": "MaMuGH6",
+    "gifUrl": "https://static.exercisedb.dev/media/MaMuGH6.gif",
+    "confidence": "high",
+    "score": 0.8692,
+    "edb_name": "lever assisted chin-up"
+  },
+  "ff_back_lat_pulldown_machine": {
+    "exerciseId": "ecpY0rH",
+    "gifUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "reverse grip machine lat pulldown"
+  },
+  "ff_back_wide_grip_lat_pulldown_machine": {
+    "exerciseId": "ecpY0rH",
+    "gifUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+    "confidence": "high",
+    "score": 0.862,
+    "edb_name": "reverse grip machine lat pulldown"
+  },
+  "ff_back_close_grip_lat_pulldown_machine": {
+    "exerciseId": "ecpY0rH",
+    "gifUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+    "confidence": "high",
+    "score": 0.8531,
+    "edb_name": "reverse grip machine lat pulldown"
+  },
+  "ff_back_seated_cable_row": {
+    "exerciseId": "hvV79Si",
+    "gifUrl": "https://static.exercisedb.dev/media/hvV79Si.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable low seated row"
+  },
+  "ff_back_straight_arm_cable_pulldown": {
+    "exerciseId": "RVwzP10",
+    "gifUrl": "https://static.exercisedb.dev/media/RVwzP10.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable pulldown"
+  },
+  "ff_back_cable_pullover": {
+    "exerciseId": "Q2Eu1Ax",
+    "gifUrl": "https://static.exercisedb.dev/media/Q2Eu1Ax.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable lying extension pullover (with rope attachment)"
+  },
+  "ff_back_machine_pullover": {
+    "exerciseId": "4U7iLb5",
+    "gifUrl": "https://static.exercisedb.dev/media/4U7iLb5.gif",
+    "confidence": "high",
+    "score": 0.8643,
+    "edb_name": "lever pullover"
+  },
+  "ff_back_chest_supported_row_machine": {
+    "exerciseId": "wDN97Ca",
+    "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+    "confidence": "medium",
+    "score": 0.734,
+    "edb_name": "machine inner chest press"
+  },
+  "ff_back_high_row_machine": {
+    "exerciseId": "nZZZy9m",
+    "gifUrl": "https://static.exercisedb.dev/media/nZZZy9m.gif",
+    "confidence": "medium",
+    "score": 0.806,
+    "edb_name": "lever high row"
+  },
+  "ff_back_barbell_row": {
+    "exerciseId": "eZyBC3j",
+    "gifUrl": "https://static.exercisedb.dev/media/eZyBC3j.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell bent over row"
+  },
+  "ff_back_pendlay_row": {
+    "exerciseId": "r0z6xzQ",
+    "gifUrl": "https://static.exercisedb.dev/media/r0z6xzQ.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell pendlay row"
+  },
+  "ff_back_t_bar_row": {
+    "exerciseId": "R5swFnc",
+    "gifUrl": "https://static.exercisedb.dev/media/R5swFnc.gif",
+    "confidence": "high",
+    "score": 0.9313,
+    "edb_name": "cambered bar lying row"
+  },
+  "ff_back_single_arm_dumbbell_row": {
+    "exerciseId": "mWBtgmb",
+    "gifUrl": "https://static.exercisedb.dev/media/mWBtgmb.gif",
+    "confidence": "high",
+    "score": 0.8683,
+    "edb_name": "dumbbell single arm overhead carry"
+  },
+  "ff_back_chest_supported_dumbbell_row": {
+    "exerciseId": "BJ0Hz5L",
+    "gifUrl": "https://static.exercisedb.dev/media/BJ0Hz5L.gif",
+    "confidence": "high",
+    "score": 0.846,
+    "edb_name": "dumbbell bent over row"
+  },
+  "ff_back_deadlift": {
+    "exerciseId": "ila4NZS",
+    "gifUrl": "https://static.exercisedb.dev/media/ila4NZS.gif",
+    "confidence": "high",
+    "score": 0.891,
+    "edb_name": "barbell deadlift"
+  },
+  "ff_back_romanian_deadlift": {
+    "exerciseId": "wQ2c4XD",
+    "gifUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+    "confidence": "high",
+    "score": 0.891,
+    "edb_name": "barbell romanian deadlift"
+  },
+  "ff_shoulders_barbell_overhead_press": {
+    "exerciseId": "kTbSH9h",
+    "gifUrl": "https://static.exercisedb.dev/media/kTbSH9h.gif",
+    "confidence": "high",
+    "score": 0.934,
+    "edb_name": "barbell seated overhead press"
+  },
+  "ff_shoulders_seated_barbell_overhead_press": {
+    "exerciseId": "kTbSH9h",
+    "gifUrl": "https://static.exercisedb.dev/media/kTbSH9h.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell seated overhead press"
+  },
+  "ff_shoulders_dumbbell_shoulder_press": {
+    "exerciseId": "vmwLyCg",
+    "gifUrl": "https://static.exercisedb.dev/media/vmwLyCg.gif",
+    "confidence": "high",
+    "score": 0.9633,
+    "edb_name": "dumbbell w-press"
+  },
+  "ff_shoulders_arnold_press": {
+    "exerciseId": "Xy4jlWA",
+    "gifUrl": "https://static.exercisedb.dev/media/Xy4jlWA.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "dumbbell arnold press"
+  },
+  "ff_shoulders_dumbbell_lateral_raise": {
+    "exerciseId": "AQ0mC4Y",
+    "gifUrl": "https://static.exercisedb.dev/media/AQ0mC4Y.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell full can lateral raise"
+  },
+  "ff_shoulders_single_arm_dumbbell_lateral_raise": {
+    "exerciseId": "DsgkuIt",
+    "gifUrl": "https://static.exercisedb.dev/media/DsgkuIt.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "dumbbell lateral raise"
+  },
+  "ff_shoulders_dumbbell_front_raise": {
+    "exerciseId": "3eGE2JC",
+    "gifUrl": "https://static.exercisedb.dev/media/3eGE2JC.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell front raise"
+  },
+  "ff_shoulders_rear_delt_dumbbell_fly": {
+    "exerciseId": "8DiFDVA",
+    "gifUrl": "https://static.exercisedb.dev/media/8DiFDVA.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell rear fly"
+  },
+  "ff_shoulders_cable_lateral_raise": {
+    "exerciseId": "goJ6ezq",
+    "gifUrl": "https://static.exercisedb.dev/media/goJ6ezq.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable lateral raise"
+  },
+  "ff_shoulders_cable_front_raise": {
+    "exerciseId": "u2X71Np",
+    "gifUrl": "https://static.exercisedb.dev/media/u2X71Np.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable front raise"
+  },
+  "ff_shoulders_cable_rear_delt_fly": {
+    "exerciseId": "yUdIGNs",
+    "gifUrl": "https://static.exercisedb.dev/media/yUdIGNs.gif",
+    "confidence": "high",
+    "score": 0.9529,
+    "edb_name": "cable rear delt row (stirrups)"
+  },
+  "ff_shoulders_machine_lateral_raise": {
+    "exerciseId": "dRTfGZT",
+    "gifUrl": "https://static.exercisedb.dev/media/dRTfGZT.gif",
+    "confidence": "high",
+    "score": 0.8913,
+    "edb_name": "lever lateral raise"
+  },
+  "ff_shoulders_reverse_pec_deck_machine": {
+    "exerciseId": "ecpY0rH",
+    "gifUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+    "confidence": "medium",
+    "score": 0.7957,
+    "edb_name": "reverse grip machine lat pulldown"
+  },
+  "ff_shoulders_shoulder_press_machine": {
+    "exerciseId": "67n3r98",
+    "gifUrl": "https://static.exercisedb.dev/media/67n3r98.gif",
+    "confidence": "high",
+    "score": 0.8589,
+    "edb_name": "lever shoulder press"
+  },
+  "ff_shoulders_smith_machine_shoulder_press": {
+    "exerciseId": "903mzG8",
+    "gifUrl": "https://static.exercisedb.dev/media/903mzG8.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "smith shoulder press"
+  },
+  "ff_shoulders_upright_row": {
+    "exerciseId": "UDlhcO8",
+    "gifUrl": "https://static.exercisedb.dev/media/UDlhcO8.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell upright row"
+  },
+  "ff_shoulders_pike_push_up": {
+    "exerciseId": "XPUDTt7",
+    "gifUrl": "https://static.exercisedb.dev/media/XPUDTt7.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "pike-to-cobra push-up"
+  },
+  "ff_shoulders_handstand_push_up": {
+    "exerciseId": "XooAdhl",
+    "gifUrl": "https://static.exercisedb.dev/media/XooAdhl.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "handstand"
+  },
+  "ff_legs_back_squat": {
+    "exerciseId": "DhMl549",
+    "gifUrl": "https://static.exercisedb.dev/media/DhMl549.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell full squat (back pov)"
+  },
+  "ff_legs_front_squat": {
+    "exerciseId": "Y7YcmIJ",
+    "gifUrl": "https://static.exercisedb.dev/media/Y7YcmIJ.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell bench front squat"
+  },
+  "ff_legs_goblet_squat": {
+    "exerciseId": "yn8yg1r",
+    "gifUrl": "https://static.exercisedb.dev/media/yn8yg1r.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "dumbbell goblet squat"
+  },
+  "ff_legs_bulgarian_split_squat": {
+    "exerciseId": "QjE2DcA",
+    "gifUrl": "https://static.exercisedb.dev/media/QjE2DcA.gif",
+    "confidence": "medium",
+    "score": 0.8146,
+    "edb_name": "dumbbell step-up split squat"
+  },
+  "ff_legs_walking_lunge": {
+    "exerciseId": "IZVHb27",
+    "gifUrl": "https://static.exercisedb.dev/media/IZVHb27.gif",
+    "confidence": "medium",
+    "score": 0.8167,
+    "edb_name": "walking lunge"
+  },
+  "ff_legs_reverse_lunge": {
+    "exerciseId": "SSsBDwB",
+    "gifUrl": "https://static.exercisedb.dev/media/SSsBDwB.gif",
+    "confidence": "medium",
+    "score": 0.7264,
+    "edb_name": "dumbbell rear lunge"
+  },
+  "ff_legs_step_up": {
+    "exerciseId": "aXtJhlg",
+    "gifUrl": "https://static.exercisedb.dev/media/aXtJhlg.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "dumbbell step-up"
+  },
+  "ff_legs_romanian_deadlift": {
+    "exerciseId": "wQ2c4XD",
+    "gifUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell romanian deadlift"
+  },
+  "ff_legs_stiff_leg_deadlift": {
+    "exerciseId": "kuMiR2T",
+    "gifUrl": "https://static.exercisedb.dev/media/kuMiR2T.gif",
+    "confidence": "high",
+    "score": 0.9167,
+    "edb_name": "band stiff leg deadlift"
+  },
+  "ff_legs_leg_press_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.934,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_hack_squat_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.8453,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_pendulum_squat_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "medium",
+    "score": 0.7926,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_belt_squat_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.8453,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_v_squat_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.8947,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_leg_extension_machine": {
+    "exerciseId": "my33uHU",
+    "gifUrl": "https://static.exercisedb.dev/media/my33uHU.gif",
+    "confidence": "high",
+    "score": 0.8529,
+    "edb_name": "lever leg extension"
+  },
+  "ff_legs_seated_leg_curl_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.9329,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_legs_lying_leg_curl_machine": {
+    "exerciseId": "17lJ1kr",
+    "gifUrl": "https://static.exercisedb.dev/media/17lJ1kr.gif",
+    "confidence": "high",
+    "score": 0.8589,
+    "edb_name": "lever lying leg curl"
+  },
+  "ff_legs_standing_leg_curl_machine": {
+    "exerciseId": "6MaEjVA",
+    "gifUrl": "https://static.exercisedb.dev/media/6MaEjVA.gif",
+    "confidence": "medium",
+    "score": 0.7599,
+    "edb_name": "smith standing leg calf raise"
+  },
+  "ff_legs_smith_machine_squat": {
+    "exerciseId": "jFtipLl",
+    "gifUrl": "https://static.exercisedb.dev/media/jFtipLl.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "smith squat"
+  },
+  "ff_legs_air_squat": {
+    "exerciseId": "QpXqiq8",
+    "gifUrl": "https://static.exercisedb.dev/media/QpXqiq8.gif",
+    "confidence": "high",
+    "score": 0.9029,
+    "edb_name": "suspended split squat"
+  },
+  "ff_legs_jump_squat": {
+    "exerciseId": "LIlE5Tn",
+    "gifUrl": "https://static.exercisedb.dev/media/LIlE5Tn.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "jump squat"
+  },
+  "ff_legs_pistol_squat": {
+    "exerciseId": "QpXqiq8",
+    "gifUrl": "https://static.exercisedb.dev/media/QpXqiq8.gif",
+    "confidence": "high",
+    "score": 0.9,
+    "edb_name": "suspended split squat"
+  },
+  "ff_legs_cossack_squat": {
+    "exerciseId": "GWoKnIm",
+    "gifUrl": "https://static.exercisedb.dev/media/GWoKnIm.gif",
+    "confidence": "high",
+    "score": 0.9143,
+    "edb_name": "weighted cossack squats (male)"
+  },
+  "ff_calves_standing_calf_raise_machine": {
+    "exerciseId": "ykUOVze",
+    "gifUrl": "https://static.exercisedb.dev/media/ykUOVze.gif",
+    "confidence": "high",
+    "score": 0.881,
+    "edb_name": "lever standing calf raise"
+  },
+  "ff_calves_seated_calf_raise_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_calves_leg_press_calf_raise_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "high",
+    "score": 0.934,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_calves_smith_machine_calf_raise": {
+    "exerciseId": "Y4QlY8z",
+    "gifUrl": "https://static.exercisedb.dev/media/Y4QlY8z.gif",
+    "confidence": "high",
+    "score": 0.8714,
+    "edb_name": "smith toe raise"
+  },
+  "ff_calves_donkey_calf_raise_machine": {
+    "exerciseId": "C9LuR4A",
+    "gifUrl": "https://static.exercisedb.dev/media/C9LuR4A.gif",
+    "confidence": "high",
+    "score": 0.8735,
+    "edb_name": "lever donkey calf raise"
+  },
+  "ff_calves_dumbbell_standing_calf_raise": {
+    "exerciseId": "dPmaUaU",
+    "gifUrl": "https://static.exercisedb.dev/media/dPmaUaU.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell standing calf raise"
+  },
+  "ff_calves_single_leg_dumbbell_calf_raise": {
+    "exerciseId": "1kB3Wmk",
+    "gifUrl": "https://static.exercisedb.dev/media/1kB3Wmk.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell single leg calf raise"
+  },
+  "ff_calves_barbell_standing_calf_raise": {
+    "exerciseId": "8ozhUIZ",
+    "gifUrl": "https://static.exercisedb.dev/media/8ozhUIZ.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell standing calf raise"
+  },
+  "ff_calves_standing_calf_raise": {
+    "exerciseId": "6HmFgmx",
+    "gifUrl": "https://static.exercisedb.dev/media/6HmFgmx.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "standing calf raise (on a staircase)"
+  },
+  "ff_calves_single_leg_calf_raise": {
+    "exerciseId": "9JprnPh",
+    "gifUrl": "https://static.exercisedb.dev/media/9JprnPh.gif",
+    "confidence": "high",
+    "score": 0.8929,
+    "edb_name": "band single leg calf raise"
+  },
+  "ff_calves_elevated_calf_raise": {
+    "exerciseId": "u5ESqzH",
+    "gifUrl": "https://static.exercisedb.dev/media/u5ESqzH.gif",
+    "confidence": "high",
+    "score": 0.9052,
+    "edb_name": "donkey calf raise"
+  },
+  "ff_calves_toe_walk": {
+    "exerciseId": "PzNxakt",
+    "gifUrl": "https://static.exercisedb.dev/media/PzNxakt.gif",
+    "confidence": "high",
+    "score": 0.8429,
+    "edb_name": "calf push stretch with hands against wall"
+  },
+  "ff_calves_jump_rope": {
+    "exerciseId": "LIlE5Tn",
+    "gifUrl": "https://static.exercisedb.dev/media/LIlE5Tn.gif",
+    "confidence": "medium",
+    "score": 0.7779,
+    "edb_name": "jump squat"
+  },
+  "ff_calves_pogo_jump": {
+    "exerciseId": "uZKq7lo",
+    "gifUrl": "https://static.exercisedb.dev/media/uZKq7lo.gif",
+    "confidence": "medium",
+    "score": 0.7779,
+    "edb_name": "forward jump"
+  },
+  "ff_glutes_barbell_hip_thrust": {
+    "exerciseId": "t8iSghb",
+    "gifUrl": "https://static.exercisedb.dev/media/t8iSghb.gif",
+    "confidence": "high",
+    "score": 0.869,
+    "edb_name": "barbell lunge"
+  },
+  "ff_glutes_dumbbell_hip_thrust": {
+    "exerciseId": "7Hg55JG",
+    "gifUrl": "https://static.exercisedb.dev/media/7Hg55JG.gif",
+    "confidence": "high",
+    "score": 0.8804,
+    "edb_name": "dumbbell clean"
+  },
+  "ff_glutes_barbell_glute_bridge": {
+    "exerciseId": "qKBpF7I",
+    "gifUrl": "https://static.exercisedb.dev/media/qKBpF7I.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell glute bridge"
+  },
+  "ff_glutes_romanian_deadlift": {
+    "exerciseId": "wQ2c4XD",
+    "gifUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell romanian deadlift"
+  },
+  "ff_glutes_sumo_deadlift": {
+    "exerciseId": "KgI0tqW",
+    "gifUrl": "https://static.exercisedb.dev/media/KgI0tqW.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell sumo deadlift"
+  },
+  "ff_glutes_cable_pull_through": {
+    "exerciseId": "OM46QHm",
+    "gifUrl": "https://static.exercisedb.dev/media/OM46QHm.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable pull through (with rope)"
+  },
+  "ff_glutes_cable_kickback": {
+    "exerciseId": "HEJ6DIX",
+    "gifUrl": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
+    "confidence": "high",
+    "score": 0.8895,
+    "edb_name": "cable kickback"
+  },
+  "ff_glutes_hip_thrust_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "medium",
+    "score": 0.7093,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_glutes_glute_drive_machine": {
+    "exerciseId": "IeDEXTe",
+    "gifUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
+    "confidence": "medium",
+    "score": 0.7162,
+    "edb_name": "lever seated squat calf raise on leg press machine"
+  },
+  "ff_glutes_hip_abductor_machine": {
+    "exerciseId": "CHpahtl",
+    "gifUrl": "https://static.exercisedb.dev/media/CHpahtl.gif",
+    "confidence": "medium",
+    "score": 0.7309,
+    "edb_name": "lever seated hip abduction"
+  },
+  "ff_glutes_reverse_hyper_machine": {
+    "exerciseId": "ecpY0rH",
+    "gifUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
+    "confidence": "medium",
+    "score": 0.8005,
+    "edb_name": "reverse grip machine lat pulldown"
+  },
+  "ff_glutes_smith_machine_hip_thrust": {
+    "exerciseId": "jFtipLl",
+    "gifUrl": "https://static.exercisedb.dev/media/jFtipLl.gif",
+    "confidence": "medium",
+    "score": 0.8113,
+    "edb_name": "smith squat"
+  },
+  "ff_glutes_glute_bridge": {
+    "exerciseId": "GibBPPg",
+    "gifUrl": "https://static.exercisedb.dev/media/GibBPPg.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "glute bridge march"
+  },
+  "ff_glutes_single_leg_glute_bridge": {
+    "exerciseId": "rmEukuS",
+    "gifUrl": "https://static.exercisedb.dev/media/rmEukuS.gif",
+    "confidence": "high",
+    "score": 0.9175,
+    "edb_name": "single leg bridge with outstretched leg"
+  },
+  "ff_glutes_frog_pump": {
+    "exerciseId": "2Dk4xQV",
+    "gifUrl": "https://static.exercisedb.dev/media/2Dk4xQV.gif",
+    "confidence": "medium",
+    "score": 0.7885,
+    "edb_name": "rocking frog stretch"
+  },
+  "ff_glutes_donkey_kick": {
+    "exerciseId": "u5ESqzH",
+    "gifUrl": "https://static.exercisedb.dev/media/u5ESqzH.gif",
+    "confidence": "high",
+    "score": 0.8482,
+    "edb_name": "donkey calf raise"
+  },
+  "ff_glutes_curtsy_lunge": {
+    "exerciseId": "gUjqdei",
+    "gifUrl": "https://static.exercisedb.dev/media/gUjqdei.gif",
+    "confidence": "high",
+    "score": 0.835,
+    "edb_name": "curtsey squat"
+  },
+  "ff_biceps_barbell_curl": {
+    "exerciseId": "Yza7XrQ",
+    "gifUrl": "https://static.exercisedb.dev/media/Yza7XrQ.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "barbell alternate biceps curl"
+  },
+  "ff_biceps_ez_bar_curl": {
+    "exerciseId": "tJ5nYqo",
+    "gifUrl": "https://static.exercisedb.dev/media/tJ5nYqo.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "ez-bar biceps curl (with arm blaster)"
+  },
+  "ff_biceps_dumbbell_curl": {
+    "exerciseId": "BU15nH4",
+    "gifUrl": "https://static.exercisedb.dev/media/BU15nH4.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell alternate biceps curl"
+  },
+  "ff_biceps_alternating_dumbbell_curl": {
+    "exerciseId": "Zwiw7XR",
+    "gifUrl": "https://static.exercisedb.dev/media/Zwiw7XR.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell alternating bicep curl with leg raised on exercise ball"
+  },
+  "ff_biceps_hammer_curl": {
+    "exerciseId": "fy7Tgy4",
+    "gifUrl": "https://static.exercisedb.dev/media/fy7Tgy4.gif",
+    "confidence": "high",
+    "score": 0.906,
+    "edb_name": "dumbbell alternate hammer preacher curl"
+  },
+  "ff_biceps_incline_dumbbell_curl": {
+    "exerciseId": "F3xgbjF",
+    "gifUrl": "https://static.exercisedb.dev/media/F3xgbjF.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell incline biceps curl"
+  },
+  "ff_biceps_concentration_curl": {
+    "exerciseId": "gvsWLQw",
+    "gifUrl": "https://static.exercisedb.dev/media/gvsWLQw.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "dumbbell concentration curl"
+  },
+  "ff_biceps_preacher_curl_machine": {
+    "exerciseId": "b6hQYMb",
+    "gifUrl": "https://static.exercisedb.dev/media/b6hQYMb.gif",
+    "confidence": "high",
+    "score": 0.8529,
+    "edb_name": "lever preacher curl"
+  },
+  "ff_biceps_cable_curl": {
+    "exerciseId": "NvfE43H",
+    "gifUrl": "https://static.exercisedb.dev/media/NvfE43H.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable concentration curl"
+  },
+  "ff_biceps_rope_hammer_curl": {
+    "exerciseId": "HPlPoQA",
+    "gifUrl": "https://static.exercisedb.dev/media/HPlPoQA.gif",
+    "confidence": "high",
+    "score": 0.906,
+    "edb_name": "cable hammer curl (with rope)"
+  },
+  "ff_biceps_bayesian_cable_curl": {
+    "exerciseId": "G08RZcQ",
+    "gifUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable curl"
+  },
+  "ff_biceps_high_cable_curl": {
+    "exerciseId": "G08RZcQ",
+    "gifUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable curl"
+  },
+  "ff_biceps_single_arm_cable_curl": {
+    "exerciseId": "G08RZcQ",
+    "gifUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable curl"
+  },
+  "ff_biceps_reverse_cable_curl": {
+    "exerciseId": "eOG0r6v",
+    "gifUrl": "https://static.exercisedb.dev/media/eOG0r6v.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable reverse curl"
+  },
+  "ff_biceps_chin_up": {
+    "exerciseId": "T2mxWqc",
+    "gifUrl": "https://static.exercisedb.dev/media/T2mxWqc.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "chin-up"
+  },
+  "ff_biceps_close_grip_chin_up": {
+    "exerciseId": "VnfUNW7",
+    "gifUrl": "https://static.exercisedb.dev/media/VnfUNW7.gif",
+    "confidence": "high",
+    "score": 0.935,
+    "edb_name": "close grip chin-up"
+  },
+  "ff_biceps_ring_curl": {
+    "exerciseId": "sJFIDIp",
+    "gifUrl": "https://static.exercisedb.dev/media/sJFIDIp.gif",
+    "confidence": "high",
+    "score": 0.9029,
+    "edb_name": "biceps leg concentration curl"
+  },
+  "ff_biceps_bodyweight_biceps_curl": {
+    "exerciseId": "gscGLOU",
+    "gifUrl": "https://static.exercisedb.dev/media/gscGLOU.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "bodyweight side lying biceps curl"
+  },
+  "ff_triceps_close_grip_bench_press": {
+    "exerciseId": "da4cXST",
+    "gifUrl": "https://static.exercisedb.dev/media/da4cXST.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "ez-bar close-grip bench press"
+  },
+  "ff_triceps_skull_crusher": {
+    "exerciseId": "h8LFzo9",
+    "gifUrl": "https://static.exercisedb.dev/media/h8LFzo9.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell lying triceps extension skull crusher"
+  },
+  "ff_triceps_ez_bar_skull_crusher": {
+    "exerciseId": "h8LFzo9",
+    "gifUrl": "https://static.exercisedb.dev/media/h8LFzo9.gif",
+    "confidence": "high",
+    "score": 0.8589,
+    "edb_name": "barbell lying triceps extension skull crusher"
+  },
+  "ff_triceps_jm_press": {
+    "exerciseId": "ZsiqXYa",
+    "gifUrl": "https://static.exercisedb.dev/media/ZsiqXYa.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "barbell jm bench press"
+  },
+  "ff_triceps_overhead_dumbbell_extension": {
+    "exerciseId": "XalXcvM",
+    "gifUrl": "https://static.exercisedb.dev/media/XalXcvM.gif",
+    "confidence": "high",
+    "score": 0.89,
+    "edb_name": "dumbbell forward lunge triceps extension"
+  },
+  "ff_triceps_single_arm_overhead_dumbbell_extension": {
+    "exerciseId": "6MfS53i",
+    "gifUrl": "https://static.exercisedb.dev/media/6MfS53i.gif",
+    "confidence": "high",
+    "score": 0.8971,
+    "edb_name": "dumbbell lying single extension"
+  },
+  "ff_triceps_dumbbell_kickback": {
+    "exerciseId": "W6PxUkg",
+    "gifUrl": "https://static.exercisedb.dev/media/W6PxUkg.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "dumbbell kickback"
+  },
+  "ff_triceps_rope_pushdown": {
+    "exerciseId": "dU605di",
+    "gifUrl": "https://static.exercisedb.dev/media/dU605di.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable pushdown (with rope attachment)"
+  },
+  "ff_triceps_straight_bar_pushdown": {
+    "exerciseId": "3ZflifB",
+    "gifUrl": "https://static.exercisedb.dev/media/3ZflifB.gif",
+    "confidence": "high",
+    "score": 0.846,
+    "edb_name": "cable pushdown"
+  },
+  "ff_triceps_v_bar_pushdown": {
+    "exerciseId": "gAwDzB3",
+    "gifUrl": "https://static.exercisedb.dev/media/gAwDzB3.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable triceps pushdown (v-bar)"
+  },
+  "ff_triceps_overhead_cable_extension": {
+    "exerciseId": "1xHyxys",
+    "gifUrl": "https://static.exercisedb.dev/media/1xHyxys.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable high pulley overhead tricep extension"
+  },
+  "ff_triceps_single_arm_cable_pushdown": {
+    "exerciseId": "3ZflifB",
+    "gifUrl": "https://static.exercisedb.dev/media/3ZflifB.gif",
+    "confidence": "high",
+    "score": 0.956,
+    "edb_name": "cable pushdown"
+  },
+  "ff_triceps_cable_triceps_kickback": {
+    "exerciseId": "HEJ6DIX",
+    "gifUrl": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "cable kickback"
+  },
+  "ff_triceps_triceps_extension_machine": {
+    "exerciseId": "Ser9eQp",
+    "gifUrl": "https://static.exercisedb.dev/media/Ser9eQp.gif",
+    "confidence": "high",
+    "score": 0.8735,
+    "edb_name": "lever triceps extension"
+  },
+  "ff_triceps_machine_dip": {
+    "exerciseId": "wDN97Ca",
+    "gifUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
+    "confidence": "high",
+    "score": 0.88,
+    "edb_name": "machine inner chest press"
+  },
+  "ff_triceps_assisted_dip_machine": {
+    "exerciseId": "J60bN17",
+    "gifUrl": "https://static.exercisedb.dev/media/J60bN17.gif",
+    "confidence": "medium",
+    "score": 0.8185,
+    "edb_name": "assisted triceps dip (kneeling)"
+  },
+  "ff_triceps_bench_dip": {
+    "exerciseId": "RrLske5",
+    "gifUrl": "https://static.exercisedb.dev/media/RrLske5.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "bench dip (knees bent)"
+  },
+  "ff_triceps_parallel_bar_dip": {
+    "exerciseId": "K1vlode",
+    "gifUrl": "https://static.exercisedb.dev/media/K1vlode.gif",
+    "confidence": "high",
+    "score": 0.8857,
+    "edb_name": "weighted triceps dip on high parallel bars"
+  },
+  "ff_triceps_ring_dip": {
+    "exerciseId": "ezTvXcr",
+    "gifUrl": "https://static.exercisedb.dev/media/ezTvXcr.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "ring dips"
+  },
+  "ff_triceps_bodyweight_triceps_extension": {
+    "exerciseId": "s0HKO2I",
+    "gifUrl": "https://static.exercisedb.dev/media/s0HKO2I.gif",
+    "confidence": "high",
+    "score": 1.0,
+    "edb_name": "bodyweight kneeling triceps extension"
+  }
+}

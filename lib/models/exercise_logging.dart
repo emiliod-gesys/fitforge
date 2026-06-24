@@ -10,6 +10,52 @@ enum ExerciseLoggingType {
   String toJson() => name;
 }
 
+/// Cómo registrar carga en series de fuerza (catálogo FitForge).
+enum ExerciseLoadMode {
+  singleLoad,
+  dualLoad,
+  machineStack,
+  bodyweight,
+  assistedBodyweight,
+  cardioMachine,
+  cardioOutdoor;
+
+  static ExerciseLoadMode fromJson(String? value) {
+    switch (value) {
+      case 'dual_load':
+        return ExerciseLoadMode.dualLoad;
+      case 'machine_stack':
+        return ExerciseLoadMode.machineStack;
+      case 'bodyweight':
+        return ExerciseLoadMode.bodyweight;
+      case 'assisted_bodyweight':
+        return ExerciseLoadMode.assistedBodyweight;
+      case 'cardio_machine':
+        return ExerciseLoadMode.cardioMachine;
+      case 'cardio_outdoor':
+        return ExerciseLoadMode.cardioOutdoor;
+      default:
+        return ExerciseLoadMode.singleLoad;
+    }
+  }
+
+  String toJson() => switch (this) {
+        ExerciseLoadMode.dualLoad => 'dual_load',
+        ExerciseLoadMode.machineStack => 'machine_stack',
+        ExerciseLoadMode.bodyweight => 'bodyweight',
+        ExerciseLoadMode.assistedBodyweight => 'assisted_bodyweight',
+        ExerciseLoadMode.cardioMachine => 'cardio_machine',
+        ExerciseLoadMode.cardioOutdoor => 'cardio_outdoor',
+        ExerciseLoadMode.singleLoad => 'single_load',
+      };
+
+  bool get weightOptional =>
+      this == ExerciseLoadMode.bodyweight ||
+      this == ExerciseLoadMode.assistedBodyweight ||
+      this == ExerciseLoadMode.cardioMachine ||
+      this == ExerciseLoadMode.cardioOutdoor;
+}
+
 /// Detección de ejercicios cardio por nombre (p. ej. wger «Caminando» en categoría Piernas).
 abstract final class CardioNameMatcher {
   static String normalize(String input) {
@@ -85,9 +131,114 @@ abstract final class CardioNameMatcher {
     'elevacion',
     'raise',
     'remo con',
+    'remo en polea',
+    'remo en la polea',
+    'remo sentado',
+    'remo inclinado',
+    'remo con barra',
+    'remo con mancuerna',
+    'remo unilateral',
+    'remo a una mano',
+    'remo al pecho',
+    'remo en banco',
     'row with',
+    'seated row',
+    'bent over row',
+    'barbell row',
+    'dumbbell row',
+    'cable row',
+    't-bar row',
+    't bar row',
+    'landmine row',
+    'one arm row',
+    'one-arm row',
+    'single arm row',
+    'chest supported row',
     'deadlift',
     'peso muerto',
+  ];
+
+  static const _strengthRowPatterns = [
+    'remo con',
+    'remo en polea',
+    'remo en la polea',
+    'remo en polea baja',
+    'remo en polea alta',
+    'remo sentado',
+    'remo inclinado',
+    'remo con barra',
+    'remo con mancuerna',
+    'remo con mancuernas',
+    'remo unilateral',
+    'remo a un brazo',
+    'remo a una mano',
+    'remo al pecho',
+    'remo en banco',
+    'remo pendlay',
+    'remo invertido',
+    'remo en t',
+    'remo en plancha',
+    'remo planche',
+    'row with',
+    'seated row',
+    'bent over row',
+    'barbell row',
+    'dumbbell row',
+    'cable row',
+    'inverted row',
+    'australian pull',
+    't-bar row',
+    't bar row',
+    'landmine row',
+    'one arm row',
+    'one-arm row',
+    'single arm row',
+    'chest supported row',
+    'face pull',
+    'low row',
+    'high row',
+  ];
+
+  static const _strengthPullPatterns = [
+    'dominada',
+    'pull-up',
+    'pull up',
+    'pullup',
+    'chin-up',
+    'chin up',
+    'chinup',
+    'muscle-up',
+    'muscle up',
+    'jalon al pecho',
+    'lat pulldown',
+    'lat pull-down',
+    'pull-down',
+    'pulldown',
+  ];
+
+  static const _strengthPushPatterns = [
+    'flexion',
+    'flexiones',
+    'push-up',
+    'push up',
+    'pushup',
+    'lagartija',
+    'fondos en paralelas',
+    'fondos en barras',
+    'parallel bar dip',
+    'bench dip',
+  ];
+
+  static const _cardioRowingMachinePatterns = [
+    'maquina de remo',
+    'rowing machine',
+    'concept2',
+    'concept 2',
+    'ergometro',
+    'row erg',
+    'ski erg',
+    'remo erg',
+    'air rower',
   ];
 
   static const _pureCardioNames = {
@@ -115,14 +266,21 @@ abstract final class CardioNameMatcher {
     if (exerciseName.trim().isEmpty) return false;
     final name = CardioNameMatcher.normalize(exerciseName);
 
+    if (isClearlyStrength(name)) return false;
+
     if (_pureCardioNames.contains(name)) return true;
+
+    if (_isCardioRowingName(name)) return true;
 
     final hasStrengthModifier =
         _strengthModifiers.any((modifier) => name.contains(modifier));
 
     for (final keyword in _keywords) {
+      if (keyword == 'remo' || keyword == 'rowing' || keyword == 'rower') {
+        continue;
+      }
       if (name.contains(keyword)) {
-        if (hasStrengthModifier && !_isMachineKeyword(keyword)) continue;
+        if (hasStrengthModifier) continue;
         return true;
       }
     }
@@ -139,29 +297,30 @@ abstract final class CardioNameMatcher {
     return false;
   }
 
-  static bool _isMachineKeyword(String keyword) {
-    const machines = {
-      'cardio',
-      'cinta',
-      'treadmill',
-      'caminadora',
-      'eliptica',
-      'elliptical',
-      'bicicleta',
-      'bici',
-      'bike',
-      'cycling',
-      'spinning',
-      'remo',
-      'rowing',
-      'rower',
-      'stair',
-      'escalera',
-      'stepper',
-      'ski erg',
-      'assault',
-    };
-    return machines.contains(keyword);
+  /// Fuerza evidente: anula categoría Cardio de wger y series mal etiquetadas.
+  static bool isClearlyStrength(String exerciseName) {
+    if (exerciseName.trim().isEmpty) return false;
+    final name = normalize(exerciseName);
+    if (_isStrengthRow(name)) return true;
+    if (_strengthPullPatterns.any(name.contains)) return true;
+    if (_strengthPushPatterns.any(name.contains)) return true;
+    if (_strengthModifiers.any(name.contains)) return true;
+    return false;
+  }
+
+  static bool _isCardioRowingName(String name) {
+    if (name == 'remo' || name == 'rowing' || name == 'rower') return true;
+    return _cardioRowingMachinePatterns.any(name.contains);
+  }
+
+  static bool _isStrengthRow(String name) {
+    if (name.contains('remo') && !_isCardioRowingName(name)) return true;
+    return _strengthRowPatterns.any(name.contains);
+  }
+
+  /// Remo de fuerza (polea, barra, etc.), no ergómetro/máquina de cardio.
+  static bool isStrengthRow(String exerciseName) {
+    return _isStrengthRow(normalize(exerciseName));
   }
 
   static bool matchesTreadmill(String exerciseName) {
@@ -258,6 +417,9 @@ enum CardioPreset {
     }
 
     if (containsAny(['remo', 'rowing', 'rower', 'ski erg'])) {
+      if (CardioNameMatcher.isClearlyStrength(exerciseName)) {
+        return CardioPreset.treadmill;
+      }
       return CardioPreset.rowing;
     }
 

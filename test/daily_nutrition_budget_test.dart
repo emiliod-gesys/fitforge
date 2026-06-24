@@ -36,6 +36,34 @@ void main() {
       expect(summary.calorieBudget, greaterThan(summary.baseCalorieGoal));
     });
 
+    test('uses stored workout calories when available', () {
+      final day = DateTime(2026, 6, 15);
+      final workout = Workout(
+        id: 'w1',
+        userId: 'u1',
+        name: 'Push',
+        startedAt: day.add(const Duration(hours: 9)),
+        completedAt: day.add(const Duration(hours: 10)),
+        durationMinutes: 60,
+        totalVolume: 5000,
+        activeCaloriesKcal: 390,
+      );
+
+      final summary = DailyNutritionBudget.build(
+        day: day,
+        entries: const [],
+        workoutsCompletedOnDay: [workout],
+        profile: UserProfile(
+          id: 'u1',
+          bodyWeight: 80,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        bodyMetrics: null,
+      );
+
+      expect(summary.workoutCaloriesBurned, 390);
+    });
+
     test('sums eaten macros from entries on the same day', () {
       final day = DateTime(2026, 6, 15);
       final entries = [

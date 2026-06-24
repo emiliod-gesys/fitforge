@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import '../services/exercise_service.dart';
 import 'exercise_category_mannequin.dart';
@@ -78,27 +79,42 @@ class ExerciseThumbnail extends ConsumerWidget {
     return !url.startsWith('http://') && !url.startsWith('https://');
   }
 
-  Widget _localImage(String path, WidgetRef ref) {
+  Widget _illustrationFrame({required Widget child}) {
     return ClipRRect(
       borderRadius: borderRadius,
+      child: ColoredBox(
+        color: AppColors.exerciseIllustrationBackground,
+        child: SizedBox(
+          width: fullWidth ? double.infinity : width,
+          height: height,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _localImage(String path, WidgetRef ref) {
+    return _illustrationFrame(
       child: Image.file(
         File(path),
-        width: fullWidth ? double.infinity : width,
-        height: height,
-        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => _categoryFallback(ref: ref),
       ),
     );
   }
 
   Widget _networkImage(String url, WidgetRef ref) {
-    return ClipRRect(
-      borderRadius: borderRadius,
+    return _illustrationFrame(
       child: CachedNetworkImage(
         imageUrl: url,
-        width: fullWidth ? double.infinity : width,
-        height: height,
-        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
         placeholder: (_, __) => _placeholder(ref: ref, loading: true),
         errorWidget: (_, __, ___) => _placeholder(ref: ref),
       ),

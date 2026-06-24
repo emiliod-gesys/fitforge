@@ -4,8 +4,8 @@ import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
 import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/food_estimate_parser.dart';
 import '../core/utils/food_query_hints.dart';
-import '../core/utils/food_serving_parser.dart';
 import '../core/utils/gym_weight.dart';
 import '../core/utils/proactive_workout_ai_rules.dart';
 import '../core/utils/unit_converter.dart';
@@ -771,10 +771,29 @@ JSON:
 
     final lang = _resolveLanguageCode(profile: profile);
     final prompt = '''
-Identifica la comida en la imagen y estima nutrición de la porción visible.
+Identifica la comida en la imagen y estima nutrición de la porción visible en el plato.
 ${languageInstruction(lang)}
-Responde SOLO JSON:
-{"name":"","brand":null,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"serving_description":"","ingredients":[]}
+Responde SOLO JSON válido sin markdown.
+
+Reglas:
+- reference_amount_g: peso total estimado en gramos de TODO lo visible (no uses 100 por defecto).
+- calories_kcal, protein_g, carbs_g, fat_g: TOTALES para esa porción (no valores por 100 g).
+- serving_description: describe la porción real (ej. "1 plato ~280 g", "2 tacos ~180 g").
+- Si hay varios ítems, inclúyelos en ingredients y suma todo en reference_amount_g.
+
+JSON:
+{
+  "name": "nombre corto del plato",
+  "brand": null,
+  "calories_kcal": 0,
+  "protein_g": 0,
+  "carbs_g": 0,
+  "fat_g": 0,
+  "fiber_g": 0,
+  "serving_description": "1 plato ~280 g",
+  "reference_amount_g": 280,
+  "ingredients": ["ingrediente 1"]
+}
 ''';
 
     try {
@@ -796,34 +815,7 @@ Responde SOLO JSON:
   }
 
   FoodNutritionEstimate? _parseFoodEstimate(String response) {
-    try {
-      final cleaned = response.replaceAll(RegExp(r'```json|```'), '').trim();
-      final start = cleaned.indexOf('{');
-      final end = cleaned.lastIndexOf('}');
-      if (start < 0 || end <= start) return null;
-
-      final json = jsonDecode(cleaned.substring(start, end + 1)) as Map<String, dynamic>;
-      final name = json['name'] as String?;
-      if (name == null || name.isEmpty) return null;
-
-      return FoodNutritionEstimate(
-        name: name,
-        brand: json['brand'] as String?,
-        caloriesKcal: (json['calories_kcal'] as num?)?.round().clamp(0, 9999) ?? 0,
-        proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0,
-        carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0,
-        fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,
-        fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
-        servingDescription: json['serving_description'] as String?,
-        ingredients: (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [],
-        referenceAmount: (json['reference_amount_g'] as num?)?.toDouble() ??
-            FoodServingParser.amountFromDescription(json['serving_description'] as String?) ??
-            100,
-        amountUnit: FoodServingParser.unitFromDescription(json['serving_description'] as String?),
-      );
-    } catch (_) {
-      return null;
-    }
+    return FoodEstimateParser.parse(response);
   }
 
   Future<String> _callOpenAIVision(String apiKey, String prompt, List<int> imageBytes) async {

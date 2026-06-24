@@ -4,6 +4,8 @@ import 'exercise_logging.dart';
 class Exercise {
   final int? wgerId;
   final String? supabaseId;
+  /// ID estable del catálogo propio (`assets/data/exercise_catalog.json`).
+  final String? catalogId;
   final String name;
   final String description;
   final String category;
@@ -13,8 +15,12 @@ class Exercise {
   final String? videoUrl;
   final bool isCustom;
   final bool isUserCustom;
-  /// Solo ejercicios personalizados: peso registrado por brazo/mancuerna.
+  final bool isBundled;
+  /// Peso registrado por brazo/mancuerna (catálogo o personalizado).
   final bool perArmWeight;
+  final bool unilateral;
+  final bool weightOptional;
+  final ExerciseLoadMode loadMode;
   final List<String> aliases;
   final ExerciseLoggingType loggingType;
   final CardioLoggingConfig? cardioConfig;
@@ -22,6 +28,7 @@ class Exercise {
   const Exercise({
     this.wgerId,
     this.supabaseId,
+    this.catalogId,
     required this.name,
     this.description = '',
     this.category = 'Otros',
@@ -31,7 +38,11 @@ class Exercise {
     this.videoUrl,
     this.isCustom = false,
     this.isUserCustom = false,
+    this.isBundled = false,
     this.perArmWeight = false,
+    this.unilateral = false,
+    this.weightOptional = false,
+    this.loadMode = ExerciseLoadMode.singleLoad,
     this.aliases = const [],
     this.loggingType = ExerciseLoggingType.strength,
     this.cardioConfig,
@@ -144,6 +155,9 @@ class Exercise {
     if (isUserCustom && supabaseId != null) {
       return '${CustomExercise.idPrefix}$supabaseId';
     }
+    if (catalogId != null && catalogId!.isNotEmpty) {
+      return catalogId!;
+    }
     return supabaseId ?? wgerId?.toString() ?? name;
   }
 
@@ -198,6 +212,9 @@ class Exercise {
   }
 
   static ExerciseLoggingType _inferLoggingType(String category, {String name = ''}) {
+    if (name.isNotEmpty && CardioNameMatcher.isClearlyStrength(name)) {
+      return ExerciseLoggingType.strength;
+    }
     if (category.toLowerCase().contains('cardio')) {
       return ExerciseLoggingType.cardio;
     }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/workout_calorie_estimator.dart';
 import 'package:fitforge/models/body_metric.dart';
 import 'package:fitforge/models/profile.dart';
+import 'package:fitforge/models/workout.dart';
 
 void main() {
   test('estima calorías con peso del perfil y duración', () {
@@ -86,5 +87,23 @@ void main() {
     final gross = met * weightKg * durationHours;
 
     expect(result.caloriesKcal!, lessThan(gross.round()));
+  });
+
+  test('resolvedActiveCalories prefers stored value over estimate', () {
+    final workout = Workout(
+      id: 'w1',
+      userId: 'u1',
+      name: 'Leg day',
+      startedAt: DateTime.utc(2026, 6, 15, 9),
+      completedAt: DateTime.utc(2026, 6, 15, 10),
+      durationMinutes: 90,
+      totalVolume: 12000,
+      activeCaloriesKcal: 390,
+    );
+
+    expect(
+      WorkoutCalorieEstimator.resolvedActiveCalories(workout: workout),
+      390,
+    );
   });
 }

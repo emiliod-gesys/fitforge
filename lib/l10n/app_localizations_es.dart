@@ -1709,6 +1709,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodBarcodeRetry => 'Reintentar';
 
   @override
+  String get foodBarcodeOpenSettings => 'Abrir ajustes de la app';
+
+  @override
+  String get foodBarcodePhotoAction => 'Fotografiar código del empaque';
+
+  @override
+  String get foodBarcodePhotoFallback =>
+      'Si el visor en vivo no arranca, usa el botón de arriba (misma cámara que en Foto).';
+
+  @override
+  String get foodBarcodeNotDetectedInPhoto =>
+      'No se detectó código de barras en la imagen. Acerca más el empaque e intenta de nuevo.';
+
+  @override
   String get foodBarcodeLookupFailed =>
       'Error al consultar el código. Revisa tu conexión.';
 

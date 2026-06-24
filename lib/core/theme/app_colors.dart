@@ -17,4 +17,7 @@ abstract final class AppColors {
 
   static const logoFit = slate;
   static const logoForge = orange;
+
+  /// Fondo claro para ilustraciones wger (siluetas negras sobre PNG transparente).
+  static const exerciseIllustrationBackground = Color(0xFFFFFFFF);
 }

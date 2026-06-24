@@ -1696,6 +1696,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodBarcodeRetry => 'Retry';
 
   @override
+  String get foodBarcodeOpenSettings => 'Open app settings';
+
+  @override
+  String get foodBarcodePhotoAction => 'Photograph package barcode';
+
+  @override
+  String get foodBarcodePhotoFallback =>
+      'If the live view does not start, use the button above (same camera as Photo).';
+
+  @override
+  String get foodBarcodeNotDetectedInPhoto =>
+      'No barcode detected in the image. Move closer to the package and try again.';
+
+  @override
   String get foodBarcodeLookupFailed =>
       'Could not look up the barcode. Check your connection.';
 

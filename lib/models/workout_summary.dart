@@ -136,6 +136,7 @@ abstract final class WorkoutSummaryBuilder {
       (sum, ex) => sum +
           ex.totalVolume(
             perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
+            unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, catalog),
           ),
     );
     final totalReps = _totalReps(workout);
@@ -155,29 +156,18 @@ abstract final class WorkoutSummaryBuilder {
       (s, e) => s +
           e.totalVolume(
             perArmWeight: ExerciseLoad.perArmWeightForExerciseId(e.exerciseId, catalog),
+            unilateral: ExerciseLoad.unilateralForExerciseId(e.exerciseId, catalog),
           ),
     );
     final prevMax = previousSameRoutine != null ? _maxWeightKg(previousSameRoutine) : null;
     final prevDuration = previousSameRoutine?.durationMinutes;
 
-    final completedSets = workout.exercises.fold<int>(
-      0,
-      (sum, ex) => sum + ex.sets.where((s) => s.completed).length,
-    );
-    final cardioDurationSeconds = workout.exercises
-        .expand((ex) => ex.sets)
-        .where((s) => s.completed && s.isCardio)
-        .map((s) => s.durationSeconds ?? 0)
-        .fold<int>(0, (sum, seconds) => sum + seconds);
-
-    final calorieEstimate = WorkoutCalorieEstimator.estimate(
+    final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
+      workout: workout,
       durationMinutes: durationMinutes,
       totalVolumeKg: totalVolumeKg,
-      completedSets: completedSets,
-      totalReps: totalReps,
       profile: profile,
       bodyMetrics: bodyMetrics,
-      cardioDurationSeconds: cardioDurationSeconds,
     );
 
     return WorkoutSummaryData(
@@ -267,6 +257,7 @@ abstract final class WorkoutSummaryBuilder {
 
       final volume = ex.totalVolume(
         perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, exerciseCatalog),
+        unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, exerciseCatalog),
       );
 
       final prevEx = _findPreviousExercise(previousSameRoutine, ex.exerciseId);
@@ -282,6 +273,10 @@ abstract final class WorkoutSummaryBuilder {
         }
         prevVolume = prevEx.totalVolume(
           perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
+            prevEx.exerciseId,
+            exerciseCatalog,
+          ),
+          unilateral: ExerciseLoad.unilateralForExerciseId(
             prevEx.exerciseId,
             exerciseCatalog,
           ),

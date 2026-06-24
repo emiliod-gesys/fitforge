@@ -172,30 +172,38 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
       ),
       body: Stack(
         children: [
-          ListView(
-            padding: const EdgeInsets.all(16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _ModeTabs(
-                mode: _mode,
-                onChanged: (m) => setState(() => _mode = m),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _ModeTabs(
+                  mode: _mode,
+                  onChanged: (m) => setState(() => _mode = m),
+                ),
               ),
               const SizedBox(height: 16),
-              switch (_mode) {
-                FoodAddMode.search => _SearchPane(
-                    filterController: _filterController,
-                    recent: _recent,
-                    onSelect: _openFromEntry,
-                  ),
-                FoodAddMode.quick => _QuickAddPane(
-                    controller: _quickController,
-                    onSubmit: _quickAddWithAi,
-                  ),
-                FoodAddMode.photo => _PhotoPane(onTakePhoto: _pickPhoto),
-                FoodAddMode.barcode => _BarcodePane(
-                    scannerKey: _barcodeScannerKey,
-                    onDetected: _lookupBarcode,
-                  ),
-              },
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: switch (_mode) {
+                    FoodAddMode.search => _SearchPane(
+                        filterController: _filterController,
+                        recent: _recent,
+                        onSelect: _openFromEntry,
+                      ),
+                    FoodAddMode.quick => _QuickAddPane(
+                        controller: _quickController,
+                        onSubmit: _quickAddWithAi,
+                      ),
+                    FoodAddMode.photo => _PhotoPane(onTakePhoto: _pickPhoto),
+                    FoodAddMode.barcode => _BarcodePane(
+                        scannerKey: _barcodeScannerKey,
+                        onDetected: _lookupBarcode,
+                      ),
+                  },
+                ),
+              ),
             ],
           ),
           if (_loading)
@@ -240,10 +248,19 @@ class _SearchPane extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textMuted),
         ),
         const SizedBox(height: 8),
-        if (recent.isEmpty)
-          Text(l10n.foodNoRecent, style: const TextStyle(color: AppColors.textMuted)),
-        ...recent.map(
-          (entry) => _RecentFoodTile(entry: entry, onTap: () => onSelect(entry)),
+        Expanded(
+          child: recent.isEmpty
+              ? Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(l10n.foodNoRecent, style: const TextStyle(color: AppColors.textMuted)),
+                )
+              : ListView(
+                  children: recent
+                      .map(
+                        (entry) => _RecentFoodTile(entry: entry, onTap: () => onSelect(entry)),
+                      )
+                      .toList(),
+                ),
         ),
       ],
     );
@@ -394,9 +411,28 @@ class _BarcodePane extends StatelessWidget {
           style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         const SizedBox(height: 12),
-        FoodBarcodeScannerView(
-          key: scannerKey,
-          onDetected: onDetected,
+        Expanded(
+          child: FoodBarcodeScannerView(
+            key: scannerKey,
+            onDetected: onDetected,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: () => scannerKey.currentState?.scanFromPhoto(),
+          icon: const Icon(Icons.camera_alt),
+          label: Text(l10n.foodBarcodePhotoAction),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.orange,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(48),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.foodBarcodePhotoFallback,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
         ),
         const SizedBox(height: 12),
         Text(

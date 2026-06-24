@@ -3,15 +3,36 @@ import '../../models/workout.dart';
 
 /// Cómo interpretar el peso registrado en una serie (total vs. por brazo).
 abstract final class ExerciseLoad {
-  /// Override explícito desde ejercicio personalizado (`null` = inferir del nombre).
+  static Exercise? _findInCatalog(String exerciseId, Iterable<Exercise> catalog) {
+    for (final exercise in catalog) {
+      if (exercise.id == exerciseId) return exercise;
+    }
+    return null;
+  }
+
+  /// Override explícito desde catálogo o ejercicio personalizado (`null` = inferir del nombre).
   static bool? perArmWeightOverride(Exercise? exercise) {
-    if (exercise == null || !exercise.isUserCustom) return null;
-    return exercise.perArmWeight;
+    if (exercise == null) return null;
+    if (exercise.isBundled || exercise.isUserCustom) return exercise.perArmWeight;
+    return null;
   }
 
   static bool? perArmWeightForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
-    for (final exercise in catalog) {
-      if (exercise.id == exerciseId) return perArmWeightOverride(exercise);
+    return perArmWeightOverride(_findInCatalog(exerciseId, catalog));
+  }
+
+  static bool? unilateralForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+    final exercise = _findInCatalog(exerciseId, catalog);
+    if (exercise == null) return null;
+    if (exercise.isBundled || exercise.isUserCustom) return exercise.unilateral;
+    return null;
+  }
+
+  static bool? weightOptionalForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+    final exercise = _findInCatalog(exerciseId, catalog);
+    if (exercise == null) return null;
+    if (exercise.isBundled || exercise.isUserCustom) {
+      return exercise.weightOptional || exercise.loadMode.weightOptional;
     }
     return null;
   }
@@ -29,8 +50,14 @@ abstract final class ExerciseLoad {
   }
 
   /// Multiplicador de volumen respecto al peso registrado por serie.
-  static double volumeMultiplier(String exerciseName, {bool? perArmWeight}) {
+  static double volumeMultiplier(
+    String exerciseName, {
+    bool? perArmWeight,
+    bool? unilateral,
+  }) {
     final n = _normalize(exerciseName);
+    if (unilateral == true) return 1;
+
     if (perArmWeight == true) {
       if (_isUnilateral(n: n)) return 1;
       return 2;
@@ -48,13 +75,28 @@ abstract final class ExerciseLoad {
     WorkoutSet set, {
     required String exerciseName,
     bool? perArmWeight,
+    bool? unilateral,
   }) {
     if (set.isCardio) return 0;
     if (!set.completed || set.weight == null || set.weight! <= 0) return 0;
-    return set.weight! * set.reps * volumeMultiplier(exerciseName, perArmWeight: perArmWeight);
+    return set.weight! *
+        set.reps *
+        volumeMultiplier(
+          exerciseName,
+          perArmWeight: perArmWeight,
+          unilateral: unilateral,
+        );
   }
 
-  static String weightLabel(String unitLabel, String exerciseName, {bool? perArmWeight}) {
+  static String weightLabel(
+    String unitLabel,
+    String exerciseName, {
+    bool? perArmWeight,
+    bool? weightOptional,
+  }) {
+    if (weightOptional == true) {
+      return '$unitLabel (adicional)';
+    }
     if (isPerArmWeight(exerciseName, perArmWeight: perArmWeight)) {
       return '$unitLabel (por brazo)';
     }
