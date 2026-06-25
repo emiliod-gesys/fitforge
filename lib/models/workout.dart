@@ -125,7 +125,7 @@ class WorkoutExercise {
     );
   }
 
-  double totalVolume({bool? perArmWeight, bool? unilateral}) => sets
+  double totalVolume({bool? perArmWeight, bool? unilateral, ExerciseLoadMode? loadMode}) => sets
       .where((s) => s.completed)
       .fold(
         0.0,
@@ -135,6 +135,7 @@ class WorkoutExercise {
               exerciseName: exerciseName,
               perArmWeight: perArmWeight,
               unilateral: unilateral,
+              loadMode: loadMode,
             ),
       );
 }

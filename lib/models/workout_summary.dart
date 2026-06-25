@@ -137,6 +137,7 @@ abstract final class WorkoutSummaryBuilder {
           ex.totalVolume(
             perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
             unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, catalog),
+            loadMode: ExerciseLoad.loadModeForExerciseId(ex.exerciseId, catalog),
           ),
     );
     final totalReps = _totalReps(workout);
@@ -157,6 +158,7 @@ abstract final class WorkoutSummaryBuilder {
           e.totalVolume(
             perArmWeight: ExerciseLoad.perArmWeightForExerciseId(e.exerciseId, catalog),
             unilateral: ExerciseLoad.unilateralForExerciseId(e.exerciseId, catalog),
+            loadMode: ExerciseLoad.loadModeForExerciseId(e.exerciseId, catalog),
           ),
     );
     final prevMax = previousSameRoutine != null ? _maxWeightKg(previousSameRoutine) : null;
@@ -258,6 +260,7 @@ abstract final class WorkoutSummaryBuilder {
       final volume = ex.totalVolume(
         perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, exerciseCatalog),
         unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, exerciseCatalog),
+        loadMode: ExerciseLoad.loadModeForExerciseId(ex.exerciseId, exerciseCatalog),
       );
 
       final prevEx = _findPreviousExercise(previousSameRoutine, ex.exerciseId);
@@ -277,6 +280,10 @@ abstract final class WorkoutSummaryBuilder {
             exerciseCatalog,
           ),
           unilateral: ExerciseLoad.unilateralForExerciseId(
+            prevEx.exerciseId,
+            exerciseCatalog,
+          ),
+          loadMode: ExerciseLoad.loadModeForExerciseId(
             prevEx.exerciseId,
             exerciseCatalog,
           ),

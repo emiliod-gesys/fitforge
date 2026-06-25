@@ -14,7 +14,7 @@ void main() {
   test('loads full Spanish catalog from Excel import', () async {
     final exercises = await BundledExerciseCatalog.load(locale: 'es');
 
-    expect(exercises.length, 179);
+    expect(exercises.length, 199);
     expect(exercises.every((e) => e.isBundled), isTrue);
     expect(exercises.any((e) => e.catalogId == 'ff_back_pull_up'), isTrue);
     expect(

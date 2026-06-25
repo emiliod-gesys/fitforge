@@ -3,6 +3,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/player_level_badge.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/l10n_extensions.dart';
 
 class PlayerLevelCard extends StatelessWidget {
   final PlayerLevelProgress progress;
@@ -21,29 +22,22 @@ class PlayerLevelCard extends StatelessWidget {
     return Card(
       color: AppColors.card,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _CircularLevelRing(progress: progress, l10n: l10n),
+            const SizedBox(height: 14),
             Row(
               children: [
-                _LevelBadgeIcon(level: progress.level),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.playerLevelTitle(progress.level),
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        progress.isMaxLevel
-                            ? l10n.playerLevelMax
-                            : l10n.playerXpProgress(progress.xpInCurrentLevel, progress.xpToNextLevel),
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                      ),
-                    ],
+                  child: Text(
+                    progress.isMaxLevel
+                        ? l10n.playerLevelMax
+                        : l10n.playerXpProgress(
+                            progress.xpInCurrentLevel,
+                            progress.xpToNextLevel,
+                          ),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),
                 Text(
@@ -55,16 +49,6 @@ class PlayerLevelCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: progress.progressFraction,
-                minHeight: 10,
-                backgroundColor: AppColors.border,
-                color: AppColors.orange,
-              ),
-            ),
           ],
         ),
       ),
@@ -72,31 +56,92 @@ class PlayerLevelCard extends StatelessWidget {
   }
 }
 
-class _LevelBadgeIcon extends StatelessWidget {
-  final int level;
+class _CircularLevelRing extends StatelessWidget {
+  final PlayerLevelProgress progress;
+  final AppLocalizations l10n;
 
-  const _LevelBadgeIcon({required this.level});
+  const _CircularLevelRing({
+    required this.progress,
+    required this.l10n,
+  });
+
+  static const _size = 132.0;
+  static const _stroke = 5.0;
 
   @override
   Widget build(BuildContext context) {
-    final assetPath = PlayerLevelBadge.assetForLevel(level);
+    final theme = Theme.of(context);
+    final level = progress.level;
+    final badgeAsset = PlayerLevelBadge.assetForLevel(level);
+    final badgeName = l10n.playerLevelBadgeName(level);
 
     return SizedBox(
-      width: 44,
-      height: 44,
-      child: assetPath != null
-          ? Image.asset(
-              assetPath,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            )
-          : Container(
-              decoration: BoxDecoration(
-                color: AppColors.orange.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.military_tech, color: AppColors.orange),
+      width: _size,
+      height: _size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: _size,
+            height: _size,
+            child: CircularProgressIndicator(
+              value: progress.progressFraction,
+              strokeWidth: _stroke,
+              backgroundColor: AppColors.border,
+              color: AppColors.orange,
+              strokeCap: StrokeCap.round,
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(_stroke + 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: badgeAsset != null
+                      ? Image.asset(
+                          badgeAsset,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.military_tech,
+                            color: AppColors.orange,
+                            size: 32,
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.orange.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.military_tech, color: AppColors.orange, size: 28),
+                        ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.playerLevelTitle(level),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  badgeName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.orange,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -155,10 +155,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get experienceLevel => 'Experience level';
 
   @override
-  String get activityLevel => 'Daily activity';
+  String get activityLevel => 'Non-gym daily activity';
 
   @override
-  String get activityLevelTitle => 'Activity level';
+  String get activityLevelTitle => 'Daily activity besides gym';
+
+  @override
+  String get activityLevelHint =>
+      'Your everyday routine, excluding strength and cardio workouts';
 
   @override
   String get activitySedentary => 'Sedentary';
@@ -310,6 +314,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerLevelMax => 'Max level reached';
 
   @override
+  String get playerLevelTierMythic => 'Mythic';
+
+  @override
+  String get playerLevelTierImmortal => 'Immortal';
+
+  @override
   String xpEarned(int xp) {
     return '+$xp XP';
   }
@@ -396,6 +406,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get milestoneAllUnlocked => 'All badges unlocked!';
+
+  @override
+  String get milestoneTierBronze => 'Bronze';
+
+  @override
+  String get milestoneTierSilver => 'Silver';
+
+  @override
+  String get milestoneTierGold => 'Gold';
+
+  @override
+  String get milestoneTierPlatinum => 'Platinum';
+
+  @override
+  String get milestoneTierDiamond => 'Diamond';
+
+  @override
+  String get milestoneTierMaster => 'Master';
+
+  @override
+  String get milestoneTierGrandmaster => 'Grandmaster';
+
+  @override
+  String get milestoneTierLegend => 'Legend';
 
   @override
   String get personalRecords => 'Personal records';
@@ -1533,8 +1567,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String shareMilestoneUnlocked(String category, int tier) {
-    return '🏅 $category badge — tier $tier';
+  String shareMilestoneUnlocked(String category, String tierName) {
+    return '🏅 $category badge — $tierName';
   }
 
   @override
@@ -1549,8 +1583,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get summaryMilestoneUnlocked => 'New badge';
 
   @override
-  String summaryMilestoneDetail(String category, int tier) {
-    return '$category · Tier $tier';
+  String summaryMilestoneDetail(String category, String tierName) {
+    return '$category · $tierName';
   }
 
   @override

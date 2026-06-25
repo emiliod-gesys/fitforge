@@ -383,14 +383,20 @@ abstract class AppLocalizations {
   /// No description provided for @activityLevel.
   ///
   /// In es, this message translates to:
-  /// **'Actividad diaria'**
+  /// **'Actividad fuera del gym'**
   String get activityLevel;
 
   /// No description provided for @activityLevelTitle.
   ///
   /// In es, this message translates to:
-  /// **'Nivel de actividad'**
+  /// **'Actividad diaria aparte del gym'**
   String get activityLevelTitle;
+
+  /// No description provided for @activityLevelHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu rutina diaria sin contar entrenamientos de fuerza ni cardio'**
+  String get activityLevelHint;
 
   /// No description provided for @activitySedentary.
   ///
@@ -674,6 +680,18 @@ abstract class AppLocalizations {
   /// **'Nivel máximo alcanzado'**
   String get playerLevelMax;
 
+  /// No description provided for @playerLevelTierMythic.
+  ///
+  /// In es, this message translates to:
+  /// **'Mítico'**
+  String get playerLevelTierMythic;
+
+  /// No description provided for @playerLevelTierImmortal.
+  ///
+  /// In es, this message translates to:
+  /// **'Inmortal'**
+  String get playerLevelTierImmortal;
+
   /// No description provided for @xpEarned.
   ///
   /// In es, this message translates to:
@@ -823,6 +841,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¡Todas las medallas desbloqueadas!'**
   String get milestoneAllUnlocked;
+
+  /// No description provided for @milestoneTierBronze.
+  ///
+  /// In es, this message translates to:
+  /// **'Bronce'**
+  String get milestoneTierBronze;
+
+  /// No description provided for @milestoneTierSilver.
+  ///
+  /// In es, this message translates to:
+  /// **'Plata'**
+  String get milestoneTierSilver;
+
+  /// No description provided for @milestoneTierGold.
+  ///
+  /// In es, this message translates to:
+  /// **'Oro'**
+  String get milestoneTierGold;
+
+  /// No description provided for @milestoneTierPlatinum.
+  ///
+  /// In es, this message translates to:
+  /// **'Platino'**
+  String get milestoneTierPlatinum;
+
+  /// No description provided for @milestoneTierDiamond.
+  ///
+  /// In es, this message translates to:
+  /// **'Diamante'**
+  String get milestoneTierDiamond;
+
+  /// No description provided for @milestoneTierMaster.
+  ///
+  /// In es, this message translates to:
+  /// **'Maestro'**
+  String get milestoneTierMaster;
+
+  /// No description provided for @milestoneTierGrandmaster.
+  ///
+  /// In es, this message translates to:
+  /// **'Gran maestro'**
+  String get milestoneTierGrandmaster;
+
+  /// No description provided for @milestoneTierLegend.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyenda'**
+  String get milestoneTierLegend;
 
   /// No description provided for @personalRecords.
   ///
@@ -2783,8 +2849,8 @@ abstract class AppLocalizations {
   /// No description provided for @shareMilestoneUnlocked.
   ///
   /// In es, this message translates to:
-  /// **'🏅 Medalla {category} — tier {tier}'**
-  String shareMilestoneUnlocked(String category, int tier);
+  /// **'🏅 Medalla {category} — {tierName}'**
+  String shareMilestoneUnlocked(String category, String tierName);
 
   /// No description provided for @shareXpEarned.
   ///
@@ -2807,8 +2873,8 @@ abstract class AppLocalizations {
   /// No description provided for @summaryMilestoneDetail.
   ///
   /// In es, this message translates to:
-  /// **'{category} · Tier {tier}'**
-  String summaryMilestoneDetail(String category, int tier);
+  /// **'{category} · {tierName}'**
+  String summaryMilestoneDetail(String category, String tierName);
 
   /// No description provided for @shareExercisesHeader.
   ///

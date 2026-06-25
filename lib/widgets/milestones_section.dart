@@ -5,6 +5,7 @@ import '../core/utils/milestone_badge.dart';
 import '../core/utils/milestones.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/l10n_extensions.dart';
 
 class MilestonesSection extends StatelessWidget {
   final MilestoneTotals totals;
@@ -50,6 +51,8 @@ class MilestonesSection extends StatelessWidget {
     final next = MilestonesCalculator.nextDefinition(category, totals);
     final remaining = MilestonesCalculator.remainingToNext(category, totals);
     final label = categoryLabel(l10n, category);
+    final displayTier = MilestonesCalculator.displayTier(category, totals);
+    final tierName = l10n.milestoneTierName(displayTier);
 
     showModalBottomSheet<void>(
       context: context,
@@ -73,13 +76,20 @@ class MilestonesSection extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _MilestoneBadgeImage(
-                assetPath: MilestoneBadge.assetPathForTier(
-                  MilestonesCalculator.displayTier(category, totals),
-                ),
+                assetPath: MilestoneBadge.assetPathForTier(displayTier),
                 unlocked: MilestonesCalculator.hasUnlockedTier(category, totals),
                 size: 72,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Text(
+                tierName,
+                style: const TextStyle(
+                  color: AppColors.orange,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
               Text(
                 label,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),

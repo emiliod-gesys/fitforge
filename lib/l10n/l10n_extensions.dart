@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/utils/player_level_badge.dart';
 import '../models/profile.dart';
 import '../models/food_entry.dart';
 import '../models/rest_timer_alert_mode.dart';
@@ -167,6 +168,36 @@ extension ProfileL10n on AppLocalizations {
       MealType.lunch => mealLunch,
       MealType.dinner => mealDinner,
       MealType.snack => mealSnack,
+    };
+  }
+
+  String milestoneTierName(int tier) {
+    return switch (tier.clamp(1, 8)) {
+      1 => milestoneTierBronze,
+      2 => milestoneTierSilver,
+      3 => milestoneTierGold,
+      4 => milestoneTierPlatinum,
+      5 => milestoneTierDiamond,
+      6 => milestoneTierMaster,
+      7 => milestoneTierGrandmaster,
+      8 => milestoneTierLegend,
+      _ => milestoneTierBronze,
+    };
+  }
+
+  String playerLevelBadgeName(int level) {
+    return switch (PlayerLevelBadge.tierIndexForLevel(level)) {
+      1 => milestoneTierBronze,
+      2 => milestoneTierSilver,
+      3 => milestoneTierGold,
+      4 => milestoneTierPlatinum,
+      5 => milestoneTierDiamond,
+      6 => milestoneTierMaster,
+      7 => milestoneTierGrandmaster,
+      8 => milestoneTierLegend,
+      9 => playerLevelTierMythic,
+      10 => playerLevelTierImmortal,
+      _ => milestoneTierBronze,
     };
   }
 }

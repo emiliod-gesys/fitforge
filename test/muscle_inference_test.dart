@@ -40,6 +40,18 @@ void main() {
       expect(MuscleInference.fromExerciseName('Remo con barra'), contains('Espalda'));
       expect(MuscleInference.fromExerciseName('Dominadas'), contains('Espalda'));
     });
+
+    test('chest supported rows tag back not chest', () {
+      for (final name in [
+        'Chest Supported Dumbbell Row',
+        'Chest Supported Row Machine',
+        'Remo con mancuernas pecho apoyado',
+        'Remo con pecho apoyado en máquina',
+      ]) {
+        expect(MuscleInference.fromExerciseName(name), contains('Espalda'), reason: name);
+        expect(MuscleInference.fromExerciseName(name), isNot(contains('Pecho')), reason: name);
+      }
+    });
   });
 
   group('MuscleInference.resolve with supplemental catalog', () {
@@ -141,6 +153,36 @@ void main() {
 
       expect(
         MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Cardio'),
+        isTrue,
+      );
+    });
+
+    test('sentadilla con core secundario no aparece en filtro Abdominales', () {
+      const exercise = Exercise(
+        catalogId: 'ff_legs_goblet_squat',
+        name: 'Goblet Squat',
+        category: 'Piernas',
+        muscles: ['Cuádriceps', 'Core'],
+        isBundled: true,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Abdominales'),
+        isFalse,
+      );
+    });
+
+    test('crunch del catalogo aparece en filtro Abdominales', () {
+      const exercise = Exercise(
+        catalogId: 'ff_abs_crunch',
+        name: 'Crunch abdominal',
+        category: 'Abdominales',
+        muscles: ['Abdominales'],
+        isBundled: true,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Abdominales'),
         isTrue,
       );
     });

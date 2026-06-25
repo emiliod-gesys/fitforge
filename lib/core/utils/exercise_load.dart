@@ -1,4 +1,5 @@
 import '../../models/exercise.dart';
+import '../../models/exercise_logging.dart';
 import '../../models/workout.dart';
 
 /// Cómo interpretar el peso registrado en una serie (total vs. por brazo).
@@ -35,6 +36,23 @@ abstract final class ExerciseLoad {
       return exercise.weightOptional || exercise.loadMode.weightOptional;
     }
     return null;
+  }
+
+  static ExerciseLoadMode? loadModeForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+    final exercise = _findInCatalog(exerciseId, catalog);
+    if (exercise == null) return null;
+    if (exercise.isBundled || exercise.isUserCustom) return exercise.loadMode;
+    return null;
+  }
+
+  /// En ejercicios asistidos el peso registrado es contrapeso a favor, no carga levantada.
+  static bool isAssistedExercise(
+    String exerciseName, {
+    ExerciseLoadMode? loadMode,
+  }) {
+    if (loadMode == ExerciseLoadMode.assistedBodyweight) return true;
+    final n = _normalize(exerciseName);
+    return n.contains('assisted') || n.contains('asistid');
   }
 
   /// Muestra la etiqueta «(por brazo)» en la UI de series.
@@ -76,8 +94,10 @@ abstract final class ExerciseLoad {
     required String exerciseName,
     bool? perArmWeight,
     bool? unilateral,
+    ExerciseLoadMode? loadMode,
   }) {
     if (set.isCardio) return 0;
+    if (isAssistedExercise(exerciseName, loadMode: loadMode)) return 0;
     if (!set.completed || set.weight == null || set.weight! <= 0) return 0;
     return set.weight! *
         set.reps *

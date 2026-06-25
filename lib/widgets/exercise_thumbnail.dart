@@ -75,8 +75,22 @@ class ExerciseThumbnail extends ConsumerWidget {
     return _categoryFallback(ref: ref, loading: loading);
   }
 
+  bool _isAssetPath(String url) => url.startsWith('assets/');
+
   bool _isLocalPath(String url) {
     return !url.startsWith('http://') && !url.startsWith('https://');
+  }
+
+  Widget _assetImage(String path, WidgetRef ref) {
+    return _illustrationFrame(
+      child: Image.asset(
+        path,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _categoryFallback(ref: ref),
+      ),
+    );
   }
 
   Widget _illustrationFrame({required Widget child}) {
@@ -126,6 +140,7 @@ class ExerciseThumbnail extends ConsumerWidget {
     final urlAsync = ref.watch(exerciseImageUrlProvider(_lookup));
     final content = urlAsync.when(
       data: (url) {
+        if (url != null && _isAssetPath(url)) return _assetImage(url, ref);
         if (url != null && _isLocalPath(url)) return _localImage(url, ref);
         if (url != null) return _networkImage(url, ref);
         return _categoryFallback(ref: ref);

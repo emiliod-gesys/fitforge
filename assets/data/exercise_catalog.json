@@ -1,7 +1,134 @@
 {
   "version": 2,
-  "exerciseCount": 179,
+  "exerciseCount": 199,
   "exercises": [
+    {
+      "id": "ff_abs_ab_crunch_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch abdominal en máquina",
+        "en": "Ab Crunch Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/ZnJHhMk.gif",
+      "exercisedbId": "ZnJHhMk",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_ab_wheel_rollout",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Rueda abdominal",
+        "en": "Ab Wheel Rollout"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/NAgVB3t.gif",
+      "exercisedbId": "NAgVB3t",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_legs_adductor_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Aductores",
+        "en": "Adductors"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos"
+        ],
+        "en": [
+          "Glutes"
+        ]
+      },
+      "names": {
+        "es": "Aducción de cadera en máquina",
+        "en": "Adductor Machine"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "assets/exercises/ff_legs_adductor_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
     {
       "id": "ff_cardio_air_bike",
       "loggingType": "cardio",
@@ -46,8 +173,8 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/1ZFqTDN.gif",
-      "exercisedbId": "1ZFqTDN",
+      "imageUrl": "assets/exercises/ff_cardio_air_bike.png",
+      "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
     },
@@ -706,10 +833,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/t8iSghb.gif",
-      "exercisedbId": "t8iSghb",
-      "matchConfidence": "high",
-      "matchScore": 0.869
+      "imageUrl": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_barbell_overhead_press",
@@ -990,10 +1117,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "high",
-      "matchScore": 0.8453
+      "imageUrl": "assets/exercises/ff_legs_belt_squat_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_triceps_bench_dip",
@@ -1041,6 +1168,47 @@
       "exercisedbId": "RrLske5",
       "matchConfidence": "high",
       "matchScore": 1.0
+    },
+    {
+      "id": "ff_abs_bicycle_crunch",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch bicicleta",
+        "en": "Bicycle Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/tZkGYZ9.gif",
+      "exercisedbId": "tZkGYZ9",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_bodyweight_biceps_curl",
@@ -1182,6 +1350,47 @@
       "exercisedbId": "QjE2DcA",
       "matchConfidence": "medium",
       "matchScore": 0.8146
+    },
+    {
+      "id": "ff_abs_cable_crunch",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch en polea",
+        "en": "Cable Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/WW95auq.gif",
+      "exercisedbId": "WW95auq",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_cable_curl",
@@ -1358,10 +1567,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
-      "exercisedbId": "HEJ6DIX",
-      "matchConfidence": "high",
-      "matchScore": 0.8895
+      "imageUrl": "assets/exercises/ff_glutes_cable_kickback.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_cable_lateral_raise",
@@ -1552,6 +1761,170 @@
       "matchScore": 0.9529
     },
     {
+      "id": "ff_abs_cable_reverse_crunch",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch inverso en polea",
+        "en": "Cable Reverse Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/RqOtqD7.gif",
+      "exercisedbId": "RqOtqD7",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_cable_seated_twist",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Giro sentado en polea",
+        "en": "Cable Seated Twist"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/UEjSrKI.gif",
+      "exercisedbId": "UEjSrKI",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_cable_side_bend",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Flexión lateral en polea",
+        "en": "Cable Side Bend"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/wPypxFY.gif",
+      "exercisedbId": "wPypxFY",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_cable_standing_crunch",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch de pie en polea",
+        "en": "Cable Standing Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/jpgqxiS.gif",
+      "exercisedbId": "jpgqxiS",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
       "id": "ff_triceps_cable_triceps_kickback",
       "loggingType": "strength",
       "loadMode": "single_load",
@@ -1595,6 +1968,88 @@
       "exercisedbId": "HEJ6DIX",
       "matchConfidence": "high",
       "matchScore": 1.0
+    },
+    {
+      "id": "ff_abs_cable_wood_chop",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Leñador en polea",
+        "en": "Cable Wood Chop"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/fhZQPlV.gif",
+      "exercisedbId": "fhZQPlV",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_captain_s_chair_leg_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Elevación de piernas en silla romana",
+        "en": "Captain's Chair Leg Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/weoDEpH.gif",
+      "exercisedbId": "weoDEpH",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_chest_chest_press_machine",
@@ -1736,10 +2191,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
-      "exercisedbId": "wDN97Ca",
-      "matchConfidence": "medium",
-      "matchScore": 0.734
+      "imageUrl": "assets/exercises/ff_back_chest_supported_row_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_back_chin_up",
@@ -2071,6 +2526,47 @@
       "matchScore": 0.9143
     },
     {
+      "id": "ff_abs_crunch",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch abdominal",
+        "en": "Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/TFqbd8t.gif",
+      "exercisedbId": "TFqbd8t",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
       "id": "ff_glutes_curtsy_lunge",
       "loggingType": "strength",
       "loadMode": "bodyweight",
@@ -2116,6 +2612,47 @@
       "exercisedbId": "gUjqdei",
       "matchConfidence": "high",
       "matchScore": 0.835
+    },
+    {
+      "id": "ff_abs_dead_bug",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Dead bug",
+        "en": "Dead Bug"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/iny3m5y.gif",
+      "exercisedbId": "iny3m5y",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_back_deadlift",
@@ -2719,10 +3256,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/7Hg55JG.gif",
-      "exercisedbId": "7Hg55JG",
-      "matchConfidence": "high",
-      "matchScore": 0.8804
+      "imageUrl": "https://static.exercisedb.dev/media/aWedzZX.gif",
+      "exercisedbId": "aWedzZX",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_triceps_dumbbell_kickback",
@@ -2862,6 +3399,51 @@
       "exercisedbId": "vi8EhoE",
       "matchConfidence": "high",
       "matchScore": 1.0
+    },
+    {
+      "id": "ff_biceps_dumbbell_reverse_spider_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Bíceps",
+        "en": "Biceps"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Antebrazos"
+        ],
+        "en": [
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Curl araña inverso con mancuernas",
+        "en": "Dumbbell Reverse Spider Curl"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "assets/exercises/ff_biceps_dumbbell_reverse_spider_curl.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_dumbbell_shoulder_press",
@@ -3181,10 +3763,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/RVwzP10.gif",
-      "exercisedbId": "RVwzP10",
-      "matchConfidence": "low",
-      "matchScore": 0.617
+      "imageUrl": "assets/exercises/ff_shoulders_face_pull.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_glutes_fire_hydrant",
@@ -3414,10 +3996,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "medium",
-      "matchScore": 0.7162
+      "imageUrl": "assets/exercises/ff_glutes_glute_drive_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_legs_goblet_squat",
@@ -3508,10 +4090,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "high",
-      "matchScore": 0.8453
+      "imageUrl": "assets/exercises/ff_legs_hack_squat_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_hammer_curl",
@@ -3606,6 +4188,47 @@
       "exercisedbId": "XooAdhl",
       "matchConfidence": "high",
       "matchScore": 0.935
+    },
+    {
+      "id": "ff_abs_hanging_leg_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Elevación de piernas colgado",
+        "en": "Hanging Leg Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/I3tsCnC.gif",
+      "exercisedbId": "I3tsCnC",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_chest_hex_dumbbell_press",
@@ -3936,10 +4559,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "medium",
-      "matchScore": 0.7093
+      "imageUrl": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_chest_incline_barbell_bench_press",
@@ -4030,10 +4653,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
-      "exercisedbId": "wDN97Ca",
-      "matchConfidence": "high",
-      "matchScore": 0.8917
+      "imageUrl": "assets/exercises/ff_chest_incline_chest_press_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_chest_incline_dumbbell_bench_press",
@@ -4499,10 +5122,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "high",
-      "matchScore": 0.934
+      "imageUrl": "assets/exercises/ff_calves_leg_press_calf_raise_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_legs_leg_press_machine",
@@ -4642,6 +5265,47 @@
       "matchScore": 0.8589
     },
     {
+      "id": "ff_abs_lying_leg_raise",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Elevación de piernas acostado",
+        "en": "Lying Leg Raise"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/WhuFnR7.gif",
+      "exercisedbId": "WhuFnR7",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
       "id": "ff_triceps_machine_dip",
       "loggingType": "strength",
       "loadMode": "machine_stack",
@@ -4683,10 +5347,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
-      "exercisedbId": "wDN97Ca",
-      "matchConfidence": "high",
-      "matchScore": 0.88
+      "imageUrl": "assets/exercises/ff_triceps_machine_dip.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_machine_lateral_raise",
@@ -4779,6 +5443,47 @@
       "exercisedbId": "4U7iLb5",
       "matchConfidence": "high",
       "matchScore": 0.8643
+    },
+    {
+      "id": "ff_abs_machine_seated_leg_raise_crunch",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Crunch con elevación de piernas en máquina",
+        "en": "Machine Seated Leg Raise Crunch"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/PQ2AtC3.gif",
+      "exercisedbId": "PQ2AtC3",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_back_meadows_row",
@@ -5218,10 +5923,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/wDN97Ca.gif",
-      "exercisedbId": "wDN97Ca",
-      "matchConfidence": "medium",
-      "matchScore": 0.7678
+      "imageUrl": "assets/exercises/ff_chest_pec_deck_fly_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_back_pendlay_row",
@@ -5414,6 +6119,47 @@
       "exercisedbId": "QpXqiq8",
       "matchConfidence": "high",
       "matchScore": 0.9
+    },
+    {
+      "id": "ff_abs_plank",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Plancha abdominal",
+        "en": "Plank"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/VBAWRPG.gif",
+      "exercisedbId": "VBAWRPG",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_calves_pogo_jump",
@@ -5790,10 +6536,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
-      "exercisedbId": "ecpY0rH",
-      "matchConfidence": "medium",
-      "matchScore": 0.8005
+      "imageUrl": "assets/exercises/ff_glutes_reverse_hyper_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_legs_reverse_lunge",
@@ -5884,10 +6630,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/ecpY0rH.gif",
-      "exercisedbId": "ecpY0rH",
-      "matchConfidence": "medium",
-      "matchScore": 0.7957
+      "imageUrl": "https://static.exercisedb.dev/media/myfUsKf.gif",
+      "exercisedbId": "myfUsKf",
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_ring_curl",
@@ -6313,8 +7059,49 @@
         "es": [],
         "en": []
       },
-      "imageUrl": null,
+      "imageUrl": "assets/exercises/ff_cardio_rowing_machine.png",
       "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_russian_twist",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Giros rusos",
+        "en": "Russian Twist"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/XVDdcoj.gif",
+      "exercisedbId": "XVDdcoj",
       "matchConfidence": "curated",
       "matchScore": null
     },
@@ -6501,10 +7288,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "high",
-      "matchScore": 1.0
+      "imageUrl": "assets/exercises/ff_calves_seated_calf_raise_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_legs_seated_leg_curl_machine",
@@ -6546,10 +7333,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "high",
-      "matchScore": 0.9329
+      "imageUrl": "assets/exercises/ff_legs_seated_leg_curl_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_shoulder_press_machine",
@@ -6593,10 +7380,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/67n3r98.gif",
-      "exercisedbId": "67n3r98",
-      "matchConfidence": "high",
-      "matchScore": 0.8589
+      "imageUrl": "assets/exercises/ff_shoulders_shoulder_press_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_single_arm_cable_curl",
@@ -6638,10 +7425,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/G08RZcQ.gif",
-      "exercisedbId": "G08RZcQ",
-      "matchConfidence": "high",
-      "matchScore": 0.956
+      "imageUrl": "assets/exercises/ff_biceps_single_arm_cable_curl.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_triceps_single_arm_cable_pushdown",
@@ -6777,10 +7564,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/mWBtgmb.gif",
-      "exercisedbId": "mWBtgmb",
-      "matchConfidence": "high",
-      "matchScore": 0.8683
+      "imageUrl": "assets/exercises/ff_back_single_arm_dumbbell_row.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_triceps_single_arm_overhead_dumbbell_extension",
@@ -6965,6 +7752,47 @@
       "matchScore": 0.9175
     },
     {
+      "id": "ff_abs_sit_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [],
+        "en": []
+      },
+      "names": {
+        "es": "Abdominal completo",
+        "en": "Sit-Up"
+      },
+      "descriptions": {
+        "es": "",
+        "en": ""
+      },
+      "aliases": {
+        "es": [],
+        "en": []
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/QLL2gdc.gif",
+      "exercisedbId": "QLL2gdc",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
       "id": "ff_cardio_ski_erg",
       "loggingType": "cardio",
       "loadMode": "cardio_machine",
@@ -7145,10 +7973,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/Y4QlY8z.gif",
-      "exercisedbId": "Y4QlY8z",
-      "matchConfidence": "high",
-      "matchScore": 0.8714
+      "imageUrl": "assets/exercises/ff_calves_smith_machine_calf_raise.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_glutes_smith_machine_hip_thrust",
@@ -7190,10 +8018,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/jFtipLl.gif",
-      "exercisedbId": "jFtipLl",
-      "matchConfidence": "medium",
-      "matchScore": 0.8113
+      "imageUrl": "assets/exercises/ff_glutes_smith_machine_hip_thrust.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_chest_smith_machine_incline_bench_press",
@@ -7562,10 +8390,10 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "https://static.exercisedb.dev/media/6MaEjVA.gif",
-      "exercisedbId": "6MaEjVA",
-      "matchConfidence": "medium",
-      "matchScore": 0.7599
+      "imageUrl": "assets/exercises/ff_legs_standing_leg_curl_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_cardio_stationary_bike",

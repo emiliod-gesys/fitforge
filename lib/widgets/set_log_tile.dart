@@ -12,6 +12,7 @@ class SetLogTile extends StatefulWidget {
   final bool? perArmWeight;
   final bool? weightOptional;
   final bool isLast;
+  final bool isSaving;
   final void Function(WorkoutSet set) onChanged;
   final VoidCallback? onDelete;
   final void Function(String message)? onValidationError;
@@ -24,6 +25,7 @@ class SetLogTile extends StatefulWidget {
     this.perArmWeight,
     this.weightOptional,
     this.isLast = true,
+    this.isSaving = false,
     required this.onChanged,
     this.onDelete,
     this.onValidationError,
@@ -261,7 +263,7 @@ class _SetLogTileState extends State<SetLogTile> {
                       )
                     else
                       FilledButton(
-                        onPressed: _submit,
+                        onPressed: widget.isSaving ? null : _submit,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.orange,
                           foregroundColor: Colors.white,
@@ -270,7 +272,16 @@ class _SetLogTileState extends State<SetLogTile> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(l10n.done),
+                        child: widget.isSaving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(l10n.done),
                       ),
                   ],
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -51,7 +52,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     if (routine != null) {
       _nameController.text = routine.name;
       _descController.text = routine.description ?? '';
-      _exercises.addAll(routine.exercises);
+      final sorted = [...routine.exercises]..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+      _exercises.addAll(sorted);
       _targetMuscles.addAll(routine.targetMuscles);
     }
     setState(() => _loading = false);
@@ -60,6 +62,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   Future<void> _save() async {
     if (_nameController.text.trim().isEmpty) return;
     setState(() => _saving = true);
+
+    _normalizeOrderIndices();
 
     final routine = Routine(
       id: widget.routineId ?? '',
@@ -127,11 +131,80 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           targetDurationSeconds: selected.isCardio ? 1200 : null,
           targetDistanceMeters: selected.isCardio ? 3000 : null,
         ));
+        _normalizeOrderIndices();
         for (final m in selected.muscles) {
           if (!_targetMuscles.contains(m)) _targetMuscles.add(m);
         }
       });
     }
+  }
+
+  void _normalizeOrderIndices() {
+    for (var i = 0; i < _exercises.length; i++) {
+      if (_exercises[i].orderIndex != i) {
+        _exercises[i] = _exercises[i].copyWith(orderIndex: i);
+      }
+    }
+  }
+
+  void _reorderExercises(int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) return;
+    setState(() {
+      final item = _exercises.removeAt(oldIndex);
+      _exercises.insert(newIndex, item);
+      _normalizeOrderIndices();
+    });
+  }
+
+  void _removeExercise(int index) {
+    setState(() {
+      _exercises.removeAt(index);
+      _normalizeOrderIndices();
+    });
+  }
+
+  Widget _buildExerciseCard({
+    required int index,
+    required RoutineExercise ex,
+    required String unitSystem,
+    required AppLocalizations l10n,
+    required bool showDragHandle,
+  }) {
+    return Card(
+      key: ValueKey(ex.id),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showDragHandle)
+              ReorderableDragStartListener(
+                index: index,
+                child: const Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: Icon(Icons.drag_handle, color: AppColors.textMuted),
+                ),
+              ),
+            ExerciseThumbnail(
+              exerciseId: ex.exerciseId,
+              exerciseName: ex.exerciseName,
+              width: 48,
+              height: 48,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ],
+        ),
+        title: LocalizedExerciseName(
+          ex.exerciseName,
+          exerciseId: ex.exerciseId,
+        ),
+        subtitle: Text(_exerciseSubtitle(ex, unitSystem, l10n)),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => _removeExercise(index),
+        ),
+      ),
+    );
   }
 
   @override
@@ -143,6 +216,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     }
 
     final unitSystem = ref.watch(unitSystemProvider);
+    final canReorder = _exercises.length > 1;
 
     return Scaffold(
       appBar: FitForgeAppBar(
@@ -156,80 +230,100 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(labelText: l10n.routineName),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: l10n.routineName),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _descController,
+                  decoration: InputDecoration(labelText: l10n.description),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  children: AppConstants.muscleGroups.map((m) {
+                    final selected = _targetMuscles.contains(m);
+                    return FilterChip(
+                      label: Text(l10n.muscleLabel(m)),
+                      selected: selected,
+                      onSelected: (v) {
+                        setState(() {
+                          if (v) {
+                            _targetMuscles.add(m);
+                          } else {
+                            _targetMuscles.remove(m);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(l10n.exercisesSection(_exercises.length), style: Theme.of(context).textTheme.titleMedium),
+                    TextButton.icon(
+                      onPressed: _addExercise,
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.add),
+                    ),
+                  ],
+                ),
+                if (canReorder) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.reorderExercise,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+              ]),
+            ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _descController,
-            decoration: InputDecoration(labelText: l10n.description),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            children: AppConstants.muscleGroups.map((m) {
-              final selected = _targetMuscles.contains(m);
-              return FilterChip(
-                label: Text(l10n.muscleLabel(m)),
-                selected: selected,
-                onSelected: (v) {
-                  setState(() {
-                    if (v) {
-                      _targetMuscles.add(m);
-                    } else {
-                      _targetMuscles.remove(m);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.exercisesSection(_exercises.length), style: Theme.of(context).textTheme.titleMedium),
-              TextButton.icon(
-                onPressed: _addExercise,
-                icon: const Icon(Icons.add),
-                label: Text(l10n.add),
+          if (canReorder)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverReorderableList(
+                itemCount: _exercises.length,
+                onReorderItem: _reorderExercises,
+                itemBuilder: (context, index) => _buildExerciseCard(
+                  index: index,
+                  ex: _exercises[index],
+                  unitSystem: unitSystem,
+                  l10n: l10n,
+                  showDragHandle: true,
+                ),
               ),
-            ],
-          ),
-          ..._exercises.asMap().entries.map((entry) {
-            final i = entry.key;
-            final ex = entry.value;
-            return Card(
-              child: ListTile(
-                leading: ExerciseThumbnail(
-                  exerciseId: ex.exerciseId,
-                  exerciseName: ex.exerciseName,
-                  width: 48,
-                  height: 48,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                title: LocalizedExerciseName(
-                  ex.exerciseName,
-                  exerciseId: ex.exerciseId,
-                ),
-                subtitle: Text(_exerciseSubtitle(ex, unitSystem, l10n)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => setState(() => _exercises.removeAt(i)),
+            )
+          else if (_exercises.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _buildExerciseCard(
+                    index: index,
+                    ex: _exercises[index],
+                    unitSystem: unitSystem,
+                    l10n: l10n,
+                    showDragHandle: false,
+                  ),
+                  childCount: _exercises.length,
                 ),
               ),
-            );
-          }),
+            ),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addExercise,
-        child: const Icon(Icons.add),
       ),
     );
   }

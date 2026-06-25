@@ -57,6 +57,8 @@ class ExerciseImageViewer extends ConsumerWidget {
         exerciseName: exerciseName,
       );
 
+  bool _isAssetPath(String url) => url.startsWith('assets/');
+
   bool _isLocalPath(String url) {
     return !url.startsWith('http://') && !url.startsWith('https://');
   }
@@ -135,6 +137,15 @@ class ExerciseImageViewer extends ConsumerWidget {
             Center(
               child: urlAsync.when(
                 data: (url) {
+                  if (url != null && _isAssetPath(url)) {
+                    return _zoomableIllustration(
+                      Image.asset(
+                        url,
+                        fit: BoxFit.contain,
+                        width: maxWidth,
+                      ),
+                    );
+                  }
                   if (url != null && _isLocalPath(url)) {
                     return _zoomableIllustration(
                       Image.file(

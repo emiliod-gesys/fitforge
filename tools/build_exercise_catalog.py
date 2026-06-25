@@ -25,6 +25,7 @@ GROUP_ES = {
     "Glutes": "Glúteos",
     "Cardio": "Cardio",
     "Calves": "Pantorrillas",
+    "Abs": "Abdominales",
 }
 
 GROUP_EN = {
@@ -37,6 +38,7 @@ GROUP_EN = {
     "Glutes": "Glutes",
     "Calves": "Calves",
     "Cardio": "Cardio",
+    "Abs": "Abs",
 }
 
 EQUIPMENT_ES = {
@@ -122,6 +124,253 @@ MUSCLE_EN = {
 
 # Reemplaza saltar cuerda bajo Pantorrillas por la entrada en Cardio.
 EXCLUDE_FF_IDS = {"ff_calves_jump_rope"}
+
+# ExerciseDB no tiene hip thrust con barra/mancuerna; el fuzzy match eligió lunges/squats.
+# Usamos el movimiento más cercano (puente/hip thrust con espalda en banco).
+EXERCISEDB_OVERRIDES: dict[str, str] = {
+    "ff_glutes_dumbbell_hip_thrust": "aWedzZX",  # glute bridge two legs on bench
+    "ff_shoulders_reverse_pec_deck_machine": "myfUsKf",  # lever seated reverse fly
+}
+
+# Ilustraciones propias cuando ExerciseDB no tiene un GIF fiel.
+LOCAL_IMAGE_OVERRIDES: dict[str, str] = {
+    "ff_legs_hack_squat_machine": "assets/exercises/ff_legs_hack_squat_machine.png",
+    "ff_glutes_barbell_hip_thrust": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
+    "ff_glutes_hip_thrust_machine": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
+    "ff_glutes_smith_machine_hip_thrust": "assets/exercises/ff_glutes_smith_machine_hip_thrust.png",
+    "ff_back_chest_supported_row_machine": "assets/exercises/ff_back_chest_supported_row_machine.png",
+    "ff_chest_incline_chest_press_machine": "assets/exercises/ff_chest_incline_chest_press_machine.png",
+    "ff_triceps_machine_dip": "assets/exercises/ff_triceps_machine_dip.png",
+    "ff_chest_pec_deck_fly_machine": "assets/exercises/ff_chest_pec_deck_fly_machine.png",
+    "ff_cardio_rowing_machine": "assets/exercises/ff_cardio_rowing_machine.png",
+    "ff_back_single_arm_dumbbell_row": "assets/exercises/ff_back_single_arm_dumbbell_row.png",
+    "ff_cardio_air_bike": "assets/exercises/ff_cardio_air_bike.png",
+    "ff_shoulders_face_pull": "assets/exercises/ff_shoulders_face_pull.png",
+    "ff_shoulders_shoulder_press_machine": "assets/exercises/ff_shoulders_shoulder_press_machine.png",
+    "ff_biceps_single_arm_cable_curl": "assets/exercises/ff_biceps_single_arm_cable_curl.png",
+    "ff_biceps_dumbbell_reverse_spider_curl": "assets/exercises/ff_biceps_dumbbell_reverse_spider_curl.png",
+    "ff_calves_smith_machine_calf_raise": "assets/exercises/ff_calves_smith_machine_calf_raise.png",
+    "ff_legs_standing_leg_curl_machine": "assets/exercises/ff_legs_standing_leg_curl_machine.png",
+    "ff_legs_seated_leg_curl_machine": "assets/exercises/ff_legs_seated_leg_curl_machine.png",
+    "ff_legs_belt_squat_machine": "assets/exercises/ff_legs_belt_squat_machine.png",
+    "ff_glutes_cable_kickback": "assets/exercises/ff_glutes_cable_kickback.png",
+    "ff_glutes_glute_drive_machine": "assets/exercises/ff_glutes_glute_drive_machine.png",
+    "ff_legs_adductor_machine": "assets/exercises/ff_legs_adductor_machine.png",
+    "ff_calves_leg_press_calf_raise_machine": "assets/exercises/ff_calves_leg_press_calf_raise_machine.png",
+    "ff_calves_seated_calf_raise_machine": "assets/exercises/ff_calves_seated_calf_raise_machine.png",
+    "ff_glutes_reverse_hyper_machine": "assets/exercises/ff_glutes_reverse_hyper_machine.png",
+}
+
+# Ejercicios añadidos fuera del Excel (evita duplicados por id al regenerar).
+CATALOG_SUPPLEMENT = [
+    {
+        "group": "Biceps",
+        "name_en": "Dumbbell Reverse Spider Curl",
+        "name_es": "Curl araña inverso con mancuernas",
+        "equipment": "Dumbbell",
+        "load_mode": "dual_load",
+        "per_arm_weight": True,
+        "unilateral": False,
+        "primary": "Biceps",
+        "secondary": ["Forearms"],
+        "exercisedb_id": "6sMAmNv",
+    },
+    {
+        "group": "Legs",
+        "name_en": "Adductor Machine",
+        "name_es": "Aducción de cadera en máquina",
+        "equipment": "Machine",
+        "load_mode": "machine_stack",
+        "per_arm_weight": False,
+        "unilateral": False,
+        "primary": "Adductors",
+        "secondary": ["Glutes"],
+        "exercisedb_id": "oHsrypV",
+    },
+    # Abdominales (no estaban en el Excel; GIFs de ExerciseDB)
+    {
+        "group": "Abs",
+        "name_en": "Crunch",
+        "name_es": "Crunch abdominal",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "TFqbd8t",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Plank",
+        "name_es": "Plancha abdominal",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "VBAWRPG",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Hanging Leg Raise",
+        "name_es": "Elevación de piernas colgado",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "I3tsCnC",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Crunch",
+        "name_es": "Crunch en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "WW95auq",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Bicycle Crunch",
+        "name_es": "Crunch bicicleta",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "tZkGYZ9",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Russian Twist",
+        "name_es": "Giros rusos",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "XVDdcoj",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Dead Bug",
+        "name_es": "Dead bug",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "iny3m5y",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Ab Wheel Rollout",
+        "name_es": "Rueda abdominal",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "NAgVB3t",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Lying Leg Raise",
+        "name_es": "Elevación de piernas acostado",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "WhuFnR7",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Sit-Up",
+        "name_es": "Abdominal completo",
+        "equipment": "Bodyweight",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "QLL2gdc",
+    },
+    # Abdominales en máquina y polea
+    {
+        "group": "Abs",
+        "name_en": "Ab Crunch Machine",
+        "name_es": "Crunch abdominal en máquina",
+        "equipment": "Machine",
+        "load_mode": "machine_stack",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "ZnJHhMk",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Captain's Chair Leg Raise",
+        "name_es": "Elevación de piernas en silla romana",
+        "equipment": "Machine",
+        "load_mode": "bodyweight",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "weoDEpH",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Machine Seated Leg Raise Crunch",
+        "name_es": "Crunch con elevación de piernas en máquina",
+        "equipment": "Machine",
+        "load_mode": "machine_stack",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "PQ2AtC3",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Standing Crunch",
+        "name_es": "Crunch de pie en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "jpgqxiS",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Reverse Crunch",
+        "name_es": "Crunch inverso en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "RqOtqD7",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Side Bend",
+        "name_es": "Flexión lateral en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "unilateral": True,
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "wPypxFY",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Wood Chop",
+        "name_es": "Leñador en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "fhZQPlV",
+    },
+    {
+        "group": "Abs",
+        "name_en": "Cable Seated Twist",
+        "name_es": "Giro sentado en polea",
+        "equipment": "Cable",
+        "load_mode": "single_load",
+        "primary": "Abs",
+        "secondary": [],
+        "exercisedb_id": "UEjSrKI",
+    },
+]
 
 CARDIO_SUPPLEMENT = [
     # Máquinas (hoja Cardio del Excel)
@@ -337,6 +586,64 @@ def gif_url(exercisedb_id: str | None) -> str | None:
     return f"https://static.exercisedb.dev/media/{exercisedb_id}.gif"
 
 
+def build_strength_supplement_entry(spec: dict) -> dict:
+    group = spec["group"]
+    name_en = spec["name_en"]
+    ff_id = make_ff_id(group, name_en)
+    load_mode = spec["load_mode"]
+    secondary = spec.get("secondary", [])
+    primary = spec["primary"]
+    logging_type, cardio_preset = infer_logging(ff_id, group, name_en, load_mode)
+
+    per_arm = spec.get("per_arm_weight", load_mode == "dual_load")
+    unilateral = spec.get("unilateral", False)
+    weight_optional = load_mode in {"bodyweight", "assisted_bodyweight"}
+
+    exercisedb_id = spec.get("exercisedb_id")
+    image_url = gif_url(exercisedb_id)
+    match_confidence = "curated"
+    match_score = None
+
+    if ff_id in LOCAL_IMAGE_OVERRIDES:
+        image_url = LOCAL_IMAGE_OVERRIDES[ff_id]
+        exercisedb_id = None
+    elif ff_id in EXERCISEDB_OVERRIDES:
+        exercisedb_id = EXERCISEDB_OVERRIDES[ff_id]
+        image_url = gif_url(exercisedb_id)
+
+    primary_es = localize_muscle(primary, "es")
+    primary_en = localize_muscle(primary, "en")
+    secondary_es = [localize_muscle(m, "es") for m in secondary]
+    secondary_en = [localize_muscle(m, "en") for m in secondary]
+
+    return {
+        "id": ff_id,
+        "loggingType": logging_type,
+        "loadMode": load_mode,
+        "perArmWeight": per_arm,
+        "unilateral": unilateral,
+        "weightOptional": weight_optional,
+        "cardioPreset": cardio_preset,
+        "category": {"es": GROUP_ES.get(group, group), "en": GROUP_EN.get(group, group)},
+        "equipment": {
+            "es": EQUIPMENT_ES.get(spec["equipment"], spec["equipment"]),
+            "en": EQUIPMENT_EN.get(spec["equipment"], spec["equipment"]),
+        },
+        "primaryMuscle": {"es": primary_es, "en": primary_en},
+        "secondaryMuscles": {"es": secondary_es, "en": secondary_en},
+        "names": {"es": spec["name_es"], "en": name_en},
+        "descriptions": {"es": spec.get("notes_es", ""), "en": spec.get("notes_en", "")},
+        "aliases": {
+            "es": spec.get("aliases_es", []),
+            "en": spec.get("aliases_en", []),
+        },
+        "imageUrl": image_url,
+        "exercisedbId": exercisedb_id,
+        "matchConfidence": match_confidence,
+        "matchScore": match_score,
+    }
+
+
 def build_cardio_entry(spec: dict) -> dict:
     group = "Cardio"
     name_en = spec["name_en"]
@@ -346,6 +653,10 @@ def build_cardio_entry(spec: dict) -> dict:
     cardio_preset = spec.get("cardio_preset", "custom")
     logging_type, preset = infer_logging(ff_id, group, name_en, load_mode, cardio_preset)
     exercisedb_id = spec.get("exercisedb_id")
+    image_url = gif_url(exercisedb_id)
+    if ff_id in LOCAL_IMAGE_OVERRIDES:
+        image_url = LOCAL_IMAGE_OVERRIDES[ff_id]
+        exercisedb_id = None
 
     return {
         "id": ff_id,
@@ -371,7 +682,7 @@ def build_cardio_entry(spec: dict) -> dict:
             "es": spec.get("aliases_es", []),
             "en": spec.get("aliases_en", []),
         },
-        "imageUrl": gif_url(exercisedb_id),
+        "imageUrl": image_url,
         "exercisedbId": exercisedb_id,
         "matchConfidence": "curated",
         "matchScore": None,
@@ -396,8 +707,21 @@ def build_entry(row: tuple, match: dict | None) -> dict:
     weight_optional = load_mode in {"bodyweight", "assisted_bodyweight"}
 
     exercisedb = (match or {}).get("exercisedb") or {}
-    image_url = exercisedb.get("gifUrl")
     exercisedb_id = exercisedb.get("exerciseId")
+    image_url = exercisedb.get("gifUrl")
+    match_confidence = (match or {}).get("match_confidence")
+    match_score = (match or {}).get("match_score")
+
+    if ff_id in LOCAL_IMAGE_OVERRIDES:
+        image_url = LOCAL_IMAGE_OVERRIDES[ff_id]
+        exercisedb_id = None
+        match_confidence = "curated"
+        match_score = None
+    elif ff_id in EXERCISEDB_OVERRIDES:
+        exercisedb_id = EXERCISEDB_OVERRIDES[ff_id]
+        image_url = gif_url(exercisedb_id)
+        match_confidence = "curated"
+        match_score = None
 
     primary_es = localize_muscle(primary, "es")
     primary_en = localize_muscle(primary, "en")
@@ -424,8 +748,8 @@ def build_entry(row: tuple, match: dict | None) -> dict:
         "aliases": {"es": [], "en": []},
         "imageUrl": image_url,
         "exercisedbId": exercisedb_id,
-        "matchConfidence": (match or {}).get("match_confidence"),
-        "matchScore": (match or {}).get("match_score"),
+        "matchConfidence": match_confidence,
+        "matchScore": match_score,
     }
 
 
@@ -456,6 +780,13 @@ def main() -> None:
         if ff_id in EXCLUDE_FF_IDS:
             continue
         exercises.append(build_entry(row, matches.get(ff_id)))
+
+    existing_ids = {e["id"] for e in exercises}
+    for spec in CATALOG_SUPPLEMENT:
+        entry = build_strength_supplement_entry(spec)
+        if entry["id"] not in existing_ids:
+            exercises.append(entry)
+            existing_ids.add(entry["id"])
 
     for spec in CARDIO_SUPPLEMENT:
         exercises.append(build_cardio_entry(spec))

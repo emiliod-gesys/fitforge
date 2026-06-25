@@ -233,5 +233,32 @@ void main() {
         0,
       );
     });
+
+    test('assisted exercise volume ignores weight but reps still count elsewhere', () {
+      const set = WorkoutSet(
+        id: 's1',
+        setNumber: 1,
+        weight: 40,
+        reps: 12,
+        completed: true,
+        loggingType: ExerciseLoggingType.strength,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          set,
+          exerciseName: 'Assisted Pull Up Machine',
+          loadMode: ExerciseLoadMode.assistedBodyweight,
+        ),
+        0,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(set, exerciseName: 'Dominada asistida en máquina'),
+        0,
+      );
+      expect(
+        ExerciseLoad.isAssistedExercise('Assisted Dip Machine'),
+        isTrue,
+      );
+    });
   });
 }

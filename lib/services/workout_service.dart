@@ -305,21 +305,16 @@ class WorkoutService {
   Future<List<WorkoutExercise>> _getWorkoutExercises(String workoutId) async {
     final exercisesData = await _client
         .from('workout_exercises')
-        .select()
+        .select('*, workout_sets(*)')
         .eq('workout_id', workoutId)
         .order('order_index', ascending: true);
 
     final exercises = <WorkoutExercise>[];
     for (final ex in exercisesData as List) {
-      final exMap = ex as Map<String, dynamic>;
-      final setsData = await _client
-          .from('workout_sets')
-          .select()
-          .eq('workout_exercise_id', exMap['id'])
-          .order('set_number', ascending: true);
-
-      final sets = (setsData as List)
-          .map((s) => WorkoutSet.fromJson(s as Map<String, dynamic>))
+      final exMap = Map<String, dynamic>.from(ex as Map);
+      final setsRaw = exMap.remove('workout_sets') as List? ?? [];
+      final sets = setsRaw
+          .map((s) => WorkoutSet.fromJson(Map<String, dynamic>.from(s as Map)))
           .toList()
         ..sort((a, b) => a.setNumber.compareTo(b.setNumber));
 

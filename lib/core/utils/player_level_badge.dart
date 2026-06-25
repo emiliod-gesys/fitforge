@@ -28,6 +28,18 @@ abstract final class PlayerLevelBadge {
     }
     return null;
   }
+
+  /// Índice de emblema (1–10) según el nivel del jugador.
+  static int tierIndexForLevel(int level) {
+    final safeLevel = level.clamp(1, PlayerLevelCalculator.maxLevel);
+    for (var i = 0; i < _tiers.length; i++) {
+      final tier = _tiers[i];
+      if (safeLevel >= tier.minLevel && safeLevel <= tier.maxLevel) {
+        return i + 1;
+      }
+    }
+    return 1;
+  }
 }
 
 class _LevelBadgeTier {

@@ -10,6 +10,7 @@ class CardioSetLogTile extends StatefulWidget {
   final String unitSystem;
   final CardioLoggingConfig config;
   final bool isLast;
+  final bool isSaving;
   final void Function(WorkoutSet set) onChanged;
   final VoidCallback? onDelete;
   final void Function(String message)? onValidationError;
@@ -20,6 +21,7 @@ class CardioSetLogTile extends StatefulWidget {
     required this.unitSystem,
     required this.config,
     this.isLast = true,
+    this.isSaving = false,
     required this.onChanged,
     this.onDelete,
     this.onValidationError,
@@ -251,8 +253,14 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      onPressed: () => _submit(),
-                      child: Text(l10n.done),
+                      onPressed: widget.isSaving ? null : () => _submit(),
+                      child: widget.isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.done),
                     ),
                   ),
                 ],

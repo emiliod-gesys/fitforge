@@ -12,6 +12,7 @@ import '../models/leaderboard.dart';
 import '../providers/app_providers.dart';
 import 'fitforge_loading_indicator.dart';
 import 'profile_avatar.dart';
+import 'tappable_badge.dart';
 
 class LeaderboardsSection extends ConsumerStatefulWidget {
   const LeaderboardsSection({super.key});
@@ -198,6 +199,7 @@ class _LeaderboardTile extends StatelessWidget {
     );
     final categoryLabel = LeaderboardFormat.metricLabel(l10n, metric);
     final badgeAsset = _badgeAsset(period);
+    final badgeLabel = _badgeLabel(period);
 
     return ListTile(
       onTap: onTap,
@@ -239,11 +241,14 @@ class _LeaderboardTile extends StatelessWidget {
             ),
           ),
           if (badgeAsset != null)
-            Image.asset(
-              badgeAsset,
-              width: 36,
-              height: 36,
-              errorBuilder: (_, __, ___) => const SizedBox(width: 36, height: 36),
+            TappableBadge(
+              label: badgeLabel!,
+              child: Image.asset(
+                badgeAsset,
+                width: 36,
+                height: 36,
+                errorBuilder: (_, __, ___) => const SizedBox(width: 36, height: 36),
+              ),
             ),
         ],
       ),
@@ -263,5 +268,20 @@ class _LeaderboardTile extends StatelessWidget {
     final totals = LeaderboardFormat.totalsFor(entry);
     final tier = MilestonesCalculator.displayTier(category, totals);
     return MilestoneBadge.assetPathForTier(tier);
+  }
+
+  String? _badgeLabel(LeaderboardPeriod period) {
+    if (metric == LeaderboardMetric.level) {
+      return l10n.playerLevelTitle(entry.level);
+    }
+
+    if (period != LeaderboardPeriod.all) return null;
+
+    final category = LeaderboardFormat.milestoneCategoryFor(metric);
+    if (category == null) return null;
+
+    final totals = LeaderboardFormat.totalsFor(entry);
+    final tier = MilestonesCalculator.displayTier(category, totals);
+    return l10n.milestoneTierName(tier);
   }
 }

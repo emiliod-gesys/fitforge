@@ -141,6 +141,18 @@ abstract final class MuscleInference {
           ExerciseLoggingResolver.inferFromName(exercise.name);
     }
 
+    if (muscleGroup == 'Abdominales') {
+      final categoryGroup = _mapCategoryToRecoveryGroup(exercise.category);
+      if (categoryGroup == 'Abdominales') return true;
+
+      if (exercise.muscles.isNotEmpty) {
+        final primaryGroup = _mapToRecoveryGroup(exercise.muscles.first);
+        if (primaryGroup == 'Abdominales') return true;
+      }
+
+      return _isDedicatedAbsExerciseName(exercise.name);
+    }
+
     final fromMeta = fromExerciseMuscles(exercise.muscles, exercise.category);
     if (fromMeta.contains(muscleGroup)) return true;
     return fromExerciseName(exercise.name).contains(muscleGroup);
@@ -190,7 +202,7 @@ abstract final class MuscleInference {
       return 'Piernas';
     }
     if (_containsAny(m, ['gluteo', 'glúteo', 'glute'])) return 'Glúteos';
-    if (_containsAny(m, ['abdominal', 'abs', 'core', 'oblicuo'])) return 'Abdominales';
+    if (_containsAny(m, ['abdominal', 'abs', 'oblicuo'])) return 'Abdominales';
     if (_containsAny(m, ['cardio'])) return 'Cardio';
     if (_containsAny(m, [
       'antebrazo',
@@ -329,6 +341,7 @@ abstract final class MuscleInference {
 
   static bool _isChestExercise(String name) {
     if (_isBackPullToChest(name)) return false;
+    if (_isChestSupportedBackExercise(name)) return false;
 
     return _hasAny(name, [
       'pecho',
@@ -353,6 +366,7 @@ abstract final class MuscleInference {
   }
 
   static void _applyPressHeuristics(String name, Set<String> muscles) {
+    if (_isChestSupportedBackExercise(name)) return;
     if (!_hasWord(name, 'press') && !_hasPhrase(name, 'press de') && !_hasPhrase(name, 'press con')) {
       return;
     }
@@ -451,6 +465,23 @@ abstract final class MuscleInference {
     ]);
   }
 
+  /// "Chest supported row" apoya el pecho en el banco, pero es ejercicio de espalda.
+  static bool _isChestSupportedBackExercise(String name) {
+    if (_hasAny(name, ['row', 'remo']) &&
+        _hasAny(name, [
+          'chest supported',
+          'pecho apoyado',
+          'supported row',
+          'remo con pecho apoyado',
+          'remo con mancuernas pecho apoyado',
+          'pec deck invertido',
+          'reverse pec deck',
+        ])) {
+      return true;
+    }
+    return _hasPhrase(name, 'chest supported') || _hasPhrase(name, 'pecho apoyado');
+  }
+
   static bool _isLegExercise(String name) {
     if (_hasAny(name, ['prensa de hombro', 'militar', 'overhead'])) return false;
 
@@ -482,6 +513,44 @@ abstract final class MuscleInference {
       'empuje de cadera',
       'puente de gluteo',
       'glute bridge',
+    ]);
+  }
+
+  static bool _isDedicatedAbsExerciseName(String name) {
+    final n = _normalize(name);
+    if (_isLegExercise(n) || _isChestExercise(n) || _isBackExercise(n)) return false;
+
+    return _hasAny(n, [
+      'crunch',
+      'plancha',
+      'plank',
+      'leg raise',
+      'elevacion de piernas',
+      'elevación de piernas',
+      'russian twist',
+      'giros rusos',
+      'dead bug',
+      'rollout',
+      'rollerout',
+      'ab wheel',
+      'rueda abdominal',
+      'mountain climber',
+      'escalador',
+      'sit-up',
+      'sit up',
+      'situp',
+      'bicycle crunch',
+      'crunch bicicleta',
+      'abdominal',
+      'v-up',
+      'v up',
+      'leñador',
+      'wood chop',
+      'woodchop',
+      'flexion lateral',
+      'side bend',
+      'silla romana',
+      'captain',
     ]);
   }
 

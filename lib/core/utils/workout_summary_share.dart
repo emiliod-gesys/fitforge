@@ -77,7 +77,7 @@ abstract final class WorkoutSummaryShare {
         buffer.writeln(
           l10n.shareMilestoneUnlocked(
             MilestonesSection.categoryLabel(l10n, unlock.category),
-            unlock.tier,
+            l10n.milestoneTierName(unlock.tier),
           ),
         );
       }

@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/turnstile_config.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -44,6 +46,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return false;
   }
 
+  String _authErrorMessage(Object error) {
+    final l10n = context.l10n;
+    if (error is AuthException) {
+      final message = error.message.toLowerCase();
+      if (message.contains('invalid login credentials')) {
+        return 'Email o contraseña incorrectos.';
+      }
+      if (message.contains('captcha')) {
+        return l10n.completeSecurityVerification;
+      }
+      if (message.contains('email not confirmed')) {
+        return 'Confirma tu email antes de iniciar sesión.';
+      }
+      if (kDebugMode) return '${l10n.authError} (${error.message})';
+    }
+    return l10n.authError;
+  }
+
   Future<void> _submitEmail() async {
     if (!_validateCaptcha()) return;
 
@@ -70,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _resetCaptcha();
     } catch (e) {
       _resetCaptcha();
-      if (mounted) setState(() => _error = context.l10n.authError);
+      if (mounted) setState(() => _error = _authErrorMessage(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

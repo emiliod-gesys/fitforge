@@ -188,7 +188,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ListTile(
                   leading: const Icon(Icons.directions_walk, color: AppColors.orange),
                   title: Text(l10n.activityLevel),
-                  subtitle: Text(l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate)),
+                      Text(
+                        l10n.activityLevelHint,
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                      ),
+                    ],
+                  ),
                   onTap: () => _editActivityLevel(profile),
                 ),
                 ListTile(
@@ -495,14 +504,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(l10n.activityLevelTitle),
-        children: l10n.activityLevels
-            .map(
-              (level) => SimpleDialogOption(
-                onPressed: () => Navigator.pop(ctx, level),
-                child: Text(l10n.activityLevelLabel(level)),
-              ),
-            )
-            .toList(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            child: Text(
+              l10n.activityLevelHint,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+            ),
+          ),
+          ...l10n.activityLevels.map(
+            (level) => SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, level),
+              child: Text(l10n.activityLevelLabel(level)),
+            ),
+          ),
+        ],
       ),
     );
     if (selected != null && selected != current) {

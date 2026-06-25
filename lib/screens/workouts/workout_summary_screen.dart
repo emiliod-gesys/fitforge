@@ -22,6 +22,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_logo.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
+import '../../widgets/tappable_badge.dart';
 
 class WorkoutSummaryScreen extends ConsumerStatefulWidget {
   final WorkoutSummaryData summary;
@@ -470,27 +471,33 @@ class _AchievementsSection extends StatelessWidget {
           const SizedBox(height: 12),
           if (summary.leveledUp && summary.xpAward != null)
             _AchievementRow(
-              image: _LevelBadgeImage(level: summary.xpAward!.after.level),
+              image: TappableBadge(
+                label: l10n.playerLevelTitle(summary.xpAward!.after.level),
+                child: _LevelBadgeImage(level: summary.xpAward!.after.level),
+              ),
               title: l10n.levelUp,
               subtitle: l10n.playerLevelTitle(summary.xpAward!.after.level),
             ),
           ...summary.newMilestoneUnlocks.map(
             (unlock) => _AchievementRow(
-              image: Image.asset(
-                MilestoneBadge.assetPathForTier(unlock.tier),
-                width: 48,
-                height: 48,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.emoji_events,
-                  color: AppColors.orange,
-                  size: 36,
+              image: TappableBadge(
+                label: l10n.milestoneTierName(unlock.tier),
+                child: Image.asset(
+                  MilestoneBadge.assetPathForTier(unlock.tier),
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.emoji_events,
+                    color: AppColors.orange,
+                    size: 36,
+                  ),
                 ),
               ),
               title: l10n.summaryMilestoneUnlocked,
               subtitle: l10n.summaryMilestoneDetail(
                 MilestonesSection.categoryLabel(l10n, unlock.category),
-                unlock.tier,
+                l10n.milestoneTierName(unlock.tier),
               ),
             ),
           ),

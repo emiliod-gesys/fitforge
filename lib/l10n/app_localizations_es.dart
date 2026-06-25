@@ -155,10 +155,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get experienceLevel => 'Nivel de experiencia';
 
   @override
-  String get activityLevel => 'Actividad diaria';
+  String get activityLevel => 'Actividad fuera del gym';
 
   @override
-  String get activityLevelTitle => 'Nivel de actividad';
+  String get activityLevelTitle => 'Actividad diaria aparte del gym';
+
+  @override
+  String get activityLevelHint =>
+      'Tu rutina diaria sin contar entrenamientos de fuerza ni cardio';
 
   @override
   String get activitySedentary => 'Sedentario';
@@ -310,6 +314,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get playerLevelMax => 'Nivel máximo alcanzado';
 
   @override
+  String get playerLevelTierMythic => 'Mítico';
+
+  @override
+  String get playerLevelTierImmortal => 'Inmortal';
+
+  @override
   String xpEarned(int xp) {
     return '+$xp XP';
   }
@@ -397,6 +407,30 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get milestoneAllUnlocked => '¡Todas las medallas desbloqueadas!';
+
+  @override
+  String get milestoneTierBronze => 'Bronce';
+
+  @override
+  String get milestoneTierSilver => 'Plata';
+
+  @override
+  String get milestoneTierGold => 'Oro';
+
+  @override
+  String get milestoneTierPlatinum => 'Platino';
+
+  @override
+  String get milestoneTierDiamond => 'Diamante';
+
+  @override
+  String get milestoneTierMaster => 'Maestro';
+
+  @override
+  String get milestoneTierGrandmaster => 'Gran maestro';
+
+  @override
+  String get milestoneTierLegend => 'Leyenda';
 
   @override
   String get personalRecords => 'Records personales';
@@ -1543,8 +1577,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String shareMilestoneUnlocked(String category, int tier) {
-    return '🏅 Medalla $category — tier $tier';
+  String shareMilestoneUnlocked(String category, String tierName) {
+    return '🏅 Medalla $category — $tierName';
   }
 
   @override
@@ -1559,8 +1593,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get summaryMilestoneUnlocked => 'Nueva medalla';
 
   @override
-  String summaryMilestoneDetail(String category, int tier) {
-    return '$category · Tier $tier';
+  String summaryMilestoneDetail(String category, String tierName) {
+    return '$category · $tierName';
   }
 
   @override
