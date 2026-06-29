@@ -9,10 +9,13 @@ import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
+import '../../data/avatar_catalog.dart';
+import '../../services/supabase_service.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/ai_preferences.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../widgets/body_metric_card.dart';
+import '../../widgets/body_metric_health_legend.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
@@ -165,11 +168,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 8),
                 metricsAsync.when(
                   skipLoadingOnReload: true,
-                  data: (snapshots) => _MetricsGrid(
-                    snapshots: snapshots,
-                    profile: profile,
-                    unitSystem: unitSystem,
-                    onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
+                  data: (snapshots) => Column(
+                    children: [
+                      _MetricsGrid(
+                        snapshots: snapshots,
+                        profile: profile,
+                        unitSystem: unitSystem,
+                        onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
+                      ),
+                      const SizedBox(height: 12),
+                      const BodyMetricHealthLegend(),
+                    ],
                   ),
                   loading: () => const Padding(
                     padding: EdgeInsets.all(32),
@@ -302,11 +311,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _pickAvatar(UserProfile? profile) async {
+    final email = SupabaseService.currentUser?.email;
     final selected = await showAvatarPickerSheet(
       context,
       selectedId: profile?.avatarUrl,
+      userEmail: email,
     );
     if (selected == null) return;
+    if (!AvatarCatalog.canSelect(selected, email)) return;
 
     await ref.read(profileServiceProvider).updateProfile({'avatar_url': selected});
     ref.invalidate(profileProvider);

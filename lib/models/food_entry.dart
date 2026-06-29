@@ -1,4 +1,5 @@
 import '../core/utils/food_serving_parser.dart';
+import 'manual_activity_entry.dart';
 
 enum MealType {
   breakfast,
@@ -249,26 +250,32 @@ class DailyNutritionSummary {
   final DateTime day;
   final int baseCalorieGoal;
   final int workoutCaloriesBurned;
+  final int manualActivityCaloriesBurned;
   final int calorieBudget;
   final int caloriesEaten;
   final int caloriesRemaining;
   final MacroTargets targets;
   final MacroTotals eaten;
   final Map<MealType, List<FoodEntry>> entriesByMeal;
+  final List<ManualActivityEntry> manualActivities;
   final bool bmrAvailable;
 
   const DailyNutritionSummary({
     required this.day,
     required this.baseCalorieGoal,
     required this.workoutCaloriesBurned,
+    this.manualActivityCaloriesBurned = 0,
     required this.calorieBudget,
     required this.caloriesEaten,
     required this.caloriesRemaining,
     required this.targets,
     required this.eaten,
     required this.entriesByMeal,
+    this.manualActivities = const [],
     this.bmrAvailable = true,
   });
+
+  int get totalCaloriesBurned => workoutCaloriesBurned + manualActivityCaloriesBurned;
 
   MacroTotals eatenForMeal(MealType meal) => MacroTotals.fromEntries(entriesByMeal[meal] ?? const []);
 

@@ -144,6 +144,12 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
     return l10n.seriesProgress(total, done);
   }
 
+  bool _isExerciseCompleted(WorkoutExercise exercise) {
+    final total = exercise.sets.length;
+    if (total == 0) return false;
+    return exercise.sets.where((s) => s.completed).length == total;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -214,6 +220,7 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                       listIndex: index,
                       exercise: exercise,
                       subtitle: _subtitle(exercise, l10n),
+                      isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: true,
                       onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
@@ -233,6 +240,7 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                       listIndex: index,
                       exercise: exercise,
                       subtitle: _subtitle(exercise, l10n),
+                      isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: false,
                       onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
@@ -252,9 +260,12 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
 }
 
 class _ExerciseListRow extends ConsumerWidget {
+  static const _completedGreen = Color(0xFF22C55E);
+
   final int listIndex;
   final WorkoutExercise exercise;
   final String subtitle;
+  final bool isCompleted;
   final bool showConnector;
   final bool showDragHandle;
   final VoidCallback onTap;
@@ -266,6 +277,7 @@ class _ExerciseListRow extends ConsumerWidget {
     required this.listIndex,
     required this.exercise,
     required this.subtitle,
+    required this.isCompleted,
     required this.showConnector,
     required this.showDragHandle,
     required this.onTap,
@@ -330,9 +342,23 @@ class _ExerciseListRow extends ConsumerWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              subtitle,
+                              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                            ),
+                          ),
+                          if (isCompleted) ...[
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: _completedGreen,
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

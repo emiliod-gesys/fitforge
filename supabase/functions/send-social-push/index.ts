@@ -129,12 +129,60 @@ async function sendFcm(
   }
 }
 
+interface PushSecrets {
+  firebase_service_account?: string;
+  webhook_secret?: string;
+}
+
+async function loadPushSecrets(
+  supabase: ReturnType<typeof createClient>,
+): Promise<{ serviceAccountJson: string; webhookSecret: string | null }> {
+  let serviceAccountJson = "";
+  let webhookSecret: string | null = null;
+
+  const { data, error } = await supabase.rpc("get_push_notification_secrets");
+  if (!error && data) {
+    const secrets = data as PushSecrets;
+    serviceAccountJson = secrets.firebase_service_account ?? "";
+    webhookSecret = secrets.webhook_secret ?? null;
+  }
+
+  // Vault primero; variables de entorno solo como respaldo local.
+  serviceAccountJson = serviceAccountJson || Deno.env.get("FIREBASE_SERVICE_ACCOUNT") || "";
+  webhookSecret = webhookSecret || Deno.env.get("WEBHOOK_SECRET") || null;
+
+  return { serviceAccountJson, webhookSecret };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  const webhookSecret = Deno.env.get("WEBHOOK_SECRET");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return new Response(
+      JSON.stringify({ error: "Missing Supabase env" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  let serviceAccountJson: string;
+  let webhookSecret: string | null;
+  try {
+    ({ serviceAccountJson, webhookSecret } = await loadPushSecrets(supabase));
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (webhookSecret) {
     const auth = req.headers.get("Authorization");
     if (auth !== `Bearer ${webhookSecret}`) {
@@ -142,13 +190,9 @@ Deno.serve(async (req) => {
     }
   }
 
-  const serviceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT");
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-  if (!serviceAccountJson || !supabaseUrl || !serviceRoleKey) {
+  if (!serviceAccountJson) {
     return new Response(
-      JSON.stringify({ error: "Missing FIREBASE_SERVICE_ACCOUNT or Supabase env" }),
+      JSON.stringify({ error: "Missing FIREBASE_SERVICE_ACCOUNT" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -179,7 +223,6 @@ Deno.serve(async (req) => {
   }
 
   const sa = JSON.parse(serviceAccountJson) as ServiceAccount;
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const { data: tokens, error: tokensError } = await supabase
     .from("user_push_tokens")

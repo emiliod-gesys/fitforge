@@ -272,5 +272,31 @@ void main() {
       expect(muscles, contains('Tríceps'));
       expect(muscles, isNot(contains('Bíceps')));
     });
+
+    test('ejercicio de piernas con gluteos secundarios en catalogo afecta recuperacion', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_legs_belt_squat_machine',
+          name: 'Sentadilla con cinturón en máquina',
+          category: 'Piernas',
+          muscles: ['Cuádriceps', 'Glúteos', 'Isquios'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Sentadilla con cinturón en máquina',
+        exerciseId: 'ff_legs_belt_squat_machine',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+    });
+
+    test('hack squat por nombre tambien etiqueta gluteos', () {
+      expect(MuscleInference.fromExerciseName('Hack Squat Machine'), contains('Glúteos'));
+      expect(MuscleInference.fromExerciseName('Hack Squat Machine'), contains('Piernas'));
+    });
   });
 }

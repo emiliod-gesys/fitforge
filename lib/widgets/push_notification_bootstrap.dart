@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/app_providers.dart';
+import '../services/local_notification_service.dart';
 import '../services/push_notification_service.dart';
 
 /// Inicializa FCM al iniciar sesión y registra el token en Supabase.
@@ -27,6 +30,16 @@ class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBoot
   }
 
   Future<void> _syncPush() async {
+    if (LocalNotificationService.isSupported) {
+      final local = LocalNotificationService.instance;
+      await local.initialize(onNotificationTap: () {
+        if (mounted) widget.router.go('/social');
+      });
+      if (Platform.isAndroid || Platform.isIOS) {
+        await local.requestPermission();
+      }
+    }
+
     if (!PushNotificationService.isAvailable) return;
 
     final push = ref.read(pushNotificationServiceProvider);

@@ -1,5 +1,6 @@
 import '../../models/body_metric.dart';
 import '../../models/food_entry.dart';
+import '../../models/manual_activity_entry.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
 import 'bmr_calculator.dart';
@@ -13,6 +14,7 @@ abstract final class DailyNutritionBudget {
     required DateTime day,
     required List<FoodEntry> entries,
     required List<Workout> workoutsCompletedOnDay,
+    List<ManualActivityEntry> manualActivities = const [],
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
   }) {
@@ -46,7 +48,17 @@ abstract final class DailyNutritionBudget {
       );
     }
 
-    final calorieBudget = baseGoal + workoutBurned;
+    var manualBurned = 0;
+    final dayActivities = <ManualActivityEntry>[];
+    for (final activity in manualActivities) {
+      final local = activity.loggedAt.toLocal();
+      if (!local.isBefore(dayStart) && local.isBefore(dayEnd)) {
+        dayActivities.add(activity);
+        manualBurned += activity.caloriesKcal;
+      }
+    }
+
+    final calorieBudget = baseGoal + workoutBurned + manualBurned;
     final remaining = (calorieBudget - eaten.caloriesKcal).clamp(0, 99999);
 
     final targets = _macroTargets(
@@ -69,12 +81,14 @@ abstract final class DailyNutritionBudget {
       day: dayStart,
       baseCalorieGoal: baseGoal,
       workoutCaloriesBurned: workoutBurned,
+      manualActivityCaloriesBurned: manualBurned,
       calorieBudget: calorieBudget,
       caloriesEaten: eaten.caloriesKcal,
       caloriesRemaining: remaining,
       targets: targets,
       eaten: eaten,
       entriesByMeal: byMeal,
+      manualActivities: dayActivities,
       bmrAvailable: bmr != null,
     );
   }

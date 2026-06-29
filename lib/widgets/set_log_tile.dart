@@ -3,6 +3,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
+import '../models/exercise_logging.dart';
 import '../models/workout.dart';
 
 class SetLogTile extends StatefulWidget {
@@ -11,6 +12,8 @@ class SetLogTile extends StatefulWidget {
   final String exerciseName;
   final bool? perArmWeight;
   final bool? weightOptional;
+  final ExerciseLoadMode? loadMode;
+  final double? bodyWeightKg;
   final bool isLast;
   final bool isSaving;
   final void Function(WorkoutSet set) onChanged;
@@ -24,6 +27,8 @@ class SetLogTile extends StatefulWidget {
     required this.exerciseName,
     this.perArmWeight,
     this.weightOptional,
+    this.loadMode,
+    this.bodyWeightKg,
     this.isLast = true,
     this.isSaving = false,
     required this.onChanged,
@@ -93,13 +98,19 @@ class _SetLogTileState extends State<SetLogTile> {
 
   double? _parsedWeightKg() {
     final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
-    if (parsed == null || parsed <= 0) return null;
+    if (parsed == null) return null;
+    if (widget.weightOptional == true) {
+      if (parsed < 0) return null;
+      if (parsed == 0) return 0;
+    } else if (parsed <= 0) {
+      return null;
+    }
     return UnitConverter.displayToKg(parsed, widget.unitSystem);
   }
 
   WorkoutSet _buildSet({bool? completed}) {
     return widget.set.copyWith(
-      weight: _parsedWeightKg(),
+      weight: _parsedWeightKg() ?? (widget.weightOptional == true ? 0.0 : null),
       reps: int.tryParse(_repsController.text) ?? widget.set.reps,
       completed: completed ?? widget.set.completed,
     );
@@ -166,7 +177,27 @@ class _SetLogTileState extends State<SetLogTile> {
       widget.exerciseName,
       perArmWeight: widget.perArmWeight,
       weightOptional: widget.weightOptional,
+      loadMode: widget.loadMode,
+      additionalSuffix: l10n.weightAdditionalSuffix,
+      perArmSuffix: l10n.weightPerArmSuffix,
     );
+    final parsedKg = _parsedWeightKg();
+    final effectiveKg = ExerciseLoad.effectiveWeightKg(
+      widget.set.copyWith(weight: parsedKg),
+      exerciseName: widget.exerciseName,
+      loadMode: widget.loadMode,
+      bodyWeightKg: widget.bodyWeightKg,
+    );
+    final showEffectiveLabel = effectiveKg != null &&
+        effectiveKg > 0 &&
+        (parsedKg == null || (effectiveKg - parsedKg).abs() > 0.01);
+    final effectiveLabel = showEffectiveLabel
+        ? l10n.effectiveWeightLabel(
+            UnitConverter.formatMass(effectiveKg!, widget.unitSystem),
+          )
+        : null;
+    final reserveEffectiveSlot = widget.loadMode == ExerciseLoadMode.bodyweight ||
+        widget.weightOptional == true;
     final isDone = widget.set.completed && !_editing;
     final isActive = _fieldsEnabled && !isDone;
 
@@ -223,20 +254,41 @@ class _SetLogTileState extends State<SetLogTile> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: _weightController,
-                        enabled: _fieldsEnabled,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextField(
+                            controller: _weightController,
+                            enabled: _fieldsEnabled,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                            decoration: _fieldDecoration(
+                              label: weightLabel,
+                              emphasize: isActive,
                             ),
-                        decoration: _fieldDecoration(
-                          label: weightLabel,
-                          emphasize: isActive,
-                        ),
+                          ),
+                          if (reserveEffectiveSlot)
+                            SizedBox(
+                              height: 18,
+                              child: effectiveLabel != null
+                                  ? Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        effectiveLabel,
+                                        style: const TextStyle(
+                                          color: AppColors.textMuted,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -255,34 +307,37 @@ class _SetLogTileState extends State<SetLogTile> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    if (isDone)
-                      IconButton(
-                        tooltip: l10n.edit,
-                        onPressed: () => setState(() => _editing = true),
-                        icon: const Icon(Icons.edit_outlined, size: 22),
-                      )
-                    else
-                      FilledButton(
-                        onPressed: widget.isSaving ? null : _submit,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.orange,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: widget.isSaving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                    SizedBox(
+                      height: 48,
+                      child: isDone
+                          ? IconButton(
+                              tooltip: l10n.edit,
+                              onPressed: () => setState(() => _editing = true),
+                              icon: const Icon(Icons.edit_outlined, size: 22),
+                            )
+                          : FilledButton(
+                              onPressed: widget.isSaving ? null : _submit,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.orange,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                minimumSize: const Size(72, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              )
-                            : Text(l10n.done),
-                      ),
+                              ),
+                              child: widget.isSaving
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(l10n.done),
+                            ),
+                    ),
                   ],
                 ),
               ),

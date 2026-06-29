@@ -188,8 +188,10 @@ abstract final class MuscleInference {
       'cuadriceps',
       'cuádriceps',
       'quadriceps',
+      'quads',
       'isquio',
       'hamstring',
+      'hamstrings',
       'pantorrilla',
       'calf',
       'gemelo',
@@ -198,6 +200,7 @@ abstract final class MuscleInference {
       'soleus',
       'soleo',
       'sóleo',
+      'adductor',
     ])) {
       return 'Piernas';
     }
@@ -513,7 +516,27 @@ abstract final class MuscleInference {
       'empuje de cadera',
       'puente de gluteo',
       'glute bridge',
-    ]);
+      'belt squat',
+      'hack squat',
+      'romanian deadlift',
+      'peso muerto rumano',
+      'rdl',
+      'reverse hyper',
+      'glute drive',
+      'cable kickback',
+      'kickback en polea',
+      'good morning',
+      'buenos dias',
+      'bulgarian split',
+      'split squat',
+      'sentadilla bulgara',
+      'step up',
+      'step-up',
+      'subida al cajon',
+    ]) ||
+        (_hasWord(name, 'lunge') || _hasWord(name, 'zancada')) ||
+        (_hasWord(name, 'kickback') &&
+            _hasAny(name, ['glute', 'gluteo', 'glúteo', 'cadera', 'hip', 'polea', 'cable']));
   }
 
   static bool _isDedicatedAbsExerciseName(String name) {

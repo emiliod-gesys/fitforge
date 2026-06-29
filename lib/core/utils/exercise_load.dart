@@ -29,20 +29,122 @@ abstract final class ExerciseLoad {
     return null;
   }
 
-  static bool? weightOptionalForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+  static bool? weightOptionalForExerciseId(
+    String exerciseId,
+    Iterable<Exercise> catalog, {
+    String? exerciseName,
+  }) {
     final exercise = _findInCatalog(exerciseId, catalog);
-    if (exercise == null) return null;
-    if (exercise.isBundled || exercise.isUserCustom) {
+    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
       return exercise.weightOptional || exercise.loadMode.weightOptional;
     }
+    final name = exerciseName ?? exercise?.name ?? exerciseId;
+    if (_inferBodyweightByName(name)) return true;
     return null;
   }
 
-  static ExerciseLoadMode? loadModeForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+  static ExerciseLoadMode? loadModeForExerciseId(
+    String exerciseId,
+    Iterable<Exercise> catalog, {
+    String? exerciseName,
+  }) {
     final exercise = _findInCatalog(exerciseId, catalog);
-    if (exercise == null) return null;
-    if (exercise.isBundled || exercise.isUserCustom) return exercise.loadMode;
-    return null;
+    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
+      return exercise.loadMode;
+    }
+    return _inferLoadModeByName(exerciseName ?? exercise?.name ?? exerciseId);
+  }
+
+  /// Ejercicios donde el usuario puede alternar peso por brazo vs. conjunto en la sesión.
+  static bool supportsPerArmToggle(
+    String exerciseId,
+    Iterable<Exercise> catalog,
+    String exerciseName,
+  ) {
+    final exercise = _findInCatalog(exerciseId, catalog);
+
+    if (exercise != null) {
+      if (exercise.isCardio ||
+          exercise.loadMode == ExerciseLoadMode.cardioMachine ||
+          exercise.loadMode == ExerciseLoadMode.cardioOutdoor) {
+        return false;
+      }
+    }
+
+    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
+      if (exercise.loadMode == ExerciseLoadMode.machineStack ||
+          exercise.loadMode == ExerciseLoadMode.dualLoad) {
+        return true;
+      }
+      if (exercise.perArmWeight) return true;
+    }
+
+    if (exercise != null && exercise.equipment.any(_isMachineEquipment)) {
+      return true;
+    }
+
+    if (_inferMachineByName(exerciseName)) return true;
+
+    final n = _normalize(exerciseName);
+    if (_usesDumbbell(n) && !_singleDumbbellBothHands(n)) return true;
+    if (_isPerArmCable(n)) return true;
+    return false;
+  }
+
+  static bool resolvePerArmWeight({
+    required String exerciseId,
+    required Iterable<Exercise> catalog,
+    required String exerciseName,
+    bool? sessionOverride,
+  }) {
+    if (sessionOverride != null) return sessionOverride;
+    return isPerArmWeight(
+      exerciseName,
+      perArmWeight: perArmWeightForExerciseId(exerciseId, catalog),
+    );
+  }
+
+  static bool isBodyweightLoad(
+    String exerciseId,
+    Iterable<Exercise> catalog,
+    String exerciseName,
+  ) {
+    final mode = loadModeForExerciseId(
+      exerciseId,
+      catalog,
+      exerciseName: exerciseName,
+    );
+    if (mode == ExerciseLoadMode.bodyweight) return true;
+    if (mode == ExerciseLoadMode.assistedBodyweight) return true;
+    return _inferBodyweightByName(exerciseName);
+  }
+
+  /// Peso adicional registrado (0 si vacío en ejercicios de peso corporal).
+  static double additionalWeightKg(WorkoutSet set) {
+    return set.weight ?? 0;
+  }
+
+  /// Peso efectivo para volumen y récords: corporal + adicional en bodyweight.
+  static double? effectiveWeightKg(
+    WorkoutSet set, {
+    required String exerciseName,
+    ExerciseLoadMode? loadMode,
+    double? bodyWeightKg,
+  }) {
+    if (set.isCardio) return null;
+    if (isAssistedExercise(exerciseName, loadMode: loadMode)) return null;
+
+    final additional = additionalWeightKg(set);
+    final mode = loadMode ?? _inferLoadModeByName(exerciseName);
+
+    if (mode == ExerciseLoadMode.bodyweight) {
+      final base = (bodyWeightKg ?? 0) * bodyweightFractionForExercise(exerciseName);
+      if (base <= 0 && additional <= 0) return null;
+      return base + additional;
+    }
+
+    if (additional <= 0) return null;
+    return additional;
   }
 
   /// En ejercicios asistidos el peso registrado es contrapeso a favor, no carga levantada.
@@ -95,11 +197,20 @@ abstract final class ExerciseLoad {
     bool? perArmWeight,
     bool? unilateral,
     ExerciseLoadMode? loadMode,
+    double? bodyWeightKg,
   }) {
     if (set.isCardio) return 0;
     if (isAssistedExercise(exerciseName, loadMode: loadMode)) return 0;
-    if (!set.completed || set.weight == null || set.weight! <= 0) return 0;
-    return set.weight! *
+
+    final effective = effectiveWeightKg(
+      set,
+      exerciseName: exerciseName,
+      loadMode: loadMode,
+      bodyWeightKg: bodyWeightKg,
+    );
+    if (effective == null || effective <= 0 || !set.completed || set.reps <= 0) return 0;
+
+    return effective *
         set.reps *
         volumeMultiplier(
           exerciseName,
@@ -108,19 +219,171 @@ abstract final class ExerciseLoad {
         );
   }
 
+  static double exerciseTotalVolumeKg(
+    WorkoutExercise exercise, {
+    required Iterable<Exercise> catalog,
+    Map<String, bool>? perArmOverrides,
+    double? bodyWeightKg,
+  }) {
+    final loadMode = loadModeForExerciseId(
+      exercise.exerciseId,
+      catalog,
+      exerciseName: exercise.exerciseName,
+    );
+    final perArm = resolvePerArmWeight(
+      exerciseId: exercise.exerciseId,
+      catalog: catalog,
+      exerciseName: exercise.exerciseName,
+      sessionOverride: perArmOverrides?[exercise.exerciseId],
+    );
+    final unilateral = unilateralForExerciseId(exercise.exerciseId, catalog);
+
+    return exercise.sets.fold<double>(
+      0,
+      (sum, set) =>
+          sum +
+          setVolumeKg(
+            set,
+            exerciseName: exercise.exerciseName,
+            perArmWeight: perArm,
+            unilateral: unilateral,
+            loadMode: loadMode,
+            bodyWeightKg: bodyWeightKg,
+          ),
+    );
+  }
+
   static String weightLabel(
     String unitLabel,
     String exerciseName, {
     bool? perArmWeight,
     bool? weightOptional,
+    ExerciseLoadMode? loadMode,
+    String additionalSuffix = '(+ extra)',
+    String perArmSuffix = '(por brazo)',
   }) {
-    if (weightOptional == true) {
-      return '$unitLabel (adicional)';
+    final isBw = weightOptional == true ||
+        loadMode == ExerciseLoadMode.bodyweight ||
+        loadMode == ExerciseLoadMode.assistedBodyweight ||
+        _inferBodyweightByName(exerciseName);
+    if (isBw) {
+      return '$unitLabel $additionalSuffix';
     }
     if (isPerArmWeight(exerciseName, perArmWeight: perArmWeight)) {
-      return '$unitLabel (por brazo)';
+      return '$unitLabel $perArmSuffix';
     }
     return unitLabel;
+  }
+
+  /// Fracción del peso corporal que cuenta como carga en ejercicios de peso corporal.
+  /// Abdominales/crunch: solo el torso que se flexiona (~30–42 %). Dominadas/fondos: ~100 %.
+  static double bodyweightFractionForExercise(String exerciseName) {
+    final n = _normalize(exerciseName);
+    if (_isPartialTorsoCoreExercise(n)) {
+      if (n.contains('declin')) return 0.42;
+      return 0.32;
+    }
+    if (_hasAny(n, [
+      'push up',
+      'push-up',
+      'pushup',
+      'flexion de brazos',
+      'flexiones',
+    ])) {
+      return 0.65;
+    }
+    return 1.0;
+  }
+
+  static bool _isPartialTorsoCoreExercise(String n) {
+    if (_hasAny(n, ['machine', 'maquina', 'polea', 'cable', 'barbell', 'barra'])) {
+      return false;
+    }
+    const patterns = [
+      'crunch',
+      'sit-up',
+      'sit up',
+      'situp',
+      'abdominal',
+      'bicicleta',
+      'bicycle crunch',
+      'leg raise',
+      'elevacion de piernas',
+      'dead bug',
+      'v-up',
+      'jackknife',
+      'russian twist',
+    ];
+    return patterns.any((p) => n.contains(_normalize(p)));
+  }
+
+  static ExerciseLoadMode? _inferLoadModeByName(String name) {
+    if (_inferBodyweightByName(name)) return ExerciseLoadMode.bodyweight;
+    if (isAssistedExercise(name)) return ExerciseLoadMode.assistedBodyweight;
+    return null;
+  }
+
+  static bool _inferMachineByName(String name) {
+    final n = _normalize(name);
+    return n.contains('maquina') || _hasWord(n, 'machine');
+  }
+
+  static bool _isMachineEquipment(String equipment) {
+    final n = _normalize(equipment);
+    return n.contains('maquina') || n == 'machine';
+  }
+
+  static bool _inferBodyweightByName(String name) {
+    final n = _normalize(name);
+    if (isAssistedExercise(n)) return true;
+    return _hasAny(n, [
+      'pull up',
+      'pull-up',
+      'pullup',
+      'chin up',
+      'chin-up',
+      'chinup',
+      'dominada',
+      'muscle up',
+      'muscle-up',
+      'parallel bar dip',
+      'fondos en paralela',
+      'fondos en paralelas',
+      'bench dip',
+      'fondos en banco',
+      'push up',
+      'push-up',
+      'pushup',
+      'flexion',
+      'flexión',
+      'plancha',
+      'plank',
+      'l-sit',
+      'hanging leg raise',
+      'inverted row',
+      'remo invertido',
+      'australian pull',
+    ]) ||
+        (_hasWord(n, 'dip') && !_hasAny(n, ['machine', 'maquina', 'máquina', 'cable', 'polea'])) ||
+        (_hasWord(n, 'fondos') && !_hasAny(n, ['maquina', 'máquina', 'machine']));
+  }
+
+  static bool _hasAny(String name, List<String> terms) {
+    for (final term in terms) {
+      final t = _normalize(term);
+      if (t.contains(' ')) {
+        if (name.contains(t)) return true;
+      } else if (_hasWord(name, t)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _hasWord(String name, String word) {
+    final w = _normalize(word);
+    if (w.isEmpty) return false;
+    return RegExp(r'(^|[^a-z])' + RegExp.escape(w) + r'([^a-z]|$)').hasMatch(name);
   }
 
   static String _normalize(String name) {

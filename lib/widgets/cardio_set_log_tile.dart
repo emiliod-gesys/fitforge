@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/cardio_format.dart';
+import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_logging.dart';
 import '../models/workout.dart';
@@ -32,7 +33,8 @@ class CardioSetLogTile extends StatefulWidget {
 }
 
 class _CardioSetLogTileState extends State<CardioSetLogTile> {
-  late TextEditingController _durationController;
+  late TextEditingController _minutesController;
+  late TextEditingController _secondsController;
   late TextEditingController _distanceController;
   late TextEditingController _inclineController;
   late TextEditingController _stepsController;
@@ -43,10 +45,12 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
   @override
   void initState() {
     super.initState();
-    _durationController = TextEditingController(
-      text: widget.set.durationSeconds != null
-          ? CardioFormat.duration(widget.set.durationSeconds)
-          : '',
+    final parts = CardioFormat.durationParts(widget.set.durationSeconds);
+    _minutesController = TextEditingController(
+      text: parts.minutes > 0 ? '${parts.minutes}' : '',
+    );
+    _secondsController = TextEditingController(
+      text: parts.seconds > 0 ? '${parts.seconds}' : '',
     );
     _distanceController = TextEditingController(
       text: _distanceDisplay(widget.set.distanceMeters),
@@ -67,9 +71,25 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
     return (meters / 1000).toStringAsFixed(2);
   }
 
+  void _syncDurationFields() {
+    final parts = CardioFormat.durationParts(widget.set.durationSeconds);
+    _minutesController.text = parts.minutes > 0 ? '${parts.minutes}' : '';
+    _secondsController.text = parts.seconds > 0 ? '${parts.seconds}' : '';
+  }
+
+  @override
+  void didUpdateWidget(CardioSetLogTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.set.durationSeconds != widget.set.durationSeconds && !_editing) {
+      _syncDurationFields();
+    }
+    if (widget.set.completed) _editing = false;
+  }
+
   @override
   void dispose() {
-    _durationController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
     _distanceController.dispose();
     _inclineController.dispose();
     _stepsController.dispose();
@@ -78,7 +98,10 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
 
   WorkoutSet _buildSet({bool? completed}) {
     return widget.set.copyWith(
-      durationSeconds: CardioFormat.parseDuration(_durationController.text),
+      durationSeconds: CardioFormat.durationFromPartStrings(
+        _minutesController.text,
+        _secondsController.text,
+      ),
       distanceMeters: CardioFormat.parseDistanceMeters(
         _distanceController.text,
         widget.unitSystem,
@@ -119,6 +142,129 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
       fillColor: _fieldsEnabled ? AppColors.cardElevated : AppColors.card.withValues(alpha: 0.6),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  Widget _metricField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.number,
+    bool decimal = false,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: _fieldsEnabled,
+      keyboardType: decimal
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : keyboardType,
+      decoration: _fieldDecoration(label),
+      onSubmitted: (_) => _submit(),
+    );
+  }
+
+  Widget _buildMetricFields(AppLocalizations l10n) {
+    final hasDuration = widget.config.tracksDuration;
+    final hasDistance = widget.config.tracksDistance;
+    final hasIncline = widget.config.tracksIncline;
+    final hasDifficulty = widget.config.tracksDifficulty;
+    final hasSteps = widget.config.tracksSteps;
+
+    final topRow = <Widget>[];
+    if (hasDuration) {
+      topRow.add(
+        _DurationInputRow(
+          minutesController: _minutesController,
+          secondsController: _secondsController,
+          enabled: _fieldsEnabled,
+          minutesLabel: l10n.minutes,
+          secondsLabel: l10n.cardioSecondsShort,
+          decorationBuilder: _fieldDecoration,
+          onSubmitted: _submit,
+        ),
+      );
+    }
+    if (hasDistance) {
+      if (topRow.isNotEmpty) topRow.add(const SizedBox(width: 8));
+      topRow.add(
+        Expanded(
+          child: _metricField(
+            controller: _distanceController,
+            label: '${l10n.cardioDistance} (${CardioFormat.distanceInputLabel(widget.unitSystem)})',
+            decimal: true,
+          ),
+        ),
+      );
+    }
+    if (hasDifficulty && !hasDistance) {
+      if (topRow.isNotEmpty) topRow.add(const SizedBox(width: 8));
+      topRow.add(
+        Expanded(
+          child: _metricField(
+            controller: _inclineController,
+            label: l10n.cardioDifficulty,
+            decimal: true,
+          ),
+        ),
+      );
+    }
+
+    final bottomRow = <Widget>[];
+    if (hasIncline) {
+      bottomRow.add(
+        SizedBox(
+          width: 120,
+          child: _metricField(
+            controller: _inclineController,
+            label: l10n.cardioIncline,
+            decimal: true,
+          ),
+        ),
+      );
+    }
+    if (hasDifficulty && hasDistance) {
+      if (bottomRow.isNotEmpty) bottomRow.add(const SizedBox(width: 8));
+      bottomRow.add(
+        SizedBox(
+          width: 120,
+          child: _metricField(
+            controller: _inclineController,
+            label: l10n.cardioDifficulty,
+            decimal: true,
+          ),
+        ),
+      );
+    }
+    if (hasSteps) {
+      if (bottomRow.isNotEmpty) bottomRow.add(const SizedBox(width: 8));
+      bottomRow.add(
+        SizedBox(
+          width: 120,
+          child: _metricField(
+            controller: _stepsController,
+            label: l10n.cardioSteps,
+          ),
+        ),
+      );
+    }
+
+    if (topRow.isEmpty && bottomRow.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (topRow.isNotEmpty)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: topRow,
+          ),
+        if (bottomRow.isNotEmpty) ...[
+          if (topRow.isNotEmpty) const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: bottomRow,
+          ),
+        ],
+      ],
     );
   }
 
@@ -186,69 +332,7 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
                 ),
                 if (!isDone) ...[
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (widget.config.tracksDuration)
-                        SizedBox(
-                          width: 110,
-                          child: TextField(
-                            controller: _durationController,
-                            enabled: _fieldsEnabled,
-                            keyboardType: TextInputType.datetime,
-                            decoration: _fieldDecoration(l10n.cardioDuration),
-                            onSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                      if (widget.config.tracksDistance)
-                        SizedBox(
-                          width: 110,
-                          child: TextField(
-                            controller: _distanceController,
-                            enabled: _fieldsEnabled,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _fieldDecoration(
-                              '${l10n.cardioDistance} (${CardioFormat.distanceInputLabel(widget.unitSystem)})',
-                            ),
-                            onSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                      if (widget.config.tracksIncline)
-                        SizedBox(
-                          width: 100,
-                          child: TextField(
-                            controller: _inclineController,
-                            enabled: _fieldsEnabled,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _fieldDecoration(l10n.cardioIncline),
-                            onSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                      if (widget.config.tracksDifficulty)
-                        SizedBox(
-                          width: 120,
-                          child: TextField(
-                            controller: _inclineController,
-                            enabled: _fieldsEnabled,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _fieldDecoration(l10n.cardioDifficulty),
-                            onSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                      if (widget.config.tracksSteps)
-                        SizedBox(
-                          width: 100,
-                          child: TextField(
-                            controller: _stepsController,
-                            enabled: _fieldsEnabled,
-                            keyboardType: TextInputType.number,
-                            decoration: _fieldDecoration(l10n.cardioSteps),
-                            onSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                    ],
-                  ),
+                  _buildMetricFields(l10n),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
@@ -269,6 +353,69 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DurationInputRow extends StatelessWidget {
+  final TextEditingController minutesController;
+  final TextEditingController secondsController;
+  final bool enabled;
+  final String minutesLabel;
+  final String secondsLabel;
+  final InputDecoration Function(String label) decorationBuilder;
+  final VoidCallback onSubmitted;
+
+  const _DurationInputRow({
+    required this.minutesController,
+    required this.secondsController,
+    required this.enabled,
+    required this.minutesLabel,
+    required this.secondsLabel,
+    required this.decorationBuilder,
+    required this.onSubmitted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 72,
+          child: TextField(
+            controller: minutesController,
+            enabled: enabled,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            decoration: decorationBuilder(minutesLabel),
+            onSubmitted: (_) => onSubmitted(),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            ':',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 72,
+          child: TextField(
+            controller: secondsController,
+            enabled: enabled,
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            decoration: decorationBuilder(secondsLabel),
+            onSubmitted: (_) => onSubmitted(),
+          ),
+        ),
+      ],
     );
   }
 }

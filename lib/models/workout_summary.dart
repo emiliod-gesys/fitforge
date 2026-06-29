@@ -131,37 +131,43 @@ abstract final class WorkoutSummaryBuilder {
     List<PersonalRecord> newPersonalRecords = const [],
   }) {
     final catalog = exerciseCatalog ?? const [];
+    final bodyWeightKg = profile?.bodyWeight;
     final totalVolumeKg = workout.exercises.fold<double>(
       0,
-      (sum, ex) => sum +
-          ex.totalVolume(
-            perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
-            unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, catalog),
-            loadMode: ExerciseLoad.loadModeForExerciseId(ex.exerciseId, catalog),
+      (sum, ex) =>
+          sum +
+          ExerciseLoad.exerciseTotalVolumeKg(
+            ex,
+            catalog: catalog,
+            bodyWeightKg: bodyWeightKg,
           ),
     );
     final totalReps = _totalReps(workout);
-    final maxWeightKg = _maxWeightKg(workout);
+    final maxWeightKg = _maxWeightKg(workout, catalog, bodyWeightKg);
     final prExerciseIds = newPersonalRecords.map((r) => r.exerciseId).toSet();
     final exercises = _exerciseLines(
       workout: workout,
       previousSameRoutine: previousSameRoutine,
       exerciseCatalog: catalog,
       prExerciseIds: prExerciseIds,
+      bodyWeightKg: bodyWeightKg,
     );
     final trainedMuscleGroups = _trainedMuscleGroups(workout, catalog);
 
     final prevReps = previousSameRoutine != null ? _totalReps(previousSameRoutine) : null;
     final prevVolume = previousSameRoutine?.exercises.fold<double>(
       0,
-      (s, e) => s +
-          e.totalVolume(
-            perArmWeight: ExerciseLoad.perArmWeightForExerciseId(e.exerciseId, catalog),
-            unilateral: ExerciseLoad.unilateralForExerciseId(e.exerciseId, catalog),
-            loadMode: ExerciseLoad.loadModeForExerciseId(e.exerciseId, catalog),
+      (s, e) =>
+          s +
+          ExerciseLoad.exerciseTotalVolumeKg(
+            e,
+            catalog: catalog,
+            bodyWeightKg: bodyWeightKg,
           ),
     );
-    final prevMax = previousSameRoutine != null ? _maxWeightKg(previousSameRoutine) : null;
+    final prevMax = previousSameRoutine != null
+        ? _maxWeightKg(previousSameRoutine, catalog, bodyWeightKg)
+        : null;
     final prevDuration = previousSameRoutine?.durationMinutes;
 
     final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
@@ -227,12 +233,26 @@ abstract final class WorkoutSummaryBuilder {
     });
   }
 
-  static double? _maxWeightKg(Workout workout) {
+  static double? _maxWeightKg(
+    Workout workout,
+    List<Exercise> catalog,
+    double? bodyWeightKg,
+  ) {
     double? max;
     for (final ex in workout.exercises) {
-      for (final set in ex.sets.where((s) => s.completed && s.weight != null)) {
-        final w = set.weight!;
-        if (max == null || w > max) max = w;
+      final loadMode = ExerciseLoad.loadModeForExerciseId(
+        ex.exerciseId,
+        catalog,
+        exerciseName: ex.exerciseName,
+      );
+      for (final set in ex.sets.where((s) => s.completed)) {
+        final w = ExerciseLoad.effectiveWeightKg(
+          set,
+          exerciseName: ex.exerciseName,
+          loadMode: loadMode,
+          bodyWeightKg: bodyWeightKg,
+        );
+        if (w != null && (max == null || w > max)) max = w;
       }
     }
     return max;
@@ -243,6 +263,7 @@ abstract final class WorkoutSummaryBuilder {
     Workout? previousSameRoutine,
     required List<Exercise> exerciseCatalog,
     required Set<String> prExerciseIds,
+    double? bodyWeightKg,
   }) {
     final lines = <ExerciseSummaryLine>[];
     for (final ex in workout.exercises) {
@@ -251,16 +272,26 @@ abstract final class WorkoutSummaryBuilder {
 
       double? best;
       var reps = 0;
+      final loadMode = ExerciseLoad.loadModeForExerciseId(
+        ex.exerciseId,
+        exerciseCatalog,
+        exerciseName: ex.exerciseName,
+      );
       for (final set in completed) {
         reps += set.reps;
-        final w = set.weight;
+        final w = ExerciseLoad.effectiveWeightKg(
+          set,
+          exerciseName: ex.exerciseName,
+          loadMode: loadMode,
+          bodyWeightKg: bodyWeightKg,
+        );
         if (w != null && (best == null || w > best)) best = w;
       }
 
-      final volume = ex.totalVolume(
-        perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, exerciseCatalog),
-        unilateral: ExerciseLoad.unilateralForExerciseId(ex.exerciseId, exerciseCatalog),
-        loadMode: ExerciseLoad.loadModeForExerciseId(ex.exerciseId, exerciseCatalog),
+      final volume = ExerciseLoad.exerciseTotalVolumeKg(
+        ex,
+        catalog: exerciseCatalog,
+        bodyWeightKg: bodyWeightKg,
       );
 
       final prevEx = _findPreviousExercise(previousSameRoutine, ex.exerciseId);
@@ -270,23 +301,24 @@ abstract final class WorkoutSummaryBuilder {
       if (prevEx != null) {
         final prevCompleted = prevEx.sets.where((s) => s.completed).toList();
         prevReps = prevCompleted.fold<int>(0, (sum, s) => sum + s.reps);
+        final prevLoadMode = ExerciseLoad.loadModeForExerciseId(
+          prevEx.exerciseId,
+          exerciseCatalog,
+          exerciseName: prevEx.exerciseName,
+        );
         for (final set in prevCompleted) {
-          final w = set.weight;
+          final w = ExerciseLoad.effectiveWeightKg(
+            set,
+            exerciseName: prevEx.exerciseName,
+            loadMode: prevLoadMode,
+            bodyWeightKg: bodyWeightKg,
+          );
           if (w != null && (prevBest == null || w > prevBest)) prevBest = w;
         }
-        prevVolume = prevEx.totalVolume(
-          perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
-            prevEx.exerciseId,
-            exerciseCatalog,
-          ),
-          unilateral: ExerciseLoad.unilateralForExerciseId(
-            prevEx.exerciseId,
-            exerciseCatalog,
-          ),
-          loadMode: ExerciseLoad.loadModeForExerciseId(
-            prevEx.exerciseId,
-            exerciseCatalog,
-          ),
+        prevVolume = ExerciseLoad.exerciseTotalVolumeKg(
+          prevEx,
+          catalog: exerciseCatalog,
+          bodyWeightKg: bodyWeightKg,
         );
       }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
+import '../theme/app_colors.dart';
 import 'bmr_calculator.dart';
 
 /// Nivel de salud de una métrica corporal respecto a rangos recomendados.
@@ -35,13 +36,24 @@ abstract final class BodyMetricHealthColors {
 
 /// Evalúa métricas corporales con rangos orientativos (edad, sexo, peso, talla).
 abstract final class BodyMetricHealthEvaluator {
+  /// Métricas que muestran valor con color según rango de salud.
+  static const colorCodedMetricKeys = {
+    'weight',
+    'bmi',
+    'body_fat',
+    'subcutaneous_fat',
+  };
+
+  static bool usesColorCoding(String key) => colorCodedMetricKeys.contains(key);
+
   static Color colorFor({
     required String key,
     required BodyMetricSnapshot snapshot,
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? snapshots,
   }) {
-    if (!snapshot.hasValue) return Colors.white38;
+    if (!snapshot.hasValue) return AppColors.textMuted;
+    if (!usesColorCoding(key)) return AppColors.textPrimary;
 
     final level = evaluate(
       key: key,

@@ -6,6 +6,7 @@ import '../l10n/l10n_extensions.dart';
 Future<String?> showAvatarPickerSheet(
   BuildContext context, {
   String? selectedId,
+  String? userEmail,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -14,14 +15,21 @@ Future<String?> showAvatarPickerSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (ctx) => _AvatarPickerSheet(selectedId: selectedId),
+    builder: (ctx) => _AvatarPickerSheet(
+      selectedId: selectedId,
+      userEmail: userEmail,
+    ),
   );
 }
 
 class _AvatarPickerSheet extends StatelessWidget {
   final String? selectedId;
+  final String? userEmail;
 
-  const _AvatarPickerSheet({this.selectedId});
+  const _AvatarPickerSheet({
+    this.selectedId,
+    this.userEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,7 @@ class _AvatarPickerSheet extends StatelessWidget {
     final currentKey = AvatarCatalog.isCatalogValue(selectedId)
         ? selectedId!.substring(AvatarCatalog.prefix.length)
         : null;
+    final availableOptions = AvatarCatalog.optionsForUser(userEmail);
     final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
 
     return SafeArea(
@@ -70,9 +79,9 @@ class _AvatarPickerSheet extends StatelessWidget {
                     crossAxisSpacing: 12,
                     childAspectRatio: 0.82,
                   ),
-                  itemCount: AvatarCatalog.options.length,
+                  itemCount: availableOptions.length,
                   itemBuilder: (context, index) {
-                    final option = AvatarCatalog.options[index];
+                    final option = availableOptions[index];
                     final isSelected = option.id == currentKey;
 
                     return InkWell(

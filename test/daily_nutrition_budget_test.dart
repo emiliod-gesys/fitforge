@@ -1,11 +1,38 @@
 import 'package:fitforge/core/utils/daily_nutrition_budget.dart';
 import 'package:fitforge/models/food_entry.dart';
+import 'package:fitforge/models/manual_activity_entry.dart';
 import 'package:fitforge/models/profile.dart';
 import 'package:fitforge/models/workout.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DailyNutritionBudget', () {
+    test('adds manual activity calories to daily budget', () {
+      final day = DateTime(2026, 6, 15);
+      final activities = [
+        ManualActivityEntry(
+          id: 'a1',
+          userId: 'u1',
+          loggedAt: day.add(const Duration(hours: 11)),
+          name: 'Caminata',
+          caloriesKcal: 200,
+        ),
+      ];
+
+      final summary = DailyNutritionBudget.build(
+        day: day,
+        entries: const [],
+        workoutsCompletedOnDay: const [],
+        manualActivities: activities,
+        profile: null,
+        bodyMetrics: null,
+      );
+
+      expect(summary.manualActivityCaloriesBurned, 200);
+      expect(summary.totalCaloriesBurned, 200);
+      expect(summary.calorieBudget, 2200 + 200);
+    });
+
     test('adds workout calories to daily budget', () {
       final day = DateTime(2026, 6, 15);
       final profile = UserProfile(

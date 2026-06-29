@@ -7,6 +7,7 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/workout_streak.dart';
 import '../../widgets/muscle_recovery_map.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/workout_tile.dart';
@@ -133,25 +134,25 @@ class _StartWorkoutSection extends ConsumerWidget {
               Expanded(
                 child: StatCard(
                   icon: Icons.local_fire_department,
-                  label: l10n.streakWeekly,
-                  value: l10n.streakWeeksLabel(stats.streakWeeks),
+                  label: l10n.streakWeeksSubtitle,
+                  value: '${stats.streakWeeks}',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: StatCard(
                   icon: Icons.fitness_center,
-                  label: l10n.thisWeek,
-                  value: stats.weekProgressLabel,
+                  label: l10n.weeklyWorkoutsSubtitle(stats.weeklyGoal),
+                  value: '${stats.currentWeekCount}',
                 ),
               ),
             ],
           ),
           loading: () => Row(
             children: [
-              Expanded(child: StatCard(icon: Icons.local_fire_department, label: l10n.streakLabel, value: '…')),
+              Expanded(child: StatCard(icon: Icons.local_fire_department, label: l10n.streakWeeksSubtitle, value: '…')),
               const SizedBox(width: 12),
-              Expanded(child: StatCard(icon: Icons.fitness_center, label: l10n.thisWeek, value: '…')),
+              Expanded(child: StatCard(icon: Icons.fitness_center, label: l10n.weeklyWorkoutsSubtitle(WorkoutStreakCalculator.weeklyGoal), value: '…')),
             ],
           ),
           error: (_, __) => Row(
@@ -159,7 +160,7 @@ class _StartWorkoutSection extends ConsumerWidget {
               Expanded(
                 child: StatCard(
                   icon: Icons.local_fire_department,
-                  label: l10n.streakWeekly,
+                  label: l10n.streakWeeksSubtitle,
                   value: '0',
                 ),
               ),
@@ -167,8 +168,8 @@ class _StartWorkoutSection extends ConsumerWidget {
               Expanded(
                 child: StatCard(
                   icon: Icons.fitness_center,
-                  label: l10n.thisWeek,
-                  value: '0/4',
+                  label: l10n.weeklyWorkoutsSubtitle(WorkoutStreakCalculator.weeklyGoal),
+                  value: '0',
                 ),
               ),
             ],

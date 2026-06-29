@@ -16,10 +16,35 @@ abstract final class CardioFormat {
       if (parts.length != 2) return null;
       final m = int.tryParse(parts[0]);
       final s = int.tryParse(parts[1]);
-      if (m == null || s == null || m < 0 || s < 0 || s >= 60) return null;
-      return m * 60 + s;
+      return durationFromParts(minutes: m, seconds: s);
     }
     return int.tryParse(trimmed);
+  }
+
+  static ({int minutes, int seconds}) durationParts(int? totalSeconds) {
+    if (totalSeconds == null || totalSeconds <= 0) {
+      return (minutes: 0, seconds: 0);
+    }
+    return (minutes: totalSeconds ~/ 60, seconds: totalSeconds % 60);
+  }
+
+  static int? durationFromParts({int? minutes, int? seconds}) {
+    final m = minutes ?? 0;
+    final s = seconds ?? 0;
+    if (m <= 0 && s <= 0) return null;
+    if (m < 0 || s < 0 || s >= 60) return null;
+    return m * 60 + s;
+  }
+
+  static int? durationFromPartStrings(String minutesText, String secondsText) {
+    final mTrim = minutesText.trim();
+    final sTrim = secondsText.trim();
+    if (mTrim.isEmpty && sTrim.isEmpty) return null;
+
+    final m = mTrim.isEmpty ? 0 : int.tryParse(mTrim);
+    final s = sTrim.isEmpty ? 0 : int.tryParse(sTrim);
+    if (m == null || s == null) return null;
+    return durationFromParts(minutes: m, seconds: s);
   }
 
   static String distance(double? meters, String unitSystem) {

@@ -184,6 +184,14 @@ void main() {
       expect(CardioFormat.duration(1230), '20:30');
     });
 
+    test('parses separate minute and second fields', () {
+      expect(CardioFormat.durationFromPartStrings('20', '30'), 1230);
+      expect(CardioFormat.durationFromPartStrings('5', ''), 300);
+      expect(CardioFormat.durationFromPartStrings('', '45'), 45);
+      expect(CardioFormat.durationParts(1230), (minutes: 20, seconds: 30));
+      expect(CardioFormat.durationFromPartStrings('1', '90'), isNull);
+    });
+
     test('parses km distance in metric system', () {
       expect(CardioFormat.parseDistanceMeters('3.2', 'metric'), closeTo(3200, 0.1));
     });
@@ -259,6 +267,106 @@ void main() {
         ExerciseLoad.isAssistedExercise('Assisted Dip Machine'),
         isTrue,
       );
+    });
+
+    test('bodyweight exercise uses profile weight plus additional load', () {
+      const set = WorkoutSet(
+        id: 's1',
+        setNumber: 1,
+        weight: 10,
+        reps: 8,
+        completed: true,
+        loggingType: ExerciseLoggingType.strength,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          set,
+          exerciseName: 'Pull Up',
+          loadMode: ExerciseLoadMode.bodyweight,
+          bodyWeightKg: 75,
+        ),
+        (75 + 10) * 8,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          const WorkoutSet(
+            id: 's2',
+            setNumber: 1,
+            weight: 0,
+            reps: 10,
+            completed: true,
+            loggingType: ExerciseLoggingType.strength,
+          ),
+          exerciseName: 'Chin Up',
+          loadMode: ExerciseLoadMode.bodyweight,
+          bodyWeightKg: 80,
+        ),
+        800,
+      );
+      expect(ExerciseLoad.bodyweightFractionForExercise('Decline Bench Sit-Up'), 0.42);
+      expect(
+        ExerciseLoad.setVolumeKg(
+          const WorkoutSet(
+            id: 's3',
+            setNumber: 1,
+            weight: 5,
+            reps: 12,
+            completed: true,
+            loggingType: ExerciseLoggingType.strength,
+          ),
+          exerciseName: 'Abdominales en banca declinada',
+          loadMode: ExerciseLoadMode.bodyweight,
+          bodyWeightKg: 80,
+        ),
+        (80 * 0.42 + 5) * 12,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          const WorkoutSet(
+            id: 's4',
+            setNumber: 1,
+            weight: 0,
+            reps: 15,
+            completed: true,
+            loggingType: ExerciseLoggingType.strength,
+          ),
+          exerciseName: 'Crunch abdominal',
+          loadMode: ExerciseLoadMode.bodyweight,
+          bodyWeightKg: 80,
+        ),
+        (80 * 0.32) * 15,
+      );
+    });
+
+    test('per-arm session toggle doubles volume when enabled', () {
+      const set = WorkoutSet(
+        id: 's1',
+        setNumber: 1,
+        weight: 20,
+        reps: 10,
+        completed: true,
+        loggingType: ExerciseLoggingType.strength,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          set,
+          exerciseName: 'Curl con mancuernas',
+          perArmWeight: true,
+        ),
+        400,
+      );
+      expect(
+        ExerciseLoad.setVolumeKg(
+          set,
+          exerciseName: 'Curl con mancuernas',
+          perArmWeight: false,
+        ),
+        200,
+      );
+      expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Curl con mancuernas'), isTrue);
+      expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Ab Crunch Machine'), isTrue);
+      expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Chest Press Machine'), isTrue);
+      expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Cinta'), isFalse);
     });
   });
 }

@@ -6012,17 +6012,22 @@
         "en": "Pendulum Squat Machine"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Sentadilla guiada en máquina péndulo con énfasis en cuádriceps y glúteos.",
+        "en": "Guided pendulum squat machine emphasizing quads and glutes."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Pendulum squat",
+          "Sentadilla pendulo"
+        ],
+        "en": [
+          "Pendulum Squat"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/IeDEXTe.gif",
-      "exercisedbId": "IeDEXTe",
-      "matchConfidence": "medium",
-      "matchScore": 0.7926
+      "imageUrl": "assets/exercises/ff_legs_pendulum_squat_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_shoulders_pike_push_up",
@@ -7793,6 +7798,59 @@
       "matchScore": null
     },
     {
+      "id": "ff_abs_decline_bench_sit_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Banca",
+        "en": "Bench"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Oblicuos",
+          "Flexores de cadera"
+        ],
+        "en": [
+          "Obliques",
+          "Hip flexors"
+        ]
+      },
+      "names": {
+        "es": "Abdominales en banca declinada",
+        "en": "Decline Bench Sit-Up"
+      },
+      "descriptions": {
+        "es": "Pies anclados en banca declinada. El volumen usa ~42 % del peso corporal (torso) más peso adicional en el pecho.",
+        "en": "Feet anchored on a decline bench. Volume uses ~42% of body weight (torso) plus any extra load held on the chest."
+      },
+      "aliases": {
+        "es": [
+          "Sit-up en banca declinada",
+          "Abdominal declinado"
+        ],
+        "en": [
+          "Decline Sit-Up",
+          "Weighted decline sit-up"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_abs_decline_bench_sit_up.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
       "id": "ff_cardio_ski_erg",
       "loggingType": "cardio",
       "loadMode": "cardio_machine",
@@ -8609,30 +8667,38 @@
       },
       "secondaryMuscles": {
         "es": [
-          "Teres Major",
-          "Triceps stabilizers"
+          "Teres mayor",
+          "Tríceps"
         ],
         "en": [
-          "Teres Major",
-          "Triceps stabilizers"
+          "Teres major",
+          "Triceps"
         ]
       },
       "names": {
-        "es": "Jalón con brazos rectos en polea",
-        "en": "Straight Arm Cable Pulldown"
+        "es": "Jalón en polea",
+        "en": "Cable Pull Down"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Jalón en polea alta con brazos extendidos, enfocado en dorsales.",
+        "en": "High cable pull down with straight arms, emphasizing the lats."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Jalón con brazos rectos en polea",
+          "Pulldown en polea",
+          "Cable pull down"
+        ],
+        "en": [
+          "Straight Arm Cable Pulldown",
+          "Straight-Arm Cable Pull Down",
+          "Cable Straight Arm Pulldown"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/RVwzP10.gif",
-      "exercisedbId": "RVwzP10",
-      "matchConfidence": "high",
-      "matchScore": 1.0
+      "imageUrl": "assets/exercises/ff_back_cable_pull_down.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_triceps_straight_bar_pushdown",

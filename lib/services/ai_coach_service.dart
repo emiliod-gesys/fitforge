@@ -776,6 +776,9 @@ ${languageInstruction(lang)}
 Responde SOLO JSON válido sin markdown.
 
 Reglas:
+- Si aparece una balanza de cocina con display numérico legible, usa ESE peso en gramos como reference_amount_g (prioridad sobre estimación visual del plato).
+- Lee dígitos de la pantalla (g, kg, oz, lb) y convierte todo a gramos totales del alimento pesado.
+- Si la foto muestra comida en un plato/bowl Y una balanza en la misma imagen, el número de la balanza es el peso de referencia.
 - reference_amount_g: peso total estimado en gramos de TODO lo visible (no uses 100 por defecto).
 - calories_kcal, protein_g, carbs_g, fat_g: TOTALES para esa porción (no valores por 100 g).
 - serving_description: describe la porción real (ej. "1 plato ~280 g", "2 tacos ~180 g").
@@ -812,6 +815,99 @@ JSON:
     } catch (_) {
       return null;
     }
+  }
+
+  /// Aplica una corrección del usuario sin rehacer el plato desde cero.
+  Future<FoodNutritionEstimate?> reviseFoodEstimate({
+    required FoodNutritionEstimate previous,
+    required String correction,
+    List<int>? imageBytes,
+    UserProfile? profile,
+  }) async {
+    final trimmed = correction.trim();
+    if (trimmed.isEmpty) return null;
+
+    final lang = _resolveLanguageCode(profile: profile);
+    final system = _foodRevisionSystemPrompt(lang);
+    final user = _foodRevisionUserPrompt(previous, trimmed);
+
+    try {
+      final aiProvider = profile?.aiProvider ?? AiProvider.none;
+      final canUseVision =
+          imageBytes != null && imageBytes.isNotEmpty && aiProvider != AiProvider.none && profile?.hasAiKey == true;
+
+      final String response;
+      if (canUseVision) {
+        final apiKey = await _profileService.getApiKey(aiProvider);
+        if (apiKey == null || apiKey.isEmpty) return null;
+        final visionPrompt = '$system\n\n$user';
+        switch (aiProvider) {
+          case AiProvider.openai:
+            response = await _callOpenAIVision(apiKey, visionPrompt, imageBytes);
+          case AiProvider.gemini:
+            response = await _callGeminiVision(apiKey, visionPrompt, imageBytes);
+          case AiProvider.anthropic:
+            response = await _callAnthropicVision(apiKey, visionPrompt, imageBytes);
+          case AiProvider.none:
+            return null;
+        }
+      } else {
+        response = await _complete(profile: profile, systemPrompt: system, userPrompt: user);
+      }
+
+      final parsed = _parseFoodEstimate(response);
+      if (parsed == null) return null;
+      return FoodEstimateParser.stabilizeRevision(
+        previous: previous,
+        revised: parsed,
+        correction: trimmed,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _foodRevisionSystemPrompt(String lang) {
+    return '''
+Eres un nutricionista de FitForge. ${languageInstruction(lang)}
+El usuario ya tiene una estimación y pide un AJUSTE puntual, no un plato nuevo.
+Responde SOLO JSON válido sin markdown.
+
+Reglas obligatorias:
+- Conserva TODOS los ingredientes y componentes de la estimación anterior salvo que la corrección pida explícitamente quitar algo.
+- Si corrige un ingrediente (ej. cerdo→pollo, arroz frito→arroz blanco), cambia SOLO ese ítem y recalcula macros totales del plato completo.
+- NO elimines otros alimentos del plato (arroz, brócoli, verduras, etc.) al corregir un solo ítem.
+- Si la corrección menciona peso en gramos o hay balanza visible en la imagen, actualiza reference_amount_g con ese peso.
+- ingredients debe listar TODOS los componentes finales del plato, no solo el corregido.
+- calories_kcal y macros son TOTALES para reference_amount_g del plato completo.
+- Los macros deben ser coherentes con las calorías.
+''';
+  }
+
+  String _foodRevisionUserPrompt(FoodNutritionEstimate previous, String correction) {
+    final contextJson = jsonEncode(FoodEstimateParser.toRevisionContext(previous));
+    return '''
+ESTIMACIÓN ANTERIOR (base obligatoria):
+$contextJson
+
+CORRECCIÓN DEL USUARIO:
+"$correction"
+
+Devuelve la estimación ACTUALIZADA del plato completo aplicando solo la corrección.
+JSON:
+{
+  "name": "nombre corto del plato",
+  "brand": null,
+  "calories_kcal": 0,
+  "protein_g": 0,
+  "carbs_g": 0,
+  "fat_g": 0,
+  "fiber_g": 0,
+  "serving_description": "1 plato ~280 g",
+  "reference_amount_g": 280,
+  "ingredients": ["todos los ingredientes del plato"]
+}
+''';
   }
 
   FoodNutritionEstimate? _parseFoodEstimate(String response) {

@@ -10,6 +10,7 @@ import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
 import '../models/body_metric.dart';
 import '../models/food_entry.dart';
+import '../models/manual_activity_entry.dart';
 import '../models/leaderboard.dart';
 import '../models/profile.dart';
 import '../models/workout.dart';
@@ -17,10 +18,13 @@ import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/custom_exercise_repository.dart';
 import '../services/exercise_service.dart';
+import '../services/activity_log_service.dart';
 import '../services/food_service.dart';
+import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
+import '../services/exercise_report_service.dart';
 import '../services/workout_service.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
@@ -36,6 +40,7 @@ final exerciseServiceProvider = Provider((ref) => ExerciseService());
 final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationStore());
 final routineServiceProvider = Provider((ref) => RoutineService());
 final workoutServiceProvider = Provider((ref) => WorkoutService());
+final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider((ref) => ProfileService());
 final socialServiceProvider = Provider((ref) => SocialService());
 final pushNotificationServiceProvider = Provider((ref) => PushNotificationService());
@@ -158,9 +163,7 @@ final muscleRecoveryProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
 
   final service = ref.watch(workoutServiceProvider);
-  final customRepo = ref.read(customExerciseRepositoryProvider);
-  final customs = await customRepo.loadAll();
-  final catalog = customs.map((c) => c.toExercise()).toList();
+  final catalog = await ref.watch(exercisesProvider.future);
 
   final workouts = await service.getWorkoutsForMuscleRecovery();
   return service.calculateMuscleRecovery(workouts, catalog: catalog);
@@ -232,6 +235,8 @@ final socialRealtimeProvider = StreamProvider<SocialRealtimeEvent>((ref) {
 });
 
 final foodServiceProvider = Provider((ref) => FoodService());
+final activityLogServiceProvider = Provider((ref) => ActivityLogService());
+final localManualFoodStoreProvider = Provider((ref) => LocalManualFoodStore());
 
 final openFoodFactsServiceProvider = Provider((ref) => OpenFoodFactsService());
 
@@ -245,6 +250,13 @@ final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
   return ref.watch(foodServiceProvider).getEntriesForDay(day);
+});
+
+final manualActivitiesProvider = FutureProvider<List<ManualActivityEntry>>((ref) async {
+  ref.keepAlive();
+  ref.watch(authStateProvider);
+  final day = ref.watch(foodSelectedDayProvider);
+  return ref.watch(activityLogServiceProvider).getEntriesForDay(day);
 });
 
 final foodDayWorkoutsProvider = FutureProvider.family<List<Workout>, DateTime>((ref, day) async {
@@ -263,18 +275,21 @@ final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async
   final metricsFuture = ref.watch(bodyMetricSnapshotsProvider.future);
   final entriesFuture = ref.watch(foodEntriesProvider.future);
   final workoutsFuture = ref.watch(foodDayWorkoutsProvider(normalizedDay).future);
+  final activitiesFuture = ref.watch(manualActivitiesProvider.future);
 
   final results = await Future.wait([
     profileFuture,
     metricsFuture,
     entriesFuture,
     workoutsFuture,
+    activitiesFuture,
   ]);
 
   return DailyNutritionBudget.build(
     day: normalizedDay,
     entries: results[2] as List<FoodEntry>,
     workoutsCompletedOnDay: results[3] as List<Workout>,
+    manualActivities: results[4] as List<ManualActivityEntry>,
     profile: results[0] as UserProfile?,
     bodyMetrics: results[1] as Map<String, BodyMetricSnapshot>,
   );

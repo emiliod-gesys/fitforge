@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
+import '../services/local_notification_service.dart';
 import '../services/rest_sound_service.dart';
 
 /// Allows external controllers (e.g. watch companion) to adjust or skip rest.
@@ -49,6 +50,23 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   bool _finished = false;
   bool _cancelled = false;
 
+  void _syncRestNotification() {
+    if (_finished || _cancelled) return;
+    final l10n = context.l10n;
+    unawaited(
+      LocalNotificationService.instance.scheduleRestEnd(
+        id: widget.sessionId,
+        endsAt: _endsAt,
+        title: l10n.restTimerAlertTitle,
+        body: l10n.rest,
+      ),
+    );
+  }
+
+  void _cancelRestNotification() {
+    unawaited(LocalNotificationService.instance.cancelRestEnd(widget.sessionId));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +78,12 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         widget.onClockStarted?.call(_endsAt, _total);
+        _syncRestNotification();
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncRestNotification();
       });
     }
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _syncFromClock());
@@ -83,6 +107,12 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           widget.onClockStarted?.call(_endsAt, _total);
+          _syncRestNotification();
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _syncRestNotification();
         });
       }
     }
@@ -121,6 +151,7 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   @override
   void dispose() {
     _cancelled = true;
+    _cancelRestNotification();
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     if (widget.controller?._state == this) {
@@ -159,6 +190,7 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
 
     _timer?.cancel();
     _finished = true;
+    _cancelRestNotification();
     if (mounted) setState(() => _remaining = 0);
 
     // Cierra el banner de inmediato; el sonido no debe bloquear el dismiss.
@@ -180,12 +212,14 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
     final remaining = ((remainingMs + 999) ~/ 1000).clamp(0, 600);
     if (remaining > _total) _total = remaining;
     setState(() => _remaining = remaining);
+    _syncRestNotification();
   }
 
   void _skip() {
     if (_finished || _cancelled || !mounted) return;
     _timer?.cancel();
     _finished = true;
+    _cancelRestNotification();
     unawaited(RestSoundService.cancelBell());
     widget.onSkip();
   }

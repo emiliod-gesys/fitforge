@@ -1,6 +1,8 @@
+import '../../models/exercise.dart';
 import '../../models/exercise_logging.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
+import 'exercise_load.dart';
 import 'exercise_logging_resolver.dart';
 
 /// Detecta récords personales que el entreno actual superaría respecto al historial.
@@ -8,6 +10,8 @@ abstract final class SessionPersonalRecords {
   static List<PersonalRecord> detect({
     required Workout workout,
     required List<PersonalRecord> existing,
+    Iterable<Exercise> catalog = const [],
+    double? bodyWeightKg,
   }) {
     final highlights = <PersonalRecord>[];
 
@@ -15,10 +19,21 @@ abstract final class SessionPersonalRecords {
       final completedSets = ex.sets.where((s) => s.completed).toList();
       if (completedSets.isEmpty) continue;
 
-      final strengthSets =
-          completedSets.where((s) => !s.isCardio && s.weight != null).toList();
-      for (final set in strengthSets) {
-        final oneRm = PersonalRecord.calculate1RM(set.weight!, set.reps);
+      final loadMode = ExerciseLoad.loadModeForExerciseId(
+        ex.exerciseId,
+        catalog,
+        exerciseName: ex.exerciseName,
+      );
+      for (final set in completedSets.where((s) => !s.isCardio)) {
+        final effective = ExerciseLoad.effectiveWeightKg(
+          set,
+          exerciseName: ex.exerciseName,
+          loadMode: loadMode,
+          bodyWeightKg: bodyWeightKg,
+        );
+        if (effective == null || effective <= 0) continue;
+
+        final oneRm = PersonalRecord.calculate1RM(effective, set.reps);
         final prev = _find(existing, ex.exerciseId, PersonalRecordType.strength);
         if (prev == null || (prev.oneRepMax ?? 0) < oneRm) {
           _replaceOrAdd(
@@ -27,7 +42,7 @@ abstract final class SessionPersonalRecords {
               id: '',
               exerciseId: ex.exerciseId,
               exerciseName: ex.exerciseName,
-              weight: set.weight,
+              weight: effective,
               reps: set.reps,
               oneRepMax: oneRm,
               achievedAt: DateTime.now(),

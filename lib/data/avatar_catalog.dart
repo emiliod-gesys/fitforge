@@ -2,11 +2,20 @@
 class AvatarOption {
   final String id;
   final String assetPath;
+  /// Si se define, solo ese correo puede ver y seleccionar el avatar.
+  final String? exclusiveEmail;
 
   const AvatarOption({
     required this.id,
     required this.assetPath,
+    this.exclusiveEmail,
   });
+
+  bool isAvailableTo(String? email) {
+    if (exclusiveEmail == null) return true;
+    if (email == null) return false;
+    return email.trim().toLowerCase() == exclusiveEmail!.trim().toLowerCase();
+  }
 }
 
 abstract final class AvatarCatalog {
@@ -30,6 +39,19 @@ abstract final class AvatarCatalog {
     AvatarOption(id: 'retro_bot', assetPath: '$_assetBase/retro_bot.png'),
     AvatarOption(id: 'unicorn', assetPath: '$_assetBase/unicorn.png'),
     AvatarOption(id: 'pumpkin_gains', assetPath: '$_assetBase/pumpkin_gains.png'),
+    AvatarOption(id: 'bulldog', assetPath: '$_assetBase/bulldog.png'),
+    AvatarOption(id: 'lizard', assetPath: '$_assetBase/lizard.png'),
+    AvatarOption(id: 'reps_bot', assetPath: '$_assetBase/reps_bot.png'),
+    AvatarOption(id: 'capybara', assetPath: '$_assetBase/capybara.png'),
+    AvatarOption(id: 'red_panda', assetPath: '$_assetBase/red_panda.png'),
+    AvatarOption(id: 'sloth', assetPath: '$_assetBase/sloth.png'),
+    AvatarOption(id: 'panther', assetPath: '$_assetBase/panther.png'),
+    AvatarOption(id: 'fox', assetPath: '$_assetBase/fox.png'),
+    AvatarOption(
+      id: 'admin',
+      assetPath: '$_assetBase/admin.png',
+      exclusiveEmail: 'emiliodiaz@gesys.gt',
+    ),
   ];
 
   static String toStorageId(String optionId) => '$prefix$optionId';
@@ -47,6 +69,17 @@ abstract final class AvatarCatalog {
       if (option.id == id) return option;
     }
     return null;
+  }
+
+  static List<AvatarOption> optionsForUser(String? email) =>
+      options.where((option) => option.isAvailableTo(email)).toList();
+
+  static bool canSelect(String? storageId, String? email) {
+    if (storageId == null) return false;
+    if (!isCatalogValue(storageId)) return true;
+    final option = resolve(storageId);
+    if (option == null) return false;
+    return option.isAvailableTo(email);
   }
 
   static AvatarOption defaultOption() => options.first;

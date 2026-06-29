@@ -1178,6 +1178,54 @@ abstract class AppLocalizations {
   /// **'Calculado automáticamente'**
   String get metricCalculatedAutomatically;
 
+  /// No description provided for @bodyMetricColorLegendTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyenda de colores'**
+  String get bodyMetricColorLegendTitle;
+
+  /// No description provided for @bodyMetricColorLegendNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplica a peso, IMC, grasa corporal y grasa subcutánea.'**
+  String get bodyMetricColorLegendNote;
+
+  /// No description provided for @bodyMetricHealthVeryLow.
+  ///
+  /// In es, this message translates to:
+  /// **'Muy bajo'**
+  String get bodyMetricHealthVeryLow;
+
+  /// No description provided for @bodyMetricHealthLow.
+  ///
+  /// In es, this message translates to:
+  /// **'Bajo'**
+  String get bodyMetricHealthLow;
+
+  /// No description provided for @bodyMetricHealthAppropriate.
+  ///
+  /// In es, this message translates to:
+  /// **'Adecuado'**
+  String get bodyMetricHealthAppropriate;
+
+  /// No description provided for @bodyMetricHealthIdeal.
+  ///
+  /// In es, this message translates to:
+  /// **'Ideal'**
+  String get bodyMetricHealthIdeal;
+
+  /// No description provided for @bodyMetricHealthHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Alto'**
+  String get bodyMetricHealthHigh;
+
+  /// No description provided for @bodyMetricHealthVeryBad.
+  ///
+  /// In es, this message translates to:
+  /// **'Muy alto'**
+  String get bodyMetricHealthVeryBad;
+
   /// No description provided for @metricMetabolicAge.
   ///
   /// In es, this message translates to:
@@ -1472,11 +1520,23 @@ abstract class AppLocalizations {
   /// **'Racha (≥4/sem)'**
   String get streakWeekly;
 
+  /// No description provided for @streakWeeksSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'semanas de racha (≥4/sem)'**
+  String get streakWeeksSubtitle;
+
   /// No description provided for @thisWeek.
   ///
   /// In es, this message translates to:
   /// **'Esta semana'**
   String get thisWeek;
+
+  /// No description provided for @weeklyWorkoutsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'de {goal} entrenamientos esta semana'**
+  String weeklyWorkoutsSubtitle(int goal);
 
   /// No description provided for @startWorkout.
   ///
@@ -1789,6 +1849,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Indica el peso antes de marcar la serie como hecha'**
   String get weightRequired;
+
+  /// No description provided for @weightAdditionalSuffix.
+  ///
+  /// In es, this message translates to:
+  /// **'(+ adicional)'**
+  String get weightAdditionalSuffix;
+
+  /// No description provided for @weightPerArmSuffix.
+  ///
+  /// In es, this message translates to:
+  /// **'(por brazo)'**
+  String get weightPerArmSuffix;
+
+  /// No description provided for @loadModePerArm.
+  ///
+  /// In es, this message translates to:
+  /// **'Por brazo'**
+  String get loadModePerArm;
+
+  /// No description provided for @loadModeCombined.
+  ///
+  /// In es, this message translates to:
+  /// **'Conjunto'**
+  String get loadModeCombined;
+
+  /// No description provided for @loadModeToggleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Alterna si trabajas ambos lados a la vez o por separado'**
+  String get loadModeToggleHint;
+
+  /// No description provided for @bodyweightLoadHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu peso corporal ({weight}) cuenta por defecto. El campo es carga adicional.'**
+  String bodyweightLoadHint(String weight);
+
+  /// No description provided for @effectiveWeightLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso total: {weight}'**
+  String effectiveWeightLabel(String weight);
+
+  /// No description provided for @reportExerciseProblem.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar problema con este ejercicio'**
+  String get reportExerciseProblem;
+
+  /// No description provided for @exerciseReportTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar problema'**
+  String get exerciseReportTitle;
+
+  /// No description provided for @exerciseReportSubmit.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar reporte'**
+  String get exerciseReportSubmit;
+
+  /// No description provided for @exerciseReportThanks.
+  ///
+  /// In es, this message translates to:
+  /// **'Gracias, revisaremos tu reporte'**
+  String get exerciseReportThanks;
+
+  /// No description provided for @exerciseReportWrongMetrics.
+  ///
+  /// In es, this message translates to:
+  /// **'Métricas incorrectas (peso/reps)'**
+  String get exerciseReportWrongMetrics;
+
+  /// No description provided for @exerciseReportWrongGif.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen o GIF incorrecto'**
+  String get exerciseReportWrongGif;
+
+  /// No description provided for @exerciseReportWrongName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre o traducción incorrecta'**
+  String get exerciseReportWrongName;
+
+  /// No description provided for @exerciseReportWrongMuscles.
+  ///
+  /// In es, this message translates to:
+  /// **'Músculos o categoría incorrecta'**
+  String get exerciseReportWrongMuscles;
+
+  /// No description provided for @exerciseReportOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get exerciseReportOther;
+
+  /// No description provided for @exerciseReportNotes.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalles (opcional)'**
+  String get exerciseReportNotes;
 
   /// No description provided for @repsRequired.
   ///
@@ -2183,8 +2345,14 @@ abstract class AppLocalizations {
   /// No description provided for @cardioDuration.
   ///
   /// In es, this message translates to:
-  /// **'Tiempo (mm:ss)'**
+  /// **'Tiempo'**
   String get cardioDuration;
+
+  /// No description provided for @cardioSecondsShort.
+  ///
+  /// In es, this message translates to:
+  /// **'seg'**
+  String get cardioSecondsShort;
 
   /// No description provided for @cardioDistance.
   ///
@@ -3008,6 +3176,78 @@ abstract class AppLocalizations {
   /// **'{count} kcal restantes'**
   String foodCaloriesLeft(int count);
 
+  /// No description provided for @foodDailyBudget.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto del día'**
+  String get foodDailyBudget;
+
+  /// No description provided for @foodCaloriesAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'kcal disponibles'**
+  String get foodCaloriesAvailable;
+
+  /// No description provided for @foodBudgetUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'{percent}% usado'**
+  String foodBudgetUsed(int percent);
+
+  /// No description provided for @foodBudgetGoal.
+  ///
+  /// In es, this message translates to:
+  /// **'objetivo {goal} kcal'**
+  String foodBudgetGoal(int goal);
+
+  /// No description provided for @foodStatGoal.
+  ///
+  /// In es, this message translates to:
+  /// **'Objetivo'**
+  String get foodStatGoal;
+
+  /// No description provided for @foodBudgetSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'{eaten} consumidas · {burned} quemadas · objetivo {goal} kcal'**
+  String foodBudgetSummary(int eaten, int burned, int goal);
+
+  /// No description provided for @foodTimelineEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin registros'**
+  String get foodTimelineEmpty;
+
+  /// No description provided for @foodEnergyOutputTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Energía gastada'**
+  String get foodEnergyOutputTitle;
+
+  /// No description provided for @foodEnergyOutputEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin actividad registrada hoy. Añade entrenos en FitForge o actividades manuales.'**
+  String get foodEnergyOutputEmpty;
+
+  /// No description provided for @foodAddActivity.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar actividad'**
+  String get foodAddActivity;
+
+  /// No description provided for @foodFromFitForgeWorkout.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenamiento FitForge'**
+  String get foodFromFitForgeWorkout;
+
+  /// No description provided for @foodManualActivityLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad manual'**
+  String get foodManualActivityLabel;
+
   /// No description provided for @foodWorkoutBonus.
   ///
   /// In es, this message translates to:
@@ -3019,6 +3259,78 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Comidas del día'**
   String get foodMealsTitle;
+
+  /// No description provided for @foodActivitiesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividades del día'**
+  String get foodActivitiesTitle;
+
+  /// No description provided for @foodActivityManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividades manuales'**
+  String get foodActivityManual;
+
+  /// No description provided for @foodActivityAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar actividad'**
+  String get foodActivityAdd;
+
+  /// No description provided for @foodActivityAddHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Registra entrenos u otras actividades que no hayas documentado en FitForge.'**
+  String get foodActivityAddHint;
+
+  /// No description provided for @foodActivityName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la actividad'**
+  String get foodActivityName;
+
+  /// No description provided for @foodActivityNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej. Caminata, yoga, fútbol…'**
+  String get foodActivityNameHint;
+
+  /// No description provided for @foodActivityNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para la actividad.'**
+  String get foodActivityNameRequired;
+
+  /// No description provided for @foodActivityCalories.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías quemadas'**
+  String get foodActivityCalories;
+
+  /// No description provided for @foodActivityCaloriesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'150'**
+  String get foodActivityCaloriesHint;
+
+  /// No description provided for @foodActivityCaloriesInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica calorías entre 1 y 9999.'**
+  String get foodActivityCaloriesInvalid;
+
+  /// No description provided for @foodActivitySave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar actividad'**
+  String get foodActivitySave;
+
+  /// No description provided for @foodManualActivityBonus.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} kcal por actividades manuales'**
+  String foodManualActivityBonus(int count);
 
   /// No description provided for @mealBreakfast.
   ///
@@ -3079,6 +3391,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Rápido'**
   String get foodModeQuick;
+
+  /// No description provided for @foodModeManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Manual'**
+  String get foodModeManual;
 
   /// No description provided for @foodRecentSearches.
   ///
@@ -3143,13 +3461,19 @@ abstract class AppLocalizations {
   /// No description provided for @foodBarcodePhotoAction.
   ///
   /// In es, this message translates to:
-  /// **'Fotografiar código del empaque'**
+  /// **'Tomar foto'**
   String get foodBarcodePhotoAction;
+
+  /// No description provided for @foodBarcodeGalleryAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Galería'**
+  String get foodBarcodeGalleryAction;
 
   /// No description provided for @foodBarcodePhotoFallback.
   ///
   /// In es, this message translates to:
-  /// **'Si el visor en vivo no arranca, usa el botón de arriba (misma cámara que en Foto).'**
+  /// **'Si el visor en vivo no arranca, escanea desde una foto o la galería.'**
   String get foodBarcodePhotoFallback;
 
   /// No description provided for @foodBarcodeNotDetectedInPhoto.
@@ -3188,6 +3512,60 @@ abstract class AppLocalizations {
   /// **'Estimar con IA'**
   String get foodQuickAddAction;
 
+  /// No description provided for @foodManualAddHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce los datos de una porción. Se guardará en tu dispositivo para reutilizarlo.'**
+  String get foodManualAddHint;
+
+  /// No description provided for @foodManualAddAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get foodManualAddAction;
+
+  /// No description provided for @foodManualSavedFoods.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardados en este dispositivo'**
+  String get foodManualSavedFoods;
+
+  /// No description provided for @foodManualNoSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes alimentos manuales guardados.'**
+  String get foodManualNoSaved;
+
+  /// No description provided for @foodManualNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre del alimento.'**
+  String get foodManualNameRequired;
+
+  /// No description provided for @foodManualCaloriesRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce calorías mayores que cero.'**
+  String get foodManualCaloriesRequired;
+
+  /// No description provided for @foodManualGramsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'gramos totales (g)'**
+  String get foodManualGramsLabel;
+
+  /// No description provided for @foodPortionUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'porción'**
+  String get foodPortionUnit;
+
+  /// No description provided for @foodManualQuantityHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta las porciones; calorías y macros se recalculan solos.'**
+  String get foodManualQuantityHint;
+
   /// No description provided for @foodPhotoHint.
   ///
   /// In es, this message translates to:
@@ -3199,6 +3577,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Tomar foto'**
   String get foodPhotoAction;
+
+  /// No description provided for @foodPhotoGalleryAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir de galería'**
+  String get foodPhotoGalleryAction;
+
+  /// No description provided for @foodPhotoReferenceCaption.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta foto se usa al recalcular con IA'**
+  String get foodPhotoReferenceCaption;
+
+  /// No description provided for @foodPhotoTapToExpand.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para ampliar'**
+  String get foodPhotoTapToExpand;
 
   /// No description provided for @foodQuantityLabel.
   ///

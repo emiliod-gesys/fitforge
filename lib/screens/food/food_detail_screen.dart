@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +16,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
   final DateTime day;
   final FoodEntrySource source;
   final String? originalQuery;
+  final List<int>? imageBytes;
 
   const FoodDetailScreen({
     super.key,
@@ -22,6 +25,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
     required this.day,
     required this.source,
     this.originalQuery,
+    this.imageBytes,
   });
 
   @override
@@ -31,7 +35,6 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
 class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
   late FoodNutritionEstimate _baseEstimate;
   late double _amount;
-  late String? _originalQuery;
   final _amountController = TextEditingController();
   final _correctionController = TextEditingController();
   bool _saving = false;
@@ -49,7 +52,6 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     super.initState();
     _baseEstimate = widget.estimate;
     _amount = widget.estimate.referenceAmount;
-    _originalQuery = widget.originalQuery;
     _amountController.text = _formatAmount(_amount);
   }
 
@@ -72,19 +74,54 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     setState(() => _amount = amount);
   }
 
+  bool get _hasPhotoReference =>
+      widget.imageBytes != null && widget.imageBytes!.isNotEmpty;
+
+  void _openPhotoPreview() {
+    final bytes = widget.imageBytes;
+    if (bytes == null || bytes.isEmpty) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4,
+              child: Image.memory(
+                Uint8List.fromList(bytes),
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close, color: Colors.white),
+                style: IconButton.styleFrom(backgroundColor: Colors.black45),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _reviseWithAi() async {
     final correction = _correctionController.text.trim();
     if (correction.isEmpty) return;
 
-    final query = _originalQuery != null && _originalQuery!.isNotEmpty
-        ? '$_originalQuery. Corrección: $correction'
-        : correction;
-
     setState(() => _revising = true);
     try {
       final profile = await ref.read(profileProvider.future);
-      final estimate = await ref.read(aiCoachServiceProvider).estimateFoodFromText(
-            query: query,
+      final estimate = await ref.read(aiCoachServiceProvider).reviseFoodEstimate(
+            previous: _baseEstimate,
+            correction: correction,
+            imageBytes: widget.imageBytes,
             profile: profile,
           );
       if (!mounted) return;
@@ -97,7 +134,6 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
       setState(() {
         _baseEstimate = estimate;
         _amount = estimate.referenceAmount;
-        _originalQuery = query;
         _amountController.text = _formatAmount(_amount);
         _correctionController.clear();
       });
@@ -157,7 +193,58 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
           ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (_baseEstimate.ingredients.isNotEmpty) ...[
+              if (_hasPhotoReference) ...[
+                GestureDetector(
+                  onTap: _openPhotoPreview,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.memory(
+                            Uint8List.fromList(widget.imageBytes!),
+                            fit: BoxFit.cover,
+                          ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [Colors.black87, Colors.transparent],
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.photo_camera, size: 16, color: Colors.white70),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.foodPhotoReferenceCaption,
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                    ),
+                                  ),
+                                  Text(
+                                    l10n.foodPhotoTapToExpand,
+                                    style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ] else if (_baseEstimate.ingredients.isNotEmpty) ...[
                 Container(
                   height: 120,
                   decoration: BoxDecoration(

@@ -33,10 +33,13 @@ import '../../widgets/rest_timer.dart';
 import '../../widgets/rir_picker_sheet.dart';
 import '../../widgets/cardio_set_log_tile.dart';
 import '../../widgets/set_log_tile.dart';
+import '../../widgets/workout_exercise_picker_sheet.dart';
 import '../../widgets/workout_elapsed_timer.dart';
 import '../../widgets/active_workout_exercise_list.dart';
 import '../../widgets/similar_exercise_picker_sheet.dart';
-import '../../widgets/workout_exercise_picker_sheet.dart';
+import '../../services/exercise_report_service.dart';
+import '../../widgets/exercise_load_controls.dart';
+import '../../widgets/exercise_report_sheet.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -61,6 +64,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   final Map<String, WorkoutSet> _setOverrides = {};
   final Map<String, List<WorkoutSet>> _insertedSets = {};
   final Set<String> _savingSetIds = {};
+  final Map<String, bool> _perArmOverrides = {};
 
   Workout _mergedWorkout(Workout workout) {
     if (_setOverrides.isEmpty && _insertedSets.isEmpty) return workout;
@@ -394,22 +398,24 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     try {
       final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
       final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+      final profile = ref.read(profileProvider).valueOrNull;
+      final bodyWeightKg = profile?.bodyWeight;
       final volume = workout.exercises.fold<double>(
         0,
-        (sum, ex) => sum +
-            ex.totalVolume(
-              perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
-              loadMode: ExerciseLoad.loadModeForExerciseId(ex.exerciseId, catalog),
+        (sum, ex) =>
+            sum +
+            ExerciseLoad.exerciseTotalVolumeKg(
+              ex,
+              catalog: catalog,
+              perArmOverrides: _perArmOverrides,
+              bodyWeightKg: bodyWeightKg,
             ),
       );
-
       final completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
       final streakWeeks = WorkoutStreakCalculator.weeklyStreak([
         DateTime.now(),
         ...completedDates,
       ]);
-
-      final profile = ref.read(profileProvider).valueOrNull;
       final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
       final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
         workout: workout,
@@ -453,6 +459,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       final newPersonalRecords = SessionPersonalRecords.detect(
         workout: workout,
         existing: personalRecordsBefore,
+        catalog: catalog,
+        bodyWeightKg: bodyWeightKg,
       );
 
       final summary = WorkoutSummaryBuilder.build(
@@ -718,14 +726,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   )
                 : null,
             actions: [
-              if (!inExerciseView)
-                TextButton(
-                  onPressed: _completing ? null : () => _cancelWorkout(displayWorkout),
-                  child: Text(
-                    l10n.cancelWorkout,
-                    style: const TextStyle(color: AppColors.textMuted),
-                  ),
+              TextButton(
+                onPressed: _completing ? null : () => _cancelWorkout(displayWorkout),
+                child: Text(
+                  l10n.cancelWorkout,
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
+              ),
               TextButton(
                 onPressed: _completing ? null : () => _completeWorkout(displayWorkout),
                 child: _completing
@@ -850,18 +857,53 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: IconButton.filledTonal(
-                        tooltip: l10n.exerciseHistory,
-                        onPressed: () => ExerciseHistorySheet.show(
-                          context,
-                          exerciseId: exercise.exerciseId,
-                          exerciseName: exercise.exerciseName,
-                          excludeWorkoutId: displayWorkout.id,
-                        ),
-                        icon: const Icon(Icons.history),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton.filledTonal(
+                            tooltip: l10n.reportExerciseProblem,
+                            onPressed: () => ExerciseReportSheet.show(
+                              context,
+                              exerciseId: exercise.exerciseId,
+                              exerciseName: exercise.exerciseName,
+                              service: ref.read(exerciseReportServiceProvider),
+                            ),
+                            icon: const Icon(Icons.flag_outlined),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton.filledTonal(
+                            tooltip: l10n.exerciseHistory,
+                            onPressed: () => ExerciseHistorySheet.show(
+                              context,
+                              exerciseId: exercise.exerciseId,
+                              exerciseName: exercise.exerciseName,
+                              excludeWorkoutId: displayWorkout.id,
+                            ),
+                            icon: const Icon(Icons.history),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    if (!isCardio) ...[
+                      const SizedBox(height: 8),
+                      ExerciseLoadControls(
+                        exerciseId: exercise.exerciseId,
+                        exerciseName: exercise.exerciseName,
+                        catalog: exerciseCatalog,
+                        perArmEnabled: ExerciseLoad.resolvePerArmWeight(
+                          exerciseId: exercise.exerciseId,
+                          catalog: exerciseCatalog,
+                          exerciseName: exercise.exerciseName,
+                          sessionOverride: _perArmOverrides[exercise.exerciseId],
+                        ),
+                        onPerArmChanged: (value) {
+                          setState(() => _perArmOverrides[exercise.exerciseId] = value);
+                        },
+                        bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
+                        unitSystem: unitSystem,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
                     ...sortedSets.asMap().entries.map(
                       (entry) {
                         if (isCardio) {
@@ -892,19 +934,32 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                             },
                           );
                         }
+                        final loadMode = ExerciseLoad.loadModeForExerciseId(
+                          exercise.exerciseId,
+                          exerciseCatalog,
+                          exerciseName: exercise.exerciseName,
+                        );
+                        final perArm = ExerciseLoad.resolvePerArmWeight(
+                          exerciseId: exercise.exerciseId,
+                          catalog: exerciseCatalog,
+                          exerciseName: exercise.exerciseName,
+                          sessionOverride: _perArmOverrides[exercise.exerciseId],
+                        );
+                        final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
+                              exercise.exerciseId,
+                              exerciseCatalog,
+                              exerciseName: exercise.exerciseName,
+                            ) ??
+                            false;
                         return SetLogTile(
                           key: ValueKey(entry.value.id),
                           set: entry.value,
                           unitSystem: unitSystem,
                           exerciseName: exercise.exerciseName,
-                          perArmWeight: ExerciseLoad.perArmWeightForExerciseId(
-                            exercise.exerciseId,
-                            exerciseCatalog,
-                          ),
-                          weightOptional: ExerciseLoad.weightOptionalForExerciseId(
-                            exercise.exerciseId,
-                            exerciseCatalog,
-                          ),
+                          perArmWeight: perArm,
+                          weightOptional: weightOptional,
+                          loadMode: loadMode,
+                          bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
                           isLast: entry.key == sortedSets.length - 1,
                           isSaving: _savingSetIds.contains(entry.value.id),
                           onValidationError: (message) {
@@ -1006,8 +1061,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         }
       } else {
         final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
-        final weightOptional =
-            ExerciseLoad.weightOptionalForExerciseId(exercise.exerciseId, catalog) ?? false;
+        final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
+              exercise.exerciseId,
+              catalog,
+              exerciseName: exercise.exerciseName,
+            ) ??
+            false;
         if (!weightOptional && (set.weight == null || set.weight! <= 0)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

@@ -1,25 +1,21 @@
-import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import '../firebase_options.dart';
+import 'local_notification_service.dart';
 import 'supabase_service.dart';
-
-const _androidChannelId = 'fitforge_social';
-const _androidChannelName = 'Actividad social';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (!DefaultFirebaseOptions.isConfigured) return;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await showBackgroundRemoteMessage(message);
 }
 
 class PushNotificationService {
   final _messaging = FirebaseMessaging.instance;
-  final _localNotifications = FlutterLocalNotificationsPlugin();
+  final _local = LocalNotificationService.instance;
   GoRouter? _router;
   bool _initialized = false;
 
@@ -33,31 +29,9 @@ class PushNotificationService {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-    await _localNotifications.initialize(
-      const InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: (_) => _openSocial(),
-    );
+    await _local.initialize(onNotificationTap: _openSocial);
 
-    if (Platform.isAndroid) {
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(
-            const AndroidNotificationChannel(
-              _androidChannelId,
-              _androidChannelName,
-              description: 'Avisos cuando un amigo entrena',
-              importance: Importance.high,
-            ),
-          );
-    }
-
-    FirebaseMessaging.onMessage.listen(_showForegroundNotification);
+    FirebaseMessaging.onMessage.listen(_local.showRemoteMessage);
     FirebaseMessaging.onMessageOpenedApp.listen((_) => _openSocial());
     _messaging.onTokenRefresh.listen((_) => registerToken());
 
@@ -71,6 +45,8 @@ class PushNotificationService {
 
   Future<bool> requestPermission() async {
     if (!isAvailable) return false;
+
+    await _local.requestPermission();
 
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -89,7 +65,7 @@ class PushNotificationService {
     final token = await _messaging.getToken();
     if (token == null || token.isEmpty) return;
 
-    final platform = Platform.isIOS ? 'ios' : 'android';
+    final platform = defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android';
     await SupabaseService.client.from('user_push_tokens').upsert(
       {
         'user_id': userId,
@@ -115,25 +91,6 @@ class PushNotificationService {
           .eq('token', token);
     }
     await _messaging.deleteToken();
-  }
-
-  Future<void> _showForegroundNotification(RemoteMessage message) async {
-    final notification = message.notification;
-    if (notification == null) return;
-
-    const androidDetails = AndroidNotificationDetails(
-      _androidChannelId,
-      _androidChannelName,
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    const iosDetails = DarwinNotificationDetails();
-    await _localNotifications.show(
-      notification.hashCode,
-      notification.title ?? 'FitForge',
-      notification.body,
-      const NotificationDetails(android: androidDetails, iOS: iosDetails),
-    );
   }
 
   void _openSocial() {

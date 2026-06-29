@@ -588,6 +588,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get metricCalculatedAutomatically => 'Calculado automáticamente';
 
   @override
+  String get bodyMetricColorLegendTitle => 'Leyenda de colores';
+
+  @override
+  String get bodyMetricColorLegendNote =>
+      'Aplica a peso, IMC, grasa corporal y grasa subcutánea.';
+
+  @override
+  String get bodyMetricHealthVeryLow => 'Muy bajo';
+
+  @override
+  String get bodyMetricHealthLow => 'Bajo';
+
+  @override
+  String get bodyMetricHealthAppropriate => 'Adecuado';
+
+  @override
+  String get bodyMetricHealthIdeal => 'Ideal';
+
+  @override
+  String get bodyMetricHealthHigh => 'Alto';
+
+  @override
+  String get bodyMetricHealthVeryBad => 'Muy alto';
+
+  @override
   String get metricMetabolicAge => 'Edad metabólica';
 
   @override
@@ -743,7 +768,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get streakWeekly => 'Racha (≥4/sem)';
 
   @override
+  String get streakWeeksSubtitle => 'semanas de racha (≥4/sem)';
+
+  @override
   String get thisWeek => 'Esta semana';
+
+  @override
+  String weeklyWorkoutsSubtitle(int goal) {
+    return 'de $goal entrenamientos esta semana';
+  }
 
   @override
   String get startWorkout => 'Iniciar entrenamiento';
@@ -935,6 +968,62 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get weightRequired =>
       'Indica el peso antes de marcar la serie como hecha';
+
+  @override
+  String get weightAdditionalSuffix => '(+ adicional)';
+
+  @override
+  String get weightPerArmSuffix => '(por brazo)';
+
+  @override
+  String get loadModePerArm => 'Por brazo';
+
+  @override
+  String get loadModeCombined => 'Conjunto';
+
+  @override
+  String get loadModeToggleHint =>
+      'Alterna si trabajas ambos lados a la vez o por separado';
+
+  @override
+  String bodyweightLoadHint(String weight) {
+    return 'Tu peso corporal ($weight) cuenta por defecto. El campo es carga adicional.';
+  }
+
+  @override
+  String effectiveWeightLabel(String weight) {
+    return 'Peso total: $weight';
+  }
+
+  @override
+  String get reportExerciseProblem => 'Reportar problema con este ejercicio';
+
+  @override
+  String get exerciseReportTitle => 'Reportar problema';
+
+  @override
+  String get exerciseReportSubmit => 'Enviar reporte';
+
+  @override
+  String get exerciseReportThanks => 'Gracias, revisaremos tu reporte';
+
+  @override
+  String get exerciseReportWrongMetrics => 'Métricas incorrectas (peso/reps)';
+
+  @override
+  String get exerciseReportWrongGif => 'Imagen o GIF incorrecto';
+
+  @override
+  String get exerciseReportWrongName => 'Nombre o traducción incorrecta';
+
+  @override
+  String get exerciseReportWrongMuscles => 'Músculos o categoría incorrecta';
+
+  @override
+  String get exerciseReportOther => 'Otro';
+
+  @override
+  String get exerciseReportNotes => 'Detalles (opcional)';
 
   @override
   String get repsRequired => 'Indica las repeticiones';
@@ -1168,7 +1257,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customRest => 'Descanso personalizado';
 
   @override
-  String get cardioDuration => 'Tiempo (mm:ss)';
+  String get cardioDuration => 'Tiempo';
+
+  @override
+  String get cardioSecondsShort => 'seg';
 
   @override
   String get cardioDistance => 'Distancia';
@@ -1671,12 +1763,94 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get foodDailyBudget => 'Presupuesto del día';
+
+  @override
+  String get foodCaloriesAvailable => 'kcal disponibles';
+
+  @override
+  String foodBudgetUsed(int percent) {
+    return '$percent% usado';
+  }
+
+  @override
+  String foodBudgetGoal(int goal) {
+    return 'objetivo $goal kcal';
+  }
+
+  @override
+  String get foodStatGoal => 'Objetivo';
+
+  @override
+  String foodBudgetSummary(int eaten, int burned, int goal) {
+    return '$eaten consumidas · $burned quemadas · objetivo $goal kcal';
+  }
+
+  @override
+  String get foodTimelineEmpty => 'Sin registros';
+
+  @override
+  String get foodEnergyOutputTitle => 'Energía gastada';
+
+  @override
+  String get foodEnergyOutputEmpty =>
+      'Sin actividad registrada hoy. Añade entrenos en FitForge o actividades manuales.';
+
+  @override
+  String get foodAddActivity => 'Registrar actividad';
+
+  @override
+  String get foodFromFitForgeWorkout => 'Entrenamiento FitForge';
+
+  @override
+  String get foodManualActivityLabel => 'Actividad manual';
+
+  @override
   String foodWorkoutBonus(int count) {
     return '+$count kcal activas por entrenamiento hoy';
   }
 
   @override
   String get foodMealsTitle => 'Comidas del día';
+
+  @override
+  String get foodActivitiesTitle => 'Actividades del día';
+
+  @override
+  String get foodActivityManual => 'Actividades manuales';
+
+  @override
+  String get foodActivityAdd => 'Agregar actividad';
+
+  @override
+  String get foodActivityAddHint =>
+      'Registra entrenos u otras actividades que no hayas documentado en FitForge.';
+
+  @override
+  String get foodActivityName => 'Nombre de la actividad';
+
+  @override
+  String get foodActivityNameHint => 'Ej. Caminata, yoga, fútbol…';
+
+  @override
+  String get foodActivityNameRequired => 'Escribe un nombre para la actividad.';
+
+  @override
+  String get foodActivityCalories => 'Calorías quemadas';
+
+  @override
+  String get foodActivityCaloriesHint => '150';
+
+  @override
+  String get foodActivityCaloriesInvalid => 'Indica calorías entre 1 y 9999.';
+
+  @override
+  String get foodActivitySave => 'Guardar actividad';
+
+  @override
+  String foodManualActivityBonus(int count) {
+    return '+$count kcal por actividades manuales';
+  }
 
   @override
   String get mealBreakfast => 'Desayuno';
@@ -1708,6 +1882,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get foodModeQuick => 'Rápido';
+
+  @override
+  String get foodModeManual => 'Manual';
 
   @override
   String get foodRecentSearches => 'Alimentos recientes';
@@ -1746,11 +1923,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodBarcodeOpenSettings => 'Abrir ajustes de la app';
 
   @override
-  String get foodBarcodePhotoAction => 'Fotografiar código del empaque';
+  String get foodBarcodePhotoAction => 'Tomar foto';
+
+  @override
+  String get foodBarcodeGalleryAction => 'Galería';
 
   @override
   String get foodBarcodePhotoFallback =>
-      'Si el visor en vivo no arranca, usa el botón de arriba (misma cámara que en Foto).';
+      'Si el visor en vivo no arranca, escanea desde una foto o la galería.';
 
   @override
   String get foodBarcodeNotDetectedInPhoto =>
@@ -1776,11 +1956,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodQuickAddAction => 'Estimar con IA';
 
   @override
+  String get foodManualAddHint =>
+      'Introduce los datos de una porción. Se guardará en tu dispositivo para reutilizarlo.';
+
+  @override
+  String get foodManualAddAction => 'Continuar';
+
+  @override
+  String get foodManualSavedFoods => 'Guardados en este dispositivo';
+
+  @override
+  String get foodManualNoSaved => 'Aún no tienes alimentos manuales guardados.';
+
+  @override
+  String get foodManualNameRequired => 'Escribe el nombre del alimento.';
+
+  @override
+  String get foodManualCaloriesRequired =>
+      'Introduce calorías mayores que cero.';
+
+  @override
+  String get foodManualGramsLabel => 'gramos totales (g)';
+
+  @override
+  String get foodPortionUnit => 'porción';
+
+  @override
+  String get foodManualQuantityHint =>
+      'Ajusta las porciones; calorías y macros se recalculan solos.';
+
+  @override
   String get foodPhotoHint =>
       'Toma una foto de tu plato. La IA identificará los alimentos y sugerirá los macros.';
 
   @override
   String get foodPhotoAction => 'Tomar foto';
+
+  @override
+  String get foodPhotoGalleryAction => 'Elegir de galería';
+
+  @override
+  String get foodPhotoReferenceCaption =>
+      'Esta foto se usa al recalcular con IA';
+
+  @override
+  String get foodPhotoTapToExpand => 'Toca para ampliar';
 
   @override
   String foodQuantityLabel(String unit) {

@@ -79,5 +79,19 @@ void main() {
         const Color(0xFFFFB300),
       );
     });
+
+    test('only selected metrics use health color coding', () {
+      expect(BodyMetricHealthEvaluator.usesColorCoding('weight'), isTrue);
+      expect(BodyMetricHealthEvaluator.usesColorCoding('bmi'), isTrue);
+      expect(BodyMetricHealthEvaluator.usesColorCoding('body_fat'), isTrue);
+      expect(BodyMetricHealthEvaluator.usesColorCoding('subcutaneous_fat'), isTrue);
+      expect(BodyMetricHealthEvaluator.usesColorCoding('skeletal_muscle'), isFalse);
+
+      const snap = BodyMetricSnapshot(type: 'skeletal_muscle', rawValue: 47.5);
+      expect(
+        BodyMetricHealthEvaluator.colorFor(key: 'skeletal_muscle', snapshot: snap),
+        const Color(0xFFF5F5F5),
+      );
+    });
   });
 }
