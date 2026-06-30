@@ -34,9 +34,9 @@ class RestSoundService {
           options: {AVAudioSessionOptions.mixWithOthers},
         ),
         android: const AudioContextAndroid(
-          contentType: AndroidContentType.music,
-          usageType: AndroidUsageType.media,
-          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.alarm,
+          audioFocus: AndroidAudioFocus.gainTransient,
         ),
       ),
     );

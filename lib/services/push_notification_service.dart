@@ -31,6 +31,12 @@ class PushNotificationService {
 
     await _local.initialize(onNotificationTap: _openSocial);
 
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     FirebaseMessaging.onMessage.listen(_local.showRemoteMessage);
     FirebaseMessaging.onMessageOpenedApp.listen((_) => _openSocial());
     _messaging.onTokenRefresh.listen((_) => registerToken());

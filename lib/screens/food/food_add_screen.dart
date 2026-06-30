@@ -25,6 +25,7 @@ class FoodAddScreen extends ConsumerStatefulWidget {
 
 class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   FoodAddMode _mode = FoodAddMode.search;
+  bool _barcodePaneMounted = false;
   final _filterController = TextEditingController();
   final _quickController = TextEditingController();
   final _barcodeScannerKey = GlobalKey<FoodBarcodeScannerViewState>();
@@ -225,7 +226,10 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                 child: _ModeTabs(
                   mode: _mode,
                   onChanged: (m) {
-                    setState(() => _mode = m);
+                    setState(() {
+                      _mode = m;
+                      if (m == FoodAddMode.barcode) _barcodePaneMounted = true;
+                    });
                     if (m == FoodAddMode.manual) _loadManualSaved();
                     if (m == FoodAddMode.barcode) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -239,38 +243,55 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: switch (_mode) {
-                    FoodAddMode.search => _SearchPane(
-                        filterController: _filterController,
-                        recent: _recent,
-                        onSelect: _openFromEntry,
-                      ),
-                    FoodAddMode.quick => _QuickAddPane(
-                        controller: _quickController,
-                        onSubmit: _quickAddWithAi,
-                      ),
-                    FoodAddMode.manual => _ManualAddPane(
-                        saved: _manualSaved,
-                        onContinue: (template) async {
-                          await _saveManualTemplate(template);
-                          if (!mounted) return;
-                          _openFromManualTemplate(template);
-                        },
-                        onSelectSaved: _openFromManualTemplate,
-                        onDeleteSaved: (id) async {
-                          await ref.read(localManualFoodStoreProvider).delete(id);
-                          await _loadManualSaved();
-                          await _loadRecent();
-                        },
-                      ),
-                    FoodAddMode.photo => _PhotoPane(
-                        onPickImage: _pickFoodImage,
-                      ),
-                    FoodAddMode.barcode => _BarcodePane(
-                        scannerKey: _barcodeScannerKey,
-                        onDetected: _lookupBarcode,
-                      ),
-                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (_barcodePaneMounted)
+                        Offstage(
+                          offstage: _mode != FoodAddMode.barcode,
+                          child: _BarcodePane(
+                            scannerKey: _barcodeScannerKey,
+                            isActive: _mode == FoodAddMode.barcode,
+                            onDetected: _lookupBarcode,
+                          ),
+                        ),
+                      switch (_mode) {
+                        FoodAddMode.search => _SearchPane(
+                            filterController: _filterController,
+                            recent: _recent,
+                            onSelect: _openFromEntry,
+                          ),
+                        FoodAddMode.quick => _QuickAddPane(
+                            controller: _quickController,
+                            onSubmit: _quickAddWithAi,
+                          ),
+                        FoodAddMode.manual => _ManualAddPane(
+                            saved: _manualSaved,
+                            onContinue: (template) async {
+                              await _saveManualTemplate(template);
+                              if (!mounted) return;
+                              _openFromManualTemplate(template);
+                            },
+                            onSelectSaved: _openFromManualTemplate,
+                            onDeleteSaved: (id) async {
+                              await ref.read(localManualFoodStoreProvider).delete(id);
+                              await _loadManualSaved();
+                              await _loadRecent();
+                            },
+                          ),
+                        FoodAddMode.photo => _PhotoPane(
+                            onPickImage: _pickFoodImage,
+                          ),
+                        FoodAddMode.barcode => _barcodePaneMounted
+                            ? const SizedBox.shrink()
+                            : _BarcodePane(
+                                scannerKey: _barcodeScannerKey,
+                                isActive: true,
+                                onDetected: _lookupBarcode,
+                              ),
+                      },
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -715,10 +736,12 @@ class _PhotoPane extends StatelessWidget {
 class _BarcodePane extends StatelessWidget {
   final GlobalKey<FoodBarcodeScannerViewState> scannerKey;
   final Future<void> Function(String code) onDetected;
+  final bool isActive;
 
   const _BarcodePane({
     required this.scannerKey,
     required this.onDetected,
+    this.isActive = true,
   });
 
   @override
@@ -736,6 +759,7 @@ class _BarcodePane extends StatelessWidget {
         Expanded(
           child: FoodBarcodeScannerView(
             key: scannerKey,
+            isActive: isActive,
             onDetected: onDetected,
           ),
         ),

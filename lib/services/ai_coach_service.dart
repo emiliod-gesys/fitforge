@@ -25,6 +25,20 @@ class AiCoachService {
 
   final ProfileService _profileService;
 
+  Future<({AiProvider provider, String apiKey})> _resolveCredentials(
+    UserProfile? profile,
+  ) async {
+    final provider = _profileService.resolveAiProvider(profile);
+    if (provider == AiProvider.none) {
+      throw Exception('Configura un proveedor de IA en tu perfil');
+    }
+    final apiKey = await _profileService.getApiKey(provider);
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('Configura tu API key en el perfil');
+    }
+    return (provider: provider, apiKey: apiKey);
+  }
+
   static bool isRoutineSaveIntent(String message) {
     final m = message.toLowerCase().trim();
     final hasCreateVerb = _hasRoutineCreateVerb(m);
@@ -60,13 +74,128 @@ class AiCoachService {
         m.contains('muéstrame') ||
         m.contains('muestrame') ||
         m.contains('necesito') ||
-        m.contains('quiero');
+        m.contains('quiero') ||
+        m.contains('dame') ||
+        m.contains('prepara') ||
+        m.contains('monta') ||
+        m.contains('elabora') ||
+        m.contains('create') ||
+        m.contains('make') ||
+        m.contains('build') ||
+        m.contains('design') ||
+        m.contains('give me');
+  }
+
+  static bool isMultiRoutineProgramRequest(String message) {
+    final m = _normalizeRoutineTypos(message);
+    const keywords = [
+      'toda la semana',
+      'toda semana',
+      'semana completa',
+      'semanal',
+      'weekly',
+      'whole week',
+      'for the week',
+      'per week',
+      'each day',
+      'cada día',
+      'cada dia',
+      'ulppl',
+      'ppl',
+      'push pull leg',
+      'push/pull',
+      'upper lower',
+      'upper/lower',
+      'varias rutinas',
+      'multiple routines',
+      'split semanal',
+      'plan semanal',
+      'programa semanal',
+      'rutina semanal',
+      'weekly split',
+      'weekly program',
+      'training split',
+      'workout split',
+      'week plan',
+      'plan de la semana',
+    ];
+    if (keywords.any(m.contains)) return true;
+
+    if (RegExp(r'\b[3-7]\s*d[ií]as').hasMatch(m) && _mentionsRoutineOrPlan(m)) {
+      return true;
+    }
+    if (RegExp(r'\b[3-7]\s*day').hasMatch(m) && _mentionsRoutineOrPlan(m)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  static int expectedProgramRoutineCount(String message) {
+    final m = _normalizeRoutineTypos(message);
+    if (m.contains('ulppl')) return 5;
+    if (RegExp(r'\bppl\b').hasMatch(m) && !m.contains('ulppl')) return 6;
+    if (m.contains('upper lower') || m.contains('upper/lower')) return 4;
+
+    final esDays = RegExp(r'(\d+)\s*d[ií]as').firstMatch(m);
+    if (esDays != null) {
+      final n = int.tryParse(esDays.group(1)!);
+      if (n != null && n >= 2 && n <= 7) return n;
+    }
+    final enDays = RegExp(r'(\d+)\s*day').firstMatch(m);
+    if (enDays != null) {
+      final n = int.tryParse(enDays.group(1)!);
+      if (n != null && n >= 2 && n <= 7) return n;
+    }
+
+    if (isMultiRoutineProgramRequest(message)) return 5;
+    return 3;
+  }
+
+  static bool _mentionsRoutineOrPlan(String m) {
+    return RegExp(r'rutin\w*').hasMatch(m) ||
+        m.contains('entrenamiento') ||
+        m.contains('workout') ||
+        m.contains('plan de') ||
+        m.contains('programa de');
+  }
+
+  static bool _mentionsBodyRegionOrSplit(String m) {
+    const regions = [
+      'tren superior',
+      'tren inferior',
+      'parte superior',
+      'parte inferior',
+      'upper body',
+      'lower body',
+      'push pull',
+      'push day',
+      'pull day',
+      'leg day',
+      'día de piernas',
+      'dia de piernas',
+    ];
+    return regions.any(m.contains);
+  }
+
+  static bool userSpecifiedDuration(String message) {
+    final m = message.toLowerCase();
+    return RegExp(r'(\d+)\s*(min|minutos|mins?)\b').hasMatch(m) ||
+        RegExp(r'\b1\s*h(ora|oras)?\b').hasMatch(m) ||
+        RegExp(r'\b90\b').hasMatch(m);
+  }
+
+  static String _normalizeRoutineTypos(String message) {
+    return message
+        .toLowerCase()
+        .replaceAll(RegExp(r'\bretina\b'), 'rutina')
+        .replaceAll(RegExp(r'\brutna\b'), 'rutina');
   }
 
   static bool isRoutineCreationRequest(String message) {
     if (isRoutineSaveIntent(message)) return false;
 
-    final m = message.toLowerCase();
+    final m = _normalizeRoutineTypos(message);
     const triggers = [
       'crea una rutina',
       'crear rutina',
@@ -83,23 +212,57 @@ class AiCoachService {
       'muestrame una rutina',
       'necesito una rutina',
       'quiero una rutina',
+      'crea un entrenamiento',
+      'crear entrenamiento',
+      'hazme un entrenamiento',
+      'haz un entrenamiento',
+      'genera un entrenamiento',
       'plan de entrenamiento',
       'programa de entrenamiento',
+      'create a workout',
+      'create a routine',
+      'make me a workout',
+      'make a routine',
     ];
 
     if (triggers.any(m.contains)) return true;
 
-    if (RegExp(r'rutina\s+(de|para)\b').hasMatch(m)) return true;
+    if (RegExp(r'rutin\w*\s+(de|para)\b').hasMatch(m)) return true;
+
+    if (RegExp(r'entrenamiento\s+(de|para)\b').hasMatch(m)) return true;
 
     if ((m.contains('editable') || m.contains('editar') || m.contains('revisar')) &&
-        (m.contains('rutina') || m.contains('plan'))) {
+        (m.contains('rutin') || m.contains('plan') || m.contains('entrenamiento'))) {
       return true;
     }
 
     final muscles = parseTargetMuscles(message);
     if (muscles.isNotEmpty && _hasTrainingPlanIntent(m)) return true;
 
-    return m.contains('rutina') && _hasRoutineCreateVerb(m);
+    if (_hasRoutineCreateVerb(m) && _mentionsRoutineOrPlan(m)) return true;
+
+    if (_hasRoutineCreateVerb(m) && _mentionsBodyRegionOrSplit(m)) return true;
+
+    if (_hasRoutineCreateVerb(m) &&
+        (m.contains('enfocad') || m.contains('orientad')) &&
+        (m.contains('fuerza') ||
+            m.contains('hipertrof') ||
+            m.contains('resistencia') ||
+            muscles.isNotEmpty ||
+            _mentionsBodyRegionOrSplit(m))) {
+      return true;
+    }
+
+    if (isMultiRoutineProgramRequest(message) && _hasRoutineCreateVerb(m)) return true;
+
+    if (isMultiRoutineProgramRequest(message) &&
+        RegExp(r'\b(create|make|build|design|give me|crea|haz|genera|dame)\b').hasMatch(m)) {
+      return true;
+    }
+
+    if (RegExp(r'creat\w*').hasMatch(m) && RegExp(r'routin\w*').hasMatch(m)) return true;
+
+    return RegExp(r'rutin\w*').hasMatch(m) && _hasRoutineCreateVerb(m);
   }
 
   static bool _hasTrainingPlanIntent(String m) {
@@ -144,13 +307,33 @@ REGLAS OBLIGATORIAS:
       return int.tryParse(minMatch.group(1)!) ?? 45;
     }
     if (RegExp(r'1\s*h(ora|oras)?', caseSensitive: false).hasMatch(message)) return 60;
-    if (RegExp(r'90', caseSensitive: false).hasMatch(message)) return 90;
+    if (RegExp(r'\b90\b', caseSensitive: false).hasMatch(message)) return 90;
     return 45;
   }
 
   static List<String> parseTargetMuscles(String message) {
-    final m = message.toLowerCase();
+    final m = _normalizeRoutineTypos(message);
     final found = <String>{};
+
+    if (m.contains('tren superior') ||
+        m.contains('parte superior') ||
+        m.contains('upper body')) {
+      found.addAll(['Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps']);
+    }
+    if (m.contains('tren inferior') ||
+        m.contains('parte inferior') ||
+        m.contains('lower body') ||
+        m.contains('leg day') ||
+        m.contains('día de piernas') ||
+        m.contains('dia de piernas')) {
+      found.addAll(['Piernas', 'Glúteos']);
+    }
+    if (m.contains('push day') || (m.contains('push') && !m.contains('pull'))) {
+      found.addAll(['Pecho', 'Hombros', 'Tríceps']);
+    }
+    if (m.contains('pull day') || (m.contains('pull') && !m.contains('push'))) {
+      found.addAll(['Espalda', 'Bíceps']);
+    }
 
     const keywords = <String, String>{
       'pierna': 'Piernas',
@@ -234,16 +417,9 @@ REGLAS OBLIGATORIAS:
     List<PersonalRecord>? personalRecords,
     String? languageCode,
   }) async {
-    final aiProvider = profile?.aiProvider ?? AiProvider.none;
-    if (aiProvider == AiProvider.none) {
-      throw Exception('Configura un proveedor de IA en tu perfil');
-    }
-
-    final apiKey = await _profileService.getApiKey(aiProvider);
-    if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('Configura tu API key en el perfil');
-    }
-
+    final credentials = await _resolveCredentials(profile);
+    final aiProvider = credentials.provider;
+    final apiKey = credentials.apiKey;
     final metrics = bodyMetrics ?? await _profileService.getBodyMetricSnapshots();
     final context = AiCoachContextBuilder.build(
       profile: profile,
@@ -266,7 +442,8 @@ Usa esa información para personalizar ejercicios, volumen, series, reps y progr
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
-Si el usuario pide crear o guardar una rutina, explícale brevemente el enfoque; la app le mostrará una vista previa para guardarla cuando corresponda.
+Si el usuario pide crear una rutina editable, responde solo con un resumen breve (la app generará la rutina estructurada por separado).
+No escribas rutinas completas en markdown cuando pidan crearlas en la app.
 
 Contexto del usuario:
 $context
@@ -297,6 +474,9 @@ $context
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
+    final durationLine = userSpecifiedDuration(userMessage)
+        ? 'Duración solicitada: $duration minutos.'
+        : 'El usuario no indicó duración; diseña una rutina de aproximadamente $duration minutos.';
     final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
     final routineLanguageHint = lang == 'en'
         ? 'Write the routine name and description in English.'
@@ -316,7 +496,8 @@ $context
 El usuario pidió lo siguiente:
 "$userMessage"
 
-Genera una rutina de gimnasio de $duration minutos.
+Genera una rutina de gimnasio.
+$durationLine
 Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y el perfil' : targetMuscles.join(', ')}.
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
@@ -359,6 +540,97 @@ $_routineRules
     if (routine == null) return null;
 
     return ExerciseMatcher.enrich(routine, catalog);
+  }
+
+  Future<List<Routine>> generateRoutineProgramFromMessage({
+    required String userMessage,
+    required List<Exercise> catalog,
+    UserProfile? profile,
+    List<Workout>? recentWorkouts,
+    Map<String, BodyMetricSnapshot>? bodyMetrics,
+    WorkoutWeeklyStats? weeklyStats,
+    List<PersonalRecord>? personalRecords,
+    List<Routine>? routines,
+    String? languageCode,
+  }) async {
+    final targetMuscles = parseTargetMuscles(userMessage);
+    final duration = parseDurationMinutes(userMessage);
+    final durationLine = userSpecifiedDuration(userMessage)
+        ? 'Duración por sesión: $duration minutos.'
+        : 'El usuario no indicó duración; cada sesión debe durar aproximadamente $duration minutos.';
+    final routineCount = expectedProgramRoutineCount(userMessage);
+    final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
+    final routineLanguageHint = lang == 'en'
+        ? 'Write routine names and descriptions in English.'
+        : 'Escribe nombres y descripciones en español.';
+    final aiCatalog = AiRoutineSanitizer.catalogForAi(catalog);
+    final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
+    final userContext = await _loadUserContext(
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      recentWorkouts: recentWorkouts,
+      routines: routines,
+    );
+
+    final prompt = '''
+El usuario pidió lo siguiente:
+"$userMessage"
+
+Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento).
+$durationLine
+Músculos objetivo globales: ${targetMuscles.isEmpty ? 'según el split y el perfil' : targetMuscles.join(', ')}.
+
+Perfil y contexto del usuario:
+$userContext
+
+$routineLanguageHint
+
+$_routineRules
+- Cada rutina es un día de entrenamiento independiente con nombre claro (ej. "Upper (Fuerza)", "Push hipertrofia").
+- Varía ejercicios entre días; no repitas la misma rutina.
+
+IMPORTANTE: usa SOLO nombres de ejercicio de esta lista (copia el nombre exacto):
+${names.take(120).join('\n')}
+
+Responde SOLO con JSON válido (sin markdown ni texto extra):
+{
+  "routines": [
+    {
+      "name": "nombre del día",
+      "description": "breve descripción",
+      "target_muscles": ["Pecho"],
+      "exercises": [
+        {"name": "nombre exacto de la lista", "sets": 3, "reps": 10, "weight_kg": null, "rest_seconds": 90}
+      ]
+    }
+  ]
+}
+''';
+
+    final response = await _complete(
+      profile: profile,
+      systemPrompt: '''
+Eres un generador de programas de entrenamiento para FitForge.
+Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
+${fitnessScopeInstruction(lang)}
+$_routineRules
+''',
+      userPrompt: prompt,
+    );
+
+    final parsed = _parseRoutineProgramJson(
+      response,
+      targetMuscles: targetMuscles,
+      profile: profile,
+    );
+    if (parsed.isEmpty) return const [];
+
+    return parsed
+        .map((routine) => ExerciseMatcher.enrich(routine, catalog))
+        .where((routine) => routine.exercises.length >= 2)
+        .toList();
   }
 
   Future<Routine?> generateRoutine({
@@ -436,15 +708,9 @@ $_routineRules
     required String systemPrompt,
     required String userPrompt,
   }) async {
-    final aiProvider = profile?.aiProvider ?? AiProvider.none;
-    if (aiProvider == AiProvider.none) {
-      throw Exception('Configura un proveedor de IA en tu perfil');
-    }
-
-    final apiKey = await _profileService.getApiKey(aiProvider);
-    if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('Configura tu API key en el perfil');
-    }
+    final credentials = await _resolveCredentials(profile);
+    final aiProvider = credentials.provider;
+    final apiKey = credentials.apiKey;
 
     switch (aiProvider) {
       case AiProvider.openai:
@@ -470,6 +736,71 @@ $_routineRules
       if (start < 0 || end <= start) return null;
 
       final json = jsonDecode(cleaned.substring(start, end + 1)) as Map<String, dynamic>;
+      return _parseRoutineFromMap(json, targetMuscles: targetMuscles, profile: profile);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<Routine> _parseRoutineProgramJson(
+    String response, {
+    required List<String> targetMuscles,
+    UserProfile? profile,
+  }) {
+    try {
+      final cleaned = response.replaceAll(RegExp(r'```json|```'), '').trim();
+      final start = cleaned.indexOf('{');
+      final arrayStart = cleaned.indexOf('[');
+      final useObject = start >= 0 && (arrayStart < 0 || start < arrayStart);
+
+      if (useObject) {
+        final end = cleaned.lastIndexOf('}');
+        if (end <= start) return const [];
+        final json = jsonDecode(cleaned.substring(start, end + 1));
+        if (json is Map<String, dynamic>) {
+          final routines = json['routines'];
+          if (routines is List) {
+            return _parseRoutineList(routines, targetMuscles: targetMuscles, profile: profile);
+          }
+          final single = _parseRoutineFromMap(json, targetMuscles: targetMuscles, profile: profile);
+          return single == null ? const [] : [single];
+        }
+      }
+
+      if (arrayStart >= 0) {
+        final end = cleaned.lastIndexOf(']');
+        if (end <= arrayStart) return const [];
+        final json = jsonDecode(cleaned.substring(arrayStart, end + 1));
+        if (json is List) {
+          return _parseRoutineList(json, targetMuscles: targetMuscles, profile: profile);
+        }
+      }
+    } catch (_) {
+      return const [];
+    }
+    return const [];
+  }
+
+  List<Routine> _parseRoutineList(
+    List<dynamic> items, {
+    required List<String> targetMuscles,
+    UserProfile? profile,
+  }) {
+    final routines = <Routine>[];
+    for (final item in items) {
+      if (item is! Map<String, dynamic>) continue;
+      final routine = _parseRoutineFromMap(item, targetMuscles: targetMuscles, profile: profile);
+      if (routine != null) routines.add(routine);
+    }
+    return routines;
+  }
+
+  Routine? _parseRoutineFromMap(
+    Map<String, dynamic> json, {
+    required List<String> targetMuscles,
+    UserProfile? profile,
+  }) {
+    try {
       final parsedMuscles = (json['target_muscles'] as List?)
               ?.map((m) => m.toString())
               .where((m) => m.isNotEmpty)
@@ -637,7 +968,7 @@ $_routineRules
     required UserProfile profile,
     required String payloadJson,
   }) async {
-    if (!profile.hasAiKey || profile.aiProvider == AiProvider.none) return null;
+    if (!profile.hasAiKey) return null;
 
     final lang = _resolveLanguageCode(profile: profile);
     final usesLb = UnitConverter.isLb(profile.unitSystem);
@@ -718,6 +1049,9 @@ Reglas:
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
 - Frutas por peso: manzana ~52 kcal/100g, plátano ~89 kcal/100g.
 - Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
+- name: nombre ESPECÍFICO del plato con ingredientes o preparación visibles (máx. ~70 caracteres).
+  Buenos: "2 huevos revueltos con 2 tortillas de maíz", "Avena con plátano y mantequilla de maní".
+  Malos: "Comida", "Desayuno", "Plato", "Huevos" (demasiado genérico).
 ''';
     final hints = FoodQueryHints.labeledKcalTotal(query);
     final eggs = FoodQueryHints.eggCount(query);
@@ -736,7 +1070,7 @@ Comida descrita: "$query"
 $hintsBlock
 JSON:
 {
-  "name": "nombre corto del plato",
+  "name": "nombre específico del plato con ingredientes visibles",
   "brand": null,
   "calories_kcal": 0,
   "protein_g": 0,
@@ -763,9 +1097,9 @@ JSON:
     required List<int> imageBytes,
     UserProfile? profile,
   }) async {
-    final aiProvider = profile?.aiProvider ?? AiProvider.none;
-    if (aiProvider == AiProvider.none || profile?.hasAiKey != true) return null;
+    if (!await _profileService.hasUsableAiKey(profile)) return null;
 
+    final aiProvider = _profileService.resolveAiProvider(profile);
     final apiKey = await _profileService.getApiKey(aiProvider);
     if (apiKey == null || apiKey.isEmpty) return null;
 
@@ -783,10 +1117,14 @@ Reglas:
 - calories_kcal, protein_g, carbs_g, fat_g: TOTALES para esa porción (no valores por 100 g).
 - serving_description: describe la porción real (ej. "1 plato ~280 g", "2 tacos ~180 g").
 - Si hay varios ítems, inclúyelos en ingredients y suma todo en reference_amount_g.
+- name: identifica el plato con DETALLE: proteína principal, guarnición, salsa o método de cocción si se ven (máx. ~70 caracteres).
+  Buenos: "Pechuga de pollo a la plancha con arroz blanco y brócoli", "Tacos de bistec con cebolla y cilantro", "Ensalada César con pollo empanizado".
+  Malos: "Comida", "Plato", "Almuerzo", "Pollo", "Arroz con algo".
+- ingredients: lista cada componente visible del plato, no solo el principal.
 
 JSON:
 {
-  "name": "nombre corto del plato",
+  "name": "nombre específico del plato con ingredientes visibles",
   "brand": null,
   "calories_kcal": 0,
   "protein_g": 0,
@@ -832,9 +1170,10 @@ JSON:
     final user = _foodRevisionUserPrompt(previous, trimmed);
 
     try {
-      final aiProvider = profile?.aiProvider ?? AiProvider.none;
-      final canUseVision =
-          imageBytes != null && imageBytes.isNotEmpty && aiProvider != AiProvider.none && profile?.hasAiKey == true;
+      final aiProvider = _profileService.resolveAiProvider(profile);
+      final canUseVision = imageBytes != null &&
+          imageBytes.isNotEmpty &&
+          await _profileService.hasUsableAiKey(profile);
 
       final String response;
       if (canUseVision) {
@@ -879,6 +1218,7 @@ Reglas obligatorias:
 - NO elimines otros alimentos del plato (arroz, brócoli, verduras, etc.) al corregir un solo ítem.
 - Si la corrección menciona peso en gramos o hay balanza visible en la imagen, actualiza reference_amount_g con ese peso.
 - ingredients debe listar TODOS los componentes finales del plato, no solo el corregido.
+- Si actualizas ingredientes o preparación, actualiza también name para que siga siendo específico y descriptivo.
 - calories_kcal y macros son TOTALES para reference_amount_g del plato completo.
 - Los macros deben ser coherentes con las calorías.
 ''';
@@ -896,7 +1236,7 @@ CORRECCIÓN DEL USUARIO:
 Devuelve la estimación ACTUALIZADA del plato completo aplicando solo la corrección.
 JSON:
 {
-  "name": "nombre corto del plato",
+  "name": "nombre específico del plato con ingredientes visibles",
   "brand": null,
   "calories_kcal": 0,
   "protein_g": 0,

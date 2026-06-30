@@ -1138,12 +1138,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Here is your routine. Review it and tap Save when ready.';
 
   @override
+  String coachRoutinesReady(int count) {
+    return 'Here are your $count routines for the week. Review each one and save the ones you want.';
+  }
+
+  @override
   String get coachRoutineTooFewExercises =>
       'Could not build a varied routine from the catalog. Try again or specify target muscles.';
 
   @override
   String get coachRoutineFailed =>
       'Could not generate the routine. Try being more specific (muscles and duration).';
+
+  @override
+  String get aiConnectionError => 'Connection error. Please try again.';
 
   @override
   String get coachNoRoutineToSave =>
@@ -1994,6 +2002,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get foodNameLabel => 'Name';
+
+  @override
+  String get foodNameHint => 'e.g. Grilled chicken with rice and broccoli';
+
+  @override
   String get foodMacrosAutoHint =>
       'Adjust grams; calories and macros update automatically.';
 
@@ -2015,9 +2029,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foodAddThis => 'Add this food';
-
-  @override
-  String get foodNameLabel => 'Name';
 
   @override
   String get foodServingLabel => 'Serving';

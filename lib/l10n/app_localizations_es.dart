@@ -1143,12 +1143,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.';
 
   @override
+  String coachRoutinesReady(int count) {
+    return 'Aquí tienes $count rutinas para la semana. Revísalas y guarda las que quieras.';
+  }
+
+  @override
   String get coachRoutineTooFewExercises =>
       'No pude armar una rutina variada con ejercicios del catálogo. Prueba pidiéndola de nuevo o elige músculos concretos.';
 
   @override
   String get coachRoutineFailed =>
       'No pude generar la rutina. Intenta ser más específico (músculos y duración).';
+
+  @override
+  String get aiConnectionError =>
+      'Error en la conexión. Intenta de nuevo, por favor.';
 
   @override
   String get coachNoRoutineToSave =>
@@ -2008,6 +2017,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get foodNameLabel => 'Nombre';
+
+  @override
+  String get foodNameHint => 'ej. Pechuga a la plancha con arroz y brócoli';
+
+  @override
   String get foodMacrosAutoHint =>
       'Ajusta los gramos; calorías y macros se recalculan solos.';
 
@@ -2029,9 +2044,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get foodAddThis => 'Añadir alimento';
-
-  @override
-  String get foodNameLabel => 'Nombre';
 
   @override
   String get foodServingLabel => 'Porción';

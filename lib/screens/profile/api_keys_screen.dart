@@ -33,7 +33,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
     final profile = await ref.read(profileProvider.future);
     if (profile != null && profile.aiProvider != AiProvider.none) {
       setState(() => _provider = profile.aiProvider);
-      final key = await ref.read(profileServiceProvider).getApiKey(profile.aiProvider);
+      final key = await ref.read(profileServiceProvider).getUserStoredApiKey(profile.aiProvider);
       if (key != null) _keyController.text = key;
     }
   }
@@ -71,7 +71,7 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
       _provider = provider;
       _keyController.clear();
     });
-    final key = await ref.read(profileServiceProvider).getApiKey(provider);
+    final key = await ref.read(profileServiceProvider).getUserStoredApiKey(provider);
     if (key != null && mounted) {
       setState(() => _keyController.text = key);
     }

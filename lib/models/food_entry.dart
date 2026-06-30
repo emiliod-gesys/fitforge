@@ -244,6 +244,34 @@ class FoodNutritionEstimate {
       amountUnit: amountUnit,
     );
   }
+
+  FoodNutritionEstimate copyWith({
+    String? name,
+    int? caloriesKcal,
+    double? proteinG,
+    double? carbsG,
+    double? fatG,
+    double? fiberG,
+    String? servingDescription,
+    String? brand,
+    List<String>? ingredients,
+    double? referenceAmount,
+    String? amountUnit,
+  }) {
+    return FoodNutritionEstimate(
+      name: name ?? this.name,
+      caloriesKcal: caloriesKcal ?? this.caloriesKcal,
+      proteinG: proteinG ?? this.proteinG,
+      carbsG: carbsG ?? this.carbsG,
+      fatG: fatG ?? this.fatG,
+      fiberG: fiberG ?? this.fiberG,
+      servingDescription: servingDescription ?? this.servingDescription,
+      brand: brand ?? this.brand,
+      ingredients: ingredients ?? this.ingredients,
+      referenceAmount: referenceAmount ?? this.referenceAmount,
+      amountUnit: amountUnit ?? this.amountUnit,
+    );
+  }
 }
 
 class DailyNutritionSummary {

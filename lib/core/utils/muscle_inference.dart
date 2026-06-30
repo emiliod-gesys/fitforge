@@ -4,60 +4,92 @@ import 'exercise_logging_resolver.dart';
 
 /// Infiere grupos musculares para recuperación a partir del catálogo o del nombre.
 abstract final class MuscleInference {
-  /// Resuelve músculos: catálogo (wger/suplementarios) primero, heurística como respaldo.
+  /// Peso de fatiga para músculos secundarios (no estabilizadores).
+  static const double secondaryImpactWeight = 0.35;
+
+  /// Impacto mínimo para mostrar el grupo en listas y maniquí.
+  static const double minVisibleImpact = 0.25;
+
+  /// Resuelve músculos con impacto relevante en recuperación.
   static List<String> resolve({
     required String exerciseName,
     String? exerciseId,
     List<Exercise>? catalog,
   }) {
-    final inferred = fromExerciseName(exerciseName);
+    return resolveImpacts(
+      exerciseName: exerciseName,
+      exerciseId: exerciseId,
+      catalog: catalog,
+    )
+        .entries
+        .where((entry) => entry.value >= minVisibleImpact)
+        .map((entry) => entry.key)
+        .toList();
+  }
 
-    final fromCatalog = _lookupCatalog(
+  /// Grupos musculares con peso de fatiga (1.0 = primario, ~0.35 = secundario).
+  static Map<String, double> resolveImpacts({
+    required String exerciseName,
+    String? exerciseId,
+    List<Exercise>? catalog,
+  }) {
+    final fromCatalog = _findCatalogExercise(
       exerciseName: exerciseName,
       exerciseId: exerciseId,
       catalog: catalog,
     );
     if (fromCatalog != null) {
-      return _uniqueGroups(
-        _mergeCatalogWithInferred(exerciseName, fromCatalog, inferred),
+      return _finalizeImpacts(
+        exerciseName,
+        impactsFromExerciseMuscles(fromCatalog.muscles, fromCatalog.category),
       );
     }
 
     for (final extra in SupplementalExercises.all()) {
       if (_matchesExercise(extra, exerciseId: exerciseId, exerciseName: exerciseName)) {
-        return _uniqueGroups(
-          _mergeCatalogWithInferred(
-            exerciseName,
-            fromExerciseMuscles(extra.muscles, extra.category),
-            inferred,
-          ),
+        return _finalizeImpacts(
+          exerciseName,
+          impactsFromExerciseMuscles(extra.muscles, extra.category),
         );
       }
     }
 
-    return inferred;
+    return _finalizeImpacts(
+      exerciseName,
+      _impactsFromExerciseName(exerciseName),
+    );
   }
 
-  static List<String> _uniqueGroups(Iterable<String> groups) {
-    return groups.toSet().toList();
+  static Map<String, double> _impactsFromExerciseName(String exerciseName) {
+    final impacts = <String, double>{};
+    for (final group in fromExerciseName(exerciseName)) {
+      impacts[group] = 1.0;
+    }
+    return impacts;
   }
 
-  static List<String> _mergeCatalogWithInferred(
+  static Map<String, double> _finalizeImpacts(
     String exerciseName,
-    List<String> catalog,
-    List<String> inferred,
+    Map<String, double> impacts,
   ) {
-    final merged = <String>{...catalog};
-    final catalogBiceps = catalog.contains('Bíceps');
-    final catalogTriceps = catalog.contains('Tríceps');
+    return _resolveArmAntagonistImpactsByName(exerciseName, impacts);
+  }
 
-    for (final group in inferred) {
-      if (catalogTriceps && !catalogBiceps && group == 'Bíceps') continue;
-      if (catalogBiceps && !catalogTriceps && group == 'Tríceps') continue;
-      merged.add(group);
+  static Map<String, double> _resolveArmAntagonistImpactsByName(
+    String name,
+    Map<String, double> impacts,
+  ) {
+    if (!impacts.containsKey('Bíceps') || !impacts.containsKey('Tríceps')) {
+      return impacts;
     }
 
-    return _resolveArmAntagonistConflictByName(exerciseName, merged);
+    final muscles = impacts.keys.toSet();
+    final resolved = _resolveArmAntagonistConflictByName(name, muscles);
+    final next = <String, double>{};
+    for (final group in resolved) {
+      next[group] = impacts[group] ?? 1.0;
+    }
+    return next;
   }
 
   static List<String> _resolveArmAntagonistConflictByName(
@@ -87,7 +119,7 @@ abstract final class MuscleInference {
     return muscles.toList();
   }
 
-  static List<String>? _lookupCatalog({
+  static Exercise? _findCatalogExercise({
     required String exerciseName,
     String? exerciseId,
     List<Exercise>? catalog,
@@ -96,7 +128,7 @@ abstract final class MuscleInference {
 
     for (final exercise in catalog) {
       if (_matchesExercise(exercise, exerciseId: exerciseId, exerciseName: exerciseName)) {
-        return fromExerciseMuscles(exercise.muscles, exercise.category);
+        return exercise;
       }
     }
     return null;
@@ -114,20 +146,45 @@ abstract final class MuscleInference {
     return exercise.matchesName(exerciseName);
   }
 
+  /// Mapea músculos del catálogo a grupos con peso (primario vs secundario).
+  static Map<String, double> impactsFromExerciseMuscles(
+    List<String> muscles,
+    String category,
+  ) {
+    final impacts = <String, double>{};
+    if (muscles.isEmpty) {
+      final fromCategory = _mapCategoryToRecoveryGroup(category);
+      if (fromCategory != null) impacts[fromCategory] = 1.0;
+      return impacts;
+    }
+
+    for (var i = 0; i < muscles.length; i++) {
+      final group = _mapToRecoveryGroup(muscles[i]);
+      if (group == null) continue;
+      final weight = i == 0 ? 1.0 : secondaryImpactWeight;
+      impacts[group] = _maxImpact(impacts[group], weight);
+    }
+
+    if (impacts.isEmpty) {
+      final fromCategory = _mapCategoryToRecoveryGroup(category);
+      if (fromCategory != null) impacts[fromCategory] = 1.0;
+    }
+
+    return impacts;
+  }
+
+  static double _maxImpact(double? current, double next) {
+    if (current == null) return next;
+    return current > next ? current : next;
+  }
+
   /// Mapea músculos del catálogo a los grupos de recuperación de la app.
   static List<String> fromExerciseMuscles(List<String> muscles, String category) {
-    final groups = <String>{};
-    for (final muscle in muscles) {
-      final group = _mapToRecoveryGroup(muscle);
-      if (group != null) groups.add(group);
-    }
-
-    if (groups.isEmpty) {
-      final fromCategory = _mapCategoryToRecoveryGroup(category);
-      if (fromCategory != null) groups.add(fromCategory);
-    }
-
-    return groups.toList();
+    return impactsFromExerciseMuscles(muscles, category)
+        .entries
+        .where((entry) => entry.value >= minVisibleImpact)
+        .map((entry) => entry.key)
+        .toList();
   }
 
   /// Indica si un ejercicio pertenece a un grupo muscular de la app (p. ej. Glúteos).
@@ -161,6 +218,7 @@ abstract final class MuscleInference {
   static String? _mapToRecoveryGroup(String muscle) {
     final m = _normalize(muscle);
     if (m.isEmpty) return null;
+    if (_isStabilizerMuscle(m)) return null;
 
     // Nombres latinos de pierna/pantorrilla (p. ej. bíceps femoral, tríceps sural).
     if (_containsAny(m, ['biceps femoris', 'triceps surae'])) return 'Piernas';
@@ -453,7 +511,12 @@ abstract final class MuscleInference {
       return !_hasPhrase(name, 'back squat') && !_hasPhrase(name, 'feedback');
     }
 
-    if (_hasWord(name, 'jalon') || _hasWord(name, 'jalón')) return true;
+    if (_hasWord(name, 'jalon')) {
+      if (_hasAny(name, ['tricep', 'triceps', 'pushdown'])) {
+        return false;
+      }
+      return true;
+    }
 
     return false;
   }
@@ -610,6 +673,10 @@ abstract final class MuscleInference {
       'curl inverso',
       'curl de predicador inverso',
     ]);
+  }
+
+  static bool _isStabilizerMuscle(String normalizedMuscle) {
+    return normalizedMuscle.contains('stabiliz');
   }
 
   static bool _hasWord(String name, String word) {

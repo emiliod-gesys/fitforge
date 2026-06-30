@@ -298,5 +298,143 @@ void main() {
       expect(MuscleInference.fromExerciseName('Hack Squat Machine'), contains('Glúteos'));
       expect(MuscleInference.fromExerciseName('Hack Squat Machine'), contains('Piernas'));
     });
+
+    test('dumbbell fly no etiqueta biceps por estabilizadores del catalogo', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_chest_dumbbell_fly',
+          name: 'Dumbbell Fly',
+          category: 'Pecho',
+          muscles: ['Pecho', 'Deltoides anterior', 'Biceps stabilizers'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Dumbbell Fly',
+        exerciseId: 'ff_chest_dumbbell_fly',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Pecho'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('jalon de triceps no etiqueta espalda', () {
+      expect(
+        MuscleInference.fromExerciseName('Jalón de tríceps con barra V'),
+        contains('Tríceps'),
+      );
+      expect(
+        MuscleInference.fromExerciseName('Jalón de tríceps con barra V'),
+        isNot(contains('Espalda')),
+      );
+
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_triceps_v_bar_pushdown',
+          name: 'Jalón de tríceps con barra V',
+          category: 'Tríceps',
+          muscles: ['Tríceps', 'Antebrazos'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Jalón de tríceps con barra V',
+        exerciseId: 'ff_triceps_v_bar_pushdown',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, isNot(contains('Espalda')));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('rutina de pecho y hombros no etiqueta biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_chest_dumbbell_fly',
+          name: 'Dumbbell Fly',
+          category: 'Pecho',
+          muscles: ['Pecho', 'Deltoides anterior', 'Biceps stabilizers'],
+          isBundled: true,
+        ),
+        Exercise(
+          catalogId: 'ff_triceps_v_bar_pushdown',
+          name: 'Jalón de tríceps con barra V',
+          category: 'Tríceps',
+          muscles: ['Tríceps', 'Antebrazos'],
+          isBundled: true,
+        ),
+        Exercise(
+          catalogId: 'ff_chest_chest_press_machine',
+          name: 'Chest Press Machine',
+          category: 'Pecho',
+          muscles: ['Pecho', 'Tríceps', 'Deltoides anterior'],
+          isBundled: true,
+        ),
+        Exercise(
+          catalogId: 'ff_chest_cable_fly',
+          name: 'Cable Fly',
+          category: 'Pecho',
+          muscles: ['Pecho', 'Deltoides anterior'],
+          isBundled: true,
+        ),
+        Exercise(
+          catalogId: 'ff_shoulders_dumbbell_shoulder_press',
+          name: 'Press de hombro con mancuernas',
+          category: 'Hombros',
+          muscles: ['Deltoides anterior', 'Tríceps', 'Deltoides lateral'],
+          isBundled: true,
+        ),
+        Exercise(
+          catalogId: 'ff_shoulders_cable_lateral_raise',
+          name: 'Elevación lateral en polea',
+          category: 'Hombros',
+          muscles: ['Deltoides lateral', 'Upper Traps'],
+          isBundled: true,
+        ),
+      ];
+
+      final trained = <String>{};
+      for (final exercise in catalog) {
+        trained.addAll(
+          MuscleInference.resolve(
+            exerciseName: exercise.name,
+            exerciseId: exercise.catalogId,
+            catalog: catalog,
+          ),
+        );
+      }
+
+      expect(trained, isNot(contains('Bíceps')));
+      expect(trained, contains('Pecho'));
+      expect(trained, contains('Hombros'));
+      expect(trained, contains('Tríceps'));
+    });
+
+    test('musculos secundarios tienen menor impacto que primarios', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_chest_chest_press_machine',
+          name: 'Chest Press Machine',
+          category: 'Pecho',
+          muscles: ['Pecho', 'Tríceps', 'Deltoides anterior'],
+          isBundled: true,
+        ),
+      ];
+
+      final impacts = MuscleInference.resolveImpacts(
+        exerciseName: 'Chest Press Machine',
+        exerciseId: 'ff_chest_chest_press_machine',
+        catalog: catalog,
+      );
+
+      expect(impacts['Pecho'], 1.0);
+      expect(impacts['Tríceps'], MuscleInference.secondaryImpactWeight);
+      expect(impacts['Hombros'], MuscleInference.secondaryImpactWeight);
+    });
   });
 }

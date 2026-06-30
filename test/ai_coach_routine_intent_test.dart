@@ -44,6 +44,64 @@ void main() {
         isTrue,
       );
     });
+
+    test('upper body strength without duration', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest(
+          'Crea una rutina de tren superior enfocada en fuerza',
+        ),
+        isTrue,
+      );
+      expect(AiCoachService.userSpecifiedDuration('Crea una rutina de tren superior'), isFalse);
+      expect(AiCoachService.parseDurationMinutes('Crea una rutina de tren superior'), 45);
+    });
+
+    test('workout phrasing without rutina keyword', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest('crea un entrenamiento de tren superior'),
+        isTrue,
+      );
+    });
+
+    test('retina typo is treated as rutina', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest('Crea una retina de tren superior enfocada en fuerza'),
+        isTrue,
+      );
+    });
+
+    test('tren superior maps to upper body muscles', () {
+      final muscles = AiCoachService.parseTargetMuscles('rutina de tren superior');
+      expect(muscles, contains('Pecho'));
+      expect(muscles, contains('Espalda'));
+    });
+
+    test('weekly ULPPL program in english', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest(
+          'Create a ULPPL routine for the week focusing on progressive overload',
+        ),
+        isTrue,
+      );
+      expect(
+        AiCoachService.isMultiRoutineProgramRequest(
+          'Create a ULPPL routine for the week focusing on progressive overload',
+        ),
+        isTrue,
+      );
+      expect(
+        AiCoachService.expectedProgramRoutineCount('Create a ULPPL routine for the week'),
+        5,
+      );
+    });
+
+    test('plan semanal en español', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest('crea un plan semanal de entrenamiento'),
+        isTrue,
+      );
+      expect(AiCoachService.isMultiRoutineProgramRequest('plan semanal push pull legs'), isTrue);
+    });
   });
 
   group('language instruction', () {

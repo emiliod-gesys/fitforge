@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/app_providers.dart';
+import 'services/local_notification_service.dart';
 import 'services/rest_sound_service.dart';
 import 'services/supabase_service.dart';
 import 'widgets/push_notification_bootstrap.dart';
@@ -47,6 +48,9 @@ Future<void> main() async {
   await initializeDateFormatting('es');
   await initializeDateFormatting('en');
   await SupabaseService.initialize();
+  if (LocalNotificationService.isSupported) {
+    await LocalNotificationService.instance.initialize();
+  }
   unawaited(RestSoundService.warmUp());
 
   runApp(

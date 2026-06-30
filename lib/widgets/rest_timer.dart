@@ -190,12 +190,30 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
 
     _timer?.cancel();
     _finished = true;
-    _cancelRestNotification();
     if (mounted) setState(() => _remaining = 0);
 
-    // Cierra el banner de inmediato; el sonido no debe bloquear el dismiss.
+    final inForeground =
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    final l10n = context.l10n;
+    final title = l10n.restTimerAlertTitle;
+    final body = l10n.rest;
+
+    if (inForeground) {
+      await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
+      widget.onComplete();
+      unawaited(RestSoundService.playRestCompleteAlert());
+      return;
+    }
+
+    // En segundo plano: la notificación del sistema lleva sonido; el timer en Dart
+    // suele cancelar la programada antes de que dispare.
+    await LocalNotificationService.instance.showRestEnd(
+      id: widget.sessionId,
+      title: title,
+      body: body,
+    );
+    await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
     widget.onComplete();
-    unawaited(RestSoundService.playRestCompleteAlert());
   }
 
   void _adjust(int delta) {

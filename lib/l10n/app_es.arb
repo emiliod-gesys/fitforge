@@ -392,8 +392,17 @@
   "coachWelcomeHint": "Pídele una rutina y la guardarás cuando estés listo.\nConfigura tu API key en Perfil.",
   "coachAskHint": "Pregunta o pide una rutina…",
   "coachRoutineReady": "Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.",
+  "coachRoutinesReady": "Aquí tienes {count} rutinas para la semana. Revísalas y guarda las que quieras.",
+  "@coachRoutinesReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "coachRoutineTooFewExercises": "No pude armar una rutina variada con ejercicios del catálogo. Prueba pidiéndola de nuevo o elige músculos concretos.",
   "coachRoutineFailed": "No pude generar la rutina. Intenta ser más específico (músculos y duración).",
+  "aiConnectionError": "Error en la conexión. Intenta de nuevo, por favor.",
   "coachNoRoutineToSave": "No hay ninguna rutina pendiente por guardar. Primero pídeme que cree una.",
   "coachSuggestion1": "Crea una rutina de piernas de 45 minutos",
   "coachSuggestion2": "¿Qué ejercicios me recomiendas para pecho hoy?",
@@ -681,6 +690,8 @@
   "foodPhotoTapToExpand": "Toca para ampliar",
   "foodQuantityLabel": "Cantidad ({unit})",
   "@foodQuantityLabel": { "placeholders": { "unit": {"type": "String"} } },
+  "foodNameLabel": "Nombre del alimento",
+  "foodNameHint": "ej. Pechuga a la plancha con arroz y brócoli",
   "foodMacrosAutoHint": "Ajusta los gramos; calorías y macros se recalculan solos.",
   "foodAiCorrectionHint": "¿La IA se equivocó?",
   "foodAiCorrectionPlaceholder": "Ej.: eran 3 tortillas, no 2, y cada una tiene 56 kcal",

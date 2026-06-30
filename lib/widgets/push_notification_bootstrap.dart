@@ -22,11 +22,33 @@ class PushNotificationBootstrap extends ConsumerStatefulWidget {
   ConsumerState<PushNotificationBootstrap> createState() => _PushNotificationBootstrapState();
 }
 
-class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBootstrap> {
+class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBootstrap>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncPush());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshTokenIfLoggedIn();
+    }
+  }
+
+  Future<void> _refreshTokenIfLoggedIn() async {
+    if (!PushNotificationService.isAvailable) return;
+    final session = ref.read(authStateProvider).valueOrNull?.session;
+    if (session == null) return;
+    await ref.read(pushNotificationServiceProvider).registerToken();
   }
 
   Future<void> _syncPush() async {

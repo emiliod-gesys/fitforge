@@ -100,31 +100,40 @@ class AiRoutinePreviewCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onDiscard,
-                  child: Text(l10n.discard),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  child: Text(l10n.discard, textAlign: TextAlign.center),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton(
                   onPressed: onEdit,
-                  child: Text(l10n.edit),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: isSaving ? null : onSave,
-                  child: isSaving
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.save),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  child: Text(l10n.edit, textAlign: TextAlign.center),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isSaving ? null : onSave,
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+              child: isSaving
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.save),
+            ),
           ),
         ],
       ),

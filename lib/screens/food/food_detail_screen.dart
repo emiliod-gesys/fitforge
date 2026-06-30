@@ -35,6 +35,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
 class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
   late FoodNutritionEstimate _baseEstimate;
   late double _amount;
+  final _nameController = TextEditingController();
   final _amountController = TextEditingController();
   final _correctionController = TextEditingController();
   bool _saving = false;
@@ -52,6 +53,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     super.initState();
     _baseEstimate = widget.estimate;
     _amount = widget.estimate.referenceAmount;
+    _nameController.text = widget.estimate.name;
     _amountController.text = _formatAmount(_amount);
   }
 
@@ -61,12 +63,17 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _amountController.dispose();
     _correctionController.dispose();
     super.dispose();
   }
 
   double _parseDouble(String text) => double.tryParse(text.replaceAll(',', '.')) ?? 0;
+
+  void _onNameChanged(String text) {
+    setState(() => _baseEstimate = _baseEstimate.copyWith(name: text));
+  }
 
   void _onAmountChanged(String text) {
     final amount = _parseDouble(text);
@@ -134,6 +141,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
       setState(() {
         _baseEstimate = estimate;
         _amount = estimate.referenceAmount;
+        _nameController.text = estimate.name;
         _amountController.text = _formatAmount(_amount);
         _correctionController.clear();
       });
@@ -143,10 +151,10 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
   }
 
   Future<void> _save() async {
-    final scaled = _scaled;
-    final name = scaled.name.trim();
+    final name = _nameController.text.trim();
     if (name.isEmpty || _amount <= 0) return;
 
+    final scaled = _scaled;
     final serving = FoodServingParser.formatAmount(_amount, _baseEstimate.amountUnit);
 
     setState(() => _saving = true);
@@ -257,9 +265,16 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-              Text(
-                scaled.name,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                onChanged: _onNameChanged,
+                textCapitalization: TextCapitalization.sentences,
+                maxLength: 80,
+                decoration: InputDecoration(
+                  labelText: l10n.foodNameLabel,
+                  hintText: l10n.foodNameHint,
+                ),
               ),
               if (_baseEstimate.brand != null) ...[
                 const SizedBox(height: 4),
@@ -268,7 +283,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                   style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               TextField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -346,7 +361,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton(
-            onPressed: _saving || _amount <= 0 ? null : _save,
+            onPressed: _saving || _amount <= 0 || _nameController.text.trim().isEmpty ? null : _save,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.orange,
               foregroundColor: Colors.white,

@@ -2156,6 +2156,12 @@ abstract class AppLocalizations {
   /// **'Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.'**
   String get coachRoutineReady;
 
+  /// No description provided for @coachRoutinesReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí tienes {count} rutinas para la semana. Revísalas y guarda las que quieras.'**
+  String coachRoutinesReady(int count);
+
   /// No description provided for @coachRoutineTooFewExercises.
   ///
   /// In es, this message translates to:
@@ -2167,6 +2173,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No pude generar la rutina. Intenta ser más específico (músculos y duración).'**
   String get coachRoutineFailed;
+
+  /// No description provided for @aiConnectionError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error en la conexión. Intenta de nuevo, por favor.'**
+  String get aiConnectionError;
 
   /// No description provided for @coachNoRoutineToSave.
   ///
@@ -3602,6 +3614,18 @@ abstract class AppLocalizations {
   /// **'Cantidad ({unit})'**
   String foodQuantityLabel(String unit);
 
+  /// No description provided for @foodNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get foodNameLabel;
+
+  /// No description provided for @foodNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'ej. Pechuga a la plancha con arroz y brócoli'**
+  String get foodNameHint;
+
   /// No description provided for @foodMacrosAutoHint.
   ///
   /// In es, this message translates to:
@@ -3643,12 +3667,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Añadir alimento'**
   String get foodAddThis;
-
-  /// No description provided for @foodNameLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre'**
-  String get foodNameLabel;
 
   /// No description provided for @foodServingLabel.
   ///

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/utils/workout_streak.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/body_metric.dart';
 import '../../models/coach_message.dart';
+import '../../models/coach_routine_slot.dart';
+import '../../models/exercise.dart';
+import '../../models/profile.dart';
+import '../../models/routine.dart';
+import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/ai_coach_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
@@ -22,7 +29,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   final _scrollController = ScrollController();
   final _messages = <CoachMessage>[];
   bool _loading = false;
-  int? _savingRoutineIndex;
+  int? _savingMessageIndex;
+  int? _savingSlotIndex;
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -39,6 +47,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     if (text.trim().isEmpty || _loading) return;
 
     final l10n = context.l10n;
+    final languageCode = Localizations.localeOf(context).languageCode;
 
     setState(() {
       _messages.add(CoachMessage(text: text, isUser: true));
@@ -60,7 +69,20 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       if (AiCoachService.isRoutineSaveIntent(text)) {
         final pendingIndex = _messages.lastIndexWhere((m) => m.hasActiveRoutinePreview);
         if (pendingIndex >= 0) {
-          await _saveRoutine(pendingIndex);
+          final slots = _messages[pendingIndex].allRoutineSlots;
+          final activeSlot = slots.indexWhere((slot) => slot.isActive);
+          if (activeSlot >= 0) {
+            await _saveRoutine(pendingIndex, activeSlot);
+          } else {
+            setState(() {
+              _messages.add(
+                CoachMessage(
+                  text: l10n.coachNoRoutineToSave,
+                  isError: true,
+                ),
+              );
+            });
+          }
         } else {
           setState(() {
             _messages.add(
@@ -72,42 +94,18 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           });
         }
       } else if (AiCoachService.isRoutineCreationRequest(text)) {
-        final routine = await coach.generateRoutineFromMessage(
-          userMessage: text,
-          catalog: catalog,
+        await _handleRoutineGeneration(
+          text: text,
           profile: profile,
-          recentWorkouts: workouts,
+          workouts: workouts,
+          routines: routines,
+          catalog: catalog,
           bodyMetrics: bodyMetrics,
           weeklyStats: weeklyStats,
           personalRecords: personalRecords,
-          routines: routines,
-          languageCode: Localizations.localeOf(context).languageCode,
+          coach: coach,
+          languageCode: languageCode,
         );
-
-        setState(() {
-          if (routine != null && routine.exercises.length >= 2) {
-            _messages.add(
-              CoachMessage(
-                text: l10n.coachRoutineReady,
-                routinePreview: routine,
-              ),
-            );
-          } else if (routine != null) {
-            _messages.add(
-              CoachMessage(
-                text: l10n.coachRoutineTooFewExercises,
-                isError: true,
-              ),
-            );
-          } else {
-            _messages.add(
-              CoachMessage(
-                text: l10n.coachRoutineFailed,
-                isError: true,
-              ),
-            );
-          }
-        });
       } else {
         final response = await coach.getRecommendation(
           userMessage: text,
@@ -117,7 +115,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           bodyMetrics: bodyMetrics,
           weeklyStats: weeklyStats,
           personalRecords: personalRecords,
-          languageCode: Localizations.localeOf(context).languageCode,
+          languageCode: languageCode,
         );
 
         final muscles = AiCoachService.parseTargetMuscles(text);
@@ -133,7 +131,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             _messages.add(
               CoachMessage(
                 text: l10n.coachRoutineReady,
-                routinePreview: parsedRoutine,
+                routineSlots: [CoachRoutineSlot(routine: parsedRoutine)],
               ),
             );
           } else {
@@ -143,7 +141,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       }
     } catch (e) {
       setState(() {
-        _messages.add(CoachMessage(text: l10n.errorGeneric('$e'), isError: true));
+        _messages.add(CoachMessage(text: l10n.friendlyAiError(e), isError: true));
       });
     } finally {
       setState(() => _loading = false);
@@ -151,30 +149,134 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     }
   }
 
-  Future<void> _saveRoutine(int messageIndex) async {
+  Future<void> _handleRoutineGeneration({
+    required String text,
+    required UserProfile? profile,
+    required List<Workout> workouts,
+    required List<Routine> routines,
+    required List<Exercise> catalog,
+    required Map<String, BodyMetricSnapshot> bodyMetrics,
+    required WorkoutWeeklyStats weeklyStats,
+    required List<PersonalRecord> personalRecords,
+    required AiCoachService coach,
+    required String languageCode,
+  }) async {
     final l10n = context.l10n;
-    final message = _messages[messageIndex];
-    final routine = message.routinePreview;
-    if (routine == null ||
-        message.isRoutineSaved ||
-        message.isRoutineDiscarded ||
-        _savingRoutineIndex == messageIndex) {
+    final isProgram = AiCoachService.isMultiRoutineProgramRequest(text);
+
+    if (isProgram) {
+      final generated = await coach.generateRoutineProgramFromMessage(
+        userMessage: text,
+        catalog: catalog,
+        profile: profile,
+        recentWorkouts: workouts,
+        bodyMetrics: bodyMetrics,
+        weeklyStats: weeklyStats,
+        personalRecords: personalRecords,
+        routines: routines,
+        languageCode: languageCode,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        if (generated.length >= 2) {
+          _messages.add(
+            CoachMessage(
+              text: l10n.coachRoutinesReady(generated.length),
+              routineSlots: generated
+                  .map((routine) => CoachRoutineSlot(routine: routine))
+                  .toList(),
+            ),
+          );
+        } else if (generated.length == 1) {
+          _messages.add(
+            CoachMessage(
+              text: l10n.coachRoutineReady,
+              routineSlots: [CoachRoutineSlot(routine: generated.first)],
+            ),
+          );
+        } else {
+          _messages.add(
+            CoachMessage(
+              text: l10n.coachRoutineFailed,
+              isError: true,
+            ),
+          );
+        }
+      });
       return;
     }
 
-    setState(() => _savingRoutineIndex = messageIndex);
+    final routine = await coach.generateRoutineFromMessage(
+      userMessage: text,
+      catalog: catalog,
+      profile: profile,
+      recentWorkouts: workouts,
+      bodyMetrics: bodyMetrics,
+      weeklyStats: weeklyStats,
+      personalRecords: personalRecords,
+      routines: routines,
+      languageCode: languageCode,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      if (routine != null && routine.exercises.length >= 2) {
+        _messages.add(
+          CoachMessage(
+            text: l10n.coachRoutineReady,
+            routineSlots: [CoachRoutineSlot(routine: routine)],
+          ),
+        );
+      } else if (routine != null) {
+        _messages.add(
+          CoachMessage(
+            text: l10n.coachRoutineTooFewExercises,
+            isError: true,
+          ),
+        );
+      } else {
+        _messages.add(
+          CoachMessage(
+            text: l10n.coachRoutineFailed,
+            isError: true,
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _saveRoutine(int messageIndex, int slotIndex) async {
+    final l10n = context.l10n;
+    final message = _messages[messageIndex];
+    final slots = message.allRoutineSlots;
+    if (slotIndex < 0 || slotIndex >= slots.length) return;
+
+    final slot = slots[slotIndex];
+    if (!slot.isActive ||
+        (_savingMessageIndex == messageIndex && _savingSlotIndex == slotIndex)) {
+      return;
+    }
+
+    setState(() {
+      _savingMessageIndex = messageIndex;
+      _savingSlotIndex = slotIndex;
+    });
 
     try {
-      await ref.read(routineServiceProvider).createRoutine(routine);
+      await ref.read(routineServiceProvider).createRoutine(slot.routine);
       ref.invalidate(routinesProvider);
 
       if (!mounted) return;
       setState(() {
-        _messages[messageIndex] = message.copyWith(isRoutineSaved: true);
+        _messages[messageIndex] = message.withSlotAt(
+          slotIndex,
+          slot.copyWith(isSaved: true),
+        );
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.routineSavedNamed(routine.name))),
+        SnackBar(content: Text(l10n.routineSavedNamed(slot.routine.name))),
       );
     } catch (e) {
       if (mounted) {
@@ -185,30 +287,42 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     } finally {
       if (mounted) {
         setState(() {
-          if (_savingRoutineIndex == messageIndex) {
-            _savingRoutineIndex = null;
+          if (_savingMessageIndex == messageIndex && _savingSlotIndex == slotIndex) {
+            _savingMessageIndex = null;
+            _savingSlotIndex = null;
           }
         });
       }
     }
   }
 
-  void _discardRoutine(int messageIndex) {
+  void _discardRoutine(int messageIndex, int slotIndex) {
+    final message = _messages[messageIndex];
+    final slots = message.allRoutineSlots;
+    if (slotIndex < 0 || slotIndex >= slots.length) return;
+
     setState(() {
-      _messages[messageIndex] = _messages[messageIndex].copyWith(isRoutineDiscarded: true);
+      _messages[messageIndex] = message.withSlotAt(
+        slotIndex,
+        slots[slotIndex].copyWith(isDiscarded: true),
+      );
     });
   }
 
-  Future<void> _editRoutine(int messageIndex) async {
+  Future<void> _editRoutine(int messageIndex, int slotIndex) async {
     final message = _messages[messageIndex];
-    final routine = message.routinePreview;
-    if (routine == null) return;
+    final slots = message.allRoutineSlots;
+    if (slotIndex < 0 || slotIndex >= slots.length) return;
 
-    final updated = await EditRoutineDialog.show(context, routine);
+    final slot = slots[slotIndex];
+    final updated = await EditRoutineDialog.show(context, slot.routine);
 
     if (updated != null && mounted) {
       setState(() {
-        _messages[messageIndex] = message.copyWith(routinePreview: updated);
+        _messages[messageIndex] = message.withSlotAt(
+          slotIndex,
+          slot.copyWith(routine: updated),
+        );
       });
     }
   }
@@ -269,7 +383,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   return _MessageBubble(
                     message: _messages[i],
                     index: i,
-                    isSavingRoutine: _savingRoutineIndex == i,
+                    savingMessageIndex: _savingMessageIndex,
+                    savingSlotIndex: _savingSlotIndex,
                     onSaveRoutine: _saveRoutine,
                     onEditRoutine: _editRoutine,
                     onDiscardRoutine: _discardRoutine,
@@ -316,15 +431,17 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 class _MessageBubble extends StatelessWidget {
   final CoachMessage message;
   final int index;
-  final bool isSavingRoutine;
-  final void Function(int index) onSaveRoutine;
-  final void Function(int index) onEditRoutine;
-  final void Function(int index) onDiscardRoutine;
+  final int? savingMessageIndex;
+  final int? savingSlotIndex;
+  final void Function(int messageIndex, int slotIndex) onSaveRoutine;
+  final void Function(int messageIndex, int slotIndex) onEditRoutine;
+  final void Function(int messageIndex, int slotIndex) onDiscardRoutine;
 
   const _MessageBubble({
     required this.message,
     required this.index,
-    required this.isSavingRoutine,
+    required this.savingMessageIndex,
+    required this.savingSlotIndex,
     required this.onSaveRoutine,
     required this.onEditRoutine,
     required this.onDiscardRoutine,
@@ -332,7 +449,8 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.routinePreview != null) {
+    if (message.hasRoutinePreviews) {
+      final slots = message.allRoutineSlots;
       return Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -349,15 +467,18 @@ class _MessageBubble extends StatelessWidget {
                     style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),
-              AiRoutinePreviewCard(
-                routine: message.routinePreview!,
-                isSaved: message.isRoutineSaved,
-                isDiscarded: message.isRoutineDiscarded,
-                isSaving: isSavingRoutine,
-                onSave: () => onSaveRoutine(index),
-                onEdit: () => onEditRoutine(index),
-                onDiscard: () => onDiscardRoutine(index),
-              ),
+              for (var slotIndex = 0; slotIndex < slots.length; slotIndex++) ...[
+                if (slotIndex > 0) const SizedBox(height: 10),
+                AiRoutinePreviewCard(
+                  routine: slots[slotIndex].routine,
+                  isSaved: slots[slotIndex].isSaved,
+                  isDiscarded: slots[slotIndex].isDiscarded,
+                  isSaving: savingMessageIndex == index && savingSlotIndex == slotIndex,
+                  onSave: () => onSaveRoutine(index, slotIndex),
+                  onEdit: () => onEditRoutine(index, slotIndex),
+                  onDiscard: () => onDiscardRoutine(index, slotIndex),
+                ),
+              ],
             ],
           ),
         ),

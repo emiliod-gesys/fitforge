@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/utils/connection_error.dart';
 import '../core/utils/player_level_badge.dart';
 import '../models/profile.dart';
 import '../models/food_entry.dart';
@@ -199,5 +200,10 @@ extension ProfileL10n on AppLocalizations {
       10 => playerLevelTierImmortal,
       _ => milestoneTierBronze,
     };
+  }
+
+  String friendlyAiError(Object error) {
+    if (isConnectionError(error)) return aiConnectionError;
+    return errorGeneric('$error');
   }
 }

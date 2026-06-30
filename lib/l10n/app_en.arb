@@ -375,8 +375,17 @@
   "coachWelcomeHint": "Ask for a routine and save it when you're ready.\nSet up your API key in Profile.",
   "coachAskHint": "Ask a question or request a routine…",
   "coachRoutineReady": "Here is your routine. Review it and tap Save when ready.",
+  "coachRoutinesReady": "Here are your {count} routines for the week. Review each one and save the ones you want.",
+  "@coachRoutinesReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "coachRoutineTooFewExercises": "Could not build a varied routine from the catalog. Try again or specify target muscles.",
   "coachRoutineFailed": "Could not generate the routine. Try being more specific (muscles and duration).",
+  "aiConnectionError": "Connection error. Please try again.",
   "coachNoRoutineToSave": "There is no pending routine to save. Ask me to create one first.",
   "coachSuggestion1": "Create a 45-minute leg routine",
   "coachSuggestion2": "What exercises do you recommend for chest today?",
@@ -642,6 +651,8 @@
   "foodPhotoTapToExpand": "Tap to enlarge",
   "foodQuantityLabel": "Amount ({unit})",
   "@foodQuantityLabel": { "placeholders": { "unit": {"type": "String"} } },
+  "foodNameLabel": "Food name",
+  "foodNameHint": "e.g. Grilled chicken with rice and broccoli",
   "foodMacrosAutoHint": "Adjust grams; calories and macros update automatically.",
   "foodAiCorrectionHint": "AI got it wrong?",
   "foodAiCorrectionPlaceholder": "E.g. it was 3 tortillas, not 2, each 56 kcal",

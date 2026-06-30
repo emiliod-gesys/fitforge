@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import '../core/config/ai_secrets.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/bmr_calculator.dart';
@@ -68,7 +69,32 @@ class ProfileService {
 
   Future<String?> getApiKey(AiProvider provider) async {
     if (provider == AiProvider.none) return null;
+
+    final stored = await getUserStoredApiKey(provider);
+    if (stored != null && stored.isNotEmpty) return stored;
+
+    if (provider == AiProvider.openai) return AiSecrets.openAiDefaultKey;
+    return null;
+  }
+
+  /// Solo la key guardada por el usuario (no incluye la embebida de respaldo).
+  Future<String?> getUserStoredApiKey(AiProvider provider) async {
+    if (provider == AiProvider.none) return null;
     return _secureStorage.read(key: _storageKeyFor(provider));
+  }
+
+  /// Proveedor efectivo cuando el perfil no tiene uno configurado pero hay key embebida.
+  AiProvider resolveAiProvider(UserProfile? profile) {
+    final configured = profile?.aiProvider ?? AiProvider.none;
+    if (configured != AiProvider.none) return configured;
+    return AiSecrets.hasEmbeddedOpenAi ? AiProvider.openai : AiProvider.none;
+  }
+
+  Future<bool> hasUsableAiKey(UserProfile? profile) async {
+    final provider = resolveAiProvider(profile);
+    if (provider == AiProvider.none) return false;
+    final key = await getApiKey(provider);
+    return key != null && key.isNotEmpty;
   }
 
   Future<void> deleteApiKey(AiProvider provider) async {
@@ -77,15 +103,16 @@ class ProfileService {
   }
 
   Future<bool> _hasKeyForProvider(String? provider) async {
-    return switch (provider) {
-      'openai' =>
-        (await _secureStorage.read(key: _openAiKeyStorage))?.isNotEmpty ?? false,
-      'gemini' =>
-        (await _secureStorage.read(key: _geminiKeyStorage))?.isNotEmpty ?? false,
-      'anthropic' =>
-        (await _secureStorage.read(key: _anthropicKeyStorage))?.isNotEmpty ?? false,
-      _ => false,
+    final resolved = switch (provider) {
+      'openai' => AiProvider.openai,
+      'gemini' => AiProvider.gemini,
+      'anthropic' => AiProvider.anthropic,
+      _ => AiProvider.openai,
     };
+    if (provider == null || provider == 'none') {
+      return AiSecrets.hasEmbeddedOpenAi;
+    }
+    return (await getApiKey(resolved))?.isNotEmpty ?? false;
   }
 
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshots() async {

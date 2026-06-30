@@ -1028,22 +1028,25 @@ class WorkoutService {
         final completedSets = ex.sets.where((s) => s.completed).length;
         if (completedSets == 0) continue;
 
-        final muscles = MuscleInference.resolve(
+        final impacts = MuscleInference.resolveImpacts(
           exerciseName: ex.exerciseName,
           exerciseId: ex.exerciseId,
           catalog: catalog,
         );
-        if (muscles.isEmpty) continue;
+        if (impacts.isEmpty) continue;
 
         // Más series = mayor fatiga inicial (mín. 50 %, máx. 100 %).
         final fatigueDepth = (0.5 + (completedSets.clamp(1, 6) / 6.0) * 0.5).clamp(0.5, 1.0);
 
-        for (final muscle in muscles) {
+        for (final entry in impacts.entries) {
+          if (entry.value < MuscleInference.minVisibleImpact) continue;
+          final muscle = entry.key;
           if (!recovery.containsKey(muscle)) continue;
 
           final recoveryHours = _recoveryHours(muscle);
           final timeRecovery = (hoursSince / recoveryHours * 100).clamp(0.0, 100.0);
-          final muscleRecovery = timeRecovery + (100 - timeRecovery) * (1 - fatigueDepth);
+          final effectiveFatigue = fatigueDepth * entry.value;
+          final muscleRecovery = timeRecovery + (100 - timeRecovery) * (1 - effectiveFatigue);
 
           recovery[muscle] = recovery[muscle]!.clamp(0.0, muscleRecovery);
         }
