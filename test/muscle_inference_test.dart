@@ -436,5 +436,751 @@ void main() {
       expect(impacts['Tríceps'], MuscleInference.secondaryImpactWeight);
       expect(impacts['Hombros'], MuscleInference.secondaryImpactWeight);
     });
+
+    test('burpee no etiqueta biceps y afecta piernas pecho y core', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_burpee',
+          name: 'Burpee',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Pecho',
+            'Tríceps',
+            'Deltoides anterior',
+            'Abdominales',
+            'Glúteos',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Burpee',
+        exerciseId: 'ff_cf_burpee',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Pecho'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('box jump no etiqueta pecho ni biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_box_jump',
+          name: 'Box Jump',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Isquios',
+            'Pantorrillas',
+            'Abdominales',
+            'Deltoides anterior',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Salto al cajón',
+        exerciseId: 'ff_cf_box_jump',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Pecho')));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('box step over no etiqueta pecho ni biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_box_step_over',
+          name: 'Box Step Over',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Isquios',
+            'Pantorrillas',
+            'Abdominales',
+            'Aductores',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Step-over en cajón',
+        exerciseId: 'ff_cf_box_step_over',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Pecho')));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('wall ball etiqueta piernas y hombros sin biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_wall_ball',
+          name: 'Wall Ball Shot',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Deltoides anterior',
+            'Tríceps',
+            'Abdominales',
+            'Pecho',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Wall ball',
+        exerciseId: 'ff_cf_wall_ball',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('thruster etiqueta piernas hombros y gluteos sin biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_thruster',
+          name: 'Barbell Thruster',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Deltoides anterior',
+            'Tríceps',
+            'Abdominales',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Thruster con barra',
+        exerciseId: 'ff_cf_thruster',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('dumbbell thruster etiqueta piernas hombros y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_dumbbell_thruster',
+          name: 'Dumbbell Thruster',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Deltoides anterior',
+            'Tríceps',
+            'Abdominales',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Thruster con mancuernas',
+        exerciseId: 'ff_cf_dumbbell_thruster',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('power clean etiqueta piernas espalda y gluteos sin biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_power_clean',
+          name: 'Power Clean',
+          category: 'Piernas',
+          muscles: [
+            'Isquios',
+            'Glúteos',
+            'Cuádriceps',
+            'Espalda alta',
+            'Hombros',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Cargada de potencia',
+        exerciseId: 'ff_cf_power_clean',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('hang power clean etiqueta piernas espalda y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_hang_power_clean',
+          name: 'Hang Power Clean',
+          category: 'Piernas',
+          muscles: [
+            'Isquios',
+            'Glúteos',
+            'Cuádriceps',
+            'Espalda alta',
+            'Hombros',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Hang power clean',
+        exerciseId: 'ff_cf_hang_power_clean',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('clean and jerk etiqueta piernas espalda hombros y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_clean_and_jerk',
+          name: 'Clean and Jerk',
+          category: 'Piernas',
+          muscles: [
+            'Isquios',
+            'Glúteos',
+            'Cuádriceps',
+            'Espalda alta',
+            'Hombros',
+            'Tríceps',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Cargada y envión',
+        exerciseId: 'ff_cf_clean_and_jerk',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('power snatch etiqueta piernas espalda hombros y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_power_snatch',
+          name: 'Power Snatch',
+          category: 'Piernas',
+          muscles: [
+            'Isquios',
+            'Glúteos',
+            'Cuádriceps',
+            'Espalda alta',
+            'Hombros',
+            'Tríceps',
+            'Abdominales',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Arrancada de potencia',
+        exerciseId: 'ff_cf_power_snatch',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('barbell shrug etiqueta espalda no biceps', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_back_barbell_shrug',
+          name: 'Barbell Shrug',
+          category: 'Espalda',
+          muscles: ['Espalda alta', 'Hombros'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Encogimiento con barra',
+        exerciseId: 'ff_back_barbell_shrug',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('standing military press etiqueta hombros y triceps secundario', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_shoulders_barbell_overhead_press',
+          name: 'Barbell Standing Military Press',
+          category: 'Hombros',
+          muscles: ['Deltoides anterior', 'Tríceps', 'Deltoides lateral', 'Pecho superior'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Press militar de pie con barra',
+        exerciseId: 'ff_shoulders_barbell_overhead_press',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('snatch deadlift etiqueta espalda piernas y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_snatch_deadlift',
+          name: 'Barbell Snatch Deadlift',
+          category: 'Espalda',
+          muscles: [
+            'Espalda',
+            'Glúteos',
+            'Isquios',
+            'Cuádriceps',
+            'Aductores',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Peso muerto snatch',
+        exerciseId: 'ff_cf_snatch_deadlift',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('barbell romanian deadlift etiqueta piernas gluteos y espalda', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_back_romanian_deadlift',
+          name: 'Barbell Romanian Deadlift',
+          category: 'Espalda',
+          muscles: ['Isquios', 'Glúteos', 'Erector Spinae', 'Espalda'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Peso muerto rumano con barra',
+        exerciseId: 'ff_back_romanian_deadlift',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('barbell front squat etiqueta piernas y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_legs_front_squat',
+          name: 'Barbell Front Squat',
+          category: 'Piernas',
+          muscles: ['Cuádriceps', 'Glúteos', 'Espalda alta', 'Core'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Sentadilla frontal con barra',
+        exerciseId: 'ff_legs_front_squat',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('overhead squat etiqueta piernas hombros y core', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_overhead_squat',
+          name: 'Barbell Overhead Squat',
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Glúteos',
+            'Isquios',
+            'Hombros',
+            'Abdominales',
+            'Pantorrillas',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Overhead squat',
+        exerciseId: 'ff_cf_overhead_squat',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('kettlebell swing etiqueta gluteos piernas y abdominales', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_kettlebell_swing',
+          name: 'Kettlebell Swing',
+          category: 'Glúteos',
+          muscles: ['Glúteos', 'Isquios', 'Abdominales', 'Hombros', 'Antebrazos'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Swing con kettlebell',
+        exerciseId: 'ff_cf_kettlebell_swing',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('kettlebell snatch etiqueta hombros gluteos piernas y espalda', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_kettlebell_snatch',
+          name: 'Kettlebell Snatch',
+          category: 'Hombros',
+          muscles: [
+            'Deltoides anterior',
+            'Glúteos',
+            'Isquios',
+            'Espalda alta',
+            'Abdominales',
+            'Antebrazos',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Snatch con kettlebell',
+        exerciseId: 'ff_cf_kettlebell_snatch',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('kettlebell clean and press etiqueta hombros piernas y gluteos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_kettlebell_clean_and_press',
+          name: 'Kettlebell Clean and Press',
+          category: 'Hombros',
+          muscles: [
+            'Deltoides anterior',
+            'Cuádriceps',
+            'Glúteos',
+            'Isquios',
+            'Tríceps',
+            'Abdominales',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Cargada y press con kettlebell',
+        exerciseId: 'ff_cf_kettlebell_clean_and_press',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('barbell sumo deadlift etiqueta piernas y gluteos sin espalda', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_glutes_sumo_deadlift',
+          name: 'Barbell Sumo Deadlift',
+          category: 'Glúteos',
+          muscles: ['Glúteos', 'Isquios', 'Cuádriceps', 'Aductores'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Peso muerto sumo con barra',
+        exerciseId: 'ff_glutes_sumo_deadlift',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Espalda')));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('sumo deadlift sin catalogo etiqueta piernas y gluteos', () {
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Sumo Deadlift',
+        catalog: const [],
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Espalda')));
+    });
+
+    test('farmers walk etiqueta piernas gluteos antebrazos y core', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_farmers_walk',
+          name: "Farmer's Walk",
+          category: 'Piernas',
+          muscles: [
+            'Cuádriceps',
+            'Isquios',
+            'Glúteos',
+            'Pantorrillas',
+            'Antebrazos',
+            'Abdominales',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Caminata del granjero',
+        exerciseId: 'ff_cf_farmers_walk',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Antebrazos'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('farmers walk sin catalogo etiqueta piernas gluteos y antebrazos', () {
+      final muscles = MuscleInference.resolve(
+        exerciseName: "Farmer's Walk",
+        catalog: const [],
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, contains('Antebrazos'));
+      expect(muscles, contains('Abdominales'));
+    });
+
+    test('kipping pull up etiqueta espalda biceps abdominales y antebrazos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_kipping_pull_up',
+          name: 'Kipping Pull Up',
+          category: 'Espalda',
+          muscles: [
+            'Dorsales',
+            'Bíceps',
+            'Abdominales',
+            'Antebrazos',
+            'Pecho',
+            'Espalda alta',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Dominada kipping',
+        exerciseId: 'ff_cf_kipping_pull_up',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, contains('Antebrazos'));
+      expect(muscles, isNot(contains('Tríceps')));
+    });
+
+    test('kipping pull up sin catalogo etiqueta espalda biceps y core', () {
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Kipping Pull Up',
+        catalog: const [],
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Abdominales'));
+    });
+
+    test('muscle up etiqueta espalda biceps triceps hombros y core', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_muscle_up',
+          name: 'Muscle Up',
+          category: 'Espalda',
+          muscles: [
+            'Dorsales',
+            'Bíceps',
+            'Tríceps',
+            'Abdominales',
+            'Pecho',
+            'Deltoides anterior',
+            'Antebrazos',
+            'Espalda alta',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Muscle up',
+        exerciseId: 'ff_cf_muscle_up',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Abdominales'));
+    });
+
+    test('muscle up sin catalogo etiqueta espalda biceps triceps y hombros', () {
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Muscle Up',
+        catalog: const [],
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Tríceps'));
+      expect(muscles, contains('Hombros'));
+      expect(muscles, contains('Abdominales'));
+    });
+
+    test('bar pull over etiqueta espalda biceps abdominales y antebrazos', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_cf_bar_pullover',
+          name: 'Bar Pull Over',
+          category: 'Espalda',
+          muscles: [
+            'Dorsales',
+            'Bíceps',
+            'Abdominales',
+            'Pecho',
+            'Deltoides posterior',
+            'Antebrazos',
+            'Espalda alta',
+          ],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Pull over en barra',
+        exerciseId: 'ff_cf_bar_pullover',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Abdominales'));
+      expect(muscles, contains('Antebrazos'));
+      expect(muscles, isNot(contains('Tríceps')));
+    });
+
+    test('bar pull over sin catalogo etiqueta espalda biceps y core', () {
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Bar Pull Over',
+        catalog: const [],
+      );
+
+      expect(muscles, contains('Espalda'));
+      expect(muscles, contains('Bíceps'));
+      expect(muscles, contains('Abdominales'));
+    });
   });
 }

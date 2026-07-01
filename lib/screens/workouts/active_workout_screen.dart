@@ -48,7 +48,8 @@ class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   ConsumerState<ActiveWorkoutScreen> createState() => _ActiveWorkoutScreenState();
 }
 
-class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
+class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
+    with WidgetsBindingObserver {
   bool _showExerciseList = true;
   int _currentExerciseIndex = 0;
   bool _showRestTimer = false;
@@ -313,6 +314,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
@@ -325,8 +327,24 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     ref.read(watchWorkoutCoordinatorProvider).detach();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _reconcileRestTimerOnResume();
+    }
+  }
+
+  void _reconcileRestTimerOnResume() {
+    if (!_showRestTimer) return;
+    final endsAt = _restEndsAt;
+    if (endsAt != null && !endsAt.isAfter(DateTime.now())) {
+      _dismissRestTimer(_restTimerKey);
+    }
   }
 
   List<WorkoutSet> _sortedSets(WorkoutExercise exercise) {

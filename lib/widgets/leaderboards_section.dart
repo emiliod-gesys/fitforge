@@ -272,7 +272,7 @@ class _LeaderboardTile extends StatelessWidget {
 
   String? _badgeLabel(LeaderboardPeriod period) {
     if (metric == LeaderboardMetric.level) {
-      return l10n.playerLevelTitle(entry.level);
+      return l10n.playerLevelBadgeName(entry.level);
     }
 
     if (period != LeaderboardPeriod.all) return null;

@@ -1,4 +1,5 @@
 import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/leaderboard.dart';
 import 'cardio_format.dart';
 import 'milestones.dart';
@@ -34,7 +35,7 @@ abstract final class LeaderboardFormat {
   }) {
     return switch (metric) {
       LeaderboardMetric.level => period == LeaderboardPeriod.all
-          ? l10n.playerLevelTitle(
+          ? l10n.playerLevelRankSummary(
               PlayerLevelCalculator.fromTotalXp(entry.totalXp).level,
             )
           : l10n.leaderboardPeriodXp(entry.metricValue.round()),

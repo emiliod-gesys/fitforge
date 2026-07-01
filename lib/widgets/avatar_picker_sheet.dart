@@ -37,8 +37,11 @@ class _AvatarPickerSheet extends StatelessWidget {
     final currentKey = AvatarCatalog.isCatalogValue(selectedId)
         ? selectedId!.substring(AvatarCatalog.prefix.length)
         : null;
-    final availableOptions = AvatarCatalog.optionsForUser(userEmail);
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
+    final availableOptions = AvatarCatalog.pickerOptionsForUser(
+      userEmail,
+      selectedStorageId: selectedId,
+    );
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.78;
 
     return SafeArea(
       child: SizedBox(
@@ -66,39 +69,53 @@ class _AvatarPickerSheet extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.chooseAvatarHint,
+                '${l10n.chooseAvatarHint} (${availableOptions.length})',
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.82,
-                  ),
-                  itemCount: availableOptions.length,
-                  itemBuilder: (context, index) {
-                    final option = availableOptions[index];
-                    final isSelected = option.id == currentKey;
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: GridView.builder(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.82,
+                    ),
+                    itemCount: availableOptions.length,
+                    itemBuilder: (context, index) {
+                      final option = availableOptions[index];
+                      final isSelected = option.id == currentKey;
 
-                    return InkWell(
-                      onTap: () => Navigator.pop(context, AvatarCatalog.toStorageId(option.id)),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.asset(
-                                option.assetPath,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
+                      return InkWell(
+                        onTap: () => Navigator.pop(context, AvatarCatalog.toStorageId(option.id)),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: ColoredBox(
+                                  color: AppColors.surface,
+                                  child: Image.asset(
+                                    option.assetPath,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                    gaplessPlayback: true,
+                                    errorBuilder: (_, __, ___) => Center(
+                                      child: Icon(
+                                        Icons.broken_image_outlined,
+                                        color: AppColors.textMuted.withValues(alpha: 0.6),
+                                        size: 28,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
                           if (isSelected)
                             Positioned(
                               top: 6,
@@ -121,10 +138,11 @@ class _AvatarPickerSheet extends StatelessWidget {
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

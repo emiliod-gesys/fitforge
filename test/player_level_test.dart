@@ -43,6 +43,28 @@ void main() {
       expect(p.xpInCurrentLevel, 0);
       expect(p.xpToNextLevel, 110);
     });
+
+    test('rankTierIncreased only when emblem tier changes', () {
+      final numericOnly = XpAwardResult(
+        xpEarned: 50,
+        streakWeeks: 0,
+        streakMultiplier: 1,
+        before: PlayerLevelCalculator.fromTotalXp(500),
+        after: PlayerLevelCalculator.fromTotalXp(550),
+      );
+      expect(numericOnly.leveledUp, isFalse);
+      expect(numericOnly.rankTierIncreased, isFalse);
+
+      final rankUp = XpAwardResult(
+        xpEarned: 60,
+        streakWeeks: 0,
+        streakMultiplier: 1,
+        before: PlayerLevelCalculator.fromTotalXp(890),
+        after: PlayerLevelCalculator.fromTotalXp(950),
+      );
+      expect(rankUp.leveledUp, isTrue);
+      expect(rankUp.rankTierIncreased, isTrue);
+    });
   });
 
   group('streakMultiplier', () {

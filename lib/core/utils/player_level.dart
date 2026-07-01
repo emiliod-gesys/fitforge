@@ -1,3 +1,4 @@
+import 'player_level_badge.dart';
 import 'unit_converter.dart';
 
 /// Sistema de niveles tipo juego (1–10 000).
@@ -94,4 +95,8 @@ class XpAwardResult {
   });
 
   bool get leveledUp => after.level > before.level;
+
+  /// Subida de rango (emblema + título), no cada nivel numérico.
+  bool get rankTierIncreased =>
+      PlayerLevelBadge.tierIncreased(before.level, after.level);
 }

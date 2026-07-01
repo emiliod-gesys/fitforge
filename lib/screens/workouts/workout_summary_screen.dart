@@ -469,14 +469,14 @@ class _AchievementsSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          if (summary.leveledUp && summary.xpAward != null)
+          if (summary.rankTierIncreased && summary.xpAward != null)
             _AchievementRow(
               image: TappableBadge(
-                label: l10n.playerLevelTitle(summary.xpAward!.after.level),
+                label: l10n.playerLevelBadgeName(summary.xpAward!.after.level),
                 child: _LevelBadgeImage(level: summary.xpAward!.after.level),
               ),
-              title: l10n.levelUp,
-              subtitle: l10n.playerLevelTitle(summary.xpAward!.after.level),
+              title: l10n.rankUp,
+              subtitle: l10n.playerLevelRankSummary(summary.xpAward!.after.level),
             ),
           ...summary.newMilestoneUnlocks.map(
             (unlock) => _AchievementRow(

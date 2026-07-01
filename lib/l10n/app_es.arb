@@ -107,6 +107,14 @@
   "xpEarned": "+{xp} XP",
   "@xpEarned": { "placeholders": { "xp": {"type": "int"} } },
   "levelUp": "¡Subiste de nivel!",
+  "rankUp": "¡Nuevo rango!",
+  "shareRankUp": "⭐ ¡Ascendiste a {rank}! (Nivel {level})",
+  "@shareRankUp": {
+    "placeholders": {
+      "rank": {"type": "String"},
+      "level": {"type": "int"}
+    }
+  },
   "streakXpBonus": "Bonus racha ×{multiplier}",
   "@streakXpBonus": { "placeholders": { "multiplier": {"type": "String"} } },
   "workouts30d": "Entrenos (30 d)",

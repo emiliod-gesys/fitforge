@@ -30,4 +30,12 @@ void main() {
     expect(PlayerLevelBadge.assetForLevel(500), 'assets/images/player_levels/transparent/level_500_plus.png');
     expect(PlayerLevelBadge.assetForLevel(10000), 'assets/images/player_levels/transparent/level_500_plus.png');
   });
+
+  test('tierIncreased solo al cambiar emblema', () {
+    expect(PlayerLevelBadge.tierIncreased(8, 9), isFalse);
+    expect(PlayerLevelBadge.tierIncreased(9, 10), isTrue);
+    expect(PlayerLevelBadge.tierIncreased(24, 25), isTrue);
+    expect(PlayerLevelBadge.tierIncreased(25, 26), isFalse);
+    expect(PlayerLevelBadge.tierIncreased(499, 500), isTrue);
+  });
 }

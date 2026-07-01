@@ -38,6 +38,10 @@ class ProfileAvatar extends StatelessWidget {
         height: size,
         fit: BoxFit.cover,
         alignment: Alignment.topCenter,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => Center(
+          child: Icon(Icons.person, size: radius, color: AppColors.textMuted),
+        ),
       ),
     );
   }

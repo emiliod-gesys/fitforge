@@ -328,6 +328,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get levelUp => '¡Subiste de nivel!';
 
   @override
+  String get rankUp => '¡Nuevo rango!';
+
+  @override
+  String shareRankUp(String rank, int level) {
+    return '⭐ ¡Ascendiste a $rank! (Nivel $level)';
+  }
+
+  @override
   String streakXpBonus(String multiplier) {
     return 'Bonus racha ×$multiplier';
   }

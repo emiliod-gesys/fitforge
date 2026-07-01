@@ -101,6 +101,10 @@ abstract final class MuscleInference {
     }
 
     final n = _normalize(name);
+    if (_isMuscleUpExercise(n)) {
+      return muscles.toList();
+    }
+
     final tricepsNamed = _hasAny(n, ['tricep', 'triceps', 'trícep', 'tríceps']);
     final bicepsNamed = _hasAny(n, ['bicep', 'biceps', 'bícep', 'bíceps']);
 
@@ -309,6 +313,100 @@ abstract final class MuscleInference {
     _applyPressHeuristics(name, muscles);
     if (_isBackExercise(name)) muscles.add('Espalda');
     if (_isLegExercise(name)) muscles.add('Piernas');
+    if (_isBurpeeExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Pecho');
+      muscles.add('Abdominales');
+    }
+    if (_isBoxJumpExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    }
+    if (_isBoxStepOverExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    }
+    if (_isWallBallExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+    }
+    if (_isThrusterExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+    }
+    if (_isPowerCleanExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Espalda');
+      muscles.add('Glúteos');
+    }
+    if (_isCleanAndJerkExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Espalda');
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+    }
+    if (_isPowerSnatchExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Espalda');
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+    }
+    if (_isSnatchDeadliftExercise(name)) {
+      muscles.add('Espalda');
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    }
+    if (_isSumoDeadliftExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    }
+    if (_isOverheadSquatExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+      muscles.add('Abdominales');
+    }
+    if (_isKettlebellSwingExercise(name)) {
+      muscles.add('Glúteos');
+      muscles.add('Piernas');
+      muscles.add('Abdominales');
+    }
+    if (_isKettlebellSnatchExercise(name)) {
+      muscles.add('Hombros');
+      muscles.add('Glúteos');
+      muscles.add('Piernas');
+      muscles.add('Espalda');
+    }
+    if (_isKettlebellCleanAndPressExercise(name)) {
+      muscles.add('Hombros');
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    }
+    if (_isFarmersWalkExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+      muscles.add('Antebrazos');
+      muscles.add('Abdominales');
+    }
+    if (_isKippingPullUpExercise(name)) {
+      muscles.add('Espalda');
+      muscles.add('Bíceps');
+      muscles.add('Abdominales');
+    }
+    if (_isMuscleUpExercise(name)) {
+      muscles.add('Espalda');
+      muscles.add('Bíceps');
+      muscles.add('Tríceps');
+      muscles.add('Hombros');
+      muscles.add('Abdominales');
+    }
+    if (_isBarPulloverExercise(name)) {
+      muscles.add('Espalda');
+      muscles.add('Bíceps');
+      muscles.add('Abdominales');
+    }
     if (_isGluteExercise(name)) muscles.add('Glúteos');
     if (_isCoreExercise(name)) muscles.add('Abdominales');
     if (_isForearmExercise(name)) muscles.add('Antebrazos');
@@ -463,6 +561,8 @@ abstract final class MuscleInference {
       return false;
     }
 
+    if (_isSumoDeadliftExercise(name)) return false;
+
     if (_isBackPullToChest(name)) return true;
 
     if (_hasAny(name, [
@@ -546,6 +646,144 @@ abstract final class MuscleInference {
       return true;
     }
     return _hasPhrase(name, 'chest supported') || _hasPhrase(name, 'pecho apoyado');
+  }
+
+  static bool _isBarPulloverExercise(String name) {
+    if (_hasPhrase(name, 'bar pullover') ||
+        _hasPhrase(name, 'bar pull over') ||
+        _hasPhrase(name, 'pullover en barra') ||
+        _hasPhrase(name, 'pull over en barra')) {
+      return true;
+    }
+    if (_hasAny(name, [
+      'dumbbell',
+      'mancuerna',
+      'barbell',
+      'cable',
+      'polea',
+      'machine',
+      'maquina',
+      'lever',
+      'ez bar',
+    ])) {
+      return false;
+    }
+    return _hasPhrase(name, 'pull over') ||
+        (_hasWord(name, 'pullover') && _hasAny(name, ['barra', 'bar', 'gymnastic', 'calistenia']));
+  }
+
+  static bool _isMuscleUpExercise(String name) {
+    return _hasPhrase(name, 'muscle up') ||
+        _hasPhrase(name, 'muscle-up') ||
+        _hasWord(name, 'muscleup');
+  }
+
+  static bool _isKippingPullUpExercise(String name) {
+    return _hasPhrase(name, 'kipping pull up') ||
+        _hasPhrase(name, 'kipping pull-up') ||
+        _hasPhrase(name, 'dominada kipping') ||
+        _hasPhrase(name, 'pull up kipping') ||
+        _hasPhrase(name, 'kipping pu');
+  }
+
+  static bool _isFarmersWalkExercise(String name) {
+    return _hasPhrase(name, 'farmers walk') ||
+        _hasPhrase(name, 'farmer walk') ||
+        _hasPhrase(name, "farmer's walk") ||
+        _hasPhrase(name, 'farmer carry') ||
+        _hasPhrase(name, 'caminata del granjero') ||
+        _hasPhrase(name, 'caminata de granjero');
+  }
+
+  static bool _isKettlebellCleanAndPressExercise(String name) {
+    return _hasPhrase(name, 'kettlebell clean and press') ||
+        _hasPhrase(name, 'clean and press con kettlebell') ||
+        _hasPhrase(name, 'cargada y press con kettlebell') ||
+        _hasPhrase(name, 'kb clean and press');
+  }
+
+  static bool _isKettlebellSnatchExercise(String name) {
+    return _hasPhrase(name, 'kettlebell snatch') ||
+        _hasPhrase(name, 'snatch con kettlebell') ||
+        _hasPhrase(name, 'kb snatch') ||
+        _hasPhrase(name, 'arrancada con kettlebell');
+  }
+
+  static bool _isKettlebellSwingExercise(String name) {
+    return _hasPhrase(name, 'kettlebell swing') ||
+        _hasPhrase(name, 'swing con kettlebell') ||
+        _hasPhrase(name, 'kb swing') ||
+        _hasPhrase(name, 'swing ruso');
+  }
+
+  static bool _isOverheadSquatExercise(String name) {
+    if (_hasPhrase(name, 'front squat')) return false;
+    return _hasPhrase(name, 'overhead squat') ||
+        _hasPhrase(name, 'sentadilla overhead') ||
+        _hasWord(name, 'ohs');
+  }
+
+  static bool _isSnatchDeadliftExercise(String name) {
+    return _hasPhrase(name, 'snatch deadlift') ||
+        _hasPhrase(name, 'snatch dl') ||
+        _hasPhrase(name, 'peso muerto snatch') ||
+        _hasPhrase(name, 'snatch-grip deadlift');
+  }
+
+  static bool _isSumoDeadliftExercise(String name) {
+    return _hasPhrase(name, 'sumo deadlift') ||
+        _hasPhrase(name, 'peso muerto sumo') ||
+        _hasPhrase(name, 'deadlift sumo');
+  }
+
+  static bool _isPowerSnatchExercise(String name) {
+    if (_hasPhrase(name, 'snatch pull')) return false;
+    return _hasPhrase(name, 'power snatch') ||
+        _hasPhrase(name, 'arrancada de potencia') ||
+        _hasPhrase(name, 'snatch de potencia');
+  }
+
+  static bool _isCleanAndJerkExercise(String name) {
+    return _hasPhrase(name, 'clean and jerk') ||
+        _hasPhrase(name, 'clean & jerk') ||
+        _hasPhrase(name, 'cargada y envion') ||
+        _hasPhrase(name, 'cargada y envión');
+  }
+
+  static bool _isPowerCleanExercise(String name) {
+    return _hasPhrase(name, 'hang power clean') ||
+        _hasPhrase(name, 'cargada colgada de potencia') ||
+        _hasPhrase(name, 'cargada hang') ||
+        _hasPhrase(name, 'power clean') ||
+        _hasPhrase(name, 'cargada de potencia');
+  }
+
+  static bool _isThrusterExercise(String name) {
+    return _hasWord(name, 'thruster');
+  }
+
+  static bool _isWallBallExercise(String name) {
+    return _hasPhrase(name, 'wall ball') ||
+        _hasPhrase(name, 'wallball') ||
+        _hasPhrase(name, 'lanzamiento al muro');
+  }
+
+  static bool _isBoxStepOverExercise(String name) {
+    return _hasPhrase(name, 'step over') ||
+        _hasPhrase(name, 'step-over') ||
+        _hasPhrase(name, 'stepover') ||
+        _hasPhrase(name, 'paso sobre el cajon') ||
+        _hasPhrase(name, 'step over en cajon');
+  }
+
+  static bool _isBoxJumpExercise(String name) {
+    return _hasPhrase(name, 'box jump') ||
+        _hasPhrase(name, 'salto al cajon') ||
+        _hasPhrase(name, 'salto al box');
+  }
+
+  static bool _isBurpeeExercise(String name) {
+    return _hasWord(name, 'burpee');
   }
 
   static bool _isLegExercise(String name) {
@@ -661,9 +899,6 @@ abstract final class MuscleInference {
       'agarre de mano',
       'pinch',
       'pinza',
-      'farmer walk',
-      'farmer s walk',
-      'caminata del granjero',
       'wrist roller',
       'extensor de muneca',
       'extensor de muñeca',

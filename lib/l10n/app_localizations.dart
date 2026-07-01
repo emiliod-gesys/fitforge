@@ -704,6 +704,18 @@ abstract class AppLocalizations {
   /// **'¡Subiste de nivel!'**
   String get levelUp;
 
+  /// No description provided for @rankUp.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Nuevo rango!'**
+  String get rankUp;
+
+  /// No description provided for @shareRankUp.
+  ///
+  /// In es, this message translates to:
+  /// **'⭐ ¡Ascendiste a {rank}! (Nivel {level})'**
+  String shareRankUp(String rank, int level);
+
   /// No description provided for @streakXpBonus.
   ///
   /// In es, this message translates to:

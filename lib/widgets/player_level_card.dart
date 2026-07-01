@@ -122,17 +122,20 @@ class _CircularLevelRing extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.playerLevelTitle(level),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                Text(
                   badgeName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                     color: AppColors.orange,
+                  ),
+                ),
+                Text(
+                  l10n.playerLevelTitle(level),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),

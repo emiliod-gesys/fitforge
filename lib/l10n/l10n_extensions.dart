@@ -202,6 +202,11 @@ extension ProfileL10n on AppLocalizations {
     };
   }
 
+  /// Rango + nivel numérico, alineado con el emblema mostrado.
+  String playerLevelRankSummary(int level) {
+    return '${playerLevelBadgeName(level)} · ${playerLevelTitle(level)}';
+  }
+
   String friendlyAiError(Object error) {
     if (isConnectionError(error)) return aiConnectionError;
     return errorGeneric('$error');

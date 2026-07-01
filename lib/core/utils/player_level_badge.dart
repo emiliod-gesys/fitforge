@@ -40,6 +40,11 @@ abstract final class PlayerLevelBadge {
     }
     return 1;
   }
+
+  /// `true` cuando el emblema de nivel cambia (p. ej. 9 → 10, Bronce → Plata).
+  static bool tierIncreased(int beforeLevel, int afterLevel) {
+    return tierIndexForLevel(afterLevel) > tierIndexForLevel(beforeLevel);
+  }
 }
 
 class _LevelBadgeTier {

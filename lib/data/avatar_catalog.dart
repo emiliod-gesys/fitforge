@@ -47,6 +47,18 @@ abstract final class AvatarCatalog {
     AvatarOption(id: 'sloth', assetPath: '$_assetBase/sloth.png'),
     AvatarOption(id: 'panther', assetPath: '$_assetBase/panther.png'),
     AvatarOption(id: 'fox', assetPath: '$_assetBase/fox.png'),
+    AvatarOption(id: 'pumpkin_spooky', assetPath: '$_assetBase/pumpkin_spooky.png'),
+    AvatarOption(id: 'quack_pump_duck', assetPath: '$_assetBase/quack_pump_duck.png'),
+    AvatarOption(id: 'snow_leopard', assetPath: '$_assetBase/snow_leopard.png'),
+    AvatarOption(id: 'cyber_samurai', assetPath: '$_assetBase/cyber_samurai.png'),
+    AvatarOption(id: 'skeleton_grind', assetPath: '$_assetBase/skeleton_grind.png'),
+    AvatarOption(id: 'gamer_crown', assetPath: '$_assetBase/gamer_crown.png'),
+    AvatarOption(id: 'focus_conquer', assetPath: '$_assetBase/focus_conquer.png'),
+    AvatarOption(id: 'hooded_striker', assetPath: '$_assetBase/hooded_striker.png'),
+    AvatarOption(id: 'cyber_pilot', assetPath: '$_assetBase/cyber_pilot.png'),
+    AvatarOption(id: 'discipline_skull', assetPath: '$_assetBase/discipline_skull.png'),
+    AvatarOption(id: 'strong_mind', assetPath: '$_assetBase/strong_mind.png'),
+    AvatarOption(id: 'discipline_goth', assetPath: '$_assetBase/discipline_goth.png'),
     AvatarOption(
       id: 'admin',
       assetPath: '$_assetBase/admin.png',
@@ -73,6 +85,23 @@ abstract final class AvatarCatalog {
 
   static List<AvatarOption> optionsForUser(String? email) =>
       options.where((option) => option.isAvailableTo(email)).toList();
+
+  /// Opciones del picker: las del usuario más la selección actual si quedó fuera
+  /// (p. ej. sesión sin email pero perfil con avatar exclusivo).
+  static List<AvatarOption> pickerOptionsForUser(
+    String? email, {
+    String? selectedStorageId,
+  }) {
+    final available = optionsForUser(email);
+    if (!isCatalogValue(selectedStorageId)) return available;
+
+    final selectedId = selectedStorageId!.substring(prefix.length);
+    if (available.any((option) => option.id == selectedId)) return available;
+
+    final selected = resolve(selectedStorageId);
+    if (selected == null) return available;
+    return [selected, ...available];
+  }
 
   static bool canSelect(String? storageId, String? email) {
     if (storageId == null) return false;

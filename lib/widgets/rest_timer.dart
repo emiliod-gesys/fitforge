@@ -49,6 +49,7 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   Timer? _timer;
   bool _finished = false;
   bool _cancelled = false;
+  bool _dismissed = false;
 
   void _syncRestNotification() {
     if (_finished || _cancelled) return;
@@ -166,7 +167,22 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _syncFromClock();
+      if (_finished || !_endsAt.isAfter(DateTime.now())) {
+        unawaited(_complete());
+      } else {
+        unawaited(_syncFromClock());
+      }
+    }
+  }
+
+  void _dismissParent({required bool skipped}) {
+    if (_dismissed) return;
+    _dismissed = true;
+    _cancelRestNotification();
+    if (skipped) {
+      widget.onSkip();
+    } else {
+      widget.onComplete();
     }
   }
 
@@ -186,34 +202,40 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   }
 
   Future<void> _complete() async {
-    if (_finished) return;
+    if (_dismissed) return;
 
-    _timer?.cancel();
-    _finished = true;
-    if (mounted) setState(() => _remaining = 0);
-
-    final inForeground =
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
-    final l10n = context.l10n;
-    final title = l10n.restTimerAlertTitle;
-    final body = l10n.rest;
-
-    if (inForeground) {
-      await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
-      widget.onComplete();
-      unawaited(RestSoundService.playRestCompleteAlert());
-      return;
+    final firstCompletion = !_finished;
+    if (firstCompletion) {
+      _timer?.cancel();
+      _finished = true;
+      if (mounted) setState(() => _remaining = 0);
     }
 
-    // En segundo plano: la notificación del sistema lleva sonido; el timer en Dart
-    // suele cancelar la programada antes de que dispare.
-    await LocalNotificationService.instance.showRestEnd(
-      id: widget.sessionId,
-      title: title,
-      body: body,
-    );
-    await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
-    widget.onComplete();
+    try {
+      if (firstCompletion && mounted) {
+        final inForeground =
+            WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+        final l10n = context.l10n;
+        final title = l10n.restTimerAlertTitle;
+        final body = l10n.rest;
+
+        if (inForeground) {
+          await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
+          unawaited(RestSoundService.playRestCompleteAlert());
+        } else {
+          await LocalNotificationService.instance.showRestEnd(
+            id: widget.sessionId,
+            title: title,
+            body: body,
+          );
+          await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
+        }
+      }
+    } catch (_) {
+      // Si falla la notificación, igual cerramos el timer en pantalla.
+    } finally {
+      _dismissParent(skipped: false);
+    }
   }
 
   void _adjust(int delta) {
@@ -234,12 +256,13 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   }
 
   void _skip() {
-    if (_finished || _cancelled || !mounted) return;
-    _timer?.cancel();
-    _finished = true;
-    _cancelRestNotification();
-    unawaited(RestSoundService.cancelBell());
-    widget.onSkip();
+    if (_cancelled) return;
+    if (!_finished) {
+      _timer?.cancel();
+      _finished = true;
+      unawaited(RestSoundService.cancelBell());
+    }
+    _dismissParent(skipped: true);
   }
 
   @override

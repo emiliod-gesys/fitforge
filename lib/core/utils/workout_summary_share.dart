@@ -68,9 +68,10 @@ abstract final class WorkoutSummaryShare {
       buffer
         ..writeln()
         ..writeln(l10n.shareAchievementsHeader);
-      if (summary.leveledUp && summary.xpAward != null) {
+      if (summary.rankTierIncreased && summary.xpAward != null) {
+        final level = summary.xpAward!.after.level;
         buffer.writeln(
-          l10n.shareLevelUp(summary.xpAward!.after.level),
+          l10n.shareRankUp(l10n.playerLevelBadgeName(level), level),
         );
       }
       for (final unlock in summary.newMilestoneUnlocks) {

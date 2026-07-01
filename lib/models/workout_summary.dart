@@ -97,7 +97,9 @@ class WorkoutSummaryData {
 
   bool get leveledUp => xpAward?.leveledUp ?? false;
 
-  bool get hasAchievements => leveledUp || newMilestoneUnlocks.isNotEmpty;
+  bool get rankTierIncreased => xpAward?.rankTierIncreased ?? false;
+
+  bool get hasAchievements => rankTierIncreased || newMilestoneUnlocks.isNotEmpty;
 
   bool get hasNewPersonalRecords => newPersonalRecords.isNotEmpty;
 

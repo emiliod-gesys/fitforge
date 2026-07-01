@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exerciseCount": 199,
+  "exerciseCount": 219,
   "exercises": [
     {
       "id": "ff_abs_ab_crunch_machine",
@@ -871,21 +871,29 @@
         ]
       },
       "names": {
-        "es": "Press militar con barra",
-        "en": "Barbell Overhead Press"
+        "es": "Press militar de pie con barra",
+        "en": "Barbell Standing Military Press"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Press overhead estricto de pie con barra desde rack frontal, sin impulso de piernas.",
+        "en": "Strict standing overhead barbell press from the front rack, without leg drive."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Press militar con barra",
+          "Press militar de pie",
+          "OHP de pie"
+        ],
+        "en": [
+          "Barbell overhead press",
+          "Standing OHP",
+          "Military press"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/kTbSH9h.gif",
-      "exercisedbId": "kTbSH9h",
-      "matchConfidence": "high",
-      "matchScore": 0.934
+      "imageUrl": "assets/exercises/ff_shoulders_barbell_standing_military_press.png",
+      "exercisedbId": "wdRZISl",
+      "matchConfidence": "curated",
+      "matchScore": 0.92
     },
     {
       "id": "ff_chest_barbell_pullover",
@@ -3894,20 +3902,27 @@
       },
       "names": {
         "es": "Sentadilla frontal con barra",
-        "en": "Front Squat"
+        "en": "Barbell Front Squat"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Sentadilla con barra en rack frontal (agarre clean o cruzado), énfasis en cuádriceps y torso vertical.",
+        "en": "Squat with the bar in a front rack (clean or cross-arm grip), emphasizing quads and an upright torso."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Front squat",
+          "Sentadilla front",
+          "Sentadilla frontal"
+        ],
+        "en": [
+          "Front squat",
+          "Barbell front squat"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/Y7YcmIJ.gif",
-      "exercisedbId": "Y7YcmIJ",
+      "imageUrl": "assets/exercises/ff_legs_barbell_front_squat.png",
+      "exercisedbId": "zG0zs85",
       "matchConfidence": "high",
-      "matchScore": 0.956
+      "matchScore": 1.0
     },
     {
       "id": "ff_glutes_glute_bridge",
@@ -4989,6 +5004,1213 @@
       "exercisedbId": "LIlE5Tn",
       "matchConfidence": "high",
       "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_burpee",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Pecho",
+          "Tríceps",
+          "Deltoides anterior",
+          "Abdominales",
+          "Glúteos",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Chest",
+          "Triceps",
+          "Front delts",
+          "Abs",
+          "Glutes",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Burpee",
+        "en": "Burpee"
+      },
+      "descriptions": {
+        "es": "Sentadilla, plancha con flexión, salto vertical. Ejercicio de acondicionamiento de cuerpo completo.",
+        "en": "Squat, plank with push-up, vertical jump. Full-body conditioning movement."
+      },
+      "aliases": {
+        "es": [
+          "Burpees",
+          "Sentadilla con salto al pecho"
+        ],
+        "en": [
+          "Burpees",
+          "Squat thrust"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/dK9394r.gif",
+      "exercisedbId": "dK9394r",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_box_jump",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Cajón",
+        "en": "Box"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Pantorrillas",
+          "Abdominales",
+          "Deltoides anterior"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Calves",
+          "Abs",
+          "Front delts"
+        ]
+      },
+      "names": {
+        "es": "Salto al cajón",
+        "en": "Box Jump"
+      },
+      "descriptions": {
+        "es": "Salto explosivo desde sentadilla para aterrizar con control sobre un cajón.",
+        "en": "Explosive jump from a squat to land under control on top of a box."
+      },
+      "aliases": {
+        "es": [
+          "Box jump",
+          "Salto al box"
+        ],
+        "en": [
+          "Plyometric box jump"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_box_jump.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cf_box_step_over",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Cajón",
+        "en": "Box"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Pantorrillas",
+          "Abdominales",
+          "Aductores"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Calves",
+          "Abs",
+          "Adductors"
+        ]
+      },
+      "names": {
+        "es": "Step-over en cajón",
+        "en": "Box Step Over"
+      },
+      "descriptions": {
+        "es": "Sube al cajón con un pie y pasa la otra pierna por encima para bajar al otro lado. Movimiento unilateral de piernas y cadera.",
+        "en": "Step onto the box with one foot and swing the trailing leg over to descend on the other side."
+      },
+      "aliases": {
+        "es": [
+          "Box step over",
+          "Paso sobre el cajón",
+          "Step over"
+        ],
+        "en": [
+          "Box step-over",
+          "Step over"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_box_step_over.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cf_wall_ball",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Balón medicinal",
+        "en": "Medicine ball"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Deltoides anterior",
+          "Tríceps",
+          "Abdominales",
+          "Pecho"
+        ],
+        "en": [
+          "Glutes",
+          "Front delts",
+          "Triceps",
+          "Abs",
+          "Chest"
+        ]
+      },
+      "names": {
+        "es": "Lanzamiento al muro (wall ball)",
+        "en": "Wall Ball Shot"
+      },
+      "descriptions": {
+        "es": "Sentadilla profunda con balón al pecho, impulso de piernas y lanzamiento overhead a un objetivo en la pared.",
+        "en": "Deep squat holding the ball at chest, leg drive, and overhead throw to a wall target."
+      },
+      "aliases": {
+        "es": [
+          "Wall ball",
+          "Wall balls",
+          "Lanzamiento wall ball"
+        ],
+        "en": [
+          "Wall ball",
+          "Wall balls",
+          "Medicine ball wall shot"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_wall_ball.png",
+      "exercisedbId": "PsVS1QP",
+      "matchConfidence": "curated",
+      "matchScore": 0.72
+    },
+    {
+      "id": "ff_cf_thruster",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Deltoides anterior",
+          "Tríceps",
+          "Abdominales"
+        ],
+        "en": [
+          "Glutes",
+          "Front delts",
+          "Triceps",
+          "Abs"
+        ]
+      },
+      "names": {
+        "es": "Thruster con barra",
+        "en": "Barbell Thruster"
+      },
+      "descriptions": {
+        "es": "Sentadilla frontal con barra en rack y press overhead en un solo movimiento continuo.",
+        "en": "Front squat to overhead press in one continuous movement."
+      },
+      "aliases": {
+        "es": [
+          "Thruster",
+          "Thrusters"
+        ],
+        "en": [
+          "Thruster",
+          "Thrusters"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/f7Y9eDZ.gif",
+      "exercisedbId": "f7Y9eDZ",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_dumbbell_thruster",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Deltoides anterior",
+          "Tríceps",
+          "Abdominales"
+        ],
+        "en": [
+          "Glutes",
+          "Front delts",
+          "Triceps",
+          "Abs"
+        ]
+      },
+      "names": {
+        "es": "Thruster con mancuernas",
+        "en": "Dumbbell Thruster"
+      },
+      "descriptions": {
+        "es": "Sentadilla con mancuernas en hombros y press overhead en un solo movimiento.",
+        "en": "Squat holding dumbbells at the shoulders, then drive into an overhead press."
+      },
+      "aliases": {
+        "es": [
+          "Dumbbell thruster",
+          "Thruster mancuernas"
+        ],
+        "en": [
+          "DB thruster",
+          "Thrusters dumbbell"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_dumbbell_thruster.png",
+      "exercisedbId": "FS63wTN",
+      "matchConfidence": "curated",
+      "matchScore": 0.68
+    },
+    {
+      "id": "ff_cf_power_clean",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Espalda alta",
+          "Hombros",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Upper back",
+          "Shoulders",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Cargada de potencia (power clean)",
+        "en": "Power Clean"
+      },
+      "descriptions": {
+        "es": "Tirón explosivo de barra desde el suelo y recepción en rack frontal sin sentadilla completa.",
+        "en": "Explosive bar pull from the floor into a front rack catch without a full squat."
+      },
+      "aliases": {
+        "es": [
+          "Power clean",
+          "Cargada de potencia",
+          "Cargada"
+        ],
+        "en": [
+          "PC",
+          "Clean"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/SiWCcTN.gif",
+      "exercisedbId": "SiWCcTN",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_hang_power_clean",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Espalda alta",
+          "Hombros",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Upper back",
+          "Shoulders",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Cargada de potencia desde hang",
+        "en": "Hang Power Clean"
+      },
+      "descriptions": {
+        "es": "Cargada de potencia iniciando con la barra a la altura del muslo (hang), sin tirón desde el suelo.",
+        "en": "Power clean starting with the bar at thigh height (hang position), without a pull from the floor."
+      },
+      "aliases": {
+        "es": [
+          "Hang power clean",
+          "Cargada hang de potencia",
+          "Hang clean de potencia"
+        ],
+        "en": [
+          "HPC",
+          "Hang PC"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_hang_power_clean.png",
+      "exercisedbId": "SiWCcTN",
+      "matchConfidence": "curated",
+      "matchScore": 0.78
+    },
+    {
+      "id": "ff_cf_clean_and_jerk",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Espalda alta",
+          "Hombros",
+          "Tríceps",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Upper back",
+          "Shoulders",
+          "Triceps",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Cargada y envión",
+        "en": "Clean and Jerk"
+      },
+      "descriptions": {
+        "es": "Levantamiento olímpico: cargada a rack frontal seguida de envión overhead.",
+        "en": "Olympic lift: clean to front rack followed by an overhead jerk."
+      },
+      "aliases": {
+        "es": [
+          "Clean and jerk",
+          "C&J",
+          "Cargada y jerk"
+        ],
+        "en": [
+          "C&J",
+          "Clean & jerk"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_clean_and_jerk.png",
+      "exercisedbId": "SGY8Zui",
+      "matchConfidence": "curated",
+      "matchScore": 0.72
+    },
+    {
+      "id": "ff_cf_power_snatch",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Isquios",
+        "en": "Hamstrings"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Cuádriceps",
+          "Espalda alta",
+          "Hombros",
+          "Tríceps",
+          "Abdominales",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Quads",
+          "Upper back",
+          "Shoulders",
+          "Triceps",
+          "Abs",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Arrancada de potencia (power snatch)",
+        "en": "Power Snatch"
+      },
+      "descriptions": {
+        "es": "Arrancada olímpica con recepción overhead en sentadilla parcial (por encima del paralelo).",
+        "en": "Olympic snatch caught overhead in a partial squat above parallel."
+      },
+      "aliases": {
+        "es": [
+          "Power snatch",
+          "Arrancada de potencia",
+          "Snatch de potencia"
+        ],
+        "en": [
+          "PS",
+          "Power snatch"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_power_snatch.png",
+      "exercisedbId": "dG5Smob",
+      "matchConfidence": "curated",
+      "matchScore": 0.76
+    },
+    {
+      "id": "ff_back_barbell_shrug",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Espalda alta",
+        "en": "Upper back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Hombros"
+        ],
+        "en": [
+          "Shoulders"
+        ]
+      },
+      "names": {
+        "es": "Encogimiento con barra",
+        "en": "Barbell Shrug"
+      },
+      "descriptions": {
+        "es": "Eleva los hombros hacia las orejas con la barra al frente o detrás del cuerpo para trabajar trapecio superior.",
+        "en": "Shrug the shoulders toward the ears with a barbell in front or behind the body to target the upper traps."
+      },
+      "aliases": {
+        "es": [
+          "Encogimiento de hombros con barra",
+          "Encogimientos con barra",
+          "Shrugs con barra"
+        ],
+        "en": [
+          "Barbell shrugs",
+          "Trap shrug"
+        ]
+      },
+      "imageUrl": "https://static.exercisedb.dev/media/dG7tG5y.gif",
+      "exercisedbId": "dG7tG5y",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_snatch_deadlift",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Cuádriceps",
+          "Aductores",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Quads",
+          "Adductors",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Peso muerto snatch",
+        "en": "Barbell Snatch Deadlift"
+      },
+      "descriptions": {
+        "es": "Peso muerto con agarre ancho de snatch: tirón controlado desde el suelo hasta extensión completa de cadera.",
+        "en": "Deadlift with a wide snatch grip: controlled pull from the floor to full hip extension."
+      },
+      "aliases": {
+        "es": [
+          "Snatch deadlift",
+          "Snatch DL",
+          "Peso muerto agarre snatch"
+        ],
+        "en": [
+          "Snatch deadlift",
+          "Snatch DL",
+          "Snatch-grip deadlift"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_snatch_deadlift.png",
+      "exercisedbId": "dG5Smob",
+      "matchConfidence": "curated",
+      "matchScore": 0.74
+    },
+    {
+      "id": "ff_cf_overhead_squat",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Hombros",
+          "Abdominales",
+          "Pantorrillas"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Shoulders",
+          "Abs",
+          "Calves"
+        ]
+      },
+      "names": {
+        "es": "Sentadilla overhead con barra",
+        "en": "Barbell Overhead Squat"
+      },
+      "descriptions": {
+        "es": "Sentadilla con barra bloqueada overhead y agarre ancho, exige movilidad de hombros y torso vertical.",
+        "en": "Squat with the bar locked out overhead in a wide grip, demanding shoulder mobility and an upright torso."
+      },
+      "aliases": {
+        "es": [
+          "Overhead squat",
+          "OHS",
+          "Sentadilla por encima de la cabeza"
+        ],
+        "en": [
+          "Overhead squat",
+          "OHS",
+          "OH squat"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_overhead_squat.png",
+      "exercisedbId": "gfk9kD4",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_kettlebell_swing",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "equipment": {
+        "es": "Kettlebell",
+        "en": "Kettlebell"
+      },
+      "primaryMuscle": {
+        "es": "Glúteos",
+        "en": "Glutes"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Abdominales",
+          "Hombros",
+          "Antebrazos"
+        ],
+        "en": [
+          "Hamstrings",
+          "Abs",
+          "Shoulders",
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Swing con kettlebell",
+        "en": "Kettlebell Swing"
+      },
+      "descriptions": {
+        "es": "Bisagra de cadera explosiva con kettlebell entre las piernas; impulso de glúteos e isquios.",
+        "en": "Explosive hip hinge swinging a kettlebell between the legs; driven by glutes and hamstrings."
+      },
+      "aliases": {
+        "es": [
+          "Kettlebell swing",
+          "KB swing",
+          "Swing ruso"
+        ],
+        "en": [
+          "KB swing",
+          "Russian kettlebell swing",
+          "Two-hand kettlebell swing"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_kettlebell_swing.png",
+      "exercisedbId": "UHJlbu3",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_kettlebell_snatch",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Kettlebell",
+        "en": "Kettlebell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios",
+          "Espalda alta",
+          "Abdominales",
+          "Antebrazos"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings",
+          "Upper back",
+          "Abs",
+          "Forearms"
+        ]
+      },
+      "names": {
+        "es": "Snatch con kettlebell",
+        "en": "Kettlebell Snatch"
+      },
+      "descriptions": {
+        "es": "Arrancada unilateral con kettlebell: bisagra explosiva, tirón y bloqueo overhead.",
+        "en": "Unilateral kettlebell snatch: explosive hinge, pull, and overhead lockout."
+      },
+      "aliases": {
+        "es": [
+          "Kettlebell snatch",
+          "KB snatch",
+          "Snatch unilateral con kettlebell"
+        ],
+        "en": [
+          "KB snatch",
+          "One-arm kettlebell snatch",
+          "Kettlebell one arm snatch"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_kettlebell_snatch.png",
+      "exercisedbId": "aXcUyKb",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_kettlebell_clean_and_press",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Hombros",
+        "en": "Shoulders"
+      },
+      "equipment": {
+        "es": "Kettlebell",
+        "en": "Kettlebell"
+      },
+      "primaryMuscle": {
+        "es": "Deltoides anterior",
+        "en": "Front delts"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Cuádriceps",
+          "Glúteos",
+          "Isquios",
+          "Tríceps",
+          "Abdominales"
+        ],
+        "en": [
+          "Quads",
+          "Glutes",
+          "Hamstrings",
+          "Triceps",
+          "Abs"
+        ]
+      },
+      "names": {
+        "es": "Cargada y press con kettlebell",
+        "en": "Kettlebell Clean and Press"
+      },
+      "descriptions": {
+        "es": "Cargada de dos kettlebells a rack frontal (a menudo en sentadilla) seguida de press overhead.",
+        "en": "Clean two kettlebells to the front rack (often in a squat) then press overhead."
+      },
+      "aliases": {
+        "es": [
+          "Kettlebell clean and press",
+          "KB clean and press",
+          "Cargada y press doble con kettlebell"
+        ],
+        "en": [
+          "KB clean and press",
+          "Double kettlebell clean and press",
+          "Kettlebell two arm clean and press"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_kettlebell_clean_and_press.png",
+      "exercisedbId": "7Ba7bQ2",
+      "matchConfidence": "curated",
+      "matchScore": 0.78
+    },
+    {
+      "id": "ff_cf_farmers_walk",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Isquios",
+          "Glúteos",
+          "Pantorrillas",
+          "Antebrazos",
+          "Abdominales"
+        ],
+        "en": [
+          "Hamstrings",
+          "Glutes",
+          "Calves",
+          "Forearms",
+          "Abs"
+        ]
+      },
+      "names": {
+        "es": "Caminata del granjero",
+        "en": "Farmer's Walk"
+      },
+      "descriptions": {
+        "es": "Camina con una mancuerna pesada en cada mano, brazos extendidos y torso erguido para trabajar piernas, agarre y estabilidad del core.",
+        "en": "Walk while holding a heavy dumbbell in each hand, arms at your sides and torso upright to train legs, grip, and core stability."
+      },
+      "aliases": {
+        "es": [
+          "Farmers walk",
+          "Caminata de granjero",
+          "Farmer carry con mancuernas"
+        ],
+        "en": [
+          "Farmers walk",
+          "Farmer walk",
+          "Dumbbell farmer's carry",
+          "Farmer carry"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_farmers_walk.png",
+      "exercisedbId": "qPEzJjA",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_kipping_pull_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Abdominales",
+          "Antebrazos",
+          "Pecho",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Abs",
+          "Forearms",
+          "Chest",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Dominada kipping",
+        "en": "Kipping Pull Up"
+      },
+      "descriptions": {
+        "es": "Dominada con impulso de cadera y core (kip) para asistir la tracción; común en CrossFit en barra o anillas.",
+        "en": "Pull-up using a hip and core swing (kip) to assist the pull; common in CrossFit on a bar or rings."
+      },
+      "aliases": {
+        "es": [
+          "Kipping pull up",
+          "Dominada con kip",
+          "Pull up kipping"
+        ],
+        "en": [
+          "Kipping pull-up",
+          "Kipping PU",
+          "Ring kipping pull up"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_kipping_pull_up.png",
+      "exercisedbId": "lBDjFxJ",
+      "matchConfidence": "curated",
+      "matchScore": 0.72
+    },
+    {
+      "id": "ff_cf_muscle_up",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Tríceps",
+          "Abdominales",
+          "Pecho",
+          "Deltoides anterior",
+          "Antebrazos",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Triceps",
+          "Abs",
+          "Chest",
+          "Front delts",
+          "Forearms",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Muscle up",
+        "en": "Muscle Up"
+      },
+      "descriptions": {
+        "es": "Combinación de dominada explosiva y fondo: pasas de colgado a brazos extendidos sobre la barra o anillas.",
+        "en": "Explosive pull-up into a dip: transition from a hang to locked-out arms above the bar or rings."
+      },
+      "aliases": {
+        "es": [
+          "Muscle-up",
+          "Dominada a muscle up",
+          "Muscle up en anillas"
+        ],
+        "en": [
+          "Muscle-up",
+          "Bar muscle up",
+          "Ring muscle up",
+          "Strict muscle up"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_muscle_up.png",
+      "exercisedbId": "yJUHKTn",
+      "matchConfidence": "high",
+      "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_bar_pullover",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Abdominales",
+          "Pecho",
+          "Deltoides posterior",
+          "Antebrazos",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Abs",
+          "Chest",
+          "Rear delts",
+          "Forearms",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Pull over en barra",
+        "en": "Bar Pull Over"
+      },
+      "descriptions": {
+        "es": "Desde colgado en barra, dominada con elevación de piernas y paso por encima de la barra hasta apoyo con brazos extendidos.",
+        "en": "From a bar hang, pull up while raising the legs and swing over the bar into a straight-arm support on top."
+      },
+      "aliases": {
+        "es": [
+          "Pullover en barra",
+          "Bar pullover",
+          "Pull over calistenia"
+        ],
+        "en": [
+          "Bar pullover",
+          "Pull over",
+          "Gymnastics pullover"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_cf_bar_pullover.png",
+      "exercisedbId": "yJUHKTn",
+      "matchConfidence": "curated",
+      "matchScore": 0.68
     },
     {
       "id": "ff_back_lat_pulldown_machine",
@@ -6818,21 +8040,29 @@
         ]
       },
       "names": {
-        "es": "Peso muerto rumano",
-        "en": "Romanian Deadlift"
+        "es": "Peso muerto rumano con barra",
+        "en": "Barbell Romanian Deadlift"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Bisagra de cadera con barra, rodillas semiflexionadas y espalda neutra para trabajar isquios y glúteos.",
+        "en": "Hip hinge with a barbell, soft knees, and a neutral spine to target hamstrings and glutes."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Peso muerto rumano",
+          "RDL con barra",
+          "RDL"
+        ],
+        "en": [
+          "Romanian deadlift",
+          "RDL",
+          "Barbell RDL"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/wQ2c4XD.gif",
+      "imageUrl": "assets/exercises/ff_back_barbell_romanian_deadlift.png",
       "exercisedbId": "wQ2c4XD",
       "matchConfidence": "high",
-      "matchScore": 0.891
+      "matchScore": 1.0
     },
     {
       "id": "ff_legs_romanian_deadlift",
@@ -8778,18 +10008,26 @@
         ]
       },
       "names": {
-        "es": "Peso muerto sumo",
-        "en": "Sumo Deadlift"
+        "es": "Peso muerto sumo con barra",
+        "en": "Barbell Sumo Deadlift"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "Peso muerto con postura sumo: pies anchos, agarre estrecho dentro de las rodillas y torso más vertical para enfatizar glúteos, aductores y cuádriceps.",
+        "en": "Deadlift with a wide sumo stance, narrow grip inside the knees, and a more upright torso to emphasize glutes, adductors, and quads."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Peso muerto sumo",
+          "Sumo deadlift",
+          "Deadlift sumo"
+        ],
+        "en": [
+          "Sumo deadlift",
+          "Sumo DL",
+          "Barbell sumo deadlift"
+        ]
       },
-      "imageUrl": "https://static.exercisedb.dev/media/KgI0tqW.gif",
+      "imageUrl": "assets/exercises/ff_glutes_sumo_deadlift.png",
       "exercisedbId": "KgI0tqW",
       "matchConfidence": "high",
       "matchScore": 0.956

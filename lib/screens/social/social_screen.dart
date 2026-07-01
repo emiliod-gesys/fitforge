@@ -201,7 +201,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
                         ),
                         title: Text(friend.label),
                         subtitle: Text(
-                          l10n.playerLevelTitle(friend.level),
+                          l10n.playerLevelRankSummary(friend.level),
                           style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),

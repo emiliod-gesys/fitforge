@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'fitforge_logo.dart';
 
 class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const double _logoHeight = 100;
-  static const double _toolbarHeight = 116;
+  static const double _logoHeight = 50;
+  static const double _toolbarHeight = kToolbarHeight;
 
   final String? title;
   final List<Widget>? actions;
@@ -31,13 +31,19 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: _toolbarHeight,
+      titleSpacing: leading == null && automaticallyImplyLeading ? 16 : 0,
       automaticallyImplyLeading: automaticallyImplyLeading,
       leading: leading,
       title: Row(
         children: [
-          const FitForgeLogo.icon(height: _logoHeight),
+          SizedBox(
+            height: _toolbarHeight,
+            child: const Center(
+              child: FitForgeLogo.icon(height: _logoHeight),
+            ),
+          ),
           if (showWordmark || title != null) ...[
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             if (title != null)
               Flexible(
                 child: Text(
