@@ -191,6 +191,7 @@ final leaderboardProvider = FutureProvider.family<LeaderboardResult, Leaderboard
         metric: key.metric,
         scope: key.scope,
         period: key.period,
+        limit: key.limit,
       );
 });
 

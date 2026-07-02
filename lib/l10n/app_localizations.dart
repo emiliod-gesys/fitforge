@@ -662,6 +662,84 @@ abstract class AppLocalizations {
   /// **'Progreso'**
   String get progressTitle;
 
+  /// No description provided for @progressTotalXp.
+  ///
+  /// In es, this message translates to:
+  /// **'{total} XP totales'**
+  String progressTotalXp(int total);
+
+  /// No description provided for @progressXpToNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan {remaining} XP para nivel {level}'**
+  String progressXpToNext(int remaining, int level);
+
+  /// No description provided for @progressStatsNewPrs.
+  ///
+  /// In es, this message translates to:
+  /// **'PRs nuevos'**
+  String get progressStatsNewPrs;
+
+  /// No description provided for @progressStatsMonthlyWorkouts.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenos del mes'**
+  String get progressStatsMonthlyWorkouts;
+
+  /// No description provided for @progressStatsMonthlyVolume.
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen del mes'**
+  String get progressStatsMonthlyVolume;
+
+  /// No description provided for @progressStatsMonthlyPrs.
+  ///
+  /// In es, this message translates to:
+  /// **'PRs del mes'**
+  String get progressStatsMonthlyPrs;
+
+  /// No description provided for @progressStreakWeeks.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} sem'**
+  String progressStreakWeeks(int count);
+
+  /// No description provided for @progressRecentPrs.
+  ///
+  /// In es, this message translates to:
+  /// **'PRs recientes'**
+  String get progressRecentPrs;
+
+  /// No description provided for @progressAllRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los récords'**
+  String get progressAllRecords;
+
+  /// No description provided for @progressNewPrBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo'**
+  String get progressNewPrBadge;
+
+  /// No description provided for @progressVolumeTrend.
+  ///
+  /// In es, this message translates to:
+  /// **'Tendencia de volumen'**
+  String get progressVolumeTrend;
+
+  /// No description provided for @progressBodyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuerpo'**
+  String get progressBodyTitle;
+
+  /// No description provided for @progressMilestoneNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente: {target}'**
+  String progressMilestoneNext(String target);
+
   /// No description provided for @playerLevelTitle.
   ///
   /// In es, this message translates to:
@@ -1334,10 +1412,70 @@ abstract class AppLocalizations {
   /// **'Social'**
   String get socialTitle;
 
+  /// No description provided for @socialHeroTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu círculo'**
+  String get socialHeroTitle;
+
+  /// No description provided for @socialHeroSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenad juntos, subid de nivel'**
+  String get socialHeroSubtitle;
+
+  /// No description provided for @socialHeroFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} amigos'**
+  String socialHeroFriends(int count);
+
+  /// No description provided for @socialHeroPending.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} pendientes'**
+  String socialHeroPending(int count);
+
+  /// No description provided for @socialHeroRank.
+  ///
+  /// In es, this message translates to:
+  /// **'#{rank} entre amigos'**
+  String socialHeroRank(int rank);
+
+  /// No description provided for @socialHeroRankGlobal.
+  ///
+  /// In es, this message translates to:
+  /// **'#{rank} global'**
+  String socialHeroRankGlobal(int rank);
+
+  /// No description provided for @socialHeroNoRank.
+  ///
+  /// In es, this message translates to:
+  /// **'Compite con tus amigos'**
+  String get socialHeroNoRank;
+
+  /// No description provided for @socialTabFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get socialTabFriends;
+
+  /// No description provided for @socialTabLeaderboards.
+  ///
+  /// In es, this message translates to:
+  /// **'Clasificaciones'**
+  String get socialTabLeaderboards;
+
+  /// No description provided for @leaderboardLoadMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver más'**
+  String get leaderboardLoadMore;
+
   /// No description provided for @leaderboardsTitle.
   ///
   /// In es, this message translates to:
-  /// **'Leaderboards'**
+  /// **'Clasificaciones'**
   String get leaderboardsTitle;
 
   /// No description provided for @leaderboardScopeFriends.
@@ -1436,11 +1574,89 @@ abstract class AppLocalizations {
   /// **'Contraseña'**
   String get password;
 
+  /// No description provided for @confirmPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar contraseña'**
+  String get confirmPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Las contraseñas no coinciden'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una contraseña segura para tu cuenta de FitForge.'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get newPassword;
+
+  /// No description provided for @resetPasswordAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar contraseña'**
+  String get resetPasswordAction;
+
+  /// No description provided for @resetPasswordSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actualizada correctamente'**
+  String get resetPasswordSuccess;
+
+  /// No description provided for @resetPasswordFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar la contraseña. Pide un enlace nuevo e inténtalo otra vez.'**
+  String get resetPasswordFailed;
+
+  /// No description provided for @resetPasswordTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña debe tener al menos 6 caracteres'**
+  String get resetPasswordTooShort;
+
   /// No description provided for @enter.
   ///
   /// In es, this message translates to:
   /// **'Entrar'**
   String get enter;
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @orContinueWith.
+  ///
+  /// In es, this message translates to:
+  /// **'o continúa con'**
+  String get orContinueWith;
+
+  /// No description provided for @googleSignInCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio de sesión con Google cancelado'**
+  String get googleSignInCancelled;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo iniciar sesión con Google. Inténtalo de nuevo.'**
+  String get googleSignInFailed;
 
   /// No description provided for @forgotPassword.
   ///
@@ -1549,6 +1765,102 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'de {goal} entrenamientos esta semana'**
   String weeklyWorkoutsSubtitle(int goal);
+
+  /// No description provided for @trainHeroReadyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Listo para entrenar?'**
+  String get trainHeroReadyTitle;
+
+  /// No description provided for @trainHeroGoalMetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Meta semanal cumplida!'**
+  String get trainHeroGoalMetTitle;
+
+  /// No description provided for @trainHeroStreakWeeks.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{¡Racha de 1 semana!} other{¡Racha de {count} semanas!}}'**
+  String trainHeroStreakWeeks(int count);
+
+  /// No description provided for @trainWorkoutsRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'{remaining, plural, =1{Te falta 1 entreno esta semana} other{Te faltan {remaining} entrenos esta semana}}'**
+  String trainWorkoutsRemaining(int remaining);
+
+  /// No description provided for @trainWeeklyProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{current} de {goal} esta semana'**
+  String trainWeeklyProgress(int current, int goal);
+
+  /// No description provided for @trainSuggestedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente entreno sugerido'**
+  String get trainSuggestedTitle;
+
+  /// No description provided for @trainSuggestedLastRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Retoma tu última rutina'**
+  String get trainSuggestedLastRoutine;
+
+  /// No description provided for @trainSuggestedRecovery.
+  ///
+  /// In es, this message translates to:
+  /// **'Músculos listos para esta sesión'**
+  String get trainSuggestedRecovery;
+
+  /// No description provided for @trainSuggestedDefault.
+  ///
+  /// In es, this message translates to:
+  /// **'Un buen punto de partida'**
+  String get trainSuggestedDefault;
+
+  /// No description provided for @trainStartSuggested.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar entreno'**
+  String get trainStartSuggested;
+
+  /// No description provided for @recoveryViewDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver detalle'**
+  String get recoveryViewDetail;
+
+  /// No description provided for @recoveryTopFatigued.
+  ///
+  /// In es, this message translates to:
+  /// **'Más fatigados'**
+  String get recoveryTopFatigued;
+
+  /// No description provided for @recoveryDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuperación muscular'**
+  String get recoveryDetailTitle;
+
+  /// No description provided for @trainRecentWorkouts.
+  ///
+  /// In es, this message translates to:
+  /// **'Recientes'**
+  String get trainRecentWorkouts;
+
+  /// No description provided for @trainSwipeRepeat.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetir'**
+  String get trainSwipeRepeat;
+
+  /// No description provided for @trainVolumePr.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor volumen'**
+  String get trainVolumePr;
 
   /// No description provided for @startWorkout.
   ///

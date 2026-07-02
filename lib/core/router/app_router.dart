@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/password_recovery_provider.dart';
 import '../../screens/ai/ai_coach_screen.dart';
 import '../../screens/auth/login_screen.dart';
+import '../../screens/auth/reset_password_screen.dart';
 import '../../screens/exercises/exercise_detail_screen.dart';
 import '../../screens/home/home_screen.dart';
 import '../../screens/profile/api_keys_screen.dart';
@@ -29,15 +31,25 @@ int _trainingHubInitialTab(GoRouterState state) {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final recoveryPending = ref.watch(passwordRecoveryPendingProvider);
+  ref.watch(authRecoveryListenerProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
+      final isResetRoute = state.matchedLocation == '/reset-password';
+
+      if (recoveryPending && !isResetRoute) return '/reset-password';
+      if (!recoveryPending && isResetRoute) {
+        final isLoggedIn = authState.valueOrNull?.session != null;
+        return isLoggedIn ? '/' : '/login';
+      }
+
       final isLoggedIn = authState.valueOrNull?.session != null;
-      final isAuthRoute = state.matchedLocation == '/login';
+      final isAuthRoute = state.matchedLocation == '/login' || isResetRoute;
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && isAuthRoute) return '/';
+      if (isLoggedIn && state.matchedLocation == '/login') return '/';
       if (state.uri.path == '/routines') return '/?tab=routines';
       return null;
     },
@@ -45,6 +57,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (_, __) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (_, __) => const ResetPasswordScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => SocialNotificationListener(

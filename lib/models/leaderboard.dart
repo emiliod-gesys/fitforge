@@ -75,10 +75,12 @@ class LeaderboardEntry {
 class LeaderboardResult {
   final List<LeaderboardEntry> entries;
   final LeaderboardEntry? currentUserOutsideTop;
+  final bool hasMore;
 
   const LeaderboardResult({
     required this.entries,
     this.currentUserOutsideTop,
+    this.hasMore = false,
   });
 
   factory LeaderboardResult.fromJson(Map<String, dynamic> json) {
@@ -94,8 +96,22 @@ class LeaderboardResult {
         ? LeaderboardEntry.fromJson(Map<String, dynamic>.from(outsideRaw))
         : null;
 
-    return LeaderboardResult(entries: entries, currentUserOutsideTop: outside);
+    return LeaderboardResult(
+      entries: entries,
+      currentUserOutsideTop: outside,
+      hasMore: json['has_more'] as bool? ?? false,
+    );
   }
 }
 
-typedef LeaderboardKey = ({LeaderboardScope scope, LeaderboardMetric metric, LeaderboardPeriod period});
+abstract final class LeaderboardPagination {
+  static const int pageSize = 50;
+  static const int maxLimit = 500;
+}
+
+typedef LeaderboardKey = ({
+  LeaderboardScope scope,
+  LeaderboardMetric metric,
+  LeaderboardPeriod period,
+  int limit,
+});

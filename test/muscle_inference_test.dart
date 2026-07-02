@@ -616,7 +616,7 @@ void main() {
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('power clean etiqueta piernas espalda y gluteos sin biceps', () {
+    test('power clean etiqueta piernas y gluteos sin fatiga espalda secundaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_power_clean',
@@ -641,12 +641,12 @@ void main() {
       );
 
       expect(muscles, contains('Piernas'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, contains('Glúteos'));
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('hang power clean etiqueta piernas espalda y gluteos', () {
+    test('hang power clean etiqueta piernas y gluteos sin espalda secundaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_hang_power_clean',
@@ -671,12 +671,12 @@ void main() {
       );
 
       expect(muscles, contains('Piernas'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, contains('Glúteos'));
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('clean and jerk etiqueta piernas espalda hombros y gluteos', () {
+    test('clean and jerk etiqueta piernas hombros y gluteos sin espalda secundaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_clean_and_jerk',
@@ -702,13 +702,13 @@ void main() {
       );
 
       expect(muscles, contains('Piernas'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, contains('Hombros'));
       expect(muscles, contains('Glúteos'));
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('power snatch etiqueta piernas espalda hombros y gluteos', () {
+    test('power snatch etiqueta piernas hombros y gluteos sin espalda secundaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_power_snatch',
@@ -735,7 +735,7 @@ void main() {
       );
 
       expect(muscles, contains('Piernas'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, contains('Hombros'));
       expect(muscles, contains('Glúteos'));
       expect(muscles, isNot(contains('Bíceps')));
@@ -784,7 +784,7 @@ void main() {
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('snatch deadlift etiqueta espalda piernas y gluteos', () {
+    test('snatch deadlift etiqueta piernas y gluteos sin espalda primaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_snatch_deadlift',
@@ -808,13 +808,13 @@ void main() {
         catalog: catalog,
       );
 
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, contains('Piernas'));
       expect(muscles, contains('Glúteos'));
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('barbell romanian deadlift etiqueta piernas gluteos y espalda', () {
+    test('barbell romanian deadlift etiqueta piernas y gluteos sin espalda', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_back_romanian_deadlift',
@@ -833,8 +833,47 @@ void main() {
 
       expect(muscles, contains('Piernas'));
       expect(muscles, contains('Glúteos'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, isNot(contains('Bíceps')));
+    });
+
+    test('conventional deadlift etiqueta piernas y gluteos sin espalda', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_back_deadlift',
+          name: 'Deadlift',
+          category: 'Espalda',
+          muscles: ['Espalda', 'Glúteos', 'Isquios', 'Trapecios', 'Antebrazos'],
+          isBundled: true,
+        ),
+      ];
+
+      final muscles = MuscleInference.resolve(
+        exerciseName: 'Peso muerto',
+        exerciseId: 'ff_back_deadlift',
+        catalog: catalog,
+      );
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Espalda')));
+
+      final impacts = MuscleInference.resolveImpacts(
+        exerciseName: 'Peso muerto',
+        exerciseId: 'ff_back_deadlift',
+        catalog: catalog,
+      );
+      expect(impacts['Espalda'] ?? 0, lessThan(MuscleInference.minVisibleImpact));
+      expect(impacts['Piernas'], 1.0);
+      expect(impacts['Glúteos'], 1.0);
+    });
+
+    test('peso muerto sin catalogo no etiqueta espalda', () {
+      final muscles = MuscleInference.fromExerciseName('Peso muerto convencional');
+
+      expect(muscles, contains('Piernas'));
+      expect(muscles, contains('Glúteos'));
+      expect(muscles, isNot(contains('Espalda')));
     });
 
     test('barbell front squat etiqueta piernas y gluteos', () {
@@ -913,7 +952,7 @@ void main() {
       expect(muscles, isNot(contains('Bíceps')));
     });
 
-    test('kettlebell snatch etiqueta hombros gluteos piernas y espalda', () {
+    test('kettlebell snatch etiqueta hombros gluteos y piernas sin espalda secundaria', () {
       const catalog = [
         Exercise(
           catalogId: 'ff_cf_kettlebell_snatch',
@@ -940,7 +979,7 @@ void main() {
       expect(muscles, contains('Hombros'));
       expect(muscles, contains('Glúteos'));
       expect(muscles, contains('Piernas'));
-      expect(muscles, contains('Espalda'));
+      expect(muscles, isNot(contains('Espalda')));
       expect(muscles, isNot(contains('Bíceps')));
     });
 

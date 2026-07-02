@@ -39,6 +39,44 @@ class ProgressStats {
 }
 
 abstract final class ProgressStatsCalculator {
+  static bool isInMonth(DateTime dateTime, DateTime monthReference) {
+    final local = dateTime.toLocal();
+    return local.year == monthReference.year && local.month == monthReference.month;
+  }
+
+  static Iterable<Workout> workoutsInMonth(
+    Iterable<Workout> workouts, [
+    DateTime? monthReference,
+  ]) {
+    final reference = monthReference ?? DateTime.now();
+    return workouts.where(
+      (workout) =>
+          workout.completedAt != null && isInMonth(workout.completedAt!, reference),
+    );
+  }
+
+  static int workoutsThisMonth(
+    Iterable<Workout> workouts, [
+    DateTime? monthReference,
+  ]) {
+    return workoutsInMonth(workouts, monthReference).length;
+  }
+
+  static double volumeThisMonth(
+    Iterable<Workout> workouts, [
+    DateTime? monthReference,
+  ]) {
+    return _sumVolume(workoutsInMonth(workouts, monthReference));
+  }
+
+  static int prsThisMonth(
+    Iterable<PersonalRecord> records, [
+    DateTime? monthReference,
+  ]) {
+    final reference = monthReference ?? DateTime.now();
+    return records.where((pr) => isInMonth(pr.achievedAt, reference)).length;
+  }
+
   static ProgressStats compute(
     List<Workout> workouts, {
     UserProfile? profile,

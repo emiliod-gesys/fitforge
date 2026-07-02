@@ -23,11 +23,19 @@ abstract final class BodyMannequinMapper {
     'Antebrazos': [Muscle.forearm],
   };
 
-  static Map<Muscle, MuscleData> toHeatmapData(Map<String, double> recovery) {
+  static Map<Muscle, MuscleData> toHeatmapData(
+    Map<String, double> recovery, {
+    String? focusGroup,
+  }) {
     final data = <Muscle, MuscleData>{};
 
     recovery.forEach((group, percent) {
-      final intensity = _fatigueIntensity(percent);
+      var intensity = _fatigueIntensity(percent);
+      if (intensity <= 0 && focusGroup != group) return;
+
+      if (focusGroup != null) {
+        intensity = group == focusGroup ? intensity.clamp(0.45, 1.0) : intensity * 0.2;
+      }
       if (intensity <= 0) return;
 
       final muscles = _groupToMuscles[group];

@@ -7,6 +7,9 @@ abstract final class MuscleInference {
   /// Peso de fatiga para músculos secundarios (no estabilizadores).
   static const double secondaryImpactWeight = 0.35;
 
+  /// Espalda como estabilizador (por debajo de [minVisibleImpact]).
+  static const double stabilizerBackImpactWeight = 0.18;
+
   /// Impacto mínimo para mostrar el grupo en listas y maniquí.
   static const double minVisibleImpact = 0.25;
 
@@ -72,7 +75,33 @@ abstract final class MuscleInference {
     String exerciseName,
     Map<String, double> impacts,
   ) {
-    return _resolveArmAntagonistImpactsByName(exerciseName, impacts);
+    final adjusted = _applyBackFatigueAdjustments(exerciseName, impacts);
+    return _resolveArmAntagonistImpactsByName(exerciseName, adjusted);
+  }
+
+  /// Reduce la fatiga de espalda cuando no es el músculo primario del movimiento.
+  static Map<String, double> _applyBackFatigueAdjustments(
+    String exerciseName,
+    Map<String, double> impacts,
+  ) {
+    if (!impacts.containsKey('Espalda')) return impacts;
+
+    final name = _normalize(exerciseName);
+    final next = Map<String, double>.from(impacts);
+
+    if (_isHipHingeDeadliftExercise(name)) {
+      next['Espalda'] = stabilizerBackImpactWeight;
+      next['Piernas'] = _maxImpact(next['Piernas'], 1.0);
+      next['Glúteos'] = _maxImpact(next['Glúteos'], 1.0);
+      return next;
+    }
+
+    final backImpact = next['Espalda'] ?? 0;
+    if (backImpact < 1.0) {
+      next['Espalda'] = stabilizerBackImpactWeight;
+    }
+
+    return next;
   }
 
   static Map<String, double> _resolveArmAntagonistImpactsByName(
@@ -311,7 +340,12 @@ abstract final class MuscleInference {
     if (_isShoulderExercise(name)) muscles.add('Hombros');
     if (_isChestExercise(name)) muscles.add('Pecho');
     _applyPressHeuristics(name, muscles);
-    if (_isBackExercise(name)) muscles.add('Espalda');
+    if (_isHipHingeDeadliftExercise(name)) {
+      muscles.add('Piernas');
+      muscles.add('Glúteos');
+    } else if (_isBackExercise(name)) {
+      muscles.add('Espalda');
+    }
     if (_isLegExercise(name)) muscles.add('Piernas');
     if (_isBurpeeExercise(name)) {
       muscles.add('Piernas');
@@ -354,7 +388,6 @@ abstract final class MuscleInference {
       muscles.add('Glúteos');
     }
     if (_isSnatchDeadliftExercise(name)) {
-      muscles.add('Espalda');
       muscles.add('Piernas');
       muscles.add('Glúteos');
     }
@@ -561,6 +594,8 @@ abstract final class MuscleInference {
       return false;
     }
 
+    if (_isHipHingeDeadliftExercise(name)) return false;
+
     if (_isSumoDeadliftExercise(name)) return false;
 
     if (_isBackPullToChest(name)) return true;
@@ -734,6 +769,41 @@ abstract final class MuscleInference {
     return _hasPhrase(name, 'sumo deadlift') ||
         _hasPhrase(name, 'peso muerto sumo') ||
         _hasPhrase(name, 'deadlift sumo');
+  }
+
+  static bool _isHipHingeDeadliftExercise(String name) {
+    if (_isSumoDeadliftExercise(name)) return true;
+    if (_isSnatchDeadliftExercise(name)) return true;
+
+    if (_hasAny(name, [
+      'romanian deadlift',
+      'peso muerto rumano',
+      'stiff leg deadlift',
+      'stiff-legged deadlift',
+      'stiff leg dead lift',
+      'peso muerto piernas rigidas',
+      'peso muerto piernas rígidas',
+      'trap bar deadlift',
+      'hex bar deadlift',
+      'deficit deadlift',
+      'rack deadlift',
+      'single leg deadlift',
+      'single-leg deadlift',
+      'good morning',
+      'buenos dias',
+      'buenos días',
+    ])) {
+      return true;
+    }
+
+    if (_hasWord(name, 'rdl') && !_hasWord(name, 'lateral')) return true;
+
+    if (_hasWord(name, 'deadlift') || _hasPhrase(name, 'peso muerto')) {
+      if (_hasAny(name, ['row', 'remo', 'pullover'])) return false;
+      return true;
+    }
+
+    return false;
   }
 
   static bool _isPowerSnatchExercise(String name) {

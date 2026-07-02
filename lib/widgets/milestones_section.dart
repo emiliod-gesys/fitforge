@@ -29,17 +29,26 @@ class MilestonesSection extends StatelessWidget {
     };
   }
 
-  String _formatValue(MilestoneCategory category, double value) {
+  static String formatValue(
+    MilestoneCategory category,
+    double value,
+    AppLocalizations l10n,
+    String unitSystem,
+  ) {
     return switch (category) {
-      MilestoneCategory.reps => _formatCount(value),
+      MilestoneCategory.reps => _formatCountStatic(value),
       MilestoneCategory.volume => UnitConverter.formatVolume(value, unitSystem),
       MilestoneCategory.distance => CardioFormat.distance(value, unitSystem),
       MilestoneCategory.calories => l10n.caloriesKcal(value.round()),
-      MilestoneCategory.workouts => _formatCount(value),
+      MilestoneCategory.workouts => _formatCountStatic(value),
     };
   }
 
-  String _formatCount(double value) {
+  String _formatValue(MilestoneCategory category, double value) {
+    return formatValue(category, value, l10n, unitSystem);
+  }
+
+  static String _formatCountStatic(double value) {
     final n = value.round();
     if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(n >= 10000 ? 0 : 1)}k';
@@ -47,6 +56,22 @@ class MilestonesSection extends StatelessWidget {
   }
 
   void _showDetail(BuildContext context, MilestoneCategory category) {
+    showCategoryDetail(
+      context,
+      category: category,
+      totals: totals,
+      l10n: l10n,
+      unitSystem: unitSystem,
+    );
+  }
+
+  static void showCategoryDetail(
+    BuildContext context, {
+    required MilestoneCategory category,
+    required MilestoneTotals totals,
+    required AppLocalizations l10n,
+    required String unitSystem,
+  }) {
     final current = totals.valueFor(category);
     final next = MilestonesCalculator.nextDefinition(category, totals);
     final remaining = MilestonesCalculator.remainingToNext(category, totals);
@@ -96,20 +121,20 @@ class MilestonesSection extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                l10n.milestoneTotal(_formatValue(category, current)),
+                l10n.milestoneTotal(formatValue(category, current, l10n, unitSystem)),
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
               ),
               if (next != null && remaining != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  l10n.milestoneNextTarget(_formatValue(category, next.threshold)),
+                  l10n.milestoneNextTarget(formatValue(category, next.threshold, l10n, unitSystem)),
                   style: const TextStyle(fontSize: 15),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   l10n.milestoneDetailRemaining(
-                    _formatValue(category, remaining),
-                    _formatValue(category, next.threshold),
+                    formatValue(category, remaining, l10n, unitSystem),
+                    formatValue(category, next.threshold, l10n, unitSystem),
                   ),
                   style: const TextStyle(
                     color: AppColors.orange,

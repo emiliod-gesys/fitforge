@@ -160,6 +160,7 @@ class SocialService {
     required LeaderboardMetric metric,
     required LeaderboardScope scope,
     required LeaderboardPeriod period,
+    int limit = LeaderboardPagination.pageSize,
   }) async {
     final uid = _userId;
     if (uid == null) {
@@ -172,6 +173,7 @@ class SocialService {
         'p_metric': metric.apiValue,
         'p_scope': scope.name,
         'p_period': period.apiValue,
+        'p_limit': limit.clamp(1, LeaderboardPagination.maxLimit),
       },
     );
 

@@ -1,72 +1,56 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/progress_stats.dart';
+import 'package:fitforge/models/profile.dart';
 import 'package:fitforge/models/workout.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('agrupa entrenos de 7 días e histórico', () {
-    final now = DateTime.now();
+  Workout workout({
+    required String id,
+    required DateTime completedAt,
+    double volume = 1000,
+  }) {
+    return Workout(
+      id: id,
+      userId: 'u1',
+      name: 'Session',
+      startedAt: completedAt.subtract(const Duration(hours: 1)),
+      completedAt: completedAt,
+      totalVolume: volume,
+    );
+  }
+
+  PersonalRecord pr({
+    required String id,
+    required DateTime achievedAt,
+  }) {
+    return PersonalRecord(
+      id: id,
+      exerciseId: 'ex1',
+      exerciseName: 'Bench',
+      achievedAt: achievedAt,
+    );
+  }
+
+  test('counts workouts and volume for the current calendar month', () {
+    final now = DateTime(2025, 7, 15);
     final workouts = [
-      Workout(
-        id: '1',
-        userId: 'u',
-        name: 'A',
-        startedAt: now.subtract(const Duration(days: 2)),
-        completedAt: now.subtract(const Duration(days: 2)),
-        durationMinutes: 45,
-        totalVolume: 3000,
-      ),
-      Workout(
-        id: '2',
-        userId: 'u',
-        name: 'B',
-        startedAt: now.subtract(const Duration(days: 20)),
-        completedAt: now.subtract(const Duration(days: 20)),
-        durationMinutes: 50,
-        totalVolume: 5000,
-      ),
+      workout(id: 'w1', completedAt: DateTime(2025, 7, 2), volume: 1200),
+      workout(id: 'w2', completedAt: DateTime(2025, 7, 2, 18), volume: 800),
+      workout(id: 'w3', completedAt: DateTime(2025, 6, 30), volume: 5000),
     ];
 
-    final stats = ProgressStatsCalculator.compute(workouts);
-
-    expect(stats.workouts7d, 1);
-    expect(stats.volume7dKg, 3000);
-    expect(stats.calories7d, greaterThan(0));
-    expect(stats.workoutsTotal, 2);
-    expect(stats.volumeTotalKg, 8000);
-    expect(stats.caloriesTotal, greaterThan(stats.calories7d));
+    expect(ProgressStatsCalculator.workoutsThisMonth(workouts, now), 2);
+    expect(ProgressStatsCalculator.volumeThisMonth(workouts, now), 2000);
   });
 
-  test('volumeByDayLastDays suma entrenamientos del mismo día y rellena la ventana', () {
-    final today = DateTime.now();
-    final dayStart = DateTime(today.year, today.month, today.day);
-    final workouts = [
-      Workout(
-        id: '1',
-        userId: 'u',
-        name: 'A',
-        startedAt: dayStart,
-        completedAt: dayStart,
-        durationMinutes: 45,
-        totalVolume: 3000,
-      ),
-      Workout(
-        id: '2',
-        userId: 'u',
-        name: 'B',
-        startedAt: dayStart.add(const Duration(hours: 2)),
-        completedAt: dayStart.add(const Duration(hours: 2)),
-        durationMinutes: 30,
-        totalVolume: 2000,
-      ),
+  test('counts PRs achieved in the current calendar month', () {
+    final now = DateTime(2025, 7, 15);
+    final records = [
+      pr(id: 'p1', achievedAt: DateTime(2025, 7, 1)),
+      pr(id: 'p2', achievedAt: DateTime(2025, 7, 12)),
+      pr(id: 'p3', achievedAt: DateTime(2025, 5, 1)),
     ];
 
-    final daily = ProgressStatsCalculator.volumeByDayLastDays(
-      workouts,
-      dayCount: 3,
-    );
-
-    expect(daily.length, 3);
-    expect(daily.last.volumeKg, 5000);
-    expect(daily.where((d) => d.volumeKg == 0).length, 2);
+    expect(ProgressStatsCalculator.prsThisMonth(records, now), 2);
   });
 }

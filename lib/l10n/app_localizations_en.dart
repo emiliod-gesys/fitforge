@@ -301,6 +301,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progressTitle => 'Progress';
 
   @override
+  String progressTotalXp(int total) {
+    return '$total XP total';
+  }
+
+  @override
+  String progressXpToNext(int remaining, int level) {
+    return '$remaining XP to level $level';
+  }
+
+  @override
+  String get progressStatsNewPrs => 'New PRs';
+
+  @override
+  String get progressStatsMonthlyWorkouts => 'Workouts this month';
+
+  @override
+  String get progressStatsMonthlyVolume => 'Volume this month';
+
+  @override
+  String get progressStatsMonthlyPrs => 'PRs this month';
+
+  @override
+  String progressStreakWeeks(int count) {
+    return '$count wks';
+  }
+
+  @override
+  String get progressRecentPrs => 'Recent PRs';
+
+  @override
+  String get progressAllRecords => 'All records';
+
+  @override
+  String get progressNewPrBadge => 'New';
+
+  @override
+  String get progressVolumeTrend => 'Volume trend';
+
+  @override
+  String get progressBodyTitle => 'Body';
+
+  @override
+  String progressMilestoneNext(String target) {
+    return 'Next: $target';
+  }
+
+  @override
   String playerLevelTitle(int level) {
     return 'Level $level';
   }
@@ -667,6 +714,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialTitle => 'Social';
 
   @override
+  String get socialHeroTitle => 'Your circle';
+
+  @override
+  String get socialHeroSubtitle => 'Train together, climb together';
+
+  @override
+  String socialHeroFriends(int count) {
+    return '$count friends';
+  }
+
+  @override
+  String socialHeroPending(int count) {
+    return '$count pending';
+  }
+
+  @override
+  String socialHeroRank(int rank) {
+    return '#$rank among friends';
+  }
+
+  @override
+  String socialHeroRankGlobal(int rank) {
+    return '#$rank global';
+  }
+
+  @override
+  String get socialHeroNoRank => 'Compete with your friends';
+
+  @override
+  String get socialTabFriends => 'Friends';
+
+  @override
+  String get socialTabLeaderboards => 'Leaderboards';
+
+  @override
+  String get leaderboardLoadMore => 'Show more';
+
+  @override
   String get leaderboardsTitle => 'Leaderboards';
 
   @override
@@ -722,7 +807,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get password => 'Password';
 
   @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get resetPasswordTitle => 'New password';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Choose a secure password for your FitForge account.';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get resetPasswordAction => 'Update password';
+
+  @override
+  String get resetPasswordSuccess => 'Password updated successfully';
+
+  @override
+  String get resetPasswordFailed =>
+      'Could not update your password. Request a new link and try again.';
+
+  @override
+  String get resetPasswordTooShort => 'Password must be at least 6 characters';
+
+  @override
   String get enter => 'Sign in';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get orContinueWith => 'or continue with';
+
+  @override
+  String get googleSignInCancelled => 'Google sign-in was cancelled';
+
+  @override
+  String get googleSignInFailed => 'Could not sign in with Google. Try again.';
 
   @override
   String get forgotPassword => 'Forgot your password?';
@@ -781,6 +907,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String weeklyWorkoutsSubtitle(int goal) {
     return 'of $goal workouts this week';
   }
+
+  @override
+  String get trainHeroReadyTitle => 'Ready to train?';
+
+  @override
+  String get trainHeroGoalMetTitle => 'Weekly goal crushed!';
+
+  @override
+  String trainHeroStreakWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count week streak!',
+      one: '1 week streak!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trainWorkoutsRemaining(int remaining) {
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: '$remaining workouts left this week',
+      one: '1 workout left this week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trainWeeklyProgress(int current, int goal) {
+    return '$current of $goal this week';
+  }
+
+  @override
+  String get trainSuggestedTitle => 'Suggested next workout';
+
+  @override
+  String get trainSuggestedLastRoutine => 'Pick up your last routine';
+
+  @override
+  String get trainSuggestedRecovery => 'Muscles are ready for this session';
+
+  @override
+  String get trainSuggestedDefault => 'A solid place to start';
+
+  @override
+  String get trainStartSuggested => 'Start workout';
+
+  @override
+  String get recoveryViewDetail => 'View details';
+
+  @override
+  String get recoveryTopFatigued => 'Most fatigued';
+
+  @override
+  String get recoveryDetailTitle => 'Muscle recovery';
+
+  @override
+  String get trainRecentWorkouts => 'Recent';
+
+  @override
+  String get trainSwipeRepeat => 'Repeat';
+
+  @override
+  String get trainVolumePr => 'Top volume';
 
   @override
   String get startWorkout => 'Start workout';

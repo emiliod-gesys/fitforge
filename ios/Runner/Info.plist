@@ -70,6 +70,19 @@
 	<string>FitForge usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FitForge accede a tu galería para elegir fotos de ejercicios personalizados.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.fitforge.fitforge</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.fitforge.fitforge</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

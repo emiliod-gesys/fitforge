@@ -9,11 +9,15 @@ import 'body_mannequin_mapper.dart';
 class BodyMannequin extends StatefulWidget {
   final Map<String, double> recovery;
   final Gender? gender;
+  final String? focusGroup;
+  final bool compact;
 
   const BodyMannequin({
     super.key,
     required this.recovery,
     this.gender,
+    this.focusGroup,
+    this.compact = false,
   });
 
   @override
@@ -37,10 +41,13 @@ class _BodyMannequinState extends State<BodyMannequin> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final heatmapData = BodyMannequinMapper.toHeatmapData(widget.recovery);
+    final heatmapData = BodyMannequinMapper.toHeatmapData(
+      widget.recovery,
+      focusGroup: widget.focusGroup,
+    );
 
     return AspectRatio(
-      aspectRatio: 0.50,
+      aspectRatio: widget.compact ? 0.62 : 0.50,
       child: Stack(
         alignment: Alignment.center,
         children: [

@@ -1,0 +1,85 @@
+import 'package:flutter/material.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_colors.dart';
+import '../../l10n/l10n_extensions.dart';
+
+class ProgressMuscleFilterBar extends StatelessWidget {
+  final String? selectedMuscle;
+  final ValueChanged<String?> onChanged;
+
+  const ProgressMuscleFilterBar({
+    super.key,
+    required this.selectedMuscle,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return SizedBox(
+      height: 38,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _FilterChip(
+            label: l10n.all,
+            selected: selectedMuscle == null,
+            onTap: () => onChanged(null),
+          ),
+          ...AppConstants.muscleGroups.where((m) => m != 'Cardio').map(
+                (muscle) => _FilterChip(
+                  label: l10n.muscleLabel(muscle),
+                  selected: selectedMuscle == muscle,
+                  onTap: () => onChanged(selectedMuscle == muscle ? null : muscle),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: selected ? AppColors.orange.withValues(alpha: 0.16) : AppColors.cardElevated,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: selected ? AppColors.orange : AppColors.border,
+              ),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: selected ? AppColors.orange : AppColors.textMuted,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

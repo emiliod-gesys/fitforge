@@ -37,7 +37,8 @@ flutter pub get
 2. En **SQL Editor**, ejecuta el contenido de `supabase/migrations/001_initial_schema.sql`
 3. **Authentication → Providers → Email** → desactiva **Confirm email**
 4. **Authentication → Bot and Abuse Protection** → activa CAPTCHA con **Cloudflare Turnstile** y pega la **Secret key**
-5. (Opcional, más adelante) Configurar Google OAuth en Authentication → Providers
+5. (Opcional) Configurar **Google OAuth** — ver sección [Google Sign-In](#google-sign-in) más abajo
+6. **Recuperación de contraseña (móvil)** — ver [Reset password](#reset-password) más abajo
 
 ### 2b. Configurar Cloudflare Turnstile
 
@@ -102,6 +103,34 @@ Para avisos cuando un amigo entrena **con la app cerrada**:
    - Header: `Authorization: Bearer tu-webhook-secret`
 
 Sin las variables `FIREBASE_*` la app funciona igual; solo se desactivan los push nativos.
+
+### Google Sign-In
+
+1. **Google Cloud Console** (mismo proyecto que Firebase `fitforge-76fa2`):
+   - **APIs & Services → Credentials → Create credentials → OAuth client ID**
+   - Crea un cliente **Web** → copia el Client ID → `GOOGLE_WEB_CLIENT_ID` en `dart_defines.json`
+   - Crea un cliente **Android** (`io.fitforge.fitforge`) con el SHA-1 de debug/release
+   - Crea un cliente **iOS** (`io.fitforge.fitforge`) → `GOOGLE_IOS_CLIENT_ID` en `dart_defines.json`
+2. **Supabase → Authentication → Providers → Google**: activa y pega el **Web Client ID** y **Client Secret**
+3. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**:
+   `io.fitforge.fitforge://login-callback`
+4. **iOS** (`ios/Runner/Info.plist`): añade también el URL scheme invertido de Google:
+   `com.googleusercontent.apps.TU_CLIENT_ID_SIN_SUFFIX` (ver consola de Google)
+5. Ejecuta `supabase/migrations/016_oauth_profile_metadata.sql` si aún no está aplicada
+
+Sin `GOOGLE_WEB_CLIENT_ID` el botón usa OAuth en navegador (deep link). Con el Web Client ID usa el selector nativo de Google (recomendado).
+
+### Reset password
+
+Para que el enlace del email abra la app y permita elegir contraseña nueva:
+
+1. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**, añade:
+   - `io.fitforge.fitforge://login-callback`
+   - `io.fitforge.fitforge://reset-password`
+2. (Opcional) **Authentication → Email Templates → Reset password**: personaliza asunto y cuerpo HTML. El enlace debe seguir usando `{{ .ConfirmationURL }}` (Supabase lo reemplaza automáticamente).
+3. En el móvil, al pulsar el enlace del correo se abre FitForge en la pantalla **Nueva contraseña**.
+
+Si el enlace abre el navegador y no la app, revisa que las redirect URLs estén en Supabase y que hayas reinstalado la app tras cambiar el `AndroidManifest` / `Info.plist`.
 
 ### 4. API Keys de IA
 
