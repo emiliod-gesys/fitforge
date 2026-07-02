@@ -15,6 +15,8 @@ class WorkoutSuggestionExerciseContext {
   final bool isCardio;
   final int setCount;
   final int? historyAvgSetCount;
+  final Map<String, dynamic>? latestSessionSummary;
+  final Map<String, dynamic>? recentTopSet;
   final List<String> muscleGroups;
   final double recoveryPercent;
   final int? daysSinceLastSession;
@@ -27,6 +29,8 @@ class WorkoutSuggestionExerciseContext {
     required this.isCardio,
     required this.setCount,
     this.historyAvgSetCount,
+    this.latestSessionSummary,
+    this.recentTopSet,
     required this.muscleGroups,
     required this.recoveryPercent,
     this.daysSinceLastSession,
@@ -41,6 +45,8 @@ class WorkoutSuggestionExerciseContext {
         'is_compound': isCompound,
         'set_count': setCount,
         if (historyAvgSetCount != null) 'history_avg_set_count': historyAvgSetCount,
+        if (latestSessionSummary != null) 'latest_session_summary': latestSessionSummary,
+        if (recentTopSet != null) 'recent_top_set': recentTopSet,
         'muscles': muscleGroups,
         'recovery_pct': recoveryPercent.round(),
         if (daysSinceLastSession != null) 'days_since_last': daysSinceLastSession,
@@ -97,6 +103,8 @@ abstract final class WorkoutSuggestionContextBuilder {
         isCardio: isCardio,
         setCount: ex.sets.length,
         historyAvgSetCount: historyAvgSets,
+        latestSessionSummary: history.isEmpty ? null : _latestSessionSummary(history.first, isCardio),
+        recentTopSet: _recentTopSet(history, isCardio),
         muscleGroups: muscles,
         recoveryPercent: recovery,
         daysSinceLastSession: daysSince,
@@ -176,6 +184,74 @@ abstract final class WorkoutSuggestionContextBuilder {
     }).where((m) => m.isNotEmpty).toList();
 
     return WorkoutSuggestionHistorySession(date: date, sets: sets);
+  }
+
+  static Map<String, dynamic>? _latestSessionSummary(
+    ExerciseSessionHistory session,
+    bool isCardio,
+  ) {
+    if (session.sets.isEmpty) return null;
+
+    if (isCardio || session.sets.any((set) => set.isCardio)) {
+      final longest = session.sets
+          .where((set) => (set.durationSeconds ?? 0) > 0)
+          .fold<int>(0, (best, set) => set.durationSeconds! > best ? set.durationSeconds! : best);
+      final farthest = session.sets
+          .where((set) => (set.distanceMeters ?? 0) > 0)
+          .fold<double>(0, (best, set) => set.distanceMeters! > best ? set.distanceMeters! : best);
+      if (longest <= 0 && farthest <= 0) return null;
+      return {
+        'set_count': session.sets.length,
+        if (longest > 0) 'max_duration_s': longest,
+        if (farthest > 0) 'max_distance_m': farthest,
+      };
+    }
+
+    final weighted = session.sets.where((set) => (set.weight ?? 0) > 0).toList();
+    final heaviest = weighted.fold<double>(0, (best, set) => set.weight! > best ? set.weight! : best);
+    final topRepsAtHeaviest = weighted
+        .where((set) => set.weight == heaviest)
+        .fold<int>(0, (best, set) => set.reps > best ? set.reps : best);
+
+    return {
+      'set_count': session.sets.length,
+      if (heaviest > 0) 'heaviest_weight_kg': heaviest,
+      if (topRepsAtHeaviest > 0) 'top_reps_at_heaviest': topRepsAtHeaviest,
+    };
+  }
+
+  static Map<String, dynamic>? _recentTopSet(
+    List<ExerciseSessionHistory> history,
+    bool isCardio,
+  ) {
+    if (history.isEmpty) return null;
+
+    if (isCardio || history.any((session) => session.sets.any((set) => set.isCardio))) {
+      return null;
+    }
+
+    WorkoutSet? best;
+    for (final session in history.take(historyLimit)) {
+      for (final set in session.sets) {
+        if ((set.weight ?? 0) <= 0 || set.reps <= 0) continue;
+        if (best == null) {
+          best = set;
+          continue;
+        }
+        final bestWeight = best.weight ?? 0;
+        final setWeight = set.weight ?? 0;
+        if (setWeight > bestWeight || (setWeight == bestWeight && set.reps > best.reps)) {
+          best = set;
+        }
+      }
+    }
+
+    if (best == null) return null;
+    return {
+      'weight_kg': best.weight,
+      'reps': best.reps,
+      if (best.rir != null) 'rir': best.rir,
+    };
   }
 }
 

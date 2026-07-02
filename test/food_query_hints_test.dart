@@ -43,5 +43,38 @@ void main() {
       expect(fixed.caloriesKcal, 52);
       expect(fixed.carbsG, closeTo(14, 0.5));
     });
+
+    test('reconcile fixes spaghetti when AI returns per-100g kcal at full weight', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Espagueti cocido simple',
+        caloriesKcal: 128,
+        proteinG: 5,
+        carbsG: 25,
+        fatG: 1,
+        referenceAmount: 320,
+      );
+
+      final fixed = FoodQueryHints.reconcile('320g espagueti cocido simple', ai);
+
+      expect(fixed.referenceAmount, 320);
+      expect(fixed.caloriesKcal, greaterThan(350));
+      expect(fixed.caloriesKcal, lessThan(450));
+    });
+
+    test('fixPer100gConfusion scales when reference is 100g but user asked more', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pasta',
+        caloriesKcal: 131,
+        proteinG: 5,
+        carbsG: 25,
+        fatG: 1,
+        referenceAmount: 100,
+      );
+
+      final fixed = FoodQueryHints.fixPer100gConfusion('300g pasta cocida', ai);
+
+      expect(fixed.caloriesKcal, 393);
+      expect(fixed.referenceAmount, 300);
+    });
   });
 }

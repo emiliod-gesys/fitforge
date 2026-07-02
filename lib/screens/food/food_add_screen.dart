@@ -9,9 +9,8 @@ import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
-import '../../widgets/food/barcode_scanner_view.dart';
 
-enum FoodAddMode { barcode, search, photo, quick, manual }
+enum FoodAddMode { search, photo, quick, manual }
 
 class FoodAddScreen extends ConsumerStatefulWidget {
   final MealType mealType;
@@ -25,10 +24,8 @@ class FoodAddScreen extends ConsumerStatefulWidget {
 
 class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   FoodAddMode _mode = FoodAddMode.search;
-  bool _barcodePaneMounted = false;
   final _filterController = TextEditingController();
   final _quickController = TextEditingController();
-  final _barcodeScannerKey = GlobalKey<FoodBarcodeScannerViewState>();
   bool _loading = false;
   List<FoodEntry> _recent = const [];
   List<ManualFoodTemplate> _manualSaved = const [];
@@ -168,30 +165,6 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     await _processFoodImage(image);
   }
 
-  Future<void> _lookupBarcode(String code) async {
-    setState(() => _loading = true);
-    try {
-      final estimate = await ref.read(openFoodFactsServiceProvider).lookupBarcode(code);
-      if (!mounted) return;
-      if (estimate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.foodBarcodeNotFound)),
-        );
-        return;
-      }
-      _openDetail(estimate, FoodEntrySource.barcode);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.foodBarcodeLookupFailed)),
-      );
-    } finally {
-      _barcodeScannerKey.currentState?.unlock();
-      _barcodeScannerKey.currentState?.ensureRunning();
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -226,16 +199,8 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                 child: _ModeTabs(
                   mode: _mode,
                   onChanged: (m) {
-                    setState(() {
-                      _mode = m;
-                      if (m == FoodAddMode.barcode) _barcodePaneMounted = true;
-                    });
+                    setState(() => _mode = m);
                     if (m == FoodAddMode.manual) _loadManualSaved();
-                    if (m == FoodAddMode.barcode) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _barcodeScannerKey.currentState?.ensureRunning();
-                      });
-                    }
                   },
                 ),
               ),
@@ -243,55 +208,34 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (_barcodePaneMounted)
-                        Offstage(
-                          offstage: _mode != FoodAddMode.barcode,
-                          child: _BarcodePane(
-                            scannerKey: _barcodeScannerKey,
-                            isActive: _mode == FoodAddMode.barcode,
-                            onDetected: _lookupBarcode,
-                          ),
-                        ),
-                      switch (_mode) {
-                        FoodAddMode.search => _SearchPane(
-                            filterController: _filterController,
-                            recent: _recent,
-                            onSelect: _openFromEntry,
-                          ),
-                        FoodAddMode.quick => _QuickAddPane(
-                            controller: _quickController,
-                            onSubmit: _quickAddWithAi,
-                          ),
-                        FoodAddMode.manual => _ManualAddPane(
-                            saved: _manualSaved,
-                            onContinue: (template) async {
-                              await _saveManualTemplate(template);
-                              if (!mounted) return;
-                              _openFromManualTemplate(template);
-                            },
-                            onSelectSaved: _openFromManualTemplate,
-                            onDeleteSaved: (id) async {
-                              await ref.read(localManualFoodStoreProvider).delete(id);
-                              await _loadManualSaved();
-                              await _loadRecent();
-                            },
-                          ),
-                        FoodAddMode.photo => _PhotoPane(
-                            onPickImage: _pickFoodImage,
-                          ),
-                        FoodAddMode.barcode => _barcodePaneMounted
-                            ? const SizedBox.shrink()
-                            : _BarcodePane(
-                                scannerKey: _barcodeScannerKey,
-                                isActive: true,
-                                onDetected: _lookupBarcode,
-                              ),
-                      },
-                    ],
-                  ),
+                  child: switch (_mode) {
+                    FoodAddMode.search => _SearchPane(
+                        filterController: _filterController,
+                        recent: _recent,
+                        onSelect: _openFromEntry,
+                      ),
+                    FoodAddMode.quick => _QuickAddPane(
+                        controller: _quickController,
+                        onSubmit: _quickAddWithAi,
+                      ),
+                    FoodAddMode.manual => _ManualAddPane(
+                        saved: _manualSaved,
+                        onContinue: (template) async {
+                          await _saveManualTemplate(template);
+                          if (!mounted) return;
+                          _openFromManualTemplate(template);
+                        },
+                        onSelectSaved: _openFromManualTemplate,
+                        onDeleteSaved: (id) async {
+                          await ref.read(localManualFoodStoreProvider).delete(id);
+                          await _loadManualSaved();
+                          await _loadRecent();
+                        },
+                      ),
+                    FoodAddMode.photo => _PhotoPane(
+                        onPickImage: _pickFoodImage,
+                      ),
+                  },
                 ),
               ),
             ],
@@ -733,85 +677,6 @@ class _PhotoPane extends StatelessWidget {
   }
 }
 
-class _BarcodePane extends StatelessWidget {
-  final GlobalKey<FoodBarcodeScannerViewState> scannerKey;
-  final Future<void> Function(String code) onDetected;
-  final bool isActive;
-
-  const _BarcodePane({
-    required this.scannerKey,
-    required this.onDetected,
-    this.isActive = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          l10n.foodBarcodeHint,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-        ),
-        const SizedBox(height: 12),
-        Expanded(
-          child: FoodBarcodeScannerView(
-            key: scannerKey,
-            isActive: isActive,
-            onDetected: onDetected,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () => scannerKey.currentState?.scanFromPhoto(),
-                icon: const Icon(Icons.camera_alt),
-                label: Text(l10n.foodBarcodePhotoAction),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.orange,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(48),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => scannerKey.currentState?.scanFromPhoto(
-                  source: ImageSource.gallery,
-                ),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: Text(l10n.foodBarcodeGalleryAction),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.orange,
-                  side: const BorderSide(color: AppColors.orange),
-                  minimumSize: const Size.fromHeight(48),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.foodBarcodePhotoFallback,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.foodPer100gNote,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-      ],
-    );
-  }
-}
-
 class _ModeTabs extends StatelessWidget {
   final FoodAddMode mode;
   final ValueChanged<FoodAddMode> onChanged;
@@ -822,7 +687,6 @@ class _ModeTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final items = [
-      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode),
       (FoodAddMode.search, Icons.search, l10n.foodModeSearch),
       (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto),
       (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick),
@@ -840,7 +704,7 @@ class _ModeTabs extends StatelessWidget {
               onTap: () => onChanged(item.$1),
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                width: 76,
+                width: 84,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: selected ? AppColors.orange.withValues(alpha: 0.15) : AppColors.card,

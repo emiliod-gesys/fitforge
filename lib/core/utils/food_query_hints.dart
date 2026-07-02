@@ -89,7 +89,88 @@ abstract final class FoodQueryHints {
     'plátano': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
     'platano': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
     'banana': (kcal: 89, protein: 1.1, carbs: 23.0, fat: 0.3, fiber: 2.6),
+    // Pasta / fideos cocidos sin salsa (~USDA spaghetti cooked).
+    'espagueti cocido': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'spaghetti cooked': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'espagueti': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'spaguetti': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'spaghetti': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'pasta cocida': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'pasta': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'fideos': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    'macarrones': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
+    // Arroz blanco cocido.
+    'arroz blanco cocido': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'arroz cocido': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'arroz blanco': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'white rice': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
   };
+
+  static const _lowCalorieProduce = [
+    'lechuga',
+    'pepino',
+    'apio',
+    'calabac',
+    'zucchini',
+    'espinaca',
+    'tomate cherry',
+  ];
+
+  static bool _isLowCalorieProduce(String query) {
+    final lower = query.toLowerCase();
+    return _lowCalorieProduce.any(lower.contains);
+  }
+
+  static FoodNutritionEstimate _scaleFromPer100g(FoodNutritionEstimate ai, double targetGrams) {
+    final factor = targetGrams / 100;
+    return FoodNutritionEstimate(
+      name: ai.name,
+      brand: ai.brand,
+      caloriesKcal: (ai.caloriesKcal * factor).round(),
+      proteinG: double.parse((ai.proteinG * factor).toStringAsFixed(1)),
+      carbsG: double.parse((ai.carbsG * factor).toStringAsFixed(1)),
+      fatG: double.parse((ai.fatG * factor).toStringAsFixed(1)),
+      fiberG: double.parse((ai.fiberG * factor).toStringAsFixed(1)),
+      servingDescription: FoodServingParser.formatAmount(targetGrams, ai.amountUnit),
+      ingredients: ai.ingredients,
+      referenceAmount: targetGrams,
+      amountUnit: ai.amountUnit,
+    );
+  }
+
+  /// Corrige cuando la IA devuelve macros por 100 g pero el peso total en reference_amount_g.
+  static FoodNutritionEstimate fixPer100gConfusion(String query, FoodNutritionEstimate ai) {
+    final userGrams = parseGrams(query);
+    if (userGrams == null || userGrams < 30) return ai;
+
+    if (ai.referenceAmount <= 120 && userGrams > ai.referenceAmount * 1.4) {
+      return _scaleFromPer100g(ai, userGrams);
+    }
+
+    if ((ai.referenceAmount - userGrams).abs() <= userGrams * 0.1) {
+      final kcalPerG = ai.caloriesKcal / ai.referenceAmount;
+      if (kcalPerG < 0.9 &&
+          ai.caloriesKcal <= 400 &&
+          !_isLowCalorieProduce(query)) {
+        return _scaleFromPer100g(ai, userGrams);
+      }
+    }
+
+    return ai;
+  }
+
+  /// Aplica anclas por alimento o corrige confusión per-100g antes de otras reglas.
+  static FoodNutritionEstimate correctGramBasedEstimate(String query, FoodNutritionEstimate ai) {
+    final anchored = anchoredEstimateForQuery(query, ai);
+    if (anchored != null) {
+      if (ai.caloriesKcal <= 0) return anchored;
+      final ratio = ai.caloriesKcal / anchored.caloriesKcal;
+      if (ratio < 0.8 || ratio > 1.25) return anchored;
+      if ((ai.referenceAmount - anchored.referenceAmount).abs() > 1) return anchored;
+      return ai;
+    }
+    return fixPer100gConfusion(query, ai);
+  }
 
   static FoodNutritionEstimate? anchoredEstimateForQuery(
     String query,
@@ -124,11 +205,12 @@ abstract final class FoodQueryHints {
 
   /// Ajusta la estimación de IA si el usuario dio calorías explícitas o cantidades claras.
   static FoodNutritionEstimate reconcile(String query, FoodNutritionEstimate ai) {
+    final gramCorrected = correctGramBasedEstimate(query, ai);
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
 
     if (labeledKcal == 0 && eggs == 0) {
-      return anchoredEstimateForQuery(query, ai) ?? ai;
+      return gramCorrected;
     }
 
     var kcal = labeledKcal + eggs * eggKcal;
@@ -155,23 +237,23 @@ abstract final class FoodQueryHints {
       }
     }
 
-    if (kcal <= 0) return ai;
+    if (kcal <= 0) return gramCorrected;
 
     final floor = (kcal * 0.95).round();
-    if (ai.caloriesKcal >= floor) return ai;
+    if (gramCorrected.caloriesKcal >= floor) return gramCorrected;
 
     return FoodNutritionEstimate(
-      name: ai.name,
-      brand: ai.brand,
+      name: gramCorrected.name,
+      brand: gramCorrected.brand,
       caloriesKcal: kcal.round(),
       proteinG: double.parse(protein.toStringAsFixed(1)),
       carbsG: double.parse(carbs.toStringAsFixed(1)),
       fatG: double.parse(fat.toStringAsFixed(1)),
-      fiberG: ai.fiberG,
-      servingDescription: ai.servingDescription,
-      ingredients: ai.ingredients,
-      referenceAmount: ai.referenceAmount > 0 ? ai.referenceAmount : 180,
-      amountUnit: ai.amountUnit,
+      fiberG: gramCorrected.fiberG,
+      servingDescription: gramCorrected.servingDescription,
+      ingredients: gramCorrected.ingredients,
+      referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
+      amountUnit: gramCorrected.amountUnit,
     );
   }
 }

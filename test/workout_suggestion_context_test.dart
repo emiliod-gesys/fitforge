@@ -1,9 +1,89 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/workout_suggestion_context.dart';
+import 'package:fitforge/models/exercise.dart';
+import 'package:fitforge/models/exercise_history.dart';
 import 'package:fitforge/models/exercise_logging.dart';
+import 'package:fitforge/models/profile.dart';
 import 'package:fitforge/models/workout.dart';
 
 void main() {
+  group('WorkoutSuggestionContextBuilder', () {
+    test('includes latest session summary and recent top set', () {
+      final context = WorkoutSuggestionContextBuilder.build(
+        exercises: const [
+          WorkoutExercise(
+            id: 'we-1',
+            exerciseId: 'bench',
+            exerciseName: 'Barbell Bench Press',
+            orderIndex: 0,
+            sets: [
+              WorkoutSet(
+                id: 's1',
+                setNumber: 1,
+                weight: 30,
+                reps: 10,
+                loggingType: ExerciseLoggingType.strength,
+              ),
+            ],
+          ),
+        ],
+        profile: UserProfile(id: 'u1', createdAt: DateTime(2026, 1, 1)),
+        muscleRecovery: const {'chest': 92},
+        catalog: const <Exercise>[],
+        historyByExerciseId: {
+          'bench': [
+            ExerciseSessionHistory(
+              workoutId: 'w1',
+              workoutName: 'Push A',
+              date: DateTime(2026, 6, 28),
+              sets: const [
+                WorkoutSet(
+                  id: 'a',
+                  setNumber: 1,
+                  weight: 25,
+                  reps: 12,
+                  loggingType: ExerciseLoggingType.strength,
+                ),
+                WorkoutSet(
+                  id: 'b',
+                  setNumber: 2,
+                  weight: 30,
+                  reps: 10,
+                  rir: 2,
+                  loggingType: ExerciseLoggingType.strength,
+                ),
+              ],
+            ),
+            ExerciseSessionHistory(
+              workoutId: 'w0',
+              workoutName: 'Push Prev',
+              date: DateTime(2026, 6, 20),
+              sets: const [
+                WorkoutSet(
+                  id: 'c',
+                  setNumber: 1,
+                  weight: 32.5,
+                  reps: 8,
+                  rir: 1,
+                  loggingType: ExerciseLoggingType.strength,
+                ),
+              ],
+            ),
+          ],
+        },
+      ).single;
+
+      expect(context.latestSessionSummary, isNotNull);
+      expect(context.latestSessionSummary!['heaviest_weight_kg'], 30.0);
+      expect(context.latestSessionSummary!['top_reps_at_heaviest'], 10);
+
+      expect(context.recentTopSet, isNotNull);
+      expect(context.recentTopSet!['weight_kg'], 32.5);
+      expect(context.recentTopSet!['reps'], 8);
+      expect(context.recentTopSet!['rir'], 1);
+    });
+  });
+
   group('AiWorkoutSuggestionsMerger', () {
     test('applies AI weight and reps to matching sets', () {
       const exercises = [

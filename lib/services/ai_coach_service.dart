@@ -990,6 +990,9 @@ Reglas generales:
 - Usa el historial (máx. 5 sesiones), objetivo y experiencia del usuario.
 - recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce; reduce series de trabajo.
 - days_since_last: días desde la última sesión de ese ejercicio.
+- latest_session_summary resume la sesión más reciente; recent_top_set resume la mejor serie reciente.
+- Si existe latest_session_summary o recent_top_set, tómalos como ancla principal. No bajes el peso de trabajo frente al historial reciente salvo que recovery_pct < 60, hayan pasado muy pocos días desde la última sesión, el rir reciente haya sido 0-1, o el objetivo pida claramente menos carga.
+- Si el usuario ya hizo por ejemplo 30 kg x 10 recientemente con buena recuperación, no sugieras 20 kg x 10 por defecto. Mantén o micro-progresa.
 - set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo.
 - Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps.
 - Si no hay historial, usa valores conservadores según objetivo y experiencia.
@@ -1047,6 +1050,8 @@ Reglas:
 - serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
 - reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
+- Si el usuario indica gramos (ej. "300 g espagueti cocido"), calories_kcal = (kcal por 100 g) × (gramos / 100). Pasta cocida ~131 kcal/100g, arroz cocido ~130 kcal/100g.
+- NUNCA pongas reference_amount_g=300 con calories_kcal de solo 100 g de comida.
 - Frutas por peso: manzana ~52 kcal/100g, plátano ~89 kcal/100g.
 - Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
 - name: nombre ESPECÍFICO del plato con ingredientes o preparación visibles (máx. ~70 caracteres).

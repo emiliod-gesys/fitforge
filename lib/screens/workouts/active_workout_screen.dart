@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
+import '../../core/utils/workout_exercise_navigation.dart';
 import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/exercise_load.dart';
@@ -1016,26 +1017,31 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               ),
               _ExerciseNavigator(
                 l10n: l10n,
-                currentIndex: visibleExercises.indexOf(exercise).clamp(0, visibleExercises.length - 1),
+                currentIndex: WorkoutExerciseNavigation.visibleIndex(visibleExercises, exercise.id)
+                    .clamp(0, visibleExercises.length - 1),
                 total: visibleExercises.length,
                 onPrevious: () {
-                  final vi = visibleExercises.indexOf(exercise);
-                  if (vi > 0) {
-                    setState(() {
-                      _currentExerciseIndex = workout.exercises.indexOf(visibleExercises[vi - 1]);
-                    });
+                  final previousIndex = WorkoutExerciseNavigation.resolvePreviousWorkoutIndex(
+                    workoutExercises: displayWorkout.exercises,
+                    visibleExercises: visibleExercises,
+                    currentExerciseId: exercise.id,
+                  );
+                  if (previousIndex != null) {
+                    setState(() => _currentExerciseIndex = previousIndex);
                   }
                 },
                 onNext: () {
-                  final vi = visibleExercises.indexOf(exercise);
-                  if (vi >= 0 && vi < visibleExercises.length - 1) {
-                    setState(() {
-                      _currentExerciseIndex = workout.exercises.indexOf(visibleExercises[vi + 1]);
-                    });
+                  final nextIndex = WorkoutExerciseNavigation.resolveNextWorkoutIndex(
+                    workoutExercises: displayWorkout.exercises,
+                    visibleExercises: visibleExercises,
+                    currentExerciseId: exercise.id,
+                  );
+                  if (nextIndex != null) {
+                    setState(() => _currentExerciseIndex = nextIndex);
                   }
                 },
-                hasPrevious: visibleExercises.indexOf(exercise) > 0,
-                hasNext: visibleExercises.indexOf(exercise) < visibleExercises.length - 1,
+                hasPrevious: WorkoutExerciseNavigation.hasPrevious(visibleExercises, exercise.id),
+                hasNext: WorkoutExerciseNavigation.hasNext(visibleExercises, exercise.id),
               ),
             ],
           );

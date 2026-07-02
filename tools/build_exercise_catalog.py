@@ -135,9 +135,9 @@ EXERCISEDB_OVERRIDES: dict[str, str] = {
 # Ilustraciones propias cuando ExerciseDB no tiene un GIF fiel.
 LOCAL_IMAGE_OVERRIDES: dict[str, str] = {
     "ff_legs_hack_squat_machine": "assets/exercises/ff_legs_hack_squat_machine.png",
-    "ff_glutes_barbell_hip_thrust": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
-    "ff_glutes_hip_thrust_machine": "assets/exercises/ff_glutes_barbell_hip_thrust.png",
-    "ff_glutes_smith_machine_hip_thrust": "assets/exercises/ff_glutes_smith_machine_hip_thrust.png",
+    "ff_glutes_barbell_hip_thrust": "assets/exercises/ff_glutes_barbell_hip_thrust.webp",
+    "ff_glutes_hip_thrust_machine": "assets/exercises/ff_glutes_hip_thrust_machine.jpg",
+    "ff_glutes_smith_machine_hip_thrust": "assets/exercises/ff_glutes_smith_machine_hip_thrust.jpg",
     "ff_back_chest_supported_row_machine": "assets/exercises/ff_back_chest_supported_row_machine.png",
     "ff_chest_incline_chest_press_machine": "assets/exercises/ff_chest_incline_chest_press_machine.png",
     "ff_triceps_machine_dip": "assets/exercises/ff_triceps_machine_dip.png",

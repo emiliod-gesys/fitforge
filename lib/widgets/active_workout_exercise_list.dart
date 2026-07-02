@@ -223,7 +223,10 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                       isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: true,
-                      onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
+                      onTap: () {
+                        final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
+                        if (index >= 0) widget.onOpenExercise(index);
+                      },
                       onSwap: () => widget.onSwapExercise(exercise),
                       onRemove: () => widget.onRemoveExercise(exercise),
                     );
@@ -243,7 +246,10 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                       isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: false,
-                      onTap: () => widget.onOpenExercise(widget.workout.exercises.indexOf(exercise)),
+                      onTap: () {
+                        final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
+                        if (index >= 0) widget.onOpenExercise(index);
+                      },
                       onSwap: () => widget.onSwapExercise(exercise),
                       onRemove: () => widget.onRemoveExercise(exercise),
                     );
