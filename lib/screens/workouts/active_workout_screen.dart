@@ -519,6 +519,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     setState(() {
       _restTimerKey++;
       _showRestTimer = true;
+      _restEndsAt = null;
+      _restTotalSeconds = null;
     });
   }
 
