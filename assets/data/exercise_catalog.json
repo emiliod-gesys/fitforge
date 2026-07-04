@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exerciseCount": 230,
+  "exerciseCount": 237,
   "exercises": [
     {
       "id": "ff_abs_ab_crunch_machine",
@@ -2617,6 +2617,61 @@
       "exercisedbId": "ecpY0rH",
       "matchConfidence": "high",
       "matchScore": 0.8531
+    },
+    {
+      "id": "ff_back_lat_pulldown_classic",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón clásico al pecho",
+        "en": "Lat Pulldown Classic"
+      },
+      "descriptions": {
+        "es": "Jalón al pecho sentado con barra larga en polea alta.",
+        "en": "Seated lat pulldown using a long bar on a high pulley."
+      },
+      "aliases": {
+        "es": [
+          "Lat Pulldown Classic",
+          "Jalón al pecho clásico",
+          "Jalón en polea alta"
+        ],
+        "en": [
+          "Classic Lat Pulldown",
+          "Lat Pulldown",
+          "High Cable Lat Pulldown"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_lat_pulldown_classic.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_biceps_concentration_curl",
@@ -11120,6 +11175,336 @@
       "exercisedbId": "ecpY0rH",
       "matchConfidence": "high",
       "matchScore": 0.862
+    },
+    {
+      "id": "ff_back_v_bar_lat_pulldown",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón al pecho con barra V",
+        "en": "V Bar Lat Pulldown"
+      },
+      "descriptions": {
+        "es": "Jalón al pecho sentado usando accesorio de barra V en polea alta.",
+        "en": "Seated lat pulldown performed with a V-bar attachment on a high pulley."
+      },
+      "aliases": {
+        "es": [
+          "V Bar Lat Pulldown",
+          "Jalón con agarre V",
+          "Jalón cerrado con barra V"
+        ],
+        "en": [
+          "V-Bar Lat Pulldown",
+          "Close Grip V-Bar Pulldown",
+          "Parallel Grip Lat Pulldown"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_v_bar_lat_pulldown.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_single_arm_lat_pulldown",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón al pecho a una mano",
+        "en": "Single Arm Lat Pulldown"
+      },
+      "descriptions": {
+        "es": "Jalón al pecho unilateral con manija en polea alta, sentado en banco.",
+        "en": "Unilateral lat pulldown using a single handle on a high cable, seated on a bench."
+      },
+      "aliases": {
+        "es": [
+          "Single Arm Lat Pulldown",
+          "Jalón unilateral al pecho",
+          "Jalón a una mano en polea"
+        ],
+        "en": [
+          "One Arm Lat Pulldown",
+          "Unilateral Lat Pulldown",
+          "Single-Arm Cable Lat Pulldown"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_single_arm_lat_pulldown.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_cable_parallel_grip_lat_pulldown",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back"
+        ]
+      },
+      "names": {
+        "es": "Jalón al pecho con agarre paralelo en polea",
+        "en": "Cable Parallel Grip Lat Pulldown"
+      },
+      "descriptions": {
+        "es": "Jalón al pecho arrodillado con manijas en poleas altas y agarre paralelo.",
+        "en": "Kneeling lat pulldown using high cable handles with a parallel neutral grip."
+      },
+      "aliases": {
+        "es": [
+          "Cable Parallel Grip Lat Pulldown",
+          "Jalón con agarre neutro en polea",
+          "Jalón arrodillado en poleas"
+        ],
+        "en": [
+          "Parallel Grip Cable Lat Pulldown",
+          "Kneeling Dual Cable Lat Pulldown",
+          "Neutral Grip Cable Pulldown"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_cable_parallel_grip_lat_pulldown.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_back_extension_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Glúteos",
+          "Isquios"
+        ],
+        "en": [
+          "Glutes",
+          "Hamstrings"
+        ]
+      },
+      "names": {
+        "es": "Extensión lumbar en máquina",
+        "en": "Back Extension Machine"
+      },
+      "descriptions": {
+        "es": "Extensión de la columna lumbar sentado en máquina con torre de pesas.",
+        "en": "Seated lower-back extension on a selectorized machine."
+      },
+      "aliases": {
+        "es": [
+          "Back Extension Machine",
+          "Hiperextensiones en máquina",
+          "Extensión de espalda en máquina"
+        ],
+        "en": [
+          "Seated Back Extension Machine",
+          "Lever Back Extension",
+          "Lower Back Extension Machine"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_back_extension_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_abs_rotary_torso_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Abdominales",
+        "en": "Abs"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Core"
+        ],
+        "en": [
+          "Core"
+        ]
+      },
+      "names": {
+        "es": "Oblicuos en máquina",
+        "en": "Rotary Torso Machine"
+      },
+      "descriptions": {
+        "es": "Rotación de torso sentado en máquina para trabajar oblicuos.",
+        "en": "Seated torso rotation on a selectorized machine targeting the obliques."
+      },
+      "aliases": {
+        "es": [
+          "Rotary Torso Machine",
+          "Rotación de torso en máquina",
+          "Máquina de oblicuos"
+        ],
+        "en": [
+          "Oblique Machine",
+          "Torso Rotation Machine",
+          "Seated Rotary Torso"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_abs_rotary_torso_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_back_seated_row_machine",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Espalda alta",
+          "Deltoides posterior"
+        ],
+        "en": [
+          "Biceps",
+          "Upper back",
+          "Rear delts"
+        ]
+      },
+      "names": {
+        "es": "Remo sentado en máquina",
+        "en": "Seated Row Machine"
+      },
+      "descriptions": {
+        "es": "Remo horizontal sentado en máquina con pecho apoyado y agarre neutro.",
+        "en": "Seated horizontal row on a machine with chest support and neutral grip handles."
+      },
+      "aliases": {
+        "es": [
+          "Seated Row Machine",
+          "Remo en máquina sentado",
+          "Remo horizontal en máquina"
+        ],
+        "en": [
+          "Lever Seated Row",
+          "Machine Seated Row",
+          "Diverging Seated Row Machine"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_back_seated_row_machine.png",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     }
   ]
 }

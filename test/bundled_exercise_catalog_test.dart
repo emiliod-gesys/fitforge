@@ -14,9 +14,16 @@ void main() {
   test('loads full Spanish catalog from Excel import', () async {
     final exercises = await BundledExerciseCatalog.load(locale: 'es');
 
-    expect(exercises.length, 200);
+    expect(exercises.length, 237);
     expect(exercises.every((e) => e.isBundled), isTrue);
     expect(exercises.any((e) => e.catalogId == 'ff_back_pull_up'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_lat_pulldown_classic'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_v_bar_lat_pulldown'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_single_arm_lat_pulldown'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_cable_parallel_grip_lat_pulldown'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_back_extension_machine'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_abs_rotary_torso_machine'), isTrue);
+    expect(exercises.any((e) => e.catalogId == 'ff_back_seated_row_machine'), isTrue);
     expect(
       exercises.firstWhere((e) => e.catalogId == 'ff_back_pull_up').name,
       'Dominada prona',
