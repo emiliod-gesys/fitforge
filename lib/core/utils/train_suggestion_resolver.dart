@@ -27,14 +27,7 @@ abstract final class TrainSuggestionResolver {
   }) {
     if (routines.isEmpty) return null;
 
-    for (final workout in recentWorkouts) {
-      final routineId = workout.routineId;
-      if (routineId == null) continue;
-      final match = _findRoutine(routines, routineId);
-      if (match != null) {
-        return TrainSuggestion(routine: match, reason: TrainSuggestionReason.lastRoutine);
-      }
-    }
+    final lastRoutineId = _lastRoutineIdFromWorkouts(recentWorkouts);
 
     Routine? bestRoutine;
     var bestScore = -1.0;
@@ -46,19 +39,35 @@ abstract final class TrainSuggestionResolver {
       }
     }
 
-    if (bestRoutine != null && bestScore >= _recoveryThreshold) {
-      return TrainSuggestion(routine: bestRoutine, reason: TrainSuggestionReason.recovery);
-    }
+    if (bestRoutine == null) return null;
 
-    return TrainSuggestion(
-      routine: routines.first,
-      reason: TrainSuggestionReason.defaultPick,
+    final reason = _reasonForPick(
+      routine: bestRoutine,
+      score: bestScore,
+      lastRoutineId: lastRoutineId,
     );
+
+    return TrainSuggestion(routine: bestRoutine, reason: reason);
   }
 
-  static Routine? _findRoutine(List<Routine> routines, String id) {
-    for (final routine in routines) {
-      if (routine.id == id) return routine;
+  static TrainSuggestionReason _reasonForPick({
+    required Routine routine,
+    required double score,
+    required String? lastRoutineId,
+  }) {
+    if (score < _recoveryThreshold) {
+      return TrainSuggestionReason.defaultPick;
+    }
+    if (lastRoutineId != null && routine.id == lastRoutineId) {
+      return TrainSuggestionReason.lastRoutine;
+    }
+    return TrainSuggestionReason.recovery;
+  }
+
+  static String? _lastRoutineIdFromWorkouts(List<Workout> recentWorkouts) {
+    for (final workout in recentWorkouts) {
+      final routineId = workout.routineId;
+      if (routineId != null) return routineId;
     }
     return null;
   }
