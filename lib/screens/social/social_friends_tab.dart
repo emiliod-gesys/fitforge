@@ -46,11 +46,13 @@ class SocialFriendsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final friendshipsAsync = ref.watch(friendshipsProvider);
+    final mutedAsync = ref.watch(mutedFriendsProvider);
     final profileAsync = ref.watch(profileProvider);
     final searchAsync = query.length >= 2 ? ref.watch(userSearchProvider(query)) : null;
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
 
     final friendships = friendshipsAsync.valueOrNull ?? [];
+    final mutedIds = mutedAsync.valueOrNull ?? const <String>{};
     final pending = friendships.where((f) => f.status == FriendshipStatus.pending).toList();
     final friends = friendships.where((f) => f.status == FriendshipStatus.accepted).toList();
     final incomingPending = uid == null
@@ -171,13 +173,57 @@ class SocialFriendsTab extends ConsumerWidget {
               return Column(
                 children: friends.map((f) {
                   final friend = uid != null ? f.friendFor(uid) : FriendUser(id: f.requesterId);
+                  final isMuted = mutedIds.contains(friend.id);
                   return FriendTile(
                     friend: friend,
+                    isMuted: isMuted,
                     onTap: () => context.push('/social/friend/${friend.id}'),
                     onLongPress: () => onConfirmRemove(
                       context,
                       friend.label,
                       () => onRemove(f),
+                    ),
+                    trailing: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+                      onSelected: (value) async {
+                        if (value == 'remove') {
+                          onConfirmRemove(
+                            context,
+                            friend.label,
+                            () => onRemove(f),
+                          );
+                        } else if (value == 'mute' || value == 'unmute') {
+                          await ref.read(socialServiceProvider).setFriendMuted(
+                                friend.id,
+                                value == 'mute',
+                              );
+                          ref.invalidate(mutedFriendsProvider);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  value == 'mute'
+                                      ? l10n.friendMuted(friend.label)
+                                      : l10n.friendUnmuted(friend.label),
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: isMuted ? 'unmute' : 'mute',
+                          child: Text(isMuted ? l10n.unmuteFriend : l10n.muteFriend),
+                        ),
+                        PopupMenuItem(
+                          value: 'remove',
+                          child: Text(
+                            l10n.removeFriendTitle,
+                            style: const TextStyle(color: AppColors.error),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),

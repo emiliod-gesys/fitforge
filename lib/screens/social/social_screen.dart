@@ -99,6 +99,8 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
     await ref.read(socialServiceProvider).removeFriendship(f.id);
     ref.invalidate(friendshipsProvider);
     ref.invalidate(leaderboardProvider);
+    ref.invalidate(friendFavoriteRoutinesProvider);
+    ref.invalidate(mutedFriendsProvider);
   }
 
   int? _userRank(LeaderboardResult? result) {
@@ -116,6 +118,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
     ref.invalidate(leaderboardProvider);
     ref.invalidate(socialNotificationsProvider);
     ref.invalidate(socialUnreadCountProvider);
+    ref.invalidate(mutedFriendsProvider);
     if (_query.length >= 2) ref.invalidate(userSearchProvider(_query));
   }
 

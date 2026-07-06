@@ -18,6 +18,7 @@ import '../../widgets/progress/progress_hero_card.dart';
 import '../../widgets/progress/progress_milestones_carousel.dart';
 import '../../widgets/progress/progress_muscle_filter_bar.dart';
 import '../../widgets/progress/progress_stats_grid.dart';
+import '../../widgets/progress/progress_trainer_card.dart';
 import '../../widgets/progress/progress_volume_chart.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
@@ -64,6 +65,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final weeklyStatsAsync = ref.watch(workoutWeeklyStatsProvider);
     final workoutsAsync = ref.watch(workoutHistoryProvider);
     final bodyAsync = ref.watch(bodyMeasurementsProvider);
+    final myTrainerAsync = ref.watch(myTrainerProvider);
     final unitSystem = ref.watch(unitSystemProvider);
     final catalog = ref.watch(exercisesProvider).valueOrNull ?? [];
 
@@ -75,6 +77,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       ref.invalidate(workoutWeeklyStatsProvider);
       ref.invalidate(workoutHistoryProvider);
       ref.invalidate(bodyMeasurementsProvider);
+      ref.invalidate(myTrainerProvider);
     }
 
     return Scaffold(
@@ -96,6 +99,19 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 );
               },
               loading: () => const _HeroSkeleton(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            myTrainerAsync.when(
+              data: (trainerView) {
+                if (trainerView == null) return const SizedBox.shrink();
+                return Column(
+                  children: [
+                    ProgressTrainerCard(trainerView: trainerView, l10n: l10n),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
             weeklyStatsAsync.when(

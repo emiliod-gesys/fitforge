@@ -8,9 +8,9 @@ class ActivityLogService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
 
-  Future<List<ManualActivityEntry>> getEntriesForDay(DateTime day) async {
-    final userId = SupabaseService.currentUser?.id;
-    if (userId == null) return [];
+  Future<List<ManualActivityEntry>> getEntriesForDay(DateTime day, {String? userId}) async {
+    final uid = userId ?? SupabaseService.currentUser?.id;
+    if (uid == null) return [];
 
     final start = DateTime(day.year, day.month, day.day);
     final end = start.add(const Duration(days: 1));
@@ -18,7 +18,7 @@ class ActivityLogService {
     final data = await _client
         .from('manual_activity_entries')
         .select()
-        .eq('user_id', userId)
+        .eq('user_id', uid)
         .gte('logged_at', start.toUtc().toIso8601String())
         .lt('logged_at', end.toUtc().toIso8601String())
         .order('logged_at', ascending: true);

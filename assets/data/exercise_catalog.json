@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exerciseCount": 237,
+  "exerciseCount": 243,
   "exercises": [
     {
       "id": "ff_abs_ab_crunch_machine",
@@ -8141,8 +8141,8 @@
       "weightOptional": false,
       "cardioPreset": null,
       "category": {
-        "es": "Bíceps",
-        "en": "Biceps"
+        "es": "Antebrazos",
+        "en": "Forearms"
       },
       "equipment": {
         "es": "Polea",
@@ -9730,7 +9730,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_smith_machine_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_smith_machine_bench_press.png",
       "exercisedbId": "trqKQv2",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -11503,6 +11503,317 @@
       },
       "imageUrl": "assets/exercises/ff_back_seated_row_machine.png",
       "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_dumbbell_wrist_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps"
+        ],
+        "en": [
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Curl de muñeca con mancuernas",
+        "en": "Dumbbell Wrist Curl"
+      },
+      "descriptions": {
+        "es": "Sentado con antebrazos apoyados en los muslos, flexiona las muñecas con mancuernas en agarre supino.",
+        "en": "Seated with forearms resting on the thighs, curl the wrists upward using a palms-up dumbbell grip."
+      },
+      "aliases": {
+        "es": [
+          "Curl de muñecas sentado",
+          "Flexión de muñeca con mancuernas"
+        ],
+        "en": [
+          "Seated dumbbell wrist curl",
+          "Palms-up wrist curl"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_dumbbell_wrist_curl.png",
+      "exercisedbId": "2dImyQ8",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_dumbbell_reverse_wrist_curl",
+      "loggingType": "strength",
+      "loadMode": "dual_load",
+      "perArmWeight": true,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Mancuernas",
+        "en": "Dumbbell"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Braquial"
+        ],
+        "en": [
+          "Brachialis"
+        ]
+      },
+      "names": {
+        "es": "Curl inverso de muñeca con mancuernas",
+        "en": "Dumbbell Reverse Wrist Curl"
+      },
+      "descriptions": {
+        "es": "Sentado con antebrazos apoyados, extiende las muñecas con mancuernas en agarre prono para trabajar extensores del antebrazo.",
+        "en": "Seated with forearms supported, extend the wrists using a palms-down dumbbell grip to target the forearm extensors."
+      },
+      "aliases": {
+        "es": [
+          "Extensión de muñeca con mancuernas",
+          "Curl de muñeca prono"
+        ],
+        "en": [
+          "Reverse wrist curl",
+          "Palms-down wrist curl"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_dumbbell_reverse_wrist_curl.png",
+      "exercisedbId": "BLCvwr2",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_barbell_wrist_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Braquial"
+        ],
+        "en": [
+          "Biceps",
+          "Brachialis"
+        ]
+      },
+      "names": {
+        "es": "Curl de muñeca con barra",
+        "en": "Barbell Wrist Curl"
+      },
+      "descriptions": {
+        "es": "Sentado con antebrazos apoyados en un banco, flexiona las muñecas con barra en agarre supino.",
+        "en": "Seated with forearms resting on a bench, curl the wrists upward using a palms-up barbell grip."
+      },
+      "aliases": {
+        "es": [
+          "Flexión de muñeca con barra",
+          "Curl de muñecas con barra"
+        ],
+        "en": [
+          "Barbell palms-up wrist curl",
+          "Seated barbell wrist curl"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_barbell_wrist_curl.gif",
+      "exercisedbId": "82LxxkW",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_barbell_reverse_wrist_curl",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Barra",
+        "en": "Barbell"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Braquial"
+        ],
+        "en": [
+          "Brachialis"
+        ]
+      },
+      "names": {
+        "es": "Curl inverso de muñeca con barra",
+        "en": "Barbell Reverse Wrist Curl"
+      },
+      "descriptions": {
+        "es": "Sentado con antebrazos apoyados, extiende las muñecas con barra en agarre prono.",
+        "en": "Seated with forearms supported, extend the wrists using a palms-down barbell grip."
+      },
+      "aliases": {
+        "es": [
+          "Extensión de muñeca con barra",
+          "Curl de muñeca prono con barra"
+        ],
+        "en": [
+          "Barbell reverse wrist curl",
+          "Palms-down barbell wrist curl"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_barbell_reverse_wrist_curl.png",
+      "exercisedbId": "LsZkfU6",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_cable_wrist_curl",
+      "loggingType": "strength",
+      "loadMode": "machine_stack",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Polea",
+        "en": "Cable"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps"
+        ],
+        "en": [
+          "Biceps"
+        ]
+      },
+      "names": {
+        "es": "Curl de muñeca en polea",
+        "en": "Cable Wrist Curl"
+      },
+      "descriptions": {
+        "es": "De pie o arrodillado frente a polea baja, flexiona las muñecas con barra o agarre en agarre supino.",
+        "en": "Standing or kneeling at a low pulley, curl the wrists upward using a palms-up bar or handle attachment."
+      },
+      "aliases": {
+        "es": [
+          "Flexión de muñeca en cable",
+          "Curl de muñecas en polea baja"
+        ],
+        "en": [
+          "Low cable wrist curl",
+          "Cable palms-up wrist curl"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_cable_wrist_curl.png",
+      "exercisedbId": "LrV4s90",
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_forearms_wrist_roller",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "equipment": {
+        "es": "Máquina",
+        "en": "Machine"
+      },
+      "primaryMuscle": {
+        "es": "Antebrazos",
+        "en": "Forearms"
+      },
+      "secondaryMuscles": {
+        "es": [
+          "Bíceps",
+          "Tríceps"
+        ],
+        "en": [
+          "Biceps",
+          "Triceps"
+        ]
+      },
+      "names": {
+        "es": "Rueda de antebrazo",
+        "en": "Wrist Roller"
+      },
+      "descriptions": {
+        "es": "Enrolla una cuerda con peso atado hacia arriba y luego baja de forma controlada para fortalecer flexores y extensores del antebrazo.",
+        "en": "Roll a weighted rope upward and then lower it under control to strengthen the forearm flexors and extensors."
+      },
+      "aliases": {
+        "es": [
+          "Wrist roller",
+          "Rodillo de muñeca",
+          "Enrollador de antebrazo"
+        ],
+        "en": [
+          "Forearm roller",
+          "Wrist roller exercise"
+        ]
+      },
+      "imageUrl": "assets/exercises/ff_forearms_wrist_roller.png",
+      "exercisedbId": "bd5b860",
       "matchConfidence": "curated",
       "matchScore": null
     }

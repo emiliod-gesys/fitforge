@@ -113,6 +113,14 @@ extension ProfileL10n on AppLocalizations {
     };
   }
 
+  String activityLevelDescription(DailyActivityLevel level) {
+    return switch (level) {
+      DailyActivityLevel.sedentary => activitySedentaryDescription,
+      DailyActivityLevel.moderate => activityModerateDescription,
+      DailyActivityLevel.high => activityHighDescription,
+    };
+  }
+
   List<DailyActivityLevel> get activityLevels => DailyActivityLevel.values;
 
   String timeAgo(DateTime dt) {

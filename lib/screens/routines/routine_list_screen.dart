@@ -5,9 +5,11 @@ import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../services/routine_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
 
 abstract final class RoutineListActions {
@@ -194,6 +196,11 @@ class RoutinesTab extends ConsumerWidget {
             ),
           );
         }
+        final sorted = [...routines]..sort((a, b) {
+            if (a.isFavorite != b.isFavorite) return a.isFavorite ? -1 : 1;
+            return b.updatedAt.compareTo(a.updatedAt);
+          });
+        final favoriteCount = sorted.where((r) => r.isFavorite).length;
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
           children: [
@@ -208,7 +215,10 @@ class RoutinesTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ...routines.map((routine) => _RoutineCard(routine: routine)),
+            ...sorted.map((routine) => _RoutineCard(
+                  routine: routine,
+                  favoriteCount: favoriteCount,
+                )),
           ],
         );
       },
@@ -220,8 +230,41 @@ class RoutinesTab extends ConsumerWidget {
 
 class _RoutineCard extends ConsumerWidget {
   final Routine routine;
+  final int favoriteCount;
 
-  const _RoutineCard({required this.routine});
+  const _RoutineCard({
+    required this.routine,
+    required this.favoriteCount,
+  });
+
+  Future<void> _toggleFavorite(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final next = !routine.isFavorite;
+    if (next && favoriteCount >= RoutineService.maxFavoriteRoutines) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.routineFavoritesMax(RoutineService.maxFavoriteRoutines))),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(routineServiceProvider).setRoutineFavorite(routine.id, next);
+      ref.invalidate(routinesProvider);
+      ref.invalidate(friendFavoriteRoutinesProvider);
+    } catch (e) {
+      if (context.mounted) {
+        final message = '$e'.contains('Maximum of 5')
+            ? l10n.routineFavoritesMax(RoutineService.maxFavoriteRoutines)
+            : l10n.saveFailed('$e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -247,6 +290,14 @@ class _RoutineCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              icon: Icon(
+                routine.isFavorite ? Icons.star : Icons.star_border,
+                color: routine.isFavorite ? AppColors.orange : AppColors.textMuted,
+              ),
+              tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
+              onPressed: () => _toggleFavorite(context, ref),
+            ),
+            IconButton(
               icon: const Icon(Icons.play_arrow),
               tooltip: l10n.startWorkout,
               color: AppColors.orange,
@@ -255,14 +306,18 @@ class _RoutineCard extends ConsumerWidget {
             PopupMenuButton(
               itemBuilder: (_) => [
                 PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                PopupMenuItem(value: 'share', child: Text(l10n.share)),
                 PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
               ],
               onSelected: (value) async {
                 if (value == 'edit') {
                   context.push('/routines/${routine.id}/edit');
+                } else if (value == 'share') {
+                  await RoutineShareFriendSheet.show(context, routine);
                 } else if (value == 'delete') {
                   await ref.read(routineServiceProvider).deleteRoutine(routine.id);
                   ref.invalidate(routinesProvider);
+                  ref.invalidate(friendFavoriteRoutinesProvider);
                 }
               },
             ),

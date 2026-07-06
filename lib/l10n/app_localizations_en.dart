@@ -97,6 +97,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSocial => 'Social';
 
   @override
+  String get navStudents => 'Students';
+
+  @override
   String get navProfile => 'Profile';
 
   @override
@@ -149,6 +152,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingConfig => 'Training settings';
 
   @override
+  String get personalTrainerMode => 'Personal trainer mode';
+
+  @override
+  String get personalTrainerModeSubtitle =>
+      'Enables the Students tab to monitor clients';
+
+  @override
+  String get personalTrainerModeEnabled =>
+      'Trainer mode enabled. Students tab is now available.';
+
+  @override
+  String get personalTrainerModeDisabled => 'Trainer mode disabled.';
+
+  @override
+  String personalTrainerModeFailed(String message) {
+    return 'Could not change mode: $message';
+  }
+
+  @override
+  String get trainerModeRequired =>
+      'Enable personal trainer mode in Profile to use this section.';
+
+  @override
+  String get studentsScreenHint =>
+      'Add friends as students to view their workouts and muscle recovery.';
+
+  @override
+  String studentsCount(int count) {
+    return 'Students ($count)';
+  }
+
+  @override
+  String get studentsEmpty =>
+      'No students yet. Add friends from the list below.';
+
+  @override
+  String get addStudentFromFriends => 'Add from friends';
+
+  @override
+  String get addStudentEmpty =>
+      'No friends available. They must be accepted friends first.';
+
+  @override
+  String get addStudentAction => 'Add student';
+
+  @override
+  String get studentAdded => 'Student added';
+
+  @override
+  String addStudentFailed(String message) {
+    return 'Could not add: $message';
+  }
+
+  @override
+  String get removeStudentTitle => 'Remove student';
+
+  @override
+  String removeStudentMessage(String name) {
+    return 'Remove $name from your students?';
+  }
+
+  @override
+  String get studentDetailTitle => 'Student';
+
+  @override
+  String get studentNotFound => 'Student not found';
+
+  @override
+  String get studentRecoveryTitle => 'Muscle recovery';
+
+  @override
+  String get studentNutritionTitle => 'Today\'s nutrition';
+
+  @override
+  String studentNutritionTitleDate(String date) {
+    return 'Nutrition for $date';
+  }
+
+  @override
+  String get studentWorkoutsTitle => 'Recent workouts';
+
+  @override
+  String get studentWorkoutsEmpty =>
+      'This student has not logged any completed workouts yet.';
+
+  @override
+  String get studentRoutinesTitle => 'Student routines';
+
+  @override
+  String get studentRoutinesEmpty => 'This student has no routines yet.';
+
+  @override
+  String get studentRoutineNew => 'New routine for student';
+
+  @override
+  String get studentRoutineEdit => 'Edit student routine';
+
+  @override
+  String get deleteRoutineTitle => 'Delete routine';
+
+  @override
+  String deleteRoutineMessage(String name) {
+    return 'Delete routine \"$name\"?';
+  }
+
+  @override
   String get goal => 'Goal';
 
   @override
@@ -172,6 +281,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activityHigh => 'High';
+
+  @override
+  String get activitySedentaryDescription => 'Under 4,000 daily steps';
+
+  @override
+  String get activityModerateDescription => '4,000–10,000 daily steps';
+
+  @override
+  String get activityHighDescription => 'Over 10,000 daily steps';
+
+  @override
+  String get activityLevelFootnote =>
+      'These are approximate activity levels to help guide your selection.';
 
   @override
   String get restTimerAlert => 'Rest timer alert';
@@ -299,6 +421,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get progressTitle => 'Progress';
+
+  @override
+  String get progressMyTrainerLabel => 'Your personal trainer';
 
   @override
   String progressTotalXp(int total) {
@@ -1303,6 +1428,69 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get routineFavorite => 'Mark as favorite';
+
+  @override
+  String get routineUnfavorite => 'Remove from favorites';
+
+  @override
+  String routineFavoritesMax(int max) {
+    return 'You can only have $max favorite routines on your profile';
+  }
+
+  @override
+  String get friendFavoriteRoutines => 'Favorite routines';
+
+  @override
+  String get noFavoriteRoutinesFriend =>
+      'This user has no public favorite routines';
+
+  @override
+  String get previewRoutine => 'Preview routine';
+
+  @override
+  String get saveRoutine => 'Save routine';
+
+  @override
+  String get shareRoutine => 'Share routine';
+
+  @override
+  String get shareRoutineTitle => 'Send routine to a friend';
+
+  @override
+  String get shareRoutineSelectFriend =>
+      'Select a friend to send this routine to';
+
+  @override
+  String shareRoutineSent(String name) {
+    return 'Routine sent to $name';
+  }
+
+  @override
+  String shareRoutineFailed(String message) {
+    return 'Could not share: $message';
+  }
+
+  @override
+  String get shareRoutineNoFriends => 'Add friends to share routines';
+
+  @override
+  String get routineShareAccepted => 'Routine saved to your library';
+
+  @override
+  String get routineShareDeclined => 'Routine share declined';
+
+  @override
+  String get routineShareUnavailable =>
+      'This share request is no longer available';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
   String saveFailed(String message) {
     return 'Could not save: $message';
   }
@@ -1412,6 +1600,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String removeFriendBody(String name) {
     return 'Remove $name from your list?';
+  }
+
+  @override
+  String get muteFriend => 'Mute';
+
+  @override
+  String get unmuteFriend => 'Unmute';
+
+  @override
+  String get friendMutedLabel => 'Muted';
+
+  @override
+  String friendMuted(String name) {
+    return '$name muted';
+  }
+
+  @override
+  String friendUnmuted(String name) {
+    return '$name unmuted';
   }
 
   @override
@@ -1966,6 +2173,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodCaloriesAvailable => 'Cal available';
 
   @override
+  String get foodCaloriesSurplus => 'Cal over';
+
+  @override
   String foodBudgetUsed(int percent) {
     return '$percent% used';
   }
@@ -2254,5 +2464,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String foodMealGoalPlaceholder(int eaten, int goal) {
     return '$eaten / $goal Cal';
+  }
+
+  @override
+  String get routineExerciseSets => 'Sets';
+
+  @override
+  String routineExerciseWeight(String unit) {
+    return 'Weight ($unit)';
+  }
+
+  @override
+  String get routineAddSet => 'Add set';
+
+  @override
+  String routineSetNumber(int number) {
+    return 'Set $number';
   }
 }

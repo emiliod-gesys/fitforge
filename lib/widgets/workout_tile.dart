@@ -12,6 +12,7 @@ class WorkoutTile extends StatelessWidget {
   final bool showTopVolumeBadge;
   final bool enableSwipeRepeat;
   final VoidCallback? onRepeat;
+  final VoidCallback? onTap;
 
   const WorkoutTile({
     super.key,
@@ -21,6 +22,7 @@ class WorkoutTile extends StatelessWidget {
     this.showTopVolumeBadge = false,
     this.enableSwipeRepeat = false,
     this.onRepeat,
+    this.onTap,
   });
 
   @override
@@ -32,6 +34,7 @@ class WorkoutTile extends StatelessWidget {
     final tile = Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
         leading: CircleAvatar(
           backgroundColor: AppColors.orange.withValues(alpha: 0.15),
@@ -100,7 +103,9 @@ class WorkoutTile extends StatelessWidget {
                 backgroundColor: AppColors.orange.withValues(alpha: 0.2),
                 labelStyle: const TextStyle(color: AppColors.orange),
               )
-            : null,
+            : onTap != null
+                ? const Icon(Icons.chevron_right, color: AppColors.textMuted)
+                : null,
         isThreeLine: muscleGroups.isNotEmpty,
       ),
     );

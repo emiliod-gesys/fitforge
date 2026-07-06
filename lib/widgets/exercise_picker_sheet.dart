@@ -224,10 +224,17 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                         ],
                       ),
                       subtitle: Text(
-                        [
-                          ex.category,
-                          if (ex.muscles.isNotEmpty) ex.muscles.first,
-                        ].join(' · '),
+                        () {
+                          final primaryGroup = MuscleInference.primaryRecoveryGroup(
+                            category: ex.category,
+                            muscles: ex.muscles,
+                          );
+                          final parts = <String>[
+                            if (primaryGroup != null) primaryGroup else ex.category,
+                            if (ex.muscles.isNotEmpty) ex.muscles.first,
+                          ];
+                          return parts.join(' · ');
+                        }(),
                       ),
                       trailing: inRoutine
                           ? const Icon(Icons.check_circle, color: AppColors.orange)

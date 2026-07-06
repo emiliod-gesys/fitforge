@@ -20,12 +20,14 @@ class MuscleRecoveryMap extends ConsumerStatefulWidget {
   final Map<String, double> recovery;
   final bool compact;
   final bool isLoading;
+  final Gender? gender;
 
   const MuscleRecoveryMap({
     super.key,
     required this.recovery,
     this.compact = false,
     this.isLoading = false,
+    this.gender,
   });
 
   @override
@@ -43,7 +45,7 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
   }
 
   Gender? _genderFromProfile() {
-    return ref.watch(profileProvider).value?.gender;
+    return widget.gender ?? ref.watch(profileProvider).value?.gender;
   }
 
   List<MapEntry<String, double>> _sortedEntries() {

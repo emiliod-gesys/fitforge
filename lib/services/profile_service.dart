@@ -118,11 +118,14 @@ class ProfileService {
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshots() async {
     final user = _client.auth.currentUser;
     if (user == null) return {};
+    return getBodyMetricSnapshotsForUser(user.id);
+  }
 
+  Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshotsForUser(String userId) async {
     final data = await _client
         .from('body_measurements')
         .select()
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('measured_at', ascending: false)
         .limit(500);
 
@@ -135,7 +138,7 @@ class ProfileService {
     final profileRow = await _client
         .from('profiles')
         .select('body_weight')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle();
     final profileWeight = (profileRow?['body_weight'] as num?)?.toDouble();
 

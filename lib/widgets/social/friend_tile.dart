@@ -8,6 +8,7 @@ import '../tappable_badge.dart';
 
 class FriendTile extends StatelessWidget {
   final FriendUser friend;
+  final bool isMuted;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Widget? trailing;
@@ -15,6 +16,7 @@ class FriendTile extends StatelessWidget {
   const FriendTile({
     super.key,
     required this.friend,
+    this.isMuted = false,
     this.onTap,
     this.onLongPress,
     this.trailing,
@@ -66,6 +68,17 @@ class FriendTile extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
+                    if (isMuted) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.friendMutedLabel,
+                        style: TextStyle(
+                          color: AppColors.textMuted.withValues(alpha: 0.85),
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

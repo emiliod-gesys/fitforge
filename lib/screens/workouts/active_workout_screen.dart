@@ -67,6 +67,23 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, List<WorkoutSet>> _insertedSets = {};
   final Set<String> _savingSetIds = {};
   final Map<String, bool> _perArmOverrides = {};
+  bool _perArmSeeded = false;
+
+  Future<void> _seedPerArmFromRoutine(Workout workout) async {
+    final routineId = workout.routineId;
+    if (routineId == null) return;
+
+    final routine = await ref.read(routineServiceProvider).getRoutineById(routineId);
+    if (!mounted || routine == null) return;
+
+    setState(() {
+      for (final ex in routine.exercises) {
+        if (ex.perArmWeight != null) {
+          _perArmOverrides[ex.exerciseId] = ex.perArmWeight!;
+        }
+      }
+    });
+  }
 
   Workout _mergedWorkout(Workout workout) {
     if (_setOverrides.isEmpty && _insertedSets.isEmpty) return workout;
@@ -717,6 +734,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     final activeAsync = ref.watch(activeWorkoutProvider);
     final unitSystem = ref.watch(unitSystemProvider);
     final exerciseCatalog = ref.watch(exercisesProvider).valueOrNull ?? [];
+
+    final workoutForSeed = activeAsync.valueOrNull;
+    if (workoutForSeed != null && !_perArmSeeded && workoutForSeed.routineId != null) {
+      _perArmSeeded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_seedPerArmFromRoutine(workoutForSeed));
+      });
+    }
 
     return PopScope(
       canPop: false,

@@ -16,16 +16,27 @@ class WorkoutService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
 
-  Future<List<Workout>> getWorkoutSummaries({int limit = 20}) async {
+  Future<List<Workout>> getWorkoutSummaries({int limit = 20}) {
     final userId = SupabaseService.currentUser?.id;
-    if (userId == null) return [];
+    if (userId == null) return Future.value([]);
+    return getWorkoutSummariesForUser(userId, limit: limit);
+  }
 
-    final workoutsData = await _client
+  Future<List<Workout>> getWorkoutSummariesForUser(
+    String userId, {
+    int limit = 20,
+    bool completedOnly = false,
+  }) async {
+    var query = _client
         .from('workouts')
         .select('*, routines(name)')
-        .eq('user_id', userId)
-        .order('started_at', ascending: false)
-        .limit(limit);
+        .eq('user_id', userId);
+
+    if (completedOnly) {
+      query = query.not('completed_at', 'is', null);
+    }
+
+    final workoutsData = await query.order('started_at', ascending: false).limit(limit);
 
     return (workoutsData as List).map((w) {
       final map = Map<String, dynamic>.from(w as Map);
@@ -37,9 +48,9 @@ class WorkoutService {
   }
 
   /// Entrenos completados en un día (sin ejercicios/series — para presupuesto calórico de Comida).
-  Future<List<Workout>> getCompletedWorkoutsOnDay(DateTime day) async {
-    final userId = SupabaseService.currentUser?.id;
-    if (userId == null) return [];
+  Future<List<Workout>> getCompletedWorkoutsOnDay(DateTime day, {String? userId}) async {
+    final uid = userId ?? SupabaseService.currentUser?.id;
+    if (uid == null) return [];
 
     final start = DateTime(day.year, day.month, day.day);
     final end = start.add(const Duration(days: 1));
@@ -49,7 +60,7 @@ class WorkoutService {
         .select(
           'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes',
         )
-        .eq('user_id', userId)
+        .eq('user_id', uid)
         .gte('completed_at', start.toUtc().toIso8601String())
         .lt('completed_at', end.toUtc().toIso8601String())
         .order('completed_at', ascending: true);
@@ -166,10 +177,13 @@ class WorkoutService {
   }
 
   /// Solo entrenos completados recientes, con consultas en lote (para recuperación muscular).
-  Future<List<Workout>> getWorkoutsForMuscleRecovery({int limit = 10}) async {
+  Future<List<Workout>> getWorkoutsForMuscleRecovery({int limit = 10}) {
     final userId = SupabaseService.currentUser?.id;
-    if (userId == null) return [];
+    if (userId == null) return Future.value([]);
+    return getWorkoutsForMuscleRecoveryForUser(userId, limit: limit);
+  }
 
+  Future<List<Workout>> getWorkoutsForMuscleRecoveryForUser(String userId, {int limit = 10}) async {
     final workoutsData = await _client
         .from('workouts')
         .select(
@@ -242,6 +256,24 @@ class WorkoutService {
       final id = map['id'] as String;
       return Workout.fromJson(map, exercises: exercisesByWorkout[id] ?? const []);
     }).toList();
+  }
+
+  Future<Workout?> getCompletedWorkoutById(String workoutId) async {
+    final rows = await _client
+        .from('workouts')
+        .select('*, routines(name)')
+        .eq('id', workoutId)
+        .not('completed_at', 'is', null)
+        .maybeSingle();
+
+    if (rows == null) return null;
+
+    final map = Map<String, dynamic>.from(rows);
+    if (map['routines'] != null) {
+      map['routine_name'] = (map['routines'] as Map)['name'];
+    }
+    final exercises = await _getWorkoutExercises(workoutId);
+    return Workout.fromJson(map, exercises: exercises);
   }
 
   Future<List<DateTime>> getCompletedWorkoutTimestamps() async {

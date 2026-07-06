@@ -37,6 +37,18 @@ enum Gender {
   }
 }
 
+enum UserType {
+  athlete,
+  trainer;
+
+  static UserType fromCode(String? value) {
+    if (value == 'trainer') return UserType.trainer;
+    return UserType.athlete;
+  }
+
+  String get code => name;
+}
+
 /// Nivel de actividad diaria fuera del entrenamiento (factor TDEE).
 enum DailyActivityLevel {
   sedentary,
@@ -79,8 +91,11 @@ class UserProfile {
   final DailyActivityLevel activityLevel;
   final AiProvider aiProvider;
   final bool hasAiKey;
+  final UserType userType;
   final int totalXp;
   final DateTime createdAt;
+
+  bool get isTrainer => userType == UserType.trainer;
 
   const UserProfile({
     required this.id,
@@ -97,6 +112,7 @@ class UserProfile {
     this.activityLevel = DailyActivityLevel.moderate,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
+    this.userType = UserType.athlete,
     this.totalXp = 0,
     required this.createdAt,
   });
@@ -117,6 +133,7 @@ class UserProfile {
       activityLevel: DailyActivityLevel.fromCode(json['activity_level'] as String?),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
+      userType: UserType.fromCode(json['user_type'] as String?),
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -148,6 +165,7 @@ class UserProfile {
         'experience_level': experienceLevel,
         'activity_level': activityLevel.code,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
+        'user_type': userType.code,
       };
 }
 

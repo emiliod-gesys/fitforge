@@ -42,6 +42,37 @@ class SocialService {
     await _client.from('friendships').delete().eq('id', friendshipId);
   }
 
+  Future<Set<String>> getMutedFriendIds() async {
+    final uid = _userId;
+    if (uid == null) return {};
+
+    final data = await _client
+        .from('friend_mutes')
+        .select('muted_user_id')
+        .eq('user_id', uid);
+
+    return (data as List)
+        .map((row) => (row as Map)['muted_user_id'] as String)
+        .toSet();
+  }
+
+  Future<void> setFriendMuted(String friendId, bool muted) async {
+    final uid = _userId;
+    if (uid == null) return;
+
+    if (muted) {
+      await _client.from('friend_mutes').upsert({
+        'user_id': uid,
+        'muted_user_id': friendId,
+      });
+    } else {
+      await _client.from('friend_mutes').delete().match({
+        'user_id': uid,
+        'muted_user_id': friendId,
+      });
+    }
+  }
+
   Future<List<Friendship>> getFriendships() async {
     final uid = _userId;
     if (uid == null) return [];
@@ -217,6 +248,8 @@ class SocialService {
           (n) => SocialNotification(
             id: n.id,
             actorId: n.actorId,
+            type: n.type,
+            referenceId: n.referenceId,
             message: n.message,
             createdAt: n.createdAt,
             readAt: n.readAt,

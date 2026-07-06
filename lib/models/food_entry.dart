@@ -282,6 +282,7 @@ class DailyNutritionSummary {
   final int calorieBudget;
   final int caloriesEaten;
   final int caloriesRemaining;
+  final int caloriesSurplus;
   final MacroTargets targets;
   final MacroTotals eaten;
   final Map<MealType, List<FoodEntry>> entriesByMeal;
@@ -296,6 +297,7 @@ class DailyNutritionSummary {
     required this.calorieBudget,
     required this.caloriesEaten,
     required this.caloriesRemaining,
+    this.caloriesSurplus = 0,
     required this.targets,
     required this.eaten,
     required this.entriesByMeal,
@@ -304,6 +306,8 @@ class DailyNutritionSummary {
   });
 
   int get totalCaloriesBurned => workoutCaloriesBurned + manualActivityCaloriesBurned;
+
+  bool get isCaloricSurplus => caloriesSurplus > 0;
 
   MacroTotals eatenForMeal(MealType meal) => MacroTotals.fromEntries(entriesByMeal[meal] ?? const []);
 

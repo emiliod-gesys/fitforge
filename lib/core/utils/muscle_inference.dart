@@ -179,22 +179,47 @@ abstract final class MuscleInference {
     return exercise.matchesName(exerciseName);
   }
 
+  /// Grupo principal de recuperación según categoría del catálogo o músculo primario.
+  static String? primaryRecoveryGroup({
+    required String category,
+    required List<String> muscles,
+  }) {
+    final fromCategory = _mapCategoryToRecoveryGroup(category);
+    if (fromCategory != null) return fromCategory;
+
+    if (muscles.isNotEmpty) {
+      final fromMuscle = _mapToRecoveryGroup(muscles.first);
+      if (fromMuscle != null) return fromMuscle;
+    }
+
+    return null;
+  }
+
   /// Mapea músculos del catálogo a grupos con peso (primario vs secundario).
   static Map<String, double> impactsFromExerciseMuscles(
     List<String> muscles,
     String category,
   ) {
     final impacts = <String, double>{};
-    if (muscles.isEmpty) {
-      final fromCategory = _mapCategoryToRecoveryGroup(category);
-      if (fromCategory != null) impacts[fromCategory] = 1.0;
-      return impacts;
+    final primaryFromCategory = _mapCategoryToRecoveryGroup(category);
+
+    if (primaryFromCategory != null) {
+      impacts[primaryFromCategory] = 1.0;
+    } else if (muscles.isNotEmpty) {
+      final primaryFromMuscle = _mapToRecoveryGroup(muscles.first);
+      if (primaryFromMuscle != null) {
+        impacts[primaryFromMuscle] = 1.0;
+      }
     }
 
-    for (var i = 0; i < muscles.length; i++) {
+    final startIndex = primaryFromCategory == null && muscles.isNotEmpty ? 1 : 0;
+    for (var i = startIndex; i < muscles.length; i++) {
       final group = _mapToRecoveryGroup(muscles[i]);
       if (group == null) continue;
-      final weight = i == 0 ? 1.0 : secondaryImpactWeight;
+
+      final isPrimarySlot = i == 0 && primaryFromCategory == null;
+      final weight = isPrimarySlot ? 1.0 : secondaryImpactWeight;
+      if ((impacts[group] ?? 0) >= 1.0 && weight < 1.0) continue;
       impacts[group] = _maxImpact(impacts[group], weight);
     }
 
@@ -243,8 +268,28 @@ abstract final class MuscleInference {
       return _isDedicatedAbsExerciseName(exercise.name);
     }
 
-    final fromMeta = fromExerciseMuscles(exercise.muscles, exercise.category);
-    if (fromMeta.contains(muscleGroup)) return true;
+    if (muscleGroup == 'Antebrazos') {
+      if (primaryRecoveryGroup(
+            category: exercise.category,
+            muscles: exercise.muscles,
+          ) ==
+          'Antebrazos') {
+        return true;
+      }
+
+      for (final muscle in exercise.muscles) {
+        if (_mapToRecoveryGroup(muscle) == 'Antebrazos') return true;
+      }
+
+      return _isForearmExercise(_normalize(exercise.name));
+    }
+
+    final primary = primaryRecoveryGroup(
+      category: exercise.category,
+      muscles: exercise.muscles,
+    );
+    if (primary != null) return primary == muscleGroup;
+
     return fromExerciseName(exercise.name).contains(muscleGroup);
   }
 
@@ -272,7 +317,10 @@ abstract final class MuscleInference {
     if (_containsAny(m, ['espalda', 'back', 'latissimus', 'dorsal', 'trapecio', 'romboid', 'romboides'])) {
       return 'Espalda';
     }
-    if (_containsAny(m, ['hombro', 'shoulder', 'deltoid', 'deltoides'])) return 'Hombros';
+    if (_containsAny(m, ['hombro', 'shoulder', 'deltoid', 'deltoides']) ||
+        _hasMuscleToken(m, 'delts')) {
+      return 'Hombros';
+    }
     if (_containsAny(m, [
       'pierna',
       'leg',

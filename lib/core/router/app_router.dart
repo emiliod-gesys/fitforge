@@ -20,6 +20,8 @@ import '../../screens/food/food_detail_screen.dart';
 import '../../models/workout_summary.dart';
 import '../../models/food_entry.dart';
 import '../../screens/training/training_hub_screen.dart';
+import '../../screens/trainer/students_screen.dart';
+import '../../screens/trainer/student_detail_screen.dart';
 import '../../screens/workouts/active_workout_screen.dart';
 import '../../screens/workouts/workout_summary_screen.dart';
 import '../../screens/workouts/workout_history_screen.dart';
@@ -94,6 +96,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (_, __) => const NoTransitionPage(child: SocialScreen()),
           ),
           GoRoute(
+            path: '/students',
+            pageBuilder: (_, __) => const NoTransitionPage(child: StudentsScreen()),
+          ),
+          GoRoute(
             path: '/profile',
             pageBuilder: (_, __) => const NoTransitionPage(child: ProfileScreen()),
           ),
@@ -102,6 +108,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/social/friend/:id',
         builder: (_, state) => FriendProfileScreen(friendId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/students/:id',
+        builder: (_, state) => StudentDetailScreen(studentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/workout/active',
@@ -124,6 +134,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/routines/:id/edit',
         builder: (_, state) => RoutineEditorScreen(routineId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '/students/:studentId/routines/new',
+        builder: (_, state) => RoutineEditorScreen(studentId: state.pathParameters['studentId']),
+      ),
+      GoRoute(
+        path: '/students/:studentId/routines/:id/edit',
+        builder: (_, state) => RoutineEditorScreen(
+          studentId: state.pathParameters['studentId'],
+          routineId: state.pathParameters['id'],
+        ),
       ),
       GoRoute(
         path: '/exercises/:id',

@@ -29,6 +29,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _scrollController = ScrollController();
+  bool _trainerModeUpdating = false;
 
   @override
   void dispose() {
@@ -214,6 +215,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: Text(l10n.experienceLevel),
                   subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
                   onTap: () => _editExperience(profile),
+                ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.school_outlined, color: AppColors.orange),
+                  title: Text(l10n.personalTrainerMode),
+                  subtitle: Text(l10n.personalTrainerModeSubtitle),
+                  value: profile?.isTrainer ?? false,
+                  activeThumbColor: AppColors.orange,
+                  onChanged: _trainerModeUpdating ? null : (value) => _setTrainerMode(enabled: value),
                 ),
                 ref.watch(restTimerAlertModeProvider).when(
                   skipLoadingOnReload: true,
@@ -527,7 +536,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ...l10n.activityLevels.map(
             (level) => SimpleDialogOption(
               onPressed: () => Navigator.pop(ctx, level),
-              child: Text(l10n.activityLevelLabel(level)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.activityLevelLabel(level),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.activityLevelDescription(level),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+            child: Text(
+              l10n.activityLevelFootnote,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.35),
             ),
           ),
         ],
@@ -576,6 +605,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     await AiPreferences.setProactiveAiEnabled(enabled);
     ref.invalidate(aiProactiveEnabledProvider);
+  }
+
+  Future<void> _setTrainerMode({required bool enabled}) async {
+    if (_trainerModeUpdating) return;
+
+    setState(() => _trainerModeUpdating = true);
+    final l10n = context.l10n;
+
+    try {
+      await ref.read(profileServiceProvider).updateProfile({
+        'user_type': enabled ? 'trainer' : 'athlete',
+      });
+      ref.invalidate(profileProvider);
+      await ref.read(profileProvider.future);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            enabled ? l10n.personalTrainerModeEnabled : l10n.personalTrainerModeDisabled,
+          ),
+        ),
+      );
+
+      if (enabled) {
+        context.go('/students');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.personalTrainerModeFailed('$e')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _trainerModeUpdating = false);
+    }
   }
 
   Future<void> _editRestTimerAlert(RestTimerAlertMode current) async {

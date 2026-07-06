@@ -66,7 +66,7 @@ void main() {
   });
 
   group('MuscleInference.matchesMuscleGroup', () {
-    test('hip thrust de wger en piernas aparece en filtro de gluteos', () {
+    test('hip thrust en categoria piernas aparece solo en filtro piernas', () {
       const exercise = Exercise(
         wgerId: 1234,
         name: 'Hip Thrust con Barra',
@@ -75,21 +75,97 @@ void main() {
       );
 
       expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Piernas'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Glúteos'),
+        isFalse,
+      );
+    });
+
+    test('hip thrust sin categoria util se infiere por nombre', () {
+      const exercise = Exercise(
+        wgerId: 1235,
+        name: 'Barbell Hip Thrust',
+        category: '',
+        muscles: const [],
+      );
+
+      expect(
         MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Glúteos'),
         isTrue,
       );
     });
 
-    test('hip thrust sin metadatos de gluteos se infiere por nombre', () {
+    test('fondos asistidos solo aparecen en triceps, no en pecho', () {
       const exercise = Exercise(
-        wgerId: 1235,
-        name: 'Barbell Hip Thrust',
-        category: 'Piernas',
-        muscles: ['Cuádriceps'],
+        catalogId: 'ff_triceps_assisted_dip_machine',
+        name: 'Assisted Dip Machine',
+        category: 'Triceps',
+        muscles: ['Triceps', 'Chest', 'Front delts'],
+        isBundled: true,
       );
 
       expect(
-        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Glúteos'),
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Tríceps'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Pecho'),
+        isFalse,
+      );
+    });
+
+    test('pullover con barra en pecho no aparece en filtro espalda por lats secundarios', () {
+      const exercise = Exercise(
+        catalogId: 'ff_chest_barbell_pullover',
+        name: 'Barbell Pullover',
+        category: 'Chest',
+        muscles: ['Chest', 'Lats', 'Triceps'],
+        isBundled: true,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Pecho'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Espalda'),
+        isFalse,
+      );
+    });
+
+    test('caminata del granjero aparece en antebrazos por musculo secundario', () {
+      const exercise = Exercise(
+        catalogId: 'ff_cf_farmers_walk',
+        name: "Farmer's Walk",
+        category: 'Legs',
+        muscles: ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Forearms', 'Abs'],
+        isBundled: true,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Piernas'),
+        isTrue,
+      );
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Antebrazos'),
+        isTrue,
+      );
+    });
+
+    test('curl inverso en polea aparece en filtro antebrazos', () {
+      const exercise = Exercise(
+        catalogId: 'ff_biceps_reverse_cable_curl',
+        name: 'Reverse Cable Curl',
+        category: 'Forearms',
+        muscles: ['Forearms', 'Brachialis', 'Biceps'],
+        isBundled: true,
+      );
+
+      expect(
+        MuscleInference.matchesMuscleGroup(exercise: exercise, muscleGroup: 'Antebrazos'),
         isTrue,
       );
     });
@@ -435,6 +511,27 @@ void main() {
       expect(impacts['Pecho'], 1.0);
       expect(impacts['Tríceps'], MuscleInference.secondaryImpactWeight);
       expect(impacts['Hombros'], MuscleInference.secondaryImpactWeight);
+    });
+
+    test('press militar con front delts afecta hombros como primario', () {
+      const catalog = [
+        Exercise(
+          catalogId: 'ff_shoulders_barbell_overhead_press',
+          name: 'Barbell Standing Military Press',
+          category: 'Shoulders',
+          muscles: ['Front delts', 'Triceps', 'Side delts', 'Upper chest'],
+          isBundled: true,
+        ),
+      ];
+
+      final impacts = MuscleInference.resolveImpacts(
+        exerciseName: 'Barbell Standing Military Press',
+        exerciseId: 'ff_shoulders_barbell_overhead_press',
+        catalog: catalog,
+      );
+
+      expect(impacts['Hombros'], 1.0);
+      expect(impacts['Tríceps'], MuscleInference.secondaryImpactWeight);
     });
 
     test('burpee no etiqueta biceps y afecta piernas pecho y core', () {

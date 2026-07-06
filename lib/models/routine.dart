@@ -1,4 +1,38 @@
+import '../core/constants/app_constants.dart';
 import 'exercise_logging.dart';
+
+class RoutineSetTarget {
+  final int reps;
+  final double? weight;
+
+  const RoutineSetTarget({
+    required this.reps,
+    this.weight,
+  });
+
+  factory RoutineSetTarget.fromJson(dynamic json) {
+    if (json is! Map) {
+      return const RoutineSetTarget(reps: AppConstants.defaultReps);
+    }
+    final map = Map<String, dynamic>.from(json);
+    return RoutineSetTarget(
+      reps: map['reps'] as int? ?? AppConstants.defaultReps,
+      weight: (map['weight'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'reps': reps,
+        if (weight != null) 'weight': weight,
+      };
+
+  RoutineSetTarget copyWith({int? reps, double? weight, bool clearWeight = false}) {
+    return RoutineSetTarget(
+      reps: reps ?? this.reps,
+      weight: clearWeight ? null : (weight ?? this.weight),
+    );
+  }
+}
 
 class RoutineExercise {
   final String id;
@@ -15,6 +49,8 @@ class RoutineExercise {
   final double? targetDistanceMeters;
   final double? targetInclinePercent;
   final int? targetSteps;
+  final bool? perArmWeight;
+  final List<RoutineSetTarget> targetSetDetails;
 
   const RoutineExercise({
     required this.id,
@@ -31,11 +67,52 @@ class RoutineExercise {
     this.targetDistanceMeters,
     this.targetInclinePercent,
     this.targetSteps,
+    this.perArmWeight,
+    this.targetSetDetails = const [],
   });
 
   bool get isCardio => loggingType == ExerciseLoggingType.cardio;
 
+  List<RoutineSetTarget> get resolvedSetDetails {
+    if (targetSetDetails.isNotEmpty) return targetSetDetails;
+    return List.generate(
+      targetSets,
+      (_) => RoutineSetTarget(reps: targetReps, weight: targetWeight),
+    );
+  }
+
+  RoutineExercise withSyncedLegacyFields() {
+    final details = resolvedSetDetails;
+    if (details.isEmpty) return this;
+    return RoutineExercise(
+      id: id,
+      exerciseId: exerciseId,
+      exerciseName: exerciseName,
+      orderIndex: orderIndex,
+      targetSets: details.length,
+      targetReps: details.first.reps,
+      targetWeight: details.first.weight,
+      restSeconds: restSeconds,
+      imageUrl: imageUrl,
+      loggingType: loggingType,
+      targetDurationSeconds: targetDurationSeconds,
+      targetDistanceMeters: targetDistanceMeters,
+      targetInclinePercent: targetInclinePercent,
+      targetSteps: targetSteps,
+      perArmWeight: perArmWeight,
+      targetSetDetails: details,
+    );
+  }
+
   factory RoutineExercise.fromJson(Map<String, dynamic> json) {
+    final details = <RoutineSetTarget>[];
+    final rawDetails = json['target_set_details'];
+    if (rawDetails is List) {
+      for (final item in rawDetails) {
+        details.add(RoutineSetTarget.fromJson(item));
+      }
+    }
+
     return RoutineExercise(
       id: json['id'] as String,
       exerciseId: json['exercise_id'] as String,
@@ -51,6 +128,8 @@ class RoutineExercise {
       targetDistanceMeters: (json['target_distance_meters'] as num?)?.toDouble(),
       targetInclinePercent: (json['target_incline_percent'] as num?)?.toDouble(),
       targetSteps: json['target_steps'] as int?,
+      perArmWeight: json['per_arm_weight'] as bool?,
+      targetSetDetails: details,
     );
   }
 
@@ -69,6 +148,9 @@ class RoutineExercise {
         if (targetDistanceMeters != null) 'target_distance_meters': targetDistanceMeters,
         if (targetInclinePercent != null) 'target_incline_percent': targetInclinePercent,
         if (targetSteps != null) 'target_steps': targetSteps,
+        if (perArmWeight != null) 'per_arm_weight': perArmWeight,
+        if (targetSetDetails.isNotEmpty)
+          'target_set_details': targetSetDetails.map((s) => s.toJson()).toList(),
       };
 
   RoutineExercise copyWith({
@@ -85,6 +167,8 @@ class RoutineExercise {
     double? targetDistanceMeters,
     double? targetInclinePercent,
     int? targetSteps,
+    bool? perArmWeight,
+    List<RoutineSetTarget>? targetSetDetails,
   }) {
     return RoutineExercise(
       id: id,
@@ -101,6 +185,8 @@ class RoutineExercise {
       targetDistanceMeters: targetDistanceMeters ?? this.targetDistanceMeters,
       targetInclinePercent: targetInclinePercent ?? this.targetInclinePercent,
       targetSteps: targetSteps ?? this.targetSteps,
+      perArmWeight: perArmWeight ?? this.perArmWeight,
+      targetSetDetails: targetSetDetails ?? this.targetSetDetails,
     );
   }
 }
@@ -115,6 +201,7 @@ class Routine {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isAiGenerated;
+  final bool isFavorite;
 
   const Routine({
     required this.id,
@@ -126,6 +213,7 @@ class Routine {
     required this.createdAt,
     required this.updatedAt,
     this.isAiGenerated = false,
+    this.isFavorite = false,
   });
 
   factory Routine.fromJson(Map<String, dynamic> json, {List<RoutineExercise>? exercises}) {
@@ -139,6 +227,7 @@ class Routine {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       isAiGenerated: json['is_ai_generated'] as bool? ?? false,
+      isFavorite: json['is_favorite'] as bool? ?? false,
     );
   }
 
@@ -147,6 +236,7 @@ class Routine {
         'description': description,
         'target_muscles': targetMuscles,
         'is_ai_generated': isAiGenerated,
+        if (isFavorite) 'is_favorite': isFavorite,
       };
 
   Routine copyWith({
@@ -155,6 +245,7 @@ class Routine {
     List<String>? targetMuscles,
     List<RoutineExercise>? exercises,
     bool? isAiGenerated,
+    bool? isFavorite,
   }) {
     return Routine(
       id: id,
@@ -166,6 +257,44 @@ class Routine {
       createdAt: createdAt,
       updatedAt: updatedAt,
       isAiGenerated: isAiGenerated ?? this.isAiGenerated,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
+
+  /// Copia para guardar en la biblioteca del usuario actual (nuevos ids).
+  Routine copyForCurrentUser() {
+    return Routine(
+      id: '',
+      userId: '',
+      name: name,
+      description: description,
+      targetMuscles: List<String>.from(targetMuscles),
+      exercises: exercises
+          .map(
+            (e) => RoutineExercise(
+              id: '',
+              exerciseId: e.exerciseId,
+              exerciseName: e.exerciseName,
+              orderIndex: e.orderIndex,
+              targetSets: e.targetSets,
+              targetReps: e.targetReps,
+              targetWeight: e.targetWeight,
+              restSeconds: e.restSeconds,
+              imageUrl: e.imageUrl,
+              loggingType: e.loggingType,
+              targetDurationSeconds: e.targetDurationSeconds,
+              targetDistanceMeters: e.targetDistanceMeters,
+              targetInclinePercent: e.targetInclinePercent,
+              targetSteps: e.targetSteps,
+              perArmWeight: e.perArmWeight,
+              targetSetDetails: e.targetSetDetails,
+            ),
+          )
+          .toList(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isAiGenerated: false,
+      isFavorite: false,
     );
   }
 }

@@ -26,6 +26,7 @@ GROUP_ES = {
     "Cardio": "Cardio",
     "Calves": "Pantorrillas",
     "Abs": "Abdominales",
+    "Forearms": "Antebrazos",
 }
 
 GROUP_EN = {
@@ -39,6 +40,7 @@ GROUP_EN = {
     "Calves": "Calves",
     "Cardio": "Cardio",
     "Abs": "Abs",
+    "Forearms": "Forearms",
 }
 
 EQUIPMENT_ES = {
@@ -537,6 +539,70 @@ CATALOG_SUPPLEMENT = [
         "primary": "Abs",
         "secondary": [],
         "exercisedb_id": "UEjSrKI",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Dumbbell Wrist Curl",
+        "name_es": "Curl de muñeca con mancuernas",
+        "equipment": "Dumbbell",
+        "load_mode": "dual_load",
+        "per_arm_weight": True,
+        "primary": "Forearms",
+        "secondary": ["Biceps"],
+        "exercisedb_id": "2dImyQ8",
+        "notes_es": "Sentado con antebrazos apoyados en los muslos, flexiona las muñecas con mancuernas en agarre supino.",
+        "notes_en": "Seated with forearms resting on the thighs, curl the wrists upward using a palms-up dumbbell grip.",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Dumbbell Reverse Wrist Curl",
+        "name_es": "Curl inverso de muñeca con mancuernas",
+        "equipment": "Dumbbell",
+        "load_mode": "dual_load",
+        "per_arm_weight": True,
+        "primary": "Forearms",
+        "secondary": ["Brachialis"],
+        "exercisedb_id": "BLCvwr2",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Barbell Wrist Curl",
+        "name_es": "Curl de muñeca con barra",
+        "equipment": "Barbell",
+        "load_mode": "single_load",
+        "primary": "Forearms",
+        "secondary": ["Biceps", "Brachialis"],
+        "exercisedb_id": "82LxxkW",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Barbell Reverse Wrist Curl",
+        "name_es": "Curl inverso de muñeca con barra",
+        "equipment": "Barbell",
+        "load_mode": "single_load",
+        "primary": "Forearms",
+        "secondary": ["Brachialis"],
+        "exercisedb_id": "LsZkfU6",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Cable Wrist Curl",
+        "name_es": "Curl de muñeca en polea",
+        "equipment": "Cable",
+        "load_mode": "machine_stack",
+        "primary": "Forearms",
+        "secondary": ["Biceps"],
+        "exercisedb_id": "LrV4s90",
+    },
+    {
+        "group": "Forearms",
+        "name_en": "Wrist Roller",
+        "name_es": "Rueda de antebrazo",
+        "equipment": "Machine",
+        "load_mode": "single_load",
+        "primary": "Forearms",
+        "secondary": ["Biceps", "Triceps"],
+        "exercisedb_id": "bd5b860",
     },
 ]
 

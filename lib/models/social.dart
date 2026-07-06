@@ -86,6 +86,8 @@ class Friendship {
 class SocialNotification {
   final String id;
   final String actorId;
+  final String type;
+  final String? referenceId;
   final String message;
   final DateTime createdAt;
   final DateTime? readAt;
@@ -94,6 +96,8 @@ class SocialNotification {
   const SocialNotification({
     required this.id,
     required this.actorId,
+    this.type = 'workout_completed',
+    this.referenceId,
     required this.message,
     required this.createdAt,
     this.readAt,
@@ -101,11 +105,14 @@ class SocialNotification {
   });
 
   bool get isUnread => readAt == null;
+  bool get isRoutineShare => type == 'routine_share';
 
   factory SocialNotification.fromJson(Map<String, dynamic> json) {
     return SocialNotification(
       id: json['id'] as String,
       actorId: json['actor_id'] as String,
+      type: json['type'] as String? ?? 'workout_completed',
+      referenceId: json['reference_id'] as String?,
       message: json['message'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,

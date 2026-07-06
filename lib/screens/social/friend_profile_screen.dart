@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
@@ -19,6 +20,7 @@ import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/player_level_card.dart';
+import '../../widgets/social/friend_favorite_routines_section.dart';
 import '../../widgets/stat_card.dart';
 
 class FriendProfileScreen extends ConsumerWidget {
@@ -26,15 +28,101 @@ class FriendProfileScreen extends ConsumerWidget {
 
   const FriendProfileScreen({super.key, required this.friendId});
 
+  Friendship? _friendshipFor(List<Friendship> friendships, String? uid) {
+    if (uid == null) return null;
+    for (final f in friendships) {
+      if (f.status != FriendshipStatus.accepted) continue;
+      if (f.requesterId == friendId || f.addresseeId == friendId) return f;
+    }
+    return null;
+  }
+
+  void _confirmRemoveFriend(
+    BuildContext context,
+    WidgetRef ref,
+    Friendship friendship,
+    String name,
+  ) {
+    final l10n = context.l10n;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.removeFriendTitle),
+        content: Text(l10n.removeFriendBody(name)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(socialServiceProvider).removeFriendship(friendship.id);
+              ref.invalidate(friendshipsProvider);
+              ref.invalidate(leaderboardProvider);
+              ref.invalidate(friendFavoriteRoutinesProvider);
+              ref.invalidate(friendProfileProvider(friendId));
+              if (context.mounted) context.pop();
+            },
+            child: Text(l10n.delete, style: const TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final profileAsync = ref.watch(friendProfileProvider(friendId));
+    final friendships = ref.watch(friendshipsProvider).valueOrNull ?? [];
+    final mutedIds = ref.watch(mutedFriendsProvider).valueOrNull ?? const <String>{};
+    final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
+    final friendship = _friendshipFor(friendships, uid);
+    final isMuted = mutedIds.contains(friendId);
     final unitSystem = ref.watch(unitSystemProvider);
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      appBar: FitForgeAppBar(title: l10n.profileTitle),
+      appBar: FitForgeAppBar(
+        title: l10n.profileTitle,
+        actions: [
+          if (friendship != null)
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                final name = profileAsync.valueOrNull?.user.label ?? '';
+                if (value == 'remove' && profileAsync.valueOrNull != null) {
+                  _confirmRemoveFriend(context, ref, friendship, name);
+                } else if (value == 'mute' || value == 'unmute') {
+                  await ref.read(socialServiceProvider).setFriendMuted(
+                        friendId,
+                        value == 'mute',
+                      );
+                  ref.invalidate(mutedFriendsProvider);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          value == 'mute' ? l10n.friendMuted(name) : l10n.friendUnmuted(name),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: isMuted ? 'unmute' : 'mute',
+                  child: Text(isMuted ? l10n.unmuteFriend : l10n.muteFriend),
+                ),
+                PopupMenuItem(
+                  value: 'remove',
+                  child: Text(
+                    l10n.removeFriendTitle,
+                    style: const TextStyle(color: AppColors.error),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
       body: profileAsync.when(
         loading: () => const Center(child: FitForgeLoadingIndicator()),
         error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
@@ -65,6 +153,13 @@ class FriendProfileScreen extends ConsumerWidget {
                 l10n: l10n,
                 unitSystem: unitSystem,
               ),
+              const SizedBox(height: 24),
+              Text(
+                l10n.friendFavoriteRoutines,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              FriendFavoriteRoutinesSection(userId: friendId, l10n: l10n),
               const SizedBox(height: 24),
               Text(
                 l10n.personalRecords,

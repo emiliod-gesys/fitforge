@@ -59,7 +59,10 @@ abstract final class DailyNutritionBudget {
     }
 
     final calorieBudget = baseGoal + workoutBurned + manualBurned;
-    final remaining = (calorieBudget - eaten.caloriesKcal).clamp(0, 99999);
+    final eatenKcal = eaten.caloriesKcal;
+    final balance = calorieBudget - eatenKcal;
+    final remaining = balance.clamp(0, 99999);
+    final surplus = (-balance).clamp(0, 99999);
 
     final targets = _macroTargets(
       calorieGoal: calorieBudget,
@@ -83,8 +86,9 @@ abstract final class DailyNutritionBudget {
       workoutCaloriesBurned: workoutBurned,
       manualActivityCaloriesBurned: manualBurned,
       calorieBudget: calorieBudget,
-      caloriesEaten: eaten.caloriesKcal,
+      caloriesEaten: eatenKcal,
       caloriesRemaining: remaining,
+      caloriesSurplus: surplus,
       targets: targets,
       eaten: eaten,
       entriesByMeal: byMeal,

@@ -117,8 +117,41 @@ void main() {
       );
 
       expect(summary.caloriesEaten, 300);
+      expect(summary.caloriesRemaining, 2200 - 300);
+      expect(summary.caloriesSurplus, 0);
+      expect(summary.isCaloricSurplus, isFalse);
       expect(summary.eaten.proteinG, 10);
       expect(summary.eaten.fiberG, 5);
+    });
+
+    test('tracks caloric surplus when eaten exceeds budget', () {
+      final day = DateTime(2026, 6, 15);
+      final entries = [
+        FoodEntry(
+          id: '1',
+          userId: 'u1',
+          loggedAt: day.add(const Duration(hours: 20)),
+          mealType: MealType.dinner,
+          name: 'Pizza',
+          caloriesKcal: 2500,
+          proteinG: 80,
+          carbsG: 250,
+          fatG: 90,
+        ),
+      ];
+
+      final summary = DailyNutritionBudget.build(
+        day: day,
+        entries: entries,
+        workoutsCompletedOnDay: const [],
+        profile: null,
+        bodyMetrics: null,
+      );
+
+      expect(summary.caloriesEaten, 2500);
+      expect(summary.caloriesRemaining, 0);
+      expect(summary.caloriesSurplus, 300);
+      expect(summary.isCaloricSurplus, isTrue);
     });
     test('sedentary fat loss yields lower goal than moderate', () {
       final sedentary = DailyNutritionBudget.build(

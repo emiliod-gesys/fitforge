@@ -13,6 +13,8 @@ class AiRoutinePreviewCard extends ConsumerWidget {
   final bool isSaved;
   final bool isDiscarded;
   final bool isSaving;
+  final bool shareMode;
+  final bool previewOnly;
   final VoidCallback onSave;
   final VoidCallback onEdit;
   final VoidCallback onDiscard;
@@ -23,6 +25,8 @@ class AiRoutinePreviewCard extends ConsumerWidget {
     required this.isSaved,
     required this.isDiscarded,
     this.isSaving = false,
+    this.shareMode = false,
+    this.previewOnly = false,
     required this.onSave,
     required this.onEdit,
     required this.onDiscard,
@@ -60,7 +64,11 @@ class AiRoutinePreviewCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: AppColors.orange, size: 20),
+              Icon(
+                shareMode ? Icons.fitness_center : Icons.auto_awesome,
+                color: AppColors.orange,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -95,32 +103,34 @@ class AiRoutinePreviewCard extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onDiscard,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+          if (!previewOnly) ...[
+          if (!shareMode)
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onDiscard,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: Text(l10n.discard, textAlign: TextAlign.center),
                   ),
-                  child: Text(l10n.discard, textAlign: TextAlign.center),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onEdit,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onEdit,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: Text(l10n.edit, textAlign: TextAlign.center),
                   ),
-                  child: Text(l10n.edit, textAlign: TextAlign.center),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
+              ],
+            ),
+          if (!shareMode) const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -132,9 +142,21 @@ class AiRoutinePreviewCard extends ConsumerWidget {
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.save),
+                  : Text(shareMode ? l10n.saveRoutine : l10n.save),
             ),
           ),
+          if (shareMode) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onDiscard,
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                child: Text(l10n.close),
+              ),
+            ),
+          ],
+          ],
         ],
       ),
     );

@@ -266,6 +266,12 @@ abstract class AppLocalizations {
   /// **'Social'**
   String get navSocial;
 
+  /// No description provided for @navStudents.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos'**
+  String get navStudents;
+
   /// No description provided for @navProfile.
   ///
   /// In es, this message translates to:
@@ -368,6 +374,180 @@ abstract class AppLocalizations {
   /// **'Configuración de entrenamiento'**
   String get trainingConfig;
 
+  /// No description provided for @personalTrainerMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo entrenador personal'**
+  String get personalTrainerMode;
+
+  /// No description provided for @personalTrainerModeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la pestaña Alumnos para monitorear clientes'**
+  String get personalTrainerModeSubtitle;
+
+  /// No description provided for @personalTrainerModeEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo entrenador activado. Pestaña Alumnos disponible.'**
+  String get personalTrainerModeEnabled;
+
+  /// No description provided for @personalTrainerModeDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo entrenador desactivado.'**
+  String get personalTrainerModeDisabled;
+
+  /// No description provided for @personalTrainerModeFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cambiar el modo: {message}'**
+  String personalTrainerModeFailed(String message);
+
+  /// No description provided for @trainerModeRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el modo entrenador personal en tu Perfil para usar esta sección.'**
+  String get trainerModeRequired;
+
+  /// No description provided for @studentsScreenHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega amigos como alumnos para ver sus entrenos y recuperación muscular.'**
+  String get studentsScreenHint;
+
+  /// No description provided for @studentsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos ({count})'**
+  String studentsCount(int count);
+
+  /// No description provided for @studentsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes alumnos. Agrega amigos desde la lista de abajo.'**
+  String get studentsEmpty;
+
+  /// No description provided for @addStudentFromFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar desde amigos'**
+  String get addStudentFromFriends;
+
+  /// No description provided for @addStudentEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay amigos disponibles. Primero deben ser amigos aceptados.'**
+  String get addStudentEmpty;
+
+  /// No description provided for @addStudentAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar alumno'**
+  String get addStudentAction;
+
+  /// No description provided for @studentAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno agregado'**
+  String get studentAdded;
+
+  /// No description provided for @addStudentFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo agregar: {message}'**
+  String addStudentFailed(String message);
+
+  /// No description provided for @removeStudentTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar alumno'**
+  String get removeStudentTitle;
+
+  /// No description provided for @removeStudentMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar a {name} de tus alumnos?'**
+  String removeStudentMessage(String name);
+
+  /// No description provided for @studentDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno'**
+  String get studentDetailTitle;
+
+  /// No description provided for @studentNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno no encontrado'**
+  String get studentNotFound;
+
+  /// No description provided for @studentRecoveryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuperación muscular'**
+  String get studentRecoveryTitle;
+
+  /// No description provided for @studentNutritionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nutrición de hoy'**
+  String get studentNutritionTitle;
+
+  /// No description provided for @studentNutritionTitleDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Nutrición del {date}'**
+  String studentNutritionTitleDate(String date);
+
+  /// No description provided for @studentWorkoutsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenos recientes'**
+  String get studentWorkoutsTitle;
+
+  /// No description provided for @studentWorkoutsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Este alumno aún no ha registrado entrenos completados.'**
+  String get studentWorkoutsEmpty;
+
+  /// No description provided for @studentRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas del alumno'**
+  String get studentRoutinesTitle;
+
+  /// No description provided for @studentRoutinesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Este alumno aún no tiene rutinas.'**
+  String get studentRoutinesEmpty;
+
+  /// No description provided for @studentRoutineNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva rutina para alumno'**
+  String get studentRoutineNew;
+
+  /// No description provided for @studentRoutineEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar rutina del alumno'**
+  String get studentRoutineEdit;
+
+  /// No description provided for @deleteRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar rutina'**
+  String get deleteRoutineTitle;
+
+  /// No description provided for @deleteRoutineMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar la rutina \"{name}\"?'**
+  String deleteRoutineMessage(String name);
+
   /// No description provided for @goal.
   ///
   /// In es, this message translates to:
@@ -415,6 +595,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Alto'**
   String get activityHigh;
+
+  /// No description provided for @activitySedentaryDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos de 4 mil pasos diarios'**
+  String get activitySedentaryDescription;
+
+  /// No description provided for @activityModerateDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Entre 4 mil y 10 mil pasos diarios'**
+  String get activityModerateDescription;
+
+  /// No description provided for @activityHighDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Más de 10 mil pasos diarios'**
+  String get activityHighDescription;
+
+  /// No description provided for @activityLevelFootnote.
+  ///
+  /// In es, this message translates to:
+  /// **'Estas son aproximaciones de actividad física para ayudar a orientar al usuario.'**
+  String get activityLevelFootnote;
 
   /// No description provided for @restTimerAlert.
   ///
@@ -661,6 +865,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Progreso'**
   String get progressTitle;
+
+  /// No description provided for @progressMyTrainerLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu entrenador personal'**
+  String get progressMyTrainerLabel;
 
   /// No description provided for @progressTotalXp.
   ///
@@ -2426,6 +2636,114 @@ abstract class AppLocalizations {
   /// **'\"{name}\" guardada en Rutinas'**
   String routineSavedNamed(String name);
 
+  /// No description provided for @routineFavorite.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar como favorita'**
+  String get routineFavorite;
+
+  /// No description provided for @routineUnfavorite.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar de favoritas'**
+  String get routineUnfavorite;
+
+  /// No description provided for @routineFavoritesMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo puedes tener {max} rutinas favoritas en tu perfil'**
+  String routineFavoritesMax(int max);
+
+  /// No description provided for @friendFavoriteRoutines.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas favoritas'**
+  String get friendFavoriteRoutines;
+
+  /// No description provided for @noFavoriteRoutinesFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Este usuario no tiene rutinas favoritas públicas'**
+  String get noFavoriteRoutinesFriend;
+
+  /// No description provided for @previewRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Previsualizar rutina'**
+  String get previewRoutine;
+
+  /// No description provided for @saveRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar rutina'**
+  String get saveRoutine;
+
+  /// No description provided for @shareRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir rutina'**
+  String get shareRoutine;
+
+  /// No description provided for @shareRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar rutina a un amigo'**
+  String get shareRoutineTitle;
+
+  /// No description provided for @shareRoutineSelectFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un amigo para enviarle esta rutina'**
+  String get shareRoutineSelectFriend;
+
+  /// No description provided for @shareRoutineSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina enviada a {name}'**
+  String shareRoutineSent(String name);
+
+  /// No description provided for @shareRoutineFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo compartir: {message}'**
+  String shareRoutineFailed(String message);
+
+  /// No description provided for @shareRoutineNoFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega amigos para compartir rutinas'**
+  String get shareRoutineNoFriends;
+
+  /// No description provided for @routineShareAccepted.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina guardada en tu biblioteca'**
+  String get routineShareAccepted;
+
+  /// No description provided for @routineShareDeclined.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud de rutina rechazada'**
+  String get routineShareDeclined;
+
+  /// No description provided for @routineShareUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta solicitud ya no está disponible'**
+  String get routineShareUnavailable;
+
+  /// No description provided for @accept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get accept;
+
+  /// No description provided for @decline.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get decline;
+
   /// No description provided for @saveFailed.
   ///
   /// In es, this message translates to:
@@ -2605,6 +2923,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¿Quitar a {name} de tu lista?'**
   String removeFriendBody(String name);
+
+  /// No description provided for @muteFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Silenciar'**
+  String get muteFriend;
+
+  /// No description provided for @unmuteFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Dejar de silenciar'**
+  String get unmuteFriend;
+
+  /// No description provided for @friendMutedLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Silenciado'**
+  String get friendMutedLabel;
+
+  /// No description provided for @friendMuted.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} silenciado'**
+  String friendMuted(String name);
+
+  /// No description provided for @friendUnmuted.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} ya no está silenciado'**
+  String friendUnmuted(String name);
 
   /// No description provided for @friendWorkoutNotify.
   ///
@@ -3524,6 +3872,12 @@ abstract class AppLocalizations {
   /// **'kcal disponibles'**
   String get foodCaloriesAvailable;
 
+  /// No description provided for @foodCaloriesSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'kcal en exceso'**
+  String get foodCaloriesSurplus;
+
   /// No description provided for @foodBudgetUsed.
   ///
   /// In es, this message translates to:
@@ -4039,6 +4393,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{eaten} / {goal} kcal'**
   String foodMealGoalPlaceholder(int eaten, int goal);
+
+  /// No description provided for @routineExerciseSets.
+  ///
+  /// In es, this message translates to:
+  /// **'Series'**
+  String get routineExerciseSets;
+
+  /// No description provided for @routineExerciseWeight.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso ({unit})'**
+  String routineExerciseWeight(String unit);
+
+  /// No description provided for @routineAddSet.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir serie'**
+  String get routineAddSet;
+
+  /// No description provided for @routineSetNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'Ser. {number}'**
+  String routineSetNumber(int number);
 }
 
 class _AppLocalizationsDelegate

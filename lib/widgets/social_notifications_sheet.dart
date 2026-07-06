@@ -6,6 +6,7 @@ import '../l10n/l10n_extensions.dart';
 import '../models/social.dart';
 import '../providers/app_providers.dart';
 import 'fitforge_loading_indicator.dart';
+import 'routine_share_request_dialog.dart';
 
 class SocialNotificationsBellButton extends ConsumerWidget {
   const SocialNotificationsBellButton({super.key});
@@ -60,6 +61,14 @@ class SocialNotificationsSheet extends ConsumerWidget {
     WidgetRef ref,
     SocialNotification notification,
   ) async {
+    if (notification.isRoutineShare && notification.referenceId != null) {
+      if (!context.mounted) return;
+      await RoutineShareRequestDialog.show(context, notification.referenceId!);
+      ref.invalidate(socialNotificationsProvider);
+      ref.invalidate(socialUnreadCountProvider);
+      return;
+    }
+
     if (notification.isUnread) {
       await ref.read(socialServiceProvider).markNotificationRead(notification.id);
       ref.invalidate(socialNotificationsProvider);
@@ -71,6 +80,42 @@ class SocialNotificationsSheet extends ConsumerWidget {
 
     if (notification.actorId.isNotEmpty) {
       context.push('/social/friend/${notification.actorId}');
+    }
+  }
+
+  Future<void> _respondShare(
+    BuildContext context,
+    WidgetRef ref,
+    SocialNotification notification,
+    bool accept,
+  ) async {
+    final requestId = notification.referenceId;
+    if (requestId == null) return;
+    final l10n = context.l10n;
+
+    try {
+      await ref.read(routineShareServiceProvider).respondToShare(
+            requestId: requestId,
+            accept: accept,
+          );
+      ref.invalidate(socialNotificationsProvider);
+      ref.invalidate(socialUnreadCountProvider);
+      if (accept) ref.invalidate(routinesProvider);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(accept ? l10n.routineShareAccepted : l10n.routineShareDeclined),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.saveFailed('$e')),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -146,28 +191,73 @@ class SocialNotificationsSheet extends ConsumerWidget {
                     separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
                     itemBuilder: (context, index) {
                       final notification = notifications[index];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: notification.isUnread
-                              ? AppColors.orange.withValues(alpha: 0.2)
-                              : AppColors.cardElevated,
-                          child: Icon(
-                            Icons.fitness_center,
-                            color: notification.isUnread ? AppColors.orange : AppColors.textMuted,
-                            size: 20,
+                      final isShare = notification.isRoutineShare && notification.isUnread;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: notification.isUnread
+                                  ? AppColors.orange.withValues(alpha: 0.2)
+                                  : AppColors.cardElevated,
+                              child: Icon(
+                                notification.isRoutineShare
+                                    ? Icons.share_outlined
+                                    : Icons.fitness_center,
+                                color: notification.isUnread
+                                    ? AppColors.orange
+                                    : AppColors.textMuted,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(
+                              notification.message,
+                              style: TextStyle(
+                                fontWeight:
+                                    notification.isUnread ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l10n.timeAgo(notification.createdAt),
+                              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                            ),
+                            onTap: () => _openNotification(context, ref, notification),
                           ),
-                        ),
-                        title: Text(
-                          notification.message,
-                          style: TextStyle(
-                            fontWeight: notification.isUnread ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: Text(
-                          l10n.timeAgo(notification.createdAt),
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                        ),
-                        onTap: () => _openNotification(context, ref, notification),
+                          if (isShare && notification.referenceId != null)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => RoutineShareRequestDialog.show(
+                                        context,
+                                        notification.referenceId!,
+                                      ),
+                                      child: Text(l10n.previewRoutine),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () =>
+                                          _respondShare(context, ref, notification, false),
+                                      child: Text(l10n.decline),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () =>
+                                          _respondShare(context, ref, notification, true),
+                                      child: Text(l10n.accept),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),

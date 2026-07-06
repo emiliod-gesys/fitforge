@@ -13,6 +13,7 @@ import '../models/food_entry.dart';
 import '../models/manual_activity_entry.dart';
 import '../models/leaderboard.dart';
 import '../models/profile.dart';
+import '../models/routine.dart';
 import '../models/workout.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
@@ -24,10 +25,13 @@ import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
+import '../services/routine_share_service.dart';
 import '../services/exercise_report_service.dart';
 import '../services/workout_service.dart';
+import '../models/trainer.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
+import '../services/trainer_service.dart';
 import '../models/rest_timer_alert_mode.dart';
 import '../services/rest_preferences.dart';
 import '../services/ai_preferences.dart';
@@ -38,11 +42,14 @@ import '../services/watch_workout_coordinator.dart';
 final authServiceProvider = Provider((ref) => AuthService());
 final exerciseServiceProvider = Provider((ref) => ExerciseService());
 final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationStore());
+final routineShareServiceProvider = Provider((ref) => RoutineShareService());
+
 final routineServiceProvider = Provider((ref) => RoutineService());
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider((ref) => ProfileService());
 final socialServiceProvider = Provider((ref) => SocialService());
+final trainerServiceProvider = Provider((ref) => TrainerService());
 final pushNotificationServiceProvider = Provider((ref) => PushNotificationService());
 final aiCoachServiceProvider = Provider(
   (ref) => AiCoachService(ref.watch(profileServiceProvider)),
@@ -179,9 +186,96 @@ final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistor
   },
 );
 
+final isTrainerProvider = Provider<bool>((ref) {
+  return ref.watch(profileProvider).value?.isTrainer ?? false;
+});
+
+final trainerStudentsProvider = FutureProvider<List<TrainerStudent>>((ref) async {
+  ref.watch(authStateProvider);
+  final profile = await ref.watch(profileProvider.future);
+  if (profile?.isTrainer != true) return [];
+  return ref.watch(trainerServiceProvider).getStudents();
+});
+
+final trainerAddableFriendsProvider = FutureProvider<List<FriendUser>>((ref) async {
+  ref.watch(authStateProvider);
+  final profile = await ref.watch(profileProvider.future);
+  if (profile?.isTrainer != true) return [];
+  final social = ref.watch(socialServiceProvider);
+  return ref.watch(trainerServiceProvider).getAddableFriends(social);
+});
+
+final studentProfileProvider = FutureProvider.family<StudentProfileView?, String>((ref, studentId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(trainerServiceProvider).getStudentProfile(studentId);
+});
+
+final studentWorkoutHistoryProvider = FutureProvider.family<List<Workout>, String>((ref, studentId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).getWorkoutSummariesForUser(
+        studentId,
+        limit: 30,
+        completedOnly: true,
+      );
+});
+
+final studentRoutinesProvider = FutureProvider.family<List<Routine>, String>((ref, studentId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(routineServiceProvider).getRoutinesForUser(studentId);
+});
+
+final studentNutritionDayProvider = StateProvider.family<DateTime, String>((ref, studentId) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
+final studentDailyNutritionProvider = FutureProvider.family<DailyNutritionSummary, String>((ref, studentId) async {
+  ref.watch(authStateProvider);
+  final selected = ref.watch(studentNutritionDayProvider(studentId));
+  final day = DateTime(selected.year, selected.month, selected.day);
+
+  final profileView = await ref.watch(studentProfileProvider(studentId).future);
+  if (profileView == null) {
+    throw StateError('Student not found');
+  }
+
+  final entries = await ref.watch(foodServiceProvider).getEntriesForDay(day, userId: studentId);
+  final workouts = await ref.watch(workoutServiceProvider).getCompletedWorkoutsOnDay(day, userId: studentId);
+  final activities = await ref.watch(activityLogServiceProvider).getEntriesForDay(day, userId: studentId);
+  final bodyMetrics = await ref.watch(profileServiceProvider).getBodyMetricSnapshotsForUser(studentId);
+
+  return DailyNutritionBudget.build(
+    day: day,
+    entries: entries,
+    workoutsCompletedOnDay: workouts,
+    manualActivities: activities,
+    profile: profileView.profile,
+    bodyMetrics: bodyMetrics,
+  );
+});
+
+final studentRecoveryProvider = FutureProvider.family<Map<String, double>, String>((ref, studentId) async {
+  ref.keepAlive();
+  ref.watch(authStateProvider);
+  final service = ref.watch(workoutServiceProvider);
+  final catalog = await ref.watch(exercisesProvider.future);
+  final workouts = await service.getWorkoutsForMuscleRecoveryForUser(studentId);
+  return service.calculateMuscleRecovery(workouts, catalog: catalog);
+});
+
+final myTrainerProvider = FutureProvider<MyTrainerView?>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(trainerServiceProvider).getMyTrainer();
+});
+
 final friendshipsProvider = FutureProvider<List<Friendship>>((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getFriendships();
+});
+
+final mutedFriendsProvider = FutureProvider<Set<String>>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getMutedFriendIds();
 });
 
 final leaderboardProvider = FutureProvider.family<LeaderboardResult, LeaderboardKey>((ref, key) async {
@@ -198,6 +292,11 @@ final leaderboardProvider = FutureProvider.family<LeaderboardResult, Leaderboard
 final userSearchProvider = FutureProvider.family<List<FriendUser>, String>((ref, query) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).searchUsers(query);
+});
+
+final friendFavoriteRoutinesProvider = FutureProvider.family<List<Routine>, String>((ref, userId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(routineServiceProvider).getFavoriteRoutinesForUser(userId);
 });
 
 final friendProfileProvider = FutureProvider.family<FriendProfileView?, String>((ref, friendId) async {

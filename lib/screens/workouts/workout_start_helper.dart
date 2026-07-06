@@ -123,20 +123,23 @@ List<WorkoutExercise> workoutExercisesFromRoutine(Routine routine) {
           exerciseName: e.exerciseName,
           imageUrl: e.imageUrl,
           orderIndex: e.orderIndex,
-          sets: List.generate(
-            e.targetSets,
-            (i) => WorkoutSet(
-              id: '',
-              setNumber: i + 1,
-              weight: e.isCardio ? null : e.targetWeight,
-              reps: e.isCardio ? 0 : e.targetReps,
-              loggingType: e.loggingType,
-              durationSeconds: e.targetDurationSeconds,
-              distanceMeters: e.targetDistanceMeters,
-              inclinePercent: e.targetInclinePercent,
-              steps: e.targetSteps,
-            ),
-          ),
+          sets: e.resolvedSetDetails
+              .asMap()
+              .entries
+              .map(
+                (entry) => WorkoutSet(
+                  id: '',
+                  setNumber: entry.key + 1,
+                  weight: e.isCardio ? null : entry.value.weight,
+                  reps: e.isCardio ? 0 : entry.value.reps,
+                  loggingType: e.loggingType,
+                  durationSeconds: e.targetDurationSeconds,
+                  distanceMeters: e.targetDistanceMeters,
+                  inclinePercent: e.targetInclinePercent,
+                  steps: e.targetSteps,
+                ),
+              )
+              .toList(),
         ),
       )
       .toList();
