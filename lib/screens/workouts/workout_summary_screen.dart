@@ -51,9 +51,15 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     return offset & box.size;
   }
 
+  String _shareImageFileName(String displayName) {
+    final label = displayName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').trim();
+    return '${label.isEmpty ? 'FitForge' : label} — FitForge.png';
+  }
+
   Future<bool> _shareWithImageCard({
     required String text,
     required String displayName,
+    required String shareSubject,
     Rect? shareOrigin,
   }) async {
     final boundary =
@@ -66,19 +72,17 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     if (data == null || !mounted) return false;
 
-    final safeName = summary.workout.name
-        .replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '-')
-        .replaceAll(RegExp(r'-+'), '-')
-        .toLowerCase();
-    final fileName = 'fitforge-${safeName.isEmpty ? 'workout' : safeName}.png';
+    final fileName = _shareImageFileName(displayName);
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
 
+    // iOS lists image + text as separate items ("1 Document" / "Plain Text").
+    // The summary card image already contains the workout details.
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'image/png', name: fileName)],
-      text: text,
-      subject: displayName,
+      text: Platform.isIOS ? null : text,
+      subject: shareSubject,
       sharePositionOrigin: shareOrigin,
     );
     return true;
@@ -92,18 +96,20 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     final l10n = context.l10n;
     final displayName = l10n.workoutDisplayName(summary.workout.name);
     final text = WorkoutSummaryShare.formatText(l10n, summary, unit, displayName: displayName);
+    final shareSubject = l10n.shareWorkoutTitle(displayName);
     final shareOrigin = _shareOriginRect();
 
     try {
       final sharedWithImage = await _shareWithImageCard(
         text: text,
         displayName: displayName,
+        shareSubject: shareSubject,
         shareOrigin: shareOrigin,
       );
       if (!sharedWithImage) {
         await Share.share(
           text,
-          subject: displayName,
+          subject: shareSubject,
           sharePositionOrigin: shareOrigin,
         );
       }
