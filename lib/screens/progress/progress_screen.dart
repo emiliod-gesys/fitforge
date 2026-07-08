@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/muscle_inference.dart';
 import '../../core/utils/player_level.dart';
@@ -31,13 +32,23 @@ class ProgressScreen extends ConsumerStatefulWidget {
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   String? _muscleFilter;
 
-  bool _matchesMuscleFilter(PersonalRecord pr, List<Exercise> catalog) {
-    if (_muscleFilter == null) return true;
+  /// Categorías de filtro a las que pertenece un record (Cardio o grupos musculares).
+  List<String> _categoriesFor(PersonalRecord pr, List<Exercise> catalog) {
+    if (pr.isCardio) return const ['Cardio'];
     return MuscleInference.resolve(
       exerciseName: pr.exerciseName,
       exerciseId: pr.exerciseId,
       catalog: catalog,
-    ).contains(_muscleFilter);
+    );
+  }
+
+  /// Grupos musculares con records, en el orden canónico.
+  List<String> _availableMuscles(List<PersonalRecord> prs, List<Exercise> catalog) {
+    final present = <String>{};
+    for (final pr in prs) {
+      present.addAll(_categoriesFor(pr, catalog));
+    }
+    return AppConstants.muscleGroups.where(present.contains).toList();
   }
 
   List<String> _muscleGroupsFor(PersonalRecord pr, List<Exercise> catalog) {
@@ -178,41 +189,60 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             prsAsync.when(
               data: (prs) {
-                final filtered = prs.where((pr) => _matchesMuscleFilter(pr, catalog)).toList();
-                final recent = [...filtered]
-                  ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
-                final recentPreview = recent.take(5).toList();
-                final remainingRecords = _muscleFilter == null && recentPreview.isNotEmpty
-                    ? filtered.skip(5).toList()
-                    : filtered;
-
-                if (filtered.isEmpty) {
+                if (prs.isEmpty) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      ProgressMuscleFilterBar(
-                        selectedMuscle: _muscleFilter,
-                        onChanged: (value) => setState(() => _muscleFilter = value),
-                      ),
                       const SizedBox(height: 16),
-                      Text(
-                        _muscleFilter == null
-                            ? l10n.noRecordsYet
-                            : l10n.noRecordsForMuscle(l10n.muscleLabel(_muscleFilter!)),
-                      ),
+                      Text(l10n.noRecordsYet),
                     ],
                   );
                 }
 
+                final available = _availableMuscles(prs, catalog);
+                if (available.isEmpty) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 16),
+                      Text(l10n.noRecordsYet),
+                    ],
+                  );
+                }
+
+                // Por defecto, el músculo del record más reciente.
+                final mostRecent = [...prs]
+                  ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
+                final recentCats =
+                    _categoriesFor(mostRecent.first, catalog).where(available.contains);
+                final defaultMuscle =
+                    recentCats.isNotEmpty ? recentCats.first : available.first;
+                final selected = (_muscleFilter != null && available.contains(_muscleFilter))
+                    ? _muscleFilter!
+                    : defaultMuscle;
+
+                final filtered = prs
+                    .where((pr) => _categoriesFor(pr, catalog).contains(selected))
+                    .toList()
+                  ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (recentPreview.isNotEmpty && _muscleFilter == null) ...[
-                      Text(l10n.progressRecentPrs, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      ...recentPreview.map(
+                    Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    ProgressMuscleFilterBar(
+                      selectedMuscle: selected,
+                      muscles: available,
+                      onChanged: (value) => setState(() => _muscleFilter = value),
+                    ),
+                    const SizedBox(height: 12),
+                    if (filtered.isEmpty)
+                      Text(l10n.noRecordsForMuscle(l10n.muscleLabel(selected)))
+                    else
+                      ...filtered.map(
                         (pr) => PersonalRecordCard(
                           record: pr,
                           unitSystem: unitSystem,
@@ -220,37 +250,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                           isRecent: _isRecentPr(pr),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                    ],
-                    if (remainingRecords.isNotEmpty) ...[
-                      Text(
-                        _muscleFilter == null ? l10n.progressAllRecords : l10n.personalRecords,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 12),
-                      ProgressMuscleFilterBar(
-                        selectedMuscle: _muscleFilter,
-                        onChanged: (value) => setState(() => _muscleFilter = value),
-                      ),
-                      const SizedBox(height: 12),
-                      ...remainingRecords.map(
-                        (pr) => PersonalRecordCard(
-                          record: pr,
-                          unitSystem: unitSystem,
-                          muscleGroups: _muscleGroupsFor(pr, catalog),
-                          isRecent: _isRecentPr(pr),
-                        ),
-                      ),
-                    ] else if (_muscleFilter != null) ...[
-                      Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      ProgressMuscleFilterBar(
-                        selectedMuscle: _muscleFilter,
-                        onChanged: (value) => setState(() => _muscleFilter = value),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(l10n.noRecordsForMuscle(l10n.muscleLabel(_muscleFilter!))),
-                    ],
                   ],
                 );
               },

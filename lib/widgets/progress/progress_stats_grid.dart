@@ -53,7 +53,7 @@ class ProgressStatsGrid extends StatelessWidget {
           icon: Icons.local_fire_department,
           label: l10n.streakLabel,
           value: l10n.progressStreakWeeks(streakWeeks),
-          accent: const Color(0xFFFF8A65),
+          accent: AppColors.goldDark,
         ),
       ],
     );

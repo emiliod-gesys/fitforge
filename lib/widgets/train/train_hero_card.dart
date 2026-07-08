@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_decorations.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../l10n/l10n_extensions.dart';
 
@@ -44,25 +45,7 @@ class TrainHeroCard extends StatelessWidget {
                 : l10n.trainWeeklyProgress(weekCount, weeklyGoal);
 
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFF6622),
-            Color(0xFFE05518),
-            Color(0xFF8B3A12),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.orange.withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: AppDecorations.heroCard(),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
         child: Column(
@@ -80,7 +63,7 @@ class TrainHeroCard extends StatelessWidget {
             Text(
               subtitle,
               style: const TextStyle(
-                color: Color(0xFFFFE8DC),
+                color: AppDecorations.heroSubtitleColor,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -111,7 +94,7 @@ class TrainHeroCard extends StatelessWidget {
                 label: Text(l10n.startWorkout),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: AppColors.orangeDark,
+                  foregroundColor: AppColors.goldDark,
                   minimumSize: const Size.fromHeight(50),
                   textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),

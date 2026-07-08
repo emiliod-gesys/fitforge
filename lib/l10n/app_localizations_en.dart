@@ -176,7 +176,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentsScreenHint =>
-      'Add friends as students to view their workouts and muscle recovery.';
+      'Send a request to add friends as students. You\'ll only see their data once they accept.';
 
   @override
   String studentsCount(int count) {
@@ -185,7 +185,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentsEmpty =>
-      'No students yet. Add friends from the list below.';
+      'No students yet. Send a request to your friends from the list below.';
 
   @override
   String get addStudentFromFriends => 'Add from friends';
@@ -198,7 +198,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addStudentAction => 'Add student';
 
   @override
+  String get sendStudentRequestAction => 'Send request';
+
+  @override
   String get studentAdded => 'Student added';
+
+  @override
+  String get studentRequestSent => 'Request sent. The student must accept it.';
+
+  @override
+  String get studentRequestCanceled => 'Request canceled';
+
+  @override
+  String get studentRequestsSentSection => 'Sent requests';
+
+  @override
+  String get studentRequestPendingLabel => 'Awaiting approval';
+
+  @override
+  String get trainerRequestAccepted =>
+      'Request accepted. You now have a trainer.';
+
+  @override
+  String get trainerRequestDeclined => 'Request declined';
 
   @override
   String addStudentFailed(String message) {
@@ -212,6 +234,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String removeStudentMessage(String name) {
     return 'Remove $name from your students?';
   }
+
+  @override
+  String get removeStudentAction => 'Remove student';
 
   @override
   String get studentDetailTitle => 'Student';

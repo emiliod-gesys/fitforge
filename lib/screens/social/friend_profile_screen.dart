@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
+import '../../core/utils/muscle_inference.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/exercise.dart';
 import '../../models/exercise_logging.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
@@ -20,6 +23,7 @@ import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/player_level_card.dart';
+import '../../widgets/progress/progress_muscle_filter_bar.dart';
 import '../../widgets/social/friend_favorite_routines_section.dart';
 import '../../widgets/stat_card.dart';
 
@@ -161,55 +165,152 @@ class FriendProfileScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               FriendFavoriteRoutinesSection(userId: friendId, l10n: l10n),
               const SizedBox(height: 24),
-              Text(
-                l10n.personalRecords,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              _FriendPersonalRecordsSection(
+                prs: prs,
+                unitSystem: unitSystem,
+                locale: locale,
+                l10n: l10n,
               ),
-              const SizedBox(height: 8),
-              if (prs.isEmpty)
-                Text(
-                  l10n.noRecordsFriend,
-                  style: const TextStyle(color: AppColors.textMuted),
-                )
-              else
-                ...prs.map((pr) {
-                  if (pr.isCardio) {
-                    return Card(
-                      color: AppColors.card,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        title: LocalizedExerciseName(
-                          pr.exerciseName,
-                          exerciseId: pr.exerciseId,
-                        ),
-                        subtitle: Text(_friendCardioPrLine(pr, unitSystem, l10n)),
-                      ),
-                    );
-                  }
-                  final weight = UnitConverter.kgToDisplay(pr.weight ?? 0, unitSystem);
-                  final orm = UnitConverter.kgToDisplay(pr.oneRepMax ?? 0, unitSystem);
-                  final label = UnitConverter.massLabel(unitSystem);
-                  return Card(
-                    color: AppColors.card,
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      title: LocalizedExerciseName(
-                        pr.exerciseName,
-                        exerciseId: pr.exerciseId,
-                      ),
-                      subtitle: Text(
-                        '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label',
-                      ),
-                      trailing: Text(
-                        DateFormat('d MMM', locale).format(pr.achievedAt),
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                      ),
-                    ),
-                  );
-                }),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _FriendPersonalRecordsSection extends ConsumerStatefulWidget {
+  final List<PersonalRecord> prs;
+  final String unitSystem;
+  final String locale;
+  final AppLocalizations l10n;
+
+  const _FriendPersonalRecordsSection({
+    required this.prs,
+    required this.unitSystem,
+    required this.locale,
+    required this.l10n,
+  });
+
+  @override
+  ConsumerState<_FriendPersonalRecordsSection> createState() =>
+      _FriendPersonalRecordsSectionState();
+}
+
+class _FriendPersonalRecordsSectionState
+    extends ConsumerState<_FriendPersonalRecordsSection> {
+  String? _muscleFilter;
+
+  List<String> _categoriesFor(PersonalRecord pr, List<Exercise> catalog) {
+    if (pr.isCardio) return const ['Cardio'];
+    return MuscleInference.resolve(
+      exerciseName: pr.exerciseName,
+      exerciseId: pr.exerciseId,
+      catalog: catalog,
+    );
+  }
+
+  List<String> _availableMuscles(List<PersonalRecord> prs, List<Exercise> catalog) {
+    final present = <String>{};
+    for (final pr in prs) {
+      present.addAll(_categoriesFor(pr, catalog));
+    }
+    return AppConstants.muscleGroups.where(present.contains).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final prs = widget.prs;
+    final catalog = ref.watch(exercisesProvider).valueOrNull ?? const [];
+
+    final header = Text(
+      l10n.personalRecords,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    );
+
+    if (prs.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          const SizedBox(height: 8),
+          Text(l10n.noRecordsFriend, style: const TextStyle(color: AppColors.textMuted)),
+        ],
+      );
+    }
+
+    final available = _availableMuscles(prs, catalog);
+    if (available.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          const SizedBox(height: 8),
+          ...prs.map(_buildCard),
+        ],
+      );
+    }
+
+    final mostRecent = [...prs]..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
+    final recentCats = _categoriesFor(mostRecent.first, catalog).where(available.contains);
+    final defaultMuscle = recentCats.isNotEmpty ? recentCats.first : available.first;
+    final selected = (_muscleFilter != null && available.contains(_muscleFilter))
+        ? _muscleFilter!
+        : defaultMuscle;
+
+    final filtered = prs
+        .where((pr) => _categoriesFor(pr, catalog).contains(selected))
+        .toList()
+      ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        header,
+        const SizedBox(height: 12),
+        ProgressMuscleFilterBar(
+          selectedMuscle: selected,
+          muscles: available,
+          onChanged: (value) => setState(() => _muscleFilter = value),
+        ),
+        const SizedBox(height: 12),
+        if (filtered.isEmpty)
+          Text(l10n.noRecordsForMuscle(l10n.muscleLabel(selected)))
+        else
+          ...filtered.map(_buildCard),
+      ],
+    );
+  }
+
+  Widget _buildCard(PersonalRecord pr) {
+    final l10n = widget.l10n;
+    final unitSystem = widget.unitSystem;
+    if (pr.isCardio) {
+      return Card(
+        color: AppColors.card,
+        margin: const EdgeInsets.only(bottom: 8),
+        child: ListTile(
+          title: LocalizedExerciseName(pr.exerciseName, exerciseId: pr.exerciseId),
+          subtitle: Text(_friendCardioPrLine(pr, unitSystem, l10n)),
+        ),
+      );
+    }
+    final weight = UnitConverter.kgToDisplay(pr.weight ?? 0, unitSystem);
+    final orm = UnitConverter.kgToDisplay(pr.oneRepMax ?? 0, unitSystem);
+    final label = UnitConverter.massLabel(unitSystem);
+    return Card(
+      color: AppColors.card,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        title: LocalizedExerciseName(pr.exerciseName, exerciseId: pr.exerciseId),
+        subtitle: Text(
+          '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label',
+        ),
+        trailing: Text(
+          DateFormat('d MMM', widget.locale).format(pr.achievedAt),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+        ),
       ),
     );
   }

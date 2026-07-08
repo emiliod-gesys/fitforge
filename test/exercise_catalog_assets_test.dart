@@ -44,6 +44,55 @@ void main() {
       }
     });
 
+    test('every imageUrl file extension matches its binary format', () {
+      String? detectFormat(List<int> bytes) {
+        if (bytes.length >= 3 &&
+            bytes[0] == 0x47 &&
+            bytes[1] == 0x49 &&
+            bytes[2] == 0x46) {
+          return 'gif';
+        }
+        if (bytes.length >= 8 &&
+            bytes[0] == 0x89 &&
+            bytes[1] == 0x50 &&
+            bytes[2] == 0x4E &&
+            bytes[3] == 0x47) {
+          return 'png';
+        }
+        if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xD8) {
+          return 'jpg';
+        }
+        if (bytes.length >= 12 &&
+            bytes[0] == 0x52 &&
+            bytes[1] == 0x49 &&
+            bytes[2] == 0x46 &&
+            bytes[3] == 0x46 &&
+            bytes[8] == 0x57 &&
+            bytes[9] == 0x45 &&
+            bytes[10] == 0x42 &&
+            bytes[11] == 0x50) {
+          return 'webp';
+        }
+        return null;
+      }
+
+      for (final entry in exercises) {
+        final id = entry['id'] as String;
+        final imageUrl = entry['imageUrl'] as String;
+        final file = File(imageUrl);
+        final ext = file.path.split('.').last.toLowerCase();
+        final format = detectFormat(file.readAsBytesSync());
+
+        expect(format, isNotNull, reason: 'unknown format for $id');
+        final normalizedExt = ext == 'jpeg' ? 'jpg' : ext;
+        expect(
+          normalizedExt,
+          format,
+          reason: '$id uses .$ext but file is $format',
+        );
+      }
+    });
+
     test('every imageUrl loads from the asset bundle', () async {
       for (final entry in exercises) {
         final id = entry['id'] as String;

@@ -183,7 +183,7 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
             if (widget.isLoading)
               Shimmer.fromColors(
                 baseColor: AppColors.cardElevated,
-                highlightColor: AppColors.card,
+                highlightColor: Color.lerp(AppColors.card, AppColors.gold, 0.12)!,
                 child: Container(
                   height: widget.compact ? 220 : 280,
                   decoration: BoxDecoration(

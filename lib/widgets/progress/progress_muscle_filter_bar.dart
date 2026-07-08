@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 
 class ProgressMuscleFilterBar extends StatelessWidget {
-  final String? selectedMuscle;
-  final ValueChanged<String?> onChanged;
+  final String selectedMuscle;
+  final List<String> muscles;
+  final ValueChanged<String> onChanged;
 
   const ProgressMuscleFilterBar({
     super.key,
     required this.selectedMuscle,
+    required this.muscles,
     required this.onChanged,
   });
 
@@ -22,18 +23,13 @@ class ProgressMuscleFilterBar extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _FilterChip(
-            label: l10n.all,
-            selected: selectedMuscle == null,
-            onTap: () => onChanged(null),
+          ...muscles.map(
+            (muscle) => _FilterChip(
+              label: l10n.muscleLabel(muscle),
+              selected: selectedMuscle == muscle,
+              onTap: () => onChanged(muscle),
+            ),
           ),
-          ...AppConstants.muscleGroups.where((m) => m != 'Cardio').map(
-                (muscle) => _FilterChip(
-                  label: l10n.muscleLabel(muscle),
-                  selected: selectedMuscle == muscle,
-                  onTap: () => onChanged(selectedMuscle == muscle ? null : muscle),
-                ),
-              ),
         ],
       ),
     );

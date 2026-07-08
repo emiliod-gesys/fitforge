@@ -36,17 +36,7 @@ class TrainerService {
         (p as Map)['id'] as String: FriendUser.fromJson(Map<String, dynamic>.from(p)),
     };
 
-    return rows
-        .map(
-          (r) => TrainerStudent(
-            id: r.id,
-            trainerId: r.trainerId,
-            studentId: r.studentId,
-            createdAt: r.createdAt,
-            student: profiles[r.studentId],
-          ),
-        )
-        .toList();
+    return rows.map((r) => r.copyWith(student: profiles[r.studentId])).toList();
   }
 
   /// Amigos aceptados que aún no son alumnos (y no son entrenadores).
@@ -79,12 +69,28 @@ class TrainerService {
     return friends.where((f) => !trainerIds.contains(f.id)).toList();
   }
 
+  /// Envía una solicitud pendiente al alumno (requiere su aprobación).
   Future<void> addStudent(String studentId) async {
     await _client.rpc('add_trainer_student', params: {'p_student_id': studentId});
   }
 
+  /// Elimina el vínculo (o cancela una solicitud pendiente) como entrenador.
   Future<void> removeStudent(String studentId) async {
     await _client.rpc('remove_trainer_student', params: {'p_student_id': studentId});
+  }
+
+  /// El alumno acepta o rechaza una solicitud de entrenador.
+  Future<void> respondToTrainerRequest({
+    required String requestId,
+    required bool accept,
+  }) async {
+    await _client.rpc(
+      'respond_trainer_request',
+      params: {
+        'p_request_id': requestId,
+        'p_accept': accept,
+      },
+    );
   }
 
   Future<StudentProfileView?> getStudentProfile(String studentId) async {
@@ -96,6 +102,7 @@ class TrainerService {
         .select('id')
         .eq('trainer_id', uid)
         .eq('student_id', studentId)
+        .eq('status', 'accepted')
         .maybeSingle();
 
     if (link == null) return null;
@@ -123,6 +130,7 @@ class TrainerService {
         .from('trainer_students')
         .select('trainer_id, created_at')
         .eq('student_id', uid)
+        .eq('status', 'accepted')
         .order('created_at', ascending: false)
         .limit(1)
         .maybeSingle();

@@ -176,7 +176,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get studentsScreenHint =>
-      'Agrega amigos como alumnos para ver sus entrenos y recuperación muscular.';
+      'Envía una solicitud a tus amigos para agregarlos como alumnos. Solo verás sus datos cuando la acepten.';
 
   @override
   String studentsCount(int count) {
@@ -185,7 +185,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get studentsEmpty =>
-      'Aún no tienes alumnos. Agrega amigos desde la lista de abajo.';
+      'Aún no tienes alumnos. Envía una solicitud a tus amigos desde la lista de abajo.';
 
   @override
   String get addStudentFromFriends => 'Agregar desde amigos';
@@ -198,7 +198,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addStudentAction => 'Agregar alumno';
 
   @override
+  String get sendStudentRequestAction => 'Enviar solicitud';
+
+  @override
   String get studentAdded => 'Alumno agregado';
+
+  @override
+  String get studentRequestSent =>
+      'Solicitud enviada. El alumno debe aceptarla.';
+
+  @override
+  String get studentRequestCanceled => 'Solicitud cancelada';
+
+  @override
+  String get studentRequestsSentSection => 'Solicitudes enviadas';
+
+  @override
+  String get studentRequestPendingLabel => 'Pendiente de aprobación';
+
+  @override
+  String get trainerRequestAccepted =>
+      'Solicitud aceptada. Ahora tienes un entrenador.';
+
+  @override
+  String get trainerRequestDeclined => 'Solicitud rechazada';
 
   @override
   String addStudentFailed(String message) {
@@ -212,6 +235,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String removeStudentMessage(String name) {
     return '¿Quitar a $name de tus alumnos?';
   }
+
+  @override
+  String get removeStudentAction => 'Eliminar alumno';
 
   @override
   String get studentDetailTitle => 'Alumno';

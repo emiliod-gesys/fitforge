@@ -29,7 +29,6 @@ HEADERS = {"User-Agent": "FitForge/1.0 (exercise media bundler)"}
 CATALOG_ASSET_ALIASES: dict[str, str] = {
     "ff_legs_front_squat": "assets/exercises/ff_legs_barbell_front_squat.jpg",
     "ff_back_romanian_deadlift": "assets/exercises/ff_back_barbell_romanian_deadlift.gif",
-    "ff_back_straight_arm_cable_pulldown": "assets/exercises/ff_back_cable_pull_down.gif",
 }
 
 # Sin match fiable en ExerciseDB; GIF del índice GymGifs por nombre exacto.

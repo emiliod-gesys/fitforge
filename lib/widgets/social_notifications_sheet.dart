@@ -69,6 +69,9 @@ class SocialNotificationsSheet extends ConsumerWidget {
       return;
     }
 
+    // La solicitud de entrenador se resuelve con los botones aceptar/rechazar.
+    if (notification.isTrainerRequest && notification.isUnread) return;
+
     if (notification.isUnread) {
       await ref.read(socialServiceProvider).markNotificationRead(notification.id);
       ref.invalidate(socialNotificationsProvider);
@@ -106,6 +109,42 @@ class SocialNotificationsSheet extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(accept ? l10n.routineShareAccepted : l10n.routineShareDeclined),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.saveFailed('$e')),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _respondTrainerRequest(
+    BuildContext context,
+    WidgetRef ref,
+    SocialNotification notification,
+    bool accept,
+  ) async {
+    final requestId = notification.referenceId;
+    if (requestId == null) return;
+    final l10n = context.l10n;
+
+    try {
+      await ref.read(trainerServiceProvider).respondToTrainerRequest(
+            requestId: requestId,
+            accept: accept,
+          );
+      ref.invalidate(socialNotificationsProvider);
+      ref.invalidate(socialUnreadCountProvider);
+      ref.invalidate(myTrainerProvider);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(accept ? l10n.trainerRequestAccepted : l10n.trainerRequestDeclined),
         ),
       );
     } catch (e) {
@@ -192,6 +231,8 @@ class SocialNotificationsSheet extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final notification = notifications[index];
                       final isShare = notification.isRoutineShare && notification.isUnread;
+                      final isTrainerReq =
+                          notification.isTrainerRequest && notification.isUnread;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,7 +245,9 @@ class SocialNotificationsSheet extends ConsumerWidget {
                               child: Icon(
                                 notification.isRoutineShare
                                     ? Icons.share_outlined
-                                    : Icons.fitness_center,
+                                    : notification.isTrainerRequest
+                                        ? Icons.school_outlined
+                                        : Icons.fitness_center,
                                 color: notification.isUnread
                                     ? AppColors.orange
                                     : AppColors.textMuted,
@@ -251,6 +294,29 @@ class SocialNotificationsSheet extends ConsumerWidget {
                                     child: ElevatedButton(
                                       onPressed: () =>
                                           _respondShare(context, ref, notification, true),
+                                      child: Text(l10n.accept),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (isTrainerReq && notification.referenceId != null)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => _respondTrainerRequest(
+                                          context, ref, notification, false),
+                                      child: Text(l10n.decline),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () => _respondTrainerRequest(
+                                          context, ref, notification, true),
                                       child: Text(l10n.accept),
                                     ),
                                   ),

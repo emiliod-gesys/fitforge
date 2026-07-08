@@ -10,22 +10,22 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.orange,
-        onPrimary: Colors.white,
-        secondary: AppColors.slate,
+        primary: AppColors.gold,
+        onPrimary: Colors.black,
+        secondary: AppColors.goldDark,
         onSecondary: AppColors.textPrimary,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
         error: AppColors.error,
         outline: AppColors.border,
       ),
-      scaffoldBackgroundColor: AppColors.black,
+      scaffoldBackgroundColor: AppColors.surface,
       cardColor: AppColors.card,
       dividerColor: AppColors.border,
-      splashColor: AppColors.orange.withValues(alpha: 0.12),
-      highlightColor: AppColors.orange.withValues(alpha: 0.08),
+      splashColor: AppColors.gold.withValues(alpha: 0.12),
+      highlightColor: AppColors.gold.withValues(alpha: 0.08),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.black,
+        backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -39,19 +39,19 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.card,
-        indicatorColor: AppColors.orange.withValues(alpha: 0.18),
+        indicatorColor: AppColors.gold.withValues(alpha: 0.18),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return GoogleFonts.montserrat(
             fontSize: 11,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppColors.orange : AppColors.textMuted,
+            color: selected ? AppColors.gold : AppColors.textMuted,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? AppColors.orange : AppColors.textMuted,
+            color: selected ? AppColors.gold : AppColors.textMuted,
             size: 22,
           );
         }),
@@ -59,8 +59,8 @@ class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.orange,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.gold,
+        foregroundColor: Colors.black,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
@@ -86,7 +86,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -96,8 +96,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.orange,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.gold,
+          foregroundColor: Colors.black,
           disabledBackgroundColor: AppColors.slate,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: 0,
@@ -107,8 +107,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.orange,
-          side: const BorderSide(color: AppColors.orange),
+          foregroundColor: AppColors.gold,
+          side: const BorderSide(color: AppColors.gold),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
           textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
@@ -116,19 +116,19 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.orange,
+          foregroundColor: AppColors.gold,
           textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
         ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.cardElevated,
-        selectedColor: AppColors.orange.withValues(alpha: 0.2),
+        selectedColor: AppColors.gold.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.montserrat(fontSize: 13),
         side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.orange,
+        color: AppColors.gold,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.cardElevated,

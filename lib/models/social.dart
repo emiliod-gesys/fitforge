@@ -106,6 +106,7 @@ class SocialNotification {
 
   bool get isUnread => readAt == null;
   bool get isRoutineShare => type == 'routine_share';
+  bool get isTrainerRequest => type == 'trainer_request';
 
   factory SocialNotification.fromJson(Map<String, dynamic> json) {
     return SocialNotification(

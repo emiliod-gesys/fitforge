@@ -24,12 +24,7 @@ class FitForgeLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (variant) {
-      FitForgeLogoVariant.full => Image.asset(
-          'assets/images/logo_full.png',
-          height: height ?? 120,
-          width: width,
-          fit: BoxFit.contain,
-        ),
+      FitForgeLogoVariant.full => _FullLogo(height: height ?? 140, width: width),
       FitForgeLogoVariant.icon => Image.asset(
           'assets/images/logo_icon.png',
           height: height ?? 64,
@@ -38,6 +33,36 @@ class FitForgeLogo extends StatelessWidget {
         ),
       FitForgeLogoVariant.wordmark => _Wordmark(height: height ?? 32),
     };
+  }
+}
+
+class _FullLogo extends StatelessWidget {
+  final double height;
+  final double? width;
+
+  const _FullLogo({required this.height, this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    final markHeight = height * 0.72;
+    final wordmarkHeight = height * 0.16;
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/logo_icon.png',
+            height: markHeight,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(height: height * 0.06),
+          _Wordmark(height: wordmarkHeight),
+        ],
+      ),
+    );
   }
 }
 

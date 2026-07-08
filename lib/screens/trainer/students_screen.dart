@@ -9,6 +9,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/social/friend_tile.dart';
+import '../../widgets/social/pending_request_tile.dart';
 import '../../widgets/social/social_section_header.dart';
 
 class StudentsScreen extends ConsumerWidget {
@@ -53,7 +54,11 @@ class StudentsScreen extends ConsumerWidget {
               style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
             const SizedBox(height: 16),
-            SocialSectionHeader(title: l10n.studentsCount(studentsAsync.valueOrNull?.length ?? 0)),
+            SocialSectionHeader(
+              title: l10n.studentsCount(
+                studentsAsync.valueOrNull?.where((s) => s.isAccepted).length ?? 0,
+              ),
+            ),
             studentsAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.all(24),
@@ -61,21 +66,45 @@ class StudentsScreen extends ConsumerWidget {
               ),
               error: (e, _) => Text(l10n.errorGeneric('$e'), style: const TextStyle(color: AppColors.error)),
               data: (students) {
-                if (students.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(l10n.studentsEmpty, style: const TextStyle(color: AppColors.textMuted)),
-                  );
-                }
+                final accepted = students.where((s) => s.isAccepted).toList();
+                final pending = students.where((s) => s.isPending).toList();
+
                 return Column(
-                  children: students.map((entry) {
-                    final student = entry.student ?? FriendUser(id: entry.studentId);
-                    return FriendTile(
-                      friend: student,
-                      onTap: () => context.push('/students/${entry.studentId}'),
-                      onLongPress: () => _confirmRemove(context, ref, student.label, entry.studentId),
-                    );
-                  }).toList(),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (accepted.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(l10n.studentsEmpty, style: const TextStyle(color: AppColors.textMuted)),
+                      )
+                    else
+                      ...accepted.map((entry) {
+                        final student = entry.student ?? FriendUser(id: entry.studentId);
+                        return FriendTile(
+                          friend: student,
+                          onTap: () => context.push('/students/${entry.studentId}'),
+                          onLongPress: () => _confirmRemove(context, ref, student.label, entry.studentId),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppColors.textMuted),
+                            tooltip: l10n.removeStudentAction,
+                            onPressed: () => _confirmRemove(context, ref, student.label, entry.studentId),
+                          ),
+                        );
+                      }),
+                    if (pending.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      SocialSectionHeader(title: l10n.studentRequestsSentSection),
+                      ...pending.map((entry) {
+                        final student = entry.student ?? FriendUser(id: entry.studentId);
+                        return PendingRequestTile(
+                          friend: student,
+                          subtitle: l10n.studentRequestPendingLabel,
+                          incoming: false,
+                          onDecline: () => _cancelRequest(context, ref, entry.studentId),
+                        );
+                      }),
+                    ],
+                  ],
                 );
               },
             ),
@@ -98,7 +127,7 @@ class StudentsScreen extends ConsumerWidget {
                           friend: friend,
                           trailing: IconButton(
                             icon: const Icon(Icons.person_add_alt_1_outlined, color: AppColors.orange),
-                            tooltip: l10n.addStudentAction,
+                            tooltip: l10n.sendStudentRequestAction,
                             onPressed: () => _addStudent(context, ref, friend.id),
                           ),
                         ),
@@ -121,13 +150,33 @@ class StudentsScreen extends ConsumerWidget {
       ref.invalidate(trainerAddableFriendsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.studentAdded)),
+          SnackBar(content: Text(l10n.studentRequestSent)),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.addStudentFailed('$e'))),
+        );
+      }
+    }
+  }
+
+  Future<void> _cancelRequest(BuildContext context, WidgetRef ref, String studentId) async {
+    final l10n = context.l10n;
+    try {
+      await ref.read(trainerServiceProvider).removeStudent(studentId);
+      ref.invalidate(trainerStudentsProvider);
+      ref.invalidate(trainerAddableFriendsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.studentRequestCanceled)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorGeneric('$e'))),
         );
       }
     }

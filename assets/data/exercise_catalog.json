@@ -221,7 +221,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_legs_air_squat.gif",
-      "exercisedbId": "QpXqiq8",
+      "exercisedbId": "QChZi3x",
       "matchConfidence": "high",
       "matchScore": 0.9029
     },
@@ -601,7 +601,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_back_australian_pull_up.gif",
-      "exercisedbId": "lBDjFxJ",
+      "exercisedbId": "bZGHsAZ",
       "matchConfidence": "high",
       "matchScore": 0.94
     },
@@ -1192,7 +1192,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_belt_squat_machine.png",
+      "imageUrl": "assets/exercises/ff_legs_belt_squat_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -1508,7 +1508,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_biceps_cable_curl.gif",
-      "exercisedbId": "NvfE43H",
+      "exercisedbId": "G08RZcQ",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -1553,7 +1553,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_chest_cable_fly.gif",
-      "exercisedbId": "FVmZVhk",
+      "exercisedbId": "Pr9Rhf4",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -1676,12 +1676,12 @@
         ]
       },
       "names": {
-        "es": "Elevación lateral en polea",
-        "en": "Cable Lateral Raise"
+        "es": "Elevaciones laterales con cable (un solo brazo)",
+        "en": "Cable Lateral Raises (Single Arm)"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "La elevación lateral con cable con un solo brazo es una variación de la elevación lateral y un ejercicio que se utiliza para desarrollar los músculos de los hombros. Coloque un cable en la posición más baja posible y coloque una sola manija. Estire su cuerpo y agarre el mango con un agarre neutral. Mantenga el codo ligeramente doblado, tire del mango a lo largo de su cuerpo y levántelo lateralmente. Baje lentamente la manija hasta el inicio bajo control.",
+        "en": "The single arm cable lateral raise is a variation of the lateral raise and an exercise used to build the muscles of the shoulders. Position a cable at the lowest position possible and attach a single handle. Reach across your body and grab the handle with a neutral grip. Keep the elbow slightly bent and pull the handle across your body and raise laterally. Slowly lower the handle back to the starting position under control."
       },
       "aliases": {
         "es": [],
@@ -2668,7 +2668,7 @@
           "High Cable Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_lat_pulldown_classic.png",
+      "imageUrl": "assets/exercises/ff_back_lat_pulldown_classic.gif",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -3268,7 +3268,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_glutes_donkey_kick.gif",
-      "exercisedbId": "u5ESqzH",
+      "exercisedbId": "Kpajagk",
       "matchConfidence": "high",
       "matchScore": 0.8482
     },
@@ -3589,7 +3589,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_shoulders_dumbbell_lateral_raise.gif",
-      "exercisedbId": "AQ0mC4Y",
+      "exercisedbId": "DsgkuIt",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -3820,7 +3820,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_calves_elevated_calf_raise.gif",
-      "exercisedbId": "u5ESqzH",
+      "exercisedbId": "6HmFgmx",
       "matchConfidence": "high",
       "matchScore": 0.9052
     },
@@ -4528,7 +4528,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_chest_hex_dumbbell_press.gif",
-      "exercisedbId": "SpYC0Kp",
+      "exercisedbId": "pP8wP2P",
       "matchConfidence": "high",
       "matchScore": 0.9313
     },
@@ -4573,7 +4573,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_biceps_high_cable_curl.gif",
-      "exercisedbId": "G08RZcQ",
+      "exercisedbId": "wDUqY2u",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -4667,7 +4667,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_chest_high_to_low_cable_fly.gif",
-      "exercisedbId": "FVmZVhk",
+      "exercisedbId": "tBWXbIT",
       "matchConfidence": "high",
       "matchScore": 0.956
     },
@@ -4721,7 +4721,7 @@
         ]
       },
       "imageUrl": "assets/exercises/ff_cardio_hiking.gif",
-      "exercisedbId": "rjiM4L3",
+      "exercisedbId": "IZVHb27",
       "matchConfidence": "curated",
       "matchScore": null
     },
@@ -5364,7 +5364,7 @@
           "Plyometric box jump"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_box_jump.png",
+      "imageUrl": "assets/exercises/ff_cf_box_jump.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -6551,7 +6551,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_back_lat_pulldown_machine.gif",
-      "exercisedbId": "ecpY0rH",
+      "exercisedbId": "LEprlgG",
       "matchConfidence": "high",
       "matchScore": 0.956
     },
@@ -6688,7 +6688,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_legs_leg_press_machine.gif",
-      "exercisedbId": "IeDEXTe",
+      "exercisedbId": "10Z2DXU",
       "matchConfidence": "high",
       "matchScore": 0.934
     },
@@ -6919,7 +6919,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_machine_dip.png",
+      "imageUrl": "assets/exercises/ff_triceps_machine_dip.jpg",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -7693,7 +7693,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_legs_pistol_squat.gif",
-      "exercisedbId": "QpXqiq8",
+      "exercisedbId": "nqs5HGV",
       "matchConfidence": "high",
       "matchScore": 0.9
     },
@@ -7983,7 +7983,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_back_pull_up.gif",
-      "exercisedbId": "mExgrF9",
+      "exercisedbId": "lBDjFxJ",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -8461,7 +8461,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_chest_ring_push_up.gif",
-      "exercisedbId": "I4hDWkc",
+      "exercisedbId": "IaGQCrC",
       "matchConfidence": "high",
       "matchScore": 1.0
     },
@@ -9220,7 +9220,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_triceps_single_arm_cable_pushdown.gif",
-      "exercisedbId": "3ZflifB",
+      "exercisedbId": "qRZ5S1N",
       "matchConfidence": "high",
       "matchScore": 0.956
     },
@@ -9265,7 +9265,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_shoulders_single_arm_dumbbell_lateral_raise.gif",
-      "exercisedbId": "DsgkuIt",
+      "exercisedbId": "n5cWCsI",
       "matchConfidence": "high",
       "matchScore": 0.956
     },
@@ -9730,7 +9730,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_smith_machine_bench_press.png",
+      "imageUrl": "assets/exercises/ff_chest_smith_machine_bench_press.webp",
       "exercisedbId": "trqKQv2",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -10439,8 +10439,8 @@
           "Cable Straight Arm Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_cable_pull_down.gif",
-      "exercisedbId": null,
+      "imageUrl": "assets/exercises/ff_back_straight_arm_cable_pulldown.gif",
+      "exercisedbId": "x69MAlq",
       "matchConfidence": "curated",
       "matchScore": null
     },
@@ -10485,7 +10485,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_triceps_straight_bar_pushdown.gif",
-      "exercisedbId": "3ZflifB",
+      "exercisedbId": "gAwDzB3",
       "matchConfidence": "high",
       "matchScore": 0.846
     },
@@ -11029,7 +11029,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_legs_v_squat_machine.gif",
-      "exercisedbId": "IeDEXTe",
+      "exercisedbId": "Qa55kX1",
       "matchConfidence": "high",
       "matchScore": 0.8947
     },
@@ -11172,7 +11172,7 @@
         "en": []
       },
       "imageUrl": "assets/exercises/ff_back_wide_grip_lat_pulldown_machine.gif",
-      "exercisedbId": "ecpY0rH",
+      "exercisedbId": "rkg41Fb",
       "matchConfidence": "high",
       "matchScore": 0.862
     },
@@ -11226,7 +11226,7 @@
           "Parallel Grip Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_v_bar_lat_pulldown.png",
+      "imageUrl": "assets/exercises/ff_back_v_bar_lat_pulldown.gif",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11281,7 +11281,7 @@
           "Single-Arm Cable Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_single_arm_lat_pulldown.png",
+      "imageUrl": "assets/exercises/ff_back_single_arm_lat_pulldown.gif",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11336,7 +11336,7 @@
           "Neutral Grip Cable Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_cable_parallel_grip_lat_pulldown.png",
+      "imageUrl": "assets/exercises/ff_back_cable_parallel_grip_lat_pulldown.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11444,7 +11444,7 @@
           "Seated Rotary Torso"
         ]
       },
-      "imageUrl": "assets/exercises/ff_abs_rotary_torso_machine.png",
+      "imageUrl": "assets/exercises/ff_abs_rotary_torso_machine.gif",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11501,7 +11501,7 @@
           "Diverging Seated Row Machine"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_seated_row_machine.png",
+      "imageUrl": "assets/exercises/ff_back_seated_row_machine.gif",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11552,7 +11552,7 @@
           "Palms-up wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_dumbbell_wrist_curl.png",
+      "imageUrl": "assets/exercises/ff_forearms_dumbbell_wrist_curl.gif",
       "exercisedbId": "2dImyQ8",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11603,7 +11603,7 @@
           "Palms-down wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_dumbbell_reverse_wrist_curl.png",
+      "imageUrl": "assets/exercises/ff_forearms_dumbbell_reverse_wrist_curl.webp",
       "exercisedbId": "BLCvwr2",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11707,7 +11707,7 @@
           "Palms-down barbell wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_barbell_reverse_wrist_curl.png",
+      "imageUrl": "assets/exercises/ff_forearms_barbell_reverse_wrist_curl.gif",
       "exercisedbId": "LsZkfU6",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11758,7 +11758,7 @@
           "Cable palms-up wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_cable_wrist_curl.png",
+      "imageUrl": "assets/exercises/ff_forearms_cable_wrist_curl.webp",
       "exercisedbId": "LrV4s90",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11812,7 +11812,7 @@
           "Wrist roller exercise"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_wrist_roller.png",
+      "imageUrl": "assets/exercises/ff_forearms_wrist_roller.webp",
       "exercisedbId": "bd5b860",
       "matchConfidence": "curated",
       "matchScore": null

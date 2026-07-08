@@ -413,7 +413,7 @@ abstract class AppLocalizations {
   /// No description provided for @studentsScreenHint.
   ///
   /// In es, this message translates to:
-  /// **'Agrega amigos como alumnos para ver sus entrenos y recuperación muscular.'**
+  /// **'Envía una solicitud a tus amigos para agregarlos como alumnos. Solo verás sus datos cuando la acepten.'**
   String get studentsScreenHint;
 
   /// No description provided for @studentsCount.
@@ -425,7 +425,7 @@ abstract class AppLocalizations {
   /// No description provided for @studentsEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no tienes alumnos. Agrega amigos desde la lista de abajo.'**
+  /// **'Aún no tienes alumnos. Envía una solicitud a tus amigos desde la lista de abajo.'**
   String get studentsEmpty;
 
   /// No description provided for @addStudentFromFriends.
@@ -446,11 +446,53 @@ abstract class AppLocalizations {
   /// **'Agregar alumno'**
   String get addStudentAction;
 
+  /// No description provided for @sendStudentRequestAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar solicitud'**
+  String get sendStudentRequestAction;
+
   /// No description provided for @studentAdded.
   ///
   /// In es, this message translates to:
   /// **'Alumno agregado'**
   String get studentAdded;
+
+  /// No description provided for @studentRequestSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud enviada. El alumno debe aceptarla.'**
+  String get studentRequestSent;
+
+  /// No description provided for @studentRequestCanceled.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud cancelada'**
+  String get studentRequestCanceled;
+
+  /// No description provided for @studentRequestsSentSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes enviadas'**
+  String get studentRequestsSentSection;
+
+  /// No description provided for @studentRequestPendingLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente de aprobación'**
+  String get studentRequestPendingLabel;
+
+  /// No description provided for @trainerRequestAccepted.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud aceptada. Ahora tienes un entrenador.'**
+  String get trainerRequestAccepted;
+
+  /// No description provided for @trainerRequestDeclined.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud rechazada'**
+  String get trainerRequestDeclined;
 
   /// No description provided for @addStudentFailed.
   ///
@@ -469,6 +511,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¿Quitar a {name} de tus alumnos?'**
   String removeStudentMessage(String name);
+
+  /// No description provided for @removeStudentAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar alumno'**
+  String get removeStudentAction;
 
   /// No description provided for @studentDetailTitle.
   ///

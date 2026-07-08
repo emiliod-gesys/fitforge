@@ -467,7 +467,7 @@ void main() {
         ),
         Exercise(
           catalogId: 'ff_shoulders_cable_lateral_raise',
-          name: 'Elevación lateral en polea',
+          name: 'Elevaciones laterales con cable (un solo brazo)',
           category: 'Hombros',
           muscles: ['Deltoides lateral', 'Upper Traps'],
           isBundled: true,
