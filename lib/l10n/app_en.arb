@@ -126,6 +126,8 @@
   "apiKeysNotAvailableOnPaidPlan": "Your plan already includes AI — you don't need your own API key",
   "featureGymratPlansOnly": "Gymrat and Gymrat Pro users only",
   "featureGymratProOnly": "Gymrat Pro users only",
+  "subscriptionTierGymrat": "Gymrat",
+  "subscriptionTierGymratPro": "Gymrat Pro",
   "aiCoachSubtitle": "Personalized recommendations",
   "proactiveAi": "Proactive AI",
   "proactiveAiSubtitleOff": "AI only responds when you message it",

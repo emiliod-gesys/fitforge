@@ -21,6 +21,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
+import '../../widgets/profile/subscription_tier_label.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/player_level_card.dart';
 import '../../widgets/progress/progress_muscle_filter_bar.dart';
@@ -365,6 +366,7 @@ class _ProfileHeader extends StatelessWidget {
               user.label,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+            SubscriptionTierLabel(tier: profile.subscriptionTier),
             const SizedBox(height: 12),
             PlayerLevelCard(
               progress: PlayerLevelCalculator.fromTotalXp(profile.totalXp),

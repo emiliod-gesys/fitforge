@@ -437,6 +437,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get featureGymratProOnly => 'Solo para usuarios Gymrat Pro';
 
   @override
+  String get subscriptionTierGymrat => 'Gymrat';
+
+  @override
+  String get subscriptionTierGymratPro => 'Gymrat Pro';
+
+  @override
   String get aiCoachSubtitle => 'Recomendaciones personalizadas';
 
   @override

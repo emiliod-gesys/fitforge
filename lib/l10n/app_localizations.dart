@@ -884,6 +884,18 @@ abstract class AppLocalizations {
   /// **'Solo para usuarios Gymrat Pro'**
   String get featureGymratProOnly;
 
+  /// No description provided for @subscriptionTierGymrat.
+  ///
+  /// In es, this message translates to:
+  /// **'Gymrat'**
+  String get subscriptionTierGymrat;
+
+  /// No description provided for @subscriptionTierGymratPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Gymrat Pro'**
+  String get subscriptionTierGymratPro;
+
   /// No description provided for @aiCoachSubtitle.
   ///
   /// In es, this message translates to:

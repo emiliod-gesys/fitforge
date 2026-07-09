@@ -44,6 +44,14 @@ extension ProfileL10n on AppLocalizations {
     };
   }
 
+  String? subscriptionTierLabel(SubscriptionTier tier) {
+    return switch (tier) {
+      SubscriptionTier.gymrat => subscriptionTierGymrat,
+      SubscriptionTier.gymratPro => subscriptionTierGymratPro,
+      SubscriptionTier.free => null,
+    };
+  }
+
   String languageLabel(String code) => code == 'en' ? languageEn : languageEs;
 
   String accentLabel(AppAccent accent) {

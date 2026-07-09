@@ -22,6 +22,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/profile/accent_color_selector.dart';
+import '../../widgets/profile/subscription_tier_label.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -111,9 +112,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 Center(
-                  child: Text(
-                    profile?.displayName ?? l10n.user,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  child: Column(
+                    children: [
+                      Text(
+                        profile?.displayName ?? l10n.user,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if (profile != null)
+                        SubscriptionTierLabel(tier: profile.subscriptionTier),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
