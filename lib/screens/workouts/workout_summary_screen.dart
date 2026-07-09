@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
@@ -36,43 +38,90 @@ class WorkoutSummaryScreen extends ConsumerStatefulWidget {
 
 class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
   final _shareCardKey = GlobalKey();
+  final _shareButtonKey = GlobalKey();
   bool _sharing = false;
 
   WorkoutSummaryData get summary => widget.summary;
+
+  Rect? _shareOriginRect() {
+    final context = _shareButtonKey.currentContext;
+    if (context == null) return null;
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return null;
+    final offset = box.localToGlobal(Offset.zero);
+    return offset & box.size;
+  }
+
+  String _shareImageFileName(String displayName) {
+    final label = displayName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').trim();
+    return '${label.isEmpty ? 'FitForge' : label} — FitForge.png';
+  }
+
+  Future<bool> _shareWithImageCard({
+    required String text,
+    required String displayName,
+    required String shareSubject,
+    Rect? shareOrigin,
+  }) async {
+    final boundary =
+        _shareCardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return false;
+
+    await WidgetsBinding.instance.endOfFrame;
+
+    final image = await boundary.toImage(pixelRatio: 3);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (data == null || !mounted) return false;
+
+    final fileName = _shareImageFileName(displayName);
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/$fileName');
+    await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+
+    // iOS lists image + text as separate items ("1 Document" / "Plain Text").
+    // The summary card image already contains the workout details.
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'image/png', name: fileName)],
+      text: Platform.isIOS ? null : text,
+      subject: shareSubject,
+      sharePositionOrigin: shareOrigin,
+    );
+    return true;
+  }
 
   Future<void> _share() async {
     if (_sharing) return;
     setState(() => _sharing = true);
 
+    final unit = ref.read(unitSystemProvider);
+    final l10n = context.l10n;
+    final displayName = l10n.workoutDisplayName(summary.workout.name);
+    final text = WorkoutSummaryShare.formatText(l10n, summary, unit, displayName: displayName);
+    final shareSubject = l10n.shareWorkoutTitle(displayName);
+    final shareOrigin = _shareOriginRect();
+
     try {
-      final unit = ref.read(unitSystemProvider);
-      final l10n = context.l10n;
-      final displayName = l10n.workoutDisplayName(summary.workout.name);
-      final text = WorkoutSummaryShare.formatText(l10n, summary, unit, displayName: displayName);
-
-      final boundary =
-          _shareCardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary != null) {
-        final image = await boundary.toImage(pixelRatio: 3);
-        final data = await image.toByteData(format: ui.ImageByteFormat.png);
-        if (data != null && mounted) {
-          final bytes = data.buffer.asUint8List();
-          await Share.shareXFiles(
-            [
-              XFile.fromData(
-                bytes,
-                mimeType: 'image/png',
-                name: 'fitforge-${summary.workout.name.replaceAll(' ', '-').toLowerCase()}.png',
-              ),
-            ],
-            text: text,
-            subject: displayName,
-          );
-          return;
-        }
+      final sharedWithImage = await _shareWithImageCard(
+        text: text,
+        displayName: displayName,
+        shareSubject: shareSubject,
+        shareOrigin: shareOrigin,
+      );
+      if (!sharedWithImage) {
+        await Share.share(
+          text,
+          subject: shareSubject,
+          sharePositionOrigin: shareOrigin,
+        );
       }
-
-      await Share.share(text, subject: displayName);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.errorGeneric('$e')),
+          backgroundColor: AppColors.error,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _sharing = false);
     }
@@ -192,6 +241,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                   Expanded(
                     flex: 2,
                     child: FilledButton.icon(
+                      key: _shareButtonKey,
                       onPressed: _sharing ? null : _share,
                       icon: _sharing
                           ? const SizedBox(
