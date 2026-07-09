@@ -179,6 +179,38 @@ class MacroTargets {
   });
 }
 
+/// Componente del plato con peso estimado (foto IA).
+class FoodIngredientPortion {
+  final String name;
+  final double gramsG;
+
+  const FoodIngredientPortion({
+    required this.name,
+    required this.gramsG,
+  });
+
+  FoodIngredientPortion scaledBy(double factor) {
+    if (factor == 1) return this;
+    return FoodIngredientPortion(
+      name: name,
+      gramsG: gramsG * factor,
+    );
+  }
+
+  factory FoodIngredientPortion.fromJson(Map<String, dynamic> json) {
+    final name = (json['name'] as String?)?.trim() ?? '';
+    final grams = (json['grams_g'] as num?)?.toDouble() ??
+        (json['grams'] as num?)?.toDouble() ??
+        0;
+    return FoodIngredientPortion(name: name, gramsG: grams);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'grams_g': gramsG,
+      };
+}
+
 class FoodNutritionEstimate {
   final String name;
   final int caloriesKcal;
@@ -189,6 +221,7 @@ class FoodNutritionEstimate {
   final String? servingDescription;
   final String? brand;
   final List<String> ingredients;
+  final List<FoodIngredientPortion> ingredientPortions;
   /// Cantidad de referencia (g o ml) para la que aplican los macros anteriores.
   final double referenceAmount;
   final String amountUnit;
@@ -203,6 +236,7 @@ class FoodNutritionEstimate {
     this.servingDescription,
     this.brand,
     this.ingredients = const [],
+    this.ingredientPortions = const [],
     this.referenceAmount = 100,
     this.amountUnit = 'g',
   });
@@ -222,6 +256,7 @@ class FoodNutritionEstimate {
       fiberG: entry.fiberG,
       servingDescription: entry.servingDescription,
       ingredients: const [],
+      ingredientPortions: const [],
       referenceAmount: reference,
       amountUnit: unit,
     );
@@ -240,6 +275,9 @@ class FoodNutritionEstimate {
       fiberG: fiberG * factor,
       servingDescription: FoodServingParser.formatAmount(amount, amountUnit),
       ingredients: ingredients,
+      ingredientPortions: ingredientPortions
+          .map((portion) => portion.scaledBy(factor))
+          .toList(),
       referenceAmount: amount,
       amountUnit: amountUnit,
     );
@@ -255,6 +293,7 @@ class FoodNutritionEstimate {
     String? servingDescription,
     String? brand,
     List<String>? ingredients,
+    List<FoodIngredientPortion>? ingredientPortions,
     double? referenceAmount,
     String? amountUnit,
   }) {
@@ -268,6 +307,7 @@ class FoodNutritionEstimate {
       servingDescription: servingDescription ?? this.servingDescription,
       brand: brand ?? this.brand,
       ingredients: ingredients ?? this.ingredients,
+      ingredientPortions: ingredientPortions ?? this.ingredientPortions,
       referenceAmount: referenceAmount ?? this.referenceAmount,
       amountUnit: amountUnit ?? this.amountUnit,
     );

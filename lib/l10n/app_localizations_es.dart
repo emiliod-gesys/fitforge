@@ -116,6 +116,41 @@ class AppLocalizationsEs extends AppLocalizations {
   String get personalData => 'Datos personales';
 
   @override
+  String get profileOnboardingTitle => 'Completa tu perfil';
+
+  @override
+  String get profileOnboardingSubtitle =>
+      'Necesitamos estos datos para personalizar entrenamientos, nutrición y progreso.';
+
+  @override
+  String get profileOnboardingNickname => 'Nombre o apodo';
+
+  @override
+  String get profileOnboardingContinue => 'Continuar';
+
+  @override
+  String get weightUpdateTitle => 'Actualiza tu peso';
+
+  @override
+  String get weightUpdateMessage =>
+      'Han pasado más de 15 días desde tu último registro. Actualiza tu peso para mantener tus métricas precisas.';
+
+  @override
+  String get weightUpdateSave => 'Guardar peso';
+
+  @override
+  String get weightInvalid => 'Indica un peso válido';
+
+  @override
+  String get genderRequired => 'Selecciona tu género';
+
+  @override
+  String get heightInvalid => 'Indica una altura válida (50–280 cm)';
+
+  @override
+  String get ageInvalid => 'Indica una edad válida (13–119 años)';
+
+  @override
   String get displayName => 'Nombre';
 
   @override
@@ -377,6 +412,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get apiKeysNotConfigured => 'No configurado';
+
+  @override
+  String get advancedSettings => 'Ajustes avanzados';
+
+  @override
+  String get advancedSettingsHint => 'Opciones para usuarios con experiencia';
+
+  @override
+  String get bringYourOwnAi => 'Conectar tu cuenta de IA';
+
+  @override
+  String get bringYourOwnAiSubtitle =>
+      'Usa tu propia cuenta de OpenAI, Gemini o Claude';
+
+  @override
+  String get apiKeysNotAvailableOnPaidPlan =>
+      'Tu plan ya incluye IA — no necesitas una API key propia';
+
+  @override
+  String get featureGymratPlansOnly => 'Solo para usuarios Gymrat y Gymrat Pro';
+
+  @override
+  String get featureGymratProOnly => 'Solo para usuarios Gymrat Pro';
 
   @override
   String get aiCoachSubtitle => 'Recomendaciones personalizadas';
@@ -927,7 +985,82 @@ class AppLocalizationsEs extends AppLocalizations {
   String get socialTabFriends => 'Amigos';
 
   @override
+  String get socialTabFeed => 'Feed';
+
+  @override
   String get socialTabLeaderboards => 'Clasificaciones';
+
+  @override
+  String get feedEmptyTitle => 'Tu feed está vacío';
+
+  @override
+  String get feedEmptySubtitle =>
+      'Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.';
+
+  @override
+  String get feedExpiryHint =>
+      'Solo se muestran publicaciones de las últimas 24 horas.';
+
+  @override
+  String get feedLongPressToReact =>
+      'Mantén pulsado una publicación para reaccionar.';
+
+  @override
+  String feedMilestoneUnlock(String name, String category, String tier) {
+    return '$name desbloqueó medalla $category — $tier';
+  }
+
+  @override
+  String feedLevelUp(String name, int level) {
+    return '$name subió al nivel $level';
+  }
+
+  @override
+  String feedPrUnlock(String name, String exercise, String value) {
+    return '$name batió un récord en $exercise: $value';
+  }
+
+  @override
+  String feedPrUnlockSelf(String exercise, String value) {
+    return 'Batiste un récord en $exercise: $value';
+  }
+
+  @override
+  String feedMilestoneUnlockSelf(String category, String tier) {
+    return 'Desbloqueaste la medalla $category — $tier';
+  }
+
+  @override
+  String feedLevelUpSelf(int level) {
+    return 'Subiste al nivel $level';
+  }
+
+  @override
+  String feedWorkoutCompletedSelf(String workout) {
+    return 'Completaste \"$workout\"';
+  }
+
+  @override
+  String get feedSharePrTitle => 'Compartir en el feed';
+
+  @override
+  String get feedSharePrSubtitle =>
+      'Elige qué récords quieren ver tus amigos. Se publican al cerrar.';
+
+  @override
+  String feedPrShared(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count récords compartidos en el feed de tus amigos',
+      one: '1 récord compartido en el feed de tus amigos',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedPrShareFailed =>
+      'No se pudo compartir en el feed. Inténtalo de nuevo.';
 
   @override
   String get leaderboardLoadMore => 'Ver más';
@@ -1577,6 +1710,26 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get coachWelcomeHint =>
       'Pídele una rutina y la guardarás cuando estés listo.\nConfigura tu API key en Perfil.';
+
+  @override
+  String coachDailyLimitReached(int limit) {
+    return 'Has alcanzado el límite diario de $limit mensajes del Coach IA. Mejora tu plan para más.';
+  }
+
+  @override
+  String coachDailyLimitRemaining(int remaining, int limit) {
+    return '$remaining de $limit mensajes hoy';
+  }
+
+  @override
+  String routineLimitReached(int limit) {
+    return 'Has alcanzado el límite de $limit rutinas de tu plan. Mejora tu plan para guardar más.';
+  }
+
+  @override
+  String routineLimitUsage(int used, int limit) {
+    return '$used de $limit rutinas guardadas';
+  }
 
   @override
   String get coachAskHint => 'Pregunta o pide una rutina…';
@@ -2518,6 +2671,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get foodIngredients => 'Ingredientes';
+
+  @override
+  String get foodIngredientBreakdownHint =>
+      'Peso estimado por componente — corrige abajo si algo no cuadra';
+
+  @override
+  String foodIngredientGrams(String grams) {
+    return '~$grams g';
+  }
+
+  @override
+  String foodIngredientTotalGrams(String grams) {
+    return 'Total estimado · ~$grams g';
+  }
 
   @override
   String get macroProtein => 'Proteína';

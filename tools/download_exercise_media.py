@@ -4,14 +4,19 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 import time
 import unicodedata
 from pathlib import Path
 
+TOOLS_DIR = Path(__file__).resolve().parent
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
 import requests
 from rapidfuzz import fuzz, process
+
+from exercise_media_webp import gif_to_webp
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "assets" / "data" / "exercise_catalog.json"
@@ -28,7 +33,7 @@ HEADERS = {"User-Agent": "FitForge/1.0 (exercise media bundler)"}
 # Catálogo apunta a otro asset con el mismo visual.
 CATALOG_ASSET_ALIASES: dict[str, str] = {
     "ff_legs_front_squat": "assets/exercises/ff_legs_barbell_front_squat.jpg",
-    "ff_back_romanian_deadlift": "assets/exercises/ff_back_barbell_romanian_deadlift.gif",
+    "ff_back_romanian_deadlift": "assets/exercises/ff_back_barbell_romanian_deadlift.webp",
 }
 
 # Sin match fiable en ExerciseDB; GIF del índice GymGifs por nombre exacto.
@@ -241,7 +246,14 @@ def main() -> int:
                     break
 
         if success:
-            ex["imageUrl"] = local_asset_path(exercise_id, "gif")
+            webp_dest = ASSETS_DIR / f"{exercise_id}.webp"
+            try:
+                gif_to_webp(dest, webp_dest)
+                dest.unlink(missing_ok=True)
+                ex["imageUrl"] = local_asset_path(exercise_id, "webp")
+            except (OSError, ValueError) as exc:
+                print(f"  WARN webp convert failed for {exercise_id}: {exc}", file=sys.stderr)
+                ex["imageUrl"] = local_asset_path(exercise_id, "gif")
             downloaded += 1
         else:
             failed.append(f"{exercise_id}: {english_name or 'no english name'}")

@@ -36,6 +36,17 @@
   "profileTitle": "Perfil",
   "profileDedication": "Esta app nunca hubiera existido sin la motivación de mis hermanos Diego y Rodrigo, que me inspiraron a buscar un estilo de vida más saludable, LIGHT WEIGHT BABY!",
   "personalData": "Datos personales",
+  "profileOnboardingTitle": "Completa tu perfil",
+  "profileOnboardingSubtitle": "Necesitamos estos datos para personalizar entrenamientos, nutrición y progreso.",
+  "profileOnboardingNickname": "Nombre o apodo",
+  "profileOnboardingContinue": "Continuar",
+  "weightUpdateTitle": "Actualiza tu peso",
+  "weightUpdateMessage": "Han pasado más de 15 días desde tu último registro. Actualiza tu peso para mantener tus métricas precisas.",
+  "weightUpdateSave": "Guardar peso",
+  "weightInvalid": "Indica un peso válido",
+  "genderRequired": "Selecciona tu género",
+  "heightInvalid": "Indica una altura válida (50–280 cm)",
+  "ageInvalid": "Indica una edad válida (13–119 años)",
   "displayName": "Nombre",
   "displayNameTitle": "Tu nombre",
   "displayNameRequired": "Escribe un nombre",
@@ -122,6 +133,13 @@
   "apiKeysConfigured": "Configurado ({provider})",
   "@apiKeysConfigured": { "placeholders": { "provider": {"type": "String"} } },
   "apiKeysNotConfigured": "No configurado",
+  "advancedSettings": "Ajustes avanzados",
+  "advancedSettingsHint": "Opciones para usuarios con experiencia",
+  "bringYourOwnAi": "Conectar tu cuenta de IA",
+  "bringYourOwnAiSubtitle": "Usa tu propia cuenta de OpenAI, Gemini o Claude",
+  "apiKeysNotAvailableOnPaidPlan": "Tu plan ya incluye IA — no necesitas una API key propia",
+  "featureGymratPlansOnly": "Solo para usuarios Gymrat y Gymrat Pro",
+  "featureGymratProOnly": "Solo para usuarios Gymrat Pro",
   "aiCoachSubtitle": "Recomendaciones personalizadas",
   "proactiveAi": "IA proactiva",
   "proactiveAiSubtitleOff": "La IA solo responde cuando le escribes",
@@ -319,7 +337,70 @@
   "@socialHeroRankGlobal": { "placeholders": { "rank": {"type": "int"} } },
   "socialHeroNoRank": "Compite con tus amigos",
   "socialTabFriends": "Amigos",
+  "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Clasificaciones",
+  "feedEmptyTitle": "Tu feed está vacío",
+  "feedEmptySubtitle": "Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.",
+  "feedExpiryHint": "Solo se muestran publicaciones de las últimas 24 horas.",
+  "feedLongPressToReact": "Mantén pulsado una publicación para reaccionar.",
+  "feedMilestoneUnlock": "{name} desbloqueó medalla {category} — {tier}",
+  "@feedMilestoneUnlock": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "category": { "type": "String" },
+      "tier": { "type": "String" }
+    }
+  },
+  "feedLevelUp": "{name} subió al nivel {level}",
+  "@feedLevelUp": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "level": { "type": "int" }
+    }
+  },
+  "feedPrUnlock": "{name} batió un récord en {exercise}: {value}",
+  "@feedPrUnlock": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "exercise": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+  "feedPrUnlockSelf": "Batiste un récord en {exercise}: {value}",
+  "@feedPrUnlockSelf": {
+    "placeholders": {
+      "exercise": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+  "feedMilestoneUnlockSelf": "Desbloqueaste la medalla {category} — {tier}",
+  "@feedMilestoneUnlockSelf": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "tier": { "type": "String" }
+    }
+  },
+  "feedLevelUpSelf": "Subiste al nivel {level}",
+  "@feedLevelUpSelf": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "feedWorkoutCompletedSelf": "Completaste \"{workout}\"",
+  "@feedWorkoutCompletedSelf": {
+    "placeholders": {
+      "workout": { "type": "String" }
+    }
+  },
+  "feedSharePrTitle": "Compartir en el feed",
+  "feedSharePrSubtitle": "Elige qué récords quieren ver tus amigos. Se publican al cerrar.",
+  "feedPrShared": "{count, plural, =1{1 récord compartido en el feed de tus amigos} other{{count} récords compartidos en el feed de tus amigos}}",
+  "@feedPrShared": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedPrShareFailed": "No se pudo compartir en el feed. Inténtalo de nuevo.",
   "leaderboardLoadMore": "Ver más",
   "leaderboardsTitle": "Clasificaciones",
   "leaderboardScopeFriends": "Amigos",
@@ -540,6 +621,32 @@
   "coachTitle": "Coach IA",
   "coachWelcome": "Tu entrenador personal con IA",
   "coachWelcomeHint": "Pídele una rutina y la guardarás cuando estés listo.\nConfigura tu API key en Perfil.",
+  "coachDailyLimitReached": "Has alcanzado el límite diario de {limit} mensajes del Coach IA. Mejora tu plan para más.",
+  "@coachDailyLimitReached": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "coachDailyLimitRemaining": "{remaining} de {limit} mensajes hoy",
+  "@coachDailyLimitRemaining": {
+    "placeholders": {
+      "remaining": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "routineLimitReached": "Has alcanzado el límite de {limit} rutinas de tu plan. Mejora tu plan para guardar más.",
+  "@routineLimitReached": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "routineLimitUsage": "{used} de {limit} rutinas guardadas",
+  "@routineLimitUsage": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
   "coachAskHint": "Pregunta o pide una rutina…",
   "coachRoutineReady": "Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.",
   "coachRoutinesReady": "Aquí tienes {count} rutinas para la semana. Revísalas y guarda las que quieras.",
@@ -861,6 +968,11 @@
   "foodServingLabel": "Porción",
   "foodCaloriesLabel": "Calorías (kcal)",
   "foodIngredients": "Ingredientes",
+  "foodIngredientBreakdownHint": "Peso estimado por componente — corrige abajo si algo no cuadra",
+  "foodIngredientGrams": "~{grams} g",
+  "@foodIngredientGrams": { "placeholders": { "grams": {"type": "String"} } },
+  "foodIngredientTotalGrams": "Total estimado · ~{grams} g",
+  "@foodIngredientTotalGrams": { "placeholders": { "grams": {"type": "String"} } },
   "macroProtein": "Proteína",
   "macroFat": "Grasa",
   "macroCarbs": "Carbohidratos",

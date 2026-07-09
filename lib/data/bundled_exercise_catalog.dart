@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import '../core/utils/json_parsing.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
 
@@ -75,10 +76,11 @@ abstract final class BundledExerciseCatalog {
       loggingType: loggingType,
       cardioConfig: cardioConfig,
       loadMode: loadMode,
-      perArmWeight: json['perArmWeight'] as bool? ?? false,
-      unilateral: json['unilateral'] as bool? ?? false,
-      weightOptional: json['weightOptional'] as bool? ??
-          (loadMode.weightOptional || loggingType == ExerciseLoggingType.cardio),
+      perArmWeight: parseJsonBool(json['perArmWeight']),
+      unilateral: parseJsonBool(json['unilateral']),
+      weightOptional: json.containsKey('weightOptional')
+          ? parseJsonBool(json['weightOptional'])
+          : (loadMode.weightOptional || loggingType == ExerciseLoggingType.cardio),
       isBundled: true,
     );
   }

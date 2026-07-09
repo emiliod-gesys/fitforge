@@ -5,7 +5,13 @@ class AiPreferences {
 
   static Future<bool> isProactiveAiEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_proactiveAiKey) ?? false;
+    final asBool = prefs.getBool(_proactiveAiKey);
+    if (asBool != null) return asBool;
+    final asDouble = prefs.getDouble(_proactiveAiKey);
+    if (asDouble != null) return asDouble != 0;
+    final asInt = prefs.getInt(_proactiveAiKey);
+    if (asInt != null) return asInt != 0;
+    return false;
   }
 
   static Future<void> setProactiveAiEnabled(bool enabled) async {

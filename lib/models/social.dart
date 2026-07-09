@@ -1,5 +1,7 @@
 import 'profile.dart';
 import '../core/utils/milestones.dart';
+import '../core/constants/social_feed.dart';
+import '../core/utils/feed_personal_record.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/workout_streak.dart';
 
@@ -89,6 +91,7 @@ class SocialNotification {
   final String type;
   final String? referenceId;
   final String message;
+  final Map<String, dynamic>? metadata;
   final DateTime createdAt;
   final DateTime? readAt;
   final FriendUser? actor;
@@ -99,6 +102,7 @@ class SocialNotification {
     this.type = 'workout_completed',
     this.referenceId,
     required this.message,
+    this.metadata,
     required this.createdAt,
     this.readAt,
     this.actor,
@@ -107,14 +111,50 @@ class SocialNotification {
   bool get isUnread => readAt == null;
   bool get isRoutineShare => type == 'routine_share';
   bool get isTrainerRequest => type == 'trainer_request';
+  bool get isWorkoutCompleted => type == 'workout_completed';
+  bool get isMilestoneUnlock => type == 'milestone_unlocked';
+  bool get isLevelUp => type == 'level_up';
+  bool get isPrUnlock => type == 'pr_unlocked';
+
+  bool get isFeedItem =>
+      isWorkoutCompleted || isMilestoneUnlock || isLevelUp || isPrUnlock;
+
+  static const feedTypes = SocialFeed.feedTypes;
+
+  bool isOwnPost(String? currentUserId) =>
+      currentUserId != null && currentUserId.isNotEmpty && actorId == currentUserId;
+
+  String? get feedWorkoutName => metadata?['workout_name'] as String?;
+
+  PersonalRecord? get feedPersonalRecord => FeedPersonalRecord.fromMetadata(metadata);
+
+  MilestoneCategory? get milestoneCategory {
+    final raw = metadata?['category'] as String?;
+    if (raw == null) return null;
+    for (final category in MilestoneCategory.values) {
+      if (category.name == raw) return category;
+    }
+    return null;
+  }
+
+  int? get milestoneTier => (metadata?['tier'] as num?)?.toInt();
+
+  int? get levelReached => (metadata?['level'] as num?)?.toInt();
 
   factory SocialNotification.fromJson(Map<String, dynamic> json) {
+    final metadataRaw = json['metadata'];
+    Map<String, dynamic>? metadata;
+    if (metadataRaw is Map) {
+      metadata = Map<String, dynamic>.from(metadataRaw);
+    }
+
     return SocialNotification(
       id: json['id'] as String,
       actorId: json['actor_id'] as String,
       type: json['type'] as String? ?? 'workout_completed',
       referenceId: json['reference_id'] as String?,
       message: json['message'] as String,
+      metadata: metadata,
       createdAt: DateTime.parse(json['created_at'] as String),
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
       actor: json['actor'] != null
@@ -128,19 +168,33 @@ class SocialNotification {
 class SocialRealtimeEvent {
   final String notificationId;
   final String actorId;
+  final String type;
   final String message;
+  final Map<String, dynamic>? metadata;
 
   const SocialRealtimeEvent({
     required this.notificationId,
     required this.actorId,
+    required this.type,
     required this.message,
+    this.metadata,
   });
 
+  bool get isFeedItem => SocialNotification.feedTypes.contains(type);
+
   factory SocialRealtimeEvent.fromRecord(Map<String, dynamic> record) {
+    final metadataRaw = record['metadata'];
+    Map<String, dynamic>? metadata;
+    if (metadataRaw is Map) {
+      metadata = Map<String, dynamic>.from(metadataRaw);
+    }
+
     return SocialRealtimeEvent(
       notificationId: record['id'] as String,
       actorId: record['actor_id'] as String? ?? '',
+      type: record['type'] as String? ?? 'workout_completed',
       message: record['message'] as String? ?? '',
+      metadata: metadata,
     );
   }
 }

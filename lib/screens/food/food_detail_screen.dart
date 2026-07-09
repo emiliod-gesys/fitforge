@@ -62,6 +62,10 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     return value == value.roundToDouble() ? value.toInt().toString() : value.toStringAsFixed(1);
   }
 
+  String _formatPortionGrams(double value) {
+    return value == value.roundToDouble() ? value.toInt().toString() : value.toStringAsFixed(1);
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -320,7 +324,49 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                 label: l10n.macroFiber,
                 value: '${scaled.fiberG.toStringAsFixed(1)} g',
               ),
-              if (_baseEstimate.ingredients.isNotEmpty) ...[
+              if (_scaled.ingredientPortions.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(l10n.foodIngredients, style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.foodIngredientBreakdownHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                ),
+                const SizedBox(height: 10),
+                ..._scaled.ingredientPortions.map(
+                  (portion) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            portion.name,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                        Text(
+                          l10n.foodIngredientGrams(_formatPortionGrams(portion.gramsG)),
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Text(
+                  l10n.foodIngredientTotalGrams(_formatPortionGrams(
+                    _scaled.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG),
+                  )),
+                  style: TextStyle(
+                    color: context.accentColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ] else if (_baseEstimate.ingredients.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(l10n.foodIngredients, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),

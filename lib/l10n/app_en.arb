@@ -23,6 +23,17 @@
   "profileTitle": "Profile",
   "profileDedication": "This app would never have existed without the motivation of my brothers Diego and Rodrigo, who inspired me to pursue a healthier lifestyle. LIGHT WEIGHT BABY!",
   "personalData": "Personal details",
+  "profileOnboardingTitle": "Complete your profile",
+  "profileOnboardingSubtitle": "We need this information to personalize training, nutrition, and progress.",
+  "profileOnboardingNickname": "Name or nickname",
+  "profileOnboardingContinue": "Continue",
+  "weightUpdateTitle": "Update your weight",
+  "weightUpdateMessage": "It's been more than 15 days since your last weigh-in. Update your weight to keep your metrics accurate.",
+  "weightUpdateSave": "Save weight",
+  "weightInvalid": "Enter a valid weight",
+  "genderRequired": "Select your gender",
+  "heightInvalid": "Enter a valid height (50–280 cm)",
+  "ageInvalid": "Enter a valid age (13–119 years)",
   "displayName": "Name",
   "displayNameTitle": "Your name",
   "displayNameRequired": "Enter a name",
@@ -108,6 +119,13 @@
   "apiKeys": "API Keys (OpenAI / Gemini)",
   "apiKeysConfigured": "Configured ({provider})",
   "apiKeysNotConfigured": "Not configured",
+  "advancedSettings": "Advanced settings",
+  "advancedSettingsHint": "Optional settings for experienced users",
+  "bringYourOwnAi": "Connect your AI account",
+  "bringYourOwnAiSubtitle": "Use your own OpenAI, Gemini, or Claude account",
+  "apiKeysNotAvailableOnPaidPlan": "Your plan already includes AI — you don't need your own API key",
+  "featureGymratPlansOnly": "Gymrat and Gymrat Pro users only",
+  "featureGymratProOnly": "Gymrat Pro users only",
   "aiCoachSubtitle": "Personalized recommendations",
   "proactiveAi": "Proactive AI",
   "proactiveAiSubtitleOff": "AI only responds when you message it",
@@ -312,7 +330,70 @@
   "@socialHeroRankGlobal": { "placeholders": { "rank": {"type": "int"} } },
   "socialHeroNoRank": "Compete with your friends",
   "socialTabFriends": "Friends",
+  "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Leaderboards",
+  "feedEmptyTitle": "Your feed is empty",
+  "feedEmptySubtitle": "When you or friends work out, level up, or unlock badges, you'll see it here. Posts last 24 hours.",
+  "feedExpiryHint": "Only posts from the last 24 hours are shown.",
+  "feedLongPressToReact": "Long-press a post to react.",
+  "feedMilestoneUnlock": "{name} unlocked {category} badge — {tier}",
+  "@feedMilestoneUnlock": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "category": { "type": "String" },
+      "tier": { "type": "String" }
+    }
+  },
+  "feedLevelUp": "{name} reached level {level}",
+  "@feedLevelUp": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "level": { "type": "int" }
+    }
+  },
+  "feedPrUnlock": "{name} set a new PR on {exercise}: {value}",
+  "@feedPrUnlock": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "exercise": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+  "feedPrUnlockSelf": "You set a new PR on {exercise}: {value}",
+  "@feedPrUnlockSelf": {
+    "placeholders": {
+      "exercise": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+  "feedMilestoneUnlockSelf": "You unlocked the {category} badge — {tier}",
+  "@feedMilestoneUnlockSelf": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "tier": { "type": "String" }
+    }
+  },
+  "feedLevelUpSelf": "You reached level {level}",
+  "@feedLevelUpSelf": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "feedWorkoutCompletedSelf": "You completed \"{workout}\"",
+  "@feedWorkoutCompletedSelf": {
+    "placeholders": {
+      "workout": { "type": "String" }
+    }
+  },
+  "feedSharePrTitle": "Share to feed",
+  "feedSharePrSubtitle": "Choose which records friends can see. They publish when you close this screen.",
+  "feedPrShared": "{count, plural, =1{1 record shared to your friends' feed} other{{count} records shared to your friends' feed}}",
+  "@feedPrShared": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedPrShareFailed": "Couldn't share to the feed. Please try again.",
   "leaderboardLoadMore": "Show more",
   "leaderboardsTitle": "Leaderboards",
   "leaderboardScopeFriends": "Friends",
@@ -523,6 +604,32 @@
   "coachTitle": "AI Coach",
   "coachWelcome": "Your personal AI trainer",
   "coachWelcomeHint": "Ask for a routine and save it when you're ready.\nSet up your API key in Profile.",
+  "coachDailyLimitReached": "You've reached today's limit of {limit} AI Coach messages. Upgrade for more.",
+  "@coachDailyLimitReached": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "coachDailyLimitRemaining": "{remaining} of {limit} messages today",
+  "@coachDailyLimitRemaining": {
+    "placeholders": {
+      "remaining": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "routineLimitReached": "You've reached your plan's limit of {limit} saved routines. Upgrade to save more.",
+  "@routineLimitReached": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "routineLimitUsage": "{used} of {limit} routines saved",
+  "@routineLimitUsage": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
   "coachAskHint": "Ask a question or request a routine…",
   "coachRoutineReady": "Here is your routine. Review it and tap Save when ready.",
   "coachRoutinesReady": "Here are your {count} routines for the week. Review each one and save the ones you want.",
@@ -822,6 +929,11 @@
   "foodServingLabel": "Serving",
   "foodCaloriesLabel": "Calories (kcal)",
   "foodIngredients": "Ingredients",
+  "foodIngredientBreakdownHint": "Estimated weight per item — correct below if something looks off",
+  "foodIngredientGrams": "~{grams} g",
+  "@foodIngredientGrams": { "placeholders": { "grams": {"type": "String"} } },
+  "foodIngredientTotalGrams": "Estimated total · ~{grams} g",
+  "@foodIngredientTotalGrams": { "placeholders": { "grams": {"type": "String"} } },
   "macroProtein": "Protein",
   "macroFat": "Fat",
   "macroCarbs": "Carbs",

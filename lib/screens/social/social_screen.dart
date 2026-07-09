@@ -11,6 +11,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/leaderboards_section.dart';
 import '../../widgets/social_notifications_sheet.dart';
+import 'social_feed_tab.dart';
 import 'social_friends_tab.dart';
 import '../../core/theme/app_accent.dart';
 
@@ -44,7 +45,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -118,6 +119,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
     ref.invalidate(profileProvider);
     ref.invalidate(leaderboardProvider);
     ref.invalidate(socialNotificationsProvider);
+    ref.invalidate(socialFeedProvider);
     ref.invalidate(socialUnreadCountProvider);
     ref.invalidate(mutedFriendsProvider);
     if (_query.length >= 2) ref.invalidate(userSearchProvider(_query));
@@ -163,6 +165,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
           labelColor: context.accentColor,
           unselectedLabelColor: AppColors.textMuted,
           tabs: [
+            Tab(text: l10n.socialTabFeed),
             Tab(text: l10n.socialTabFriends),
             Tab(text: l10n.socialTabLeaderboards),
           ],
@@ -171,6 +174,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
+          SocialFeedTab(onRefresh: _onFriendsRefresh),
           SocialFriendsTab(
             searchController: _searchController,
             query: _query,

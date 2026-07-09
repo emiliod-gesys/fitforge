@@ -1,3 +1,4 @@
+import '../core/utils/json_parsing.dart';
 import '../core/theme/app_accent.dart';
 import 'exercise_logging.dart';
 
@@ -36,6 +37,31 @@ enum Gender {
         return 'prefer_not_to_say';
     }
   }
+}
+
+enum SubscriptionTier {
+  free,
+  gymrat,
+  gymratPro;
+
+  static SubscriptionTier fromCode(String? value) {
+    switch (value) {
+      case 'gymrat':
+        return SubscriptionTier.gymrat;
+      case 'gymrat_pro':
+        return SubscriptionTier.gymratPro;
+      default:
+        return SubscriptionTier.free;
+    }
+  }
+
+  String get code => switch (this) {
+        SubscriptionTier.free => 'free',
+        SubscriptionTier.gymrat => 'gymrat',
+        SubscriptionTier.gymratPro => 'gymrat_pro',
+      };
+
+  bool get isFree => this == SubscriptionTier.free;
 }
 
 enum UserType {
@@ -93,6 +119,7 @@ class UserProfile {
   final AiProvider aiProvider;
   final bool hasAiKey;
   final UserType userType;
+  final SubscriptionTier subscriptionTier;
   final AppAccent accentColor;
   final int totalXp;
   final DateTime createdAt;
@@ -115,6 +142,7 @@ class UserProfile {
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.userType = UserType.athlete,
+    this.subscriptionTier = SubscriptionTier.free,
     this.accentColor = AppAccent.gold,
     this.totalXp = 0,
     required this.createdAt,
@@ -136,8 +164,9 @@ class UserProfile {
       activityLevel: DailyActivityLevel.fromCode(json['activity_level'] as String?),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
-      userType: UserType.fromCode(json['user_type'] as String?),
-      accentColor: AppAccent.fromCode(json['accent_color'] as String?),
+      userType: UserType.fromCode(parseJsonString(json['user_type'])),
+      subscriptionTier: SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
+      accentColor: AppAccent.fromCode(parseJsonString(json['accent_color'])),
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
     );

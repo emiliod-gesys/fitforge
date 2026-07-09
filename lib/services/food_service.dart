@@ -28,6 +28,22 @@ class FoodService {
         .toList();
   }
 
+  Future<List<FoodEntry>> getEntriesSince(DateTime startInclusive, {String? userId}) async {
+    final uid = userId ?? SupabaseService.currentUser?.id;
+    if (uid == null) return [];
+
+    final data = await _client
+        .from('food_entries')
+        .select()
+        .eq('user_id', uid)
+        .gte('logged_at', startInclusive.toUtc().toIso8601String())
+        .order('logged_at', ascending: true);
+
+    return (data as List)
+        .map((row) => FoodEntry.fromJson(Map<String, dynamic>.from(row as Map)))
+        .toList();
+  }
+
   Future<List<FoodEntry>> getRecentEntries({int limit = 20}) async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return [];

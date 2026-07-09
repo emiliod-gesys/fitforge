@@ -25,6 +25,7 @@ import '../../screens/trainer/student_detail_screen.dart';
 import '../../screens/workouts/active_workout_screen.dart';
 import '../../screens/workouts/workout_summary_screen.dart';
 import '../../screens/workouts/workout_history_screen.dart';
+import '../../widgets/profile_gate_listener.dart';
 import '../../widgets/social_notification_listener.dart';
 
 int _trainingHubInitialTab(GoRouterState state) {
@@ -66,7 +67,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       ShellRoute(
         builder: (context, state, child) => SocialNotificationListener(
-          child: HomeScreen(child: child),
+          child: ProfileGateListener(
+            child: HomeScreen(child: child),
+          ),
         ),
         routes: [
           GoRoute(

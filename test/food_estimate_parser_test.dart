@@ -53,6 +53,30 @@ void main() {
       expect(estimate?.servingDescription, '275 g');
     });
 
+    test('parses ingredient_portions with grams per component', () {
+      final estimate = FoodEstimateParser.parse('''
+{
+  "name": "Pollo con arroz y brócoli",
+  "calories_kcal": 520,
+  "protein_g": 42,
+  "carbs_g": 55,
+  "fat_g": 12,
+  "reference_amount_g": 320,
+  "ingredient_portions": [
+    {"name": "pechuga de pollo", "grams_g": 150},
+    {"name": "arroz blanco", "grams_g": 120},
+    {"name": "brócoli", "grams_g": 50}
+  ]
+}
+''');
+
+      expect(estimate, isNotNull);
+      expect(estimate!.ingredientPortions, hasLength(3));
+      expect(estimate.ingredientPortions.first.name, 'pechuga de pollo');
+      expect(estimate.ingredientPortions.first.gramsG, 150);
+      expect(estimate.ingredients, ['pechuga de pollo', 'arroz blanco', 'brócoli']);
+    });
+
     test('stabilizeRevision restores dropped ingredients on partial correction', () {
       const previous = FoodNutritionEstimate(
         name: 'Arroz con cerdo y brócoli',

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/workout_streak.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/coach_message.dart';
+import '../../models/coach_nutrition_snapshot.dart';
 import '../../models/coach_routine_slot.dart';
 import '../../models/exercise.dart';
 import '../../models/profile.dart';
@@ -49,6 +51,24 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 
     final l10n = context.l10n;
     final languageCode = Localizations.localeOf(context).languageCode;
+    final isSaveOnly = AiCoachService.isRoutineSaveIntent(text);
+
+    if (!isSaveOnly) {
+      final profile = await ref.read(profileProvider.future);
+      final usageService = ref.read(coachUsageServiceProvider);
+      final profileService = ref.read(profileServiceProvider);
+      final canSend = await usageService.canSendMessage(profile, profileService);
+      if (!canSend) {
+        if (!mounted) return;
+        final status = await usageService.getStatus(profile, profileService);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.coachDailyLimitReached(status.limit ?? 0)),
+          ),
+        );
+        return;
+      }
+    }
 
     setState(() {
       _messages.add(CoachMessage(text: text, isUser: true));
@@ -56,6 +76,15 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     });
     _controller.clear();
     _scrollToBottom();
+
+    var coachUsageRecorded = false;
+
+    Future<void> recordCoachUsage() async {
+      if (isSaveOnly || coachUsageRecorded) return;
+      coachUsageRecorded = true;
+      await ref.read(coachUsageServiceProvider).recordMessage();
+      ref.invalidate(coachUsageStatusProvider);
+    }
 
     try {
       final profile = await ref.read(profileProvider.future);
@@ -65,6 +94,10 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
       final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
       final personalRecords = await ref.read(personalRecordsProvider.future);
+      final nutrition = await ref.read(coachNutritionServiceProvider).load(
+            profile: profile,
+            bodyMetrics: bodyMetrics,
+          );
       final coach = ref.read(aiCoachServiceProvider);
 
       if (AiCoachService.isRoutineSaveIntent(text)) {
@@ -106,7 +139,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           personalRecords: personalRecords,
           coach: coach,
           languageCode: languageCode,
+          nutrition: nutrition,
         );
+        await recordCoachUsage();
       } else {
         final response = await coach.getRecommendation(
           userMessage: text,
@@ -117,6 +152,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           weeklyStats: weeklyStats,
           personalRecords: personalRecords,
           languageCode: languageCode,
+          nutrition: nutrition,
         );
 
         final muscles = AiCoachService.parseTargetMuscles(text);
@@ -139,6 +175,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             _messages.add(CoachMessage(text: response, isUser: false));
           }
         });
+        await recordCoachUsage();
       }
     } catch (e) {
       setState(() {
@@ -161,6 +198,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     required List<PersonalRecord> personalRecords,
     required AiCoachService coach,
     required String languageCode,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final l10n = context.l10n;
     final isProgram = AiCoachService.isMultiRoutineProgramRequest(text);
@@ -176,6 +214,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         personalRecords: personalRecords,
         routines: routines,
         languageCode: languageCode,
+        nutrition: nutrition,
       );
 
       if (!mounted) return;
@@ -218,6 +257,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       personalRecords: personalRecords,
       routines: routines,
       languageCode: languageCode,
+      nutrition: nutrition,
     );
 
     if (!mounted) return;
@@ -259,6 +299,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       return;
     }
 
+    if (!await ensureCanCreateRoutine(context, ref)) return;
+
     setState(() {
       _savingMessageIndex = messageIndex;
       _savingSlotIndex = slotIndex;
@@ -267,6 +309,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     try {
       await ref.read(routineServiceProvider).createRoutine(slot.routine);
       ref.invalidate(routinesProvider);
+      ref.invalidate(routineLimitStatusProvider);
 
       if (!mounted) return;
       setState(() {
@@ -281,9 +324,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.saveFailed('$e'))),
-        );
+        showRoutineSaveErrorSnackBar(context, e);
       }
     } finally {
       if (mounted) {
@@ -332,11 +373,37 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final suggestions = l10n.coachSuggestions;
+    final usageAsync = ref.watch(coachUsageStatusProvider);
+    final usage = usageAsync.value;
+    final inputBlocked = usage != null && !usage.canSend;
 
     return Scaffold(
       appBar: FitForgeAppBar(title: l10n.coachTitle),
       body: Column(
         children: [
+          usageAsync.when(
+            data: (status) {
+              if (status.isUnlimited) return const SizedBox.shrink();
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                color: status.canSend
+                    ? context.accentColor.withValues(alpha: 0.12)
+                    : AppColors.error.withValues(alpha: 0.12),
+                child: Text(
+                  status.canSend
+                      ? l10n.coachDailyLimitRemaining(status.remaining, status.limit!)
+                      : l10n.coachDailyLimitReached(status.limit!),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: status.canSend ? context.accentColor : AppColors.error,
+                  ),
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
           if (_messages.isEmpty)
             Expanded(
               child: ListView(
@@ -361,7 +428,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: ActionChip(
                         label: Text(s),
-                        onPressed: () => _send(s),
+                        onPressed: inputBlocked ? null : () => _send(s),
                       ),
                     ),
                   ),
@@ -404,12 +471,12 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                       decoration: InputDecoration(
                         hintText: l10n.coachAskHint,
                       ),
-                      onSubmitted: _send,
-                      enabled: !_loading,
+                      onSubmitted: inputBlocked ? null : _send,
+                      enabled: !_loading && !inputBlocked,
                     ),
                   ),
                   IconButton(
-                    onPressed: _loading ? null : () => _send(_controller.text),
+                    onPressed: _loading || inputBlocked ? null : () => _send(_controller.text),
                     icon: const Icon(Icons.send),
                   ),
                 ],

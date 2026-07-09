@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/connection_error.dart';
+import '../core/utils/feed_personal_record.dart';
+import '../core/utils/milestones.dart';
 import '../core/utils/player_level_badge.dart';
 import '../models/profile.dart';
 import '../models/food_entry.dart';
 import '../models/rest_timer_alert_mode.dart';
+import '../models/social.dart';
 import 'app_localizations.dart';
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -226,6 +229,56 @@ extension ProfileL10n on AppLocalizations {
   /// Rango + nivel numérico, alineado con el emblema mostrado.
   String playerLevelRankSummary(int level) {
     return '${playerLevelBadgeName(level)} · ${playerLevelTitle(level)}';
+  }
+
+  String milestoneCategoryLabel(MilestoneCategory category) {
+    return switch (category) {
+      MilestoneCategory.reps => milestoneCategoryReps,
+      MilestoneCategory.volume => milestoneCategoryVolume,
+      MilestoneCategory.distance => milestoneCategoryDistance,
+      MilestoneCategory.calories => milestoneCategoryCalories,
+      MilestoneCategory.workouts => milestoneCategoryWorkouts,
+    };
+  }
+
+  String feedItemMessage(
+    SocialNotification item, {
+    String unitSystem = 'kg',
+    String? currentUserId,
+  }) {
+    final isSelf = item.isOwnPost(currentUserId);
+    final name = item.actor?.label ?? user;
+
+    if (item.isMilestoneUnlock) {
+      final category = item.milestoneCategory;
+      final tier = item.milestoneTier ?? 1;
+      if (category != null) {
+        final categoryLabel = milestoneCategoryLabel(category);
+        final tierLabel = milestoneTierName(tier);
+        if (isSelf) {
+          return feedMilestoneUnlockSelf(categoryLabel, tierLabel);
+        }
+        return feedMilestoneUnlock(name, categoryLabel, tierLabel);
+      }
+    }
+    if (item.isLevelUp) {
+      final level = item.levelReached ?? item.actor?.level ?? 1;
+      if (isSelf) return feedLevelUpSelf(level);
+      return feedLevelUp(name, level);
+    }
+    if (item.isPrUnlock) {
+      final pr = item.feedPersonalRecord;
+      if (pr != null) {
+        final value = FeedPersonalRecord.formatValue(pr, unitSystem);
+        if (isSelf) return feedPrUnlockSelf(pr.exerciseName, value);
+        return feedPrUnlock(name, pr.exerciseName, value);
+      }
+    }
+    if (item.isWorkoutCompleted && isSelf) {
+      final workoutName = item.feedWorkoutName ?? item.message;
+      return feedWorkoutCompletedSelf(workoutName);
+    }
+    return item.message;
   }
 
   String friendlyAiError(Object error) {

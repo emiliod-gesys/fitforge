@@ -38,7 +38,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_ab_crunch_machine.gif",
+      "imageUrl": "assets/exercises/ff_abs_ab_crunch_machine.webp",
       "exercisedbId": "ZnJHhMk",
       "matchConfidence": "curated",
       "matchScore": null
@@ -79,7 +79,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_ab_wheel_rollout.gif",
+      "imageUrl": "assets/exercises/ff_abs_ab_wheel_rollout.webp",
       "exercisedbId": "NAgVB3t",
       "matchConfidence": "curated",
       "matchScore": null
@@ -124,7 +124,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_adductor_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_adductor_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -220,7 +220,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_air_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_air_squat.webp",
       "exercisedbId": "QChZi3x",
       "matchConfidence": "high",
       "matchScore": 0.9029
@@ -265,7 +265,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_alternating_dumbbell_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_alternating_dumbbell_curl.webp",
       "exercisedbId": "Zwiw7XR",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -314,7 +314,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_arc_trainer.gif",
+      "imageUrl": "assets/exercises/ff_cardio_arc_trainer.webp",
       "exercisedbId": "XSCHmiI",
       "matchConfidence": "curated",
       "matchScore": null
@@ -363,7 +363,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_archer_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_archer_push_up.webp",
       "exercisedbId": "A9qxk2F",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -410,7 +410,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_arnold_press.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_arnold_press.webp",
       "exercisedbId": "Xy4jlWA",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -457,7 +457,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_assisted_chin_up_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_assisted_chin_up_machine.webp",
       "exercisedbId": "MaMuGH6",
       "matchConfidence": "high",
       "matchScore": 0.8692
@@ -504,7 +504,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_assisted_dip_machine.gif",
+      "imageUrl": "assets/exercises/ff_triceps_assisted_dip_machine.webp",
       "exercisedbId": "J60bN17",
       "matchConfidence": "medium",
       "matchScore": 0.8185
@@ -551,7 +551,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_assisted_pull_up_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_assisted_pull_up_machine.webp",
       "exercisedbId": "kiJ4Z2K",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -600,7 +600,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_australian_pull_up.gif",
+      "imageUrl": "assets/exercises/ff_back_australian_pull_up.webp",
       "exercisedbId": "bZGHsAZ",
       "matchConfidence": "high",
       "matchScore": 0.94
@@ -649,7 +649,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_back_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_back_squat.webp",
       "exercisedbId": "DhMl549",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -696,7 +696,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_barbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_barbell_bench_press.webp",
       "exercisedbId": "EIeI8Vf",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -741,7 +741,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_barbell_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_barbell_curl.webp",
       "exercisedbId": "Yza7XrQ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -786,7 +786,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_barbell_glute_bridge.gif",
+      "imageUrl": "assets/exercises/ff_glutes_barbell_glute_bridge.webp",
       "exercisedbId": "qKBpF7I",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -939,7 +939,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_barbell_pullover.gif",
+      "imageUrl": "assets/exercises/ff_chest_barbell_pullover.webp",
       "exercisedbId": "cA9FuWG",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -994,7 +994,7 @@
           "Bent Over Row"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_barbell_row.gif",
+      "imageUrl": "assets/exercises/ff_back_barbell_row.webp",
       "exercisedbId": "eZyBC3j",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1049,7 +1049,7 @@
           "Smith Machine Row"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_smith_machine_bent_over_row.gif",
+      "imageUrl": "assets/exercises/ff_back_smith_machine_bent_over_row.webp",
       "exercisedbId": "ZX9UZmj",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1094,7 +1094,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_barbell_standing_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_barbell_standing_calf_raise.webp",
       "exercisedbId": "8ozhUIZ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1145,7 +1145,7 @@
           "Cable Behind-the-Back Curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_bayesian_cable_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_bayesian_cable_curl.webp",
       "exercisedbId": "G08RZcQ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1239,7 +1239,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_bench_dip.gif",
+      "imageUrl": "assets/exercises/ff_triceps_bench_dip.webp",
       "exercisedbId": "RrLske5",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1280,7 +1280,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_bicycle_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_bicycle_crunch.webp",
       "exercisedbId": "tZkGYZ9",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1327,7 +1327,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_bodyweight_biceps_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_bodyweight_biceps_curl.webp",
       "exercisedbId": "gscGLOU",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1374,7 +1374,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_bodyweight_triceps_extension.gif",
+      "imageUrl": "assets/exercises/ff_triceps_bodyweight_triceps_extension.webp",
       "exercisedbId": "s0HKO2I",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1421,7 +1421,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_bulgarian_split_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_bulgarian_split_squat.webp",
       "exercisedbId": "QjE2DcA",
       "matchConfidence": "medium",
       "matchScore": 0.8146
@@ -1462,7 +1462,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_crunch.webp",
       "exercisedbId": "WW95auq",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1507,7 +1507,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_cable_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_cable_curl.webp",
       "exercisedbId": "G08RZcQ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1552,7 +1552,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_cable_fly.gif",
+      "imageUrl": "assets/exercises/ff_chest_cable_fly.webp",
       "exercisedbId": "Pr9Rhf4",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1597,7 +1597,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_cable_front_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_cable_front_raise.webp",
       "exercisedbId": "u2X71Np",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1642,7 +1642,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_cable_kickback.gif",
+      "imageUrl": "assets/exercises/ff_glutes_cable_kickback.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -1687,7 +1687,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_cable_lateral_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_cable_lateral_raise.webp",
       "exercisedbId": "goJ6ezq",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1734,7 +1734,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_cable_pull_through.gif",
+      "imageUrl": "assets/exercises/ff_glutes_cable_pull_through.webp",
       "exercisedbId": "OM46QHm",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1783,7 +1783,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_cable_pullover.gif",
+      "imageUrl": "assets/exercises/ff_back_cable_pullover.webp",
       "exercisedbId": "Q2Eu1Ax",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -1830,7 +1830,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_cable_rear_delt_fly.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_cable_rear_delt_fly.webp",
       "exercisedbId": "yUdIGNs",
       "matchConfidence": "high",
       "matchScore": 0.9529
@@ -1871,7 +1871,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_reverse_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_reverse_crunch.webp",
       "exercisedbId": "RqOtqD7",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1912,7 +1912,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_seated_twist.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_seated_twist.webp",
       "exercisedbId": "UEjSrKI",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1953,7 +1953,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_side_bend.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_side_bend.webp",
       "exercisedbId": "wPypxFY",
       "matchConfidence": "curated",
       "matchScore": null
@@ -1994,7 +1994,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_standing_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_standing_crunch.webp",
       "exercisedbId": "jpgqxiS",
       "matchConfidence": "curated",
       "matchScore": null
@@ -2039,7 +2039,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_cable_triceps_kickback.gif",
+      "imageUrl": "assets/exercises/ff_triceps_cable_triceps_kickback.webp",
       "exercisedbId": "HEJ6DIX",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -2080,7 +2080,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_cable_wood_chop.gif",
+      "imageUrl": "assets/exercises/ff_abs_cable_wood_chop.webp",
       "exercisedbId": "fhZQPlV",
       "matchConfidence": "curated",
       "matchScore": null
@@ -2121,7 +2121,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_captain_s_chair_leg_raise.gif",
+      "imageUrl": "assets/exercises/ff_abs_captain_s_chair_leg_raise.webp",
       "exercisedbId": "weoDEpH",
       "matchConfidence": "curated",
       "matchScore": null
@@ -2168,7 +2168,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_chest_press_machine.gif",
+      "imageUrl": "assets/exercises/ff_chest_chest_press_machine.webp",
       "exercisedbId": "wDN97Ca",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -2217,7 +2217,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_chest_supported_dumbbell_row.gif",
+      "imageUrl": "assets/exercises/ff_back_chest_supported_dumbbell_row.webp",
       "exercisedbId": "BJ0Hz5L",
       "matchConfidence": "high",
       "matchScore": 0.846
@@ -2378,7 +2378,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_chest_supported_row_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_chest_supported_row_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -2425,7 +2425,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_chin_up.gif",
+      "imageUrl": "assets/exercises/ff_back_chin_up.webp",
       "exercisedbId": "T2mxWqc",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -2472,7 +2472,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_chin_up.gif",
+      "imageUrl": "assets/exercises/ff_biceps_chin_up.webp",
       "exercisedbId": "T2mxWqc",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -2519,7 +2519,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_close_grip_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_triceps_close_grip_bench_press.webp",
       "exercisedbId": "da4cXST",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -2566,7 +2566,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_close_grip_chin_up.gif",
+      "imageUrl": "assets/exercises/ff_biceps_close_grip_chin_up.webp",
       "exercisedbId": "VnfUNW7",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -2613,7 +2613,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_close_grip_lat_pulldown_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_close_grip_lat_pulldown_machine.webp",
       "exercisedbId": "ecpY0rH",
       "matchConfidence": "high",
       "matchScore": 0.8531
@@ -2668,7 +2668,7 @@
           "High Cable Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_lat_pulldown_classic.gif",
+      "imageUrl": "assets/exercises/ff_back_lat_pulldown_classic.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -2713,7 +2713,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_concentration_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_concentration_curl.webp",
       "exercisedbId": "gvsWLQw",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -2762,7 +2762,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_cossack_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_cossack_squat.webp",
       "exercisedbId": "GWoKnIm",
       "matchConfidence": "high",
       "matchScore": 0.9143
@@ -2803,7 +2803,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_crunch.webp",
       "exercisedbId": "TFqbd8t",
       "matchConfidence": "curated",
       "matchScore": null
@@ -2850,7 +2850,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_curtsy_lunge.gif",
+      "imageUrl": "assets/exercises/ff_glutes_curtsy_lunge.webp",
       "exercisedbId": "gUjqdei",
       "matchConfidence": "high",
       "matchScore": 0.835
@@ -2891,7 +2891,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_dead_bug.gif",
+      "imageUrl": "assets/exercises/ff_abs_dead_bug.webp",
       "exercisedbId": "iny3m5y",
       "matchConfidence": "curated",
       "matchScore": null
@@ -2942,7 +2942,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_back_deadlift.webp",
       "exercisedbId": "ila4NZS",
       "matchConfidence": "high",
       "matchScore": 0.891
@@ -2989,7 +2989,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_decline_barbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_decline_barbell_bench_press.webp",
       "exercisedbId": "GrO65fd",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3036,7 +3036,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_decline_chest_press_machine.gif",
+      "imageUrl": "assets/exercises/ff_chest_decline_chest_press_machine.webp",
       "exercisedbId": "vsVoPHt",
       "matchConfidence": "high",
       "matchScore": 0.881
@@ -3083,7 +3083,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_decline_dumbbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_decline_dumbbell_bench_press.webp",
       "exercisedbId": "DwhEmmE",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3130,7 +3130,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_decline_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_decline_push_up.webp",
       "exercisedbId": "i5cEhka",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3177,7 +3177,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_diamond_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_diamond_push_up.webp",
       "exercisedbId": "soIB2rj",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -3222,7 +3222,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_donkey_calf_raise_machine.gif",
+      "imageUrl": "assets/exercises/ff_calves_donkey_calf_raise_machine.webp",
       "exercisedbId": "C9LuR4A",
       "matchConfidence": "high",
       "matchScore": 0.8735
@@ -3267,7 +3267,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_donkey_kick.gif",
+      "imageUrl": "assets/exercises/ff_glutes_donkey_kick.webp",
       "exercisedbId": "Kpajagk",
       "matchConfidence": "high",
       "matchScore": 0.8482
@@ -3314,7 +3314,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_dumbbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_dumbbell_bench_press.webp",
       "exercisedbId": "SpYC0Kp",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3359,7 +3359,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_dumbbell_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_dumbbell_curl.webp",
       "exercisedbId": "BU15nH4",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3406,7 +3406,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_dumbbell_fly.gif",
+      "imageUrl": "assets/exercises/ff_chest_dumbbell_fly.webp",
       "exercisedbId": "yz9nUhF",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3453,7 +3453,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_front_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_front_raise.webp",
       "exercisedbId": "3eGE2JC",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3498,7 +3498,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_dumbbell_hip_thrust.gif",
+      "imageUrl": "assets/exercises/ff_glutes_dumbbell_hip_thrust.webp",
       "exercisedbId": "aWedzZX",
       "matchConfidence": "curated",
       "matchScore": null
@@ -3543,7 +3543,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_dumbbell_kickback.gif",
+      "imageUrl": "assets/exercises/ff_triceps_dumbbell_kickback.webp",
       "exercisedbId": "W6PxUkg",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3588,7 +3588,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_lateral_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_lateral_raise.webp",
       "exercisedbId": "DsgkuIt",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3637,7 +3637,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_dumbbell_pullover.gif",
+      "imageUrl": "assets/exercises/ff_chest_dumbbell_pullover.webp",
       "exercisedbId": "vi8EhoE",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3682,7 +3682,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_dumbbell_reverse_spider_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_dumbbell_reverse_spider_curl.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -3729,7 +3729,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_shoulder_press.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_dumbbell_shoulder_press.webp",
       "exercisedbId": "vmwLyCg",
       "matchConfidence": "high",
       "matchScore": 0.9633
@@ -3774,7 +3774,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_dumbbell_standing_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_dumbbell_standing_calf_raise.webp",
       "exercisedbId": "dPmaUaU",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3819,7 +3819,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_elevated_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_elevated_calf_raise.webp",
       "exercisedbId": "6HmFgmx",
       "matchConfidence": "high",
       "matchScore": 0.9052
@@ -3868,7 +3868,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_elliptical_trainer.gif",
+      "imageUrl": "assets/exercises/ff_cardio_elliptical_trainer.webp",
       "exercisedbId": "rjtuP6X",
       "matchConfidence": "curated",
       "matchScore": null
@@ -3913,7 +3913,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_ez_bar_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_ez_bar_curl.webp",
       "exercisedbId": "tJ5nYqo",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -3958,7 +3958,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_ez_bar_skull_crusher.gif",
+      "imageUrl": "assets/exercises/ff_triceps_ez_bar_skull_crusher.webp",
       "exercisedbId": "h8LFzo9",
       "matchConfidence": "high",
       "matchScore": 0.8589
@@ -4052,7 +4052,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_fire_hydrant.gif",
+      "imageUrl": "assets/exercises/ff_glutes_fire_hydrant.webp",
       "exercisedbId": "OrETs32",
       "matchConfidence": "low",
       "matchScore": 0.5802
@@ -4097,7 +4097,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_frog_pump.gif",
+      "imageUrl": "assets/exercises/ff_glutes_frog_pump.webp",
       "exercisedbId": "2Dk4xQV",
       "matchConfidence": "medium",
       "matchScore": 0.7885
@@ -4198,7 +4198,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_glute_bridge.gif",
+      "imageUrl": "assets/exercises/ff_glutes_glute_bridge.webp",
       "exercisedbId": "GibBPPg",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -4292,7 +4292,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_goblet_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_goblet_squat.webp",
       "exercisedbId": "yn8yg1r",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -4339,7 +4339,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_hack_squat_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_hack_squat_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -4392,7 +4392,7 @@
           "Dumbbell Hammer Curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_hammer_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_hammer_curl.webp",
       "exercisedbId": "fy7Tgy4",
       "matchConfidence": "high",
       "matchScore": 0.906
@@ -4439,7 +4439,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_handstand_push_up.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_handstand_push_up.webp",
       "exercisedbId": "XooAdhl",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -4480,7 +4480,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_hanging_leg_raise.gif",
+      "imageUrl": "assets/exercises/ff_abs_hanging_leg_raise.webp",
       "exercisedbId": "I3tsCnC",
       "matchConfidence": "curated",
       "matchScore": null
@@ -4527,7 +4527,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_hex_dumbbell_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_hex_dumbbell_press.webp",
       "exercisedbId": "pP8wP2P",
       "matchConfidence": "high",
       "matchScore": 0.9313
@@ -4572,7 +4572,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_high_cable_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_high_cable_curl.webp",
       "exercisedbId": "wDUqY2u",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -4621,7 +4621,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_high_row_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_high_row_machine.webp",
       "exercisedbId": "nZZZy9m",
       "matchConfidence": "medium",
       "matchScore": 0.806
@@ -4666,7 +4666,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_high_to_low_cable_fly.gif",
+      "imageUrl": "assets/exercises/ff_chest_high_to_low_cable_fly.webp",
       "exercisedbId": "tBWXbIT",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -4720,7 +4720,7 @@
           "Trekking"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cardio_hiking.gif",
+      "imageUrl": "assets/exercises/ff_cardio_hiking.webp",
       "exercisedbId": "IZVHb27",
       "matchConfidence": "curated",
       "matchScore": null
@@ -4767,7 +4767,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_hip_abductor_machine.gif",
+      "imageUrl": "assets/exercises/ff_glutes_hip_abductor_machine.webp",
       "exercisedbId": "CHpahtl",
       "matchConfidence": "medium",
       "matchScore": 0.7309
@@ -4861,7 +4861,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_incline_barbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_incline_barbell_bench_press.webp",
       "exercisedbId": "3TZduzM",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -4955,7 +4955,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_incline_dumbbell_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_incline_dumbbell_bench_press.webp",
       "exercisedbId": "ns0SIbU",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5005,7 +5005,7 @@
           "Incline DB Curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_incline_dumbbell_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_incline_dumbbell_curl.webp",
       "exercisedbId": "F3xgbjF",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5052,7 +5052,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_incline_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_incline_push_up.webp",
       "exercisedbId": "CB8WET1",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5101,7 +5101,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_inverted_row.gif",
+      "imageUrl": "assets/exercises/ff_back_inverted_row.webp",
       "exercisedbId": "bZGHsAZ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5148,7 +5148,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_jm_press.gif",
+      "imageUrl": "assets/exercises/ff_triceps_jm_press.webp",
       "exercisedbId": "ZsiqXYa",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -5198,7 +5198,7 @@
         ],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_jump_rope.gif",
+      "imageUrl": "assets/exercises/ff_cardio_jump_rope.webp",
       "exercisedbId": "e1e76I2",
       "matchConfidence": "curated",
       "matchScore": null
@@ -5245,7 +5245,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_jump_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_jump_squat.webp",
       "exercisedbId": "LIlE5Tn",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5306,7 +5306,7 @@
           "Squat thrust"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_burpee.gif",
+      "imageUrl": "assets/exercises/ff_cf_burpee.webp",
       "exercisedbId": "dK9394r",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5485,7 +5485,7 @@
           "Medicine ball wall shot"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_wall_ball.gif",
+      "imageUrl": "assets/exercises/ff_cf_wall_ball.webp",
       "exercisedbId": "PsVS1QP",
       "matchConfidence": "curated",
       "matchScore": 0.72
@@ -5542,7 +5542,7 @@
           "Thrusters"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_thruster.gif",
+      "imageUrl": "assets/exercises/ff_cf_thruster.webp",
       "exercisedbId": "f7Y9eDZ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5599,7 +5599,7 @@
           "Thrusters dumbbell"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_dumbbell_thruster.gif",
+      "imageUrl": "assets/exercises/ff_cf_dumbbell_thruster.webp",
       "exercisedbId": "FS63wTN",
       "matchConfidence": "curated",
       "matchScore": 0.68
@@ -5659,7 +5659,7 @@
           "Clean"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_power_clean.gif",
+      "imageUrl": "assets/exercises/ff_cf_power_clean.webp",
       "exercisedbId": "SiWCcTN",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -5845,7 +5845,7 @@
           "Power snatch"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_power_snatch.gif",
+      "imageUrl": "assets/exercises/ff_cf_power_snatch.webp",
       "exercisedbId": "dG5Smob",
       "matchConfidence": "curated",
       "matchScore": 0.76
@@ -5897,7 +5897,7 @@
           "Trap shrug"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_barbell_shrug.gif",
+      "imageUrl": "assets/exercises/ff_back_barbell_shrug.webp",
       "exercisedbId": "dG7tG5y",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -6009,7 +6009,7 @@
           "Snatch-grip deadlift"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_snatch_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_cf_snatch_deadlift.webp",
       "exercisedbId": "dG5Smob",
       "matchConfidence": "curated",
       "matchScore": 0.74
@@ -6129,7 +6129,7 @@
           "Two-hand kettlebell swing"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_kettlebell_swing.gif",
+      "imageUrl": "assets/exercises/ff_cf_kettlebell_swing.webp",
       "exercisedbId": "UHJlbu3",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -6190,7 +6190,7 @@
           "Kettlebell one arm snatch"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_kettlebell_snatch.gif",
+      "imageUrl": "assets/exercises/ff_cf_kettlebell_snatch.webp",
       "exercisedbId": "aXcUyKb",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -6440,7 +6440,7 @@
           "Strict muscle up"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cf_muscle_up.gif",
+      "imageUrl": "assets/exercises/ff_cf_muscle_up.webp",
       "exercisedbId": "yJUHKTn",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -6550,7 +6550,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_lat_pulldown_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_lat_pulldown_machine.webp",
       "exercisedbId": "LEprlgG",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -6595,7 +6595,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_leg_extension_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_leg_extension_machine.webp",
       "exercisedbId": "my33uHU",
       "matchConfidence": "high",
       "matchScore": 0.8529
@@ -6640,7 +6640,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_leg_press_calf_raise_machine.gif",
+      "imageUrl": "assets/exercises/ff_calves_leg_press_calf_raise_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -6687,7 +6687,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_leg_press_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_leg_press_machine.webp",
       "exercisedbId": "10Z2DXU",
       "matchConfidence": "high",
       "matchScore": 0.934
@@ -6786,7 +6786,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_low_to_high_cable_fly.gif",
+      "imageUrl": "assets/exercises/ff_chest_low_to_high_cable_fly.webp",
       "exercisedbId": "FVmZVhk",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -6831,7 +6831,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_lying_leg_curl_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_lying_leg_curl_machine.webp",
       "exercisedbId": "17lJ1kr",
       "matchConfidence": "high",
       "matchScore": 0.8589
@@ -6872,7 +6872,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_lying_leg_raise.gif",
+      "imageUrl": "assets/exercises/ff_abs_lying_leg_raise.webp",
       "exercisedbId": "WhuFnR7",
       "matchConfidence": "curated",
       "matchScore": null
@@ -6964,7 +6964,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_machine_lateral_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_machine_lateral_raise.webp",
       "exercisedbId": "dRTfGZT",
       "matchConfidence": "high",
       "matchScore": 0.8913
@@ -7011,7 +7011,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_machine_pullover.gif",
+      "imageUrl": "assets/exercises/ff_back_machine_pullover.webp",
       "exercisedbId": "4U7iLb5",
       "matchConfidence": "high",
       "matchScore": 0.8643
@@ -7052,7 +7052,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_machine_seated_leg_raise_crunch.gif",
+      "imageUrl": "assets/exercises/ff_abs_machine_seated_leg_raise_crunch.webp",
       "exercisedbId": "PQ2AtC3",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7101,7 +7101,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_meadows_row.gif",
+      "imageUrl": "assets/exercises/ff_back_meadows_row.webp",
       "exercisedbId": "X3cqyXz",
       "matchConfidence": "low",
       "matchScore": 0.636
@@ -7148,7 +7148,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_neutral_grip_pull_up.gif",
+      "imageUrl": "assets/exercises/ff_back_neutral_grip_pull_up.webp",
       "exercisedbId": "0V2YQjW",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -7204,7 +7204,7 @@
           "Road bike"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cardio_outdoor_cycling.gif",
+      "imageUrl": "assets/exercises/ff_cardio_outdoor_cycling.webp",
       "exercisedbId": "km2Ljzj",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7260,7 +7260,7 @@
           "Jogging"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cardio_outdoor_running.gif",
+      "imageUrl": "assets/exercises/ff_cardio_outdoor_running.webp",
       "exercisedbId": "oLrKqDH",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7313,7 +7313,7 @@
           "Brisk walk"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cardio_outdoor_walking.gif",
+      "imageUrl": "assets/exercises/ff_cardio_outdoor_walking.webp",
       "exercisedbId": "CcWEoWV",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7358,7 +7358,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_overhead_cable_extension.gif",
+      "imageUrl": "assets/exercises/ff_triceps_overhead_cable_extension.webp",
       "exercisedbId": "1xHyxys",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -7403,7 +7403,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_overhead_dumbbell_extension.gif",
+      "imageUrl": "assets/exercises/ff_triceps_overhead_dumbbell_extension.webp",
       "exercisedbId": "XalXcvM",
       "matchConfidence": "high",
       "matchScore": 0.89
@@ -7450,7 +7450,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_parallel_bar_dip.gif",
+      "imageUrl": "assets/exercises/ff_triceps_parallel_bar_dip.webp",
       "exercisedbId": "K1vlode",
       "matchConfidence": "high",
       "matchScore": 0.8857
@@ -7495,7 +7495,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_pec_deck_fly_machine.gif",
+      "imageUrl": "assets/exercises/ff_chest_pec_deck_fly_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -7544,7 +7544,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_pendlay_row.gif",
+      "imageUrl": "assets/exercises/ff_back_pendlay_row.webp",
       "exercisedbId": "r0z6xzQ",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -7596,7 +7596,7 @@
           "Pendulum Squat"
         ]
       },
-      "imageUrl": "assets/exercises/ff_legs_pendulum_squat_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_pendulum_squat_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -7643,7 +7643,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_pike_push_up.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_pike_push_up.webp",
       "exercisedbId": "XPUDTt7",
       "matchConfidence": "high",
       "matchScore": 0.935
@@ -7692,7 +7692,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_pistol_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_pistol_squat.webp",
       "exercisedbId": "nqs5HGV",
       "matchConfidence": "high",
       "matchScore": 0.9
@@ -7733,7 +7733,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_plank.gif",
+      "imageUrl": "assets/exercises/ff_abs_plank.webp",
       "exercisedbId": "VBAWRPG",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7780,7 +7780,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_pogo_jump.gif",
+      "imageUrl": "assets/exercises/ff_calves_pogo_jump.webp",
       "exercisedbId": "uZKq7lo",
       "matchConfidence": "medium",
       "matchScore": 0.7779
@@ -7882,7 +7882,7 @@
           "Close Grip Preacher EZ Curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_close_grip_preacher_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_close_grip_preacher_curl.webp",
       "exercisedbId": "hacCyUv",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7933,7 +7933,7 @@
           "Barbell Close Grip Curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_close_grip_barbell_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_close_grip_barbell_curl.webp",
       "exercisedbId": "4dUn2iv",
       "matchConfidence": "curated",
       "matchScore": null
@@ -7982,7 +7982,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_pull_up.gif",
+      "imageUrl": "assets/exercises/ff_back_pull_up.webp",
       "exercisedbId": "lBDjFxJ",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8031,7 +8031,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_push_up.webp",
       "exercisedbId": "7E06s6d",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8078,7 +8078,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_rear_delt_dumbbell_fly.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_rear_delt_dumbbell_fly.webp",
       "exercisedbId": "8DiFDVA",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8127,7 +8127,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_recumbent_bike.gif",
+      "imageUrl": "assets/exercises/ff_cardio_recumbent_bike.webp",
       "exercisedbId": "a8VDgLw",
       "matchConfidence": "curated",
       "matchScore": null
@@ -8174,7 +8174,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_reverse_cable_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_reverse_cable_curl.webp",
       "exercisedbId": "eOG0r6v",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8221,7 +8221,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_reverse_hyper_machine.gif",
+      "imageUrl": "assets/exercises/ff_glutes_reverse_hyper_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -8268,7 +8268,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_reverse_lunge.gif",
+      "imageUrl": "assets/exercises/ff_legs_reverse_lunge.webp",
       "exercisedbId": "SSsBDwB",
       "matchConfidence": "medium",
       "matchScore": 0.7264
@@ -8315,7 +8315,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_reverse_pec_deck_machine.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_reverse_pec_deck_machine.webp",
       "exercisedbId": "myfUsKf",
       "matchConfidence": "curated",
       "matchScore": null
@@ -8362,7 +8362,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_ring_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_ring_curl.webp",
       "exercisedbId": "sJFIDIp",
       "matchConfidence": "high",
       "matchScore": 0.9029
@@ -8411,7 +8411,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_ring_dip.gif",
+      "imageUrl": "assets/exercises/ff_triceps_ring_dip.webp",
       "exercisedbId": "ezTvXcr",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8460,7 +8460,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_ring_push_up.gif",
+      "imageUrl": "assets/exercises/ff_chest_ring_push_up.webp",
       "exercisedbId": "IaGQCrC",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8517,7 +8517,7 @@
           "Barbell RDL"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_barbell_romanian_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_back_barbell_romanian_deadlift.webp",
       "exercisedbId": "wQ2c4XD",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8564,7 +8564,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_romanian_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_legs_romanian_deadlift.webp",
       "exercisedbId": "wQ2c4XD",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -8611,7 +8611,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_romanian_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_glutes_romanian_deadlift.webp",
       "exercisedbId": "wQ2c4XD",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -8658,7 +8658,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_rope_hammer_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_rope_hammer_curl.webp",
       "exercisedbId": "HPlPoQA",
       "matchConfidence": "high",
       "matchScore": 0.906
@@ -8703,7 +8703,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_rope_pushdown.gif",
+      "imageUrl": "assets/exercises/ff_triceps_rope_pushdown.webp",
       "exercisedbId": "dU605di",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -8793,7 +8793,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_russian_twist.gif",
+      "imageUrl": "assets/exercises/ff_abs_russian_twist.webp",
       "exercisedbId": "XVDdcoj",
       "matchConfidence": "curated",
       "matchScore": null
@@ -8840,7 +8840,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_scapular_pull_up.gif",
+      "imageUrl": "assets/exercises/ff_back_scapular_pull_up.webp",
       "exercisedbId": "uTBt1HV",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8887,7 +8887,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_seated_barbell_overhead_press.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_seated_barbell_overhead_press.webp",
       "exercisedbId": "kTbSH9h",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -8936,7 +8936,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_seated_cable_row.gif",
+      "imageUrl": "assets/exercises/ff_back_seated_cable_row.webp",
       "exercisedbId": "hvV79Si",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -9129,7 +9129,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_shoulder_press_machine.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_shoulder_press_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -9174,7 +9174,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_biceps_single_arm_cable_curl.gif",
+      "imageUrl": "assets/exercises/ff_biceps_single_arm_cable_curl.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -9219,7 +9219,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_single_arm_cable_pushdown.gif",
+      "imageUrl": "assets/exercises/ff_triceps_single_arm_cable_pushdown.webp",
       "exercisedbId": "qRZ5S1N",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -9264,7 +9264,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_single_arm_dumbbell_lateral_raise.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_single_arm_dumbbell_lateral_raise.webp",
       "exercisedbId": "n5cWCsI",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -9313,7 +9313,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_single_arm_dumbbell_row.gif",
+      "imageUrl": "assets/exercises/ff_back_single_arm_dumbbell_row.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -9358,7 +9358,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_single_arm_overhead_dumbbell_extension.gif",
+      "imageUrl": "assets/exercises/ff_triceps_single_arm_overhead_dumbbell_extension.webp",
       "exercisedbId": "6MfS53i",
       "matchConfidence": "high",
       "matchScore": 0.8971
@@ -9403,7 +9403,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_single_leg_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_single_leg_calf_raise.webp",
       "exercisedbId": "9JprnPh",
       "matchConfidence": "high",
       "matchScore": 0.8929
@@ -9448,7 +9448,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_single_leg_dumbbell_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_single_leg_dumbbell_calf_raise.webp",
       "exercisedbId": "1kB3Wmk",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -9495,7 +9495,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_glutes_single_leg_glute_bridge.gif",
+      "imageUrl": "assets/exercises/ff_glutes_single_leg_glute_bridge.webp",
       "exercisedbId": "rmEukuS",
       "matchConfidence": "high",
       "matchScore": 0.9175
@@ -9536,7 +9536,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_abs_sit_up.gif",
+      "imageUrl": "assets/exercises/ff_abs_sit_up.webp",
       "exercisedbId": "QLL2gdc",
       "matchConfidence": "curated",
       "matchScore": null
@@ -9589,7 +9589,7 @@
           "Weighted decline sit-up"
         ]
       },
-      "imageUrl": "assets/exercises/ff_abs_decline_bench_sit_up.gif",
+      "imageUrl": "assets/exercises/ff_abs_decline_bench_sit_up.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -9638,7 +9638,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_ski_erg.gif",
+      "imageUrl": "assets/exercises/ff_cardio_ski_erg.webp",
       "exercisedbId": "vpQaQkH",
       "matchConfidence": "curated",
       "matchScore": null
@@ -9683,7 +9683,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_skull_crusher.gif",
+      "imageUrl": "assets/exercises/ff_triceps_skull_crusher.webp",
       "exercisedbId": "h8LFzo9",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -9775,7 +9775,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_smith_machine_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_smith_machine_calf_raise.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -9867,7 +9867,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_smith_machine_incline_bench_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_smith_machine_incline_bench_press.webp",
       "exercisedbId": "5v7KYld",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -9914,7 +9914,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_smith_machine_shoulder_press.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_smith_machine_shoulder_press.webp",
       "exercisedbId": "903mzG8",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -9961,7 +9961,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_smith_machine_squat.gif",
+      "imageUrl": "assets/exercises/ff_legs_smith_machine_squat.webp",
       "exercisedbId": "jFtipLl",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -10010,7 +10010,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_stair_climber.gif",
+      "imageUrl": "assets/exercises/ff_cardio_stair_climber.webp",
       "exercisedbId": "j9Q5crt",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10057,7 +10057,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_chest_standing_cable_chest_press.gif",
+      "imageUrl": "assets/exercises/ff_chest_standing_cable_chest_press.webp",
       "exercisedbId": "Pr9Rhf4",
       "matchConfidence": "high",
       "matchScore": 0.9313
@@ -10102,7 +10102,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_standing_calf_raise.gif",
+      "imageUrl": "assets/exercises/ff_calves_standing_calf_raise.webp",
       "exercisedbId": "6HmFgmx",
       "matchConfidence": "high",
       "matchScore": 1.0
@@ -10147,7 +10147,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_standing_calf_raise_machine.gif",
+      "imageUrl": "assets/exercises/ff_calves_standing_calf_raise_machine.webp",
       "exercisedbId": "ykUOVze",
       "matchConfidence": "high",
       "matchScore": 0.881
@@ -10192,7 +10192,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_standing_leg_curl_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_standing_leg_curl_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -10241,7 +10241,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_stationary_bike.gif",
+      "imageUrl": "assets/exercises/ff_cardio_stationary_bike.webp",
       "exercisedbId": "H1PESYI",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10288,7 +10288,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_step_up.gif",
+      "imageUrl": "assets/exercises/ff_legs_step_up.webp",
       "exercisedbId": "aXtJhlg",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -10337,7 +10337,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_stepmill.gif",
+      "imageUrl": "assets/exercises/ff_cardio_stepmill.webp",
       "exercisedbId": "j9Q5crt",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10384,7 +10384,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_stiff_leg_deadlift.gif",
+      "imageUrl": "assets/exercises/ff_legs_stiff_leg_deadlift.webp",
       "exercisedbId": "kuMiR2T",
       "matchConfidence": "high",
       "matchScore": 0.9167
@@ -10439,7 +10439,7 @@
           "Cable Straight Arm Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_straight_arm_cable_pulldown.gif",
+      "imageUrl": "assets/exercises/ff_back_straight_arm_cable_pulldown.webp",
       "exercisedbId": "x69MAlq",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10484,7 +10484,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_straight_bar_pushdown.gif",
+      "imageUrl": "assets/exercises/ff_triceps_straight_bar_pushdown.webp",
       "exercisedbId": "gAwDzB3",
       "matchConfidence": "high",
       "matchScore": 0.846
@@ -10536,7 +10536,7 @@
           "Cable Reverse Grip Pushdown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_triceps_reverse_grip_pushdown.gif",
+      "imageUrl": "assets/exercises/ff_triceps_reverse_grip_pushdown.webp",
       "exercisedbId": "ThKP69G",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10647,7 +10647,7 @@
           "Swim"
         ]
       },
-      "imageUrl": "assets/exercises/ff_cardio_swimming.gif",
+      "imageUrl": "assets/exercises/ff_cardio_swimming.webp",
       "exercisedbId": "SP3hUez",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10694,7 +10694,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_t_bar_row.gif",
+      "imageUrl": "assets/exercises/ff_back_t_bar_row.webp",
       "exercisedbId": "R5swFnc",
       "matchConfidence": "high",
       "matchScore": 0.9313
@@ -10750,7 +10750,7 @@
           "T-Bar Machine Row"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_t_bar_row_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_t_bar_row_machine.webp",
       "exercisedbId": "aaXr7ld",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10797,7 +10797,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_calves_toe_walk.gif",
+      "imageUrl": "assets/exercises/ff_calves_toe_walk.webp",
       "exercisedbId": "PzNxakt",
       "matchConfidence": "high",
       "matchScore": 0.8429
@@ -10844,7 +10844,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_cardio_treadmill.gif",
+      "imageUrl": "assets/exercises/ff_cardio_treadmill.webp",
       "exercisedbId": "rjiM4L3",
       "matchConfidence": "curated",
       "matchScore": null
@@ -10889,7 +10889,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_triceps_extension_machine.gif",
+      "imageUrl": "assets/exercises/ff_triceps_triceps_extension_machine.webp",
       "exercisedbId": "Ser9eQp",
       "matchConfidence": "high",
       "matchScore": 0.8735
@@ -10936,7 +10936,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_upright_row.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_upright_row.webp",
       "exercisedbId": "UDlhcO8",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -10981,7 +10981,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_triceps_v_bar_pushdown.gif",
+      "imageUrl": "assets/exercises/ff_triceps_v_bar_pushdown.webp",
       "exercisedbId": "gAwDzB3",
       "matchConfidence": "high",
       "matchScore": 0.956
@@ -11028,7 +11028,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_v_squat_machine.gif",
+      "imageUrl": "assets/exercises/ff_legs_v_squat_machine.webp",
       "exercisedbId": "Qa55kX1",
       "matchConfidence": "high",
       "matchScore": 0.8947
@@ -11075,7 +11075,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_legs_walking_lunge.gif",
+      "imageUrl": "assets/exercises/ff_legs_walking_lunge.webp",
       "exercisedbId": "IZVHb27",
       "matchConfidence": "medium",
       "matchScore": 0.8167
@@ -11124,7 +11124,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_shoulders_wall_walk.gif",
+      "imageUrl": "assets/exercises/ff_shoulders_wall_walk.webp",
       "exercisedbId": "NCmbLCw",
       "matchConfidence": "low",
       "matchScore": 0.586
@@ -11171,7 +11171,7 @@
         "es": [],
         "en": []
       },
-      "imageUrl": "assets/exercises/ff_back_wide_grip_lat_pulldown_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_wide_grip_lat_pulldown_machine.webp",
       "exercisedbId": "rkg41Fb",
       "matchConfidence": "high",
       "matchScore": 0.862
@@ -11226,7 +11226,7 @@
           "Parallel Grip Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_v_bar_lat_pulldown.gif",
+      "imageUrl": "assets/exercises/ff_back_v_bar_lat_pulldown.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11281,7 +11281,7 @@
           "Single-Arm Cable Lat Pulldown"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_single_arm_lat_pulldown.gif",
+      "imageUrl": "assets/exercises/ff_back_single_arm_lat_pulldown.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11444,7 +11444,7 @@
           "Seated Rotary Torso"
         ]
       },
-      "imageUrl": "assets/exercises/ff_abs_rotary_torso_machine.gif",
+      "imageUrl": "assets/exercises/ff_abs_rotary_torso_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11501,7 +11501,7 @@
           "Diverging Seated Row Machine"
         ]
       },
-      "imageUrl": "assets/exercises/ff_back_seated_row_machine.gif",
+      "imageUrl": "assets/exercises/ff_back_seated_row_machine.webp",
       "exercisedbId": null,
       "matchConfidence": "curated",
       "matchScore": null
@@ -11552,7 +11552,7 @@
           "Palms-up wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_dumbbell_wrist_curl.gif",
+      "imageUrl": "assets/exercises/ff_forearms_dumbbell_wrist_curl.webp",
       "exercisedbId": "2dImyQ8",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11656,7 +11656,7 @@
           "Seated barbell wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_barbell_wrist_curl.gif",
+      "imageUrl": "assets/exercises/ff_forearms_barbell_wrist_curl.webp",
       "exercisedbId": "82LxxkW",
       "matchConfidence": "curated",
       "matchScore": null
@@ -11707,7 +11707,7 @@
           "Palms-down barbell wrist curl"
         ]
       },
-      "imageUrl": "assets/exercises/ff_forearms_barbell_reverse_wrist_curl.gif",
+      "imageUrl": "assets/exercises/ff_forearms_barbell_reverse_wrist_curl.webp",
       "exercisedbId": "LsZkfU6",
       "matchConfidence": "curated",
       "matchScore": null

@@ -26,6 +26,7 @@ import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
 import '../../widgets/tappable_badge.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/utils/feed_personal_record.dart';
 
 class WorkoutSummaryScreen extends ConsumerStatefulWidget {
   final WorkoutSummaryData summary;
@@ -40,6 +41,9 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
   final _shareCardKey = GlobalKey();
   final _shareButtonKey = GlobalKey();
   bool _sharing = false;
+  bool _finishing = false;
+  bool _allowPop = false;
+  final Set<String> _selectedPrKeys = {};
 
   WorkoutSummaryData get summary => widget.summary;
 
@@ -127,7 +131,47 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     }
   }
 
-  void _close() {
+  List<PersonalRecord> get _selectedPersonalRecords => summary.newPersonalRecords
+      .where((pr) => _selectedPrKeys.contains(FeedPersonalRecord.keyFor(pr)))
+      .toList();
+
+  Future<int> _publishSelectedFeedRecords() async {
+    final selected = _selectedPersonalRecords;
+    if (selected.isEmpty) return 0;
+    return ref.read(socialServiceProvider).publishPersonalRecords(selected);
+  }
+
+  Future<void> _finishSummary() async {
+    if (_finishing) return;
+    setState(() => _finishing = true);
+
+    var publishedCount = 0;
+    if (_selectedPrKeys.isNotEmpty && summary.hasNewPersonalRecords) {
+      try {
+        publishedCount = await _publishSelectedFeedRecords();
+        ref.invalidate(socialFeedProvider);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.feedPrShareFailed),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
+
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    if (publishedCount > 0) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(context.l10n.feedPrShared(publishedCount))),
+      );
+    }
+
+    setState(() => _allowPop = true);
     if (context.canPop()) {
       context.pop();
     } else {
@@ -140,12 +184,19 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     final l10n = context.l10n;
     final unit = ref.watch(unitSystemProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: _allowPop,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && !_finishing) {
+          _finishSummary();
+        }
+      },
+      child: Scaffold(
       appBar: FitForgeAppBar(
         title: l10n.summaryTitle,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: _close,
+          onPressed: _finishing ? null : _finishSummary,
         ),
       ),
       body: Column(
@@ -222,6 +273,24 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                     ),
                   ),
                 ),
+                if (summary.hasNewPersonalRecords) ...[
+                  const SizedBox(height: 20),
+                  _FeedShareSection(
+                    records: summary.newPersonalRecords,
+                    unitSystem: unit,
+                    selectedKeys: _selectedPrKeys,
+                    onToggle: (key, selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedPrKeys.add(key);
+                        } else {
+                          _selectedPrKeys.remove(key);
+                        }
+                      });
+                    },
+                    l10n: l10n,
+                  ),
+                ],
               ],
             ),
           ),
@@ -233,7 +302,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _close,
+                      onPressed: _finishing ? null : _finishSummary,
                       child: Text(l10n.close),
                     ),
                   ),
@@ -264,6 +333,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -917,6 +987,81 @@ class _PrBadge extends StatelessWidget {
           color: context.accentColor,
           fontSize: 11,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _FeedShareSection extends StatelessWidget {
+  final List<PersonalRecord> records;
+  final String unitSystem;
+  final Set<String> selectedKeys;
+  final void Function(String key, bool selected) onToggle;
+  final AppLocalizations l10n;
+
+  const _FeedShareSection({
+    required this.records,
+    required this.unitSystem,
+    required this.selectedKeys,
+    required this.onToggle,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.people_outline, color: context.accentColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.feedSharePrTitle,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.feedSharePrSubtitle,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...records.map((pr) {
+              final key = FeedPersonalRecord.keyFor(pr);
+              return CheckboxListTile(
+                value: selectedKeys.contains(key),
+                onChanged: (checked) => onToggle(key, checked ?? false),
+                activeColor: context.accentColor,
+                secondary: Icon(Icons.emoji_events, color: context.accentColor, size: 22),
+                title: LocalizedExerciseName(
+                  pr.exerciseName,
+                  exerciseId: pr.exerciseId,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  FeedPersonalRecord.formatValue(pr, unitSystem),
+                  style: TextStyle(color: context.accentColor, fontWeight: FontWeight.w600),
+                ),
+                controlAffinity: ListTileControlAffinity.leading,
+              );
+            }),
+          ],
         ),
       ),
     );

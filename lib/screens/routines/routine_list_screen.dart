@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
@@ -59,8 +60,26 @@ abstract final class RoutineListActions {
                 final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
                 final personalRecords = await ref.read(personalRecordsProvider.future);
                 final routines = await ref.read(routinesProvider.future);
+                final nutrition = await ref.read(coachNutritionServiceProvider).load(
+                      profile: profile,
+                      bodyMetrics: bodyMetrics,
+                    );
 
                 if (!context.mounted) return;
+
+                final usageService = ref.read(coachUsageServiceProvider);
+                final profileService = ref.read(profileServiceProvider);
+                final canSend = await usageService.canSendMessage(profile, profileService);
+                if (!canSend) {
+                  if (!context.mounted) return;
+                  final status = await usageService.getStatus(profile, profileService);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.coachDailyLimitReached(status.limit ?? 0)),
+                    ),
+                  );
+                  return;
+                }
 
                 try {
                   final routine = await FitForgeLoadingOverlay.run(
@@ -76,10 +95,13 @@ abstract final class RoutineListActions {
                           weeklyStats: weeklyStats,
                           personalRecords: personalRecords,
                           routines: routines,
+                          nutrition: nutrition,
                         ),
                   );
 
                   if (routine != null && context.mounted) {
+                    await usageService.recordMessage();
+                    ref.invalidate(coachUsageStatusProvider);
                     await showRoutinePreview(context, ref, routine);
                   }
                 } catch (e) {
@@ -133,10 +155,13 @@ abstract final class RoutineListActions {
                     isSaving: isSaving,
                     onSave: () async {
                       if (isSaving) return;
+                      final canCreate = await ensureCanCreateRoutine(context, ref);
+                      if (!canCreate) return;
                       setDialogState(() => isSaving = true);
                       try {
                         await ref.read(routineServiceProvider).createRoutine(preview);
                         ref.invalidate(routinesProvider);
+                        ref.invalidate(routineLimitStatusProvider);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.routineSavedNamed(preview.name))),
@@ -146,9 +171,7 @@ abstract final class RoutineListActions {
                       } catch (e) {
                         setDialogState(() => isSaving = false);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.saveFailed('$e'))),
-                          );
+                          showRoutineSaveErrorSnackBar(context, e);
                         }
                       }
                     },
@@ -177,9 +200,13 @@ class RoutinesTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final routinesAsync = ref.watch(routinesProvider);
+    final limitAsync = ref.watch(routineLimitStatusProvider);
 
     return routinesAsync.when(
       data: (routines) {
+        final limitStatus = limitAsync.valueOrNull;
+        final atLimit = limitStatus != null && !limitStatus.canCreate;
+
         if (routines.isEmpty) {
           return Center(
             child: Column(
@@ -188,9 +215,22 @@ class RoutinesTab extends ConsumerWidget {
                 const Icon(Icons.list_alt, size: 64, color: Colors.white24),
                 const SizedBox(height: 16),
                 Text(l10n.noRoutines),
+                if (limitStatus != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.routineLimitUsage(limitStatus.used, limitStatus.limit),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => context.push('/routines/new'),
+                  onPressed: atLimit
+                      ? null
+                      : () async {
+                          if (await ensureCanCreateRoutine(context, ref)) {
+                            if (context.mounted) context.push('/routines/new');
+                          }
+                        },
                   child: Text(l10n.createRoutine),
                 ),
               ],
@@ -205,8 +245,22 @@ class RoutinesTab extends ConsumerWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
           children: [
+            if (limitStatus != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  l10n.routineLimitUsage(limitStatus.used, limitStatus.limit),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+              ),
             OutlinedButton.icon(
-              onPressed: () => context.push('/routines/new'),
+              onPressed: atLimit
+                  ? null
+                  : () async {
+                      if (await ensureCanCreateRoutine(context, ref)) {
+                        if (context.mounted) context.push('/routines/new');
+                      }
+                    },
               icon: const Icon(Icons.add),
               label: Text(l10n.newRoutine),
               style: OutlinedButton.styleFrom(

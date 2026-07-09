@@ -161,13 +161,13 @@ LOCAL_IMAGE_OVERRIDES: dict[str, str] = {
     "ff_calves_leg_press_calf_raise_machine": "assets/exercises/ff_calves_leg_press_calf_raise_machine.png",
     "ff_calves_seated_calf_raise_machine": "assets/exercises/ff_calves_seated_calf_raise_machine.png",
     "ff_glutes_reverse_hyper_machine": "assets/exercises/ff_glutes_reverse_hyper_machine.png",
-    "ff_back_lat_pulldown_classic": "assets/exercises/ff_back_lat_pulldown_classic.gif",
-    "ff_back_v_bar_lat_pulldown": "assets/exercises/ff_back_v_bar_lat_pulldown.gif",
-    "ff_back_single_arm_lat_pulldown": "assets/exercises/ff_back_single_arm_lat_pulldown.gif",
+    "ff_back_lat_pulldown_classic": "assets/exercises/ff_back_lat_pulldown_classic.webp",
+    "ff_back_v_bar_lat_pulldown": "assets/exercises/ff_back_v_bar_lat_pulldown.webp",
+    "ff_back_single_arm_lat_pulldown": "assets/exercises/ff_back_single_arm_lat_pulldown.webp",
     "ff_back_cable_parallel_grip_lat_pulldown": "assets/exercises/ff_back_cable_parallel_grip_lat_pulldown.webp",
     "ff_back_back_extension_machine": "assets/exercises/ff_back_back_extension_machine.png",
-    "ff_abs_rotary_torso_machine": "assets/exercises/ff_abs_rotary_torso_machine.gif",
-    "ff_back_seated_row_machine": "assets/exercises/ff_back_seated_row_machine.gif",
+    "ff_abs_rotary_torso_machine": "assets/exercises/ff_abs_rotary_torso_machine.webp",
+    "ff_back_seated_row_machine": "assets/exercises/ff_back_seated_row_machine.webp",
 }
 
 # Ejercicios añadidos fuera del Excel (evita duplicados por id al regenerar).

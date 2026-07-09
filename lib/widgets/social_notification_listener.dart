@@ -31,6 +31,11 @@ class _SocialNotificationListenerState extends ConsumerState<SocialNotificationL
   }
 
   void _onRealtimeEvent(SocialRealtimeEvent event) {
+    if (event.isFeedItem) {
+      ref.invalidate(socialFeedProvider);
+      return;
+    }
+
     if (event.message.isEmpty) return;
 
     ref.invalidate(socialNotificationsProvider);

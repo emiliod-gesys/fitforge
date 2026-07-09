@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/l10n/app_locale.dart';
+import '../../core/subscription/subscription_features.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
@@ -220,12 +221,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => _editExperience(profile),
                 ),
                 SwitchListTile(
-                  secondary: Icon(Icons.school_outlined, color: context.accentColor),
+                  secondary: Icon(
+                    Icons.school_outlined,
+                    color: (profile?.subscriptionTier.hasTrainerMode ?? false)
+                        ? context.accentColor
+                        : AppColors.textMuted,
+                  ),
                   title: Text(l10n.personalTrainerMode),
-                  subtitle: Text(l10n.personalTrainerModeSubtitle),
-                  value: profile?.isTrainer ?? false,
+                  subtitle: Text(
+                    (profile?.subscriptionTier.hasTrainerMode ?? false)
+                        ? l10n.personalTrainerModeSubtitle
+                        : l10n.featureGymratProOnly,
+                  ),
+                  value: (profile?.isTrainer ?? false) &&
+                      (profile?.subscriptionTier.hasTrainerMode ?? false),
                   activeThumbColor: context.accentColor,
-                  onChanged: _trainerModeUpdating ? null : (value) => _setTrainerMode(enabled: value),
+                  onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) &&
+                          !_trainerModeUpdating
+                      ? (value) => _setTrainerMode(enabled: value)
+                      : null,
                 ),
                 ref.watch(restTimerAlertModeProvider).when(
                   skipLoadingOnReload: true,
@@ -252,40 +266,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _SectionTitle(l10n.aiSection),
                 ref.watch(aiProactiveEnabledProvider).when(
                   skipLoadingOnReload: true,
-                  data: (enabled) => SwitchListTile(
-                    secondary: Icon(Icons.psychology_outlined, color: context.accentColor),
-                    title: Text(l10n.proactiveAi),
-                    subtitle: Text(
-                      enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff,
-                    ),
-                    value: enabled,
-                    activeThumbColor: context.accentColor,
-                    onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled),
-                  ),
+                  data: (enabled) {
+                    final canProactive = profile?.subscriptionTier.hasProactiveAi ?? false;
+                    return SwitchListTile(
+                      secondary: Icon(
+                        Icons.psychology_outlined,
+                        color: canProactive ? context.accentColor : AppColors.textMuted,
+                      ),
+                      title: Text(l10n.proactiveAi),
+                      subtitle: Text(
+                        !canProactive
+                            ? l10n.featureGymratPlansOnly
+                            : (enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff),
+                      ),
+                      value: canProactive && enabled,
+                      activeThumbColor: context.accentColor,
+                      onChanged: canProactive
+                          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled)
+                          : null,
+                    );
+                  },
                   loading: () => ListTile(
                     leading: Icon(Icons.psychology_outlined, color: context.accentColor),
                     title: Text(l10n.proactiveAi),
                     subtitle: Text(l10n.loading),
                   ),
-                  error: (_, __) => SwitchListTile(
-                    secondary: Icon(Icons.psychology_outlined, color: context.accentColor),
-                    title: Text(l10n.proactiveAi),
-                    subtitle: Text(l10n.proactiveAiSubtitleOff),
-                    value: false,
-                    activeThumbColor: context.accentColor,
-                    onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: false),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.key, color: context.accentColor),
-                  title: Text(l10n.apiKeys),
-                  subtitle: Text(
-                    profile?.hasAiKey == true
-                        ? l10n.apiKeysConfigured(profile?.aiProvider.name ?? '')
-                        : l10n.apiKeysNotConfigured,
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/api-keys'),
+                  error: (_, __) {
+                    final canProactive = profile?.subscriptionTier.hasProactiveAi ?? false;
+                    return SwitchListTile(
+                      secondary: Icon(
+                        Icons.psychology_outlined,
+                        color: canProactive ? context.accentColor : AppColors.textMuted,
+                      ),
+                      title: Text(l10n.proactiveAi),
+                      subtitle: Text(
+                        !canProactive ? l10n.featureGymratPlansOnly : l10n.proactiveAiSubtitleOff,
+                      ),
+                      value: false,
+                      activeThumbColor: context.accentColor,
+                      onChanged: canProactive
+                          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: false)
+                          : null,
+                    );
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.auto_awesome, color: context.accentColor),
@@ -298,19 +321,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _SectionTitle(l10n.accentColor),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.accentColorHint,
+                  (profile?.subscriptionTier.hasCustomAccent ?? false)
+                      ? l10n.accentColorHint
+                      : l10n.featureGymratPlansOnly,
                   style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
                 AccentColorSelector(
                   selected: accent,
-                  onChanged: (value) async {
-                    await ref.read(profileServiceProvider).updateProfile({
-                      'accent_color': value.name,
-                    });
-                    ref.invalidate(profileProvider);
-                  },
+                  lockedMessage: l10n.featureGymratPlansOnly,
+                  onChanged: (profile?.subscriptionTier.hasCustomAccent ?? false)
+                      ? (value) async {
+                          await ref.read(profileServiceProvider).updateProfile({
+                            'accent_color': value.name,
+                          });
+                          ref.invalidate(profileProvider);
+                        }
+                      : null,
                 ),
+                if (profile?.subscriptionTier.isFree ?? true) ...[
+                  const SizedBox(height: 24),
+                  _FreeAdvancedSettings(profile: profile),
+                ],
                 const SizedBox(height: 32),
                 Padding(
                   padding: EdgeInsets.fromLTRB(
@@ -630,6 +662,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _setTrainerMode({required bool enabled}) async {
     if (_trainerModeUpdating) return;
 
+    final profile = ref.read(profileProvider).value;
+    if (enabled && !(profile?.subscriptionTier.hasTrainerMode ?? false)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.featureGymratProOnly)),
+      );
+      return;
+    }
+
     setState(() => _trainerModeUpdating = true);
     final l10n = context.l10n;
 
@@ -901,6 +941,78 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textMuted),
+    );
+  }
+}
+
+/// Ajustes avanzados visibles solo en plan gratuito (p. ej. API key propia).
+class _FreeAdvancedSettings extends StatefulWidget {
+  final UserProfile? profile;
+
+  const _FreeAdvancedSettings({required this.profile});
+
+  @override
+  State<_FreeAdvancedSettings> createState() => _FreeAdvancedSettingsState();
+}
+
+class _FreeAdvancedSettingsState extends State<_FreeAdvancedSettings> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    const muted = AppColors.textMuted;
+    final profile = widget.profile;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.advancedSettings,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: muted),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.advancedSettingsHint,
+                        style: TextStyle(color: muted.withValues(alpha: 0.85), fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  _expanded ? Icons.expand_less : Icons.expand_more,
+                  color: muted.withValues(alpha: 0.85),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_expanded)
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            leading: const Icon(Icons.key_outlined, color: muted),
+            title: Text(l10n.bringYourOwnAi),
+            subtitle: Text(
+              profile?.hasAiKey == true
+                  ? l10n.apiKeysConfigured(profile?.aiProvider.name ?? '')
+                  : l10n.bringYourOwnAiSubtitle,
+              style: TextStyle(color: muted.withValues(alpha: 0.85), fontSize: 13),
+            ),
+            trailing: Icon(Icons.chevron_right, color: muted.withValues(alpha: 0.7)),
+            onTap: () => context.push('/api-keys'),
+          ),
+      ],
     );
   }
 }

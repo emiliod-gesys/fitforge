@@ -28,6 +28,25 @@ class ActivityLogService {
         .toList();
   }
 
+  Future<List<ManualActivityEntry>> getEntriesSince(
+    DateTime startInclusive, {
+    String? userId,
+  }) async {
+    final uid = userId ?? SupabaseService.currentUser?.id;
+    if (uid == null) return [];
+
+    final data = await _client
+        .from('manual_activity_entries')
+        .select()
+        .eq('user_id', uid)
+        .gte('logged_at', startInclusive.toUtc().toIso8601String())
+        .order('logged_at', ascending: true);
+
+    return (data as List)
+        .map((row) => ManualActivityEntry.fromJson(Map<String, dynamic>.from(row as Map)))
+        .toList();
+  }
+
   Future<ManualActivityEntry> addEntry({
     required String name,
     required int caloriesKcal,

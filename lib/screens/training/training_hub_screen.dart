@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -81,7 +82,11 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
             IconButton(
               icon: const Icon(Icons.add),
               tooltip: l10n.newRoutine,
-              onPressed: () => context.push('/routines/new'),
+              onPressed: () async {
+                if (await ensureCanCreateRoutine(context, ref)) {
+                  if (context.mounted) context.push('/routines/new');
+                }
+              },
             ),
             IconButton(
               icon: const Icon(Icons.auto_awesome_outlined),

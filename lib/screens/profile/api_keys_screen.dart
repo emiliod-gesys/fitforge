@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/api_key_guides.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -94,6 +95,17 @@ class _ApiKeysScreenState extends ConsumerState<ApiKeysScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final profile = ref.watch(profileProvider).value;
+    if (profile != null && !profile.subscriptionTier.isFree) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.apiKeysNotAvailableOnPaidPlan)),
+        );
+        context.pop();
+      });
+      return const Scaffold(body: SizedBox.shrink());
+    }
 
     return Scaffold(
       appBar: FitForgeAppBar(title: l10n.apiKeysTitle),

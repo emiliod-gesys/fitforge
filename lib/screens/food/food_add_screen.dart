@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
+import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_accent.dart';
@@ -139,6 +141,16 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   }
 
   Future<void> _processFoodImage(XFile image) async {
+    final tier = (await ref.read(profileProvider.future))?.subscriptionTier ?? SubscriptionTier.free;
+    if (!tier.hasFoodPhotoAi) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.featureGymratProOnly)),
+        );
+      }
+      return;
+    }
+
     setState(() => _loading = true);
     try {
       final bytes = await image.readAsBytes();
@@ -169,6 +181,8 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final tier = ref.watch(profileProvider).value?.subscriptionTier ?? SubscriptionTier.free;
+    final photoAllowed = tier.hasFoodPhotoAi;
     final summaryAsync = ref.watch(dailyNutritionProvider);
     final mealEaten = summaryAsync.valueOrNull?.eatenForMeal(widget.mealType).caloriesKcal ?? 0;
     final mealGoal = summaryAsync.valueOrNull?.mealCalorieGoal(widget.mealType) ?? 0;
@@ -199,7 +213,19 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: _ModeTabs(
                   mode: _mode,
+                  photoLocked: !photoAllowed,
+                  onPhotoLockedTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.featureGymratProOnly)),
+                    );
+                  },
                   onChanged: (m) {
+                    if (m == FoodAddMode.photo && !photoAllowed) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.featureGymratProOnly)),
+                      );
+                      return;
+                    }
                     setState(() => _mode = m);
                     if (m == FoodAddMode.manual) _loadManualSaved();
                   },
@@ -234,6 +260,8 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         },
                       ),
                     FoodAddMode.photo => _PhotoPane(
+                        locked: !photoAllowed,
+                        lockedMessage: l10n.featureGymratProOnly,
                         onPickImage: _pickFoodImage,
                       ),
                   },
@@ -625,13 +653,40 @@ class _QuickAddPane extends StatelessWidget {
 }
 
 class _PhotoPane extends StatelessWidget {
+  final bool locked;
+  final String lockedMessage;
   final Future<void> Function(ImageSource source) onPickImage;
 
-  const _PhotoPane({required this.onPickImage});
+  const _PhotoPane({
+    required this.locked,
+    required this.lockedMessage,
+    required this.onPickImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
+    if (locked) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock_outline, size: 48, color: AppColors.textMuted.withValues(alpha: 0.7)),
+          const SizedBox(height: 16),
+          Text(
+            lockedMessage,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.foodPhotoHint,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.75), fontSize: 12),
+          ),
+        ],
+      );
+    }
 
     return Column(
       children: [
@@ -680,56 +735,88 @@ class _PhotoPane extends StatelessWidget {
 
 class _ModeTabs extends StatelessWidget {
   final FoodAddMode mode;
+  final bool photoLocked;
+  final VoidCallback onPhotoLockedTap;
   final ValueChanged<FoodAddMode> onChanged;
 
-  const _ModeTabs({required this.mode, required this.onChanged});
+  const _ModeTabs({
+    required this.mode,
+    required this.photoLocked,
+    required this.onPhotoLockedTap,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final items = [
-      (FoodAddMode.search, Icons.search, l10n.foodModeSearch),
-      (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto),
-      (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick),
-      (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual),
+      (FoodAddMode.search, Icons.search, l10n.foodModeSearch, false),
+      (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto, photoLocked),
+      (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick, false),
+      (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual, false),
     ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: items.map((item) {
-          final selected = mode == item.$1;
+          final foodMode = item.$1;
+          final locked = item.$4;
+          final selected = mode == foodMode;
+          final accent = locked ? AppColors.textMuted : context.accentColor;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: InkWell(
-              onTap: () => onChanged(item.$1),
+              onTap: () {
+                if (locked) {
+                  onPhotoLockedTap();
+                  return;
+                }
+                onChanged(foodMode);
+              },
               borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 84,
-                padding: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: selected ? context.accentColor.withValues(alpha: 0.15) : AppColors.card,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: selected ? context.accentColor : AppColors.border,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(item.$2, color: selected ? context.accentColor : AppColors.textMuted),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.$3,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10,
-                        height: 1.1,
-                        color: selected ? context.accentColor : AppColors.textMuted,
-                      ),
+              child: Opacity(
+                opacity: locked ? 0.55 : 1,
+                child: Container(
+                  width: 84,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: selected && !locked
+                        ? context.accentColor.withValues(alpha: 0.15)
+                        : AppColors.card,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: selected && !locked ? context.accentColor : AppColors.border,
                     ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(item.$2, color: selected && !locked ? accent : AppColors.textMuted),
+                          if (locked)
+                            Positioned(
+                              right: -6,
+                              top: -4,
+                              child: Icon(Icons.lock, size: 12, color: AppColors.textMuted),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.$3,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          height: 1.1,
+                          color: selected && !locked ? accent : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

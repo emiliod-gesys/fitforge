@@ -302,6 +302,72 @@ abstract class AppLocalizations {
   /// **'Datos personales'**
   String get personalData;
 
+  /// No description provided for @profileOnboardingTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tu perfil'**
+  String get profileOnboardingTitle;
+
+  /// No description provided for @profileOnboardingSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitamos estos datos para personalizar entrenamientos, nutrición y progreso.'**
+  String get profileOnboardingSubtitle;
+
+  /// No description provided for @profileOnboardingNickname.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre o apodo'**
+  String get profileOnboardingNickname;
+
+  /// No description provided for @profileOnboardingContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get profileOnboardingContinue;
+
+  /// No description provided for @weightUpdateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualiza tu peso'**
+  String get weightUpdateTitle;
+
+  /// No description provided for @weightUpdateMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Han pasado más de 15 días desde tu último registro. Actualiza tu peso para mantener tus métricas precisas.'**
+  String get weightUpdateMessage;
+
+  /// No description provided for @weightUpdateSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar peso'**
+  String get weightUpdateSave;
+
+  /// No description provided for @weightInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica un peso válido'**
+  String get weightInvalid;
+
+  /// No description provided for @genderRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona tu género'**
+  String get genderRequired;
+
+  /// No description provided for @heightInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica una altura válida (50–280 cm)'**
+  String get heightInvalid;
+
+  /// No description provided for @ageInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica una edad válida (13–119 años)'**
+  String get ageInvalid;
+
   /// No description provided for @displayName.
   ///
   /// In es, this message translates to:
@@ -775,6 +841,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No configurado'**
   String get apiKeysNotConfigured;
+
+  /// No description provided for @advancedSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes avanzados'**
+  String get advancedSettings;
+
+  /// No description provided for @advancedSettingsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Opciones para usuarios con experiencia'**
+  String get advancedSettingsHint;
+
+  /// No description provided for @bringYourOwnAi.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectar tu cuenta de IA'**
+  String get bringYourOwnAi;
+
+  /// No description provided for @bringYourOwnAiSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Usa tu propia cuenta de OpenAI, Gemini o Claude'**
+  String get bringYourOwnAiSubtitle;
+
+  /// No description provided for @apiKeysNotAvailableOnPaidPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan ya incluye IA — no necesitas una API key propia'**
+  String get apiKeysNotAvailableOnPaidPlan;
+
+  /// No description provided for @featureGymratPlansOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo para usuarios Gymrat y Gymrat Pro'**
+  String get featureGymratPlansOnly;
+
+  /// No description provided for @featureGymratProOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo para usuarios Gymrat Pro'**
+  String get featureGymratProOnly;
 
   /// No description provided for @aiCoachSubtitle.
   ///
@@ -1772,11 +1880,107 @@ abstract class AppLocalizations {
   /// **'Amigos'**
   String get socialTabFriends;
 
+  /// No description provided for @socialTabFeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Feed'**
+  String get socialTabFeed;
+
   /// No description provided for @socialTabLeaderboards.
   ///
   /// In es, this message translates to:
   /// **'Clasificaciones'**
   String get socialTabLeaderboards;
+
+  /// No description provided for @feedEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu feed está vacío'**
+  String get feedEmptyTitle;
+
+  /// No description provided for @feedEmptySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.'**
+  String get feedEmptySubtitle;
+
+  /// No description provided for @feedExpiryHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se muestran publicaciones de las últimas 24 horas.'**
+  String get feedExpiryHint;
+
+  /// No description provided for @feedLongPressToReact.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantén pulsado una publicación para reaccionar.'**
+  String get feedLongPressToReact;
+
+  /// No description provided for @feedMilestoneUnlock.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} desbloqueó medalla {category} — {tier}'**
+  String feedMilestoneUnlock(String name, String category, String tier);
+
+  /// No description provided for @feedLevelUp.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} subió al nivel {level}'**
+  String feedLevelUp(String name, int level);
+
+  /// No description provided for @feedPrUnlock.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} batió un récord en {exercise}: {value}'**
+  String feedPrUnlock(String name, String exercise, String value);
+
+  /// No description provided for @feedPrUnlockSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'Batiste un récord en {exercise}: {value}'**
+  String feedPrUnlockSelf(String exercise, String value);
+
+  /// No description provided for @feedMilestoneUnlockSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloqueaste la medalla {category} — {tier}'**
+  String feedMilestoneUnlockSelf(String category, String tier);
+
+  /// No description provided for @feedLevelUpSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiste al nivel {level}'**
+  String feedLevelUpSelf(int level);
+
+  /// No description provided for @feedWorkoutCompletedSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'Completaste \"{workout}\"'**
+  String feedWorkoutCompletedSelf(String workout);
+
+  /// No description provided for @feedSharePrTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir en el feed'**
+  String get feedSharePrTitle;
+
+  /// No description provided for @feedSharePrSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué récords quieren ver tus amigos. Se publican al cerrar.'**
+  String get feedSharePrSubtitle;
+
+  /// No description provided for @feedPrShared.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 récord compartido en el feed de tus amigos} other{{count} récords compartidos en el feed de tus amigos}}'**
+  String feedPrShared(int count);
+
+  /// No description provided for @feedPrShareFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo compartir en el feed. Inténtalo de nuevo.'**
+  String get feedPrShareFailed;
 
   /// No description provided for @leaderboardLoadMore.
   ///
@@ -2887,6 +3091,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pídele una rutina y la guardarás cuando estés listo.\nConfigura tu API key en Perfil.'**
   String get coachWelcomeHint;
+
+  /// No description provided for @coachDailyLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite diario de {limit} mensajes del Coach IA. Mejora tu plan para más.'**
+  String coachDailyLimitReached(int limit);
+
+  /// No description provided for @coachDailyLimitRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'{remaining} de {limit} mensajes hoy'**
+  String coachDailyLimitRemaining(int remaining, int limit);
+
+  /// No description provided for @routineLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite de {limit} rutinas de tu plan. Mejora tu plan para guardar más.'**
+  String routineLimitReached(int limit);
+
+  /// No description provided for @routineLimitUsage.
+  ///
+  /// In es, this message translates to:
+  /// **'{used} de {limit} rutinas guardadas'**
+  String routineLimitUsage(int used, int limit);
 
   /// No description provided for @coachAskHint.
   ///
@@ -4465,6 +4693,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ingredientes'**
   String get foodIngredients;
+
+  /// No description provided for @foodIngredientBreakdownHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso estimado por componente — corrige abajo si algo no cuadra'**
+  String get foodIngredientBreakdownHint;
+
+  /// No description provided for @foodIngredientGrams.
+  ///
+  /// In es, this message translates to:
+  /// **'~{grams} g'**
+  String foodIngredientGrams(String grams);
+
+  /// No description provided for @foodIngredientTotalGrams.
+  ///
+  /// In es, this message translates to:
+  /// **'Total estimado · ~{grams} g'**
+  String foodIngredientTotalGrams(String grams);
 
   /// No description provided for @macroProtein.
   ///

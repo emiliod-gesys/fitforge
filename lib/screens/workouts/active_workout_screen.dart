@@ -489,6 +489,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         milestoneTotalsAfter,
       );
 
+      try {
+        await ref.read(socialServiceProvider).publishPostWorkoutFeedEvents(
+              newMilestones: newMilestones,
+              xpAward: xpAward,
+            );
+      } catch (_) {}
+
       final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
             routineId: workout.routineId,
             excludeWorkoutId: workout.id,

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/subscription/subscription_features.dart';
 import '../core/utils/bmr_calculator.dart';
 import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
@@ -30,12 +31,15 @@ import '../services/routine_share_service.dart';
 import '../services/exercise_report_service.dart';
 import '../services/workout_service.dart';
 import '../models/trainer.dart';
+import '../models/feed_reaction.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
 import '../services/trainer_service.dart';
 import '../models/rest_timer_alert_mode.dart';
 import '../services/rest_preferences.dart';
 import '../services/ai_preferences.dart';
+import '../services/coach_nutrition_service.dart';
+import '../services/coach_usage_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/watch_session_bridge.dart';
 import '../services/watch_workout_coordinator.dart';
@@ -55,6 +59,20 @@ final pushNotificationServiceProvider = Provider((ref) => PushNotificationServic
 final aiCoachServiceProvider = Provider(
   (ref) => AiCoachService(ref.watch(profileServiceProvider)),
 );
+final coachUsageServiceProvider = Provider((ref) => CoachUsageService());
+final coachNutritionServiceProvider = Provider(
+  (ref) => CoachNutritionService(
+    foodService: ref.watch(foodServiceProvider),
+    workoutService: ref.watch(workoutServiceProvider),
+    activityLogService: ref.watch(activityLogServiceProvider),
+  ),
+);
+
+final coachUsageStatusProvider = FutureProvider<CoachUsageStatus>((ref) async {
+  final profile = await ref.watch(profileProvider.future);
+  final profileService = ref.watch(profileServiceProvider);
+  return ref.watch(coachUsageServiceProvider).getStatus(profile, profileService);
+});
 
 final authStateProvider = StreamProvider((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
@@ -193,7 +211,9 @@ final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistor
 );
 
 final isTrainerProvider = Provider<bool>((ref) {
-  return ref.watch(profileProvider).value?.isTrainer ?? false;
+  final profile = ref.watch(profileProvider).value;
+  if (profile == null) return false;
+  return profile.isTrainer && profile.subscriptionTier.hasTrainerMode;
 });
 
 final trainerStudentsProvider = FutureProvider<List<TrainerStudent>>((ref) async {
@@ -313,6 +333,11 @@ final friendProfileProvider = FutureProvider.family<FriendProfileView?, String>(
 final socialNotificationsProvider = FutureProvider<List<SocialNotification>>((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getNotifications();
+});
+
+final socialFeedProvider = FutureProvider<List<FeedPost>>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getFeedWithReactions();
 });
 
 final socialUnreadCountProvider = FutureProvider<int>((ref) async {

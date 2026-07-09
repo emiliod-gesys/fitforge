@@ -1,3 +1,4 @@
+import '../core/subscription/subscription_features.dart';
 import '../core/utils/workout_suggestion_context.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
@@ -26,6 +27,9 @@ class ProactiveWorkoutEnricher {
     required String excludeWorkoutId,
   }) async {
     if (exercises.isEmpty) {
+      return (exercises: exercises, aiApplied: false);
+    }
+    if (!profile.subscriptionTier.hasProactiveAi) {
       return (exercises: exercises, aiApplied: false);
     }
     if (!profile.hasAiKey) {

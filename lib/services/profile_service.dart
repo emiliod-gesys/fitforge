@@ -115,6 +115,40 @@ class ProfileService {
     return (await getApiKey(resolved))?.isNotEmpty ?? false;
   }
 
+  Future<DateTime?> getLastWeightMeasuredAt() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return null;
+
+    final measurement = await _client
+        .from('body_measurements')
+        .select('measured_at')
+        .eq('user_id', user.id)
+        .eq('type', 'weight')
+        .order('measured_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (measurement != null) {
+      return DateTime.parse(measurement['measured_at'] as String);
+    }
+
+    final profileRow = await _client
+        .from('profiles')
+        .select('body_weight, updated_at, created_at')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (profileRow?['body_weight'] == null) return null;
+
+    final updatedAt = profileRow!['updated_at'] as String?;
+    if (updatedAt != null) return DateTime.parse(updatedAt);
+
+    final createdAt = profileRow['created_at'] as String?;
+    if (createdAt != null) return DateTime.parse(createdAt);
+
+    return null;
+  }
+
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshots() async {
     final user = _client.auth.currentUser;
     if (user == null) return {};

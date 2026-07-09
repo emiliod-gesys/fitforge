@@ -18,7 +18,25 @@ abstract final class FoodEstimateParser {
       'serving_description': estimate.servingDescription,
       'reference_amount_g': estimate.referenceAmount,
       'ingredients': estimate.ingredients,
+      if (estimate.ingredientPortions.isNotEmpty)
+        'ingredient_portions': estimate.ingredientPortions.map((p) => p.toJson()).toList(),
     };
+  }
+
+  static List<FoodIngredientPortion> parseIngredientPortions(dynamic raw) {
+    if (raw is! List) return const [];
+    final portions = <FoodIngredientPortion>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final portion = FoodIngredientPortion.fromJson(Map<String, dynamic>.from(item));
+      if (portion.name.isEmpty || portion.gramsG <= 0) continue;
+      portions.add(portion);
+    }
+    return portions;
+  }
+
+  static List<String> ingredientNamesFromPortions(List<FoodIngredientPortion> portions) {
+    return portions.map((portion) => portion.name).toList();
   }
 
   static bool correctionImpliesRemoval(String correction) {
@@ -58,7 +76,7 @@ abstract final class FoodEstimateParser {
     required String correction,
   }) {
     if (correctionImpliesRemoval(correction)) return revised;
-    if (previous.ingredients.isEmpty) return revised;
+    if (previous.ingredients.isEmpty && previous.ingredientPortions.isEmpty) return revised;
 
     final mergedIngredients = <String>[...revised.ingredients];
     for (final ingredient in previous.ingredients) {
@@ -69,7 +87,18 @@ abstract final class FoodEstimateParser {
       if (!alreadyListed) mergedIngredients.add(ingredient);
     }
 
-    if (mergedIngredients.length <= revised.ingredients.length) return revised;
+    final mergedPortions = <FoodIngredientPortion>[...revised.ingredientPortions];
+    for (final portion in previous.ingredientPortions) {
+      if (ingredientRejectedByCorrection(portion.name, correction)) continue;
+      final alreadyListed = mergedPortions.any(
+        (item) => item.name.toLowerCase() == portion.name.toLowerCase(),
+      );
+      if (!alreadyListed) mergedPortions.add(portion);
+    }
+
+    final ingredientsChanged = mergedIngredients.length > revised.ingredients.length;
+    final portionsChanged = mergedPortions.length > revised.ingredientPortions.length;
+    if (!ingredientsChanged && !portionsChanged) return revised;
 
     return FoodNutritionEstimate(
       name: revised.name,
@@ -80,7 +109,8 @@ abstract final class FoodEstimateParser {
       fatG: revised.fatG,
       fiberG: revised.fiberG,
       servingDescription: revised.servingDescription ?? previous.servingDescription,
-      ingredients: mergedIngredients,
+      ingredients: ingredientsChanged ? mergedIngredients : revised.ingredients,
+      ingredientPortions: portionsChanged ? mergedPortions : revised.ingredientPortions,
       referenceAmount: revised.referenceAmount > 0 ? revised.referenceAmount : previous.referenceAmount,
       amountUnit: revised.amountUnit.isNotEmpty ? revised.amountUnit : previous.amountUnit,
     );
@@ -110,6 +140,12 @@ abstract final class FoodEstimateParser {
               ? FoodServingParser.formatAmount(referenceAmount, unit)
               : null;
 
+      final ingredientPortions = parseIngredientPortions(json['ingredient_portions']);
+      final ingredientsRaw = (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [];
+      final ingredients = ingredientPortions.isNotEmpty
+          ? ingredientNamesFromPortions(ingredientPortions)
+          : ingredientsRaw;
+
       return FoodNutritionEstimate(
         name: name,
         brand: json['brand'] as String?,
@@ -119,7 +155,8 @@ abstract final class FoodEstimateParser {
         fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,
         fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
         servingDescription: servingDescription,
-        ingredients: (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+        ingredients: ingredients,
+        ingredientPortions: ingredientPortions,
         referenceAmount: referenceAmount,
         amountUnit: unit,
       );

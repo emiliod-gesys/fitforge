@@ -1,5 +1,7 @@
 import '../../models/body_metric.dart';
+import '../../models/coach_nutrition_snapshot.dart';
 import '../../models/exercise_logging.dart';
+import '../../models/food_entry.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
@@ -17,6 +19,7 @@ abstract final class AiCoachContextBuilder {
     List<PersonalRecord>? personalRecords,
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
+    CoachNutritionSnapshot? nutrition,
   }) {
     final buffer = StringBuffer();
 
@@ -65,6 +68,7 @@ abstract final class AiCoachContextBuilder {
     _appendPersonalRecords(buffer, personalRecords, profile?.unitSystem ?? 'kg');
     _appendWorkouts(buffer, recentWorkouts, profile?.unitSystem ?? 'kg');
     _appendRoutines(buffer, routines);
+    _appendNutrition(buffer, nutrition);
 
     final text = buffer.toString().trim();
     return text.isEmpty ? 'Sin datos de perfil registrados aún.' : text;
@@ -183,6 +187,136 @@ abstract final class AiCoachContextBuilder {
         buffer.writeln('  ${r.description}');
       }
     }
+  }
+
+  static void _appendNutrition(StringBuffer buffer, CoachNutritionSnapshot? nutrition) {
+    if (nutrition == null) return;
+
+    final today = nutrition.today;
+    final loaded = nutrition.loadedAt.toLocal();
+    final timeLabel =
+        '${loaded.hour.toString().padLeft(2, '0')}:${loaded.minute.toString().padLeft(2, '0')}';
+
+    buffer.writeln('\n=== NUTRICIÓN HOY (tiempo real, actualizado $timeLabel) ===');
+    _appendDayNutritionSummary(buffer, today, detailed: true);
+
+    buffer.writeln('\n=== HISTORIAL NUTRICIONAL (últimos 7 días) ===');
+    var daysWithLogs = 0;
+    var totalKcal = 0;
+    var totalProtein = 0.0;
+    var totalCarbs = 0.0;
+    var totalFat = 0.0;
+
+    for (final day in nutrition.weekHistory) {
+      final hasLogs = day.caloriesEaten > 0;
+      if (hasLogs) {
+        daysWithLogs++;
+        totalKcal += day.caloriesEaten;
+        totalProtein += day.eaten.proteinG;
+        totalCarbs += day.eaten.carbsG;
+        totalFat += day.eaten.fatG;
+      }
+
+      final label = _dayLabel(day.day);
+      if (!hasLogs) {
+        buffer.writeln('- $label: sin registros');
+        continue;
+      }
+
+      final mealCount = day.entriesByMeal.values.fold<int>(0, (sum, list) => sum + list.length);
+      buffer.writeln(
+        '- $label: ${day.caloriesEaten} kcal '
+        '(P ${day.eaten.proteinG.toStringAsFixed(0)}g, '
+        'C ${day.eaten.carbsG.toStringAsFixed(0)}g, '
+        'G ${day.eaten.fatG.toStringAsFixed(0)}g) — $mealCount comidas',
+      );
+    }
+
+    if (daysWithLogs > 0) {
+      final avgKcal = (totalKcal / daysWithLogs).round();
+      buffer.writeln(
+        'Promedio en días con registro ($daysWithLogs/7): '
+        '$avgKcal kcal/día | '
+        'P ${(totalProtein / daysWithLogs).toStringAsFixed(0)}g | '
+        'C ${(totalCarbs / daysWithLogs).toStringAsFixed(0)}g | '
+        'G ${(totalFat / daysWithLogs).toStringAsFixed(0)}g',
+      );
+    } else {
+      buffer.writeln('Sin registros nutricionales en la última semana.');
+    }
+  }
+
+  static void _appendDayNutritionSummary(
+    StringBuffer buffer,
+    DailyNutritionSummary summary, {
+    required bool detailed,
+  }) {
+    if (summary.caloriesEaten == 0 && summary.entriesByMeal.values.every((e) => e.isEmpty)) {
+      buffer.writeln('Sin comidas registradas hoy todavía.');
+      if (summary.bmrAvailable) {
+        buffer.writeln(
+          'Presupuesto estimado del día: ${summary.calorieBudget} kcal '
+          '(base ${summary.baseCalorieGoal} kcal'
+          '${summary.totalCaloriesBurned > 0 ? ' + ${summary.totalCaloriesBurned} kcal actividad' : ''}).',
+        );
+      }
+      return;
+    }
+
+    buffer.writeln(
+      'Presupuesto: ${summary.calorieBudget} kcal '
+      '(base ${summary.baseCalorieGoal}'
+      '${summary.workoutCaloriesBurned > 0 ? ' + ${summary.workoutCaloriesBurned} entreno' : ''}'
+      '${summary.manualActivityCaloriesBurned > 0 ? ' + ${summary.manualActivityCaloriesBurned} actividad manual' : ''})',
+    );
+    buffer.writeln(
+      'Consumido: ${summary.caloriesEaten} kcal | '
+      '${summary.isCaloricSurplus ? 'Superávit: ${summary.caloriesSurplus} kcal' : 'Restante: ${summary.caloriesRemaining} kcal'}',
+    );
+    buffer.writeln(
+      'Macros vs objetivo: '
+      'P ${summary.eaten.proteinG.toStringAsFixed(0)}/${summary.targets.proteinG.toStringAsFixed(0)}g, '
+      'C ${summary.eaten.carbsG.toStringAsFixed(0)}/${summary.targets.carbsG.toStringAsFixed(0)}g, '
+      'G ${summary.eaten.fatG.toStringAsFixed(0)}/${summary.targets.fatG.toStringAsFixed(0)}g, '
+      'Fibra ${summary.eaten.fiberG.toStringAsFixed(0)}/${summary.targets.fiberG.toStringAsFixed(0)}g',
+    );
+
+    if (!detailed) return;
+
+    for (final meal in MealType.values) {
+      final entries = summary.entriesByMeal[meal] ?? const [];
+      if (entries.isEmpty) continue;
+
+      final mealTotals = summary.eatenForMeal(meal);
+      buffer.writeln('\n${_mealLabel(meal)} (${mealTotals.caloriesKcal} kcal):');
+      for (final entry in entries) {
+        final portion = entry.servingDescription != null && entry.servingDescription!.isNotEmpty
+            ? ' — ${entry.servingDescription}'
+            : '';
+        buffer.writeln(
+          '- ${entry.name}$portion: ${entry.caloriesKcal} kcal '
+          '(P${entry.proteinG.toStringAsFixed(0)} C${entry.carbsG.toStringAsFixed(0)} G${entry.fatG.toStringAsFixed(0)})',
+        );
+      }
+    }
+  }
+
+  static String _dayLabel(DateTime day) {
+    const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    final local = day.toLocal();
+    final weekday = weekdays[local.weekday - 1];
+    final date =
+        '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
+    return '$weekday $date';
+  }
+
+  static String _mealLabel(MealType meal) {
+    return switch (meal) {
+      MealType.breakfast => 'Desayuno',
+      MealType.lunch => 'Comida',
+      MealType.dinner => 'Cena',
+      MealType.snack => 'Snack',
+    };
   }
 
   static String _formatMetric(

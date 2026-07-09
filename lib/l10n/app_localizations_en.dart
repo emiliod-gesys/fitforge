@@ -116,6 +116,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalData => 'Personal details';
 
   @override
+  String get profileOnboardingTitle => 'Complete your profile';
+
+  @override
+  String get profileOnboardingSubtitle =>
+      'We need this information to personalize training, nutrition, and progress.';
+
+  @override
+  String get profileOnboardingNickname => 'Name or nickname';
+
+  @override
+  String get profileOnboardingContinue => 'Continue';
+
+  @override
+  String get weightUpdateTitle => 'Update your weight';
+
+  @override
+  String get weightUpdateMessage =>
+      'It\'s been more than 15 days since your last weigh-in. Update your weight to keep your metrics accurate.';
+
+  @override
+  String get weightUpdateSave => 'Save weight';
+
+  @override
+  String get weightInvalid => 'Enter a valid weight';
+
+  @override
+  String get genderRequired => 'Select your gender';
+
+  @override
+  String get heightInvalid => 'Enter a valid height (50–280 cm)';
+
+  @override
+  String get ageInvalid => 'Enter a valid age (13–119 years)';
+
+  @override
   String get displayName => 'Name';
 
   @override
@@ -375,6 +410,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiKeysNotConfigured => 'Not configured';
+
+  @override
+  String get advancedSettings => 'Advanced settings';
+
+  @override
+  String get advancedSettingsHint => 'Optional settings for experienced users';
+
+  @override
+  String get bringYourOwnAi => 'Connect your AI account';
+
+  @override
+  String get bringYourOwnAiSubtitle =>
+      'Use your own OpenAI, Gemini, or Claude account';
+
+  @override
+  String get apiKeysNotAvailableOnPaidPlan =>
+      'Your plan already includes AI — you don\'t need your own API key';
+
+  @override
+  String get featureGymratPlansOnly => 'Gymrat and Gymrat Pro users only';
+
+  @override
+  String get featureGymratProOnly => 'Gymrat Pro users only';
 
   @override
   String get aiCoachSubtitle => 'Personalized recommendations';
@@ -923,7 +981,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialTabFriends => 'Friends';
 
   @override
+  String get socialTabFeed => 'Feed';
+
+  @override
   String get socialTabLeaderboards => 'Leaderboards';
+
+  @override
+  String get feedEmptyTitle => 'Your feed is empty';
+
+  @override
+  String get feedEmptySubtitle =>
+      'When you or friends work out, level up, or unlock badges, you\'ll see it here. Posts last 24 hours.';
+
+  @override
+  String get feedExpiryHint => 'Only posts from the last 24 hours are shown.';
+
+  @override
+  String get feedLongPressToReact => 'Long-press a post to react.';
+
+  @override
+  String feedMilestoneUnlock(String name, String category, String tier) {
+    return '$name unlocked $category badge — $tier';
+  }
+
+  @override
+  String feedLevelUp(String name, int level) {
+    return '$name reached level $level';
+  }
+
+  @override
+  String feedPrUnlock(String name, String exercise, String value) {
+    return '$name set a new PR on $exercise: $value';
+  }
+
+  @override
+  String feedPrUnlockSelf(String exercise, String value) {
+    return 'You set a new PR on $exercise: $value';
+  }
+
+  @override
+  String feedMilestoneUnlockSelf(String category, String tier) {
+    return 'You unlocked the $category badge — $tier';
+  }
+
+  @override
+  String feedLevelUpSelf(int level) {
+    return 'You reached level $level';
+  }
+
+  @override
+  String feedWorkoutCompletedSelf(String workout) {
+    return 'You completed \"$workout\"';
+  }
+
+  @override
+  String get feedSharePrTitle => 'Share to feed';
+
+  @override
+  String get feedSharePrSubtitle =>
+      'Choose which records friends can see. They publish when you close this screen.';
+
+  @override
+  String feedPrShared(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count records shared to your friends\' feed',
+      one: '1 record shared to your friends\' feed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feedPrShareFailed =>
+      'Couldn\'t share to the feed. Please try again.';
 
   @override
   String get leaderboardLoadMore => 'Show more';
@@ -1569,6 +1700,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get coachWelcomeHint =>
       'Ask for a routine and save it when you\'re ready.\nSet up your API key in Profile.';
+
+  @override
+  String coachDailyLimitReached(int limit) {
+    return 'You\'ve reached today\'s limit of $limit AI Coach messages. Upgrade for more.';
+  }
+
+  @override
+  String coachDailyLimitRemaining(int remaining, int limit) {
+    return '$remaining of $limit messages today';
+  }
+
+  @override
+  String routineLimitReached(int limit) {
+    return 'You\'ve reached your plan\'s limit of $limit saved routines. Upgrade to save more.';
+  }
+
+  @override
+  String routineLimitUsage(int used, int limit) {
+    return '$used of $limit routines saved';
+  }
 
   @override
   String get coachAskHint => 'Ask a question or request a routine…';
@@ -2500,6 +2651,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foodIngredients => 'Ingredients';
+
+  @override
+  String get foodIngredientBreakdownHint =>
+      'Estimated weight per item — correct below if something looks off';
+
+  @override
+  String foodIngredientGrams(String grams) {
+    return '~$grams g';
+  }
+
+  @override
+  String foodIngredientTotalGrams(String grams) {
+    return 'Estimated total · ~$grams g';
+  }
 
   @override
   String get macroProtein => 'Protein';

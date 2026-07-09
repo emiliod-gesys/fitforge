@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/subscription/subscription_features.dart';
 import '../../core/router/app_router.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
@@ -27,6 +28,7 @@ Future<void> startWorkoutAndNavigate(
   final profile = proactive ? await ref.read(profileProvider.future) : null;
   final useAi = proactive &&
       profile != null &&
+      profile.subscriptionTier.hasProactiveAi &&
       profile.hasAiKey &&
       exercises != null &&
       exercises.isNotEmpty;

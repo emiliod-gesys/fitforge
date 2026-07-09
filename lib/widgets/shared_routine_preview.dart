@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/subscription/routine_limit_gate.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
@@ -41,10 +42,13 @@ abstract final class SharedRoutinePreview {
                     shareMode: true,
                     onSave: () async {
                       if (isSaving) return;
+                      final canCreate = await ensureCanCreateRoutine(context, ref);
+                      if (!canCreate) return;
                       setDialogState(() => isSaving = true);
                       try {
                         await ref.read(routineServiceProvider).copyRoutineToCurrentUser(routine);
                         ref.invalidate(routinesProvider);
+                        ref.invalidate(routineLimitStatusProvider);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.routineSavedNamed(routine.name))),
@@ -54,12 +58,7 @@ abstract final class SharedRoutinePreview {
                       } catch (e) {
                         setDialogState(() => isSaving = false);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.saveFailed('$e')),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
+                          showRoutineSaveErrorSnackBar(context, e);
                         }
                       }
                     },

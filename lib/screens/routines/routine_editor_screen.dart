@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/theme/app_colors.dart';
@@ -107,18 +108,14 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         ref.invalidate(studentRoutinesProvider(widget.studentId!));
       } else {
         ref.invalidate(routinesProvider);
+        ref.invalidate(routineLimitStatusProvider);
       }
 
       if (!mounted) return;
       context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.saveFailed('$e')),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        showRoutineSaveErrorSnackBar(context, e);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

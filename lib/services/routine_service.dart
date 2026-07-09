@@ -1,4 +1,7 @@
 import 'package:uuid/uuid.dart';
+import '../core/errors/routine_limit_exception.dart';
+import '../core/subscription/subscription_features.dart';
+import '../models/profile.dart';
 import '../models/routine.dart';
 import 'supabase_service.dart';
 
@@ -60,6 +63,28 @@ class RoutineService {
         'p_favorite': favorite,
       },
     );
+  }
+
+  Future<int> countRoutinesForUser(String userId) async {
+    final data = await _client.from('routines').select('id').eq('user_id', userId);
+    return (data as List).length;
+  }
+
+  Future<SubscriptionTier> _subscriptionTierForUser(String userId) async {
+    final row = await _client
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', userId)
+        .maybeSingle();
+    return SubscriptionTier.fromCode(row?['subscription_tier'] as String?);
+  }
+
+  Future<void> assertCanCreateRoutine(String userId) async {
+    final tier = await _subscriptionTierForUser(userId);
+    final count = await countRoutinesForUser(userId);
+    if (count >= tier.maxSavedRoutines) {
+      throw RoutineLimitReachedException(limit: tier.maxSavedRoutines, tier: tier);
+    }
   }
 
   Future<Routine> copyRoutineToCurrentUser(Routine source) async {
@@ -165,6 +190,7 @@ class RoutineService {
 
   Future<Routine> createRoutine(Routine routine, {String? forUserId}) async {
     if (_isStudentRoutine(forUserId)) {
+      await assertCanCreateRoutine(forUserId!);
       final routineId = await _saveStudentRoutineViaRpc(
         studentId: forUserId!,
         routine: routine,
@@ -185,6 +211,7 @@ class RoutineService {
     }
 
     final userId = SupabaseService.currentUser!.id;
+    await assertCanCreateRoutine(userId);
     final routineId = routine.id.isEmpty ? _uuid.v4() : routine.id;
     final description = routine.description?.trim();
     final now = DateTime.now().toUtc().toIso8601String();

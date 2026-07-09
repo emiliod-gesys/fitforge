@@ -133,6 +133,9 @@ abstract final class FoodQueryHints {
       fiberG: double.parse((ai.fiberG * factor).toStringAsFixed(1)),
       servingDescription: FoodServingParser.formatAmount(targetGrams, ai.amountUnit),
       ingredients: ai.ingredients,
+      ingredientPortions: ai.ingredientPortions
+          .map((portion) => portion.scaledBy(targetGrams / (ai.referenceAmount > 0 ? ai.referenceAmount : 100)))
+          .toList(),
       referenceAmount: targetGrams,
       amountUnit: ai.amountUnit,
     );
@@ -196,6 +199,9 @@ abstract final class FoodQueryHints {
         fiberG: double.parse((anchor.fiber * factor).toStringAsFixed(1)),
         servingDescription: FoodServingParser.formatAmount(grams, 'g'),
         ingredients: ai.ingredients,
+        ingredientPortions: ai.ingredientPortions
+            .map((portion) => portion.scaledBy(grams / (ai.referenceAmount > 0 ? ai.referenceAmount : 100)))
+            .toList(),
         referenceAmount: grams,
         amountUnit: 'g',
       );
@@ -252,6 +258,7 @@ abstract final class FoodQueryHints {
       fiberG: gramCorrected.fiberG,
       servingDescription: gramCorrected.servingDescription,
       ingredients: gramCorrected.ingredients,
+      ingredientPortions: gramCorrected.ingredientPortions,
       referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
       amountUnit: gramCorrected.amountUnit,
     );

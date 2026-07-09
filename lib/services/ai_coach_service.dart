@@ -12,6 +12,7 @@ import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
 import '../core/utils/workout_suggestion_context.dart';
 import '../models/body_metric.dart';
+import '../models/coach_nutrition_snapshot.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
 import '../models/food_entry.dart';
@@ -416,6 +417,7 @@ REGLAS OBLIGATORIAS:
     WorkoutWeeklyStats? weeklyStats,
     List<PersonalRecord>? personalRecords,
     String? languageCode,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final credentials = await _resolveCredentials(profile);
     final aiProvider = credentials.provider;
@@ -428,6 +430,7 @@ REGLAS OBLIGATORIAS:
       personalRecords: personalRecords,
       recentWorkouts: recentWorkouts,
       routines: routines,
+      nutrition: nutrition,
     );
     final usesLb = profile != null && UnitConverter.isLb(profile.unitSystem);
     final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
@@ -437,8 +440,9 @@ REGLAS OBLIGATORIAS:
 Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
 ${languageInstruction(lang)} Sé conciso pero útil.
 ${fitnessScopeInstruction(lang)}
-Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records y historial.
-Usa esa información para personalizar ejercicios, volumen, series, reps y progresión según su propósito y estado actual.
+Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records, historial de entrenos y nutrición.
+La ingesta del día se actualiza en tiempo real; también tienes el historial nutricional de los últimos 7 días.
+Usa esa información para personalizar ejercicios, volumen, series, reps, progresión y consejos de nutrición (macros, timing pre/post entreno, déficit/superávit) según su propósito y estado actual.
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
@@ -471,6 +475,7 @@ $context
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
     String? languageCode,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
@@ -490,6 +495,7 @@ $context
       personalRecords: personalRecords,
       recentWorkouts: recentWorkouts,
       routines: routines,
+      nutrition: nutrition,
     );
 
     final prompt = '''
@@ -552,6 +558,7 @@ $_routineRules
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
     String? languageCode,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
@@ -572,6 +579,7 @@ $_routineRules
       personalRecords: personalRecords,
       recentWorkouts: recentWorkouts,
       routines: routines,
+      nutrition: nutrition,
     );
 
     final prompt = '''
@@ -643,6 +651,7 @@ $_routineRules
     WorkoutWeeklyStats? weeklyStats,
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final names = catalog != null
         ? AiRoutineSanitizer.namesForMuscles(AiRoutineSanitizer.catalogForAi(catalog), targetMuscles)
@@ -654,6 +663,7 @@ $_routineRules
       personalRecords: personalRecords,
       recentWorkouts: recentWorkouts,
       routines: routines,
+      nutrition: nutrition,
     );
 
     final catalogHint = names.isEmpty
@@ -865,6 +875,7 @@ $_routineRules
     List<PersonalRecord>? personalRecords,
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
+    CoachNutritionSnapshot? nutrition,
   }) async {
     final metrics = bodyMetrics ?? await _profileService.getBodyMetricSnapshots();
     return AiCoachContextBuilder.build(
@@ -874,6 +885,7 @@ $_routineRules
       personalRecords: personalRecords,
       recentWorkouts: recentWorkouts,
       routines: routines,
+      nutrition: nutrition,
     );
   }
 
@@ -1126,6 +1138,9 @@ Reglas:
   Buenos: "Pechuga de pollo a la plancha con arroz blanco y brócoli", "Tacos de bistec con cebolla y cilantro", "Ensalada César con pollo empanizado".
   Malos: "Comida", "Plato", "Almuerzo", "Pollo", "Arroz con algo".
 - ingredients: lista cada componente visible del plato, no solo el principal.
+- ingredient_portions: OBLIGATORIO si hay varios componentes. Array de objetos con name y grams_g (peso estimado de cada uno).
+  La suma de grams_g debe aproximar reference_amount_g.
+  Ejemplo: [{"name": "pechuga de pollo", "grams_g": 150}, {"name": "arroz blanco", "grams_g": 120}, {"name": "brócoli", "grams_g": 50}]
 
 JSON:
 {
@@ -1138,7 +1153,12 @@ JSON:
   "fiber_g": 0,
   "serving_description": "1 plato ~280 g",
   "reference_amount_g": 280,
-  "ingredients": ["ingrediente 1"]
+  "ingredients": ["pechuga de pollo", "arroz blanco", "brócoli"],
+  "ingredient_portions": [
+    {"name": "pechuga de pollo", "grams_g": 150},
+    {"name": "arroz blanco", "grams_g": 120},
+    {"name": "brócoli", "grams_g": 50}
+  ]
 }
 ''';
 
@@ -1223,6 +1243,7 @@ Reglas obligatorias:
 - NO elimines otros alimentos del plato (arroz, brócoli, verduras, etc.) al corregir un solo ítem.
 - Si la corrección menciona peso en gramos o hay balanza visible en la imagen, actualiza reference_amount_g con ese peso.
 - ingredients debe listar TODOS los componentes finales del plato, no solo el corregido.
+- ingredient_portions: si hay varios componentes, incluye name y grams_g de cada uno; la suma debe aproximar reference_amount_g.
 - Si actualizas ingredientes o preparación, actualiza también name para que siga siendo específico y descriptivo.
 - calories_kcal y macros son TOTALES para reference_amount_g del plato completo.
 - Los macros deben ser coherentes con las calorías.
@@ -1250,7 +1271,11 @@ JSON:
   "fiber_g": 0,
   "serving_description": "1 plato ~280 g",
   "reference_amount_g": 280,
-  "ingredients": ["todos los ingredientes del plato"]
+  "ingredients": ["todos los ingredientes del plato"],
+  "ingredient_portions": [
+    {"name": "ingrediente 1", "grams_g": 120},
+    {"name": "ingrediente 2", "grams_g": 80}
+  ]
 }
 ''';
   }
