@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
+import '../../core/theme/app_accent.dart';
 /// Resumen nutricional compacto para que el entrenador vea el día del alumno.
 class StudentNutritionSummaryCard extends StatelessWidget {
   final DailyNutritionSummary summary;
@@ -41,7 +42,7 @@ class StudentNutritionSummaryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.restaurant_outlined, size: 18, color: AppColors.orange),
+                Icon(Icons.restaurant_outlined, size: 18, color: context.accentColor),
                 const SizedBox(width: 8),
                 Text(
                   _title(context),
@@ -76,14 +77,14 @@ class StudentNutritionSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
                 backgroundColor: AppColors.cardElevated,
-                color: isSurplus ? AppColors.error : AppColors.orange,
+                color: isSurplus ? AppColors.error : context.accentColor,
               ),
             ),
             const SizedBox(height: 10),

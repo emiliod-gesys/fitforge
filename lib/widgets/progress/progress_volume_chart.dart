@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/progress_weekly_volume.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressVolumeChart extends StatelessWidget {
   final List<WeeklyVolumeBucket> buckets;
@@ -99,10 +100,10 @@ class ProgressVolumeChart extends StatelessWidget {
                             toY: buckets[i].volumeKg,
                             width: 14,
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
-                              colors: [AppColors.orangeDark, AppColors.orange],
+                              colors: [context.accentDark, context.accentColor],
                             ),
                           ),
                         ],

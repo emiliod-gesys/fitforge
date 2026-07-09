@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import '../core/theme/app_accent.dart';
 import '../core/theme/app_colors.dart';
 
 /// Indicador de carga con animación Lottie (fondo transparente).
@@ -21,6 +22,7 @@ class FitForgeLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.fitForgeAccent;
     final spinnerSize = size * spinnerScale;
     final logoSize = size * logoScale;
 
@@ -40,10 +42,22 @@ class FitForgeLoadingIndicator extends StatelessWidget {
                 fit: BoxFit.contain,
                 repeat: true,
                 frameRate: FrameRate.max,
+                delegates: LottieDelegates(
+                  values: [
+                    ValueDelegate.color(
+                      const ['Outer Ring', 'Group 1', 'Stroke 1'],
+                      value: accent.accentColor,
+                    ),
+                    ValueDelegate.color(
+                      const ['Inner Ring', 'Group 1', 'Stroke 1'],
+                      value: accent.accentDark,
+                    ),
+                  ],
+                ),
                 errorBuilder: (_, __, ___) => SizedBox(
                   width: spinnerSize,
                   height: spinnerSize,
-                  child: const CircularProgressIndicator(color: AppColors.gold),
+                  child: CircularProgressIndicator(color: accent.accentColor),
                 ),
               ),
               Image.asset(

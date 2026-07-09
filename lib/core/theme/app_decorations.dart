@@ -1,40 +1,34 @@
 import 'package:flutter/material.dart';
 
+import 'app_accent.dart';
 import 'app_colors.dart';
 
 /// Decoraciones reutilizables de la línea gráfica premium FitForge.
 abstract final class AppDecorations {
-  static const heroGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFD4B87A),
-      Color(0xFFC6A46B),
-      Color(0xFF8A6A3D),
-      Color(0xFF5C4528),
-    ],
-    stops: [0.0, 0.35, 0.72, 1.0],
-  );
+  static LinearGradient heroGradient(AppAccent accent) => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: accent.heroGradientColors,
+        stops: const [0.0, 0.35, 0.72, 1.0],
+      );
 
-  static const heroSubtitleColor = Color(0xFFF0E6D2);
-
-  static List<BoxShadow> get heroGlow => [
+  static List<BoxShadow> heroGlow(Color accent, Color accentDark) => [
         BoxShadow(
-          color: AppColors.gold.withValues(alpha: 0.3),
+          color: accent.withValues(alpha: 0.3),
           blurRadius: 26,
           offset: const Offset(0, 12),
         ),
         BoxShadow(
-          color: AppColors.goldDark.withValues(alpha: 0.18),
+          color: accentDark.withValues(alpha: 0.18),
           blurRadius: 8,
           offset: const Offset(0, 4),
         ),
       ];
 
-  static BoxDecoration heroCard({double radius = 20}) => BoxDecoration(
+  static BoxDecoration heroCard(AppAccent accent, {double radius = 20}) => BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        gradient: heroGradient,
-        boxShadow: heroGlow,
+        gradient: heroGradient(accent),
+        boxShadow: heroGlow(accent.primary, accent.dark),
       );
 
   static BoxDecoration authCard({double radius = 16}) => BoxDecoration(
@@ -55,12 +49,12 @@ abstract final class AppDecorations {
         ],
       );
 
-  static BoxDecoration authBackdropGlow() => BoxDecoration(
+  static BoxDecoration authBackdropGlow(AppAccent accent) => BoxDecoration(
         gradient: RadialGradient(
           center: const Alignment(0, -0.55),
           radius: 1.1,
           colors: [
-            AppColors.gold.withValues(alpha: 0.14),
+            accent.primary.withValues(alpha: 0.14),
             AppColors.surface.withValues(alpha: 0),
           ],
         ),

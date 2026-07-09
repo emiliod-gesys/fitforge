@@ -140,6 +140,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unitSystem => 'Unit system';
 
   @override
+  String get accentColor => 'Accent color';
+
+  @override
+  String get accentColorHint => 'Customize the app\'s main color';
+
+  @override
+  String get accentGold => 'Gold';
+
+  @override
+  String get accentOrange => 'Orange';
+
+  @override
+  String get accentCobalt => 'Blue';
+
+  @override
+  String get accentViolet => 'Violet';
+
+  @override
+  String get accentEmerald => 'Green';
+
+  @override
+  String get accentRose => 'Pink';
+
+  @override
+  String get accentCrimson => 'Crimson';
+
+  @override
   String get kilograms => 'Kilograms';
 
   @override

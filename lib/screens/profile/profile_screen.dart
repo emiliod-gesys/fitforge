@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/l10n/app_locale.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -19,6 +20,7 @@ import '../../widgets/body_metric_health_legend.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
+import '../../widgets/profile/accent_color_selector.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -59,6 +61,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         skipLoadingOnReload: true,
         data: (profile) {
           final unitSystem = ref.watch(unitSystemProvider);
+          final accent = ref.watch(accentProvider);
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(profileProvider);
@@ -83,7 +86,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             right: 0,
                             bottom: 0,
                             child: Material(
-                              color: AppColors.orange,
+                              color: context.accentColor,
                               shape: const CircleBorder(),
                               child: InkWell(
                                 onTap: () => _pickAvatar(profile),
@@ -116,28 +119,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _SectionTitle(l10n.personalData),
                 const SizedBox(height: 4),
                 ListTile(
-                  leading: const Icon(Icons.person_outline, color: AppColors.orange),
+                  leading: Icon(Icons.person_outline, color: context.accentColor),
                   title: Text(l10n.displayName),
                   subtitle: Text(profile?.displayName ?? l10n.notDefined),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _editDisplayName(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.cake_outlined, color: AppColors.orange),
+                  leading: Icon(Icons.cake_outlined, color: context.accentColor),
                   title: Text(l10n.age),
                   subtitle: Text(profile?.age != null ? '${profile!.age} ${l10n.years}' : l10n.notDefined),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _editAge(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.wc_outlined, color: AppColors.orange),
+                  leading: Icon(Icons.wc_outlined, color: context.accentColor),
                   title: Text(l10n.gender),
                   subtitle: Text(l10n.genderLabel(profile?.gender)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _editGender(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.height, color: AppColors.orange),
+                  leading: Icon(Icons.height, color: context.accentColor),
                   title: Text(l10n.height),
                   subtitle: Text(
                     profile?.heightCm != null
@@ -148,7 +151,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => _editHeight(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.language, color: AppColors.orange),
+                  leading: Icon(Icons.language, color: context.accentColor),
                   title: Text(l10n.preferredLanguage),
                   subtitle: Text(l10n.languageLabel(profile?.preferredLanguage ?? 'es')),
                   trailing: const Icon(Icons.chevron_right),
@@ -190,13 +193,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
                 _SectionTitle(l10n.trainingConfig),
                 ListTile(
-                  leading: const Icon(Icons.flag, color: AppColors.orange),
+                  leading: Icon(Icons.flag, color: context.accentColor),
                   title: Text(l10n.goal),
                   subtitle: Text(l10n.goalLabel(profile?.fitnessGoal)),
                   onTap: () => _editGoal(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.directions_walk, color: AppColors.orange),
+                  leading: Icon(Icons.directions_walk, color: context.accentColor),
                   title: Text(l10n.activityLevel),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,35 +214,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => _editActivityLevel(profile),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.trending_up, color: AppColors.orange),
+                  leading: Icon(Icons.trending_up, color: context.accentColor),
                   title: Text(l10n.experienceLevel),
                   subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
                   onTap: () => _editExperience(profile),
                 ),
                 SwitchListTile(
-                  secondary: const Icon(Icons.school_outlined, color: AppColors.orange),
+                  secondary: Icon(Icons.school_outlined, color: context.accentColor),
                   title: Text(l10n.personalTrainerMode),
                   subtitle: Text(l10n.personalTrainerModeSubtitle),
                   value: profile?.isTrainer ?? false,
-                  activeThumbColor: AppColors.orange,
+                  activeThumbColor: context.accentColor,
                   onChanged: _trainerModeUpdating ? null : (value) => _setTrainerMode(enabled: value),
                 ),
                 ref.watch(restTimerAlertModeProvider).when(
                   skipLoadingOnReload: true,
                   data: (mode) => ListTile(
-                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
                     title: Text(l10n.restTimerAlert),
                     subtitle: Text(l10n.restTimerAlertModeLabel(mode)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _editRestTimerAlert(mode),
                   ),
                   loading: () => ListTile(
-                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
                     title: Text(l10n.restTimerAlert),
                     subtitle: Text(l10n.loading),
                   ),
                   error: (_, __) => ListTile(
-                    leading: const Icon(Icons.timer_outlined, color: AppColors.orange),
+                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
                     title: Text(l10n.restTimerAlert),
                     subtitle: Text(l10n.notDefined),
                     onTap: () => _editRestTimerAlert(RestTimerAlertMode.both),
@@ -250,31 +253,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ref.watch(aiProactiveEnabledProvider).when(
                   skipLoadingOnReload: true,
                   data: (enabled) => SwitchListTile(
-                    secondary: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    secondary: Icon(Icons.psychology_outlined, color: context.accentColor),
                     title: Text(l10n.proactiveAi),
                     subtitle: Text(
                       enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff,
                     ),
                     value: enabled,
-                    activeThumbColor: AppColors.orange,
+                    activeThumbColor: context.accentColor,
                     onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled),
                   ),
                   loading: () => ListTile(
-                    leading: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    leading: Icon(Icons.psychology_outlined, color: context.accentColor),
                     title: Text(l10n.proactiveAi),
                     subtitle: Text(l10n.loading),
                   ),
                   error: (_, __) => SwitchListTile(
-                    secondary: const Icon(Icons.psychology_outlined, color: AppColors.orange),
+                    secondary: Icon(Icons.psychology_outlined, color: context.accentColor),
                     title: Text(l10n.proactiveAi),
                     subtitle: Text(l10n.proactiveAiSubtitleOff),
                     value: false,
-                    activeThumbColor: AppColors.orange,
+                    activeThumbColor: context.accentColor,
                     onChanged: (value) => _setProactiveAi(enabled: value, currentlyEnabled: false),
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.key, color: AppColors.orange),
+                  leading: Icon(Icons.key, color: context.accentColor),
                   title: Text(l10n.apiKeys),
                   subtitle: Text(
                     profile?.hasAiKey == true
@@ -285,11 +288,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onTap: () => context.push('/api-keys'),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.auto_awesome, color: AppColors.orange),
+                  leading: Icon(Icons.auto_awesome, color: context.accentColor),
                   title: Text(l10n.coachAi),
                   subtitle: Text(l10n.aiCoachSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.go('/ai-coach'),
+                ),
+                const SizedBox(height: 24),
+                _SectionTitle(l10n.accentColor),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.accentColorHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                AccentColorSelector(
+                  selected: accent,
+                  onChanged: (value) async {
+                    await ref.read(profileServiceProvider).updateProfile({
+                      'accent_color': value.name,
+                    });
+                    ref.invalidate(profileProvider);
+                  },
                 ),
                 const SizedBox(height: 32),
                 Padding(
@@ -592,7 +612,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.orange,
+                backgroundColor: context.accentColor,
                 foregroundColor: Colors.white,
               ),
               child: Text(l10n.proactiveAiEnableConfirm),
@@ -660,9 +680,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   children: [
                     if (mode == current)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(right: 8),
-                        child: Icon(Icons.check, color: AppColors.orange, size: 20),
+                        child: Icon(Icons.check, color: context.accentColor, size: 20),
                       ),
                     Expanded(child: Text(l10n.restTimerAlertModeLabel(mode))),
                   ],
@@ -795,7 +815,7 @@ class _UnitChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.orange : Colors.transparent,
+      color: selected ? context.accentColor : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,

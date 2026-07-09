@@ -6,6 +6,7 @@ import '../core/utils/milestones.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/theme/app_accent.dart';
 
 class MilestonesSection extends StatelessWidget {
   final MilestoneTotals totals;
@@ -108,8 +109,8 @@ class MilestonesSection extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 tierName,
-                style: const TextStyle(
-                  color: AppColors.orange,
+                style: TextStyle(
+                  color: context.accentColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -136,8 +137,8 @@ class MilestonesSection extends StatelessWidget {
                     formatValue(category, remaining, l10n, unitSystem),
                     formatValue(category, next.threshold, l10n, unitSystem),
                   ),
-                  style: const TextStyle(
-                    color: AppColors.orange,
+                  style: TextStyle(
+                    color: context.accentColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -146,8 +147,8 @@ class MilestonesSection extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   l10n.milestoneAllUnlocked,
-                  style: const TextStyle(
-                    color: AppColors.orange,
+                  style: TextStyle(
+                    color: context.accentColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -244,10 +245,10 @@ class _MilestoneBadgeImage extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
-      opacity: unlocked ? const AlwaysStoppedAnimation(1) : const AlwaysStoppedAnimation(0.35),
+      opacity: unlocked ? AlwaysStoppedAnimation(1) : const AlwaysStoppedAnimation(0.35),
       errorBuilder: (_, __, ___) => Icon(
         unlocked ? Icons.emoji_events : Icons.lock_outline,
-        color: unlocked ? AppColors.orange : AppColors.textMuted,
+        color: unlocked ? context.accentColor : AppColors.textMuted,
         size: size * 0.55,
       ),
     );

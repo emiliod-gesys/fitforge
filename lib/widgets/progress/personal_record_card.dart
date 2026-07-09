@@ -9,6 +9,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../exercise_history_sheet.dart';
 import '../exercise_thumbnail.dart';
 import '../localized_exercise_name.dart';
+import '../../core/theme/app_accent.dart';
 
 class PersonalRecordCard extends ConsumerWidget {
   final PersonalRecord record;
@@ -99,15 +100,15 @@ class PersonalRecordCard extends ConsumerWidget {
                         if (isRecent)
                           Container(
                             margin: const EdgeInsets.only(left: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.orange.withValues(alpha: 0.15),
+                              color: context.accentColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               l10n.progressNewPrBadge,
-                              style: const TextStyle(
-                                color: AppColors.orange,
+                              style: TextStyle(
+                                color: context.accentColor,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -142,16 +143,16 @@ class PersonalRecordCard extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.orange.withValues(alpha: 0.12),
+                  color: context.accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   _trailing(l10n),
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: AppColors.orange,
+                  style: TextStyle(
+                    color: context.accentColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 11,
                   ),

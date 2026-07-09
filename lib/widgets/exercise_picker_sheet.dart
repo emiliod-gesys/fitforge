@@ -8,6 +8,7 @@ import '../models/exercise.dart';
 import '../providers/app_providers.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_thumbnail.dart';
+import '../core/theme/app_accent.dart';
 
 enum ExercisePickerFilter { all, inRoutine, custom }
 
@@ -237,7 +238,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                         }(),
                       ),
                       trailing: inRoutine
-                          ? const Icon(Icons.check_circle, color: AppColors.orange)
+                          ? Icon(Icons.check_circle, color: context.accentColor)
                           : const Icon(Icons.add_circle_outline),
                       onTap: () => Navigator.pop(context, ex),
                     );

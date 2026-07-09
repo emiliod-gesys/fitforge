@@ -41,6 +41,7 @@ import '../../widgets/similar_exercise_picker_sheet.dart';
 import '../../services/exercise_report_service.dart';
 import '../../widgets/exercise_load_controls.dart';
 import '../../widgets/exercise_report_sheet.dart';
+import '../../core/theme/app_accent.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -1034,9 +1035,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                       icon: const Icon(Icons.add),
                       label: Text(l10n.addSet),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        side: const BorderSide(color: AppColors.orange),
-                        foregroundColor: AppColors.orange,
+                        minimumSize: Size.fromHeight(48),
+                        side: BorderSide(color: context.accentColor),
+                        foregroundColor: context.accentColor,
                       ),
                     ),
                   ],

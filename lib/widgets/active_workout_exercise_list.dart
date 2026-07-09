@@ -8,6 +8,7 @@ import '../l10n/l10n_extensions.dart';
 import '../models/workout.dart';
 import 'exercise_thumbnail.dart';
 import 'localized_exercise_name.dart';
+import '../core/theme/app_accent.dart';
 
 class ActiveWorkoutExerciseList extends StatefulWidget {
   final Workout workout;
@@ -385,7 +386,7 @@ class _ExerciseListRow extends ConsumerWidget {
                     value: 'swap',
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.swap_horiz, color: AppColors.orange),
+                      leading: Icon(Icons.swap_horiz, color: context.accentColor),
                       title: Text(l10n.swapSimilar),
                     ),
                   ),
@@ -420,23 +421,23 @@ class _AddExerciseRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
             Container(
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.orange.withValues(alpha: 0.5), width: 1.5),
+                border: Border.all(color: context.accentColor.withValues(alpha: 0.5), width: 1.5),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.add, color: AppColors.orange),
+              child: Icon(Icons.add, color: context.accentColor),
             ),
             const SizedBox(width: 16),
             Text(
               l10n.addExercise,
-              style: const TextStyle(
-                color: AppColors.orange,
+              style: TextStyle(
+                color: context.accentColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),

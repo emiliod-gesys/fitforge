@@ -11,6 +11,7 @@ import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/social/friend_tile.dart';
 import '../../widgets/social/pending_request_tile.dart';
 import '../../widgets/social/social_section_header.dart';
+import '../../core/theme/app_accent.dart';
 
 class StudentsScreen extends ConsumerWidget {
   const StudentsScreen({super.key});
@@ -126,7 +127,7 @@ class StudentsScreen extends ConsumerWidget {
                         (friend) => FriendTile(
                           friend: friend,
                           trailing: IconButton(
-                            icon: const Icon(Icons.person_add_alt_1_outlined, color: AppColors.orange),
+                            icon: Icon(Icons.person_add_alt_1_outlined, color: context.accentColor),
                             tooltip: l10n.sendStudentRequestAction,
                             onPressed: () => _addStudent(context, ref, friend.id),
                           ),

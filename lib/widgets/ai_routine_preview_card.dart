@@ -7,6 +7,7 @@ import '../core/utils/exercise_logging_resolver.dart';
 import '../models/exercise_logging.dart';
 import '../models/routine.dart';
 import '../providers/app_providers.dart';
+import '../core/theme/app_accent.dart';
 
 class AiRoutinePreviewCard extends ConsumerWidget {
   final Routine routine;
@@ -48,7 +49,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
       return _StatusBanner(
         icon: Icons.check_circle,
         text: l10n.routineSaved,
-        color: AppColors.orange,
+        color: context.accentColor,
       );
     }
 
@@ -56,7 +57,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.cardElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.orange.withValues(alpha: 0.4)),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.4)),
       ),
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -66,7 +67,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
             children: [
               Icon(
                 shareMode ? Icons.fitness_center : Icons.auto_awesome,
-                color: AppColors.orange,
+                color: context.accentColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -89,11 +90,11 @@ class AiRoutinePreviewCard extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               routine.targetMuscles.join(' · '),
-              style: const TextStyle(color: AppColors.orange, fontSize: 12),
+              style: TextStyle(color: context.accentColor, fontSize: 12),
             ),
           ],
           const SizedBox(height: 12),
-            ...routine.exercises.take(8).map((ex) => _exerciseLine(ref, ex)),
+            ...routine.exercises.take(8).map((ex) => _exerciseLine(context, ref, ex)),
           if (routine.exercises.length > 8)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -162,7 +163,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
     );
   }
 
-  Widget _exerciseLine(WidgetRef ref, RoutineExercise ex) {
+  Widget _exerciseLine(BuildContext context, WidgetRef ref, RoutineExercise ex) {
     final name = ref.watch(exercisesProvider).maybeWhen(
           data: (_) => ref.read(exerciseServiceProvider).localizedName(
                 exerciseId: ex.exerciseId,
@@ -178,7 +179,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(color: AppColors.orange)),
+          Text('• ', style: TextStyle(color: context.accentColor)),
           Expanded(
             child: Text(
               '$name — $detail',

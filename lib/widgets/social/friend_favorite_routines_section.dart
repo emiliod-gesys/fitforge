@@ -7,6 +7,7 @@ import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../fitforge_loading_indicator.dart';
 import '../shared_routine_preview.dart';
+import '../../core/theme/app_accent.dart';
 
 class FriendFavoriteRoutinesSection extends ConsumerWidget {
   final String userId;
@@ -70,20 +71,20 @@ class _FavoriteRoutineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.card,
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.orange.withValues(alpha: 0.15),
-          child: const Icon(Icons.star, color: AppColors.orange, size: 20),
+          backgroundColor: context.accentColor.withValues(alpha: 0.15),
+          child: Icon(Icons.star, color: context.accentColor, size: 20),
         ),
         title: Text(routine.name),
         subtitle: Text(
           '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.visibility_outlined),
+          icon: Icon(Icons.visibility_outlined),
           tooltip: l10n.previewRoutine,
-          color: AppColors.orange,
+          color: context.accentColor,
           onPressed: onPreview,
         ),
         onTap: onPreview,

@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/theme/app_accent.dart';
 
 /// Controles de sesión: alternar peso por brazo/conjunto y aviso de peso corporal.
 class ExerciseLoadControls extends StatelessWidget {
@@ -58,10 +59,10 @@ class ExerciseLoadControls extends StatelessWidget {
                 perArmEnabled ? l10n.loadModePerArm : l10n.loadModeCombined,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Switch.adaptive(
                 value: perArmEnabled,
-                activeThumbColor: AppColors.orange,
+                activeThumbColor: context.accentColor,
                 onChanged: onPerArmChanged,
               ),
             ],
@@ -70,11 +71,11 @@ class ExerciseLoadControls extends StatelessWidget {
         ],
         if (isBodyweight && bodyWeightKg != null && bodyWeightKg! > 0) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.orange.withValues(alpha: 0.1),
+              color: context.accentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.orange.withValues(alpha: 0.25)),
+              border: Border.all(color: context.accentColor.withValues(alpha: 0.25)),
             ),
             child: Text(
               l10n.bodyweightLoadHint(

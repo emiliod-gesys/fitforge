@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../services/activity_log_service.dart';
+import '../../core/theme/app_accent.dart';
 
 class ManualActivitySheet {
   static Future<void> show(
@@ -153,11 +154,11 @@ class _ManualActivitySheetBodyState extends State<_ManualActivitySheetBody> {
               suffixText: 'kcal',
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           FilledButton(
             onPressed: _saving ? null : _save,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.orange,
+              backgroundColor: context.accentColor,
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             child: _saving

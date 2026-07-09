@@ -350,6 +350,60 @@ abstract class AppLocalizations {
   /// **'Sistema de unidades'**
   String get unitSystem;
 
+  /// No description provided for @accentColor.
+  ///
+  /// In es, this message translates to:
+  /// **'Color de acento'**
+  String get accentColor;
+
+  /// No description provided for @accentColorHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Personaliza el color principal de la app'**
+  String get accentColorHint;
+
+  /// No description provided for @accentGold.
+  ///
+  /// In es, this message translates to:
+  /// **'Dorado'**
+  String get accentGold;
+
+  /// No description provided for @accentOrange.
+  ///
+  /// In es, this message translates to:
+  /// **'Naranja'**
+  String get accentOrange;
+
+  /// No description provided for @accentCobalt.
+  ///
+  /// In es, this message translates to:
+  /// **'Azul'**
+  String get accentCobalt;
+
+  /// No description provided for @accentViolet.
+  ///
+  /// In es, this message translates to:
+  /// **'Violeta'**
+  String get accentViolet;
+
+  /// No description provided for @accentEmerald.
+  ///
+  /// In es, this message translates to:
+  /// **'Verde'**
+  String get accentEmerald;
+
+  /// No description provided for @accentRose.
+  ///
+  /// In es, this message translates to:
+  /// **'Rosado'**
+  String get accentRose;
+
+  /// No description provided for @accentCrimson.
+  ///
+  /// In es, this message translates to:
+  /// **'Carmesí'**
+  String get accentCrimson;
+
   /// No description provided for @kilograms.
   ///
   /// In es, this message translates to:

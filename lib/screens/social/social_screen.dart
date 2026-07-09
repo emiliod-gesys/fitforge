@@ -12,6 +12,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/leaderboards_section.dart';
 import '../../widgets/social_notifications_sheet.dart';
 import 'social_friends_tab.dart';
+import '../../core/theme/app_accent.dart';
 
 class SocialScreen extends ConsumerStatefulWidget {
   const SocialScreen({super.key});
@@ -153,13 +154,13 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
       appBar: FitForgeAppBar(
         title: l10n.socialTitle,
         automaticallyImplyLeading: false,
-        actions: const [
+        actions: [
           SocialNotificationsBellButton(),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.orange,
-          labelColor: AppColors.orange,
+          indicatorColor: context.accentColor,
+          labelColor: context.accentColor,
           unselectedLabelColor: AppColors.textMuted,
           tabs: [
             Tab(text: l10n.socialTabFriends),

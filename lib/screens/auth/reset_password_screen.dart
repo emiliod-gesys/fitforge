@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -71,7 +72,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          Positioned.fill(child: DecoratedBox(decoration: AppDecorations.authBackdropGlow())),
+          Positioned.fill(child: DecoratedBox(decoration: AppDecorations.authBackdropGlow(context.appAccent))),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),

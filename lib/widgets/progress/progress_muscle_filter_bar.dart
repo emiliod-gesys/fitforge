@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressMuscleFilterBar extends StatelessWidget {
   final String selectedMuscle;
@@ -50,25 +51,25 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: EdgeInsets.only(right: 8),
       child: Material(
-        color: selected ? AppColors.orange.withValues(alpha: 0.16) : AppColors.cardElevated,
+        color: selected ? context.accentColor.withValues(alpha: 0.16) : AppColors.cardElevated,
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: selected ? AppColors.orange : AppColors.border,
+                color: selected ? context.accentColor : AppColors.border,
               ),
             ),
             child: Text(
               label,
               style: TextStyle(
-                color: selected ? AppColors.orange : AppColors.textMuted,
+                color: selected ? context.accentColor : AppColors.textMuted,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                 fontSize: 12,
               ),

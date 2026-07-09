@@ -26,6 +26,7 @@ import '../../widgets/player_level_card.dart';
 import '../../widgets/progress/progress_muscle_filter_bar.dart';
 import '../../widgets/social/friend_favorite_routines_section.dart';
 import '../../widgets/stat_card.dart';
+import '../../core/theme/app_accent.dart';
 
 class FriendProfileScreen extends ConsumerWidget {
   final String friendId;
@@ -374,7 +375,7 @@ class _ProfileHeader extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   l10n.goalLabel(profile.fitnessGoal),
-                  style: const TextStyle(color: AppColors.orange),
+                  style: TextStyle(color: context.accentColor),
                   textAlign: TextAlign.center,
                 ),
               ),

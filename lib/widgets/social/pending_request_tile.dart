@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/social.dart';
 import '../profile_avatar.dart';
+import '../../core/theme/app_accent.dart';
 
 class PendingRequestTile extends StatelessWidget {
   final FriendUser friend;
@@ -23,11 +24,11 @@ class PendingRequestTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.card,
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: incoming ? AppColors.orange.withValues(alpha: 0.35) : AppColors.border,
+          color: incoming ? context.accentColor.withValues(alpha: 0.35) : AppColors.border,
         ),
       ),
       child: Padding(
@@ -51,11 +52,11 @@ class PendingRequestTile extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: incoming ? AppColors.orange : AppColors.textMuted,
+                      color: incoming ? context.accentColor : AppColors.textMuted,
                       fontSize: 12,
                       fontWeight: incoming ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -65,8 +66,8 @@ class PendingRequestTile extends StatelessWidget {
             ),
             if (incoming) ...[
               IconButton(
-                icon: const Icon(Icons.check_circle_outline),
-                color: AppColors.orange,
+                icon: Icon(Icons.check_circle_outline),
+                color: context.accentColor,
                 onPressed: onAccept,
               ),
               IconButton(

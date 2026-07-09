@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../screens/workouts/workout_start_helper.dart';
+import '../../core/theme/app_accent.dart';
 
 Future<void> showTrainStartSheet(
   BuildContext context,
@@ -29,7 +30,7 @@ Future<void> showTrainStartSheet(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.flash_on, color: AppColors.orange),
+                  leading: Icon(Icons.flash_on, color: context.accentColor),
                   title: Text(l10n.freeWorkout),
                   onTap: () async {
                     Navigator.pop(ctx);

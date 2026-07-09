@@ -7,6 +7,7 @@ import '../l10n/l10n_extensions.dart';
 import '../models/profile.dart';
 import '../providers/app_providers.dart';
 import 'body_mannequin/body_mannequin.dart';
+import '../core/theme/app_accent.dart';
 
 /// Mapa con todos los grupos al 100 % (placeholder mientras carga).
 Map<String, double> fullMuscleRecoveryMap() {
@@ -97,7 +98,7 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                         child: Row(
                           children: [
-                            const Icon(Icons.bolt, color: AppColors.orange, size: 22),
+                            Icon(Icons.bolt, color: context.accentColor, size: 22),
                             const SizedBox(width: 8),
                             Text(
                               l10n.recoveryDetailTitle,
@@ -165,7 +166,7 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
           children: [
             Row(
               children: [
-                const Icon(Icons.bolt, color: AppColors.orange, size: 20),
+                Icon(Icons.bolt, color: context.accentColor, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(l10n.muscleRecovery, style: Theme.of(context).textTheme.titleMedium),
@@ -179,11 +180,11 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
             ),
             const SizedBox(height: 4),
             Text(l10n.recoveryHint, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             if (widget.isLoading)
               Shimmer.fromColors(
                 baseColor: AppColors.cardElevated,
-                highlightColor: Color.lerp(AppColors.card, AppColors.gold, 0.12)!,
+                highlightColor: Color.lerp(AppColors.card, context.accentColor, 0.12)!,
                 child: Container(
                   height: widget.compact ? 220 : 280,
                   decoration: BoxDecoration(
@@ -258,7 +259,7 @@ class _MuscleRecoveryRow extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: compact ? 8 : 10),
       child: Material(
-        color: highlighted ? AppColors.orange.withValues(alpha: 0.08) : Colors.transparent,
+        color: highlighted ? context.accentColor.withValues(alpha: 0.08) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,

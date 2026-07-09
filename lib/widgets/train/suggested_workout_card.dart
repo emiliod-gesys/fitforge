@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/train_suggestion_resolver.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
+import '../../core/theme/app_accent.dart';
 
 class SuggestedWorkoutCard extends StatelessWidget {
   final Routine routine;
@@ -35,12 +36,12 @@ class SuggestedWorkoutCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.orange.withValues(alpha: 0.14),
+                    color: context.accentColor.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.auto_awesome, color: AppColors.orange, size: 22),
+                  child: Icon(Icons.auto_awesome, color: context.accentColor, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -93,11 +94,11 @@ class SuggestedWorkoutCard extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onStart,
-                icon: const Icon(Icons.play_circle_outline),
+                icon: Icon(Icons.play_circle_outline),
                 label: Text(l10n.trainStartSuggested),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.orange,
-                  side: const BorderSide(color: AppColors.orange),
+                  foregroundColor: context.accentColor,
+                  side: BorderSide(color: context.accentColor),
                   minimumSize: const Size.fromHeight(44),
                 ),
               ),

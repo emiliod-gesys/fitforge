@@ -6,6 +6,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../routines/routine_list_screen.dart';
 import '../workouts/workout_list_screen.dart';
+import '../../core/theme/app_accent.dart';
 
 class TrainingHubScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -91,8 +92,8 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.orange,
-          labelColor: AppColors.orange,
+          indicatorColor: context.accentColor,
+          labelColor: context.accentColor,
           unselectedLabelColor: AppColors.textMuted,
           tabs: [
             Tab(text: l10n.trainTabToday),

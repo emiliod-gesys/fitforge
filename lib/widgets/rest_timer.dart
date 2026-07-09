@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/local_notification_service.dart';
 import '../services/rest_sound_service.dart';
+import '../core/theme/app_accent.dart';
 
 /// Allows external controllers (e.g. watch companion) to adjust or skip rest.
 class RestTimerController {
@@ -271,8 +272,8 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
     final progress = _total > 0 ? _remaining / _total : 0.0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: AppColors.orange.withValues(alpha: 0.12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: context.accentColor.withValues(alpha: 0.12),
       child: Row(
         children: [
           SizedBox(
@@ -282,7 +283,7 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
               value: progress.clamp(0.0, 1.0),
               strokeWidth: 4,
               backgroundColor: Colors.white12,
-              color: AppColors.orange,
+              color: context.accentColor,
             ),
           ),
           const SizedBox(width: 16),

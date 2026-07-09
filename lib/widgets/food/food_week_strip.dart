@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_accent.dart';
 
 class FoodWeekStrip extends StatelessWidget {
   final DateTime selectedDay;
@@ -48,16 +49,16 @@ class FoodWeekStrip extends StatelessWidget {
                 onTap: isFuture ? null : () => onChanged(day),
                 borderRadius: BorderRadius.circular(12),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  duration: Duration(milliseconds: 180),
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.orange : AppColors.card,
+                    color: isSelected ? context.accentColor : AppColors.card,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.orange
+                          ? context.accentColor
                           : isToday
-                              ? AppColors.orange.withValues(alpha: 0.45)
+                              ? context.accentColor.withValues(alpha: 0.45)
                               : AppColors.border.withValues(alpha: 0.6),
                     ),
                   ),

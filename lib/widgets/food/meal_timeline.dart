@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
+import '../../core/theme/app_accent.dart';
 
 class MealTimeline extends StatelessWidget {
   final DailyNutritionSummary summary;
@@ -94,11 +95,11 @@ class _MealTimelineNode extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: eatenKcal > 0
-                          ? AppColors.orange.withValues(alpha: 0.6)
+                          ? context.accentColor.withValues(alpha: 0.6)
                           : AppColors.border,
                     ),
                   ),
-                  child: Icon(icon, size: 16, color: AppColors.orange),
+                  child: Icon(icon, size: 16, color: context.accentColor),
                 ),
                 if (!isLast)
                   Expanded(
@@ -134,7 +135,7 @@ class _MealTimelineNode extends StatelessWidget {
                             Text(
                               '$eatenKcal kcal',
                               style: TextStyle(
-                                color: eatenKcal > 0 ? AppColors.orange : AppColors.textMuted,
+                                color: eatenKcal > 0 ? context.accentColor : AppColors.textMuted,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -144,8 +145,8 @@ class _MealTimelineNode extends StatelessWidget {
                       ),
                       IconButton(
                         onPressed: onAdd,
-                        icon: const Icon(Icons.add_circle_outline),
-                        color: AppColors.orange,
+                        icon: Icon(Icons.add_circle_outline),
+                        color: context.accentColor,
                         tooltip: title,
                       ),
                     ],

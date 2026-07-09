@@ -11,6 +11,7 @@ import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
+import '../../core/theme/app_accent.dart';
 
 abstract final class RoutineListActions {
   static void showAiGenerator(BuildContext context, WidgetRef ref) {
@@ -209,9 +210,9 @@ class RoutinesTab extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: Text(l10n.newRoutine),
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                foregroundColor: AppColors.orange,
-                side: const BorderSide(color: AppColors.orange),
+                minimumSize: Size.fromHeight(48),
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
               ),
             ),
             const SizedBox(height: 16),
@@ -271,15 +272,15 @@ class _RoutineCard extends ConsumerWidget {
     final l10n = context.l10n;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: routine.isAiGenerated
-              ? AppColors.orange.withValues(alpha: 0.15)
+              ? context.accentColor.withValues(alpha: 0.15)
               : AppColors.slate.withValues(alpha: 0.4),
           child: Icon(
             routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt,
-            color: AppColors.orange,
+            color: context.accentColor,
           ),
         ),
         title: Text(routine.name),
@@ -292,15 +293,15 @@ class _RoutineCard extends ConsumerWidget {
             IconButton(
               icon: Icon(
                 routine.isFavorite ? Icons.star : Icons.star_border,
-                color: routine.isFavorite ? AppColors.orange : AppColors.textMuted,
+                color: routine.isFavorite ? context.accentColor : AppColors.textMuted,
               ),
               tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
               onPressed: () => _toggleFavorite(context, ref),
             ),
             IconButton(
-              icon: const Icon(Icons.play_arrow),
+              icon: Icon(Icons.play_arrow),
               tooltip: l10n.startWorkout,
-              color: AppColors.orange,
+              color: context.accentColor,
               onPressed: () => startWorkoutFromRoutine(context, ref, routine),
             ),
             PopupMenuButton(

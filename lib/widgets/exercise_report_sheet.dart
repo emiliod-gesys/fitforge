@@ -3,6 +3,7 @@ import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/exercise_report_service.dart';
+import '../core/theme/app_accent.dart';
 
 class ExerciseReportSheet {
   static Future<void> show(
@@ -121,12 +122,12 @@ class _ExerciseReportSheetBodyState extends State<_ExerciseReportSheetBody> {
             widget.exerciseName,
             style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ...ExerciseReportCategory.values.map(
             (category) => RadioListTile<ExerciseReportCategory>(
               value: category,
               groupValue: _category,
-              activeColor: AppColors.orange,
+              activeColor: context.accentColor,
               title: Text(_categoryLabel(l10n, category)),
               onChanged: _submitting
                   ? null
@@ -141,11 +142,11 @@ class _ExerciseReportSheetBodyState extends State<_ExerciseReportSheetBody> {
               labelText: l10n.exerciseReportNotes,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           FilledButton(
             onPressed: _category == null || _submitting ? null : _submit,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.orange,
+              backgroundColor: context.accentColor,
               minimumSize: const Size.fromHeight(48),
             ),
             child: _submitting

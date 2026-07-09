@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_accent.dart';
 
 class SocialSectionHeader extends StatelessWidget {
   final String title;
@@ -35,8 +36,8 @@ class SocialSectionHeader extends StatelessWidget {
               onTap: onTrailingTap,
               child: Text(
                 trailing!,
-                style: const TextStyle(
-                  color: AppColors.orange,
+                style: TextStyle(
+                  color: context.accentColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

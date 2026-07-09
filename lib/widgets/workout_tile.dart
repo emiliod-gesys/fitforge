@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/workout.dart';
+import '../core/theme/app_accent.dart';
 
 class WorkoutTile extends StatelessWidget {
   final Workout workout;
@@ -35,10 +36,10 @@ class WorkoutTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         onTap: onTap,
-        contentPadding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        contentPadding: EdgeInsets.fromLTRB(16, 10, 16, 10),
         leading: CircleAvatar(
-          backgroundColor: AppColors.orange.withValues(alpha: 0.15),
-          child: const Icon(Icons.fitness_center, color: AppColors.orange),
+          backgroundColor: context.accentColor.withValues(alpha: 0.15),
+          child: Icon(Icons.fitness_center, color: context.accentColor),
         ),
         title: Row(
           children: [
@@ -100,8 +101,8 @@ class WorkoutTile extends StatelessWidget {
         trailing: workout.isActive
             ? Chip(
                 label: Text(l10n.active),
-                backgroundColor: AppColors.orange.withValues(alpha: 0.2),
-                labelStyle: const TextStyle(color: AppColors.orange),
+                backgroundColor: context.accentColor.withValues(alpha: 0.2),
+                labelStyle: TextStyle(color: context.accentColor),
               )
             : onTap != null
                 ? const Icon(Icons.chevron_right, color: AppColors.textMuted)
@@ -118,9 +119,9 @@ class WorkoutTile extends StatelessWidget {
       key: ValueKey('repeat_${workout.id}'),
       direction: DismissDirection.startToEnd,
       background: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: AppColors.orange,
+          color: context.accentColor,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerLeft,

@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/trainer.dart';
 import '../profile_avatar.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressTrainerCard extends StatelessWidget {
   final MyTrainerView trainerView;
@@ -53,7 +54,7 @@ class ProgressTrainerCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.school_outlined, color: AppColors.orange, size: 28),
+            Icon(Icons.school_outlined, color: context.accentColor, size: 28),
           ],
         ),
       ),

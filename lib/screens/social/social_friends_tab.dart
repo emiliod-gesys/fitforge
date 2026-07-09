@@ -13,6 +13,7 @@ import '../../widgets/social/pending_request_tile.dart';
 import '../../widgets/social/social_hero_card.dart';
 import '../../widgets/social/social_search_bar.dart';
 import '../../widgets/social/social_section_header.dart';
+import '../../core/theme/app_accent.dart';
 
 class SocialFriendsTab extends ConsumerWidget {
   final TextEditingController searchController;
@@ -130,7 +131,7 @@ class SocialFriendsTab extends ConsumerWidget {
                         (user) => FriendTile(
                           friend: user,
                           trailing: IconButton(
-                            icon: const Icon(Icons.person_add_outlined, color: AppColors.orange),
+                            icon: Icon(Icons.person_add_outlined, color: context.accentColor),
                             onPressed: () => onSendRequest(user.id),
                           ),
                         ),

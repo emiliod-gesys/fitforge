@@ -15,6 +15,7 @@ import 'profile_avatar.dart';
 import 'social/social_filter_chip.dart';
 import 'fitforge_loading_indicator.dart';
 import 'tappable_badge.dart';
+import '../core/theme/app_accent.dart';
 
 class LeaderboardsSection extends ConsumerStatefulWidget {
   const LeaderboardsSection({super.key});
@@ -208,26 +209,26 @@ class _LeaderboardList extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _LeaderboardTile(
             entry: result.currentUserOutsideTop!,
             metric: metric,
             period: period,
             l10n: l10n,
             unitSystem: unitSystem,
-            rankColor: AppColors.orange,
+            rankColor: context.accentColor,
             onTap: null,
           ),
         ],
         if (onLoadMore != null) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: isLoadingMore ? null : onLoadMore,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.orange,
-                side: const BorderSide(color: AppColors.orange),
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -309,16 +310,16 @@ class _LeaderboardTile extends StatelessWidget {
 
     return Card(
       color: entry.isCurrentUser
-          ? AppColors.orange.withValues(alpha: 0.08)
+          ? context.accentColor.withValues(alpha: 0.08)
           : isTopThree
               ? rankColor.withValues(alpha: 0.06)
               : AppColors.card,
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: entry.isCurrentUser
-              ? AppColors.orange.withValues(alpha: 0.28)
+              ? context.accentColor.withValues(alpha: 0.28)
               : isTopThree
                   ? rankColor.withValues(alpha: 0.22)
                   : AppColors.border,
@@ -356,7 +357,7 @@ class _LeaderboardTile extends StatelessWidget {
                       name,
                       style: TextStyle(
                         fontWeight: entry.isCurrentUser ? FontWeight.w700 : FontWeight.w600,
-                        color: entry.isCurrentUser ? AppColors.orange : AppColors.textPrimary,
+                        color: entry.isCurrentUser ? context.accentColor : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),

@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../core/theme/app_accent.dart';
 
 class StudentRoutinesSection extends ConsumerWidget {
   final String studentId;
@@ -36,9 +37,9 @@ class StudentRoutinesSection extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: Text(l10n.studentRoutineNew),
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                foregroundColor: AppColors.orange,
-                side: const BorderSide(color: AppColors.orange),
+                minimumSize: Size.fromHeight(44),
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
               ),
             ),
             const SizedBox(height: 12),
@@ -106,15 +107,15 @@ class _StudentRoutineCard extends ConsumerWidget {
         : routine.targetMuscles.map((m) => l10n.muscleLabel(m)).join(', ');
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: routine.isAiGenerated
-              ? AppColors.orange.withValues(alpha: 0.15)
+              ? context.accentColor.withValues(alpha: 0.15)
               : AppColors.slate.withValues(alpha: 0.4),
           child: Icon(
             routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt,
-            color: AppColors.orange,
+            color: context.accentColor,
           ),
         ),
         title: Text(routine.name),

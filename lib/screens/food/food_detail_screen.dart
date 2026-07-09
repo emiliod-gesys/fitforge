@@ -9,6 +9,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../core/theme/app_accent.dart';
 
 class FoodDetailScreen extends ConsumerStatefulWidget {
   final FoodNutritionEstimate estimate;
@@ -259,8 +260,8 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                     color: AppColors.cardElevated,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.restaurant, size: 56, color: AppColors.orange),
+                  child: Center(
+                    child: Icon(Icons.restaurant, size: 56, color: context.accentColor),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -344,7 +345,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: _revising ? null : _reviseWithAi,
-                  icon: const Icon(Icons.auto_awesome, color: AppColors.orange),
+                  icon: Icon(Icons.auto_awesome, color: context.accentColor),
                   label: Text(l10n.foodAiCorrectionAction),
                 ),
               ],
@@ -359,11 +360,11 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: FilledButton(
             onPressed: _saving || _amount <= 0 || _nameController.text.trim().isEmpty ? null : _save,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.orange,
+              backgroundColor: context.accentColor,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
             ),
@@ -412,7 +413,7 @@ class _NutrientCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: prominent ? 18 : 15,
-              color: prominent ? AppColors.orange : null,
+              color: prominent ? context.accentColor : null,
             ),
           ),
         ],

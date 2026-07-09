@@ -9,6 +9,7 @@ import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../core/theme/app_accent.dart';
 
 enum FoodAddMode { search, photo, quick, manual }
 
@@ -324,7 +325,7 @@ class _RecentFoodTile extends StatelessWidget {
         title: Row(
           children: [
             Expanded(child: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
-            if (_isAi) const Icon(Icons.auto_awesome, size: 16, color: AppColors.orange),
+            if (_isAi) Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
             if (_isManual)
               const Icon(Icons.edit_note, size: 16, color: AppColors.textMuted),
           ],
@@ -333,7 +334,7 @@ class _RecentFoodTile extends StatelessWidget {
           '${entry.caloriesKcal} kcal${serving != null ? ', $serving' : ''}',
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.add_circle, color: AppColors.orange),
+          icon: Icon(Icons.add_circle, color: context.accentColor),
           onPressed: onTap,
         ),
       ),
@@ -518,11 +519,11 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: decoration(l10n.foodManualGramsLabel),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               FilledButton(
                 onPressed: _submitting ? null : _submit,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.orange,
+                  backgroundColor: context.accentColor,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(48),
                 ),
@@ -563,7 +564,7 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
                             onPressed: () => widget.onDeleteSaved(template.id),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add_circle, color: AppColors.orange),
+                            icon: Icon(Icons.add_circle, color: context.accentColor),
                             onPressed: () => widget.onSelectSaved(template),
                           ),
                         ],
@@ -610,10 +611,10 @@ class _QuickAddPane extends StatelessWidget {
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: onSubmit,
-          icon: const Icon(Icons.auto_awesome),
+          icon: Icon(Icons.auto_awesome),
           label: Text(l10n.foodQuickAddAction),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.orange,
+            backgroundColor: context.accentColor,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(48),
           ),
@@ -642,7 +643,7 @@ class _PhotoPane extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
           ),
-          child: const Icon(Icons.photo_camera_outlined, size: 64, color: AppColors.orange),
+          child: Icon(Icons.photo_camera_outlined, size: 64, color: context.accentColor),
         ),
         const SizedBox(height: 16),
         Text(
@@ -653,10 +654,10 @@ class _PhotoPane extends StatelessWidget {
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: () => onPickImage(ImageSource.camera),
-          icon: const Icon(Icons.camera_alt),
+          icon: Icon(Icons.camera_alt),
           label: Text(l10n.foodPhotoAction),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.orange,
+            backgroundColor: context.accentColor,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(48),
           ),
@@ -664,11 +665,11 @@ class _PhotoPane extends StatelessWidget {
         const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: () => onPickImage(ImageSource.gallery),
-          icon: const Icon(Icons.photo_library_outlined),
+          icon: Icon(Icons.photo_library_outlined),
           label: Text(l10n.foodPhotoGalleryAction),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.orange,
-            side: const BorderSide(color: AppColors.orange),
+            foregroundColor: context.accentColor,
+            side: BorderSide(color: context.accentColor),
             minimumSize: const Size.fromHeight(48),
           ),
         ),
@@ -705,17 +706,17 @@ class _ModeTabs extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 width: 84,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.orange.withValues(alpha: 0.15) : AppColors.card,
+                  color: selected ? context.accentColor.withValues(alpha: 0.15) : AppColors.card,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: selected ? AppColors.orange : AppColors.border,
+                    color: selected ? context.accentColor : AppColors.border,
                   ),
                 ),
                 child: Column(
                   children: [
-                    Icon(item.$2, color: selected ? AppColors.orange : AppColors.textMuted),
+                    Icon(item.$2, color: selected ? context.accentColor : AppColors.textMuted),
                     const SizedBox(height: 4),
                     Text(
                       item.$3,
@@ -725,7 +726,7 @@ class _ModeTabs extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         height: 1.1,
-                        color: selected ? AppColors.orange : AppColors.textMuted,
+                        color: selected ? context.accentColor : AppColors.textMuted,
                       ),
                     ),
                   ],

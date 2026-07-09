@@ -6,6 +6,7 @@ import '../../core/utils/milestones.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../milestones_section.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressMilestonesCarousel extends StatelessWidget {
   final MilestoneTotals totals;
@@ -107,18 +108,18 @@ class _MilestoneCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     fit: BoxFit.contain,
-                    opacity: unlocked ? const AlwaysStoppedAnimation(1) : const AlwaysStoppedAnimation(0.35),
+                    opacity: unlocked ? AlwaysStoppedAnimation(1) : const AlwaysStoppedAnimation(0.35),
                     errorBuilder: (_, __, ___) => Icon(
                       unlocked ? Icons.emoji_events : Icons.lock_outline,
-                      color: unlocked ? AppColors.orange : AppColors.textMuted,
+                      color: unlocked ? context.accentColor : AppColors.textMuted,
                       size: 24,
                     ),
                   ),
-                  const Spacer(),
+                  Spacer(),
                   Text(
                     tierName,
                     style: TextStyle(
-                      color: unlocked ? AppColors.orange : AppColors.textMuted,
+                      color: unlocked ? context.accentColor : AppColors.textMuted,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
@@ -147,7 +148,7 @@ class _MilestoneCard extends StatelessWidget {
                     value: progress,
                     minHeight: 5,
                     backgroundColor: AppColors.cardElevated,
-                    color: AppColors.orange,
+                    color: context.accentColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -164,7 +165,7 @@ class _MilestoneCard extends StatelessWidget {
                   l10n.milestoneAllUnlocked,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.orange, fontSize: 10, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: context.accentColor, fontSize: 10, fontWeight: FontWeight.w600),
                 ),
             ],
           ),

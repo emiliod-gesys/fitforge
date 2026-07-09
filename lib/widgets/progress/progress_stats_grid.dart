@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressStatsGrid extends StatelessWidget {
   final AppLocalizations l10n;
@@ -35,7 +36,7 @@ class ProgressStatsGrid extends StatelessWidget {
           icon: Icons.fitness_center,
           label: l10n.progressStatsMonthlyWorkouts,
           value: '$monthlyWorkouts',
-          accent: AppColors.orange,
+          accent: context.accentColor,
         ),
         _StatTile(
           icon: Icons.trending_up,
@@ -47,13 +48,13 @@ class ProgressStatsGrid extends StatelessWidget {
           icon: Icons.emoji_events_outlined,
           label: l10n.progressStatsMonthlyPrs,
           value: '$monthlyPrCount',
-          accent: const Color(0xFFFFD54F),
+          accent: Color(0xFFFFD54F),
         ),
         _StatTile(
           icon: Icons.local_fire_department,
           label: l10n.streakLabel,
           value: l10n.progressStreakWeeks(streakWeeks),
-          accent: AppColors.goldDark,
+          accent: context.accentDark,
         ),
       ],
     );

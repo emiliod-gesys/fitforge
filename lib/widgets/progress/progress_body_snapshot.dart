@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/profile.dart';
+import '../../core/theme/app_accent.dart';
 
 class ProgressBodySnapshot extends StatelessWidget {
   final List<BodyMeasurement> measurements;
@@ -96,14 +97,14 @@ class _MetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.cardElevated,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.orange, size: 20),
+          Icon(icon, color: context.accentColor, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

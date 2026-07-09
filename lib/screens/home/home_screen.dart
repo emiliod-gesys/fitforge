@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
+import '../../core/theme/app_accent.dart';
 
 class HomeScreen extends ConsumerWidget {
   final Widget child;
@@ -58,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
       ),
       NavigationDestination(
         icon: _NavAiIcon(color: AppColors.textMuted.withValues(alpha: 0.85)),
-        selectedIcon: const _NavAiIcon(color: AppColors.orange),
+        selectedIcon: _NavAiIcon(color: context.accentColor),
         label: l10n.navCoach,
       ),
       NavigationDestination(

@@ -23,6 +23,7 @@ import '../../widgets/fitforge_logo.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/milestones_section.dart';
 import '../../widgets/tappable_badge.dart';
+import '../../core/theme/app_accent.dart';
 
 class WorkoutSummaryScreen extends ConsumerStatefulWidget {
   final WorkoutSummaryData summary;
@@ -160,8 +161,8 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 l10n.summaryExerciseImproved,
-                                style: const TextStyle(
-                                  color: AppColors.orange,
+                                style: TextStyle(
+                                  color: context.accentColor,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -198,10 +199,10 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : const Icon(Icons.share_outlined),
+                          : Icon(Icons.share_outlined),
                       label: Text(l10n.share),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.orange,
+                        backgroundColor: context.accentColor,
                         foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(48),
                       ),
@@ -319,17 +320,17 @@ class _ShareCard extends StatelessWidget {
             ),
           ],
           if (records.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: records
                   .map(
                     (r) => Chip(
-                      avatar: Icon(Icons.emoji_events, size: 16, color: AppColors.orange),
+                      avatar: Icon(Icons.emoji_events, size: 16, color: context.accentColor),
                       label: Text(l10n.recordLabel(r)),
-                      backgroundColor: AppColors.orange.withValues(alpha: 0.15),
-                      side: BorderSide(color: AppColors.orange.withValues(alpha: 0.4)),
+                      backgroundColor: context.accentColor.withValues(alpha: 0.15),
+                      side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
                     ),
                   )
                   .toList(),
@@ -392,25 +393,25 @@ class _XpAwardBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.orange.withValues(alpha: 0.12),
+        color: context.accentColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.orange.withValues(alpha: 0.35)),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.bolt, color: AppColors.orange, size: 22),
+              Icon(Icons.bolt, color: context.accentColor, size: 22),
               const SizedBox(width: 8),
               Text(
                 l10n.xpEarned(xpAward.xpEarned),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.orange,
+                  color: context.accentColor,
                 ),
               ),
             ],
@@ -438,31 +439,31 @@ class _AchievementsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.orange.withValues(alpha: 0.18),
-            AppColors.orange.withValues(alpha: 0.06),
+            context.accentColor.withValues(alpha: 0.18),
+            context.accentColor.withValues(alpha: 0.06),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.orange.withValues(alpha: 0.45)),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.45)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.celebration, color: AppColors.orange, size: 22),
+              Icon(Icons.celebration, color: context.accentColor, size: 22),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   l10n.summaryAchievementsTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.orange,
+                    color: context.accentColor,
                   ),
                 ),
               ),
@@ -487,9 +488,9 @@ class _AchievementsSection extends StatelessWidget {
                   width: 48,
                   height: 48,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.emoji_events,
-                    color: AppColors.orange,
+                    color: context.accentColor,
                     size: 36,
                   ),
                 ),
@@ -553,7 +554,7 @@ class _LevelBadgeImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final asset = PlayerLevelBadge.assetForLevel(level);
     if (asset == null) {
-      return const Icon(Icons.military_tech, color: AppColors.orange, size: 36);
+      return Icon(Icons.military_tech, color: context.accentColor, size: 36);
     }
     return Image.asset(
       asset,
@@ -561,7 +562,7 @@ class _LevelBadgeImage extends StatelessWidget {
       height: 48,
       fit: BoxFit.contain,
       errorBuilder: (_, __, ___) =>
-          const Icon(Icons.military_tech, color: AppColors.orange, size: 36),
+          Icon(Icons.military_tech, color: context.accentColor, size: 36),
     );
   }
 }
@@ -582,19 +583,19 @@ class _StatTile extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: highlight ? AppColors.orange : AppColors.textPrimary,
+            color: highlight ? context.accentColor : AppColors.textPrimary,
           ),
         ),
         if (highlight)
           Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Icon(Icons.arrow_upward, size: 14, color: AppColors.orange),
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.arrow_upward, size: 14, color: context.accentColor),
           ),
       ],
     );
@@ -608,7 +609,7 @@ class _ComparisonSection extends StatelessWidget {
 
   const _ComparisonSection({required this.summary, required this.unitSystem, required this.l10n});
 
-  Widget _row(String label, String current, String? previous, String? delta, bool isRecord) {
+  Widget _row(BuildContext context, String label, String current, String? previous, String? delta, bool isRecord) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -630,7 +631,7 @@ class _ComparisonSection extends StatelessWidget {
             Text(
               delta,
               style: TextStyle(
-                color: isRecord ? AppColors.orange : AppColors.textMuted,
+                color: isRecord ? context.accentColor : AppColors.textMuted,
                 fontWeight: isRecord ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -670,6 +671,7 @@ class _ComparisonSection extends StatelessWidget {
             ),
             const Divider(height: 16),
             _row(
+              context,
               l10n.reps,
               '${summary.totalReps}',
               summary.previousTotalReps?.toString(),
@@ -677,6 +679,7 @@ class _ComparisonSection extends StatelessWidget {
               summary.isRepsRecord,
             ),
             _row(
+              context,
               l10n.maxWeight,
               summary.maxWeightKg != null
                   ? UnitConverter.formatMass(summary.maxWeightKg, unitSystem, decimals: 0)
@@ -688,6 +691,7 @@ class _ComparisonSection extends StatelessWidget {
               summary.isMaxWeightRecord,
             ),
             _row(
+              context,
               l10n.volume,
               UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem),
               summary.previousTotalVolumeKg != null
@@ -697,6 +701,7 @@ class _ComparisonSection extends StatelessWidget {
               summary.isVolumeRecord,
             ),
             _row(
+              context,
               l10n.durationMin,
               '${summary.durationMinutes}',
               summary.previousDurationMinutes?.toString(),
@@ -724,17 +729,17 @@ class _HeroBanner extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.orange.withValues(alpha: showCelebration ? 0.22 : 0.12),
-            AppColors.orange.withValues(alpha: 0.04),
+            context.accentColor.withValues(alpha: showCelebration ? 0.22 : 0.12),
+            context.accentColor.withValues(alpha: 0.04),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.orange.withValues(alpha: showCelebration ? 0.5 : 0.25),
+          color: context.accentColor.withValues(alpha: showCelebration ? 0.5 : 0.25),
         ),
       ),
       child: Row(
@@ -756,7 +761,7 @@ class _HeroBanner extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.summaryVolumeUp(percent.toStringAsFixed(0)),
-                    style: const TextStyle(color: AppColors.orange, fontSize: 13),
+                    style: TextStyle(color: context.accentColor, fontSize: 13),
                   ),
                 ],
               ],
@@ -803,7 +808,7 @@ class _PersonalRecordsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.emoji_events, color: AppColors.orange, size: 18),
+            Icon(Icons.emoji_events, color: context.accentColor, size: 18),
             const SizedBox(width: 6),
             Text(
               l10n.summaryPersonalRecords,
@@ -826,8 +831,8 @@ class _PersonalRecordsSection extends StatelessWidget {
                 ),
                 Text(
                   _value(pr),
-                  style: const TextStyle(
-                    color: AppColors.orange,
+                  style: TextStyle(
+                    color: context.accentColor,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -849,17 +854,17 @@ class _PrBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      margin: EdgeInsets.only(left: 8),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.orange.withValues(alpha: 0.2),
+        color: context.accentColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.orange.withValues(alpha: 0.5)),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppColors.orange,
+        style: TextStyle(
+          color: context.accentColor,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),

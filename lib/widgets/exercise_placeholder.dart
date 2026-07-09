@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import 'fitforge_logo.dart';
+import '../core/theme/app_accent.dart';
 
 /// Placeholder con logo FitForge cuando el ejercicio no tiene imagen.
 class ExercisePlaceholder extends StatelessWidget {
@@ -34,11 +35,11 @@ class ExercisePlaceholder extends StatelessWidget {
         border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
       ),
       child: loading
-          ? const Center(
+          ? Center(
               child: SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.orange),
+                child: CircularProgressIndicator(strokeWidth: 2, color: context.accentColor),
               ),
             )
           : Center(

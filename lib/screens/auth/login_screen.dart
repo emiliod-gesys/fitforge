@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/google_auth_config.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/constants/turnstile_config.dart';
@@ -165,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          Positioned.fill(child: DecoratedBox(decoration: AppDecorations.authBackdropGlow())),
+          Positioned.fill(child: DecoratedBox(decoration: AppDecorations.authBackdropGlow(context.appAccent))),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),

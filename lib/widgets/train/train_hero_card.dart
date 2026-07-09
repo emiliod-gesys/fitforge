@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -45,7 +45,7 @@ class TrainHeroCard extends StatelessWidget {
                 : l10n.trainWeeklyProgress(weekCount, weeklyGoal);
 
     return Container(
-      decoration: AppDecorations.heroCard(),
+      decoration: AppDecorations.heroCard(context.appAccent),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
         child: Column(
@@ -62,8 +62,8 @@ class TrainHeroCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: const TextStyle(
-                color: AppDecorations.heroSubtitleColor,
+              style: TextStyle(
+                color: context.fitForgeAccent.subtitleOnHero,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -90,11 +90,11 @@ class TrainHeroCard extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: onStartWorkout,
-                icon: const Icon(Icons.play_arrow_rounded),
+                icon: Icon(Icons.play_arrow_rounded),
                 label: Text(l10n.startWorkout),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: AppColors.goldDark,
+                  foregroundColor: context.accentDark,
                   minimumSize: const Size.fromHeight(50),
                   textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),

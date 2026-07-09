@@ -8,6 +8,7 @@ import '../models/social.dart';
 import '../providers/app_providers.dart';
 import 'fitforge_loading_indicator.dart';
 import 'profile_avatar.dart';
+import '../core/theme/app_accent.dart';
 
 class RoutineShareFriendSheet extends ConsumerWidget {
   final Routine routine;
@@ -143,7 +144,7 @@ class RoutineShareFriendSheet extends ConsumerWidget {
                         fallbackLetter: friend.label,
                       ),
                       title: Text(friend.label),
-                      trailing: const Icon(Icons.send, color: AppColors.orange),
+                      trailing: Icon(Icons.send, color: context.accentColor),
                       onTap: () => _send(context, ref, friend),
                     );
                   },

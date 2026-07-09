@@ -4,6 +4,7 @@ import '../core/utils/player_level.dart';
 import '../core/utils/player_level_badge.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/theme/app_accent.dart';
 
 class PlayerLevelCard extends StatelessWidget {
   final PlayerLevelProgress progress;
@@ -37,13 +38,13 @@ class PlayerLevelCard extends StatelessWidget {
                             progress.xpInCurrentLevel,
                             progress.xpToNextLevel,
                           ),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),
                 Text(
                   '${progress.totalXp} XP',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: AppColors.orange,
+                    color: context.accentColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -88,7 +89,7 @@ class _CircularLevelRing extends StatelessWidget {
               value: progress.progressFraction,
               strokeWidth: _stroke,
               backgroundColor: AppColors.border,
-              color: AppColors.orange,
+              color: context.accentColor,
               strokeCap: StrokeCap.round,
             ),
           ),
@@ -106,28 +107,28 @@ class _CircularLevelRing extends StatelessWidget {
                           badgeAsset,
                           fit: BoxFit.contain,
                           filterQuality: FilterQuality.high,
-                          errorBuilder: (_, __, ___) => const Icon(
+                          errorBuilder: (_, __, ___) => Icon(
                             Icons.military_tech,
-                            color: AppColors.orange,
+                            color: context.accentColor,
                             size: 32,
                           ),
                         )
                       : Container(
                           decoration: BoxDecoration(
-                            color: AppColors.orange.withValues(alpha: 0.15),
+                            color: context.accentColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.military_tech, color: AppColors.orange, size: 28),
+                          child: Icon(Icons.military_tech, color: context.accentColor, size: 28),
                         ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   badgeName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.orange,
+                    color: context.accentColor,
                   ),
                 ),
                 Text(

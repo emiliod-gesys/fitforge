@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/supabase_datetime.dart';
+import '../core/theme/app_accent.dart';
 
 /// Cronómetro del tiempo total transcurrido desde el inicio del entrenamiento.
 class WorkoutElapsedTimer extends StatefulWidget {
@@ -56,7 +57,7 @@ class _WorkoutElapsedTimerState extends State<WorkoutElapsedTimer> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.timer_outlined, size: 18, color: AppColors.orange),
+          Icon(Icons.timer_outlined, size: 18, color: context.accentColor),
           const SizedBox(width: 8),
           Text(
             _format(_elapsed),

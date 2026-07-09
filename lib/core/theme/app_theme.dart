@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'app_accent.dart';
 import 'app_colors.dart';
 
 class AppTheme {
   static const borderRadius = 8.0;
 
-  static ThemeData get dark {
+  static ThemeData dark({AppAccent accent = AppAccent.gold}) {
+    final palette = FitForgeAccent.fromAccent(accent);
+    final primary = palette.accentColor;
+    final secondary = palette.accentDark;
+
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.gold,
+      colorScheme: ColorScheme.dark(
+        primary: primary,
         onPrimary: Colors.black,
-        secondary: AppColors.goldDark,
+        secondary: secondary,
         onSecondary: AppColors.textPrimary,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
@@ -22,8 +27,9 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.surface,
       cardColor: AppColors.card,
       dividerColor: AppColors.border,
-      splashColor: AppColors.gold.withValues(alpha: 0.12),
-      highlightColor: AppColors.gold.withValues(alpha: 0.08),
+      splashColor: primary.withValues(alpha: 0.12),
+      highlightColor: primary.withValues(alpha: 0.08),
+      extensions: [palette],
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -39,30 +45,30 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.card,
-        indicatorColor: AppColors.gold.withValues(alpha: 0.18),
+        indicatorColor: primary.withValues(alpha: 0.18),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return GoogleFonts.montserrat(
             fontSize: 11,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppColors.gold : AppColors.textMuted,
+            color: selected ? primary : AppColors.textMuted,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? AppColors.gold : AppColors.textMuted,
+            color: selected ? primary : AppColors.textMuted,
             size: 22,
           );
         }),
         height: 68,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.gold,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
         foregroundColor: Colors.black,
         elevation: 4,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
         ),
       ),
@@ -86,7 +92,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+          borderSide: BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
@@ -96,7 +102,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.gold,
+          backgroundColor: primary,
           foregroundColor: Colors.black,
           disabledBackgroundColor: AppColors.slate,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -107,8 +113,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.gold,
-          side: const BorderSide(color: AppColors.gold),
+          foregroundColor: primary,
+          side: BorderSide(color: primary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
           textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
@@ -116,19 +122,19 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.gold,
+          foregroundColor: primary,
           textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
         ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.cardElevated,
-        selectedColor: AppColors.gold.withValues(alpha: 0.2),
+        selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.montserrat(fontSize: 13),
         side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.gold,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: primary,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.cardElevated,

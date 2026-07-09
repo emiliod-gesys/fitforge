@@ -7,6 +7,7 @@ import '../models/social.dart';
 import '../providers/app_providers.dart';
 import 'fitforge_loading_indicator.dart';
 import 'routine_share_request_dialog.dart';
+import '../core/theme/app_accent.dart';
 
 class SocialNotificationsBellButton extends ConsumerWidget {
   const SocialNotificationsBellButton({super.key});
@@ -240,7 +241,7 @@ class SocialNotificationsSheet extends ConsumerWidget {
                           ListTile(
                             leading: CircleAvatar(
                               backgroundColor: notification.isUnread
-                                  ? AppColors.orange.withValues(alpha: 0.2)
+                                  ? context.accentColor.withValues(alpha: 0.2)
                                   : AppColors.cardElevated,
                               child: Icon(
                                 notification.isRoutineShare
@@ -249,7 +250,7 @@ class SocialNotificationsSheet extends ConsumerWidget {
                                         ? Icons.school_outlined
                                         : Icons.fitness_center,
                                 color: notification.isUnread
-                                    ? AppColors.orange
+                                    ? context.accentColor
                                     : AppColors.textMuted,
                                 size: 20,
                               ),

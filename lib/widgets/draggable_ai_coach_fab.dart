@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/theme/app_accent.dart';
 
 /// FAB del AI Coach arrastrable. Debe ser hijo directo de un [Stack].
 class DraggableAiCoachFab extends StatefulWidget {
@@ -144,7 +145,7 @@ class _DraggableAiCoachFabState extends State<DraggableAiCoachFab> {
           key: _fabKey,
           elevation: 4,
           borderRadius: BorderRadius.circular(8),
-          color: AppColors.orange,
+          color: context.accentColor,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(

@@ -8,6 +8,7 @@ import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../models/routine.dart';
+import '../core/theme/app_accent.dart';
 
 class RoutineExerciseTargetFields extends StatefulWidget {
   const RoutineExerciseTargetFields({
@@ -241,10 +242,10 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
               _perArmEnabled ? l10n.loadModePerArm : l10n.loadModeCombined,
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Switch.adaptive(
               value: _perArmEnabled,
-              activeThumbColor: AppColors.orange,
+              activeThumbColor: context.accentColor,
               onChanged: (value) {
                 setState(() => _perArmWeight = value);
                 _commit();

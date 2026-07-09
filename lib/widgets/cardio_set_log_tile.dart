@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_logging.dart';
 import '../models/workout.dart';
+import '../core/theme/app_accent.dart';
 
 class CardioSetLogTile extends StatefulWidget {
   final WorkoutSet set;
@@ -292,12 +293,12 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isDone
-                            ? AppColors.orange.withValues(alpha: 0.2)
+                            ? context.accentColor.withValues(alpha: 0.2)
                             : AppColors.cardElevated,
-                        border: Border.all(color: AppColors.orange),
+                        border: Border.all(color: context.accentColor),
                       ),
                       child: isDone
-                          ? const Icon(Icons.check, size: 16, color: AppColors.orange)
+                          ? Icon(Icons.check, size: 16, color: context.accentColor)
                           : Text('${widget.set.setNumber}'),
                     ),
                     const SizedBox(width: 12),

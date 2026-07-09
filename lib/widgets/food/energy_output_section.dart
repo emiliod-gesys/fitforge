@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/manual_activity_entry.dart';
+import '../../core/theme/app_accent.dart';
 
 class WorkoutEnergyItem {
   final String name;
@@ -53,8 +54,8 @@ class EnergyOutputSection extends StatelessWidget {
                   if (_totalKcal > 0)
                     Text(
                       '$_totalKcal kcal',
-                      style: const TextStyle(
-                        color: AppColors.orange,
+                      style: TextStyle(
+                        color: context.accentColor,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -64,11 +65,11 @@ class EnergyOutputSection extends StatelessWidget {
             ),
             OutlinedButton.icon(
               onPressed: onAddActivity,
-              icon: const Icon(Icons.add, size: 18),
+              icon: Icon(Icons.add, size: 18),
               label: Text(l10n.foodAddActivity),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.orange,
-                side: BorderSide(color: AppColors.orange.withValues(alpha: 0.6)),
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor.withValues(alpha: 0.6)),
               ),
             ),
           ],
@@ -142,10 +143,10 @@ class _EnergyRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.orange.withValues(alpha: 0.12),
+              color: context.accentColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 18, color: AppColors.orange),
+            child: Icon(icon, size: 18, color: context.accentColor),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -159,8 +160,8 @@ class _EnergyRow extends StatelessWidget {
           ),
           Text(
             '$kcal kcal',
-            style: const TextStyle(
-              color: AppColors.orange,
+            style: TextStyle(
+              color: context.accentColor,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

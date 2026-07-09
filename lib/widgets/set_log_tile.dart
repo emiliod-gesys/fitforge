@@ -5,6 +5,7 @@ import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_logging.dart';
 import '../models/workout.dart';
+import '../core/theme/app_accent.dart';
 
 class SetLogTile extends StatefulWidget {
   final WorkoutSet set;
@@ -150,17 +151,17 @@ class _SetLogTileState extends State<SetLogTile> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: emphasize ? AppColors.orange.withValues(alpha: 0.6) : AppColors.border,
+          color: emphasize ? context.accentColor.withValues(alpha: 0.6) : AppColors.border,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
+        borderSide: BorderSide(color: context.accentColor, width: 1.5),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -219,17 +220,17 @@ class _SetLogTileState extends State<SetLogTile> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isDone
-                          ? AppColors.orange.withValues(alpha: 0.2)
+                          ? context.accentColor.withValues(alpha: 0.2)
                           : isActive
                               ? AppColors.cardElevated
                               : AppColors.card,
                       border: Border.all(
-                        color: isDone || isActive ? AppColors.orange : AppColors.border,
+                        color: isDone || isActive ? context.accentColor : AppColors.border,
                         width: isActive ? 2 : 1,
                       ),
                     ),
                     child: isDone
-                        ? const Icon(Icons.check, size: 16, color: AppColors.orange)
+                        ? Icon(Icons.check, size: 16, color: context.accentColor)
                         : Text(
                             '${widget.set.setNumber}',
                             style: TextStyle(
@@ -313,12 +314,12 @@ class _SetLogTileState extends State<SetLogTile> {
                           ? IconButton(
                               tooltip: l10n.edit,
                               onPressed: () => setState(() => _editing = true),
-                              icon: const Icon(Icons.edit_outlined, size: 22),
+                              icon: Icon(Icons.edit_outlined, size: 22),
                             )
                           : FilledButton(
                               onPressed: widget.isSaving ? null : _submit,
                               style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.orange,
+                                backgroundColor: context.accentColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 minimumSize: const Size(72, 48),

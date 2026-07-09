@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
+import '../core/theme/app_accent.dart';
 
 class ApiKeyGuideCard extends StatelessWidget {
   final String title;
@@ -55,7 +56,7 @@ class ApiKeyGuideCard extends StatelessWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          leading: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.orange),
+          leading: Icon(Icons.picture_as_pdf_outlined, color: context.accentColor),
           title: Text(
             title,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
@@ -76,13 +77,13 @@ class ApiKeyGuideCard extends StatelessWidget {
                       height: 24,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppColors.orange.withValues(alpha: 0.15),
+                        color: context.accentColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '${entry.key + 1}',
-                        style: const TextStyle(
-                          color: AppColors.orange,
+                        style: TextStyle(
+                          color: context.accentColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -106,13 +107,13 @@ class ApiKeyGuideCard extends StatelessWidget {
               children: [
                 OutlinedButton.icon(
                   onPressed: _openPortal,
-                  icon: const Icon(Icons.open_in_new, size: 18),
+                  icon: Icon(Icons.open_in_new, size: 18),
                   label: Text(l10n.apiGuideOpenPortal),
                 ),
                 if (pdfAssetPath != null && pdfFileName != null)
                   FilledButton.icon(
                     onPressed: _sharePdf,
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.orange),
+                    style: FilledButton.styleFrom(backgroundColor: context.accentColor),
                     icon: const Icon(Icons.picture_as_pdf, size: 18),
                     label: Text(l10n.apiGuideOpenPdf),
                   ),

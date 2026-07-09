@@ -16,6 +16,7 @@ import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../core/theme/app_accent.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
   const AiCoachScreen({super.key});
@@ -341,7 +342,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Icon(Icons.auto_awesome_outlined, size: 64, color: AppColors.orange),
+                  Icon(Icons.auto_awesome_outlined, size: 64, color: context.accentColor),
                   const SizedBox(height: 16),
                   Text(
                     l10n.coachWelcome,
@@ -489,13 +490,13 @@ class _MessageBubble extends StatelessWidget {
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
         decoration: BoxDecoration(
           color: message.isError
               ? AppColors.error.withValues(alpha: 0.2)
               : message.isUser
-                  ? AppColors.orange.withValues(alpha: 0.2)
+                  ? context.accentColor.withValues(alpha: 0.2)
                   : AppColors.card,
           borderRadius: BorderRadius.circular(12),
         ),

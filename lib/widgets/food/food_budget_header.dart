@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
+import '../../core/theme/app_accent.dart';
 
 class FoodBudgetHeader extends StatelessWidget {
   final DailyNutritionSummary summary;
@@ -71,14 +72,14 @@ class FoodBudgetHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
               minHeight: 8,
               backgroundColor: AppColors.cardElevated,
-              color: isSurplus ? AppColors.error : AppColors.orange,
+              color: isSurplus ? AppColors.error : context.accentColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -97,13 +98,13 @@ class FoodBudgetHeader extends StatelessWidget {
                   accent: const Color(0xFF5BB8F0),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: _BudgetStatTile(
                   icon: Icons.local_fire_department_outlined,
                   label: l10n.foodBurned,
                   value: summary.totalCaloriesBurned,
-                  accent: AppColors.orange,
+                  accent: context.accentColor,
                 ),
               ),
               const SizedBox(width: 8),
@@ -217,20 +218,20 @@ class _BonusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.orange.withValues(alpha: 0.12),
+        color: context.accentColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.orange.withValues(alpha: 0.35)),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppColors.orange),
+          Icon(icon, size: 14, color: context.accentColor),
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(color: AppColors.orange, fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(color: context.accentColor, fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
       ),

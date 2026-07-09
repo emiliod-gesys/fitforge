@@ -17,6 +17,7 @@ import '../../widgets/train/train_hero_card.dart';
 import '../../widgets/train/train_start_sheet.dart';
 import '../../widgets/workout_tile.dart';
 import 'workout_start_helper.dart';
+import '../../core/theme/app_accent.dart';
 
 class WorkoutTodayTab extends ConsumerWidget {
   const WorkoutTodayTab({super.key});
@@ -186,16 +187,16 @@ class WorkoutTodayTab extends ConsumerWidget {
 class _ActiveWorkoutBanner extends StatelessWidget {
   final Workout workout;
 
-  const _ActiveWorkoutBanner({required this.workout});
+  _ActiveWorkoutBanner({required this.workout});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
     return Card(
-      color: AppColors.orange.withValues(alpha: 0.12),
+      color: context.accentColor.withValues(alpha: 0.12),
       child: ListTile(
-        leading: const Icon(Icons.play_circle_fill, size: 40, color: AppColors.orange),
+        leading: Icon(Icons.play_circle_fill, size: 40, color: context.accentColor),
         title: Text(
           l10n.workoutDisplayName(workout.name),
           style: const TextStyle(fontWeight: FontWeight.bold),

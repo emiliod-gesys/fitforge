@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/bmr_calculator.dart';
 import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
+import '../core/theme/app_accent.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise_history.dart';
@@ -76,6 +77,11 @@ final preferredLanguageProvider = Provider<String>((ref) {
 
 final appLocaleProvider = Provider<Locale>((ref) {
   return AppLocale.toLocale(ref.watch(preferredLanguageProvider));
+});
+
+/// Color de acento personalizado del usuario (solo afecta su propia vista).
+final accentProvider = Provider<AppAccent>((ref) {
+  return ref.watch(profileProvider).value?.accentColor ?? AppAccent.gold;
 });
 
 final bodyMetricSnapshotsProvider = FutureProvider((ref) async {

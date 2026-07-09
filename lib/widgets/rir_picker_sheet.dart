@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
+import '../core/theme/app_accent.dart';
 
 /// Pregunta RIR (reps en reserva) tras completar una serie de fuerza.
 abstract final class RirPickerSheet {
@@ -78,19 +79,19 @@ class _RirOption extends StatelessWidget {
         onTap: () => Navigator.pop(context, rir),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.orange.withValues(alpha: 0.35)),
+            border: Border.all(color: context.accentColor.withValues(alpha: 0.35)),
           ),
           child: Column(
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.orange,
+                  color: context.accentColor,
                 ),
               ),
               const SizedBox(height: 4),

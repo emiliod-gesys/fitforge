@@ -1,3 +1,4 @@
+import '../core/theme/app_accent.dart';
 import 'exercise_logging.dart';
 
 enum AiProvider { none, openai, gemini, anthropic }
@@ -92,6 +93,7 @@ class UserProfile {
   final AiProvider aiProvider;
   final bool hasAiKey;
   final UserType userType;
+  final AppAccent accentColor;
   final int totalXp;
   final DateTime createdAt;
 
@@ -113,6 +115,7 @@ class UserProfile {
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.userType = UserType.athlete,
+    this.accentColor = AppAccent.gold,
     this.totalXp = 0,
     required this.createdAt,
   });
@@ -134,6 +137,7 @@ class UserProfile {
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       userType: UserType.fromCode(json['user_type'] as String?),
+      accentColor: AppAccent.fromCode(json['accent_color'] as String?),
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -166,6 +170,7 @@ class UserProfile {
         'activity_level': activityLevel.code,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
         'user_type': userType.code,
+        'accent_color': accentColor.name,
       };
 }
 

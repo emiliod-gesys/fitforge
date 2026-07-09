@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_accent.dart';
 import '../core/utils/connection_error.dart';
 import '../core/utils/player_level_badge.dart';
 import '../models/profile.dart';
@@ -41,6 +42,18 @@ extension ProfileL10n on AppLocalizations {
   }
 
   String languageLabel(String code) => code == 'en' ? languageEn : languageEs;
+
+  String accentLabel(AppAccent accent) {
+    return switch (accent) {
+      AppAccent.gold => accentGold,
+      AppAccent.orange => accentOrange,
+      AppAccent.cobalt => accentCobalt,
+      AppAccent.violet => accentViolet,
+      AppAccent.emerald => accentEmerald,
+      AppAccent.rose => accentRose,
+      AppAccent.crimson => accentCrimson,
+    };
+  }
 
   String muscleLabel(String muscle) {
     return switch (muscle) {

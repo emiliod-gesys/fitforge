@@ -21,6 +21,7 @@ class FitForgeApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final locale = ref.watch(appLocaleProvider);
+    final accent = ref.watch(accentProvider);
 
     return PushNotificationBootstrap(
       router: router,
@@ -28,7 +29,7 @@ class FitForgeApp extends ConsumerWidget {
         scaffoldMessengerKey: rootScaffoldMessengerKey,
         title: 'FitForge',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
+        theme: AppTheme.dark(accent: accent),
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [

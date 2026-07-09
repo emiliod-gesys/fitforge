@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../data/avatar_catalog.dart';
 import '../l10n/l10n_extensions.dart';
+import '../core/theme/app_accent.dart';
 
 Future<String?> showAvatarPickerSheet(
   BuildContext context, {
@@ -122,8 +123,8 @@ class _AvatarPickerSheet extends StatelessWidget {
                               right: 6,
                               child: Container(
                                 padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.orange,
+                                decoration: BoxDecoration(
+                                  color: context.accentColor,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.check, size: 14, color: Colors.white),
@@ -134,7 +135,7 @@ class _AvatarPickerSheet extends StatelessWidget {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.orange, width: 2.5),
+                                  border: Border.all(color: context.accentColor, width: 2.5),
                                 ),
                               ),
                             ),

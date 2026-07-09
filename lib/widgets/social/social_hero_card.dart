@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/utils/player_level.dart';
 import '../../core/utils/player_level_badge.dart';
@@ -34,7 +35,7 @@ class SocialHeroCard extends StatelessWidget {
     final badgeName = l10n.playerLevelBadgeName(level);
 
     return Container(
-      decoration: AppDecorations.heroCard(),
+      decoration: AppDecorations.heroCard(context.appAccent),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
         child: Column(
