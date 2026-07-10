@@ -9,7 +9,7 @@ abstract final class GoogleAuthConfig {
   static const iosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
 
   /// Deep link de retorno para `signInWithOAuth` (fallback).
-  static const redirectUrl = AuthRedirectConfig.loginCallback;
+  static String get redirectUrl => AuthRedirectConfig.loginCallback;
 
   /// Desactivar temporalmente el botón de Google en login.
   static const enabled = false;

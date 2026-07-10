@@ -41,6 +41,6 @@ abstract final class DefaultFirebaseOptions {
     appId: _appId,
     messagingSenderId: _messagingSenderId,
     projectId: _projectId,
-    iosBundleId: 'io.fitforge.fitforge',
+    iosBundleId: 'io.fitforge.app',
   );
 }

@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>FitForge</string>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>io.fitforge.fitforge</string>
+	<string>io.fitforge.app</string>
 	<key>WKWatchOnly</key>
 	<false/>
 </dict>
