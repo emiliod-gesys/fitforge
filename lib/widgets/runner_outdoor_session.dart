@@ -150,6 +150,10 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
     final points = snap?.route ?? const [];
     final latLngs = points.map((p) => LatLng(p.lat, p.lng)).toList();
     final center = latLngs.isNotEmpty ? latLngs.last : const LatLng(19.4326, -99.1332);
+    final awaitingMovement = snap == null || !snap.hasMovementStarted;
+    final gainMeters = snap?.elevationGainMeters ?? 0;
+    final lossMeters = snap?.elevationLossMeters ?? 0;
+    final accent = Theme.of(context).colorScheme.primary;
 
     return Column(
       children: [
@@ -202,63 +206,91 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _Metric(label: l10n.runnerTime, value: CardioFormat.duration(elapsed)),
+                  _Metric(
+                    label: l10n.runnerTime,
+                    value: awaitingMovement ? '—' : CardioFormat.duration(elapsed),
+                  ),
                   _Metric(
                     label: l10n.runnerDistance,
-                    value: CardioFormat.distance(distance, widget.unitSystem),
+                    value: distance > 0
+                        ? CardioFormat.distance(distance, widget.unitSystem)
+                        : '—',
                   ),
                   _Metric(
                     label: l10n.runnerPace,
-                    value: CardioFormat.pace(currentPace ?? avgPace, widget.unitSystem),
+                    value: awaitingMovement || distance <= 0
+                        ? '—'
+                        : CardioFormat.pace(currentPace ?? avgPace, widget.unitSystem),
                   ),
                 ],
               ),
-              if (snap != null &&
-                  (snap.elevationGainMeters > 0 || snap.elevationLossMeters > 0)) ...[
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.terrain, size: 18, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.runnerElevationLabel,
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      CardioFormat.elevationGainLoss(
-                        gainMeters: snap.elevationGainMeters,
-                        lossMeters: snap.elevationLossMeters,
-                        unitSystem: widget.unitSystem,
-                      ),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                ),
-              ],
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _Metric(
+                    label: l10n.runnerElevationGain,
+                    value: awaitingMovement
+                        ? '—'
+                        : CardioFormat.elevationLive(gainMeters, widget.unitSystem),
+                    icon: Icons.trending_up,
+                    iconColor: accent,
+                  ),
+                  _Metric(
+                    label: l10n.runnerElevationLoss,
+                    value: awaitingMovement
+                        ? '—'
+                        : CardioFormat.elevationLive(lossMeters, widget.unitSystem),
+                    icon: Icons.trending_down,
+                    iconColor: accent,
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-        if (snap != null && snap.splits.isNotEmpty)
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                Text(l10n.runnerSplitsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                ...snap.splits.map(
-                  (s) => ListTile(
-                    dense: true,
-                    title: Text(l10n.runnerSplitKm(s.km)),
-                    trailing: Text(CardioFormat.duration(s.seconds)),
+        Expanded(
+          child: awaitingMovement
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.directions_run, size: 40, color: accent.withValues(alpha: 0.85)),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.runnerAutoStartHint,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: accent.withValues(alpha: 0.95),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          )
-        else
-          const Spacer(),
+                )
+              : snap != null && snap.splits.isNotEmpty
+                  ? ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        Text(
+                          l10n.runnerSplitsTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        ...snap.splits.map(
+                          (s) => ListTile(
+                            dense: true,
+                            title: Text(l10n.runnerSplitKm(s.km)),
+                            trailing: Text(CardioFormat.duration(s.seconds)),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+        ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -300,17 +332,34 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
 class _Metric extends StatelessWidget {
   final String label;
   final String value;
+  final IconData? icon;
+  final Color? iconColor;
 
-  const _Metric({required this.label, required this.value});
+  const _Metric({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20)),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: iconColor ?? AppColors.textMuted),
+            const SizedBox(height: 2),
+          ],
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+          ),
+        ],
+      ),
     );
   }
 }

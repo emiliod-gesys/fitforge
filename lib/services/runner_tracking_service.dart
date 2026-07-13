@@ -21,6 +21,7 @@ class RunnerTrackingService {
   RunnerTrackingSnapshot? _snapshot;
   RunnerRoutePoint? _lastPoint;
   DateTime? _lastPositionAt;
+  ElevationAccumulator _elevationAcc = ElevationAccumulator();
   final _controller = StreamController<RunnerTrackingSnapshot>.broadcast();
 
   Stream<RunnerTrackingSnapshot> get stream => _controller.stream;
@@ -98,6 +99,11 @@ class RunnerTrackingService {
     if (_snapshot!.route.isNotEmpty) {
       _lastPoint = _snapshot!.route.last;
     }
+    if (_snapshot!.movementStartedAt == null &&
+        _snapshot!.distanceMeters >= RunnerTracking.minMovementStartMeters) {
+      _snapshot = _snapshot!.copyWith(movementStartedAt: _snapshot!.startedAt);
+    }
+    _elevationAcc = ElevationAccumulator.fromRoute(_snapshot!.route);
 
     status = RunnerTrackingStatus.acquiringGps;
     _emit();
@@ -143,6 +149,12 @@ class RunnerTrackingService {
       distance += deltaMeters;
     }
 
+    var movementStartedAt = _snapshot!.movementStartedAt;
+    if (movementStartedAt == null && distance >= RunnerTracking.minMovementStartMeters) {
+      movementStartedAt = now;
+      _elevationAcc = ElevationAccumulator();
+    }
+
     double? alt;
     if (RunnerTracking.isValidAltitude(
       altitudeMeters: position.altitude,
@@ -153,20 +165,11 @@ class RunnerTrackingService {
 
     var gain = _snapshot!.elevationGainMeters;
     var loss = _snapshot!.elevationLossMeters;
-    if (alt != null) {
-      double? previousAlt = _lastPoint?.alt;
-      if (previousAlt == null && _snapshot!.route.isNotEmpty) {
-        for (var i = _snapshot!.route.length - 1; i >= 0; i--) {
-          final candidate = _snapshot!.route[i].alt;
-          if (candidate != null) {
-            previousAlt = candidate;
-            break;
-          }
-        }
-      }
-      final delta = RunnerTracking.elevationDelta(previousAlt: previousAlt, currentAlt: alt);
-      gain += delta.gain;
-      loss += delta.loss;
+    if (alt != null && movementStartedAt != null) {
+      _elevationAcc.addSample(alt);
+      final live = _elevationAcc.liveTotals();
+      gain = live.gain;
+      loss = live.loss;
     }
 
     final point = RunnerRoutePoint(
@@ -191,6 +194,7 @@ class RunnerTrackingService {
       elevationLossMeters: loss,
       route: route,
       splits: splits,
+      movementStartedAt: movementStartedAt,
     );
     _lastPoint = point;
     _lastPositionAt = now;
@@ -229,13 +233,24 @@ class RunnerTrackingService {
     await _sub?.cancel();
     _sub = null;
     status = RunnerTrackingStatus.stopped;
-    final result = _snapshot;
+    var result = _snapshot;
+    if (result != null) {
+      final totals = RunnerTracking.elevationFromRoute(
+        result.route,
+        since: result.movementStartedAt,
+      );
+      result = result.copyWith(
+        elevationGainMeters: totals.gain,
+        elevationLossMeters: totals.loss,
+      );
+    }
     if (clearStorage && result != null) {
       await RunnerSessionStorage.clear(result.workoutId);
     }
     _snapshot = null;
     _lastPoint = null;
     _lastPositionAt = null;
+    _elevationAcc = ElevationAccumulator();
     return result;
   }
 

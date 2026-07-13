@@ -5,7 +5,9 @@ import 'runner_models.dart';
 abstract final class RunnerTracking {
   static const maxAccuracyMeters = 25.0;
   static const maxAltitudeAccuracyMeters = 30.0;
-  static const minElevationStepMeters = 4.0;
+  /// Mínimo acumulado para confirmar una subida/bajada (filtra ruido GPS).
+  static const minElevationStepMeters = 2.5;
+  static const minMovementStartMeters = 15.0;
   static const maxSpeedMetersPerSecond = 12.0;
   static const splitDistanceMeters = 1000.0;
 
@@ -69,38 +71,28 @@ abstract final class RunnerTracking {
     required double altitudeAccuracyMeters,
   }) {
     if (altitudeMeters.isNaN || altitudeMeters.isInfinite) return false;
-    if (altitudeAccuracyMeters < 0) return true;
+    // 0.0 suele significar "desconocido" en Android; aceptamos si hay lectura horizontal válida.
+    if (altitudeAccuracyMeters <= 0) return true;
     return altitudeAccuracyMeters <= maxAltitudeAccuracyMeters;
   }
 
-  static ({double gain, double loss}) elevationDelta({
-    required double? previousAlt,
-    required double currentAlt,
-    double minStepMeters = minElevationStepMeters,
-  }) {
-    if (previousAlt == null) return (gain: 0, loss: 0);
-    final delta = currentAlt - previousAlt;
-    if (delta >= minStepMeters) return (gain: delta, loss: 0);
-    if (delta <= -minStepMeters) return (gain: 0, loss: -delta);
-    return (gain: 0, loss: 0);
-  }
-
+  /// Acumula pendiente gradual (varios puntos pequeños → una subida real).
   static ({double gain, double loss}) elevationFromRoute(
     List<RunnerRoutePoint> route, {
     double minStepMeters = minElevationStepMeters,
+    DateTime? since,
   }) {
-    double? lastAlt;
-    var gain = 0.0;
-    var loss = 0.0;
-    for (final point in route) {
+    final sinceMs = since?.millisecondsSinceEpoch;
+    final filtered = sinceMs == null
+        ? route
+        : route.where((p) => p.timestampMs >= sinceMs).toList();
+    final acc = ElevationAccumulator(minSegmentMeters: minStepMeters);
+    for (final point in filtered) {
       final alt = point.alt;
-      if (alt == null) continue;
-      final delta = elevationDelta(previousAlt: lastAlt, currentAlt: alt, minStepMeters: minStepMeters);
-      gain += delta.gain;
-      loss += delta.loss;
-      lastAlt = alt;
+      if (alt != null) acc.addSample(alt);
     }
-    return (gain: gain, loss: loss);
+    acc.finalize();
+    return (gain: acc.gain, loss: acc.loss);
   }
 
   static List<RunnerKmSplit> detectNewSplits({
@@ -116,5 +108,74 @@ abstract final class RunnerTracking {
       splits.add(RunnerKmSplit(km: km, seconds: elapsedSeconds));
     }
     return splits;
+  }
+}
+
+/// Rastrea desnivel acumulando tramos pequeños hasta superar el umbral.
+class ElevationAccumulator {
+  final double minSegmentMeters;
+
+  double gain = 0;
+  double loss = 0;
+  double? _lastAlt;
+  double _climb = 0;
+  double _descent = 0;
+
+  ElevationAccumulator({this.minSegmentMeters = RunnerTracking.minElevationStepMeters});
+
+  factory ElevationAccumulator.fromRoute(List<RunnerRoutePoint> route) {
+    final acc = ElevationAccumulator();
+    for (final point in route) {
+      final alt = point.alt;
+      if (alt != null) acc.addSample(alt);
+    }
+    return acc;
+  }
+
+  void addSample(double alt) {
+    if (_lastAlt == null) {
+      _lastAlt = alt;
+      return;
+    }
+
+    final delta = alt - _lastAlt!;
+    _lastAlt = alt;
+
+    if (delta > 0) {
+      if (_descent > 0) {
+        _flushDescent();
+        _descent = 0;
+      }
+      _climb += delta;
+    } else if (delta < 0) {
+      if (_climb > 0) {
+        _flushClimb();
+        _climb = 0;
+      }
+      _descent += -delta;
+    }
+  }
+
+  void finalize() {
+    _flushClimb();
+    _flushDescent();
+  }
+
+  /// Totales para UI en vivo (incluye tramo pendiente si ya supera 1 m).
+  ({double gain, double loss}) liveTotals({double previewMeters = 1.0}) {
+    return (
+      gain: gain + (_climb >= previewMeters ? _climb : 0),
+      loss: loss + (_descent >= previewMeters ? _descent : 0),
+    );
+  }
+
+  void _flushClimb() {
+    if (_climb >= minSegmentMeters) gain += _climb;
+    _climb = 0;
+  }
+
+  void _flushDescent() {
+    if (_descent >= minSegmentMeters) loss += _descent;
+    _descent = 0;
   }
 }

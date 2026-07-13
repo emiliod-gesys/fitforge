@@ -1184,6 +1184,24 @@ abstract class AppLocalizations {
   /// **'Desnivel'**
   String get runnerElevationLabel;
 
+  /// No description provided for @runnerElevationGain.
+  ///
+  /// In es, this message translates to:
+  /// **'Elevación +'**
+  String get runnerElevationGain;
+
+  /// No description provided for @runnerElevationLoss.
+  ///
+  /// In es, this message translates to:
+  /// **'Elevación −'**
+  String get runnerElevationLoss;
+
+  /// No description provided for @runnerAutoStartHint.
+  ///
+  /// In es, this message translates to:
+  /// **'¡A correr! El cronómetro y las métricas iniciarán solas al detectar movimiento.'**
+  String get runnerAutoStartHint;
+
   /// No description provided for @hyroxSystemBadge.
   ///
   /// In es, this message translates to:

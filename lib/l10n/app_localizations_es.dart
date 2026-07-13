@@ -607,6 +607,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get runnerElevationLabel => 'Desnivel';
 
   @override
+  String get runnerElevationGain => 'Elevación +';
+
+  @override
+  String get runnerElevationLoss => 'Elevación −';
+
+  @override
+  String get runnerAutoStartHint =>
+      '¡A correr! El cronómetro y las métricas iniciarán solas al detectar movimiento.';
+
+  @override
   String get hyroxSystemBadge => 'Hyrox';
 
   @override

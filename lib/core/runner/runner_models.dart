@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'runner_standards.dart';
+import 'runner_tracking.dart';
 
 class RunnerRoutePoint {
   final double lat;
@@ -61,6 +62,8 @@ class RunnerTrackingSnapshot {
   final List<RunnerRoutePoint> route;
   final List<RunnerKmSplit> splits;
   final bool isPaused;
+  /// Cuando se detecta movimiento real (null = esperando arranque automático).
+  final DateTime? movementStartedAt;
 
   const RunnerTrackingSnapshot({
     required this.workoutId,
@@ -74,10 +77,16 @@ class RunnerTrackingSnapshot {
     this.route = const [],
     this.splits = const [],
     this.isPaused = false,
+    this.movementStartedAt,
   });
 
+  bool get hasMovementStarted =>
+      movementStartedAt != null || distanceMeters >= RunnerTracking.minMovementStartMeters;
+
   int elapsedSeconds(DateTime now) {
-    var ms = now.difference(startedAt).inMilliseconds - accumulatedPauseMs;
+    final origin = movementStartedAt;
+    if (origin == null) return 0;
+    var ms = now.difference(origin).inMilliseconds - accumulatedPauseMs;
     if (isPaused && pausedAt != null) {
       ms -= now.difference(pausedAt!).inMilliseconds;
     }
@@ -108,6 +117,9 @@ class RunnerTrackingSnapshot {
           .map((e) => RunnerKmSplit.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       isPaused: json['is_paused'] as bool? ?? false,
+      movementStartedAt: json['movement_started_at'] != null
+          ? DateTime.parse(json['movement_started_at'] as String)
+          : null,
     );
   }
 
@@ -123,6 +135,8 @@ class RunnerTrackingSnapshot {
         'route': route.map((p) => p.toJson()).toList(),
         'splits': splits.map((s) => s.toJson()).toList(),
         'is_paused': isPaused,
+        if (movementStartedAt != null)
+          'movement_started_at': movementStartedAt!.toIso8601String(),
       };
 
   RunnerTrackingSnapshot copyWith({
@@ -134,6 +148,7 @@ class RunnerTrackingSnapshot {
     List<RunnerRoutePoint>? route,
     List<RunnerKmSplit>? splits,
     bool? isPaused,
+    DateTime? movementStartedAt,
     bool clearPausedAt = false,
   }) {
     return RunnerTrackingSnapshot(
@@ -148,6 +163,7 @@ class RunnerTrackingSnapshot {
       route: route ?? this.route,
       splits: splits ?? this.splits,
       isPaused: isPaused ?? this.isPaused,
+      movementStartedAt: movementStartedAt ?? this.movementStartedAt,
     );
   }
 }

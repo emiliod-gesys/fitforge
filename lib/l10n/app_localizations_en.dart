@@ -601,6 +601,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runnerElevationLabel => 'Elevation';
 
   @override
+  String get runnerElevationGain => 'Elevation +';
+
+  @override
+  String get runnerElevationLoss => 'Elevation −';
+
+  @override
+  String get runnerAutoStartHint =>
+      'Let\'s run! The stopwatch and metrics will start automatically when movement is detected.';
+
+  @override
   String get hyroxSystemBadge => 'Hyrox';
 
   @override

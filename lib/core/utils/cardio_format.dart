@@ -85,6 +85,13 @@ abstract final class CardioFormat {
     return showSign ? '+$value m' : '$value m';
   }
 
+  static String elevationLive(double meters, String unitSystem) {
+    if (unitSystem == 'imperial') {
+      return '${(meters * 3.28084).round()} ft';
+    }
+    return '${meters.round()} m';
+  }
+
   static String elevationGainLoss({
     required double? gainMeters,
     required double? lossMeters,

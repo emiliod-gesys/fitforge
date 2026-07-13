@@ -42,23 +42,21 @@ void main() {
       expect(simplified.length, lessThan(route.length));
     });
 
-    test('elevationDelta ignores noise under threshold', () {
-      final delta = RunnerTracking.elevationDelta(previousAlt: 100, currentAlt: 102);
-      expect(delta.gain, 0);
-      expect(delta.loss, 0);
+    test('elevationFromRoute detects gradual climb in front of house', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 100.8),
+        const RunnerRoutePoint(lat: 0, lng: 0.002, timestampMs: 3, alt: 101.5),
+        const RunnerRoutePoint(lat: 0, lng: 0.003, timestampMs: 4, alt: 102.2),
+        const RunnerRoutePoint(lat: 0, lng: 0.004, timestampMs: 5, alt: 103.0),
+        const RunnerRoutePoint(lat: 0, lng: 0.005, timestampMs: 6, alt: 103.5),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route);
+      expect(totals.gain, closeTo(3.5, 0.1));
+      expect(totals.loss, 0);
     });
 
-    test('elevationDelta accumulates gain and loss', () {
-      final up = RunnerTracking.elevationDelta(previousAlt: 100, currentAlt: 110);
-      expect(up.gain, 10);
-      expect(up.loss, 0);
-
-      final down = RunnerTracking.elevationDelta(previousAlt: 110, currentAlt: 100);
-      expect(down.gain, 0);
-      expect(down.loss, 10);
-    });
-
-    test('elevationFromRoute sums route altitude changes', () {
+    test('elevationFromRoute sums steep segments', () {
       final route = [
         const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
         const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 110),
@@ -67,6 +65,18 @@ void main() {
       final totals = RunnerTracking.elevationFromRoute(route);
       expect(totals.gain, 10);
       expect(totals.loss, 5);
+    });
+
+    test('elevationFromRoute ignores flat GPS noise', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 100.5),
+        const RunnerRoutePoint(lat: 0, lng: 0.002, timestampMs: 3, alt: 100.2),
+        const RunnerRoutePoint(lat: 0, lng: 0.003, timestampMs: 4, alt: 100.8),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route);
+      expect(totals.gain, 0);
+      expect(totals.loss, 0);
     });
 
     test('paceSecPerKm calculates correctly', () {
