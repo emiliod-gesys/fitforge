@@ -209,6 +209,29 @@ void main() {
       expect(CardioFormat.difficulty(12), '12');
       expect(CardioFormat.incline(12), '12.0%');
     });
+
+    test('elevation net matches gain minus loss with two decimals', () {
+      expect(
+        CardioFormat.elevationNet(
+          gainMeters: 3.6,
+          lossMeters: 3.2,
+          unitSystem: 'metric',
+        ),
+        '+0.40 m',
+      );
+      expect(
+        CardioFormat.elevationLive(3.6, 'metric'),
+        '3.60 m',
+      );
+      expect(
+        CardioFormat.elevationLive(3.2, 'metric'),
+        '3.20 m',
+      );
+      expect(
+        CardioFormat.elevationLive(0, 'metric'),
+        '0.00 m',
+      );
+    });
   });
 
   group('Strength regression', () {

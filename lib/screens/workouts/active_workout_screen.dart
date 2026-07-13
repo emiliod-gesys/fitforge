@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/hyrox/hyrox_standards.dart';
+import '../../core/hyrox/hyrox_validation.dart';
 import '../../core/runner/runner_models.dart';
 import '../../core/runner/runner_standards.dart';
 import '../../core/theme/app_colors.dart';
@@ -17,10 +19,12 @@ import '../../core/utils/exercise_logging_resolver.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/milestones.dart';
+import '../../core/utils/player_level.dart';
 import '../../core/utils/session_personal_records.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise_logging.dart';
+import '../../models/routine.dart';
 import '../../models/watch_session.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
@@ -77,6 +81,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, bool> _perArmOverrides = {};
   bool _perArmSeeded = false;
   bool _isHyroxWorkout = false;
+  HyroxLevel? _hyroxLevel;
+  List<RoutineExercise> _hyroxRoutineExercises = const [];
   bool _hyroxRaceStarted = false;
   DateTime? _hyroxGlobalStartedAt;
   DateTime? _stationStartedAt;
@@ -95,6 +101,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
     setState(() {
       _isHyroxWorkout = routine.isHyroxSystem;
+      _hyroxLevel = routine.hyroxLevel;
+      _hyroxRoutineExercises =
+          routine.isHyroxSystem ? List<RoutineExercise>.from(routine.exercises) : const [];
       _isRunnerWorkout = routine.isRunnerSystem;
       _runnerType = routine.runnerType;
       _hyroxTargetMetersByExerciseId
@@ -598,7 +607,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           .getMilestoneTotals(profile: profile);
       final personalRecordsBefore = await ref.read(personalRecordsProvider.future);
 
-      await ref.read(workoutServiceProvider).completeWorkout(
+      final hyroxValidationFromServer = await ref.read(workoutServiceProvider).completeWorkout(
             effectiveWorkout.id,
             durationMinutes: duration,
             totalVolume: volume,
@@ -606,12 +615,28 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           );
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
-      final xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
-            workoutId: effectiveWorkout.id,
-            totalVolumeKg: volume,
-            streakWeeks: streakWeeks,
-            runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
-          );
+      HyroxValidationResult? hyroxValidation = hyroxValidationFromServer;
+      if (hyroxValidation == null && _isHyroxWorkout && _hyroxLevel != null) {
+        hyroxValidation = HyroxValidator.validate(
+          workout: effectiveWorkout,
+          level: _hyroxLevel!,
+          gender: profile?.gender,
+          startedAt: startAt,
+          completedAt: endAt,
+          expectations: HyroxValidator.expectationsFromRoutineExercises(_hyroxRoutineExercises),
+        );
+      }
+
+      XpAwardResult? xpAward;
+      final skipHyroxXp = hyroxValidation?.status == HyroxValidationStatus.rejected;
+      if (!skipHyroxXp) {
+        xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
+              workoutId: effectiveWorkout.id,
+              totalVolumeKg: volume,
+              streakWeeks: streakWeeks,
+              runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
+            );
+      }
 
       final milestoneTotalsAfter = await ref
           .read(workoutServiceProvider)
@@ -651,6 +676,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         newPersonalRecords: newPersonalRecords,
         isHyrox: _isHyroxWorkout,
         isRunner: _isRunnerWorkout,
+        hyroxValidation: hyroxValidation,
       );
 
       if (!mounted) return;

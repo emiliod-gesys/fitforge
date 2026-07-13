@@ -7,6 +7,10 @@ abstract final class RunnerTracking {
   static const maxAltitudeAccuracyMeters = 30.0;
   /// Mínimo acumulado para confirmar una subida/bajada (filtra ruido GPS).
   static const minElevationStepMeters = 2.5;
+  /// Ignora zigzags GPS menores a este valor entre muestras.
+  static const minElevationNoiseMeters = 0.5;
+  /// Umbral al cerrar sesión (coincide con la vista en vivo).
+  static const minElevationSessionFinalizeMeters = 1.0;
   static const minMovementStartMeters = 15.0;
   static const maxSpeedMetersPerSecond = 12.0;
   static const splitDistanceMeters = 1000.0;
@@ -81,6 +85,7 @@ abstract final class RunnerTracking {
     List<RunnerRoutePoint> route, {
     double minStepMeters = minElevationStepMeters,
     DateTime? since,
+    bool sessionFinalize = false,
   }) {
     final sinceMs = since?.millisecondsSinceEpoch;
     final filtered = sinceMs == null
@@ -91,7 +96,11 @@ abstract final class RunnerTracking {
       final alt = point.alt;
       if (alt != null) acc.addSample(alt);
     }
-    acc.finalize();
+    acc.finalize(
+      minSegmentMeters: sessionFinalize
+          ? minElevationSessionFinalizeMeters
+          : minStepMeters,
+    );
     return (gain: acc.gain, loss: acc.loss);
   }
 
@@ -111,7 +120,7 @@ abstract final class RunnerTracking {
   }
 }
 
-/// Rastrea desnivel acumulando tramos pequeños hasta superar el umbral.
+/// Rastrea desnivel acumulando subidas y bajadas de forma independiente.
 class ElevationAccumulator {
   final double minSegmentMeters;
 
@@ -141,41 +150,52 @@ class ElevationAccumulator {
     final delta = alt - _lastAlt!;
     _lastAlt = alt;
 
+    if (delta.abs() < RunnerTracking.minElevationNoiseMeters) {
+      return;
+    }
+
     if (delta > 0) {
-      if (_descent > 0) {
-        _flushDescent();
-        _descent = 0;
-      }
+      _commitDescent();
       _climb += delta;
-    } else if (delta < 0) {
-      if (_climb > 0) {
-        _flushClimb();
-        _climb = 0;
-      }
+    } else {
+      _commitClimb();
       _descent += -delta;
     }
   }
 
-  void finalize() {
-    _flushClimb();
-    _flushDescent();
+  void finalize({double? minSegmentMeters}) {
+    _flushClimb(min: minSegmentMeters);
+    _flushDescent(min: minSegmentMeters);
   }
 
-  /// Totales para UI en vivo (incluye tramo pendiente si ya supera 1 m).
-  ({double gain, double loss}) liveTotals({double previewMeters = 1.0}) {
-    return (
-      gain: gain + (_climb >= previewMeters ? _climb : 0),
-      loss: loss + (_descent >= previewMeters ? _descent : 0),
-    );
+  /// Totales para UI en vivo (incluye tramos pendientes).
+  ({double gain, double loss}) liveTotals() {
+    return (gain: gain + _climb, loss: loss + _descent);
   }
 
-  void _flushClimb() {
-    if (_climb >= minSegmentMeters) gain += _climb;
+  void _commitClimb() {
+    if (_climb >= RunnerTracking.minElevationNoiseMeters) {
+      gain += _climb;
+    }
     _climb = 0;
   }
 
-  void _flushDescent() {
-    if (_descent >= minSegmentMeters) loss += _descent;
+  void _commitDescent() {
+    if (_descent >= RunnerTracking.minElevationNoiseMeters) {
+      loss += _descent;
+    }
+    _descent = 0;
+  }
+
+  void _flushClimb({double? min}) {
+    final threshold = min ?? minSegmentMeters;
+    if (_climb >= threshold) gain += _climb;
+    _climb = 0;
+  }
+
+  void _flushDescent({double? min}) {
+    final threshold = min ?? minSegmentMeters;
+    if (_descent >= threshold) loss += _descent;
     _descent = 0;
   }
 }

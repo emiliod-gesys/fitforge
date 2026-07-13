@@ -79,6 +79,45 @@ void main() {
       expect(totals.loss, 0);
     });
 
+    test('elevationFromRoute session finalize counts short descents', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 98),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route, sessionFinalize: true);
+      expect(totals.gain, 0);
+      expect(totals.loss, 2);
+    });
+
+    test('elevationFromRoute round trip reports independent gain and loss', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 101),
+        const RunnerRoutePoint(lat: 0, lng: 0.002, timestampMs: 3, alt: 102),
+        const RunnerRoutePoint(lat: 0, lng: 0.003, timestampMs: 4, alt: 103),
+        const RunnerRoutePoint(lat: 0, lng: 0.004, timestampMs: 5, alt: 102),
+        const RunnerRoutePoint(lat: 0, lng: 0.005, timestampMs: 6, alt: 101),
+        const RunnerRoutePoint(lat: 0, lng: 0.006, timestampMs: 7, alt: 100),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route, sessionFinalize: true);
+      expect(totals.gain, closeTo(3, 0.1));
+      expect(totals.loss, closeTo(3, 0.1));
+    });
+
+    test('elevationFromRoute noisy round trip keeps gain on descent', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 101.2),
+        const RunnerRoutePoint(lat: 0, lng: 0.002, timestampMs: 3, alt: 100.9),
+        const RunnerRoutePoint(lat: 0, lng: 0.003, timestampMs: 4, alt: 102),
+        const RunnerRoutePoint(lat: 0, lng: 0.004, timestampMs: 5, alt: 103),
+        const RunnerRoutePoint(lat: 0, lng: 0.005, timestampMs: 6, alt: 100),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route, sessionFinalize: true);
+      expect(totals.gain, greaterThan(2));
+      expect(totals.loss, greaterThan(2));
+    });
+
     test('paceSecPerKm calculates correctly', () {
       final pace = RunnerTracking.paceSecPerKm(distanceMeters: 1000, elapsedSeconds: 300);
       expect(pace, 300);

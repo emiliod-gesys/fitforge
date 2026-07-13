@@ -283,16 +283,42 @@ class _RunnerShareCard extends StatelessWidget {
               ),
             ],
           ),
-          if (workout.runnerElevationGainMeters != null ||
-              workout.runnerElevationLossMeters != null) ...[
+          if (_isOutdoor) ...[
             const SizedBox(height: 10),
-            Text(
-              '${l10n.runnerElevationLabel}: ${CardioFormat.elevationGainLoss(
-                gainMeters: workout.runnerElevationGainMeters,
-                lossMeters: workout.runnerElevationLossMeters,
-                unitSystem: unitSystem,
-              )}',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            Row(
+              children: [
+                Expanded(
+                  child: _ShareStatTile(
+                    label: l10n.runnerElevationGain,
+                    value: CardioFormat.elevationLive(
+                      workout.runnerElevationGainMeters ?? 0,
+                      unitSystem,
+                    ),
+                    accent: _runnerAccent,
+                  ),
+                ),
+                Expanded(
+                  child: _ShareStatTile(
+                    label: l10n.runnerElevationLoss,
+                    value: CardioFormat.elevationLive(
+                      workout.runnerElevationLossMeters ?? 0,
+                      unitSystem,
+                    ),
+                    accent: _runnerAccent,
+                  ),
+                ),
+                Expanded(
+                  child: _ShareStatTile(
+                    label: l10n.runnerElevationNet,
+                    value: CardioFormat.elevationNet(
+                      gainMeters: workout.runnerElevationGainMeters ?? 0,
+                      lossMeters: workout.runnerElevationLossMeters ?? 0,
+                      unitSystem: unitSystem,
+                    ),
+                    accent: _runnerAccent,
+                  ),
+                ),
+              ],
             ),
           ],
           if (_isOutdoor) ...[

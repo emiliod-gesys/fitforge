@@ -73,23 +73,42 @@ abstract final class CardioFormat {
     return '${percent.toStringAsFixed(1)}%';
   }
 
-  /// Desnivel / elevación en metros o pies.
+  /// Desnivel / elevación en metros o pies (2 decimales).
   static String elevation(double? meters, String unitSystem, {bool showSign = false}) {
     if (meters == null || meters <= 0) return '—';
-    if (unitSystem == 'imperial') {
-      final feet = meters * 3.28084;
-      final value = feet.round();
-      return showSign ? '+$value ft' : '$value ft';
-    }
-    final value = meters.round();
-    return showSign ? '+$value m' : '$value m';
+    return _formatElevationMeters(meters, unitSystem, showSign: showSign);
   }
 
   static String elevationLive(double meters, String unitSystem) {
+    return _formatElevationMeters(meters, unitSystem);
+  }
+
+  static String elevationNet({
+    required double gainMeters,
+    required double lossMeters,
+    required String unitSystem,
+  }) {
+    return _formatElevationMeters(
+      gainMeters - lossMeters,
+      unitSystem,
+      showSign: true,
+    );
+  }
+
+  static String _formatElevationMeters(
+    double meters,
+    String unitSystem, {
+    bool showSign = false,
+  }) {
     if (unitSystem == 'imperial') {
-      return '${(meters * 3.28084).round()} ft';
+      final feet = meters * 3.28084;
+      final formatted = feet.toStringAsFixed(2);
+      if (showSign && feet > 0) return '+$formatted ft';
+      return '$formatted ft';
     }
-    return '${meters.round()} m';
+    final formatted = meters.toStringAsFixed(2);
+    if (showSign && meters > 0) return '+$formatted m';
+    return '$formatted m';
   }
 
   static String elevationGainLoss({

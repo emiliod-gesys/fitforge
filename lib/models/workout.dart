@@ -1,3 +1,4 @@
+import '../core/hyrox/hyrox_validation.dart';
 import '../core/runner/runner_models.dart';
 import '../core/runner/runner_standards.dart';
 import '../core/utils/supabase_datetime.dart';
@@ -161,6 +162,8 @@ class Workout {
   final double? runnerAvgPaceSecPerKm;
   final double? runnerElevationGainMeters;
   final double? runnerElevationLossMeters;
+  final HyroxValidationStatus? hyroxValidationStatus;
+  final List<String> hyroxValidationReasons;
 
   const Workout({
     required this.id,
@@ -181,6 +184,8 @@ class Workout {
     this.runnerAvgPaceSecPerKm,
     this.runnerElevationGainMeters,
     this.runnerElevationLossMeters,
+    this.hyroxValidationStatus,
+    this.hyroxValidationReasons = const [],
   });
 
   factory Workout.fromJson(Map<String, dynamic> json, {List<WorkoutExercise>? exercises}) {
@@ -211,7 +216,15 @@ class Workout {
       runnerAvgPaceSecPerKm: (json['runner_avg_pace_sec_per_km'] as num?)?.toDouble(),
       runnerElevationGainMeters: (json['runner_elevation_gain_m'] as num?)?.toDouble(),
       runnerElevationLossMeters: (json['runner_elevation_loss_m'] as num?)?.toDouble(),
+      hyroxValidationStatus:
+          HyroxValidationStatus.fromCode(json['hyrox_validation_status'] as String?),
+      hyroxValidationReasons: _parseReasons(json['hyrox_validation_reasons']),
     );
+  }
+
+  static List<String> _parseReasons(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw.map((e) => e.toString()).toList();
   }
 
   bool get isActive => completedAt == null;

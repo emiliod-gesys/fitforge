@@ -22,6 +22,7 @@ class RunnerTrackingService {
   RunnerRoutePoint? _lastPoint;
   DateTime? _lastPositionAt;
   ElevationAccumulator _elevationAcc = ElevationAccumulator();
+  double _preMovementMeters = 0;
   final _controller = StreamController<RunnerTrackingSnapshot>.broadcast();
 
   Stream<RunnerTrackingSnapshot> get stream => _controller.stream;
@@ -145,14 +146,20 @@ class RunnerTrackingService {
     }
 
     var distance = _snapshot!.distanceMeters;
-    if (deltaMeters != null && deltaMeters > 0) {
-      distance += deltaMeters;
-    }
-
     var movementStartedAt = _snapshot!.movementStartedAt;
-    if (movementStartedAt == null && distance >= RunnerTracking.minMovementStartMeters) {
-      movementStartedAt = now;
-      _elevationAcc = ElevationAccumulator();
+
+    if (movementStartedAt != null) {
+      if (deltaMeters != null && deltaMeters > 0) {
+        distance += deltaMeters;
+      }
+    } else if (deltaMeters != null && deltaMeters > 0) {
+      _preMovementMeters += deltaMeters;
+      if (_preMovementMeters >= RunnerTracking.minMovementStartMeters) {
+        movementStartedAt = now;
+        distance = 0;
+        _preMovementMeters = 0;
+        _elevationAcc = ElevationAccumulator();
+      }
     }
 
     double? alt;
@@ -238,6 +245,7 @@ class RunnerTrackingService {
       final totals = RunnerTracking.elevationFromRoute(
         result.route,
         since: result.movementStartedAt,
+        sessionFinalize: true,
       );
       result = result.copyWith(
         elevationGainMeters: totals.gain,
@@ -250,6 +258,7 @@ class RunnerTrackingService {
     _snapshot = null;
     _lastPoint = null;
     _lastPositionAt = null;
+    _preMovementMeters = 0;
     _elevationAcc = ElevationAccumulator();
     return result;
   }

@@ -80,8 +80,7 @@ class RunnerTrackingSnapshot {
     this.movementStartedAt,
   });
 
-  bool get hasMovementStarted =>
-      movementStartedAt != null || distanceMeters >= RunnerTracking.minMovementStartMeters;
+  bool get hasMovementStarted => movementStartedAt != null;
 
   int elapsedSeconds(DateTime now) {
     final origin = movementStartedAt;

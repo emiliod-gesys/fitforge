@@ -1187,14 +1187,20 @@ abstract class AppLocalizations {
   /// No description provided for @runnerElevationGain.
   ///
   /// In es, this message translates to:
-  /// **'Elevación +'**
+  /// **'Total ganado'**
   String get runnerElevationGain;
 
   /// No description provided for @runnerElevationLoss.
   ///
   /// In es, this message translates to:
-  /// **'Elevación −'**
+  /// **'Total perdido'**
   String get runnerElevationLoss;
+
+  /// No description provided for @runnerElevationNet.
+  ///
+  /// In es, this message translates to:
+  /// **'Neto'**
+  String get runnerElevationNet;
 
   /// No description provided for @runnerAutoStartHint.
   ///
@@ -1267,6 +1273,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Tiempos por estación'**
   String get hyroxSplitsSummaryTitle;
+
+  /// No description provided for @hyroxValidationRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Este Hyrox no cuenta para clasificación: detectamos tiempos o datos fuera de lo humanamente posible.'**
+  String get hyroxValidationRejected;
+
+  /// No description provided for @hyroxValidationSuspicious.
+  ///
+  /// In es, this message translates to:
+  /// **'Este Hyrox quedó marcado para revisión por métricas inusuales.'**
+  String get hyroxValidationSuspicious;
 
   /// No description provided for @leaderboardMetricHyrox.
   ///

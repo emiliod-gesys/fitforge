@@ -607,10 +607,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get runnerElevationLabel => 'Desnivel';
 
   @override
-  String get runnerElevationGain => 'Elevación +';
+  String get runnerElevationGain => 'Total ganado';
 
   @override
-  String get runnerElevationLoss => 'Elevación −';
+  String get runnerElevationLoss => 'Total perdido';
+
+  @override
+  String get runnerElevationNet => 'Neto';
 
   @override
   String get runnerAutoStartHint =>
@@ -654,6 +657,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get hyroxSplitsSummaryTitle => 'Tiempos por estación';
+
+  @override
+  String get hyroxValidationRejected =>
+      'Este Hyrox no cuenta para clasificación: detectamos tiempos o datos fuera de lo humanamente posible.';
+
+  @override
+  String get hyroxValidationSuspicious =>
+      'Este Hyrox quedó marcado para revisión por métricas inusuales.';
 
   @override
   String get leaderboardMetricHyrox => 'Hyrox Race';

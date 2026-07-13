@@ -601,10 +601,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runnerElevationLabel => 'Elevation';
 
   @override
-  String get runnerElevationGain => 'Elevation +';
+  String get runnerElevationGain => 'Total gained';
 
   @override
-  String get runnerElevationLoss => 'Elevation −';
+  String get runnerElevationLoss => 'Total lost';
+
+  @override
+  String get runnerElevationNet => 'Net';
 
   @override
   String get runnerAutoStartHint =>
@@ -649,6 +652,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hyroxSplitsSummaryTitle => 'Station splits';
+
+  @override
+  String get hyroxValidationRejected =>
+      'This Hyrox does not count for rankings: we detected times or data beyond humanly plausible limits.';
+
+  @override
+  String get hyroxValidationSuspicious =>
+      'This Hyrox was flagged for review due to unusual metrics.';
 
   @override
   String get leaderboardMetricHyrox => 'Hyrox Race';

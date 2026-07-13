@@ -212,9 +212,9 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
                   ),
                   _Metric(
                     label: l10n.runnerDistance,
-                    value: distance > 0
-                        ? CardioFormat.distance(distance, widget.unitSystem)
-                        : '—',
+                    value: awaitingMovement || distance <= 0
+                        ? '—'
+                        : CardioFormat.distance(distance, widget.unitSystem),
                   ),
                   _Metric(
                     label: l10n.runnerPace,
@@ -242,6 +242,18 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
                         ? '—'
                         : CardioFormat.elevationLive(lossMeters, widget.unitSystem),
                     icon: Icons.trending_down,
+                    iconColor: accent,
+                  ),
+                  _Metric(
+                    label: l10n.runnerElevationNet,
+                    value: awaitingMovement
+                        ? '—'
+                        : CardioFormat.elevationNet(
+                            gainMeters: gainMeters,
+                            lossMeters: lossMeters,
+                            unitSystem: widget.unitSystem,
+                          ),
+                    icon: Icons.swap_vert,
                     iconColor: accent,
                   ),
                 ],

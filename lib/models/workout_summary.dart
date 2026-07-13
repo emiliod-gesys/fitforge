@@ -1,3 +1,4 @@
+import '../core/hyrox/hyrox_validation.dart';
 import 'body_metric.dart';
 import 'exercise.dart';
 import 'profile.dart';
@@ -83,6 +84,7 @@ class WorkoutSummaryData {
   final bool isHyrox;
   final List<HyroxSplit> hyroxSplits;
   final bool isRunner;
+  final HyroxValidationResult? hyroxValidation;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -107,6 +109,7 @@ class WorkoutSummaryData {
     this.isHyrox = false,
     this.hyroxSplits = const [],
     this.isRunner = false,
+    this.hyroxValidation,
   });
 
   bool get hasHyroxSplits => isHyrox && hyroxSplits.isNotEmpty;
@@ -164,6 +167,7 @@ abstract final class WorkoutSummaryBuilder {
     List<PersonalRecord> newPersonalRecords = const [],
     bool isHyrox = false,
     bool isRunner = false,
+    HyroxValidationResult? hyroxValidation,
   }) {
     final catalog = exerciseCatalog ?? const [];
     final bodyWeightKg = profile?.bodyWeight;
@@ -238,6 +242,7 @@ abstract final class WorkoutSummaryBuilder {
       isHyrox: isHyrox,
       hyroxSplits: hyroxSplits,
       isRunner: isRunner,
+      hyroxValidation: hyroxValidation,
     );
   }
 

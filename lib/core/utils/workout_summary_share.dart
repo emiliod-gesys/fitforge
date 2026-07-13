@@ -86,13 +86,16 @@ abstract final class WorkoutSummaryShare {
       ),
     );
 
-    final elevation = CardioFormat.elevationGainLoss(
-      gainMeters: workout.runnerElevationGainMeters,
-      lossMeters: workout.runnerElevationLossMeters,
-      unitSystem: unitSystem,
-    );
-    if (elevation != '—') {
-      buffer.writeln('${l10n.runnerElevationLabel}: $elevation');
+    if (workout.runnerRoute.length >= 2) {
+      buffer.writeln(
+        '${l10n.runnerElevationGain}: ${CardioFormat.elevationLive(workout.runnerElevationGainMeters ?? 0, unitSystem)} · '
+        '${l10n.runnerElevationLoss}: ${CardioFormat.elevationLive(workout.runnerElevationLossMeters ?? 0, unitSystem)} · '
+        '${l10n.runnerElevationNet}: ${CardioFormat.elevationNet(
+          gainMeters: workout.runnerElevationGainMeters ?? 0,
+          lossMeters: workout.runnerElevationLossMeters ?? 0,
+          unitSystem: unitSystem,
+        )}',
+      );
     }
 
     if (cardioSet?.inclinePercent != null) {

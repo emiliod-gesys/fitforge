@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../../core/hyrox/hyrox_validation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/unit_converter.dart';
@@ -211,6 +212,11 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                 if (summary.hasRunnerSummary) ...[
                   _RunnerSummarySection(summary: summary, unitSystem: unit, l10n: l10n),
                   const SizedBox(height: 20),
+                ],
+                if (summary.hyroxValidation?.status == HyroxValidationStatus.rejected ||
+                    summary.hyroxValidation?.status == HyroxValidationStatus.suspicious) ...[
+                  _HyroxValidationBanner(summary: summary, l10n: l10n),
+                  const SizedBox(height: 16),
                 ],
                 if (summary.hasHyroxSplits) ...[
                   _HyroxSplitsSection(summary: summary, l10n: l10n),
@@ -415,16 +421,34 @@ class _RunnerSummarySection extends StatelessWidget {
               ),
             ],
           ),
-          if (workout.runnerElevationGainMeters != null ||
-              workout.runnerElevationLossMeters != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              '${l10n.runnerElevationLabel}: ${CardioFormat.elevationGainLoss(
-                gainMeters: workout.runnerElevationGainMeters,
-                lossMeters: workout.runnerElevationLossMeters,
-                unitSystem: unitSystem,
-              )}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+          if (points.length >= 2) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _RunnerStat(
+                  label: l10n.runnerElevationGain,
+                  value: CardioFormat.elevationLive(
+                    workout.runnerElevationGainMeters ?? 0,
+                    unitSystem,
+                  ),
+                ),
+                _RunnerStat(
+                  label: l10n.runnerElevationLoss,
+                  value: CardioFormat.elevationLive(
+                    workout.runnerElevationLossMeters ?? 0,
+                    unitSystem,
+                  ),
+                ),
+                _RunnerStat(
+                  label: l10n.runnerElevationNet,
+                  value: CardioFormat.elevationNet(
+                    gainMeters: workout.runnerElevationGainMeters ?? 0,
+                    lossMeters: workout.runnerElevationLossMeters ?? 0,
+                    unitSystem: unitSystem,
+                  ),
+                ),
+              ],
             ),
           ],
           if (points.length >= 2) ...[
@@ -491,6 +515,49 @@ class _RunnerStat extends StatelessWidget {
         const SizedBox(height: 2),
         Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
       ],
+    );
+  }
+}
+
+class _HyroxValidationBanner extends StatelessWidget {
+  final WorkoutSummaryData summary;
+  final AppLocalizations l10n;
+
+  const _HyroxValidationBanner({
+    required this.summary,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final validation = summary.hyroxValidation;
+    if (validation?.status == null) return const SizedBox.shrink();
+
+    final rejected = validation!.status == HyroxValidationStatus.rejected;
+    final color = rejected ? AppColors.error : const Color(0xFFE6A700);
+    final message = rejected ? l10n.hyroxValidationRejected : l10n.hyroxValidationSuspicious;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(rejected ? Icons.block : Icons.warning_amber_rounded, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: color, fontWeight: FontWeight.w600, height: 1.35),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
