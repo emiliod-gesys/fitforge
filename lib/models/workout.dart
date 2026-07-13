@@ -159,6 +159,8 @@ class Workout {
   final List<RunnerRoutePoint> runnerRoute;
   final List<RunnerKmSplit> runnerSplits;
   final double? runnerAvgPaceSecPerKm;
+  final double? runnerElevationGainMeters;
+  final double? runnerElevationLossMeters;
 
   const Workout({
     required this.id,
@@ -177,6 +179,8 @@ class Workout {
     this.runnerRoute = const [],
     this.runnerSplits = const [],
     this.runnerAvgPaceSecPerKm,
+    this.runnerElevationGainMeters,
+    this.runnerElevationLossMeters,
   });
 
   factory Workout.fromJson(Map<String, dynamic> json, {List<WorkoutExercise>? exercises}) {
@@ -205,6 +209,8 @@ class Workout {
           .map((e) => RunnerKmSplit.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       runnerAvgPaceSecPerKm: (json['runner_avg_pace_sec_per_km'] as num?)?.toDouble(),
+      runnerElevationGainMeters: (json['runner_elevation_gain_m'] as num?)?.toDouble(),
+      runnerElevationLossMeters: (json['runner_elevation_loss_m'] as num?)?.toDouble(),
     );
   }
 

@@ -920,6 +920,42 @@ abstract class AppLocalizations {
   /// **'Modo Hyrox desactivado · rutinas Hyrox eliminadas'**
   String get hyroxModeDisabled;
 
+  /// No description provided for @hyroxRoutinePrepName.
+  ///
+  /// In es, this message translates to:
+  /// **'Hyrox 1 · Preparación'**
+  String get hyroxRoutinePrepName;
+
+  /// No description provided for @hyroxRoutineBuildName.
+  ///
+  /// In es, this message translates to:
+  /// **'Hyrox 2 · Progresión'**
+  String get hyroxRoutineBuildName;
+
+  /// No description provided for @hyroxRoutineRaceName.
+  ///
+  /// In es, this message translates to:
+  /// **'Hyrox 3 · Día de carrera'**
+  String get hyroxRoutineRaceName;
+
+  /// No description provided for @hyroxRoutinePrepSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fundamentos Hyrox (~50% distancias oficiales). Enfócate en técnica y ritmo.'**
+  String get hyroxRoutinePrepSubtitle;
+
+  /// No description provided for @hyroxRoutineBuildSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen intermedio (~75%). Acerca cargas y splits al ritmo de carrera.'**
+  String get hyroxRoutineBuildSubtitle;
+
+  /// No description provided for @hyroxRoutineRaceSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Simulación Race Day a estándares oficiales (100%). Cronometra cada fase.'**
+  String get hyroxRoutineRaceSubtitle;
+
   /// No description provided for @runnerMode.
   ///
   /// In es, this message translates to:
@@ -973,6 +1009,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Correr en cinta'**
   String get runnerStartTreadmill;
+
+  /// No description provided for @runnerRoutineOutdoorSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Carrera outdoor con GPS, ritmo, splits y desnivel.'**
+  String get runnerRoutineOutdoorSubtitle;
+
+  /// No description provided for @runnerRoutineTreadmillSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Carrera en cinta con inclinación, distancia y ritmo.'**
+  String get runnerRoutineTreadmillSubtitle;
 
   /// No description provided for @runnerSurfaceTitle.
   ///
@@ -1129,6 +1177,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ritmo medio'**
   String get runnerAvgPace;
+
+  /// No description provided for @runnerElevationLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Desnivel'**
+  String get runnerElevationLabel;
 
   /// No description provided for @hyroxSystemBadge.
   ///

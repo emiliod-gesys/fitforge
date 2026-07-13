@@ -86,6 +86,15 @@ abstract final class WorkoutSummaryShare {
       ),
     );
 
+    final elevation = CardioFormat.elevationGainLoss(
+      gainMeters: workout.runnerElevationGainMeters,
+      lossMeters: workout.runnerElevationLossMeters,
+      unitSystem: unitSystem,
+    );
+    if (elevation != '—') {
+      buffer.writeln('${l10n.runnerElevationLabel}: $elevation');
+    }
+
     if (cardioSet?.inclinePercent != null) {
       buffer.writeln('${l10n.runnerInclineLabel}: ${CardioFormat.incline(cardioSet!.inclinePercent)}');
     }

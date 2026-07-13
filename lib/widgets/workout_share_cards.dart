@@ -283,6 +283,18 @@ class _RunnerShareCard extends StatelessWidget {
               ),
             ],
           ),
+          if (workout.runnerElevationGainMeters != null ||
+              workout.runnerElevationLossMeters != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              '${l10n.runnerElevationLabel}: ${CardioFormat.elevationGainLoss(
+                gainMeters: workout.runnerElevationGainMeters,
+                lossMeters: workout.runnerElevationLossMeters,
+                unitSystem: unitSystem,
+              )}',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ],
           if (_isOutdoor) ...[
             const SizedBox(height: 14),
             ClipRRect(

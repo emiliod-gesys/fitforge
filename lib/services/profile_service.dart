@@ -246,6 +246,7 @@ class ProfileService {
     required String workoutId,
     required double totalVolumeKg,
     required int streakWeeks,
+    double? runDistanceMeters,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) return null;
@@ -259,10 +260,19 @@ class ProfileService {
     if (workoutRow == null || workoutRow['user_id'] != user.id) return null;
     if (workoutRow['xp_awarded'] != null) return null;
 
-    final xpEarned = PlayerLevelCalculator.xpFromWorkoutVolume(
+    final volumeXp = PlayerLevelCalculator.xpFromWorkoutVolume(
       volumeKg: totalVolumeKg,
       streakWeeks: streakWeeks,
     );
+    final runXp = runDistanceMeters != null
+        ? PlayerLevelCalculator.xpFromRunDistance(
+            distanceMeters: runDistanceMeters,
+            streakWeeks: streakWeeks,
+          )
+        : 0;
+    final xpEarned = volumeXp + runXp;
+    if (xpEarned <= 0) return null;
+
     final multiplier = PlayerLevelCalculator.streakMultiplier(streakWeeks);
 
     final profileRow = await _client

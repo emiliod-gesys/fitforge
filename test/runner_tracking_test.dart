@@ -42,6 +42,33 @@ void main() {
       expect(simplified.length, lessThan(route.length));
     });
 
+    test('elevationDelta ignores noise under threshold', () {
+      final delta = RunnerTracking.elevationDelta(previousAlt: 100, currentAlt: 102);
+      expect(delta.gain, 0);
+      expect(delta.loss, 0);
+    });
+
+    test('elevationDelta accumulates gain and loss', () {
+      final up = RunnerTracking.elevationDelta(previousAlt: 100, currentAlt: 110);
+      expect(up.gain, 10);
+      expect(up.loss, 0);
+
+      final down = RunnerTracking.elevationDelta(previousAlt: 110, currentAlt: 100);
+      expect(down.gain, 0);
+      expect(down.loss, 10);
+    });
+
+    test('elevationFromRoute sums route altitude changes', () {
+      final route = [
+        const RunnerRoutePoint(lat: 0, lng: 0, timestampMs: 1, alt: 100),
+        const RunnerRoutePoint(lat: 0, lng: 0.001, timestampMs: 2, alt: 110),
+        const RunnerRoutePoint(lat: 0, lng: 0.002, timestampMs: 3, alt: 105),
+      ];
+      final totals = RunnerTracking.elevationFromRoute(route);
+      expect(totals.gain, 10);
+      expect(totals.loss, 5);
+    });
+
     test('paceSecPerKm calculates correctly', () {
       final pace = RunnerTracking.paceSecPerKm(distanceMeters: 1000, elapsedSeconds: 300);
       expect(pace, 300);

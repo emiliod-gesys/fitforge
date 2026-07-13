@@ -11,6 +11,7 @@ import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_exercise_navigation.dart';
 import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_streak.dart';
+import '../../core/utils/workout_xp_utils.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
 import '../../core/utils/unit_converter.dart';
@@ -360,12 +361,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _runnerSurface = ref.read(pendingRunnerSurfaceProvider);
-    ref.read(pendingRunnerSurfaceProvider.notifier).state = null;
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      ref.read(pendingRunnerSurfaceProvider.notifier).state = null;
       ref.read(watchWorkoutCoordinatorProvider).attach(_handleWatchAction);
       unawaited(_publishWatchSession());
     });
@@ -487,6 +488,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             route: snapshot.route,
             splits: snapshot.splits,
             avgPaceSecPerKm: avgPace,
+            elevationGainMeters: snapshot.elevationGainMeters,
+            elevationLossMeters: snapshot.elevationLossMeters,
           );
 
       await _syncActiveWorkout();
@@ -607,6 +610,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             workoutId: effectiveWorkout.id,
             totalVolumeKg: volume,
             streakWeeks: streakWeeks,
+            runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
           );
 
       final milestoneTotalsAfter = await ref

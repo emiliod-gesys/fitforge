@@ -6,11 +6,14 @@ class RunnerRoutePoint {
   final double lat;
   final double lng;
   final int timestampMs;
+  /// Altitud en metros sobre el nivel del mar (GPS), si está disponible.
+  final double? alt;
 
   const RunnerRoutePoint({
     required this.lat,
     required this.lng,
     required this.timestampMs,
+    this.alt,
   });
 
   factory RunnerRoutePoint.fromJson(Map<String, dynamic> json) {
@@ -18,6 +21,7 @@ class RunnerRoutePoint {
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
       timestampMs: json['t'] as int? ?? json['timestamp_ms'] as int? ?? 0,
+      alt: (json['alt'] as num?)?.toDouble(),
     );
   }
 
@@ -25,6 +29,7 @@ class RunnerRoutePoint {
         'lat': lat,
         'lng': lng,
         't': timestampMs,
+        if (alt != null) 'alt': alt,
       };
 }
 
@@ -51,6 +56,8 @@ class RunnerTrackingSnapshot {
   final DateTime? pausedAt;
   final int accumulatedPauseMs;
   final double distanceMeters;
+  final double elevationGainMeters;
+  final double elevationLossMeters;
   final List<RunnerRoutePoint> route;
   final List<RunnerKmSplit> splits;
   final bool isPaused;
@@ -62,6 +69,8 @@ class RunnerTrackingSnapshot {
     this.pausedAt,
     this.accumulatedPauseMs = 0,
     this.distanceMeters = 0,
+    this.elevationGainMeters = 0,
+    this.elevationLossMeters = 0,
     this.route = const [],
     this.splits = const [],
     this.isPaused = false,
@@ -90,6 +99,8 @@ class RunnerTrackingSnapshot {
       pausedAt: json['paused_at'] != null ? DateTime.parse(json['paused_at'] as String) : null,
       accumulatedPauseMs: json['accumulated_pause_ms'] as int? ?? 0,
       distanceMeters: (json['distance_meters'] as num?)?.toDouble() ?? 0,
+      elevationGainMeters: (json['elevation_gain_m'] as num?)?.toDouble() ?? 0,
+      elevationLossMeters: (json['elevation_loss_m'] as num?)?.toDouble() ?? 0,
       route: routeRaw
           .map((e) => RunnerRoutePoint.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
@@ -107,6 +118,8 @@ class RunnerTrackingSnapshot {
         if (pausedAt != null) 'paused_at': pausedAt!.toIso8601String(),
         'accumulated_pause_ms': accumulatedPauseMs,
         'distance_meters': distanceMeters,
+        'elevation_gain_m': elevationGainMeters,
+        'elevation_loss_m': elevationLossMeters,
         'route': route.map((p) => p.toJson()).toList(),
         'splits': splits.map((s) => s.toJson()).toList(),
         'is_paused': isPaused,
@@ -116,6 +129,8 @@ class RunnerTrackingSnapshot {
     DateTime? pausedAt,
     int? accumulatedPauseMs,
     double? distanceMeters,
+    double? elevationGainMeters,
+    double? elevationLossMeters,
     List<RunnerRoutePoint>? route,
     List<RunnerKmSplit>? splits,
     bool? isPaused,
@@ -128,6 +143,8 @@ class RunnerTrackingSnapshot {
       pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
       accumulatedPauseMs: accumulatedPauseMs ?? this.accumulatedPauseMs,
       distanceMeters: distanceMeters ?? this.distanceMeters,
+      elevationGainMeters: elevationGainMeters ?? this.elevationGainMeters,
+      elevationLossMeters: elevationLossMeters ?? this.elevationLossMeters,
       route: route ?? this.route,
       splits: splits ?? this.splits,
       isPaused: isPaused ?? this.isPaused,

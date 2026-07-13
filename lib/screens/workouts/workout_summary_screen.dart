@@ -415,6 +415,18 @@ class _RunnerSummarySection extends StatelessWidget {
               ),
             ],
           ),
+          if (workout.runnerElevationGainMeters != null ||
+              workout.runnerElevationLossMeters != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${l10n.runnerElevationLabel}: ${CardioFormat.elevationGainLoss(
+                gainMeters: workout.runnerElevationGainMeters,
+                lossMeters: workout.runnerElevationLossMeters,
+                unitSystem: unitSystem,
+              )}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
           if (points.length >= 2) ...[
             const SizedBox(height: 12),
             Text(l10n.runnerRouteTitle, style: const TextStyle(fontWeight: FontWeight.w600)),

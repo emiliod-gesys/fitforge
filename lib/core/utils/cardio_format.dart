@@ -73,6 +73,31 @@ abstract final class CardioFormat {
     return '${percent.toStringAsFixed(1)}%';
   }
 
+  /// Desnivel / elevación en metros o pies.
+  static String elevation(double? meters, String unitSystem, {bool showSign = false}) {
+    if (meters == null || meters <= 0) return '—';
+    if (unitSystem == 'imperial') {
+      final feet = meters * 3.28084;
+      final value = feet.round();
+      return showSign ? '+$value ft' : '$value ft';
+    }
+    final value = meters.round();
+    return showSign ? '+$value m' : '$value m';
+  }
+
+  static String elevationGainLoss({
+    required double? gainMeters,
+    required double? lossMeters,
+    required String unitSystem,
+  }) {
+    final gain = elevation(gainMeters, unitSystem);
+    final loss = elevation(lossMeters, unitSystem);
+    if (gain == '—' && loss == '—') return '—';
+    if (loss == '—') return '↑ $gain';
+    if (gain == '—') return '↓ $loss';
+    return '↑ $gain · ↓ $loss';
+  }
+
   /// Pace from seconds per km (metric) or sec per mile (imperial).
   static String pace(double? secPerKm, String unitSystem) {
     if (secPerKm == null || secPerKm <= 0) return '—';

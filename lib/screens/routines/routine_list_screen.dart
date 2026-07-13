@@ -364,7 +364,7 @@ class _RoutineCard extends ConsumerWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                routine.name,
+                                l10n.routineDisplayName(routine),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -391,7 +391,7 @@ class _RoutineCard extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          routine.description?.split('\n').first ??
+                          l10n.routineDisplaySubtitle(routine) ??
                               l10n.exercisesInRoutine(routine.exercises.length),
                           style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                         ),
@@ -465,7 +465,7 @@ class _RoutineCard extends ConsumerWidget {
         ),
         title: Row(
           children: [
-            Flexible(child: Text(routine.name)),
+            Flexible(child: Text(l10n.routineDisplayName(routine))),
             if (isHyrox) ...[
               const SizedBox(width: 8),
               Container(
@@ -488,7 +488,7 @@ class _RoutineCard extends ConsumerWidget {
         ),
         subtitle: Text(
           isHyrox
-              ? (routine.description?.split('\n').first ??
+              ? (l10n.routineDisplaySubtitle(routine) ??
                   l10n.exercisesInRoutine(routine.exercises.length))
               : '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
         ),

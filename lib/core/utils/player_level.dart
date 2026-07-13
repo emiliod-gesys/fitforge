@@ -30,6 +30,23 @@ abstract final class PlayerLevelCalculator {
     return (baseXp * multiplier).round();
   }
 
+  /// ~12 XP por km recorrido (carrera outdoor o cinta), con bonus de racha.
+  /// Equivalente aproximado a una sesión de gym moderada (~5 km ≈ 60 XP).
+  static const xpPerRunKm = 12;
+  static const minRunDistanceForXpMeters = 200.0;
+  static const maxRunXpPerWorkout = 360;
+
+  static int xpFromRunDistance({
+    required double distanceMeters,
+    required int streakWeeks,
+  }) {
+    if (distanceMeters < minRunDistanceForXpMeters) return 0;
+    final baseXp = ((distanceMeters / 1000) * xpPerRunKm).round();
+    final capped = baseXp.clamp(0, maxRunXpPerWorkout);
+    final multiplier = streakMultiplier(streakWeeks);
+    return (capped * multiplier).round();
+  }
+
   static PlayerLevelProgress fromTotalXp(int totalXp) {
     final safeXp = totalXp < 0 ? 0 : totalXp;
     var level = 1;

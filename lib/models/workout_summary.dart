@@ -115,7 +115,9 @@ class WorkoutSummaryData {
       isRunner &&
       (workout.runnerRoute.isNotEmpty ||
           workout.runnerSplits.isNotEmpty ||
-          workout.runnerAvgPaceSecPerKm != null);
+          workout.runnerAvgPaceSecPerKm != null ||
+          workout.runnerElevationGainMeters != null ||
+          workout.runnerElevationLossMeters != null);
 
   int get hyroxTotalSeconds =>
       hyroxSplits.fold<int>(0, (sum, s) => sum + s.seconds);

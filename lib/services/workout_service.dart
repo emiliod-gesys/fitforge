@@ -842,13 +842,24 @@ class WorkoutService {
     required List<RunnerRoutePoint> route,
     required List<RunnerKmSplit> splits,
     double? avgPaceSecPerKm,
+    double? elevationGainMeters,
+    double? elevationLossMeters,
   }) async {
     final simplified = RunnerTracking.simplifyRoute(route);
+    var gain = elevationGainMeters;
+    var loss = elevationLossMeters;
+    if (gain == null || loss == null) {
+      final totals = RunnerTracking.elevationFromRoute(simplified);
+      gain ??= totals.gain;
+      loss ??= totals.loss;
+    }
     await _client.from('workouts').update({
       if (surface != null) 'runner_surface': surface.code,
       'runner_route': simplified.map((p) => p.toJson()).toList(),
       'runner_splits': splits.map((s) => s.toJson()).toList(),
       if (avgPaceSecPerKm != null) 'runner_avg_pace_sec_per_km': avgPaceSecPerKm,
+      if (gain != null) 'runner_elevation_gain_m': gain,
+      if (loss != null) 'runner_elevation_loss_m': loss,
     }).eq('id', workoutId);
   }
 

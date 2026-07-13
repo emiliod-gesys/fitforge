@@ -197,18 +197,46 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: Column(
             children: [
-              _Metric(label: l10n.runnerTime, value: CardioFormat.duration(elapsed)),
-              _Metric(
-                label: l10n.runnerDistance,
-                value: CardioFormat.distance(distance, widget.unitSystem),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _Metric(label: l10n.runnerTime, value: CardioFormat.duration(elapsed)),
+                  _Metric(
+                    label: l10n.runnerDistance,
+                    value: CardioFormat.distance(distance, widget.unitSystem),
+                  ),
+                  _Metric(
+                    label: l10n.runnerPace,
+                    value: CardioFormat.pace(currentPace ?? avgPace, widget.unitSystem),
+                  ),
+                ],
               ),
-              _Metric(
-                label: l10n.runnerPace,
-                value: CardioFormat.pace(currentPace ?? avgPace, widget.unitSystem),
-              ),
+              if (snap != null &&
+                  (snap.elevationGainMeters > 0 || snap.elevationLossMeters > 0)) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.terrain, size: 18, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.runnerElevationLabel,
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      CardioFormat.elevationGainLoss(
+                        gainMeters: snap.elevationGainMeters,
+                        lossMeters: snap.elevationLossMeters,
+                        unitSystem: widget.unitSystem,
+                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

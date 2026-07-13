@@ -5,9 +5,12 @@ import '../core/utils/feed_personal_record.dart';
 import '../core/utils/milestones.dart';
 import '../core/utils/player_level_badge.dart';
 import '../models/profile.dart';
+import '../models/routine.dart';
 import '../models/food_entry.dart';
 import '../models/rest_timer_alert_mode.dart';
 import '../models/social.dart';
+import '../core/hyrox/hyrox_standards.dart';
+import '../core/runner/runner_standards.dart';
 import 'app_localizations.dart';
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -190,8 +193,62 @@ extension ProfileL10n on AppLocalizations {
   String workoutDisplayName(String name) {
     if (name == 'Entrenamiento' || name == 'Workout') return defaultWorkoutName;
     if (name == 'Entrenamiento libre' || name == 'Free workout') return freeWorkout;
+    if (_isRunnerOutdoorName(name)) return runnerStartOutdoor;
+    if (_isRunnerTreadmillName(name)) return runnerStartTreadmill;
+    if (_isHyroxPrepName(name)) return hyroxRoutinePrepName;
+    if (_isHyroxBuildName(name)) return hyroxRoutineBuildName;
+    if (_isHyroxRaceName(name)) return hyroxRoutineRaceName;
     return name;
   }
+
+  String routineDisplayName(Routine routine) {
+    if (routine.isRunnerSystem && routine.runnerType != null) {
+      return switch (routine.runnerType!) {
+        RunnerType.outdoor => runnerStartOutdoor,
+        RunnerType.treadmill => runnerStartTreadmill,
+      };
+    }
+    if (routine.isHyroxSystem && routine.hyroxLevel != null) {
+      return switch (routine.hyroxLevel!) {
+        HyroxLevel.prep => hyroxRoutinePrepName,
+        HyroxLevel.build => hyroxRoutineBuildName,
+        HyroxLevel.race => hyroxRoutineRaceName,
+      };
+    }
+    return workoutDisplayName(routine.name);
+  }
+
+  String? routineDisplaySubtitle(Routine routine) {
+    if (routine.isRunnerSystem && routine.runnerType != null) {
+      return switch (routine.runnerType!) {
+        RunnerType.outdoor => runnerRoutineOutdoorSubtitle,
+        RunnerType.treadmill => runnerRoutineTreadmillSubtitle,
+      };
+    }
+    if (routine.isHyroxSystem && routine.hyroxLevel != null) {
+      return switch (routine.hyroxLevel!) {
+        HyroxLevel.prep => hyroxRoutinePrepSubtitle,
+        HyroxLevel.build => hyroxRoutineBuildSubtitle,
+        HyroxLevel.race => hyroxRoutineRaceSubtitle,
+      };
+    }
+    return routine.description?.split('\n').first;
+  }
+
+  bool _isRunnerOutdoorName(String name) =>
+      name == 'Salir a correr' || name == 'Go for a run';
+
+  bool _isRunnerTreadmillName(String name) =>
+      name == 'Correr en cinta' || name == 'Treadmill run';
+
+  bool _isHyroxPrepName(String name) =>
+      name == 'Hyrox 1 · Prep' || name == 'Hyrox 1 · Preparación';
+
+  bool _isHyroxBuildName(String name) =>
+      name == 'Hyrox 2 · Build' || name == 'Hyrox 2 · Progresión';
+
+  bool _isHyroxRaceName(String name) =>
+      name == 'Hyrox 3 · Race Day' || name == 'Hyrox 3 · Día de carrera';
 
   List<String> brokenRecordLabels({
     required bool isVolumeRecord,

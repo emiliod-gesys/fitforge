@@ -458,6 +458,27 @@ class AppLocalizationsEs extends AppLocalizations {
       'Modo Hyrox desactivado · rutinas Hyrox eliminadas';
 
   @override
+  String get hyroxRoutinePrepName => 'Hyrox 1 · Preparación';
+
+  @override
+  String get hyroxRoutineBuildName => 'Hyrox 2 · Progresión';
+
+  @override
+  String get hyroxRoutineRaceName => 'Hyrox 3 · Día de carrera';
+
+  @override
+  String get hyroxRoutinePrepSubtitle =>
+      'Fundamentos Hyrox (~50% distancias oficiales). Enfócate en técnica y ritmo.';
+
+  @override
+  String get hyroxRoutineBuildSubtitle =>
+      'Volumen intermedio (~75%). Acerca cargas y splits al ritmo de carrera.';
+
+  @override
+  String get hyroxRoutineRaceSubtitle =>
+      'Simulación Race Day a estándares oficiales (100%). Cronometra cada fase.';
+
+  @override
   String get runnerMode => 'Modo runner';
 
   @override
@@ -487,6 +508,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get runnerStartTreadmill => 'Correr en cinta';
+
+  @override
+  String get runnerRoutineOutdoorSubtitle =>
+      'Carrera outdoor con GPS, ritmo, splits y desnivel.';
+
+  @override
+  String get runnerRoutineTreadmillSubtitle =>
+      'Carrera en cinta con inclinación, distancia y ritmo.';
 
   @override
   String get runnerSurfaceTitle => '¿Dónde vas a correr?';
@@ -573,6 +602,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get runnerAvgPace => 'Ritmo medio';
+
+  @override
+  String get runnerElevationLabel => 'Desnivel';
 
   @override
   String get hyroxSystemBadge => 'Hyrox';

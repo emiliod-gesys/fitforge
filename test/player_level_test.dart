@@ -102,4 +102,30 @@ void main() {
       expect(boosted, 55);
     });
   });
+
+  group('xpFromRunDistance', () {
+    test('awards 12 XP per km without streak', () {
+      final xp = PlayerLevelCalculator.xpFromRunDistance(
+        distanceMeters: 5000,
+        streakWeeks: 0,
+      );
+      expect(xp, 60);
+    });
+
+    test('ignores very short runs', () {
+      final xp = PlayerLevelCalculator.xpFromRunDistance(
+        distanceMeters: 100,
+        streakWeeks: 0,
+      );
+      expect(xp, 0);
+    });
+
+    test('applies streak multiplier', () {
+      final xp = PlayerLevelCalculator.xpFromRunDistance(
+        distanceMeters: 5000,
+        streakWeeks: 10,
+      );
+      expect(xp, 66);
+    });
+  });
 }

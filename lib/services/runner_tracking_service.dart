@@ -89,6 +89,8 @@ class RunnerTrackingService {
         startedAt: _snapshot!.startedAt,
         accumulatedPauseMs: _snapshot!.accumulatedPauseMs,
         distanceMeters: _snapshot!.distanceMeters,
+        elevationGainMeters: _snapshot!.elevationGainMeters,
+        elevationLossMeters: _snapshot!.elevationLossMeters,
         route: _snapshot!.route,
         splits: _snapshot!.splits,
       );
@@ -141,10 +143,37 @@ class RunnerTrackingService {
       distance += deltaMeters;
     }
 
+    double? alt;
+    if (RunnerTracking.isValidAltitude(
+      altitudeMeters: position.altitude,
+      altitudeAccuracyMeters: position.altitudeAccuracy,
+    )) {
+      alt = position.altitude;
+    }
+
+    var gain = _snapshot!.elevationGainMeters;
+    var loss = _snapshot!.elevationLossMeters;
+    if (alt != null) {
+      double? previousAlt = _lastPoint?.alt;
+      if (previousAlt == null && _snapshot!.route.isNotEmpty) {
+        for (var i = _snapshot!.route.length - 1; i >= 0; i--) {
+          final candidate = _snapshot!.route[i].alt;
+          if (candidate != null) {
+            previousAlt = candidate;
+            break;
+          }
+        }
+      }
+      final delta = RunnerTracking.elevationDelta(previousAlt: previousAlt, currentAlt: alt);
+      gain += delta.gain;
+      loss += delta.loss;
+    }
+
     final point = RunnerRoutePoint(
       lat: position.latitude,
       lng: position.longitude,
       timestampMs: now.millisecondsSinceEpoch,
+      alt: alt,
     );
 
     final route = [..._snapshot!.route, point];
@@ -158,6 +187,8 @@ class RunnerTrackingService {
 
     _snapshot = _snapshot!.copyWith(
       distanceMeters: distance,
+      elevationGainMeters: gain,
+      elevationLossMeters: loss,
       route: route,
       splits: splits,
     );
