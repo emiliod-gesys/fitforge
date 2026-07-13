@@ -104,6 +104,35 @@ abstract final class ExerciseLoad {
     );
   }
 
+  static bool isLoadedDistance(
+    String exerciseId,
+    Iterable<Exercise> catalog, {
+    String? exerciseName,
+  }) {
+    final mode = loadModeForExerciseId(
+      exerciseId,
+      catalog,
+      exerciseName: exerciseName,
+    );
+    if (mode == ExerciseLoadMode.loadedDistance) return true;
+    return _inferLoadedDistanceByName(exerciseName ?? exerciseId);
+  }
+
+  /// Unidades de volumen: reps normales o metros (1 m = 1 rep de volumen).
+  static int volumeUnitsForSet(
+    WorkoutSet set, {
+    required String exerciseName,
+    ExerciseLoadMode? loadMode,
+  }) {
+    final mode = loadMode ?? _inferLoadModeByName(exerciseName);
+    if (mode == ExerciseLoadMode.loadedDistance || _inferLoadedDistanceByName(exerciseName)) {
+      final meters = set.distanceMeters;
+      if (meters == null || meters <= 0) return 0;
+      return meters.round();
+    }
+    return set.reps;
+  }
+
   static bool isBodyweightLoad(
     String exerciseId,
     Iterable<Exercise> catalog,
@@ -208,10 +237,15 @@ abstract final class ExerciseLoad {
       loadMode: loadMode,
       bodyWeightKg: bodyWeightKg,
     );
-    if (effective == null || effective <= 0 || !set.completed || set.reps <= 0) return 0;
+    final units = volumeUnitsForSet(
+      set,
+      exerciseName: exerciseName,
+      loadMode: loadMode,
+    );
+    if (effective == null || effective <= 0 || !set.completed || units <= 0) return 0;
 
     return effective *
-        set.reps *
+        units *
         volumeMultiplier(
           exerciseName,
           perArmWeight: perArmWeight,
@@ -318,9 +352,20 @@ abstract final class ExerciseLoad {
   }
 
   static ExerciseLoadMode? _inferLoadModeByName(String name) {
+    if (_inferLoadedDistanceByName(name)) return ExerciseLoadMode.loadedDistance;
     if (_inferBodyweightByName(name)) return ExerciseLoadMode.bodyweight;
     if (isAssistedExercise(name)) return ExerciseLoadMode.assistedBodyweight;
     return null;
+  }
+
+  static bool _inferLoadedDistanceByName(String name) {
+    final n = _normalize(name);
+    return n.contains('farmer') ||
+        n.contains('granjero') ||
+        n.contains('farmers walk') ||
+        n.contains('farmers carry') ||
+        n.contains('farmer carry') ||
+        n.contains('farmer walk');
   }
 
   static bool _inferMachineByName(String name) {

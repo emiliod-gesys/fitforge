@@ -1,7 +1,10 @@
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
 import '../../widgets/milestones_section.dart';
+import '../../widgets/runner_surface_picker.dart';
+import 'cardio_format.dart';
 import 'unit_converter.dart';
 
 abstract final class WorkoutSummaryShare {
@@ -11,8 +14,111 @@ abstract final class WorkoutSummaryShare {
     String unitSystem, {
     String? displayName,
   }) {
-    final w = summary.workout;
-    final name = displayName ?? l10n.workoutDisplayName(w.name);
+    final name = displayName ?? l10n.workoutDisplayName(summary.workout.name);
+
+    if (summary.hasHyroxSplits) {
+      return _formatHyrox(l10n, summary, name);
+    }
+    if (summary.isRunner) {
+      return _formatRunner(l10n, summary, unitSystem, name);
+    }
+    return _formatGym(l10n, summary, unitSystem, name);
+  }
+
+  static String _formatHyrox(AppLocalizations l10n, WorkoutSummaryData summary, String name) {
+    final buffer = StringBuffer()
+      ..writeln(l10n.shareHyroxTitle(name))
+      ..writeln(l10n.shareHyroxTotalTime(CardioFormat.duration(summary.hyroxTotalSeconds)))
+      ..writeln()
+      ..writeln(l10n.hyroxSplitsSummaryTitle);
+
+    for (final entry in summary.hyroxSplits.asMap().entries) {
+      buffer.writeln(
+        l10n.shareHyroxStationLine(
+          entry.key + 1,
+          entry.value.exerciseName,
+          CardioFormat.duration(entry.value.seconds),
+        ),
+      );
+    }
+
+    if (summary.xpAward != null && summary.xpAward!.xpEarned > 0) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.shareXpEarned(summary.xpAward!.xpEarned));
+    }
+
+    buffer
+      ..writeln()
+      ..writeln(l10n.shareHashtags);
+    return buffer.toString().trim();
+  }
+
+  static String _formatRunner(
+    AppLocalizations l10n,
+    WorkoutSummaryData summary,
+    String unitSystem,
+    String name,
+  ) {
+    final workout = summary.workout;
+    WorkoutSet? cardioSet;
+    for (final ex in workout.exercises) {
+      for (final s in ex.sets) {
+        if (s.completed && s.isCardio) {
+          cardioSet = s;
+          break;
+        }
+      }
+      if (cardioSet != null) break;
+    }
+
+    final buffer = StringBuffer()..writeln(l10n.shareRunnerTitle(name));
+
+    if (workout.runnerSurface != null) {
+      buffer.writeln(runnerSurfaceLabel(l10n, workout.runnerSurface!));
+    }
+
+    buffer.writeln(
+      l10n.shareRunnerStats(
+        CardioFormat.distance(cardioSet?.distanceMeters, unitSystem),
+        CardioFormat.pace(workout.runnerAvgPaceSecPerKm, unitSystem),
+        CardioFormat.duration(cardioSet?.durationSeconds),
+      ),
+    );
+
+    if (cardioSet?.inclinePercent != null) {
+      buffer.writeln('${l10n.runnerInclineLabel}: ${CardioFormat.incline(cardioSet!.inclinePercent)}');
+    }
+
+    if (workout.runnerSplits.isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.runnerSplitsTitle);
+      for (final split in workout.runnerSplits) {
+        buffer.writeln(
+          l10n.shareRunnerSplitLine(split.km, CardioFormat.duration(split.seconds)),
+        );
+      }
+    }
+
+    if (summary.xpAward != null && summary.xpAward!.xpEarned > 0) {
+      buffer
+        ..writeln()
+        ..writeln(l10n.shareXpEarned(summary.xpAward!.xpEarned));
+    }
+
+    buffer
+      ..writeln()
+      ..writeln(l10n.shareHashtags);
+    return buffer.toString().trim();
+  }
+
+  static String _formatGym(
+    AppLocalizations l10n,
+    WorkoutSummaryData summary,
+    String unitSystem,
+    String name,
+  ) {
     final buffer = StringBuffer()
       ..writeln(l10n.shareWorkoutTitle(name))
       ..writeln(l10n.shareDuration(summary.durationMinutes))

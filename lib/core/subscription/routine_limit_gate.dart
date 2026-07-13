@@ -14,9 +14,10 @@ final routineLimitStatusProvider = FutureProvider<RoutineLimitStatus>((ref) asyn
   final profile = await ref.watch(profileProvider.future);
   final routines = await ref.watch(routinesProvider.future);
   final tier = profile?.subscriptionTier ?? SubscriptionTier.free;
+  final countable = routines.where((r) => !r.isHyroxSystem).length;
   return ref.watch(routineLimitServiceProvider).statusFor(
         tier: tier,
-        routineCount: routines.length,
+        routineCount: countable,
       );
 });
 

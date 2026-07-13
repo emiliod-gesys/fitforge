@@ -1,3 +1,5 @@
+import '../core/runner/runner_models.dart';
+import '../core/runner/runner_standards.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../core/utils/exercise_load.dart';
 import 'exercise_logging.dart';
@@ -153,6 +155,10 @@ class Workout {
   final List<WorkoutExercise> exercises;
   final String? notes;
   final double totalVolume;
+  final RunningSurface? runnerSurface;
+  final List<RunnerRoutePoint> runnerRoute;
+  final List<RunnerKmSplit> runnerSplits;
+  final double? runnerAvgPaceSecPerKm;
 
   const Workout({
     required this.id,
@@ -167,9 +173,15 @@ class Workout {
     this.exercises = const [],
     this.notes,
     this.totalVolume = 0,
+    this.runnerSurface,
+    this.runnerRoute = const [],
+    this.runnerSplits = const [],
+    this.runnerAvgPaceSecPerKm,
   });
 
   factory Workout.fromJson(Map<String, dynamic> json, {List<WorkoutExercise>? exercises}) {
+    final routeRaw = json['runner_route'] as List? ?? [];
+    final splitsRaw = json['runner_splits'] as List? ?? [];
     return Workout(
       id: json['id'] as String,
       userId: json['user_id'] as String,
@@ -185,6 +197,14 @@ class Workout {
       exercises: exercises ?? [],
       notes: json['notes'] as String?,
       totalVolume: (json['total_volume'] as num?)?.toDouble() ?? 0,
+      runnerSurface: RunningSurface.fromCode(json['runner_surface'] as String?),
+      runnerRoute: routeRaw
+          .map((e) => RunnerRoutePoint.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      runnerSplits: splitsRaw
+          .map((e) => RunnerKmSplit.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      runnerAvgPaceSecPerKm: (json['runner_avg_pace_sec_per_km'] as num?)?.toDouble(),
     );
   }
 

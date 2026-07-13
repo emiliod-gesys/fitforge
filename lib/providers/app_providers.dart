@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/runner/runner_standards.dart';
 import '../core/subscription/subscription_features.dart';
 import '../core/utils/bmr_calculator.dart';
 import '../core/utils/daily_nutrition_budget.dart';
@@ -27,6 +28,8 @@ import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
 import '../services/profile_service.dart';
 import '../services/routine_service.dart';
+import '../services/hyrox_service.dart';
+import '../services/runner_service.dart';
 import '../services/routine_share_service.dart';
 import '../services/exercise_report_service.dart';
 import '../services/workout_service.dart';
@@ -50,6 +53,13 @@ final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationSt
 final routineShareServiceProvider = Provider((ref) => RoutineShareService());
 
 final routineServiceProvider = Provider((ref) => RoutineService());
+final hyroxServiceProvider = Provider(
+  (ref) => HyroxService(ref.watch(routineServiceProvider)),
+);
+final runnerServiceProvider = Provider(
+  (ref) => RunnerService(ref.watch(routineServiceProvider)),
+);
+final pendingRunnerSurfaceProvider = StateProvider<RunningSurface?>((ref) => null);
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider((ref) => ProfileService());

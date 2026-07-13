@@ -1002,8 +1002,10 @@ Reglas generales:
 - Usa el historial (máx. 5 sesiones), objetivo y experiencia del usuario.
 - recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce; reduce series de trabajo.
 - days_since_last: días desde la última sesión de ese ejercicio.
-- latest_session_summary resume la sesión más reciente; recent_top_set resume la mejor serie reciente.
-- Si existe latest_session_summary o recent_top_set, tómalos como ancla principal. No bajes el peso de trabajo frente al historial reciente salvo que recovery_pct < 60, hayan pasado muy pocos días desde la última sesión, el rir reciente haya sido 0-1, o el objetivo pida claramente menos carga.
+- latest_session_summary resume la sesión de referencia (no siempre la más reciente si hay una sesión ligera fantasma); incluye working_weight_kg, weight_pattern y set_weights_kg en orden.
+- recent_top_set resume la mejor serie reciente.
+- Si existe latest_session_summary o recent_top_set, ancla el peso de TRABAJO en working_weight_kg o recent_top_set, no en series de aproximación ni en sesiones con peso claramente inferior al historial reciente.
+- Si weight_pattern es warmup_then_work, pyramid o varied: las series ligeras del inicio NO definen el peso de trabajo; usa working_weight_kg y las reps de las series al ≥85% del máximo.
 - Si el usuario ya hizo por ejemplo 30 kg x 10 recientemente con buena recuperación, no sugieras 20 kg x 10 por defecto. Mantén o micro-progresa.
 - set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo.
 - Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps.

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/l10n/app_locale.dart';
 import '../../core/subscription/subscription_features.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
@@ -34,6 +35,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _scrollController = ScrollController();
   bool _trainerModeUpdating = false;
+  bool _hyroxModeUpdating = false;
+  bool _runnerModeUpdating = false;
 
   @override
   void dispose() {
@@ -247,6 +250,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           !_trainerModeUpdating
                       ? (value) => _setTrainerMode(enabled: value)
                       : null,
+                ),
+                SwitchListTile(
+                  secondary: Icon(Icons.directions_run, color: context.accentColor),
+                  title: Text(l10n.hyroxMode),
+                  subtitle: Text(l10n.hyroxModeSubtitle),
+                  value: profile?.hyroxMode ?? false,
+                  activeThumbColor: context.accentColor,
+                  onChanged: _hyroxModeUpdating
+                      ? null
+                      : (value) => _setHyroxMode(enabled: value, profile: profile),
+                ),
+                SwitchListTile(
+                  secondary: Icon(Icons.nordic_walking, color: context.accentColor),
+                  title: Text(l10n.runnerMode),
+                  subtitle: Text(l10n.runnerModeSubtitle),
+                  value: profile?.runnerMode ?? false,
+                  activeThumbColor: context.accentColor,
+                  onChanged: _runnerModeUpdating
+                      ? null
+                      : (value) => _setRunnerMode(enabled: value, profile: profile),
                 ),
                 ref.watch(restTimerAlertModeProvider).when(
                   skipLoadingOnReload: true,
@@ -542,11 +565,79 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = context.l10n;
     final selected = await showDialog<String>(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.fitnessGoalTitle),
-        children: l10n.fitnessGoals
-            .map((g) => SimpleDialogOption(onPressed: () => Navigator.pop(ctx, g), child: Text(g)))
-            .toList(),
+      builder: (ctx) => Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                child: Text(
+                  l10n.fitnessGoalTitle,
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: Text(
+                  l10n.fitnessGoalHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ...l10n.fitnessGoals.map(
+                      (goal) => SimpleDialogOption(
+                        onPressed: () => Navigator.pop(ctx, goal),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              goal,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${l10n.fitnessGoalTrainingLabel}: ${l10n.fitnessGoalTrainingDescription(goal)}',
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 12,
+                                height: 1.35,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${l10n.fitnessGoalDietLabel}: ${l10n.fitnessGoalDietDescription(goal)}',
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 12,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                      child: Text(
+                        l10n.fitnessGoalFootnote,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 11,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
     if (selected != null) {
@@ -664,6 +755,75 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     await AiPreferences.setProactiveAiEnabled(enabled);
     ref.invalidate(aiProactiveEnabledProvider);
+  }
+
+  Future<void> _setHyroxMode({
+    required bool enabled,
+    required UserProfile? profile,
+  }) async {
+    if (_hyroxModeUpdating || profile == null) return;
+    setState(() => _hyroxModeUpdating = true);
+    final l10n = context.l10n;
+
+    try {
+      await ref.read(hyroxServiceProvider).setHyroxMode(
+            enabled: enabled,
+            profile: profile,
+          );
+      ref.invalidate(profileProvider);
+      ref.invalidate(routinesProvider);
+      ref.invalidate(routineLimitStatusProvider);
+      await ref.read(profileProvider.future);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(enabled ? l10n.hyroxModeEnabled : l10n.hyroxModeDisabled),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGeneric('$e'))),
+      );
+    } finally {
+      if (mounted) setState(() => _hyroxModeUpdating = false);
+    }
+  }
+
+  Future<void> _setRunnerMode({
+    required bool enabled,
+    required UserProfile? profile,
+  }) async {
+    if (_runnerModeUpdating || profile == null) return;
+    setState(() => _runnerModeUpdating = true);
+    final l10n = context.l10n;
+
+    try {
+      await ref.read(runnerServiceProvider).setRunnerMode(
+            enabled: enabled,
+            profile: profile,
+          );
+      ref.invalidate(profileProvider);
+      ref.invalidate(routinesProvider);
+      ref.invalidate(routineLimitStatusProvider);
+      await ref.read(profileProvider.future);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(enabled ? l10n.runnerModeEnabled : l10n.runnerModeDisabled),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorGeneric('$e'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _runnerModeUpdating = false);
+    }
   }
 
   Future<void> _setTrainerMode({required bool enabled}) async {

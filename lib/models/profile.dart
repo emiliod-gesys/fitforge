@@ -121,6 +121,8 @@ class UserProfile {
   final UserType userType;
   final SubscriptionTier subscriptionTier;
   final AppAccent accentColor;
+  final bool hyroxMode;
+  final bool runnerMode;
   final int totalXp;
   final DateTime createdAt;
 
@@ -144,6 +146,8 @@ class UserProfile {
     this.userType = UserType.athlete,
     this.subscriptionTier = SubscriptionTier.free,
     this.accentColor = AppAccent.gold,
+    this.hyroxMode = false,
+    this.runnerMode = false,
     this.totalXp = 0,
     required this.createdAt,
   });
@@ -167,6 +171,8 @@ class UserProfile {
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
       subscriptionTier: SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
       accentColor: AppAccent.fromCode(parseJsonString(json['accent_color'])),
+      hyroxMode: json['hyrox_mode'] as bool? ?? false,
+      runnerMode: json['runner_mode'] as bool? ?? false,
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
     );

@@ -6259,7 +6259,7 @@
     {
       "id": "ff_cf_farmers_walk",
       "loggingType": "strength",
-      "loadMode": "dual_load",
+      "loadMode": "loaded_distance",
       "perArmWeight": true,
       "unilateral": false,
       "weightOptional": false,
@@ -6317,6 +6317,170 @@
       "exercisedbId": "qPEzJjA",
       "matchConfidence": "high",
       "matchScore": 1.0
+    },
+    {
+      "id": "ff_cf_sled_push",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Trineo",
+        "en": "Sled"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": ["Glúteos", "Core", "Gemelos"],
+        "en": ["Glutes", "Core", "Calves"]
+      },
+      "names": {
+        "es": "Sled Push",
+        "en": "Sled Push"
+      },
+      "descriptions": {
+        "es": "Empuje de trineo Hyrox. Completa la distancia objetivo con la carga indicada.",
+        "en": "Hyrox sled push. Complete the target distance with the prescribed load."
+      },
+      "aliases": {
+        "es": ["Empuje de trineo", "Hyrox sled push"],
+        "en": ["Prowler push", "Hyrox sled push"]
+      },
+      "imageUrl": "assets/exercises/ff_cf_sled_push.gif",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cf_sled_pull",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Espalda",
+        "en": "Back"
+      },
+      "equipment": {
+        "es": "Trineo",
+        "en": "Sled"
+      },
+      "primaryMuscle": {
+        "es": "Dorsales",
+        "en": "Lats"
+      },
+      "secondaryMuscles": {
+        "es": ["Bíceps", "Core", "Glúteos"],
+        "en": ["Biceps", "Core", "Glutes"]
+      },
+      "names": {
+        "es": "Sled Pull",
+        "en": "Sled Pull"
+      },
+      "descriptions": {
+        "es": "Arrastre de trineo Hyrox con cuerda. Completa la distancia objetivo.",
+        "en": "Hyrox sled pull with rope. Complete the target distance."
+      },
+      "aliases": {
+        "es": ["Arrastre de trineo", "Hyrox sled pull"],
+        "en": ["Rope sled pull", "Hyrox sled pull"]
+      },
+      "imageUrl": "assets/exercises/ff_cf_sled_pull.gif",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cf_burpee_broad_jump",
+      "loggingType": "strength",
+      "loadMode": "bodyweight",
+      "perArmWeight": false,
+      "unilateral": false,
+      "weightOptional": true,
+      "cardioPreset": null,
+      "category": {
+        "es": "Full body",
+        "en": "Full body"
+      },
+      "equipment": {
+        "es": "Peso corporal",
+        "en": "Bodyweight"
+      },
+      "primaryMuscle": {
+        "es": "Full body",
+        "en": "Full body"
+      },
+      "secondaryMuscles": {
+        "es": ["Cuádriceps", "Pecho", "Core"],
+        "en": ["Quads", "Chest", "Core"]
+      },
+      "names": {
+        "es": "Burpee Broad Jump",
+        "en": "Burpee Broad Jump"
+      },
+      "descriptions": {
+        "es": "Burpee seguido de salto largo. Avanza la distancia objetivo Hyrox.",
+        "en": "Burpee into a broad jump. Cover the Hyrox target distance."
+      },
+      "aliases": {
+        "es": ["BBJ", "Burpee salto largo"],
+        "en": ["BBJ", "Burpee broad jumps"]
+      },
+      "imageUrl": "assets/exercises/ff_cf_burpee.webp",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
+    },
+    {
+      "id": "ff_cf_sandbag_lunge",
+      "loggingType": "strength",
+      "loadMode": "single_load",
+      "perArmWeight": false,
+      "unilateral": true,
+      "weightOptional": false,
+      "cardioPreset": null,
+      "category": {
+        "es": "Piernas",
+        "en": "Legs"
+      },
+      "equipment": {
+        "es": "Saco de arena",
+        "en": "Sandbag"
+      },
+      "primaryMuscle": {
+        "es": "Cuádriceps",
+        "en": "Quads"
+      },
+      "secondaryMuscles": {
+        "es": ["Glúteos", "Core"],
+        "en": ["Glutes", "Core"]
+      },
+      "names": {
+        "es": "Sandbag Lunges",
+        "en": "Sandbag Lunges"
+      },
+      "descriptions": {
+        "es": "Zancadas caminando con saco Hyrox. Completa la distancia objetivo.",
+        "en": "Walking lunges with Hyrox sandbag. Complete the target distance."
+      },
+      "aliases": {
+        "es": ["Zancadas con saco", "Hyrox lunges"],
+        "en": ["Sandbag walking lunges", "Hyrox lunges"]
+      },
+      "imageUrl": "assets/exercises/ff_legs_walking_lunge.webp",
+      "exercisedbId": null,
+      "matchConfidence": "curated",
+      "matchScore": null
     },
     {
       "id": "ff_cf_kipping_pull_up",
@@ -9601,7 +9765,7 @@
       "perArmWeight": false,
       "unilateral": false,
       "weightOptional": true,
-      "cardioPreset": "custom",
+      "cardioPreset": "rowing",
       "category": {
         "es": "Cardio",
         "en": "Cardio"
@@ -9631,12 +9795,12 @@
         "en": "Ski Erg"
       },
       "descriptions": {
-        "es": "",
-        "en": ""
+        "es": "SkiErg Hyrox: remada vertical de cuerpo completo sobre distancia objetivo.",
+        "en": "Hyrox SkiErg: full-body vertical pull for the target distance."
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": ["SkiErg", "Ski erg"],
+        "en": ["SkiErg", "Ski erg"]
       },
       "imageUrl": "assets/exercises/ff_cardio_ski_erg.webp",
       "exercisedbId": "vpQaQkH",

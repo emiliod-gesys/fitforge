@@ -8,8 +8,9 @@ import '../core/theme/app_accent.dart';
 /// Cronómetro del tiempo total transcurrido desde el inicio del entrenamiento.
 class WorkoutElapsedTimer extends StatefulWidget {
   final DateTime startedAt;
+  final DateTime? stoppedAt;
 
-  const WorkoutElapsedTimer({super.key, required this.startedAt});
+  const WorkoutElapsedTimer({super.key, required this.startedAt, this.stoppedAt});
 
   @override
   State<WorkoutElapsedTimer> createState() => _WorkoutElapsedTimerState();
@@ -22,11 +23,26 @@ class _WorkoutElapsedTimerState extends State<WorkoutElapsedTimer> {
   @override
   void initState() {
     super.initState();
-    _elapsed = SupabaseDateTime.nowUtc.difference(widget.startedAt.toUtc());
+    _elapsed = _currentElapsed();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
-      setState(() => _elapsed = SupabaseDateTime.nowUtc.difference(widget.startedAt.toUtc()));
+      if (widget.stoppedAt != null) return;
+      setState(() => _elapsed = _currentElapsed());
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant WorkoutElapsedTimer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.startedAt != widget.startedAt || oldWidget.stoppedAt != widget.stoppedAt) {
+      setState(() => _elapsed = _currentElapsed());
+    }
+  }
+
+  Duration _currentElapsed() {
+    final end = widget.stoppedAt?.toUtc() ?? SupabaseDateTime.nowUtc;
+    final elapsed = end.difference(widget.startedAt.toUtc());
+    return elapsed.isNegative ? Duration.zero : elapsed;
   }
 
   @override

@@ -1,4 +1,6 @@
 import '../core/constants/app_constants.dart';
+import '../core/hyrox/hyrox_standards.dart';
+import '../core/runner/runner_standards.dart';
 import 'exercise_logging.dart';
 
 class RoutineSetTarget {
@@ -202,6 +204,10 @@ class Routine {
   final DateTime updatedAt;
   final bool isAiGenerated;
   final bool isFavorite;
+  final bool isHyroxSystem;
+  final HyroxLevel? hyroxLevel;
+  final bool isRunnerSystem;
+  final RunnerType? runnerType;
 
   const Routine({
     required this.id,
@@ -214,9 +220,15 @@ class Routine {
     required this.updatedAt,
     this.isAiGenerated = false,
     this.isFavorite = false,
+    this.isHyroxSystem = false,
+    this.hyroxLevel,
+    this.isRunnerSystem = false,
+    this.runnerType,
   });
 
   factory Routine.fromJson(Map<String, dynamic> json, {List<RoutineExercise>? exercises}) {
+    final hyroxLevelRaw = json['hyrox_level'] as String?;
+    final runnerTypeRaw = json['runner_type'] as String?;
     return Routine(
       id: json['id'] as String,
       userId: json['user_id'] as String,
@@ -228,6 +240,10 @@ class Routine {
       updatedAt: DateTime.parse(json['updated_at'] as String),
       isAiGenerated: json['is_ai_generated'] as bool? ?? false,
       isFavorite: json['is_favorite'] as bool? ?? false,
+      isHyroxSystem: json['is_hyrox_system'] as bool? ?? false,
+      hyroxLevel: hyroxLevelRaw == null ? null : HyroxLevel.fromCode(hyroxLevelRaw),
+      isRunnerSystem: json['is_runner_system'] as bool? ?? false,
+      runnerType: RunnerType.fromCode(runnerTypeRaw),
     );
   }
 
@@ -237,18 +253,27 @@ class Routine {
         'target_muscles': targetMuscles,
         'is_ai_generated': isAiGenerated,
         if (isFavorite) 'is_favorite': isFavorite,
+        if (isHyroxSystem) 'is_hyrox_system': true,
+        if (hyroxLevel != null) 'hyrox_level': hyroxLevel!.code,
+        if (isRunnerSystem) 'is_runner_system': true,
+        if (runnerType != null) 'runner_type': runnerType!.code,
       };
 
   Routine copyWith({
+    String? id,
     String? name,
     String? description,
     List<String>? targetMuscles,
     List<RoutineExercise>? exercises,
     bool? isAiGenerated,
     bool? isFavorite,
+    bool? isHyroxSystem,
+    HyroxLevel? hyroxLevel,
+    bool? isRunnerSystem,
+    RunnerType? runnerType,
   }) {
     return Routine(
-      id: id,
+      id: id ?? this.id,
       userId: userId,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -258,6 +283,10 @@ class Routine {
       updatedAt: updatedAt,
       isAiGenerated: isAiGenerated ?? this.isAiGenerated,
       isFavorite: isFavorite ?? this.isFavorite,
+      isHyroxSystem: isHyroxSystem ?? this.isHyroxSystem,
+      hyroxLevel: hyroxLevel ?? this.hyroxLevel,
+      isRunnerSystem: isRunnerSystem ?? this.isRunnerSystem,
+      runnerType: runnerType ?? this.runnerType,
     );
   }
 
@@ -295,6 +324,10 @@ class Routine {
       updatedAt: DateTime.now(),
       isAiGenerated: false,
       isFavorite: false,
+      isHyroxSystem: false,
+      hyroxLevel: null,
+      isRunnerSystem: false,
+      runnerType: null,
     );
   }
 }

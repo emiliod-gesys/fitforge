@@ -44,16 +44,24 @@ class SetLogTile extends StatefulWidget {
 class _SetLogTileState extends State<SetLogTile> {
   late TextEditingController _weightController;
   late TextEditingController _repsController;
+  late TextEditingController _distanceController;
   late String _lastUnitSystem;
   bool _editing = false;
 
   bool get _fieldsEnabled => !widget.set.completed || _editing;
+
+  bool get _isLoadedDistance => widget.loadMode == ExerciseLoadMode.loadedDistance;
 
   @override
   void initState() {
     super.initState();
     _lastUnitSystem = widget.unitSystem;
     _repsController = TextEditingController(text: widget.set.reps.toString());
+    _distanceController = TextEditingController(
+      text: widget.set.distanceMeters != null && widget.set.distanceMeters! > 0
+          ? widget.set.distanceMeters!.round().toString()
+          : '',
+    );
     _weightController = TextEditingController();
     _syncWeightField();
   }
@@ -85,8 +93,17 @@ class _SetLogTileState extends State<SetLogTile> {
       if (!_editing) _syncWeightField();
       if (widget.set.completed) _editing = false;
     }
-    if (oldWidget.set.reps != widget.set.reps && !_editing) {
+    if (oldWidget.set.reps != widget.set.reps && !_editing && !_isLoadedDistance) {
       _repsController.text = widget.set.reps.toString();
+    }
+    if ((oldWidget.set.distanceMeters != widget.set.distanceMeters ||
+            oldWidget.set.completed != widget.set.completed) &&
+        !_editing &&
+        _isLoadedDistance) {
+      _distanceController.text = widget.set.distanceMeters != null &&
+              widget.set.distanceMeters! > 0
+          ? widget.set.distanceMeters!.round().toString()
+          : '';
     }
   }
 
@@ -94,6 +111,7 @@ class _SetLogTileState extends State<SetLogTile> {
   void dispose() {
     _weightController.dispose();
     _repsController.dispose();
+    _distanceController.dispose();
     super.dispose();
   }
 
@@ -109,7 +127,21 @@ class _SetLogTileState extends State<SetLogTile> {
     return UnitConverter.displayToKg(parsed, widget.unitSystem);
   }
 
+  double? _parsedDistanceMeters() {
+    final parsed = double.tryParse(_distanceController.text.replaceAll(',', '.'));
+    if (parsed == null || parsed <= 0) return null;
+    return parsed;
+  }
+
   WorkoutSet _buildSet({bool? completed}) {
+    if (_isLoadedDistance) {
+      return widget.set.copyWith(
+        weight: _parsedWeightKg() ?? (widget.weightOptional == true ? 0.0 : null),
+        distanceMeters: _parsedDistanceMeters(),
+        reps: 0,
+        completed: completed ?? widget.set.completed,
+      );
+    }
     return widget.set.copyWith(
       weight: _parsedWeightKg() ?? (widget.weightOptional == true ? 0.0 : null),
       reps: int.tryParse(_repsController.text) ?? widget.set.reps,
@@ -122,6 +154,13 @@ class _SetLogTileState extends State<SetLogTile> {
     if (widget.weightOptional != true && _parsedWeightKg() == null) {
       widget.onValidationError?.call(l10n.weightRequired);
       return false;
+    }
+    if (_isLoadedDistance) {
+      if (_parsedDistanceMeters() == null) {
+        widget.onValidationError?.call(l10n.distanceRequired);
+        return false;
+      }
+      return true;
     }
     final reps = int.tryParse(_repsController.text);
     if (reps == null || reps <= 0) {
@@ -294,18 +333,32 @@ class _SetLogTileState extends State<SetLogTile> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: TextField(
-                        controller: _repsController,
-                        enabled: _fieldsEnabled,
-                        keyboardType: TextInputType.number,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
+                      child: _isLoadedDistance
+                          ? TextField(
+                              controller: _distanceController,
+                              enabled: _fieldsEnabled,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(decimal: true),
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              decoration: _fieldDecoration(
+                                label: l10n.distanceMetersLabel,
+                                emphasize: isActive,
+                              ),
+                            )
+                          : TextField(
+                              controller: _repsController,
+                              enabled: _fieldsEnabled,
+                              keyboardType: TextInputType.number,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              decoration: _fieldDecoration(
+                                label: l10n.reps,
+                                emphasize: isActive,
+                              ),
                             ),
-                        decoration: _fieldDecoration(
-                          label: l10n.reps,
-                          emphasize: isActive,
-                        ),
-                      ),
                     ),
                     const SizedBox(width: 10),
                     SizedBox(

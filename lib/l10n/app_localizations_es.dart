@@ -443,6 +443,180 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscriptionTierGymratPro => 'Gymrat Pro';
 
   @override
+  String get hyroxMode => 'Modo Hyrox';
+
+  @override
+  String get hyroxModeSubtitle =>
+      'Añade 3 rutinas progresivas (Prep → Build → Race). No cuentan en tu límite de rutinas.';
+
+  @override
+  String get hyroxModeEnabled =>
+      'Modo Hyrox activado · 3 rutinas listas en Rutinas';
+
+  @override
+  String get hyroxModeDisabled =>
+      'Modo Hyrox desactivado · rutinas Hyrox eliminadas';
+
+  @override
+  String get runnerMode => 'Modo runner';
+
+  @override
+  String get runnerModeSubtitle =>
+      'Añade Salir a correr (GPS) y Correr en cinta. No cuentan en tu límite de rutinas.';
+
+  @override
+  String get runnerModeEnabled =>
+      'Modo runner activado · 2 rutinas listas en Rutinas';
+
+  @override
+  String get runnerModeDisabled =>
+      'Modo runner desactivado · rutinas runner eliminadas';
+
+  @override
+  String get runnerSystemBadge => 'Runner';
+
+  @override
+  String get runnerSystemLocked =>
+      'Rutina del sistema runner · no se puede editar ni eliminar';
+
+  @override
+  String get runnerStart => 'Iniciar';
+
+  @override
+  String get runnerStartOutdoor => 'Salir a correr';
+
+  @override
+  String get runnerStartTreadmill => 'Correr en cinta';
+
+  @override
+  String get runnerSurfaceTitle => '¿Dónde vas a correr?';
+
+  @override
+  String get runnerSurfaceHint =>
+      'Esto ayuda a contextualizar tu sesión en el historial.';
+
+  @override
+  String get runnerSurfaceAsphalt => 'Asfalto / calle';
+
+  @override
+  String get runnerSurfaceAsphaltDesc =>
+      'Carretera, aceras urbanas o paseos pavimentados.';
+
+  @override
+  String get runnerSurfaceTrack => 'Pista';
+
+  @override
+  String get runnerSurfaceTrackDesc =>
+      'Pista de atletismo o superficie sintética uniforme.';
+
+  @override
+  String get runnerSurfaceTrail => 'Trail / sendero';
+
+  @override
+  String get runnerSurfaceTrailDesc => 'Tierra, montaña o terreno irregular.';
+
+  @override
+  String get runnerAcquiringGps => 'Obteniendo señal GPS…';
+
+  @override
+  String get runnerGpsDenied =>
+      'Activa la ubicación y concede permisos para registrar tu carrera.';
+
+  @override
+  String get runnerNoDistance =>
+      'No se registró distancia. Espera unos segundos con GPS activo o muévete un poco más.';
+
+  @override
+  String get runnerTime => 'Tiempo';
+
+  @override
+  String get runnerDistance => 'Distancia';
+
+  @override
+  String get runnerPace => 'Ritmo';
+
+  @override
+  String get runnerPause => 'Pausar';
+
+  @override
+  String get runnerResume => 'Reanudar';
+
+  @override
+  String get runnerFinish => 'Finalizar';
+
+  @override
+  String get runnerSplitsTitle => 'Splits por km';
+
+  @override
+  String runnerSplitKm(int km) {
+    return 'Km $km';
+  }
+
+  @override
+  String get runnerInclineLabel => 'Inclinación de la cinta';
+
+  @override
+  String get runnerInclineHelper => '0% si está plana';
+
+  @override
+  String get runnerInclineRequired => 'Indica la inclinación (puede ser 0%)';
+
+  @override
+  String get runnerTreadmillHint =>
+      'Pulsa iniciar cuando estés en la cinta. Al terminar, indica inclinación y distancia.';
+
+  @override
+  String get runnerSummaryTitle => 'Resumen de carrera';
+
+  @override
+  String get runnerRouteTitle => 'Ruta';
+
+  @override
+  String get runnerAvgPace => 'Ritmo medio';
+
+  @override
+  String get hyroxSystemBadge => 'Hyrox';
+
+  @override
+  String get hyroxSystemLocked =>
+      'Rutina sistema Hyrox. Desactiva el modo Hyrox en Perfil para quitarla.';
+
+  @override
+  String hyroxPhaseTimer(int phase, int total) {
+    return 'Fase $phase/$total';
+  }
+
+  @override
+  String get hyroxPhaseSplit => 'Split de fase';
+
+  @override
+  String hyroxTargetDistance(int meters) {
+    return 'Objetivo: $meters m';
+  }
+
+  @override
+  String get hyroxStationDone => 'Hecho';
+
+  @override
+  String get hyroxStartRace => 'Iniciar';
+
+  @override
+  String get hyroxReadyToStart =>
+      'Pulsa Iniciar cuando estés listo. El cronómetro global arranca al darle.';
+
+  @override
+  String get hyroxStationCompleted => 'Completado';
+
+  @override
+  String get hyroxStationFixedHint => 'Peso y distancia fijos (estándar Hyrox)';
+
+  @override
+  String get hyroxSplitsSummaryTitle => 'Tiempos por estación';
+
+  @override
+  String get leaderboardMetricHyrox => 'Hyrox Race';
+
+  @override
   String get aiCoachSubtitle => 'Recomendaciones personalizadas';
 
   @override
@@ -473,6 +647,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get fitnessGoalTitle => 'Objetivo fitness';
+
+  @override
+  String get fitnessGoalHint =>
+      'Tu objetivo ajusta cómo la IA programa tus entrenos y tu objetivo calórico diario.';
+
+  @override
+  String get fitnessGoalTrainingLabel => 'Entreno';
+
+  @override
+  String get fitnessGoalDietLabel => 'Dieta';
+
+  @override
+  String get goalHypertrophyTraining =>
+      '3-5 series de trabajo, 8-12 reps, progresión de peso y volumen. Compuestos + aislamiento.';
+
+  @override
+  String get goalHypertrophyDiet =>
+      'Ligero superávit calórico (+8%), ~2 g de proteína por kg de peso.';
+
+  @override
+  String get goalStrengthTraining =>
+      '3-6 series, 3-6 reps con cargas altas. Aproximaciones en levantamientos compuestos.';
+
+  @override
+  String get goalStrengthDiet =>
+      'Superávit moderado (+8%), alta proteína (~2 g/kg) para recuperación y fuerza.';
+
+  @override
+  String get goalFatLossTraining =>
+      '2-4 series, 12-20 reps, descansos cortos. Prioriza volumen y densidad de entreno.';
+
+  @override
+  String get goalFatLossDiet =>
+      'Déficit calórico (~15%), proteína alta (~2,2 g/kg) para preservar músculo.';
+
+  @override
+  String get goalEnduranceTraining =>
+      '2-3 series, 15+ reps o cardio por tiempo/distancia. Menos carga, más repeticiones.';
+
+  @override
+  String get goalEnduranceDiet =>
+      'Calorías de mantenimiento, macros equilibrados (~1,6 g proteína/kg).';
+
+  @override
+  String get goalMaintenanceTraining =>
+      'Respeta tu historial reciente, sin forzar progresión agresiva.';
+
+  @override
+  String get goalMaintenanceDiet =>
+      'Calorías de mantenimiento (TDEE), macros equilibrados (~1,6 g proteína/kg).';
+
+  @override
+  String get fitnessGoalFootnote =>
+      'La IA proactiva y tu presupuesto calórico usan este objetivo. Puedes cambiarlo cuando quieras.';
 
   @override
   String get experienceTitle => 'Nivel de experiencia';
@@ -1549,6 +1777,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get repsRequired => 'Indica las repeticiones';
 
   @override
+  String get distanceRequired => 'Indica la distancia en metros';
+
+  @override
+  String get distanceMetersLabel => 'm';
+
+  @override
   String setDeleteFailed(String message) {
     return 'No se pudo eliminar la serie: $message';
   }
@@ -2329,6 +2563,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shareHashtags => '#FitForge #Entrenamiento';
+
+  @override
+  String shareHyroxTitle(String name) {
+    return 'HYROX · $name — FitForge';
+  }
+
+  @override
+  String shareHyroxTotalTime(String time) {
+    return 'Tiempo total: $time';
+  }
+
+  @override
+  String shareHyroxStationLine(int index, String station, String time) {
+    return '$index. $station: $time';
+  }
+
+  @override
+  String shareRunnerTitle(String name) {
+    return 'RUN · $name — FitForge';
+  }
+
+  @override
+  String shareRunnerStats(String distance, String pace, String time) {
+    return '$distance · $pace · $time';
+  }
+
+  @override
+  String shareRunnerSurface(String surface) {
+    return 'Superficie: $surface';
+  }
+
+  @override
+  String shareRunnerSplitLine(int km, String time) {
+    return 'Km $km: $time';
+  }
 
   @override
   String get maxWeight => 'Peso máx';

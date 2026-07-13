@@ -896,6 +896,312 @@ abstract class AppLocalizations {
   /// **'Gymrat Pro'**
   String get subscriptionTierGymratPro;
 
+  /// No description provided for @hyroxMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Hyrox'**
+  String get hyroxMode;
+
+  /// No description provided for @hyroxModeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade 3 rutinas progresivas (Prep → Build → Race). No cuentan en tu límite de rutinas.'**
+  String get hyroxModeSubtitle;
+
+  /// No description provided for @hyroxModeEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Hyrox activado · 3 rutinas listas en Rutinas'**
+  String get hyroxModeEnabled;
+
+  /// No description provided for @hyroxModeDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Hyrox desactivado · rutinas Hyrox eliminadas'**
+  String get hyroxModeDisabled;
+
+  /// No description provided for @runnerMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo runner'**
+  String get runnerMode;
+
+  /// No description provided for @runnerModeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade Salir a correr (GPS) y Correr en cinta. No cuentan en tu límite de rutinas.'**
+  String get runnerModeSubtitle;
+
+  /// No description provided for @runnerModeEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo runner activado · 2 rutinas listas en Rutinas'**
+  String get runnerModeEnabled;
+
+  /// No description provided for @runnerModeDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo runner desactivado · rutinas runner eliminadas'**
+  String get runnerModeDisabled;
+
+  /// No description provided for @runnerSystemBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Runner'**
+  String get runnerSystemBadge;
+
+  /// No description provided for @runnerSystemLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina del sistema runner · no se puede editar ni eliminar'**
+  String get runnerSystemLocked;
+
+  /// No description provided for @runnerStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar'**
+  String get runnerStart;
+
+  /// No description provided for @runnerStartOutdoor.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir a correr'**
+  String get runnerStartOutdoor;
+
+  /// No description provided for @runnerStartTreadmill.
+  ///
+  /// In es, this message translates to:
+  /// **'Correr en cinta'**
+  String get runnerStartTreadmill;
+
+  /// No description provided for @runnerSurfaceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dónde vas a correr?'**
+  String get runnerSurfaceTitle;
+
+  /// No description provided for @runnerSurfaceHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto ayuda a contextualizar tu sesión en el historial.'**
+  String get runnerSurfaceHint;
+
+  /// No description provided for @runnerSurfaceAsphalt.
+  ///
+  /// In es, this message translates to:
+  /// **'Asfalto / calle'**
+  String get runnerSurfaceAsphalt;
+
+  /// No description provided for @runnerSurfaceAsphaltDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Carretera, aceras urbanas o paseos pavimentados.'**
+  String get runnerSurfaceAsphaltDesc;
+
+  /// No description provided for @runnerSurfaceTrack.
+  ///
+  /// In es, this message translates to:
+  /// **'Pista'**
+  String get runnerSurfaceTrack;
+
+  /// No description provided for @runnerSurfaceTrackDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Pista de atletismo o superficie sintética uniforme.'**
+  String get runnerSurfaceTrackDesc;
+
+  /// No description provided for @runnerSurfaceTrail.
+  ///
+  /// In es, this message translates to:
+  /// **'Trail / sendero'**
+  String get runnerSurfaceTrail;
+
+  /// No description provided for @runnerSurfaceTrailDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Tierra, montaña o terreno irregular.'**
+  String get runnerSurfaceTrailDesc;
+
+  /// No description provided for @runnerAcquiringGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Obteniendo señal GPS…'**
+  String get runnerAcquiringGps;
+
+  /// No description provided for @runnerGpsDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la ubicación y concede permisos para registrar tu carrera.'**
+  String get runnerGpsDenied;
+
+  /// No description provided for @runnerNoDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'No se registró distancia. Espera unos segundos con GPS activo o muévete un poco más.'**
+  String get runnerNoDistance;
+
+  /// No description provided for @runnerTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo'**
+  String get runnerTime;
+
+  /// No description provided for @runnerDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Distancia'**
+  String get runnerDistance;
+
+  /// No description provided for @runnerPace.
+  ///
+  /// In es, this message translates to:
+  /// **'Ritmo'**
+  String get runnerPace;
+
+  /// No description provided for @runnerPause.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar'**
+  String get runnerPause;
+
+  /// No description provided for @runnerResume.
+  ///
+  /// In es, this message translates to:
+  /// **'Reanudar'**
+  String get runnerResume;
+
+  /// No description provided for @runnerFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Finalizar'**
+  String get runnerFinish;
+
+  /// No description provided for @runnerSplitsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Splits por km'**
+  String get runnerSplitsTitle;
+
+  /// No description provided for @runnerSplitKm.
+  ///
+  /// In es, this message translates to:
+  /// **'Km {km}'**
+  String runnerSplitKm(int km);
+
+  /// No description provided for @runnerInclineLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación de la cinta'**
+  String get runnerInclineLabel;
+
+  /// No description provided for @runnerInclineHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'0% si está plana'**
+  String get runnerInclineHelper;
+
+  /// No description provided for @runnerInclineRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica la inclinación (puede ser 0%)'**
+  String get runnerInclineRequired;
+
+  /// No description provided for @runnerTreadmillHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa iniciar cuando estés en la cinta. Al terminar, indica inclinación y distancia.'**
+  String get runnerTreadmillHint;
+
+  /// No description provided for @runnerSummaryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen de carrera'**
+  String get runnerSummaryTitle;
+
+  /// No description provided for @runnerRouteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta'**
+  String get runnerRouteTitle;
+
+  /// No description provided for @runnerAvgPace.
+  ///
+  /// In es, this message translates to:
+  /// **'Ritmo medio'**
+  String get runnerAvgPace;
+
+  /// No description provided for @hyroxSystemBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Hyrox'**
+  String get hyroxSystemBadge;
+
+  /// No description provided for @hyroxSystemLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina sistema Hyrox. Desactiva el modo Hyrox en Perfil para quitarla.'**
+  String get hyroxSystemLocked;
+
+  /// No description provided for @hyroxPhaseTimer.
+  ///
+  /// In es, this message translates to:
+  /// **'Fase {phase}/{total}'**
+  String hyroxPhaseTimer(int phase, int total);
+
+  /// No description provided for @hyroxPhaseSplit.
+  ///
+  /// In es, this message translates to:
+  /// **'Split de fase'**
+  String get hyroxPhaseSplit;
+
+  /// No description provided for @hyroxTargetDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Objetivo: {meters} m'**
+  String hyroxTargetDistance(int meters);
+
+  /// No description provided for @hyroxStationDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Hecho'**
+  String get hyroxStationDone;
+
+  /// No description provided for @hyroxStartRace.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar'**
+  String get hyroxStartRace;
+
+  /// No description provided for @hyroxReadyToStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa Iniciar cuando estés listo. El cronómetro global arranca al darle.'**
+  String get hyroxReadyToStart;
+
+  /// No description provided for @hyroxStationCompleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Completado'**
+  String get hyroxStationCompleted;
+
+  /// No description provided for @hyroxStationFixedHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso y distancia fijos (estándar Hyrox)'**
+  String get hyroxStationFixedHint;
+
+  /// No description provided for @hyroxSplitsSummaryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempos por estación'**
+  String get hyroxSplitsSummaryTitle;
+
+  /// No description provided for @leaderboardMetricHyrox.
+  ///
+  /// In es, this message translates to:
+  /// **'Hyrox Race'**
+  String get leaderboardMetricHyrox;
+
   /// No description provided for @aiCoachSubtitle.
   ///
   /// In es, this message translates to:
@@ -955,6 +1261,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Objetivo fitness'**
   String get fitnessGoalTitle;
+
+  /// No description provided for @fitnessGoalHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu objetivo ajusta cómo la IA programa tus entrenos y tu objetivo calórico diario.'**
+  String get fitnessGoalHint;
+
+  /// No description provided for @fitnessGoalTrainingLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Entreno'**
+  String get fitnessGoalTrainingLabel;
+
+  /// No description provided for @fitnessGoalDietLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Dieta'**
+  String get fitnessGoalDietLabel;
+
+  /// No description provided for @goalHypertrophyTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'3-5 series de trabajo, 8-12 reps, progresión de peso y volumen. Compuestos + aislamiento.'**
+  String get goalHypertrophyTraining;
+
+  /// No description provided for @goalHypertrophyDiet.
+  ///
+  /// In es, this message translates to:
+  /// **'Ligero superávit calórico (+8%), ~2 g de proteína por kg de peso.'**
+  String get goalHypertrophyDiet;
+
+  /// No description provided for @goalStrengthTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'3-6 series, 3-6 reps con cargas altas. Aproximaciones en levantamientos compuestos.'**
+  String get goalStrengthTraining;
+
+  /// No description provided for @goalStrengthDiet.
+  ///
+  /// In es, this message translates to:
+  /// **'Superávit moderado (+8%), alta proteína (~2 g/kg) para recuperación y fuerza.'**
+  String get goalStrengthDiet;
+
+  /// No description provided for @goalFatLossTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'2-4 series, 12-20 reps, descansos cortos. Prioriza volumen y densidad de entreno.'**
+  String get goalFatLossTraining;
+
+  /// No description provided for @goalFatLossDiet.
+  ///
+  /// In es, this message translates to:
+  /// **'Déficit calórico (~15%), proteína alta (~2,2 g/kg) para preservar músculo.'**
+  String get goalFatLossDiet;
+
+  /// No description provided for @goalEnduranceTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'2-3 series, 15+ reps o cardio por tiempo/distancia. Menos carga, más repeticiones.'**
+  String get goalEnduranceTraining;
+
+  /// No description provided for @goalEnduranceDiet.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías de mantenimiento, macros equilibrados (~1,6 g proteína/kg).'**
+  String get goalEnduranceDiet;
+
+  /// No description provided for @goalMaintenanceTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'Respeta tu historial reciente, sin forzar progresión agresiva.'**
+  String get goalMaintenanceTraining;
+
+  /// No description provided for @goalMaintenanceDiet.
+  ///
+  /// In es, this message translates to:
+  /// **'Calorías de mantenimiento (TDEE), macros equilibrados (~1,6 g proteína/kg).'**
+  String get goalMaintenanceDiet;
+
+  /// No description provided for @fitnessGoalFootnote.
+  ///
+  /// In es, this message translates to:
+  /// **'La IA proactiva y tu presupuesto calórico usan este objetivo. Puedes cambiarlo cuando quieras.'**
+  String get fitnessGoalFootnote;
 
   /// No description provided for @experienceTitle.
   ///
@@ -2810,6 +3200,18 @@ abstract class AppLocalizations {
   /// **'Indica las repeticiones'**
   String get repsRequired;
 
+  /// No description provided for @distanceRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica la distancia en metros'**
+  String get distanceRequired;
+
+  /// No description provided for @distanceMetersLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'m'**
+  String get distanceMetersLabel;
+
   /// No description provided for @setDeleteFailed.
   ///
   /// In es, this message translates to:
@@ -4087,6 +4489,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'#FitForge #Entrenamiento'**
   String get shareHashtags;
+
+  /// No description provided for @shareHyroxTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'HYROX · {name} — FitForge'**
+  String shareHyroxTitle(String name);
+
+  /// No description provided for @shareHyroxTotalTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo total: {time}'**
+  String shareHyroxTotalTime(String time);
+
+  /// No description provided for @shareHyroxStationLine.
+  ///
+  /// In es, this message translates to:
+  /// **'{index}. {station}: {time}'**
+  String shareHyroxStationLine(int index, String station, String time);
+
+  /// No description provided for @shareRunnerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'RUN · {name} — FitForge'**
+  String shareRunnerTitle(String name);
+
+  /// No description provided for @shareRunnerStats.
+  ///
+  /// In es, this message translates to:
+  /// **'{distance} · {pace} · {time}'**
+  String shareRunnerStats(String distance, String pace, String time);
+
+  /// No description provided for @shareRunnerSurface.
+  ///
+  /// In es, this message translates to:
+  /// **'Superficie: {surface}'**
+  String shareRunnerSurface(String surface);
+
+  /// No description provided for @shareRunnerSplitLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Km {km}: {time}'**
+  String shareRunnerSplitLine(int km, String time);
 
   /// No description provided for @maxWeight.
   ///

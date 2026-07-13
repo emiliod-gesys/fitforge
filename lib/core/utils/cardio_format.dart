@@ -69,8 +69,18 @@ abstract final class CardioFormat {
   }
 
   static String incline(double? percent) {
-    if (percent == null || percent <= 0) return '—';
+    if (percent == null || percent < 0) return '—';
     return '${percent.toStringAsFixed(1)}%';
+  }
+
+  /// Pace from seconds per km (metric) or sec per mile (imperial).
+  static String pace(double? secPerKm, String unitSystem) {
+    if (secPerKm == null || secPerKm <= 0) return '—';
+    final sec = unitSystem == 'imperial' ? secPerKm * 1.609344 : secPerKm;
+    final m = sec ~/ 60;
+    final s = (sec % 60).round().clamp(0, 59);
+    final unit = unitSystem == 'imperial' ? '/mi' : '/km';
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}$unit';
   }
 
   static String difficulty(double? level) {

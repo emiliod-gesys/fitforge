@@ -16,6 +16,34 @@ void main() {
       expect(sorted.map((s) => s.weight), [10, 20, 30]);
     });
 
+    test('sortedMeaningfulSets descarta series pre-rellenadas sin completar', () {
+      // Plantilla guardada sin entrenar: solo reps, sin peso ni completed.
+      const prefilled = [
+        WorkoutSet(id: 'a', setNumber: 1, reps: 10),
+        WorkoutSet(id: 'b', setNumber: 2, reps: 10),
+        WorkoutSet(id: 'c', setNumber: 3, reps: 10),
+      ];
+      expect(PreviousSetUtils.sortedMeaningfulSets(prefilled), isEmpty);
+    });
+
+    test('sortedMeaningfulSets conserva series completadas solo con reps (peso corporal)', () {
+      const bodyweight = [
+        WorkoutSet(id: 'a', setNumber: 1, reps: 12, completed: true),
+        WorkoutSet(id: 'b', setNumber: 2, reps: 10, completed: true),
+      ];
+      expect(PreviousSetUtils.sortedMeaningfulSets(bodyweight).length, 2);
+    });
+
+    test('sortedMeaningfulSets conserva series sin completar con peso registrado', () {
+      const legacy = [
+        WorkoutSet(id: 'a', setNumber: 1, weight: 50, reps: 10),
+        WorkoutSet(id: 'b', setNumber: 2, reps: 10),
+      ];
+      final result = PreviousSetUtils.sortedMeaningfulSets(legacy);
+      expect(result.length, 1);
+      expect(result.first.weight, 50);
+    });
+
     test('forSetNumber empareja por numero de serie aunque la lista venga invertida', () {
       const previous = [
         WorkoutSet(id: 'a', setNumber: 3, weight: 30, reps: 8, completed: true),

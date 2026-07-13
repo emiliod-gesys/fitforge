@@ -66,8 +66,139 @@ class RoutineService {
   }
 
   Future<int> countRoutinesForUser(String userId) async {
-    final data = await _client.from('routines').select('id').eq('user_id', userId);
+    final data = await _client
+        .from('routines')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_hyrox_system', false)
+        .eq('is_runner_system', false);
     return (data as List).length;
+  }
+
+  Future<List<Routine>> getRunnerSystemRoutines(String userId) async {
+    final routinesData = await _client
+        .from('routines')
+        .select()
+        .eq('user_id', userId)
+        .eq('is_runner_system', true)
+        .order('runner_type', ascending: true);
+
+    final routines = <Routine>[];
+    for (final r in routinesData as List) {
+      routines.add(await _routineFromRow(r as Map<String, dynamic>));
+    }
+    return routines;
+  }
+
+  /// Crea rutina sistema Runner sin consumir el cupo de rutinas guardadas.
+  Future<Routine> createRunnerSystemRoutine(Routine routine) async {
+    final userId = SupabaseService.currentUser!.id;
+    final routineId = routine.id.isEmpty ? _uuid.v4() : routine.id;
+    final description = routine.description?.trim();
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _client.from('routines').insert({
+      'id': routineId,
+      'user_id': userId,
+      'name': routine.name,
+      'description': description == null || description.isEmpty ? null : description,
+      'target_muscles': routine.targetMuscles,
+      'is_ai_generated': false,
+      'is_runner_system': true,
+      'runner_type': routine.runnerType?.code,
+      'updated_at': now,
+    });
+
+    if (routine.exercises.isNotEmpty) {
+      await _client.from('routine_exercises').insert(
+        routine.exercises
+            .map(
+              (ex) => {
+                ...ex.toJson(),
+                'routine_id': routineId,
+                'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
+              },
+            )
+            .toList(),
+      );
+    }
+
+    return Routine(
+      id: routineId,
+      userId: userId,
+      name: routine.name,
+      description: routine.description,
+      targetMuscles: routine.targetMuscles,
+      exercises: routine.exercises,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isAiGenerated: false,
+      isRunnerSystem: true,
+      runnerType: routine.runnerType,
+    );
+  }
+
+  Future<List<Routine>> getHyroxSystemRoutines(String userId) async {
+    final routinesData = await _client
+        .from('routines')
+        .select()
+        .eq('user_id', userId)
+        .eq('is_hyrox_system', true)
+        .order('hyrox_level', ascending: true);
+
+    final routines = <Routine>[];
+    for (final r in routinesData as List) {
+      routines.add(await _routineFromRow(r as Map<String, dynamic>));
+    }
+    return routines;
+  }
+
+  /// Crea rutina sistema Hyrox sin consumir el cupo de rutinas guardadas.
+  Future<Routine> createHyroxSystemRoutine(Routine routine) async {
+    final userId = SupabaseService.currentUser!.id;
+    final routineId = routine.id.isEmpty ? _uuid.v4() : routine.id;
+    final description = routine.description?.trim();
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _client.from('routines').insert({
+      'id': routineId,
+      'user_id': userId,
+      'name': routine.name,
+      'description': description == null || description.isEmpty ? null : description,
+      'target_muscles': routine.targetMuscles,
+      'is_ai_generated': false,
+      'is_hyrox_system': true,
+      'hyrox_level': routine.hyroxLevel?.code,
+      'updated_at': now,
+    });
+
+    if (routine.exercises.isNotEmpty) {
+      await _client.from('routine_exercises').insert(
+        routine.exercises
+            .map(
+              (ex) => {
+                ...ex.toJson(),
+                'routine_id': routineId,
+                'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
+              },
+            )
+            .toList(),
+      );
+    }
+
+    return Routine(
+      id: routineId,
+      userId: userId,
+      name: routine.name,
+      description: routine.description,
+      targetMuscles: routine.targetMuscles,
+      exercises: routine.exercises,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isAiGenerated: false,
+      isHyroxSystem: true,
+      hyroxLevel: routine.hyroxLevel,
+    );
   }
 
   Future<SubscriptionTier> _subscriptionTierForUser(String userId) async {
@@ -269,6 +400,10 @@ class RoutineService {
       'description': description == null || description.isEmpty ? null : description,
       'target_muscles': routine.targetMuscles,
       'is_ai_generated': routine.isAiGenerated,
+      if (routine.isHyroxSystem) 'is_hyrox_system': true,
+      if (routine.hyroxLevel != null) 'hyrox_level': routine.hyroxLevel!.code,
+      if (routine.isRunnerSystem) 'is_runner_system': true,
+      if (routine.runnerType != null) 'runner_type': routine.runnerType!.code,
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     }).eq('id', routine.id);
 

@@ -16,12 +16,20 @@ abstract final class PreviousSetUtils {
 
   static List<WorkoutSet> sortedMeaningfulSets(List<WorkoutSet> sets) {
     final completed = sets.where((s) => s.completed).toList();
-    final source = completed.isNotEmpty ? completed : sets;
+    // Sin series completadas, solo cuentan las que tienen datos reales
+    // (las series pre-rellenadas de plantilla llevan reps pero nada más).
+    final source = completed.isNotEmpty ? completed : sets.where(hasLoggedData).toList();
     final meaningful =
         source.where((s) => s.weight != null || s.reps > 0 || s.durationSeconds != null).toList();
     meaningful.sort((a, b) => a.setNumber.compareTo(b.setNumber));
     return meaningful;
   }
+
+  static bool hasLoggedData(WorkoutSet s) =>
+      (s.weight ?? 0) > 0 ||
+      (s.durationSeconds ?? 0) > 0 ||
+      (s.distanceMeters ?? 0) > 0 ||
+      (s.steps ?? 0) > 0;
 
   static WorkoutSet? forSetNumber(List<WorkoutSet> previous, int setNumber) {
     if (previous.isEmpty || setNumber < 1) return null;

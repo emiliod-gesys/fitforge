@@ -127,6 +127,24 @@ extension ProfileL10n on AppLocalizations {
         goalMaintenance,
       ];
 
+  String fitnessGoalTrainingDescription(String localizedGoal) {
+    if (localizedGoal == goalHypertrophy) return goalHypertrophyTraining;
+    if (localizedGoal == goalStrength) return goalStrengthTraining;
+    if (localizedGoal == goalFatLoss) return goalFatLossTraining;
+    if (localizedGoal == goalEndurance) return goalEnduranceTraining;
+    if (localizedGoal == goalMaintenance) return goalMaintenanceTraining;
+    return '';
+  }
+
+  String fitnessGoalDietDescription(String localizedGoal) {
+    if (localizedGoal == goalHypertrophy) return goalHypertrophyDiet;
+    if (localizedGoal == goalStrength) return goalStrengthDiet;
+    if (localizedGoal == goalFatLoss) return goalFatLossDiet;
+    if (localizedGoal == goalEndurance) return goalEnduranceDiet;
+    if (localizedGoal == goalMaintenance) return goalMaintenanceDiet;
+    return '';
+  }
+
   List<String> get experienceLevels => [expBeginner, expIntermediate, expAdvanced];
 
   String activityLevelLabel(DailyActivityLevel level) {

@@ -5,6 +5,7 @@ import '../../models/exercise_history.dart';
 import '../../models/exercise_logging.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
+import 'exercise_history_utils.dart';
 import 'gym_weight.dart';
 import 'muscle_inference.dart';
 
@@ -97,13 +98,17 @@ abstract final class WorkoutSuggestionContextBuilder {
           : (history.map((h) => h.sets.length).reduce((a, b) => a + b) / history.length)
               .round();
 
+      final anchoring = ExerciseHistoryUtils.anchoringSession(history);
+
       return WorkoutSuggestionExerciseContext(
         exerciseId: ex.exerciseId,
         exerciseName: ex.exerciseName,
         isCardio: isCardio,
         setCount: ex.sets.length,
         historyAvgSetCount: historyAvgSets,
-        latestSessionSummary: history.isEmpty ? null : _latestSessionSummary(history.first, isCardio),
+        latestSessionSummary: anchoring == null
+            ? null
+            : _sessionSummary(anchoring, isCardio),
         recentTopSet: _recentTopSet(history, isCardio),
         muscleGroups: muscles,
         recoveryPercent: recovery,
@@ -186,7 +191,7 @@ abstract final class WorkoutSuggestionContextBuilder {
     return WorkoutSuggestionHistorySession(date: date, sets: sets);
   }
 
-  static Map<String, dynamic>? _latestSessionSummary(
+  static Map<String, dynamic>? _sessionSummary(
     ExerciseSessionHistory session,
     bool isCardio,
   ) {
@@ -207,16 +212,29 @@ abstract final class WorkoutSuggestionContextBuilder {
       };
     }
 
-    final weighted = session.sets.where((set) => (set.weight ?? 0) > 0).toList();
-    final heaviest = weighted.fold<double>(0, (best, set) => set.weight! > best ? set.weight! : best);
-    final topRepsAtHeaviest = weighted
-        .where((set) => set.weight == heaviest)
-        .fold<int>(0, (best, set) => set.reps > best ? set.reps : best);
+    final weighted = session.sets.where((set) => (set.weight ?? 0) > 0).toList()
+      ..sort((a, b) => a.setNumber.compareTo(b.setNumber));
+    final heaviest = ExerciseHistoryUtils.sessionHeaviestWeightKg(session.sets);
+    final working = ExerciseHistoryUtils.workingSets(session.sets);
+    final workingWeight = working.isEmpty
+        ? heaviest
+        : ExerciseHistoryUtils.sessionHeaviestWeightKg(working);
+    final topRepsAtWorking = working.isEmpty
+        ? weighted
+            .where((set) => set.weight == heaviest)
+            .fold<int>(0, (best, set) => set.reps > best ? set.reps : best)
+        : working.fold<int>(0, (best, set) => set.reps > best ? set.reps : best);
+    final pattern = ExerciseHistoryUtils.weightPattern(session.sets);
+    final orderedWeights = weighted.map((set) => set.weight).toList();
 
     return {
       'set_count': session.sets.length,
       if (heaviest > 0) 'heaviest_weight_kg': heaviest,
-      if (topRepsAtHeaviest > 0) 'top_reps_at_heaviest': topRepsAtHeaviest,
+      if (workingWeight > 0) 'working_weight_kg': workingWeight,
+      if (topRepsAtWorking > 0) 'top_reps_at_working': topRepsAtWorking,
+      'weight_pattern': pattern,
+      if (orderedWeights.isNotEmpty) 'set_weights_kg': orderedWeights,
+      if (working.isNotEmpty) 'working_set_count': working.length,
     };
   }
 

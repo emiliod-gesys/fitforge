@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/runner/runner_models.dart';
+import '../../core/runner/runner_standards.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_exercise_navigation.dart';
@@ -11,6 +13,8 @@ import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
+import '../../core/utils/unit_converter.dart';
+import '../../core/utils/cardio_format.dart';
 import '../../core/utils/milestones.dart';
 import '../../core/utils/session_personal_records.dart';
 import '../../l10n/app_localizations.dart';
@@ -37,8 +41,10 @@ import '../../widgets/set_log_tile.dart';
 import '../../widgets/workout_exercise_picker_sheet.dart';
 import '../../widgets/workout_elapsed_timer.dart';
 import '../../widgets/active_workout_exercise_list.dart';
+import '../../widgets/runner_outdoor_session.dart';
+import '../../widgets/runner_treadmill_session.dart';
+import '../../widgets/hyrox_phase_timer.dart';
 import '../../widgets/similar_exercise_picker_sheet.dart';
-import '../../services/exercise_report_service.dart';
 import '../../widgets/exercise_load_controls.dart';
 import '../../widgets/exercise_report_sheet.dart';
 import '../../core/theme/app_accent.dart';
@@ -69,6 +75,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Set<String> _savingSetIds = {};
   final Map<String, bool> _perArmOverrides = {};
   bool _perArmSeeded = false;
+  bool _isHyroxWorkout = false;
+  bool _hyroxRaceStarted = false;
+  DateTime? _hyroxGlobalStartedAt;
+  DateTime? _stationStartedAt;
+  DateTime? _workoutStoppedAt;
+  final Map<String, double> _hyroxTargetMetersByExerciseId = {};
+  bool _isRunnerWorkout = false;
+  RunnerType? _runnerType;
+  RunningSurface? _runnerSurface;
 
   Future<void> _seedPerArmFromRoutine(Workout workout) async {
     final routineId = workout.routineId;
@@ -78,6 +93,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     if (!mounted || routine == null) return;
 
     setState(() {
+      _isHyroxWorkout = routine.isHyroxSystem;
+      _isRunnerWorkout = routine.isRunnerSystem;
+      _runnerType = routine.runnerType;
+      _hyroxTargetMetersByExerciseId
+        ..clear()
+        ..addEntries(
+          routine.exercises
+              .where((e) => e.targetDistanceMeters != null)
+              .map((e) => MapEntry(e.exerciseId, e.targetDistanceMeters!)),
+        );
       for (final ex in routine.exercises) {
         if (ex.perArmWeight != null) {
           _perArmOverrides[ex.exerciseId] = ex.perArmWeight!;
@@ -334,6 +359,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _runnerSurface = ref.read(pendingRunnerSurfaceProvider);
+    ref.read(pendingRunnerSurfaceProvider.notifier).state = null;
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
@@ -428,16 +455,117 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
-  Future<void> _completeWorkout(Workout workout) async {
+  Future<void> _completeRunnerOutdoor(
+    Workout workout,
+    RunnerTrackingSnapshot snapshot,
+  ) async {
     if (_completing) return;
+    _freezeWorkoutTimers();
     setState(() => _completing = true);
 
     try {
-      final duration = SupabaseDateTime.nowUtc.difference(workout.startedAt.toUtc()).inMinutes;
+      final exercise = workout.exercises.first;
+      final frozen = _workoutStoppedAt ?? DateTime.now();
+      final elapsed = snapshot.elapsedSeconds(frozen);
+      final avgPace = snapshot.avgPaceSecPerKm(frozen);
+
+      await ref.read(workoutServiceProvider).beginWorkoutTimer(workout.id);
+
+      final set = WorkoutSet(
+        id: exercise.sets.isNotEmpty ? exercise.sets.first.id : '',
+        setNumber: 1,
+        completed: true,
+        loggingType: ExerciseLoggingType.cardio,
+        durationSeconds: elapsed,
+        distanceMeters: snapshot.distanceMeters,
+      );
+      await ref.read(workoutServiceProvider).logSet(exercise.id, set);
+
+      await ref.read(workoutServiceProvider).saveRunnerSession(
+            workoutId: workout.id,
+            surface: _runnerSurface ?? snapshot.surface,
+            route: snapshot.route,
+            splits: snapshot.splits,
+            avgPaceSecPerKm: avgPace,
+          );
+
+      await _syncActiveWorkout();
+      final synced = ref.read(activeWorkoutProvider).valueOrNull;
+      final merged = synced != null ? _mergedWorkout(synced) : workout;
+      await _completeWorkout(merged, skipCompletingFlag: true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.finishFailed('$e'))),
+        );
+        setState(() => _completing = false);
+      }
+    }
+  }
+
+  Future<void> _completeRunnerTreadmill(
+    Workout workout,
+    RunnerTreadmillResult result,
+  ) async {
+    if (_completing) return;
+    _freezeWorkoutTimers();
+    setState(() => _completing = true);
+
+    try {
+      final exercise = workout.exercises.first;
+
+      await ref.read(workoutServiceProvider).beginWorkoutTimer(workout.id);
+
+      final set = WorkoutSet(
+        id: exercise.sets.isNotEmpty ? exercise.sets.first.id : '',
+        setNumber: 1,
+        completed: true,
+        loggingType: ExerciseLoggingType.cardio,
+        durationSeconds: result.durationSeconds,
+        distanceMeters: result.distanceMeters,
+        inclinePercent: result.inclinePercent,
+      );
+      await ref.read(workoutServiceProvider).logSet(exercise.id, set);
+
+      await ref.read(workoutServiceProvider).saveRunnerSession(
+            workoutId: workout.id,
+            route: const [],
+            splits: const [],
+            avgPaceSecPerKm: result.avgPaceSecPerKm,
+          );
+
+      await _syncActiveWorkout();
+      final synced = ref.read(activeWorkoutProvider).valueOrNull;
+      final merged = synced != null ? _mergedWorkout(synced) : workout;
+      await _completeWorkout(merged, skipCompletingFlag: true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.finishFailed('$e'))),
+        );
+        setState(() => _completing = false);
+      }
+    }
+  }
+
+  Future<void> _completeWorkout(Workout workout, {bool skipCompletingFlag = false}) async {
+    if (_completing && !skipCompletingFlag) return;
+    if (!skipCompletingFlag) {
+      _freezeWorkoutTimers();
+      setState(() => _completing = true);
+    }
+
+    try {
+      final fresh = await ref.read(workoutServiceProvider).getActiveWorkout();
+      var effectiveWorkout = fresh != null ? _mergedWorkout(fresh) : workout;
+
+      final startAt = _workoutTimerStart(effectiveWorkout);
+      final endAt = _workoutTimerStop()?.toUtc() ?? SupabaseDateTime.nowUtc;
+      final duration = endAt.difference(startAt.toUtc()).inMinutes;
       final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
       final profile = ref.read(profileProvider).valueOrNull;
       final bodyWeightKg = profile?.bodyWeight;
-      final volume = workout.exercises.fold<double>(
+      final volume = effectiveWorkout.exercises.fold<double>(
         0,
         (sum, ex) =>
             sum +
@@ -455,7 +583,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       ]);
       final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
       final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
-        workout: workout,
+        workout: effectiveWorkout,
         durationMinutes: duration,
         totalVolumeKg: volume,
         profile: profile,
@@ -468,7 +596,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       final personalRecordsBefore = await ref.read(personalRecordsProvider.future);
 
       await ref.read(workoutServiceProvider).completeWorkout(
-            workout.id,
+            effectiveWorkout.id,
             durationMinutes: duration,
             totalVolume: volume,
             activeCaloriesKcal: calorieEstimate.caloriesKcal,
@@ -476,7 +604,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
       final xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
-            workoutId: workout.id,
+            workoutId: effectiveWorkout.id,
             totalVolumeKg: volume,
             streakWeeks: streakWeeks,
           );
@@ -497,18 +625,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       } catch (_) {}
 
       final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
-            routineId: workout.routineId,
-            excludeWorkoutId: workout.id,
+            routineId: effectiveWorkout.routineId,
+            excludeWorkoutId: effectiveWorkout.id,
           );
       final newPersonalRecords = SessionPersonalRecords.detect(
-        workout: workout,
+        workout: effectiveWorkout,
         existing: personalRecordsBefore,
         catalog: catalog,
         bodyWeightKg: bodyWeightKg,
       );
 
       final summary = WorkoutSummaryBuilder.build(
-        workout: workout,
+        workout: effectiveWorkout,
         durationMinutes: duration,
         previousSameRoutine: previous,
         xpAward: xpAward,
@@ -517,6 +645,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         bodyMetrics: bodyMetrics,
         newMilestoneUnlocks: newMilestones,
         newPersonalRecords: newPersonalRecords,
+        isHyrox: _isHyroxWorkout,
+        isRunner: _isRunnerWorkout,
       );
 
       if (!mounted) return;
@@ -709,10 +839,113 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
+  DateTime _workoutTimerStart(Workout workout) =>
+      _hyroxGlobalStartedAt ?? workout.startedAt;
+
+  DateTime? _workoutTimerStop() => _workoutStoppedAt;
+
+  void _freezeWorkoutTimers() {
+    if (_workoutStoppedAt != null) return;
+    setState(() {
+      _workoutStoppedAt = DateTime.now();
+      _showRestTimer = false;
+    });
+  }
+
+  Future<void> _startHyroxRace(Workout workout) async {
+    final visible = workout.exercises
+        .where((e) => !_removedExerciseIds.contains(e.id))
+        .toList();
+    if (visible.isEmpty) return;
+
+    final firstIndex = workout.exercises.indexWhere((e) => e.id == visible.first.id);
+    final now = DateTime.now();
+
+    setState(() {
+      _hyroxRaceStarted = true;
+      _hyroxGlobalStartedAt = now;
+      _workoutStoppedAt = null;
+      _showExerciseList = false;
+      _currentExerciseIndex = firstIndex.clamp(0, workout.exercises.length - 1);
+      _stationStartedAt = now;
+    });
+
+    try {
+      await ref.read(workoutServiceProvider).beginWorkoutTimer(workout.id);
+      ref.invalidate(activeWorkoutProvider);
+      unawaited(_publishWatchSession());
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
+      }
+    }
+  }
+
+  Widget _buildHyroxStartGate(Workout workout, AppLocalizations l10n) {
+    final accent = context.accentColor;
+    final visibleCount =
+        workout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).length;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.directions_run, size: 56, color: accent),
+            const SizedBox(height: 20),
+            Text(
+              l10n.workoutDisplayName(workout.name),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.exercisesInRoutine(visibleCount),
+              style: const TextStyle(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.hyroxReadyToStart,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _completing ? null : () => _startHyroxRace(workout),
+                icon: const Icon(Icons.play_arrow, size: 28),
+                label: Text(l10n.hyroxStartRace),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(64),
+                  backgroundColor: accent,
+                  foregroundColor: Colors.black,
+                  textStyle: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _openExercise(int index) {
     setState(() {
       _currentExerciseIndex = index;
       _showExerciseList = false;
+      if (_isHyroxWorkout && _hyroxRaceStarted) {
+        _stationStartedAt = DateTime.now();
+      }
     });
     unawaited(_publishWatchSession());
   }
@@ -787,16 +1020,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   style: const TextStyle(color: AppColors.textMuted),
                 ),
               ),
-              TextButton(
-                onPressed: _completing ? null : () => _completeWorkout(displayWorkout),
-                child: _completing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.finish),
-              ),
+              if ((!_isHyroxWorkout || _hyroxRaceStarted) && !_isRunnerWorkout)
+                TextButton(
+                  onPressed: _completing ? null : () => _completeWorkout(displayWorkout),
+                  child: _completing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.finish),
+                ),
             ],
           );
         },
@@ -814,6 +1048,28 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
           final displayWorkout = _mergedWorkout(workout);
 
+          if (_isHyroxWorkout && !_hyroxRaceStarted) {
+            return _buildHyroxStartGate(displayWorkout, l10n);
+          }
+
+          if (_isRunnerWorkout && _runnerType == RunnerType.outdoor) {
+            return RunnerOutdoorSession(
+              workoutId: displayWorkout.id,
+              unitSystem: unitSystem,
+              surface: _runnerSurface,
+              onCancel: () => _cancelWorkout(displayWorkout),
+              onFinish: (snap) => _completeRunnerOutdoor(displayWorkout, snap),
+            );
+          }
+
+          if (_isRunnerWorkout && _runnerType == RunnerType.treadmill) {
+            return RunnerTreadmillSession(
+              unitSystem: unitSystem,
+              onCancel: () => _cancelWorkout(displayWorkout),
+              onFinish: (result) => _completeRunnerTreadmill(displayWorkout, result),
+            );
+          }
+
           final visibleExercises = displayWorkout.exercises
               .where((e) => !_removedExerciseIds.contains(e.id))
               .toList();
@@ -821,7 +1077,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           if (_showExerciseList || visibleExercises.isEmpty) {
             return Column(
               children: [
-                WorkoutElapsedTimer(startedAt: displayWorkout.startedAt),
+                if (!_isHyroxWorkout || _hyroxRaceStarted)
+                  WorkoutElapsedTimer(
+                    startedAt: _workoutTimerStart(displayWorkout),
+                    stoppedAt: _workoutTimerStop(),
+                  ),
                 if (_showRestTimer) _buildActiveRestTimer(),
                 Expanded(
                   child: ActiveWorkoutExerciseList(
@@ -874,7 +1134,27 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
           return Column(
             children: [
-              WorkoutElapsedTimer(startedAt: displayWorkout.startedAt),
+              if (!_isHyroxWorkout || _hyroxRaceStarted)
+                WorkoutElapsedTimer(
+                  startedAt: _workoutTimerStart(displayWorkout),
+                  stoppedAt: _workoutTimerStop(),
+                ),
+              if (_isHyroxWorkout && _hyroxRaceStarted && _stationStartedAt != null)
+                HyroxPhaseTimer(
+                  phaseIndex: exerciseIndex,
+                  totalPhases: visibleExercises.length,
+                  startedAt: _stationStartedAt!,
+                  stoppedAt: _workoutTimerStop(),
+                  targetDistanceMeters: () {
+                    final fromRoutine =
+                        _hyroxTargetMetersByExerciseId[exercise.exerciseId];
+                    if (fromRoutine != null) return fromRoutine;
+                    for (final s in sortedSets) {
+                      if (s.distanceMeters != null) return s.distanceMeters;
+                    }
+                    return null;
+                  }(),
+                ),
               if (_showRestTimer) _buildActiveRestTimer(),
               Expanded(
                 child: ListView(
@@ -902,7 +1182,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           ),
                     ),
                     const SizedBox(height: 16),
-                    if (!isCardio) ...[
+                    if (!isCardio && !_isHyroxWorkout) ...[
                       RestTimeSelector(
                         selectedSeconds: _restSeconds,
                         onChanged: _onRestSecondsChanged,
@@ -938,7 +1218,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                         ],
                       ),
                     ),
-                    if (!isCardio) ...[
+                    if (!isCardio && !_isHyroxWorkout) ...[
                       const SizedBox(height: 8),
                       ExerciseLoadControls(
                         exerciseId: exercise.exerciseId,
@@ -958,6 +1238,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                       ),
                     ],
                     const SizedBox(height: 12),
+                    if (_isHyroxWorkout)
+                      ..._buildHyroxStation(
+                        displayWorkout: displayWorkout,
+                        exercise: exercise,
+                        sets: sortedSets,
+                        visibleExercises: visibleExercises,
+                        unitSystem: unitSystem,
+                        isCardio: isCardio,
+                        cardioConfig: cardioConfig,
+                      )
+                    else ...[
                     ...sortedSets.asMap().entries.map(
                       (entry) {
                         if (isCardio) {
@@ -1042,11 +1333,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                       icon: const Icon(Icons.add),
                       label: Text(l10n.addSet),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: Size.fromHeight(48),
+                        minimumSize: const Size.fromHeight(48),
                         side: BorderSide(color: context.accentColor),
                         foregroundColor: context.accentColor,
                       ),
                     ),
+                    ],
                   ],
                 ),
               ),
@@ -1088,6 +1380,186 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     );
   }
 
+  List<String> _hyroxStationParts(
+    WorkoutExercise exercise,
+    List<WorkoutSet> sets,
+    String unitSystem,
+  ) {
+    final parts = <String>[];
+    final set = sets.isNotEmpty ? sets.first : null;
+    final meters = _hyroxTargetMetersByExerciseId[exercise.exerciseId] ??
+        set?.distanceMeters;
+    if (meters != null && meters > 0) {
+      parts.add('${meters.round()} m');
+    }
+    final reps = set?.reps ?? 0;
+    if (reps > 0 && (meters == null || meters <= 0)) {
+      parts.add('$reps reps');
+    }
+    final weight = set?.weight;
+    if (weight != null && weight > 0) {
+      final perArm = _perArmOverrides[exercise.exerciseId] ?? false;
+      final w = UnitConverter.formatMass(weight, unitSystem, decimals: 0);
+      parts.add(perArm ? '2 × $w' : w);
+    }
+    return parts;
+  }
+
+  List<Widget> _buildHyroxStation({
+    required Workout displayWorkout,
+    required WorkoutExercise exercise,
+    required List<WorkoutSet> sets,
+    required List<WorkoutExercise> visibleExercises,
+    required String unitSystem,
+    required bool isCardio,
+    CardioLoggingConfig? cardioConfig,
+  }) {
+    final l10n = context.l10n;
+    final accent = context.accentColor;
+    final parts = _hyroxStationParts(exercise, sets, unitSystem);
+    final allDone = sets.isNotEmpty && sets.every((s) => s.completed);
+    final splitSeconds = allDone && sets.isNotEmpty
+        ? sets
+            .map((s) => s.durationSeconds ?? 0)
+            .fold<int>(0, (a, b) => a > b ? a : b)
+        : null;
+    final saving = sets.any((s) => _savingSetIds.contains(s.id));
+
+    return [
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: accent.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              parts.isEmpty ? '—' : parts.join('   ·   '),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: accent,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.hyroxStationFixedHint,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMuted,
+                  ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 20),
+      if (allDone)
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(
+                '${l10n.hyroxStationCompleted} · ${CardioFormat.duration(splitSeconds)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        )
+      else
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: saving
+                ? null
+                : () => _completeHyroxStation(
+                      displayWorkout,
+                      exercise,
+                      sets,
+                      visibleExercises,
+                      isCardio: isCardio,
+                      cardioConfig: cardioConfig,
+                    ),
+            icon: saving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.check),
+            label: Text(l10n.hyroxStationDone),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(60),
+              backgroundColor: accent,
+              foregroundColor: Colors.black,
+              textStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+    ];
+  }
+
+  Future<void> _completeHyroxStation(
+    Workout workout,
+    WorkoutExercise exercise,
+    List<WorkoutSet> sets,
+    List<WorkoutExercise> visibleExercises, {
+    required bool isCardio,
+    CardioLoggingConfig? cardioConfig,
+  }) async {
+    final nextIndex = WorkoutExerciseNavigation.resolveNextWorkoutIndex(
+      workoutExercises: workout.exercises,
+      visibleExercises: visibleExercises,
+      currentExerciseId: exercise.id,
+    );
+    if (nextIndex == null && _workoutStoppedAt == null) {
+      setState(() => _workoutStoppedAt = DateTime.now());
+    }
+
+    for (var i = 0; i < sets.length; i++) {
+      final set = sets[i];
+      if (set.completed) continue;
+      await _logSet(
+        workout,
+        exercise,
+        set,
+        wasAlreadyCompleted: false,
+        isCardio: isCardio,
+        isLastSet: i == sets.length - 1,
+        cardioConfig: cardioConfig,
+      );
+    }
+
+    if (!mounted) return;
+    if (nextIndex != null) {
+      setState(() {
+        _currentExerciseIndex = nextIndex;
+        _stationStartedAt = DateTime.now();
+      });
+      unawaited(_publishWatchSession());
+    } else {
+      await _syncActiveWorkout();
+      if (!mounted) return;
+      final synced = ref.read(activeWorkoutProvider).valueOrNull;
+      await _completeWorkout(synced != null ? _mergedWorkout(synced) : workout);
+    }
+  }
+
   Future<void> _logSet(
     Workout workout,
     WorkoutExercise exercise,
@@ -1097,7 +1569,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     required bool isLastSet,
     CardioLoggingConfig? cardioConfig,
   }) async {
-    if (!wasAlreadyCompleted) {
+    if (!wasAlreadyCompleted && !_isHyroxWorkout) {
       if (isCardio) {
         final config = cardioConfig ??
             ExerciseLoggingResolver.cardioConfigFor(
@@ -1120,6 +1592,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         }
       } else {
         final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+        final isLoadedDistance = ExerciseLoad.isLoadedDistance(
+          exercise.exerciseId,
+          catalog,
+          exerciseName: exercise.exerciseName,
+        );
         final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
               exercise.exerciseId,
               catalog,
@@ -1134,7 +1611,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           }
           return;
         }
-        if (set.reps <= 0) {
+        if (isLoadedDistance) {
+          if (set.distanceMeters == null || set.distanceMeters! <= 0) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.l10n.distanceRequired)),
+              );
+            }
+            return;
+          }
+        } else if (set.reps <= 0) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n.repsRequired)),
@@ -1146,14 +1632,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
 
     int? rir;
-    if (!wasAlreadyCompleted && !isCardio && isLastSet && mounted) {
+    if (!wasAlreadyCompleted && !isCardio && isLastSet && mounted && !_isHyroxWorkout) {
       rir = await RirPickerSheet.show(context);
     }
+
+    final stationSeconds = (_isHyroxWorkout && _stationStartedAt != null && !wasAlreadyCompleted)
+        ? (_workoutStoppedAt ?? DateTime.now())
+            .difference(_stationStartedAt!)
+            .inSeconds
+            .clamp(1, 24 * 3600)
+        : null;
 
     final completedSet = set.copyWith(
       completed: true,
       rir: rir,
       loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
+      durationSeconds: stationSeconds ?? set.durationSeconds,
     );
 
     setState(() {
@@ -1161,17 +1655,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       _savingSetIds.add(set.id);
     });
 
-    if (!wasAlreadyCompleted && !isCardio) {
+    if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
       _startRestTimer();
     }
 
-    unawaited(
-      _persistSet(
-        exercise,
-        completedSet,
-        setId: set.id,
-      ),
+    final persist = _persistSet(
+      exercise,
+      completedSet,
+      setId: set.id,
     );
+    if (_isHyroxWorkout) {
+      await persist;
+    } else {
+      unawaited(persist);
+    }
   }
 
   Future<void> _deleteSet(
@@ -1213,14 +1710,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       catalog: catalog,
       sets: sorted,
     );
+    final isLoadedDistance = ExerciseLoad.isLoadedDistance(
+      exercise.exerciseId,
+      catalog,
+      exerciseName: exercise.exerciseName,
+    );
 
     final newSet = WorkoutSet(
       id: const Uuid().v4(),
       setNumber: sorted.length + 1,
       weight: isCardio ? null : prevSet?.weight,
-      reps: isCardio ? 0 : (prevSet?.reps ?? 10),
+      reps: isCardio || isLoadedDistance ? 0 : (prevSet?.reps ?? 10),
       durationSeconds: isCardio ? prevSet?.durationSeconds : null,
-      distanceMeters: isCardio ? prevSet?.distanceMeters : null,
+      distanceMeters: isCardio || isLoadedDistance ? prevSet?.distanceMeters : null,
       inclinePercent: isCardio ? prevSet?.inclinePercent : null,
       steps: isCardio ? prevSet?.steps : null,
       loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,

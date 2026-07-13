@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/runner/runner_standards.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -238,6 +239,19 @@ class RoutinesTab extends ConsumerWidget {
           );
         }
         final sorted = [...routines]..sort((a, b) {
+            final aSystem = a.isHyroxSystem || a.isRunnerSystem;
+            final bSystem = b.isHyroxSystem || b.isRunnerSystem;
+            if (aSystem != bSystem) return aSystem ? -1 : 1;
+            if (a.isHyroxSystem && b.isHyroxSystem) {
+              final ao = a.hyroxLevel?.index ?? 0;
+              final bo = b.hyroxLevel?.index ?? 0;
+              return ao.compareTo(bo);
+            }
+            if (a.isRunnerSystem && b.isRunnerSystem) {
+              final ao = a.runnerType?.index ?? 0;
+              final bo = b.runnerType?.index ?? 0;
+              return ao.compareTo(bo);
+            }
             if (a.isFavorite != b.isFavorite) return a.isFavorite ? -1 : 1;
             return b.updatedAt.compareTo(a.updatedAt);
           });
@@ -324,61 +338,216 @@ class _RoutineCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final isHyrox = routine.isHyroxSystem;
+    final isRunner = routine.isRunnerSystem;
+
+    if (isHyrox || isRunner) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: context.accentColor.withValues(alpha: 0.2),
+                    child: Icon(Icons.directions_run, color: context.accentColor),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                routine.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: context.accentColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                isHyrox ? l10n.hyroxSystemBadge : l10n.runnerSystemBadge,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.accentColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          routine.description?.split('\n').first ??
+                              l10n.exercisesInRoutine(routine.exercises.length),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.info_outline),
+                    tooltip: isHyrox ? l10n.hyroxSystemLocked : l10n.runnerSystemLocked,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isHyrox ? l10n.hyroxSystemLocked : l10n.runnerSystemLocked,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => isRunner
+                      ? startRunnerWorkoutFromRoutine(context, ref, routine)
+                      : startWorkoutFromRoutine(context, ref, routine),
+                  icon: const Icon(Icons.play_arrow, size: 26),
+                  label: Text(
+                    isRunner
+                        ? (routine.runnerType == RunnerType.outdoor
+                            ? l10n.runnerStartOutdoor
+                            : l10n.runnerStartTreadmill)
+                        : l10n.hyroxStartRace,
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    backgroundColor: context.accentColor,
+                    foregroundColor: Colors.black,
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Card(
       margin: EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: routine.isAiGenerated
-              ? context.accentColor.withValues(alpha: 0.15)
-              : AppColors.slate.withValues(alpha: 0.4),
+          backgroundColor: isHyrox
+              ? context.accentColor.withValues(alpha: 0.2)
+              : routine.isAiGenerated
+                  ? context.accentColor.withValues(alpha: 0.15)
+                  : AppColors.slate.withValues(alpha: 0.4),
           child: Icon(
-            routine.isAiGenerated ? Icons.auto_awesome_outlined : Icons.list_alt,
+            isHyrox
+                ? Icons.directions_run
+                : routine.isAiGenerated
+                    ? Icons.auto_awesome_outlined
+                    : Icons.list_alt,
             color: context.accentColor,
           ),
         ),
-        title: Text(routine.name),
+        title: Row(
+          children: [
+            Flexible(child: Text(routine.name)),
+            if (isHyrox) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: context.accentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  l10n.hyroxSystemBadge,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         subtitle: Text(
-          '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
+          isHyrox
+              ? (routine.description?.split('\n').first ??
+                  l10n.exercisesInRoutine(routine.exercises.length))
+              : '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: Icon(
-                routine.isFavorite ? Icons.star : Icons.star_border,
-                color: routine.isFavorite ? context.accentColor : AppColors.textMuted,
+            if (!isHyrox)
+              IconButton(
+                icon: Icon(
+                  routine.isFavorite ? Icons.star : Icons.star_border,
+                  color: routine.isFavorite ? context.accentColor : AppColors.textMuted,
+                ),
+                tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
+                onPressed: () => _toggleFavorite(context, ref),
               ),
-              tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
-              onPressed: () => _toggleFavorite(context, ref),
-            ),
             IconButton(
               icon: Icon(Icons.play_arrow),
               tooltip: l10n.startWorkout,
               color: context.accentColor,
               onPressed: () => startWorkoutFromRoutine(context, ref, routine),
             ),
-            PopupMenuButton(
-              itemBuilder: (_) => [
-                PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                PopupMenuItem(value: 'share', child: Text(l10n.share)),
-                PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-              ],
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  context.push('/routines/${routine.id}/edit');
-                } else if (value == 'share') {
-                  await RoutineShareFriendSheet.show(context, routine);
-                } else if (value == 'delete') {
-                  await ref.read(routineServiceProvider).deleteRoutine(routine.id);
-                  ref.invalidate(routinesProvider);
-                  ref.invalidate(friendFavoriteRoutinesProvider);
-                }
-              },
-            ),
+            if (!isHyrox)
+              PopupMenuButton(
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                  PopupMenuItem(value: 'share', child: Text(l10n.share)),
+                  PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                ],
+                onSelected: (value) async {
+                  if (value == 'edit') {
+                    context.push('/routines/${routine.id}/edit');
+                  } else if (value == 'share') {
+                    await RoutineShareFriendSheet.show(context, routine);
+                  } else if (value == 'delete') {
+                    await ref.read(routineServiceProvider).deleteRoutine(routine.id);
+                    ref.invalidate(routinesProvider);
+                    ref.invalidate(friendFavoriteRoutinesProvider);
+                  }
+                },
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                tooltip: l10n.hyroxSystemLocked,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.hyroxSystemLocked)),
+                  );
+                },
+              ),
           ],
         ),
-        onTap: () => context.push('/routines/${routine.id}/edit'),
+        onTap: isHyrox
+            ? () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.hyroxSystemLocked)),
+                );
+              }
+            : () => context.push('/routines/${routine.id}/edit'),
       ),
     );
   }

@@ -11,6 +11,7 @@ enum LeaderboardMetric {
   distance,
   calories,
   reps,
+  hyrox,
 }
 
 extension LeaderboardMetricApi on LeaderboardMetric {

@@ -48,6 +48,18 @@ class ExerciseSummaryLine {
       previousVolumeKg != null && volumeKg > previousVolumeKg!;
 }
 
+class HyroxSplit {
+  final String exerciseName;
+  final String exerciseId;
+  final int seconds;
+
+  const HyroxSplit({
+    required this.exerciseName,
+    required this.exerciseId,
+    required this.seconds,
+  });
+}
+
 class WorkoutSummaryData {
   final Workout workout;
   final int durationMinutes;
@@ -68,6 +80,9 @@ class WorkoutSummaryData {
   final XpAwardResult? xpAward;
   final WorkoutCalorieEstimate calorieEstimate;
   final List<MilestoneUnlock> newMilestoneUnlocks;
+  final bool isHyrox;
+  final List<HyroxSplit> hyroxSplits;
+  final bool isRunner;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -89,7 +104,21 @@ class WorkoutSummaryData {
     this.xpAward,
     this.calorieEstimate = const WorkoutCalorieEstimate.unavailable(),
     this.newMilestoneUnlocks = const [],
+    this.isHyrox = false,
+    this.hyroxSplits = const [],
+    this.isRunner = false,
   });
+
+  bool get hasHyroxSplits => isHyrox && hyroxSplits.isNotEmpty;
+
+  bool get hasRunnerSummary =>
+      isRunner &&
+      (workout.runnerRoute.isNotEmpty ||
+          workout.runnerSplits.isNotEmpty ||
+          workout.runnerAvgPaceSecPerKm != null);
+
+  int get hyroxTotalSeconds =>
+      hyroxSplits.fold<int>(0, (sum, s) => sum + s.seconds);
 
   bool get hasCalorieEstimate => calorieEstimate.isAvailable;
 
@@ -131,6 +160,8 @@ abstract final class WorkoutSummaryBuilder {
     Map<String, BodyMetricSnapshot>? bodyMetrics,
     List<MilestoneUnlock> newMilestoneUnlocks = const [],
     List<PersonalRecord> newPersonalRecords = const [],
+    bool isHyrox = false,
+    bool isRunner = false,
   }) {
     final catalog = exerciseCatalog ?? const [];
     final bodyWeightKg = profile?.bodyWeight;
@@ -180,6 +211,8 @@ abstract final class WorkoutSummaryBuilder {
       bodyMetrics: bodyMetrics,
     );
 
+    final hyroxSplits = isHyrox ? _hyroxSplits(workout) : const <HyroxSplit>[];
+
     return WorkoutSummaryData(
       workout: workout,
       durationMinutes: durationMinutes,
@@ -200,7 +233,28 @@ abstract final class WorkoutSummaryBuilder {
       xpAward: xpAward,
       calorieEstimate: calorieEstimate,
       newMilestoneUnlocks: newMilestoneUnlocks,
+      isHyrox: isHyrox,
+      hyroxSplits: hyroxSplits,
+      isRunner: isRunner,
     );
+  }
+
+  static List<HyroxSplit> _hyroxSplits(Workout workout) {
+    final splits = <HyroxSplit>[];
+    for (final ex in workout.exercises) {
+      final completed = ex.sets.where((s) => s.completed).toList();
+      if (completed.isEmpty) continue;
+      final seconds = completed
+          .map((s) => s.durationSeconds ?? 0)
+          .fold<int>(0, (a, b) => a > b ? a : b);
+      if (seconds <= 0) continue;
+      splits.add(HyroxSplit(
+        exerciseName: ex.exerciseName,
+        exerciseId: ex.exerciseId,
+        seconds: seconds,
+      ));
+    }
+    return splits;
   }
 
   static List<String> _trainedMuscleGroups(Workout workout, List<Exercise> catalog) {

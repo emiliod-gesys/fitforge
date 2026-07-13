@@ -17,6 +17,7 @@ enum ExerciseLoadMode {
   machineStack,
   bodyweight,
   assistedBodyweight,
+  loadedDistance,
   cardioMachine,
   cardioOutdoor;
 
@@ -30,6 +31,8 @@ enum ExerciseLoadMode {
         return ExerciseLoadMode.bodyweight;
       case 'assisted_bodyweight':
         return ExerciseLoadMode.assistedBodyweight;
+      case 'loaded_distance':
+        return ExerciseLoadMode.loadedDistance;
       case 'cardio_machine':
         return ExerciseLoadMode.cardioMachine;
       case 'cardio_outdoor':
@@ -44,6 +47,7 @@ enum ExerciseLoadMode {
         ExerciseLoadMode.machineStack => 'machine_stack',
         ExerciseLoadMode.bodyweight => 'bodyweight',
         ExerciseLoadMode.assistedBodyweight => 'assisted_bodyweight',
+        ExerciseLoadMode.loadedDistance => 'loaded_distance',
         ExerciseLoadMode.cardioMachine => 'cardio_machine',
         ExerciseLoadMode.cardioOutdoor => 'cardio_outdoor',
         ExerciseLoadMode.singleLoad => 'single_load',

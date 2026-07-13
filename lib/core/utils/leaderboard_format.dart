@@ -15,6 +15,7 @@ abstract final class LeaderboardFormat {
       LeaderboardMetric.distance => l10n.milestoneCategoryDistance,
       LeaderboardMetric.calories => l10n.milestoneCategoryCalories,
       LeaderboardMetric.reps => l10n.milestoneCategoryReps,
+      LeaderboardMetric.hyrox => l10n.leaderboardMetricHyrox,
     };
   }
 
@@ -44,6 +45,7 @@ abstract final class LeaderboardFormat {
       LeaderboardMetric.distance => CardioFormat.distance(entry.totalDistance, unitSystem),
       LeaderboardMetric.calories => l10n.caloriesKcal(entry.totalCalories),
       LeaderboardMetric.reps => _formatCount(entry.totalReps.toDouble()),
+      LeaderboardMetric.hyrox => CardioFormat.duration(entry.metricValue.round()),
     };
   }
 
@@ -62,6 +64,7 @@ abstract final class LeaderboardFormat {
       LeaderboardMetric.distance => MilestoneCategory.distance,
       LeaderboardMetric.calories => MilestoneCategory.calories,
       LeaderboardMetric.reps => MilestoneCategory.reps,
+      LeaderboardMetric.hyrox => null,
     };
   }
 

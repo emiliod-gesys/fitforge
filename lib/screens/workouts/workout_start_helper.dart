@@ -6,7 +6,9 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
+import '../../core/runner/runner_standards.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/runner_surface_picker.dart';
 import '../../services/ai_preferences.dart';
 import '../../services/proactive_workout_enricher.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -17,6 +19,8 @@ Future<void> startWorkoutAndNavigate(
   required String name,
   String? routineId,
   List<WorkoutExercise>? exercises,
+  bool isHyrox = false,
+  bool isRunner = false,
 }) async {
   final l10n = context.l10n;
   if (!context.mounted) return;
@@ -24,7 +28,7 @@ Future<void> startWorkoutAndNavigate(
   final router = ref.read(routerProvider);
   final messenger = ScaffoldMessenger.maybeOf(context);
 
-  final proactive = await AiPreferences.isProactiveAiEnabled();
+  final proactive = !isHyrox && !isRunner && await AiPreferences.isProactiveAiEnabled();
   final profile = proactive ? await ref.read(profileProvider.future) : null;
   final useAi = proactive &&
       profile != null &&
@@ -158,5 +162,28 @@ Future<void> startWorkoutFromRoutine(
     name: routine.name,
     routineId: routine.id,
     exercises: workoutExercisesFromRoutine(routine),
+    isHyrox: routine.isHyroxSystem,
+    isRunner: routine.isRunnerSystem,
+  );
+}
+
+Future<void> startRunnerWorkoutFromRoutine(
+  BuildContext context,
+  WidgetRef ref,
+  Routine routine,
+) async {
+  if (routine.runnerType == RunnerType.outdoor) {
+    final surface = await showRunnerSurfacePicker(context);
+    if (surface == null || !context.mounted) return;
+    ref.read(pendingRunnerSurfaceProvider.notifier).state = surface;
+  }
+  if (!context.mounted) return;
+  await startWorkoutAndNavigate(
+    context,
+    ref,
+    name: routine.name,
+    routineId: routine.id,
+    exercises: workoutExercisesFromRoutine(routine),
+    isRunner: true,
   );
 }

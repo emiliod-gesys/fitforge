@@ -70,6 +70,10 @@
 	<string>FitForge usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FitForge accede a tu galería para elegir fotos de ejercicios personalizados.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FitForge usa tu ubicación para registrar la ruta y distancia de tus carreras.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>FitForge sigue registrando tu carrera cuando la app está en segundo plano.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -87,6 +91,7 @@
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>location</string>
 	</array>
 </dict>
 </plist>
