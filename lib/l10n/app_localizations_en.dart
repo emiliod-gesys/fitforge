@@ -3063,6 +3063,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodQuickAddAction => 'Estimate with AI';
 
   @override
+  String get foodQuickAddDictate => 'Dictate';
+
+  @override
+  String get foodQuickAddDictateListening => 'Listening… Speak now.';
+
+  @override
+  String get foodQuickAddDictatePreparing => 'Starting microphone…';
+
+  @override
+  String get foodQuickAddDictateStop => 'Stop dictation';
+
+  @override
+  String get foodQuickAddDictateUnavailable =>
+      'Dictation is not available on this device.';
+
+  @override
+  String get foodQuickAddDictateLocaleUnavailable =>
+      'Spanish voice recognition is not installed on this phone. Add the language pack in system Settings, or use your keyboard\'s dictation.';
+
+  @override
+  String get foodQuickAddDictatePermissionDenied =>
+      'Enable microphone access to dictate.';
+
+  @override
   String get foodManualAddHint =>
       'Enter nutrition for one serving. It is saved on this device for quick reuse.';
 

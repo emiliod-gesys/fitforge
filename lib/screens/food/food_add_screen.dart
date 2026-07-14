@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
+import '../../core/utils/speech_locale_utils.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
@@ -256,6 +259,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                     FoodAddMode.quick => _QuickAddPane(
                         controller: _quickController,
                         onSubmit: _quickAddWithAi,
+                        languageCode: ref.watch(preferredLanguageProvider),
                       ),
                     FoodAddMode.manual => _ManualAddPane(
                         saved: _manualSaved,
@@ -620,46 +624,343 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
   }
 }
 
-class _QuickAddPane extends StatelessWidget {
+class _QuickAddPane extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onSubmit;
+  final String languageCode;
 
-  const _QuickAddPane({required this.controller, required this.onSubmit});
+  const _QuickAddPane({
+    required this.controller,
+    required this.onSubmit,
+    required this.languageCode,
+  });
+
+  @override
+  State<_QuickAddPane> createState() => _QuickAddPaneState();
+}
+
+class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderStateMixin {
+  final SpeechToText _speech = SpeechToText();
+  bool _speechReady = false;
+  bool _listening = false;
+  bool _starting = false;
+  String _dictationPrefix = '';
+  late final AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+      lowerBound: 0.35,
+      upperBound: 1,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _pulseController.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          _pulseController.forward();
+        }
+      });
+    _initSpeech();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    if (_listening) {
+      _speech.stop();
+    }
+    super.dispose();
+  }
+
+  void _setListening(bool value) {
+    if (_listening == value) return;
+    _listening = value;
+    if (value) {
+      _pulseController.forward(from: 0.35);
+    } else {
+      _pulseController.stop();
+      _pulseController.value = 1;
+    }
+  }
+
+  Future<void> _initSpeech() async {
+    final ready = await _speech.initialize(
+      onStatus: (status) {
+        if (!mounted) return;
+        if (status == 'listening') {
+          setState(() {
+            _starting = false;
+            _setListening(true);
+          });
+        } else if (status == 'done' ||
+            status == 'notListening' ||
+            status == 'stopped') {
+          setState(() {
+            _starting = false;
+            _setListening(false);
+          });
+        }
+      },
+      onError: (_) {
+        if (!mounted) return;
+        setState(() {
+          _starting = false;
+          _setListening(false);
+        });
+      },
+    );
+    if (mounted) setState(() => _speechReady = ready);
+  }
+
+  String _speechLocaleId() => widget.languageCode;
+
+  Future<void> _toggleDictation() async {
+    final l10n = context.l10n;
+
+    if (_listening || _starting) {
+      await _speech.stop();
+      if (mounted) {
+        setState(() {
+          _starting = false;
+          _setListening(false);
+        });
+      }
+      return;
+    }
+
+    setState(() => _starting = true);
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final permission = await Permission.microphone.request();
+    if (!permission.isGranted) {
+      if (!mounted) return;
+      setState(() => _starting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddDictatePermissionDenied)),
+      );
+      return;
+    }
+
+    if (!_speechReady) {
+      await _initSpeech();
+    }
+    if (!_speechReady) {
+      if (!mounted) return;
+      setState(() => _starting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddDictateUnavailable)),
+      );
+      return;
+    }
+
+    _dictationPrefix = widget.controller.text.trim();
+    final locales = await _speech.locales();
+    final locale = SpeechLocaleUtils.resolveLocaleId(
+      languageCode: _speechLocaleId(),
+      available: locales,
+    );
+    if (locale == null) {
+      if (!mounted) return;
+      setState(() => _starting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddDictateLocaleUnavailable)),
+      );
+      return;
+    }
+
+    final started = await _speech.listen(
+      onResult: (result) {
+        if (!mounted) return;
+        final words = result.recognizedWords.trim();
+        if (words.isEmpty) return;
+        final spacer = _dictationPrefix.isEmpty ? '' : ' ';
+        widget.controller.text = '$_dictationPrefix$spacer$words';
+        widget.controller.selection = TextSelection.collapsed(offset: widget.controller.text.length);
+      },
+      listenOptions: SpeechListenOptions(
+        localeId: locale,
+        listenMode: ListenMode.dictation,
+      ),
+    );
+
+    if (!mounted) return;
+    if (started) {
+      setState(() {
+        _starting = false;
+        _setListening(true);
+      });
+    } else {
+      setState(() => _starting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddDictateUnavailable)),
+      );
+    }
+  }
+
+  bool get _dictationActive => _starting || _listening;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final accent = context.accentColor;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: bottomInset > 0 ? bottomInset + 12 : 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_dictationActive)
+            AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: _listening ? 0.16 : 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: accent.withValues(alpha: _listening ? 0.75 : 0.35),
+                width: _listening ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                if (_starting)
+                  SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: accent),
+                  )
+                else
+                  ScaleTransition(
+                    scale: _pulseController,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.mic, color: Colors.white, size: 20),
+                    ),
+                  ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _starting ? l10n.foodQuickAddDictatePreparing : l10n.foodQuickAddDictateListening,
+                        style: TextStyle(
+                          color: accent,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (_listening) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.foodQuickAddDictateStop,
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (_dictationActive)
+                  IconButton(
+                    tooltip: l10n.foodQuickAddDictateStop,
+                    onPressed: _toggleDictation,
+                    icon: Icon(Icons.stop_circle, color: accent, size: 28),
+                  ),
+              ],
+            ),
+          ),
         Text(
           l10n.foodQuickAddHint,
           style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         const SizedBox(height: 12),
         TextField(
-          controller: controller,
+          controller: widget.controller,
           autofocus: true,
           minLines: 3,
           maxLines: 5,
           decoration: InputDecoration(
             hintText: l10n.foodQuickAddPlaceholder,
             alignLabelWithHint: true,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: _listening ? accent : AppColors.border,
+                width: _listening ? 2 : 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: _listening ? accent : accent.withValues(alpha: 0.8),
+                width: _listening ? 2 : 1.5,
+              ),
+            ),
+            suffixIcon: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: IconButton(
+                tooltip: _dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate,
+                onPressed: _toggleDictation,
+                icon: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _listening
+                        ? accent
+                        : _starting
+                            ? accent.withValues(alpha: 0.2)
+                            : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _dictationActive ? Icons.mic : Icons.mic_none_outlined,
+                    color: _listening ? Colors.white : accent,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: _toggleDictation,
+          icon: Icon(
+            _dictationActive ? Icons.stop_circle_outlined : Icons.mic_none_outlined,
+            color: _dictationActive ? AppColors.error : accent,
+          ),
+          label: Text(_dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _dictationActive ? AppColors.error : accent,
+            side: BorderSide(
+              color: _dictationActive
+                  ? AppColors.error.withValues(alpha: 0.55)
+                  : accent.withValues(alpha: 0.45),
+            ),
+            minimumSize: const Size.fromHeight(44),
+          ),
+        ),
+        const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: onSubmit,
-          icon: Icon(Icons.auto_awesome),
+          onPressed: widget.onSubmit,
+          icon: const Icon(Icons.auto_awesome),
           label: Text(l10n.foodQuickAddAction),
           style: FilledButton.styleFrom(
-            backgroundColor: context.accentColor,
+            backgroundColor: accent,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(48),
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 }

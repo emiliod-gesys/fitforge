@@ -68,6 +68,10 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>FitForge usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FitForge usa el micrófono para dictar descripciones de comida en el registro rápido.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>FitForge convierte tu voz en texto para describir lo que comiste.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FitForge accede a tu galería para elegir fotos de ejercicios personalizados.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

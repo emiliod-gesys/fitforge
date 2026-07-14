@@ -1071,6 +1071,11 @@ Reglas:
 - name: nombre ESPECÍFICO del plato con ingredientes o preparación visibles (máx. ~70 caracteres).
   Buenos: "2 huevos revueltos con 2 tortillas de maíz", "Avena con plátano y mantequilla de maní".
   Malos: "Comida", "Desayuno", "Plato", "Huevos" (demasiado genérico).
+- ingredients: lista cada componente del plato, no solo el principal.
+- ingredient_portions: OBLIGATORIO si hay uno o más componentes. Array con name y grams_g (peso estimado de CADA uno).
+  La suma de grams_g debe aproximar reference_amount_g.
+  Si el usuario indica gramos explícitos (ej. "300 g espagueti"), usa EXACTAMENTE esos gramos para ese ítem.
+  Ejemplo: [{"name": "espagueti cocido", "grams_g": 300}, {"name": "salsa boloñesa", "grams_g": 120}]
 ''';
     final hints = FoodQueryHints.labeledKcalTotal(query);
     final eggs = FoodQueryHints.eggCount(query);
@@ -1084,9 +1089,18 @@ ${hints > 0 ? '- Ítems con kcal explícitas en el texto: mínimo $hints kcal (s
 '''
         : '';
 
+    final userGrams = FoodQueryHints.parseIngredientGramsFromQuery(query);
+    final userGramsBlock = userGrams.isNotEmpty
+        ? '''
+
+GRAMOS EXPLÍCITOS del usuario (respétalos en ingredient_portions):
+${userGrams.map((p) => '- ${p.name}: ${p.gramsG.toStringAsFixed(0)} g').join('\n')}
+'''
+        : '';
+
     final user = '''
 Comida descrita: "$query"
-$hintsBlock
+$hintsBlock$userGramsBlock
 JSON:
 {
   "name": "nombre específico del plato con ingredientes visibles",
@@ -1098,7 +1112,11 @@ JSON:
   "fiber_g": 0,
   "serving_description": "2 huevos + 2 tortillas",
   "reference_amount_g": 180,
-  "ingredients": ["ingrediente 1"]
+  "ingredients": ["huevos", "tortillas de maíz"],
+  "ingredient_portions": [
+    {"name": "huevos", "grams_g": 100},
+    {"name": "tortillas de maíz", "grams_g": 80}
+  ]
 }
 ''';
     try {

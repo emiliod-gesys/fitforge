@@ -5378,6 +5378,48 @@ abstract class AppLocalizations {
   /// **'Estimar con IA'**
   String get foodQuickAddAction;
 
+  /// No description provided for @foodQuickAddDictate.
+  ///
+  /// In es, this message translates to:
+  /// **'Dictar'**
+  String get foodQuickAddDictate;
+
+  /// No description provided for @foodQuickAddDictateListening.
+  ///
+  /// In es, this message translates to:
+  /// **'Te estoy escuchando… Habla ahora.'**
+  String get foodQuickAddDictateListening;
+
+  /// No description provided for @foodQuickAddDictatePreparing.
+  ///
+  /// In es, this message translates to:
+  /// **'Preparando micrófono…'**
+  String get foodQuickAddDictatePreparing;
+
+  /// No description provided for @foodQuickAddDictateStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener dictado'**
+  String get foodQuickAddDictateStop;
+
+  /// No description provided for @foodQuickAddDictateUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'El dictado no está disponible en este dispositivo.'**
+  String get foodQuickAddDictateUnavailable;
+
+  /// No description provided for @foodQuickAddDictateLocaleUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay reconocimiento de voz en español en el teléfono. Instala el paquete de idioma en Ajustes del sistema o dicta con el teclado Samsung.'**
+  String get foodQuickAddDictateLocaleUnavailable;
+
+  /// No description provided for @foodQuickAddDictatePermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el permiso de micrófono para dictar.'**
+  String get foodQuickAddDictatePermissionDenied;
+
   /// No description provided for @foodManualAddHint.
   ///
   /// In es, this message translates to:

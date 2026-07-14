@@ -3087,6 +3087,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodQuickAddAction => 'Estimar con IA';
 
   @override
+  String get foodQuickAddDictate => 'Dictar';
+
+  @override
+  String get foodQuickAddDictateListening =>
+      'Te estoy escuchando… Habla ahora.';
+
+  @override
+  String get foodQuickAddDictatePreparing => 'Preparando micrófono…';
+
+  @override
+  String get foodQuickAddDictateStop => 'Detener dictado';
+
+  @override
+  String get foodQuickAddDictateUnavailable =>
+      'El dictado no está disponible en este dispositivo.';
+
+  @override
+  String get foodQuickAddDictateLocaleUnavailable =>
+      'No hay reconocimiento de voz en español en el teléfono. Instala el paquete de idioma en Ajustes del sistema o dicta con el teclado Samsung.';
+
+  @override
+  String get foodQuickAddDictatePermissionDenied =>
+      'Activa el permiso de micrófono para dictar.';
+
+  @override
   String get foodManualAddHint =>
       'Introduce los datos de una porción. Se guardará en tu dispositivo para reutilizarlo.';
 

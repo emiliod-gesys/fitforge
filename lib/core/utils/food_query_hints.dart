@@ -72,6 +72,147 @@ abstract final class FoodQueryHints {
     return (kcal: kcal, p: p, f: f, c: c);
   }
 
+  /// Extrae gramos explícitos por ítem (ej. "300g espagueti", "pollo 150 g").
+  static List<FoodIngredientPortion> parseIngredientGramsFromQuery(String query) {
+    final portions = <FoodIngredientPortion>[];
+
+    final forward = RegExp(
+      r'(\d+(?:[.,]\d+)?)\s*g(?:ramos?)?(?:\s+de)?\s+([^,+\n\d]+?)(?=\s*(?:,|\s+y\s|\s+con\s|\s+e\s|\+\s|\d+\s*g|$))',
+      caseSensitive: false,
+    );
+    for (final match in forward.allMatches(query)) {
+      final grams = double.tryParse(match.group(1)!.replaceAll(',', '.')) ?? 0;
+      final name = _cleanIngredientName(match.group(2)!);
+      if (grams <= 0 || name.isEmpty) continue;
+      _upsertPortion(portions, name, grams);
+    }
+
+    final reverse = RegExp(
+      r'([^,+\n\d]+?)\s+(\d+(?:[.,]\d+)?)\s*g(?:ramos?)?\b',
+      caseSensitive: false,
+    );
+    for (final match in reverse.allMatches(query)) {
+      final name = _cleanIngredientName(match.group(1)!);
+      final grams = double.tryParse(match.group(2)!.replaceAll(',', '.')) ?? 0;
+      if (grams <= 0 || name.isEmpty) continue;
+      if (portions.any((p) => _namesOverlap(p.name, name))) continue;
+      _upsertPortion(portions, name, grams);
+    }
+
+    return portions;
+  }
+
+  static String _cleanIngredientName(String raw) {
+    var name = raw.trim().toLowerCase();
+    name = name.replaceAll(RegExp(r'^(de|del|la|el|un|una|unos|unas)\s+'), '');
+    name = name.replaceAll(RegExp(r'\s+(y|con|e|de)$'), '');
+    return name.trim();
+  }
+
+  static bool _namesOverlap(String a, String b) {
+    final x = a.toLowerCase().trim();
+    final y = b.toLowerCase().trim();
+    if (x.isEmpty || y.isEmpty) return false;
+    return x == y || x.contains(y) || y.contains(x);
+  }
+
+  static void _upsertPortion(List<FoodIngredientPortion> portions, String name, double grams) {
+    final index = portions.indexWhere((p) => _namesOverlap(p.name, name));
+    if (index >= 0) {
+      portions[index] = FoodIngredientPortion(name: name, gramsG: grams);
+    } else {
+      portions.add(FoodIngredientPortion(name: name, gramsG: grams));
+    }
+  }
+
+  /// Completa o corrige gramos por ingrediente usando texto del usuario y totales.
+  static FoodNutritionEstimate ensureIngredientPortions(String query, FoodNutritionEstimate ai) {
+    final userPortions = parseIngredientGramsFromQuery(query);
+    final portions = [...ai.ingredientPortions];
+
+    for (final userPortion in userPortions) {
+      final index = portions.indexWhere((p) => _namesOverlap(p.name, userPortion.name));
+      if (index >= 0) {
+        portions[index] = FoodIngredientPortion(
+          name: portions[index].name,
+          gramsG: userPortion.gramsG,
+        );
+      } else {
+        portions.add(userPortion);
+      }
+    }
+
+    final eggs = eggCount(query);
+    if (eggs > 0) {
+      _upsertPortion(portions, 'huevos', eggs * 50.0);
+    }
+
+    if (portions.isEmpty && ai.ingredients.length > 1) {
+      final each = ai.referenceAmount > 0 ? ai.referenceAmount / ai.ingredients.length : 0.0;
+      for (final ingredient in ai.ingredients) {
+        portions.add(FoodIngredientPortion(name: ingredient, gramsG: each));
+      }
+    } else if (portions.isEmpty && ai.ingredients.length == 1) {
+      final grams = parseGrams(query) ?? (ai.referenceAmount > 0 ? ai.referenceAmount : 100);
+      portions.add(FoodIngredientPortion(name: ai.ingredients.first, gramsG: grams));
+    }
+
+    final totalGrams = parseGrams(query);
+    if (portions.length == 1 && totalGrams != null && totalGrams > 0) {
+      portions[0] = FoodIngredientPortion(name: portions[0].name, gramsG: totalGrams);
+    }
+
+    if (portions.isEmpty) return ai;
+
+    var sumGrams = portions.fold<double>(0, (sum, p) => sum + p.gramsG);
+    final targetTotal = totalGrams ?? (ai.referenceAmount > 0 ? ai.referenceAmount : sumGrams);
+
+    if (userPortions.isNotEmpty && sumGrams > 0 && targetTotal > sumGrams * 1.05) {
+      final unspecified = portions.where((p) {
+        return !userPortions.any((u) => _namesOverlap(u.name, p.name));
+      }).toList();
+      if (unspecified.isEmpty && ai.ingredients.length > portions.length) {
+        final remaining = targetTotal - sumGrams;
+        final missing = ai.ingredients.where(
+          (name) => !portions.any((p) => _namesOverlap(p.name, name)),
+        );
+        final each = remaining / missing.length;
+        for (final name in missing) {
+          portions.add(FoodIngredientPortion(name: name, gramsG: each));
+        }
+      } else if (unspecified.isNotEmpty) {
+        final remaining = (targetTotal - sumGrams).clamp(0, double.infinity);
+        final each = remaining / unspecified.length;
+        for (var i = 0; i < portions.length; i++) {
+          if (userPortions.any((u) => _namesOverlap(u.name, portions[i].name))) continue;
+          portions[i] = FoodIngredientPortion(
+            name: portions[i].name,
+            gramsG: portions[i].gramsG + each,
+          );
+        }
+      }
+      sumGrams = portions.fold<double>(0, (sum, p) => sum + p.gramsG);
+    }
+
+    if ((sumGrams - targetTotal).abs() > 1 && sumGrams > 0 && userPortions.isEmpty) {
+      final factor = targetTotal / sumGrams;
+      for (var i = 0; i < portions.length; i++) {
+        portions[i] = portions[i].scaledBy(factor);
+      }
+      sumGrams = targetTotal;
+    }
+
+    final referenceAmount = sumGrams > 0 ? sumGrams : ai.referenceAmount;
+
+    return ai.copyWith(
+      ingredientPortions: portions,
+      ingredients: portions.map((p) => p.name).toList(),
+      referenceAmount: referenceAmount,
+      amountUnit: 'g',
+      servingDescription: FoodServingParser.formatAmount(referenceAmount, 'g'),
+    );
+  }
+
   /// Extrae gramos del texto del usuario (ej. "100g", "100 gramos").
   static double? parseGrams(String query) {
     final match = RegExp(
@@ -198,10 +339,8 @@ abstract final class FoodQueryHints {
         fatG: double.parse((anchor.fat * factor).toStringAsFixed(1)),
         fiberG: double.parse((anchor.fiber * factor).toStringAsFixed(1)),
         servingDescription: FoodServingParser.formatAmount(grams, 'g'),
-        ingredients: ai.ingredients,
-        ingredientPortions: ai.ingredientPortions
-            .map((portion) => portion.scaledBy(grams / (ai.referenceAmount > 0 ? ai.referenceAmount : 100)))
-            .toList(),
+        ingredients: ai.ingredients.isNotEmpty ? ai.ingredients : [token],
+        ingredientPortions: [FoodIngredientPortion(name: token, gramsG: grams)],
         referenceAmount: grams,
         amountUnit: 'g',
       );
@@ -216,7 +355,7 @@ abstract final class FoodQueryHints {
     final eggs = eggCount(query);
 
     if (labeledKcal == 0 && eggs == 0) {
-      return gramCorrected;
+      return ensureIngredientPortions(query, gramCorrected);
     }
 
     var kcal = labeledKcal + eggs * eggKcal;
@@ -243,12 +382,16 @@ abstract final class FoodQueryHints {
       }
     }
 
-    if (kcal <= 0) return gramCorrected;
+    if (kcal <= 0) return ensureIngredientPortions(query, gramCorrected);
 
     final floor = (kcal * 0.95).round();
-    if (gramCorrected.caloriesKcal >= floor) return gramCorrected;
+    if (gramCorrected.caloriesKcal >= floor) {
+      return ensureIngredientPortions(query, gramCorrected);
+    }
 
-    return FoodNutritionEstimate(
+    return ensureIngredientPortions(
+      query,
+      FoodNutritionEstimate(
       name: gramCorrected.name,
       brand: gramCorrected.brand,
       caloriesKcal: kcal.round(),
@@ -261,6 +404,7 @@ abstract final class FoodQueryHints {
       ingredientPortions: gramCorrected.ingredientPortions,
       referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
       amountUnit: gramCorrected.amountUnit,
+      ),
     );
   }
 }

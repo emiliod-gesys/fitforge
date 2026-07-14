@@ -76,5 +76,52 @@ void main() {
       expect(fixed.caloriesKcal, 393);
       expect(fixed.referenceAmount, 300);
     });
+
+    test('parseIngredientGramsFromQuery reads explicit item weights', () {
+      final portions = FoodQueryHints.parseIngredientGramsFromQuery(
+        '320g espagueti cocido y 150g pollo a la plancha',
+      );
+
+      expect(portions.length, 2);
+      expect(portions.any((p) => p.gramsG == 320 && p.name.contains('espagueti')), isTrue);
+      expect(portions.any((p) => p.gramsG == 150 && p.name.contains('pollo')), isTrue);
+    });
+
+    test('ensureIngredientPortions applies user grams to AI ingredients', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Espagueti cocido simple',
+        caloriesKcal: 420,
+        proteinG: 16,
+        carbsG: 80,
+        fatG: 3,
+        referenceAmount: 320,
+        ingredients: ['espagueti cocido'],
+      );
+
+      final fixed = FoodQueryHints.reconcile('320g espagueti cocido simple', ai);
+
+      expect(fixed.ingredientPortions, isNotEmpty);
+      expect(fixed.ingredientPortions.first.gramsG, 320);
+    });
+
+    test('reconcile builds portions for multi-ingredient AI response', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pollo con arroz',
+        caloriesKcal: 520,
+        proteinG: 40,
+        carbsG: 55,
+        fatG: 12,
+        referenceAmount: 400,
+        ingredients: ['pollo', 'arroz blanco'],
+      );
+
+      final fixed = FoodQueryHints.reconcile('pollo con arroz', ai);
+
+      expect(fixed.ingredientPortions.length, 2);
+      expect(
+        fixed.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG),
+        closeTo(400, 1),
+      );
+    });
   });
 }
