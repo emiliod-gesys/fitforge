@@ -12,6 +12,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/onboarding_progress_provider.dart';
 import '../../widgets/exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/exercise_thumbnail.dart';
@@ -22,8 +23,14 @@ import '../../widgets/routine_exercise_target_fields.dart';
 class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
   final String? studentId;
+  final bool onboardingMode;
 
-  const RoutineEditorScreen({super.key, this.routineId, this.studentId});
+  const RoutineEditorScreen({
+    super.key,
+    this.routineId,
+    this.studentId,
+    this.onboardingMode = false,
+  });
 
   bool get isStudentRoutine => studentId != null && studentId!.isNotEmpty;
 
@@ -112,7 +119,12 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
       }
 
       if (!mounted) return;
-      context.pop();
+      if (widget.onboardingMode) {
+        ref.read(onboardingProgressProvider.notifier).markRoutineCompleted();
+        context.pop(true);
+      } else {
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
         showRoutineSaveErrorSnackBar(context, e);

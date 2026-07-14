@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/profile_completeness.dart';
 import '../models/profile.dart';
 import '../providers/app_providers.dart';
-import 'profile/profile_onboarding_dialog.dart';
 import 'profile/weight_update_dialog.dart';
 
 /// Muestra onboarding obligatorio o actualización de peso al abrir la app.
@@ -59,39 +58,22 @@ class _ProfileGateListenerState extends ConsumerState<ProfileGateListener>
 
     _gateRunning = true;
     try {
-      var current = profile;
+      var profile = ref.read(profileProvider).valueOrNull;
+      if (profile == null) return;
 
-      if (ProfileCompleteness.needsOnboarding(current)) {
-        await _showOnboarding(current);
-        ref.invalidate(profileProvider);
-        final updated = await ref.read(profileProvider.future);
-        if (!mounted || updated == null || ProfileCompleteness.needsOnboarding(updated)) {
-          return;
-        }
-        current = updated;
+      if (ProfileCompleteness.needsOnboarding(profile)) {
+        return;
       }
 
       final lastWeightAt = await ref.read(profileServiceProvider).getLastWeightMeasuredAt();
       if (!mounted) return;
 
       if (ProfileCompleteness.needsWeightUpdate(lastWeightAt)) {
-        await _showWeightUpdate(current);
+        await _showWeightUpdate(profile);
       }
     } finally {
       _gateRunning = false;
     }
-  }
-
-  Future<void> _showOnboarding(UserProfile profile) {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (_) => PopScope(
-        canPop: false,
-        child: ProfileOnboardingDialog(initialProfile: profile),
-      ),
-    );
   }
 
   Future<void> _showWeightUpdate(UserProfile profile) {

@@ -42,6 +42,12 @@ abstract final class WorkoutSummaryShare {
       );
     }
 
+    if (summary.hasCalorieEstimate) {
+      buffer.writeln(
+        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+      );
+    }
+
     if (summary.xpAward != null && summary.xpAward!.xpEarned > 0) {
       buffer
         ..writeln()
@@ -111,6 +117,12 @@ abstract final class WorkoutSummaryShare {
           l10n.shareRunnerSplitLine(split.km, CardioFormat.duration(split.seconds)),
         );
       }
+    }
+
+    if (summary.hasCalorieEstimate) {
+      buffer.writeln(
+        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+      );
     }
 
     if (summary.xpAward != null && summary.xpAward!.xpEarned > 0) {

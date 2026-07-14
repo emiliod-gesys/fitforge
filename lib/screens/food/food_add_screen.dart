@@ -18,8 +18,16 @@ enum FoodAddMode { search, photo, quick, manual }
 class FoodAddScreen extends ConsumerStatefulWidget {
   final MealType mealType;
   final DateTime day;
+  final bool onboardingMode;
+  final FoodAddMode? initialMode;
 
-  const FoodAddScreen({super.key, required this.mealType, required this.day});
+  const FoodAddScreen({
+    super.key,
+    required this.mealType,
+    required this.day,
+    this.onboardingMode = false,
+    this.initialMode,
+  });
 
   @override
   ConsumerState<FoodAddScreen> createState() => _FoodAddScreenState();
@@ -36,6 +44,9 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.onboardingMode && widget.initialMode != null) {
+      _mode = widget.initialMode!;
+    }
     _loadRecent();
     _loadManualSaved();
     _filterController.addListener(_loadRecent);
@@ -87,6 +98,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
         'meal': widget.mealType,
         'day': widget.day,
         'source': source,
+        if (widget.onboardingMode) 'onboarding': true,
         if (originalQuery != null) 'originalQuery': originalQuery,
         if (imageBytes != null) 'imageBytes': imageBytes,
       },

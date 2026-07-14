@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_accent.dart';
@@ -156,6 +157,10 @@ class _ProfileOnboardingDialogState extends ConsumerState<ProfileOnboardingDialo
                 TextFormField(
                   controller: _ageController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(3),
+                  ],
                   decoration: InputDecoration(
                     labelText: l10n.ageTitle,
                     suffixText: l10n.years,

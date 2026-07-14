@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -70,17 +69,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Stack(
-        children: [
-          Positioned.fill(child: DecoratedBox(decoration: AppDecorations.authBackdropGlow(context.appAccent))),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 32),
-                  const Center(child: FitForgeLogo.full(height: 132)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 32),
+              const Center(child: FitForgeLogo.full(height: 132)),
                   const SizedBox(height: 24),
                   Text(
                     l10n.resetPasswordTitle,
@@ -137,11 +133,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ],
                 ),
               ),
-                ],
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

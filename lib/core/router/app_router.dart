@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
+import '../../core/utils/onboarding_routes.dart';
+import '../../core/utils/profile_completeness.dart';
+import '../../screens/onboarding/onboarding_screen.dart';
 import '../../providers/password_recovery_provider.dart';
 import '../../screens/ai/ai_coach_screen.dart';
 import '../../screens/auth/login_screen.dart';
@@ -32,15 +35,31 @@ int _trainingHubInitialTab(GoRouterState state) {
   return state.uri.queryParameters['tab'] == 'routines' ? 1 : 0;
 }
 
+/// Notifica a GoRouter cuando cambian auth/perfil sin recrear la instancia del router.
+class _RouterRefreshNotifier extends ChangeNotifier {
+  _RouterRefreshNotifier(this._ref) {
+    _ref.listen(authStateProvider, (_, __) => notifyListeners());
+    _ref.listen(profileProvider, (_, __) => notifyListeners());
+    _ref.listen(passwordRecoveryPendingProvider, (_, __) => notifyListeners());
+  }
+
+  final Ref _ref;
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
-  final recoveryPending = ref.watch(passwordRecoveryPendingProvider);
-  ref.watch(authRecoveryListenerProvider);
+  ref.read(authRecoveryListenerProvider);
+  final refresh = _RouterRefreshNotifier(ref);
+  ref.onDispose(refresh.dispose);
 
   return GoRouter(
+    refreshListenable: refresh,
     initialLocation: '/',
     redirect: (context, state) {
+      final recoveryPending = ref.read(passwordRecoveryPendingProvider);
+      final authState = ref.read(authStateProvider);
+      final profileAsync = ref.read(profileProvider);
       final isResetRoute = state.matchedLocation == '/reset-password';
+      final isOnboardingRoute = state.matchedLocation == '/onboarding';
 
       if (recoveryPending && !isResetRoute) return '/reset-password';
       if (!recoveryPending && isResetRoute) {
@@ -52,7 +71,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = state.matchedLocation == '/login' || isResetRoute;
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && state.matchedLocation == '/login') return '/';
+
+      if (isLoggedIn) {
+        if (profileAsync.isLoading) return null;
+
+        final profile = profileAsync.valueOrNull;
+        final needsOnboarding = ProfileCompleteness.needsOnboarding(profile);
+
+        if (needsOnboarding &&
+            !isOnboardingRoute &&
+            !OnboardingRoutes.allowsDuringOnboarding(state.matchedLocation) &&
+            !isAuthRoute) {
+          return '/onboarding';
+        }
+        if (!needsOnboarding && isOnboardingRoute) return '/';
+        if (isLoggedIn && state.matchedLocation == '/login') {
+          return needsOnboarding ? '/onboarding' : '/';
+        }
+      }
+
       if (state.uri.path == '/routines') return '/?tab=routines';
       return null;
     },
@@ -64,6 +101,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reset-password',
         builder: (_, __) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => SocialNotificationListener(
@@ -132,7 +173,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/routines/new',
-        builder: (_, __) => const RoutineEditorScreen(),
+        builder: (_, state) => RoutineEditorScreen(
+          onboardingMode: state.uri.queryParameters['onboarding'] == '1',
+        ),
       ),
       GoRoute(
         path: '/routines/:id/edit',
@@ -164,6 +207,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           return FoodAddScreen(
             mealType: extra['meal'] as MealType,
             day: extra['day'] as DateTime,
+            onboardingMode: extra['onboarding'] as bool? ?? false,
+            initialMode: extra['initialMode'] as FoodAddMode?,
           );
         },
       ),
@@ -178,6 +223,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             source: extra['source'] as FoodEntrySource? ?? FoodEntrySource.manual,
             originalQuery: extra['originalQuery'] as String?,
             imageBytes: extra['imageBytes'] as List<int>?,
+            onboardingMode: extra['onboarding'] as bool? ?? false,
           );
         },
       ),

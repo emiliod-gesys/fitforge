@@ -129,6 +129,175 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileOnboardingContinue => 'Continue';
 
   @override
+  String get onboardingWelcomeTitle => 'Welcome to FitForge';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Train, log meals, and track progress in one place.';
+
+  @override
+  String get onboardingWelcomeBulletTrain =>
+      'Gym, Hyrox, and GPS running routines';
+
+  @override
+  String get onboardingWelcomeBulletFood =>
+      'Food diary with a daily calorie budget';
+
+  @override
+  String get onboardingWelcomeBulletProgress =>
+      'XP, records, and shareable progress';
+
+  @override
+  String get onboardingLanguageTitle => 'Choose your language';
+
+  @override
+  String get onboardingLanguageSubtitle =>
+      'FitForge will use this language. You can change it later in Profile.';
+
+  @override
+  String get fitnessGoalCalorieSurplus => 'Requires caloric surplus';
+
+  @override
+  String get fitnessGoalCalorieDeficit => 'Requires caloric deficit';
+
+  @override
+  String get fitnessGoalCalorieMaintenance =>
+      'Caloric maintenance (no surplus or deficit)';
+
+  @override
+  String onboardingStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get onboardingAboutYouTitle => 'About you';
+
+  @override
+  String get onboardingAboutYouSubtitle =>
+      'Pick your avatar and tell us the basics so we can personalize calories and progress.';
+
+  @override
+  String get onboardingBodyTitle => 'Your body';
+
+  @override
+  String get onboardingBodySubtitle =>
+      'Height and weight power calorie burn estimates and your daily target.';
+
+  @override
+  String get onboardingGoalsTitle => 'Your goal';
+
+  @override
+  String get onboardingGoalsSubtitle =>
+      'Set how you train and eat based on what you want to achieve.';
+
+  @override
+  String get onboardingModesTitle => 'How do you train?';
+
+  @override
+  String get onboardingModesSubtitle =>
+      'Enable extra modes for running or Hyrox prep. You can change these anytime in Profile.';
+
+  @override
+  String get onboardingRoutineTitle => 'Your first routine';
+
+  @override
+  String get onboardingRoutineSubtitle =>
+      'Open the real routine editor, name it, add exercises, and save.';
+
+  @override
+  String get onboardingRoutineOpenAction => 'Open routine editor';
+
+  @override
+  String get onboardingRoutineOpenHint =>
+      'Same editor as Train → Routines. You need a name and at least one exercise before saving.';
+
+  @override
+  String get onboardingRoutineNameHint => 'My first routine';
+
+  @override
+  String get onboardingRoutineExercisesTitle => 'Exercises';
+
+  @override
+  String get onboardingRoutineExercisesHint =>
+      'Search the catalog and pick one or more. You can fine-tune sets and reps later in the editor.';
+
+  @override
+  String get onboardingRoutineAddExercise => 'Add exercise';
+
+  @override
+  String get onboardingRoutineExerciseRequired =>
+      'Add at least one exercise before creating the routine';
+
+  @override
+  String get onboardingRoutineCreateAction => 'Create routine';
+
+  @override
+  String get onboardingRoutineCreated =>
+      'Routine created! Find it under Train → Routines.';
+
+  @override
+  String get onboardingRoutineNameRequired => 'Enter a name for the routine';
+
+  @override
+  String get onboardingFoodTitle => 'Quick food log';
+
+  @override
+  String get onboardingFoodSubtitle =>
+      'Log a breakfast with Quick add (AI), then delete it in Food to learn the full flow.';
+
+  @override
+  String get onboardingFoodOpenAction => 'Log breakfast';
+
+  @override
+  String get onboardingFoodOpenDiary => 'Go to Food';
+
+  @override
+  String get onboardingFoodPracticeBanner =>
+      'Onboarding step: swipe this entry to delete it and continue.';
+
+  @override
+  String get onboardingFoodExampleName =>
+      '2 scrambled eggs with cheese and whole wheat toast';
+
+  @override
+  String get onboardingFoodRegisterAction => 'Log meal';
+
+  @override
+  String get onboardingFoodRegistered => 'Meal logged in today\'s diary.';
+
+  @override
+  String get onboardingFoodDeleteHint =>
+      'Delete it to finish this step — that\'s the full flow.';
+
+  @override
+  String get onboardingFoodDeleted => 'Entry deleted. All set!';
+
+  @override
+  String get onboardingDoneTitle => 'You\'re all set!';
+
+  @override
+  String get onboardingDoneSubtitle =>
+      'Your profile is ready. Start your first workout whenever you want.';
+
+  @override
+  String get onboardingDoneAction => 'Enter FitForge';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String get onboardingSkipModes => 'Skip extra modes';
+
+  @override
+  String get onboardingSelectGoal => 'Select a goal';
+
+  @override
+  String get onboardingSelectExperience => 'Select your level';
+
+  @override
   String get weightUpdateTitle => 'Update your weight';
 
   @override

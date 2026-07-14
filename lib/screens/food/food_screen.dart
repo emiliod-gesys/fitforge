@@ -13,6 +13,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 
 import '../../providers/app_providers.dart';
+import '../../providers/onboarding_progress_provider.dart';
 
 import '../../widgets/fitforge_app_bar.dart';
 
@@ -78,11 +79,15 @@ class FoodScreen extends ConsumerWidget {
         onRefresh: () async => invalidateNutrition(),
 
         onDeleteEntry: (entryId) async {
-
           await ref.read(foodServiceProvider).deleteEntry(entryId);
-
           invalidateNutrition();
-
+          final onboarding = ref.read(onboardingProgressProvider);
+          if (onboarding.practiceFoodEntryId == entryId) {
+            ref.read(onboardingProgressProvider.notifier).markFoodDeleted();
+            if (context.mounted && context.canPop()) {
+              context.pop();
+            }
+          }
         },
 
         onDeleteActivity: (activityId) async {
@@ -189,6 +194,12 @@ class _FoodBody extends ConsumerWidget {
 
     final normalizedDay = DateTime(day.year, day.month, day.day);
 
+    final onboarding = ref.watch(onboardingProgressProvider);
+
+    final showOnboardingBanner = onboarding.practiceFoodEntryId != null &&
+
+        !onboarding.foodTutorialCompleted;
+
     final profile = ref.watch(profileProvider).valueOrNull;
 
     final bodyMetrics = ref.watch(bodyMetricSnapshotsProvider).valueOrNull;
@@ -238,6 +249,54 @@ class _FoodBody extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
 
             children: [
+
+              if (showOnboardingBanner) ...[
+
+                Container(
+
+                  padding: const EdgeInsets.all(14),
+
+                  decoration: BoxDecoration(
+
+                    color: context.accentColor.withValues(alpha: 0.12),
+
+                    borderRadius: BorderRadius.circular(14),
+
+                    border: Border.all(color: context.accentColor.withValues(alpha: 0.35)),
+
+                  ),
+
+                  child: Row(
+
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+
+                      Icon(Icons.school_outlined, color: context.accentColor, size: 22),
+
+                      const SizedBox(width: 10),
+
+                      Expanded(
+
+                        child: Text(
+
+                          l10n.onboardingFoodPracticeBanner,
+
+                          style: const TextStyle(fontSize: 13, height: 1.35),
+
+                        ),
+
+                      ),
+
+                    ],
+
+                  ),
+
+                ),
+
+                const SizedBox(height: 16),
+
+              ],
 
               FoodWeekStrip(selectedDay: normalizedDay, onChanged: onDayChanged),
 

@@ -22,6 +22,7 @@ import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/runner_surface_picker.dart';
+import '../../widgets/workout_calorie_estimate_display.dart';
 import '../../widgets/workout_share_cards.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../core/theme/app_accent.dart';
@@ -451,6 +452,10 @@ class _RunnerSummarySection extends StatelessWidget {
               ],
             ),
           ],
+          if (summary.hasCalorieEstimate) ...[
+            const SizedBox(height: 12),
+            WorkoutCalorieEstimateDisplay(summary: summary, l10n: l10n, accent: accent),
+          ],
           if (points.length >= 2) ...[
             const SizedBox(height: 12),
             Text(l10n.runnerRouteTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -604,6 +609,10 @@ class _HyroxSplitsSection extends StatelessWidget {
               ),
             ],
           ),
+          if (summary.hasCalorieEstimate) ...[
+            const SizedBox(height: 12),
+            WorkoutCalorieEstimateDisplay(summary: summary, l10n: l10n, accent: accent),
+          ],
           const SizedBox(height: 12),
           ...summary.hyroxSplits.asMap().entries.map(
             (entry) => Padding(

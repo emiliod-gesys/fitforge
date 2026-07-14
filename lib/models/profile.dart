@@ -125,8 +125,10 @@ class UserProfile {
   final bool runnerMode;
   final int totalXp;
   final DateTime createdAt;
+  final DateTime? onboardingCompletedAt;
 
   bool get isTrainer => userType == UserType.trainer;
+  bool get hasCompletedOnboarding => onboardingCompletedAt != null;
 
   const UserProfile({
     required this.id,
@@ -150,6 +152,7 @@ class UserProfile {
     this.runnerMode = false,
     this.totalXp = 0,
     required this.createdAt,
+    this.onboardingCompletedAt,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json, {bool hasAiKey = false}) {
@@ -175,6 +178,9 @@ class UserProfile {
       runnerMode: json['runner_mode'] as bool? ?? false,
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
+      onboardingCompletedAt: json['onboarding_completed_at'] != null
+          ? DateTime.parse(json['onboarding_completed_at'] as String)
+          : null,
     );
   }
 

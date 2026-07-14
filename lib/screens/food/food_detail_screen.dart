@@ -8,6 +8,7 @@ import '../../core/utils/food_serving_parser.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/onboarding_progress_provider.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_accent.dart';
 
@@ -18,6 +19,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
   final FoodEntrySource source;
   final String? originalQuery;
   final List<int>? imageBytes;
+  final bool onboardingMode;
 
   const FoodDetailScreen({
     super.key,
@@ -27,6 +29,7 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
     required this.source,
     this.originalQuery,
     this.imageBytes,
+    this.onboardingMode = false,
   });
 
   @override
@@ -164,7 +167,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
 
     setState(() => _saving = true);
     try {
-      await ref.read(foodServiceProvider).addEntry(
+      final entry = await ref.read(foodServiceProvider).addEntry(
             mealType: widget.mealType,
             name: name,
             brand: _baseEstimate.brand,
@@ -179,9 +182,13 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
           );
       ref.invalidate(dailyNutritionProvider);
       ref.invalidate(foodEntriesProvider);
-      if (mounted) {
-        context.go('/food');
+      if (!mounted) return;
+      if (widget.onboardingMode) {
+        ref.read(onboardingProgressProvider.notifier).markFoodLogged(entry.id);
+        context.go('/onboarding');
+        return;
       }
+      context.go('/food');
     } finally {
       if (mounted) setState(() => _saving = false);
     }

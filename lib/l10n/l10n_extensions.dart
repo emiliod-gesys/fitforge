@@ -148,6 +148,14 @@ extension ProfileL10n on AppLocalizations {
     return '';
   }
 
+  String fitnessGoalCalorieModeLabel(String localizedGoal) {
+    if (localizedGoal == goalFatLoss) return fitnessGoalCalorieDeficit;
+    if (localizedGoal == goalEndurance || localizedGoal == goalMaintenance) {
+      return fitnessGoalCalorieMaintenance;
+    }
+    return fitnessGoalCalorieSurplus;
+  }
+
   List<String> get experienceLevels => [expBeginner, expIntermediate, expAdvanced];
 
   String activityLevelLabel(DailyActivityLevel level) {

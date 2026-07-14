@@ -154,6 +154,27 @@ class _HyroxShareCard extends StatelessWidget {
               ),
             ],
           ),
+          if (summary.hasCalorieEstimate) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _ShareStatTile(
+                    label: l10n.caloriesBurned,
+                    value: l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!),
+                    accent: _hyroxAccent,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              summary.calorieEstimate.usedDefaultWeight
+                  ? l10n.caloriesEstimateDefaultWeight
+                  : l10n.caloriesEstimateNote,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
+            ),
+          ],
           const SizedBox(height: 16),
           Text(
             l10n.hyroxSplitsSummaryTitle,
@@ -283,6 +304,27 @@ class _RunnerShareCard extends StatelessWidget {
               ),
             ],
           ),
+          if (summary.hasCalorieEstimate) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _ShareStatTile(
+                    label: l10n.caloriesBurned,
+                    value: l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!),
+                    accent: _runnerAccent,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              summary.calorieEstimate.usedDefaultWeight
+                  ? l10n.caloriesEstimateDefaultWeight
+                  : l10n.caloriesEstimateNote,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
+            ),
+          ],
           if (_isOutdoor) ...[
             const SizedBox(height: 10),
             Row(

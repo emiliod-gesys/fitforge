@@ -326,6 +326,300 @@ abstract class AppLocalizations {
   /// **'Continuar'**
   String get profileOnboardingContinue;
 
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido a FitForge'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrena, registra comida y mide tu progreso en un solo lugar.'**
+  String get onboardingWelcomeSubtitle;
+
+  /// No description provided for @onboardingWelcomeBulletTrain.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas de gym, Hyrox y running con GPS'**
+  String get onboardingWelcomeBulletTrain;
+
+  /// No description provided for @onboardingWelcomeBulletFood.
+  ///
+  /// In es, this message translates to:
+  /// **'Diario de comida con presupuesto calórico diario'**
+  String get onboardingWelcomeBulletFood;
+
+  /// No description provided for @onboardingWelcomeBulletProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'XP, récords y progreso compartible'**
+  String get onboardingWelcomeBulletProgress;
+
+  /// No description provided for @onboardingLanguageTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu idioma'**
+  String get onboardingLanguageTitle;
+
+  /// No description provided for @onboardingLanguageSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Verás FitForge en este idioma. Puedes cambiarlo después en Perfil.'**
+  String get onboardingLanguageSubtitle;
+
+  /// No description provided for @fitnessGoalCalorieSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'Requiere superávit calórico'**
+  String get fitnessGoalCalorieSurplus;
+
+  /// No description provided for @fitnessGoalCalorieDeficit.
+  ///
+  /// In es, this message translates to:
+  /// **'Requiere déficit calórico'**
+  String get fitnessGoalCalorieDeficit;
+
+  /// No description provided for @fitnessGoalCalorieMaintenance.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantenimiento calórico (sin superávit ni déficit)'**
+  String get fitnessGoalCalorieMaintenance;
+
+  /// No description provided for @onboardingStepOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso {current} de {total}'**
+  String onboardingStepOf(int current, int total);
+
+  /// No description provided for @onboardingAboutYouTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos sobre ti'**
+  String get onboardingAboutYouTitle;
+
+  /// No description provided for @onboardingAboutYouSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu avatar y cuéntanos lo básico para personalizar calorías y progreso.'**
+  String get onboardingAboutYouSubtitle;
+
+  /// No description provided for @onboardingBodyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuerpo'**
+  String get onboardingBodyTitle;
+
+  /// No description provided for @onboardingBodySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Usamos altura y peso para estimar calorías quemadas y tu meta diaria.'**
+  String get onboardingBodySubtitle;
+
+  /// No description provided for @onboardingGoalsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu objetivo'**
+  String get onboardingGoalsTitle;
+
+  /// No description provided for @onboardingGoalsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Define cómo entrenar y comer según lo que buscas.'**
+  String get onboardingGoalsSubtitle;
+
+  /// No description provided for @onboardingModesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo entrenas?'**
+  String get onboardingModesTitle;
+
+  /// No description provided for @onboardingModesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa modos extra si corres o preparas Hyrox. Siempre puedes cambiarlos en Perfil.'**
+  String get onboardingModesSubtitle;
+
+  /// No description provided for @onboardingRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu primera rutina'**
+  String get onboardingRoutineTitle;
+
+  /// No description provided for @onboardingRoutineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre el editor real de rutinas, ponle nombre, añade ejercicios y guarda.'**
+  String get onboardingRoutineSubtitle;
+
+  /// No description provided for @onboardingRoutineOpenAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir editor de rutinas'**
+  String get onboardingRoutineOpenAction;
+
+  /// No description provided for @onboardingRoutineOpenHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Es el mismo editor que en Entrenar → Rutinas. Necesitas un nombre y al menos un ejercicio antes de guardar.'**
+  String get onboardingRoutineOpenHint;
+
+  /// No description provided for @onboardingRoutineNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi primera rutina'**
+  String get onboardingRoutineNameHint;
+
+  /// No description provided for @onboardingRoutineExercisesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejercicios'**
+  String get onboardingRoutineExercisesTitle;
+
+  /// No description provided for @onboardingRoutineExercisesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca en el catálogo y elige uno o más. Puedes ajustar series y reps después en el editor.'**
+  String get onboardingRoutineExercisesHint;
+
+  /// No description provided for @onboardingRoutineAddExercise.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir ejercicio'**
+  String get onboardingRoutineAddExercise;
+
+  /// No description provided for @onboardingRoutineExerciseRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade al menos un ejercicio antes de crear la rutina'**
+  String get onboardingRoutineExerciseRequired;
+
+  /// No description provided for @onboardingRoutineCreateAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rutina'**
+  String get onboardingRoutineCreateAction;
+
+  /// No description provided for @onboardingRoutineCreated.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Rutina creada! La encontrarás en Entrenar → Rutinas.'**
+  String get onboardingRoutineCreated;
+
+  /// No description provided for @onboardingRoutineNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para la rutina'**
+  String get onboardingRoutineNameRequired;
+
+  /// No description provided for @onboardingFoodTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registro rápido de comida'**
+  String get onboardingFoodTitle;
+
+  /// No description provided for @onboardingFoodSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registra un desayuno con Quick add (IA), luego bórralo en Comida para aprender el flujo.'**
+  String get onboardingFoodSubtitle;
+
+  /// No description provided for @onboardingFoodOpenAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar desayuno'**
+  String get onboardingFoodOpenAction;
+
+  /// No description provided for @onboardingFoodOpenDiary.
+  ///
+  /// In es, this message translates to:
+  /// **'Ir a Comida'**
+  String get onboardingFoodOpenDiary;
+
+  /// No description provided for @onboardingFoodPracticeBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso de onboarding: desliza esta entrada y bórrala para continuar.'**
+  String get onboardingFoodPracticeBanner;
+
+  /// No description provided for @onboardingFoodExampleName.
+  ///
+  /// In es, this message translates to:
+  /// **'2 huevos revueltos con queso y pan integral'**
+  String get onboardingFoodExampleName;
+
+  /// No description provided for @onboardingFoodRegisterAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar comida'**
+  String get onboardingFoodRegisterAction;
+
+  /// No description provided for @onboardingFoodRegistered.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida registrada en tu diario de hoy.'**
+  String get onboardingFoodRegistered;
+
+  /// No description provided for @onboardingFoodDeleteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Bórrala para terminar este paso — así aprendes el flujo completo.'**
+  String get onboardingFoodDeleteHint;
+
+  /// No description provided for @onboardingFoodDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrada eliminada. ¡Listo!'**
+  String get onboardingFoodDeleted;
+
+  /// No description provided for @onboardingDoneTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Todo listo!'**
+  String get onboardingDoneTitle;
+
+  /// No description provided for @onboardingDoneSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu perfil está configurado. Empieza tu primer entrenamiento cuando quieras.'**
+  String get onboardingDoneSubtitle;
+
+  /// No description provided for @onboardingDoneAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar a FitForge'**
+  String get onboardingDoneAction;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In es, this message translates to:
+  /// **'Atrás'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingSkipModes.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar sin modos extra'**
+  String get onboardingSkipModes;
+
+  /// No description provided for @onboardingSelectGoal.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un objetivo'**
+  String get onboardingSelectGoal;
+
+  /// No description provided for @onboardingSelectExperience.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona tu nivel'**
+  String get onboardingSelectExperience;
+
   /// No description provided for @weightUpdateTitle.
   ///
   /// In es, this message translates to:
