@@ -133,6 +133,16 @@ class ExerciseHistorySheet extends ConsumerWidget {
                               session.workoutName,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
                             ),
+                            if (_loggedNameDiffers(session.loggedExerciseName, exerciseName)) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                l10n.exerciseHistoryLoggedAs(session.loggedExerciseName!),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textMuted.withValues(alpha: 0.85),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                              ),
+                            ],
                             const SizedBox(height: 10),
                             ...session.sets.map(
                               (set) {
@@ -183,5 +193,10 @@ class ExerciseHistorySheet extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  static bool _loggedNameDiffers(String? logged, String current) {
+    if (logged == null || logged.trim().isEmpty) return false;
+    return logged.trim().toLowerCase() != current.trim().toLowerCase();
   }
 }

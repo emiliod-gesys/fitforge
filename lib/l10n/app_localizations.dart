@@ -4394,6 +4394,12 @@ abstract class AppLocalizations {
   /// **'Sin historial previo para este ejercicio.'**
   String get noExerciseHistory;
 
+  /// No description provided for @exerciseHistoryLoggedAs.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrado como: {name}'**
+  String exerciseHistoryLoggedAs(String name);
+
   /// No description provided for @loadingHistory.
   ///
   /// In es, this message translates to:

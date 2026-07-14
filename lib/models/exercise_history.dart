@@ -6,12 +6,15 @@ class ExerciseSessionHistory {
   final String workoutName;
   final DateTime date;
   final List<WorkoutSet> sets;
+  /// Nombre con el que se guardó el ejercicio en esa sesión (puede diferir del actual).
+  final String? loggedExerciseName;
 
   const ExerciseSessionHistory({
     required this.workoutId,
     required this.workoutName,
     required this.date,
     required this.sets,
+    this.loggedExerciseName,
   });
 }
 

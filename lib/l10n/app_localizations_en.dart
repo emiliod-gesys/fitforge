@@ -2454,6 +2454,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noExerciseHistory => 'No previous history for this exercise.';
 
   @override
+  String exerciseHistoryLoggedAs(String name) {
+    return 'Logged as: $name';
+  }
+
+  @override
   String get loadingHistory => 'Loading history…';
 
   @override

@@ -872,6 +872,8 @@
   "noSets": "No sets",
   "historyTitle": "History",
   "noExerciseHistory": "No previous history for this exercise.",
+  "exerciseHistoryLoggedAs": "Logged as: {name}",
+  "@exerciseHistoryLoggedAs": { "placeholders": { "name": {"type": "String"} } },
   "loadingHistory": "Loading history…",
   "setLine": "Set {n}: {detail}",
   "repsOnly": "{reps} reps",

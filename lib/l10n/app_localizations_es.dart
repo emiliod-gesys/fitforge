@@ -2473,6 +2473,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noExerciseHistory => 'Sin historial previo para este ejercicio.';
 
   @override
+  String exerciseHistoryLoggedAs(String name) {
+    return 'Registrado como: $name';
+  }
+
+  @override
   String get loadingHistory => 'Cargando historial…';
 
   @override

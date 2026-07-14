@@ -896,6 +896,8 @@
   "noSets": "Sin series",
   "historyTitle": "Historial",
   "noExerciseHistory": "Sin historial previo para este ejercicio.",
+  "exerciseHistoryLoggedAs": "Registrado como: {name}",
+  "@exerciseHistoryLoggedAs": { "placeholders": { "name": {"type": "String"} } },
   "loadingHistory": "Cargando historial…",
   "setLine": "Serie {n}: {detail}",
   "@setLine": { "placeholders": { "n": {"type": "int"}, "detail": {"type": "String"} } },

@@ -48,6 +48,7 @@ void main() {
       final entries = [
         (
           weId: 'we-light',
+          exerciseName: 'Pec Deck',
           workout: {
             'id': 'w1',
             'completed_at': '2026-07-05T20:00:00Z',
@@ -55,6 +56,7 @@ void main() {
         ),
         (
           weId: 'we-heavy',
+          exerciseName: 'Pec Deck',
           workout: {
             'id': 'w1',
             'completed_at': '2026-07-05T20:00:00Z',

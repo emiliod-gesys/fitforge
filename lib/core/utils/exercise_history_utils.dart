@@ -2,7 +2,7 @@ import '../../models/exercise_history.dart';
 import '../../models/workout.dart';
 import 'previous_set_utils.dart';
 
-typedef WorkoutExerciseEntry = ({String weId, Map<String, dynamic> workout});
+typedef WorkoutExerciseEntry = ({String weId, String exerciseName, Map<String, dynamic> workout});
 
 /// Utilidades para filtrar sesiones fantasma, deduplicar y analizar pesos.
 abstract final class ExerciseHistoryUtils {

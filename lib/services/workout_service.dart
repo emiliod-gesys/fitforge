@@ -543,6 +543,7 @@ class WorkoutService {
         workoutName: entry.workout['name'] as String? ?? 'Entrenamiento',
         date: SupabaseDateTime.parse(entry.workout['completed_at'] as String),
         sets: meaningful,
+        loggedExerciseName: entry.exerciseName,
       ));
     }
     return history;
@@ -595,9 +596,10 @@ class WorkoutService {
     final data = await _client
         .from('workout_exercises')
         .select(
-          'id, workouts!inner(id, name, completed_at, duration_minutes, total_volume)',
+          'id, exercise_name, workouts!inner(id, name, completed_at, duration_minutes, total_volume, user_id)',
         )
         .eq('exercise_id', exerciseId)
+        .eq('workouts.user_id', userId)
         .not('workouts.completed_at', 'is', null);
 
     final entries = <WorkoutExerciseEntry>[];
@@ -607,7 +609,11 @@ class WorkoutService {
       final wId = workout['id'] as String;
       if (excludeWorkoutId != null && wId == excludeWorkoutId) continue;
       if (ExerciseHistoryUtils.isStaleGhostWorkout(workout)) continue;
-      entries.add((weId: map['id'] as String, workout: workout));
+      entries.add((
+        weId: map['id'] as String,
+        exerciseName: map['exercise_name'] as String? ?? '',
+        workout: workout,
+      ));
     }
     return entries;
   }
