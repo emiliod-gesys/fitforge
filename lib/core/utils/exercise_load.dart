@@ -186,7 +186,7 @@ abstract final class ExerciseLoad {
     return n.contains('assisted') || n.contains('asistid');
   }
 
-  /// Muestra la etiqueta «(por brazo)» en la UI de series.
+  /// Muestra la etiqueta «(por brazo)» / «(por pierna)» en la UI de series.
   static bool isPerArmWeight(String exerciseName, {bool? perArmWeight}) {
     if (perArmWeight == true) return true;
     if (perArmWeight == false) return false;
@@ -196,6 +196,90 @@ abstract final class ExerciseLoad {
     if (_usesDumbbell(n)) return true;
     if (_isPerArmCable(n)) return true;
     return false;
+  }
+
+  /// True si el toggle de peso por lado debería decir «por pierna» en vez de «por brazo».
+  static bool isLowerBodySideLoad({
+    required String exerciseName,
+    Exercise? exercise,
+    String? exerciseId,
+    Iterable<Exercise>? catalog,
+  }) {
+    final resolved = exercise ??
+        (exerciseId != null && catalog != null ? _findInCatalog(exerciseId, catalog) : null);
+
+    if (resolved != null) {
+      final cat = _normalize(resolved.category);
+      if (_hasAny(cat, [
+        'piernas',
+        'legs',
+        'gluteos',
+        'glutes',
+        'pantorrillas',
+        'calves',
+      ])) {
+        return true;
+      }
+      for (final muscle in resolved.muscles) {
+        final m = _normalize(muscle);
+        if (_hasAny(m, [
+          'cuadricep',
+          'quad',
+          'femoral',
+          'hamstring',
+          'glute',
+          'pantorrilla',
+          'calf',
+          'aductor',
+          'adductor',
+          'abductor',
+          'gemelo',
+          'isquiotibial',
+        ])) {
+          return true;
+        }
+      }
+    }
+
+    final n = _normalize(exerciseName);
+    // Evitar confundir elevaciones de piernas (core) con cargas de pierna.
+    if (_hasAny(n, ['leg raise', 'elevacion de piernas', 'hanging leg'])) {
+      return false;
+    }
+    return _hasAny(n, [
+      'pierna',
+      'leg press',
+      'leg extension',
+      'leg curl',
+      'prensa',
+      'extension de piernas',
+      'extension de cuadricep',
+      'femoral',
+      'cuadricep',
+      'pantorrilla',
+      'gemelo',
+      'calf',
+      'sentadilla',
+      'squat',
+      'hack squat',
+      'hip thrust',
+      'puente de gluteo',
+      'abductor',
+      'aductor',
+      'adductor',
+      'zancada',
+      'lunge',
+      'step up',
+      'step-up',
+      'peso muerto rumano',
+      'romanian deadlift',
+      'bulgarian',
+      'bulgara',
+    ]);
+  }
+
+  static Exercise? exerciseFromCatalog(String exerciseId, Iterable<Exercise> catalog) {
+    return _findInCatalog(exerciseId, catalog);
   }
 
   /// Multiplicador de volumen respecto al peso registrado por serie.
@@ -295,6 +379,8 @@ abstract final class ExerciseLoad {
     ExerciseLoadMode? loadMode,
     String additionalSuffix = '(+ extra)',
     String perArmSuffix = '(por brazo)',
+    String perLegSuffix = '(por pierna)',
+    bool useLegLabel = false,
   }) {
     final isBw = weightOptional == true ||
         loadMode == ExerciseLoadMode.bodyweight ||
@@ -304,7 +390,7 @@ abstract final class ExerciseLoad {
       return '$unitLabel $additionalSuffix';
     }
     if (isPerArmWeight(exerciseName, perArmWeight: perArmWeight)) {
-      return '$unitLabel $perArmSuffix';
+      return '$unitLabel ${useLegLabel ? perLegSuffix : perArmSuffix}';
     }
     return unitLabel;
   }

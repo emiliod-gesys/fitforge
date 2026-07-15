@@ -1948,7 +1948,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get weightPerArmSuffix => '(por brazo)';
 
   @override
+  String get weightPerLegSuffix => '(por pierna)';
+
+  @override
   String get loadModePerArm => 'Por brazo';
+
+  @override
+  String get loadModePerLeg => 'Por pierna';
 
   @override
   String get loadModeCombined => 'Conjunto';
@@ -1956,6 +1962,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get loadModeToggleHint =>
       'Alterna si trabajas ambos lados a la vez o por separado';
+
+  @override
+  String get sessionUnitToggleHint =>
+      'Unidad de esta máquina (no cambia tu perfil)';
+
+  @override
+  String get sessionUnitKg => 'kg';
+
+  @override
+  String get sessionUnitLb => 'lb';
 
   @override
   String bodyweightLoadHint(String weight) {

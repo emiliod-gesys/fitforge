@@ -131,7 +131,13 @@ abstract final class FoodEstimateParser {
 
       final servingRaw = json['serving_description'] as String?;
       final unit = FoodServingParser.unitFromDescription(servingRaw);
-      final refFromJson = (json['reference_amount_g'] as num?)?.toDouble();
+      final refFromJson = _readNum(json, const [
+        'reference_amount_g',
+        'reference_amount',
+        'amount_g',
+        'grams',
+        'weight_g',
+      ])?.toDouble();
       final parsedFromServing = FoodServingParser.amountFromDescription(servingRaw);
       final referenceAmount = refFromJson ?? parsedFromServing ?? 100.0;
       final servingDescription = servingRaw != null && servingRaw.trim().isNotEmpty
@@ -140,7 +146,9 @@ abstract final class FoodEstimateParser {
               ? FoodServingParser.formatAmount(referenceAmount, unit)
               : null;
 
-      final ingredientPortions = parseIngredientPortions(json['ingredient_portions']);
+      final ingredientPortions = parseIngredientPortions(
+        json['ingredient_portions'] ?? json['ingredients_portions'] ?? json['portions'],
+      );
       final ingredientsRaw = (json['ingredients'] as List?)?.map((e) => e.toString()).toList() ?? const [];
       final ingredients = ingredientPortions.isNotEmpty
           ? ingredientNamesFromPortions(ingredientPortions)
@@ -149,11 +157,20 @@ abstract final class FoodEstimateParser {
       return FoodNutritionEstimate(
         name: name,
         brand: json['brand'] as String?,
-        caloriesKcal: (json['calories_kcal'] as num?)?.round().clamp(0, 9999) ?? 0,
-        proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0,
-        carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0,
-        fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,
-        fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
+        caloriesKcal: _readNum(json, const [
+              'calories_kcal',
+              'calories',
+              'kcal',
+              'calorias',
+              'calorías',
+            ])
+                ?.round()
+                .clamp(0, 9999) ??
+            0,
+        proteinG: _readNum(json, const ['protein_g', 'protein', 'proteina', 'proteína'])?.toDouble() ?? 0,
+        carbsG: _readNum(json, const ['carbs_g', 'carbohydrates_g', 'carbs', 'carbohidratos'])?.toDouble() ?? 0,
+        fatG: _readNum(json, const ['fat_g', 'fat', 'fats', 'grasa', 'grasas'])?.toDouble() ?? 0,
+        fiberG: _readNum(json, const ['fiber_g', 'fibre_g', 'fiber', 'fibra'])?.toDouble() ?? 0,
         servingDescription: servingDescription,
         ingredients: ingredients,
         ingredientPortions: ingredientPortions,
@@ -163,5 +180,17 @@ abstract final class FoodEstimateParser {
     } catch (_) {
       return null;
     }
+  }
+
+  static num? _readNum(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value is num) return value;
+      if (value is String) {
+        final parsed = num.tryParse(value.trim().replaceAll(',', '.'));
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
   }
 }

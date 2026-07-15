@@ -6,7 +6,7 @@ import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../core/theme/app_accent.dart';
 
-/// Controles de sesión: alternar peso por brazo/conjunto y aviso de peso corporal.
+/// Controles de sesión: unidad kg/lb, peso por lado y aviso de peso corporal.
 class ExerciseLoadControls extends StatelessWidget {
   final String exerciseId;
   final String exerciseName;
@@ -15,6 +15,7 @@ class ExerciseLoadControls extends StatelessWidget {
   final ValueChanged<bool> onPerArmChanged;
   final double? bodyWeightKg;
   final String unitSystem;
+  final ValueChanged<String>? onUnitSystemChanged;
 
   const ExerciseLoadControls({
     super.key,
@@ -25,6 +26,7 @@ class ExerciseLoadControls extends StatelessWidget {
     required this.onPerArmChanged,
     this.bodyWeightKg,
     required this.unitSystem,
+    this.onUnitSystemChanged,
   });
 
   @override
@@ -40,12 +42,49 @@ class ExerciseLoadControls extends StatelessWidget {
       catalog,
       exerciseName,
     );
+    final showUnitToggle = onUnitSystemChanged != null;
+    final useLegLabel = ExerciseLoad.isLowerBodySideLoad(
+      exerciseName: exerciseName,
+      exerciseId: exerciseId,
+      catalog: catalog,
+    );
+    final perSideLabel = useLegLabel ? l10n.loadModePerLeg : l10n.loadModePerArm;
 
-    if (!showToggle && !isBodyweight) return const SizedBox.shrink();
+    if (!showToggle && !isBodyweight && !showUnitToggle) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (showUnitToggle) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.sessionUnitToggleHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                ),
+              ),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(value: 'kg', label: Text(l10n.sessionUnitKg)),
+                  ButtonSegment(value: 'lb', label: Text(l10n.sessionUnitLb)),
+                ],
+                selected: {unitSystem == 'lb' ? 'lb' : 'kg'},
+                onSelectionChanged: (values) {
+                  if (values.isEmpty) return;
+                  onUnitSystemChanged!(values.first);
+                },
+                style: const ButtonStyle(
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         if (showToggle) ...[
           Row(
             children: [
@@ -56,10 +95,10 @@ class ExerciseLoadControls extends StatelessWidget {
                 ),
               ),
               Text(
-                perArmEnabled ? l10n.loadModePerArm : l10n.loadModeCombined,
+                perArmEnabled ? perSideLabel : l10n.loadModeCombined,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Switch.adaptive(
                 value: perArmEnabled,
                 activeThumbColor: context.accentColor,
@@ -71,7 +110,7 @@ class ExerciseLoadControls extends StatelessWidget {
         ],
         if (isBodyweight && bodyWeightKg != null && bodyWeightKg! > 0) ...[
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: context.accentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),

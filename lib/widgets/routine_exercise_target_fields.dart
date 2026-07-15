@@ -220,11 +220,18 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final unit = UnitConverter.massLabel(widget.unitSystem);
+    final useLegLabel = ExerciseLoad.isLowerBodySideLoad(
+      exerciseName: widget.exercise.exerciseName,
+      exerciseId: widget.exercise.exerciseId,
+      catalog: widget.catalog,
+    );
     final weightLabel = ExerciseLoad.weightLabel(
       unit,
       widget.exercise.exerciseName,
       perArmWeight: _perArmEnabled,
       perArmSuffix: l10n.weightPerArmSuffix,
+      perLegSuffix: l10n.weightPerLegSuffix,
+      useLegLabel: useLegLabel,
     );
 
     return Column(
@@ -239,7 +246,9 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
               ),
             ),
             Text(
-              _perArmEnabled ? l10n.loadModePerArm : l10n.loadModeCombined,
+              _perArmEnabled
+                  ? (useLegLabel ? l10n.loadModePerLeg : l10n.loadModePerArm)
+                  : l10n.loadModeCombined,
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
             SizedBox(width: 8),

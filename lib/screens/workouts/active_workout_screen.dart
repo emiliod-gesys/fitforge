@@ -80,6 +80,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Set<String> _savingSetIds = {};
   final Map<String, bool> _perArmOverrides = {};
   bool _perArmSeeded = false;
+  /// Unidad por ejercicio en la sesión (`kg`/`lb`); no persiste ni cambia el perfil.
+  final Map<String, String> _unitOverrides = {};
   bool _isHyroxWorkout = false;
   HyroxLevel? _hyroxLevel;
   List<RoutineExercise> _hyroxRoutineExercises = const [];
@@ -1264,7 +1266,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           setState(() => _perArmOverrides[exercise.exerciseId] = value);
                         },
                         bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
-                        unitSystem: unitSystem,
+                        unitSystem: _unitOverrides[exercise.exerciseId] ?? unitSystem,
+                        onUnitSystemChanged: (value) {
+                          setState(() => _unitOverrides[exercise.exerciseId] = value);
+                        },
                       ),
                     ],
                     const SizedBox(height: 12),
@@ -1274,18 +1279,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                         exercise: exercise,
                         sets: sortedSets,
                         visibleExercises: visibleExercises,
-                        unitSystem: unitSystem,
+                        unitSystem: _unitOverrides[exercise.exerciseId] ?? unitSystem,
                         isCardio: isCardio,
                         cardioConfig: cardioConfig,
                       )
                     else ...[
                     ...sortedSets.asMap().entries.map(
                       (entry) {
+                        final exerciseUnit =
+                            _unitOverrides[exercise.exerciseId] ?? unitSystem;
                         if (isCardio) {
                           return CardioSetLogTile(
                             key: ValueKey(entry.value.id),
                             set: entry.value,
-                            unitSystem: unitSystem,
+                            unitSystem: exerciseUnit,
                             config: cardioConfig,
                             isLast: entry.key == sortedSets.length - 1,
                             isSaving: _savingSetIds.contains(entry.value.id),
@@ -1329,11 +1336,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                         return SetLogTile(
                           key: ValueKey(entry.value.id),
                           set: entry.value,
-                          unitSystem: unitSystem,
+                          unitSystem: exerciseUnit,
                           exerciseName: exercise.exerciseName,
                           perArmWeight: perArm,
                           weightOptional: weightOptional,
                           loadMode: loadMode,
+                          useLegLabel: ExerciseLoad.isLowerBodySideLoad(
+                            exerciseName: exercise.exerciseName,
+                            exerciseId: exercise.exerciseId,
+                            catalog: exerciseCatalog,
+                          ),
                           bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
                           isLast: entry.key == sortedSets.length - 1,
                           isSaving: _savingSetIds.contains(entry.value.id),

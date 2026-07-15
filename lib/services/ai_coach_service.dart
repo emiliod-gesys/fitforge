@@ -1105,11 +1105,11 @@ JSON:
 {
   "name": "nombre específico del plato con ingredientes visibles",
   "brand": null,
-  "calories_kcal": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "fiber_g": 0,
+  "calories_kcal": 420,
+  "protein_g": 28,
+  "carbs_g": 36,
+  "fat_g": 16,
+  "fiber_g": 4,
   "serving_description": "2 huevos + 2 tortillas",
   "reference_amount_g": 180,
   "ingredients": ["huevos", "tortillas de maíz"],
@@ -1151,7 +1151,8 @@ Reglas:
 - Lee dígitos de la pantalla (g, kg, oz, lb) y convierte todo a gramos totales del alimento pesado.
 - Si la foto muestra comida en un plato/bowl Y una balanza en la misma imagen, el número de la balanza es el peso de referencia.
 - reference_amount_g: peso total estimado en gramos de TODO lo visible (no uses 100 por defecto).
-- calories_kcal, protein_g, carbs_g, fat_g: TOTALES para esa porción (no valores por 100 g).
+- calories_kcal, protein_g, carbs_g, fat_g: TOTALES reales para esa porción (NUNCA dejes 0 si hay comida visible; no uses valores por 100 g).
+- Calcula calories_kcal como suma de la densidad típica de cada ingrediente × sus grams_g.
 - serving_description: describe la porción real (ej. "1 plato ~280 g", "2 tacos ~180 g").
 - Si hay varios ítems, inclúyelos en ingredients y suma todo en reference_amount_g.
 - name: identifica el plato con DETALLE: proteína principal, guarnición, salsa o método de cocción si se ven (máx. ~70 caracteres).
@@ -1164,15 +1165,15 @@ Reglas:
 
 JSON:
 {
-  "name": "nombre específico del plato con ingredientes visibles",
+  "name": "Pechuga de pollo a la plancha con arroz blanco y brócoli",
   "brand": null,
-  "calories_kcal": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "fiber_g": 0,
-  "serving_description": "1 plato ~280 g",
-  "reference_amount_g": 280,
+  "calories_kcal": 464,
+  "protein_g": 51,
+  "carbs_g": 37,
+  "fat_g": 6,
+  "fiber_g": 2,
+  "serving_description": "1 plato ~320 g",
+  "reference_amount_g": 320,
   "ingredients": ["pechuga de pollo", "arroz blanco", "brócoli"],
   "ingredient_portions": [
     {"name": "pechuga de pollo", "grams_g": 150},
@@ -1194,7 +1195,9 @@ JSON:
         case AiProvider.none:
           return null;
       }
-      return _parseFoodEstimate(response);
+      final parsed = _parseFoodEstimate(response);
+      if (parsed == null) return null;
+      return FoodQueryHints.reconcilePhotoEstimate(parsed);
     } catch (_) {
       return null;
     }
@@ -1241,11 +1244,12 @@ JSON:
 
       final parsed = _parseFoodEstimate(response);
       if (parsed == null) return null;
-      return FoodEstimateParser.stabilizeRevision(
+      final stabilized = FoodEstimateParser.stabilizeRevision(
         previous: previous,
         revised: parsed,
         correction: trimmed,
       );
+      return FoodQueryHints.reconcilePhotoEstimate(stabilized);
     } catch (_) {
       return null;
     }
@@ -1280,15 +1284,16 @@ CORRECCIÓN DEL USUARIO:
 "$correction"
 
 Devuelve la estimación ACTUALIZADA del plato completo aplicando solo la corrección.
+Nunca dejes calories_kcal en 0 si hay comida; recalcula macros totales de la porción.
 JSON:
 {
   "name": "nombre específico del plato con ingredientes visibles",
   "brand": null,
-  "calories_kcal": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "fiber_g": 0,
+  "calories_kcal": 420,
+  "protein_g": 32,
+  "carbs_g": 40,
+  "fat_g": 12,
+  "fiber_g": 4,
   "serving_description": "1 plato ~280 g",
   "reference_amount_g": 280,
   "ingredients": ["todos los ingredientes del plato"],

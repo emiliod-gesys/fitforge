@@ -14,6 +14,7 @@ class SetLogTile extends StatefulWidget {
   final bool? perArmWeight;
   final bool? weightOptional;
   final ExerciseLoadMode? loadMode;
+  final bool useLegLabel;
   final double? bodyWeightKg;
   final bool isLast;
   final bool isSaving;
@@ -29,6 +30,7 @@ class SetLogTile extends StatefulWidget {
     this.perArmWeight,
     this.weightOptional,
     this.loadMode,
+    this.useLegLabel = false,
     this.bodyWeightKg,
     this.isLast = true,
     this.isSaving = false,
@@ -220,6 +222,8 @@ class _SetLogTileState extends State<SetLogTile> {
       loadMode: widget.loadMode,
       additionalSuffix: l10n.weightAdditionalSuffix,
       perArmSuffix: l10n.weightPerArmSuffix,
+      perLegSuffix: l10n.weightPerLegSuffix,
+      useLegLabel: widget.useLegLabel,
     );
     final parsedKg = _parsedWeightKg();
     final effectiveKg = ExerciseLoad.effectiveWeightKg(

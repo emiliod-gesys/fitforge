@@ -242,10 +242,181 @@ abstract final class FoodQueryHints {
     'macarrones': (kcal: 131, protein: 5.0, carbs: 25.0, fat: 1.1, fiber: 1.8),
     // Arroz blanco cocido.
     'arroz blanco cocido': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'arroz integral cocido': (kcal: 112, protein: 2.3, carbs: 24.0, fat: 0.8, fiber: 1.8),
     'arroz cocido': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
     'arroz blanco': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'arroz integral': (kcal: 112, protein: 2.3, carbs: 24.0, fat: 0.8, fiber: 1.8),
     'white rice': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'brown rice': (kcal: 112, protein: 2.3, carbs: 24.0, fat: 0.8, fiber: 1.8),
+    'arroz': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    // Proteínas comunes (cocidas / a la plancha).
+    'pechuga de pollo': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'pollo a la plancha': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'pollo asado': (kcal: 167, protein: 25.0, carbs: 0.0, fat: 6.6, fiber: 0.0),
+    'chicken breast': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'pollo': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'chicken': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'carne de res': (kcal: 217, protein: 26.0, carbs: 0.0, fat: 12.0, fiber: 0.0),
+    'bistec': (kcal: 217, protein: 26.0, carbs: 0.0, fat: 12.0, fiber: 0.0),
+    'res': (kcal: 217, protein: 26.0, carbs: 0.0, fat: 12.0, fiber: 0.0),
+    'beef': (kcal: 217, protein: 26.0, carbs: 0.0, fat: 12.0, fiber: 0.0),
+    'carne de cerdo': (kcal: 196, protein: 27.0, carbs: 0.0, fat: 9.0, fiber: 0.0),
+    'cerdo': (kcal: 196, protein: 27.0, carbs: 0.0, fat: 9.0, fiber: 0.0),
+    'pork': (kcal: 196, protein: 27.0, carbs: 0.0, fat: 9.0, fiber: 0.0),
+    'salmón': (kcal: 208, protein: 20.0, carbs: 0.0, fat: 13.0, fiber: 0.0),
+    'salmon': (kcal: 208, protein: 20.0, carbs: 0.0, fat: 13.0, fiber: 0.0),
+    'atún': (kcal: 132, protein: 28.0, carbs: 0.0, fat: 1.3, fiber: 0.0),
+    'atun': (kcal: 132, protein: 28.0, carbs: 0.0, fat: 1.3, fiber: 0.0),
+    'tuna': (kcal: 132, protein: 28.0, carbs: 0.0, fat: 1.3, fiber: 0.0),
+    'pescado': (kcal: 130, protein: 25.0, carbs: 0.0, fat: 3.0, fiber: 0.0),
+    'fish': (kcal: 130, protein: 25.0, carbs: 0.0, fat: 3.0, fiber: 0.0),
+    'huevos': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'huevo': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'egg': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'tofu': (kcal: 76, protein: 8.0, carbs: 1.9, fat: 4.8, fiber: 0.3),
+    // Guarniciones / verduras.
+    'brócoli': (kcal: 35, protein: 2.8, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'brocoli': (kcal: 35, protein: 2.8, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'broccoli': (kcal: 35, protein: 2.8, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'lechuga': (kcal: 15, protein: 1.4, carbs: 2.9, fat: 0.2, fiber: 1.3),
+    'lettuce': (kcal: 15, protein: 1.4, carbs: 2.9, fat: 0.2, fiber: 1.3),
+    'tomate': (kcal: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2),
+    'tomato': (kcal: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2),
+    'pepino': (kcal: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5),
+    'cucumber': (kcal: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5),
+    'zanahoria': (kcal: 41, protein: 0.9, carbs: 10.0, fat: 0.2, fiber: 2.8),
+    'carrot': (kcal: 41, protein: 0.9, carbs: 10.0, fat: 0.2, fiber: 2.8),
+    'papa': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'patata': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'potato': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'camote': (kcal: 86, protein: 1.6, carbs: 20.0, fat: 0.1, fiber: 3.0),
+    'batata': (kcal: 86, protein: 1.6, carbs: 20.0, fat: 0.1, fiber: 3.0),
+    'sweet potato': (kcal: 86, protein: 1.6, carbs: 20.0, fat: 0.1, fiber: 3.0),
+    'frijoles': (kcal: 127, protein: 8.7, carbs: 23.0, fat: 0.5, fiber: 6.4),
+    'beans': (kcal: 127, protein: 8.7, carbs: 23.0, fat: 0.5, fiber: 6.4),
+    'lentejas': (kcal: 116, protein: 9.0, carbs: 20.0, fat: 0.4, fiber: 7.9),
+    'lentils': (kcal: 116, protein: 9.0, carbs: 20.0, fat: 0.4, fiber: 7.9),
+    'aguacate': (kcal: 160, protein: 2.0, carbs: 8.5, fat: 15.0, fiber: 6.7),
+    'avocado': (kcal: 160, protein: 2.0, carbs: 8.5, fat: 15.0, fiber: 6.7),
+    'tortilla de maíz': (kcal: 218, protein: 5.7, carbs: 45.0, fat: 2.9, fiber: 6.3),
+    'tortilla de maiz': (kcal: 218, protein: 5.7, carbs: 45.0, fat: 2.9, fiber: 6.3),
+    'tortilla de harina': (kcal: 312, protein: 8.0, carbs: 51.0, fat: 8.0, fiber: 2.0),
+    'tortilla': (kcal: 218, protein: 5.7, carbs: 45.0, fat: 2.9, fiber: 6.3),
+    'pan': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
+    'bread': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
+    'queso': (kcal: 350, protein: 25.0, carbs: 2.0, fat: 27.0, fiber: 0.0),
+    'cheese': (kcal: 350, protein: 25.0, carbs: 2.0, fat: 27.0, fiber: 0.0),
+    'aceite de oliva': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
+    'olive oil': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
+    'aceite': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
   };
+
+  static ({int kcal, double protein, double carbs, double fat, double fiber})?
+      _lookupAnchor(String ingredientName) {
+    final lower = ingredientName.toLowerCase().trim();
+    if (lower.isEmpty) return null;
+    final sortedKeys = _anchorPer100g.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final token in sortedKeys) {
+      if (lower.contains(token)) return _anchorPer100g[token];
+    }
+    return null;
+  }
+
+  /// Estima macros sumando densidades conocidas de `ingredient_portions`.
+  static FoodNutritionEstimate? estimateFromIngredientPortions(FoodNutritionEstimate ai) {
+    if (ai.ingredientPortions.isEmpty) return null;
+
+    var totalKcal = 0.0;
+    var totalProtein = 0.0;
+    var totalCarbs = 0.0;
+    var totalFat = 0.0;
+    var totalFiber = 0.0;
+    var matchedGrams = 0.0;
+    var totalGrams = 0.0;
+
+    for (final portion in ai.ingredientPortions) {
+      if (portion.gramsG <= 0) continue;
+      totalGrams += portion.gramsG;
+      final anchor = _lookupAnchor(portion.name);
+      if (anchor == null) continue;
+      final factor = portion.gramsG / 100;
+      matchedGrams += portion.gramsG;
+      totalKcal += anchor.kcal * factor;
+      totalProtein += anchor.protein * factor;
+      totalCarbs += anchor.carbs * factor;
+      totalFat += anchor.fat * factor;
+      totalFiber += anchor.fiber * factor;
+    }
+
+    if (totalKcal <= 0) return null;
+    // Exigir cobertura razonable para no inventar el plato entero con 1 ancla.
+    if (matchedGrams < 40 && matchedGrams < totalGrams * 0.35) return null;
+
+    final referenceAmount = totalGrams > 0
+        ? totalGrams
+        : (ai.referenceAmount > 0 ? ai.referenceAmount : matchedGrams);
+
+    return ai.copyWith(
+      caloriesKcal: totalKcal.round().clamp(0, 9999),
+      proteinG: double.parse(totalProtein.toStringAsFixed(1)),
+      carbsG: double.parse(totalCarbs.toStringAsFixed(1)),
+      fatG: double.parse(totalFat.toStringAsFixed(1)),
+      fiberG: double.parse(totalFiber.toStringAsFixed(1)),
+      referenceAmount: referenceAmount,
+      amountUnit: 'g',
+      servingDescription: FoodServingParser.formatAmount(referenceAmount, 'g'),
+      ingredients: ai.ingredientPortions.map((p) => p.name).toList(),
+    );
+  }
+
+  /// Corrige estimaciones de foto cuando la IA deja kcal en 0 pero sí da gramos.
+  static FoodNutritionEstimate reconcilePhotoEstimate(FoodNutritionEstimate ai) {
+    var result = ai;
+    if (ai.ingredientPortions.isNotEmpty) {
+      final sumGrams =
+          ai.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG);
+      if (sumGrams > 0) {
+        result = ai.copyWith(
+          referenceAmount: sumGrams,
+          amountUnit: 'g',
+          servingDescription: ai.servingDescription?.trim().isNotEmpty == true
+              ? ai.servingDescription
+              : FoodServingParser.formatAmount(sumGrams, 'g'),
+          ingredients: ai.ingredientPortions.map((p) => p.name).toList(),
+        );
+      }
+    }
+
+    final fromPortions = estimateFromIngredientPortions(result);
+    if (fromPortions != null) {
+      if (result.caloriesKcal <= 0) return fromPortions;
+      final dens = result.referenceAmount > 0
+          ? result.caloriesKcal / result.referenceAmount
+          : 0.0;
+      // Densidad absurda (<0.3 kcal/g ≈ <30 kcal/100g) en plato mixto → reemplazar.
+      if (dens < 0.3 && fromPortions.caloriesKcal > result.caloriesKcal) {
+        return fromPortions;
+      }
+    }
+
+    if (result.caloriesKcal <= 0 && result.referenceAmount > 0) {
+      final query = '${result.name} ${result.referenceAmount.round()}g';
+      final anchored = anchoredEstimateForQuery(query, result);
+      if (anchored != null) {
+        return anchored.copyWith(
+          ingredientPortions: result.ingredientPortions.isNotEmpty
+              ? result.ingredientPortions
+              : anchored.ingredientPortions,
+          ingredients: result.ingredients.isNotEmpty
+              ? result.ingredients
+              : anchored.ingredients,
+        );
+      }
+    }
+
+    return result;
+  }
 
   static const _lowCalorieProduce = [
     'lechuga',

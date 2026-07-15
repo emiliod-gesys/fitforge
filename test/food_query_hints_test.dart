@@ -123,5 +123,29 @@ void main() {
         closeTo(400, 1),
       );
     });
+
+    test('reconcilePhotoEstimate fills calories from ingredient portions when AI returns 0', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pechuga de pollo con arroz y brócoli',
+        caloriesKcal: 0,
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+        referenceAmount: 320,
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'pechuga de pollo', gramsG: 150),
+          FoodIngredientPortion(name: 'arroz blanco', gramsG: 120),
+          FoodIngredientPortion(name: 'brócoli', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcilePhotoEstimate(ai);
+
+      // ~165*1.5 + 130*1.2 + 35*0.5 = 247.5 + 156 + 17.5 = 421
+      expect(fixed.caloriesKcal, greaterThan(350));
+      expect(fixed.caloriesKcal, lessThan(500));
+      expect(fixed.proteinG, greaterThan(40));
+      expect(fixed.referenceAmount, 320);
+    });
   });
 }
