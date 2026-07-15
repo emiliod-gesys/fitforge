@@ -2328,6 +2328,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rest => 'Descanso';
 
   @override
+  String get workoutWeightUnit => 'Peso';
+
+  @override
+  String get workoutUnitToggleHint =>
+      'Alterna entre kg y lb solo durante este entrenamiento';
+
+  @override
   String restRemaining(int seconds) {
     return '${seconds}s restantes';
   }

@@ -825,6 +825,8 @@
   "muscleRecovery": "Muscle recovery",
   "recoveryHint": "Based on your recent workouts · 48 h recovery",
   "rest": "Rest",
+  "workoutWeightUnit": "Weight",
+  "workoutUnitToggleHint": "Switch between kg and lb for this workout only",
   "restRemaining": "{seconds}s remaining",
   "skip": "Skip",
   "minus15s": "-15s",
