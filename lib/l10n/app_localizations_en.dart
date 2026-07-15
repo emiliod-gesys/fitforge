@@ -1932,7 +1932,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightPerArmSuffix => '(per arm)';
 
   @override
+  String get weightPerLegSuffix => '(per leg)';
+
+  @override
   String get loadModePerArm => 'Per arm';
+
+  @override
+  String get loadModePerLeg => 'Per leg';
 
   @override
   String get loadModeCombined => 'Combined';

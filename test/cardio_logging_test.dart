@@ -391,5 +391,32 @@ void main() {
       expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Chest Press Machine'), isTrue);
       expect(ExerciseLoad.supportsPerArmToggle('x', const [], 'Cinta'), isFalse);
     });
+
+    test('usesPerLegLabel for leg machines and not for chest', () {
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Prensa de piernas'),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Leg press'),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Extensión de cuádriceps en máquina'),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Curl con mancuernas'),
+        isFalse,
+      );
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Chest Press Machine'),
+        isFalse,
+      );
+      expect(
+        ExerciseLoad.usesPerLegLabel(exerciseName: 'Prensa de hombro'),
+        isFalse,
+      );
+    });
   });
 }

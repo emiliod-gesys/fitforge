@@ -1948,7 +1948,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get weightPerArmSuffix => '(por brazo)';
 
   @override
+  String get weightPerLegSuffix => '(por pierna)';
+
+  @override
   String get loadModePerArm => 'Por brazo';
+
+  @override
+  String get loadModePerLeg => 'Por pierna';
 
   @override
   String get loadModeCombined => 'Conjunto';

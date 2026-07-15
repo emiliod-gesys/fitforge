@@ -3488,11 +3488,23 @@ abstract class AppLocalizations {
   /// **'(por brazo)'**
   String get weightPerArmSuffix;
 
+  /// No description provided for @weightPerLegSuffix.
+  ///
+  /// In es, this message translates to:
+  /// **'(por pierna)'**
+  String get weightPerLegSuffix;
+
   /// No description provided for @loadModePerArm.
   ///
   /// In es, this message translates to:
   /// **'Por brazo'**
   String get loadModePerArm;
+
+  /// No description provided for @loadModePerLeg.
+  ///
+  /// In es, this message translates to:
+  /// **'Por pierna'**
+  String get loadModePerLeg;
 
   /// No description provided for @loadModeCombined.
   ///
