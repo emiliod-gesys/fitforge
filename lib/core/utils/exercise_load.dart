@@ -91,6 +91,90 @@ abstract final class ExerciseLoad {
     return false;
   }
 
+  static const _legMuscleGroups = {
+    'Piernas',
+    'Glúteos',
+    'Cuádriceps',
+    'Isquios',
+    'Gemelos',
+    'Pantorrillas',
+    'Legs',
+    'Glutes',
+    'Quadriceps',
+    'Hamstrings',
+    'Calves',
+  };
+
+  /// Etiqueta «por pierna» en la UI cuando el toggle per-side aplica a piernas (prensa, extensión, etc.).
+  static bool usesPerLegLabel({
+    required String exerciseName,
+    String? exerciseId,
+    Iterable<Exercise> catalog = const [],
+  }) {
+    if (exerciseId != null &&
+        !supportsPerArmToggle(exerciseId, catalog, exerciseName)) {
+      return false;
+    }
+
+    final exercise = exerciseId != null ? _findInCatalog(exerciseId, catalog) : null;
+    if (exercise != null && _isLegFocusedExercise(exercise)) return true;
+
+    return _inferLegLoadByName(exerciseName);
+  }
+
+  static bool _isLegFocusedExercise(Exercise exercise) {
+    final category = _normalize(exercise.category);
+    if (category.contains('pierna') || category == 'legs') return true;
+
+    for (final muscle in exercise.muscles) {
+      if (_legMuscleGroups.contains(muscle)) return true;
+    }
+    return false;
+  }
+
+  static bool _inferLegLoadByName(String name) {
+    final n = _normalize(name);
+    if (_hasAny(n, [
+      'prensa de hombro',
+      'shoulder press',
+      'militar',
+      'overhead press',
+      'press de hombro',
+    ])) {
+      return false;
+    }
+
+    if (_hasAny(n, [
+      'sentadilla',
+      'squat',
+      'pierna',
+      'leg press',
+      'leg extension',
+      'leg curl',
+      'extension de cuadriceps',
+      'extension de cuádriceps',
+      'curl femoral',
+      'zancada',
+      'lunge',
+      'prensa de pierna',
+      'calf raise',
+      'gemelo',
+      'pantorrilla',
+      'hack squat',
+      'hip thrust',
+      'glute',
+      'gluteo',
+      'adductor',
+      'abductor',
+    ])) {
+      return true;
+    }
+
+    return _hasWord(n, 'prensa') && !_hasPhrase(n, 'prensa de hombro');
+  }
+
+  static bool _hasPhrase(String name, String phrase) => name.contains(_normalize(phrase));
+
   static bool resolvePerArmWeight({
     required String exerciseId,
     required Iterable<Exercise> catalog,

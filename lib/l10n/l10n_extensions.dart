@@ -12,6 +12,14 @@ import '../models/social.dart';
 import '../core/hyrox/hyrox_standards.dart';
 import '../core/runner/runner_standards.dart';
 import 'app_localizations.dart';
+extension ExerciseLoadL10n on AppLocalizations {
+  String loadModePerSide({required bool perLeg}) =>
+      perLeg ? loadModePerLeg : loadModePerArm;
+
+  String weightPerSideSuffix({required bool perLeg}) =>
+      perLeg ? weightPerLegSuffix : weightPerArmSuffix;
+}
+
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
