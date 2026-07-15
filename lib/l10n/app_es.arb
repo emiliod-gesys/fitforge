@@ -847,6 +847,8 @@
   "muscleRecovery": "Recuperación muscular",
   "recoveryHint": "Basado en tus entrenamientos recientes · recuperación en 48 h",
   "rest": "Descanso",
+  "workoutWeightUnit": "Peso",
+  "workoutUnitToggleHint": "Alterna entre kg y lb solo durante este entrenamiento",
   "restRemaining": "{seconds}s restantes",
   "@restRemaining": { "placeholders": { "seconds": {"type": "int"} } },
   "skip": "Saltar",

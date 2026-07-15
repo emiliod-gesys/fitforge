@@ -4124,6 +4124,18 @@ abstract class AppLocalizations {
   /// **'Descanso'**
   String get rest;
 
+  /// No description provided for @workoutWeightUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso'**
+  String get workoutWeightUnit;
+
+  /// No description provided for @workoutUnitToggleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Alterna entre kg y lb solo durante este entrenamiento'**
+  String get workoutUnitToggleHint;
+
   /// No description provided for @restRemaining.
   ///
   /// In es, this message translates to:
