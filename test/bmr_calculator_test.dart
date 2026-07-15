@@ -58,5 +58,28 @@ void main() {
       final enriched = BodyMetricCalculator.enrich(snapshots, profile);
       expect(enriched['bmr']!.rawValue!.round(), 1780);
     });
+
+    test('enrich computes BMI from weight and height', () {
+      final snapshots = {
+        'weight': const BodyMetricSnapshot(type: 'weight', valueKg: 80),
+      };
+      final enriched = BodyMetricCalculator.enrich(snapshots, profile);
+      expect(enriched['bmi']!.rawValue, closeTo(24.7, 0.1));
+    });
+
+    test('BMI returns null without height', () {
+      final incomplete = UserProfile(
+        id: 'u1',
+        bodyWeight: 80,
+        createdAt: DateTime.utc(2026),
+      );
+      expect(
+        BmiCalculator.calculate(
+          profile: incomplete,
+          snapshots: {'weight': const BodyMetricSnapshot(type: 'weight', valueKg: 80)},
+        ),
+        isNull,
+      );
+    });
   });
 }

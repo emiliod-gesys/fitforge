@@ -55,7 +55,7 @@ abstract final class ExerciseLoad {
     return _inferLoadModeByName(exerciseName ?? exercise?.name ?? exerciseId);
   }
 
-  /// Ejercicios donde el usuario puede alternar peso por brazo vs. conjunto en la sesión.
+  /// Ejercicios donde el usuario puede alternar peso conjunto vs. por lado en la sesión.
   static bool supportsPerArmToggle(
     String exerciseId,
     Iterable<Exercise> catalog,
@@ -69,13 +69,14 @@ abstract final class ExerciseLoad {
           exercise.loadMode == ExerciseLoadMode.cardioOutdoor) {
         return false;
       }
-    }
 
-    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
       if (exercise.loadMode == ExerciseLoadMode.machineStack ||
           exercise.loadMode == ExerciseLoadMode.dualLoad) {
         return true;
       }
+    }
+
+    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
       if (exercise.perArmWeight) return true;
     }
 
@@ -85,10 +86,55 @@ abstract final class ExerciseLoad {
 
     if (_inferMachineByName(exerciseName)) return true;
 
+    if (isLowerBodySideLoad(
+      exerciseName: exerciseName,
+      exercise: exercise,
+      exerciseId: exerciseId,
+      catalog: catalog,
+    )) {
+      return _inferMachineByName(exerciseName) ||
+          (exercise?.equipment.any(_isMachineEquipment) ?? false) ||
+          _isLegMachineByName(exerciseName);
+    }
+
     final n = _normalize(exerciseName);
     if (_usesDumbbell(n) && !_singleDumbbellBothHands(n)) return true;
     if (_isPerArmCable(n)) return true;
     return false;
+  }
+
+  /// Etiqueta del modo conjunto según brazos o piernas.
+  static bool combinedModeUsesLegLabel({
+    required String exerciseName,
+    Exercise? exercise,
+    String? exerciseId,
+    Iterable<Exercise>? catalog,
+  }) {
+    return isLowerBodySideLoad(
+      exerciseName: exerciseName,
+      exercise: exercise,
+      exerciseId: exerciseId,
+      catalog: catalog,
+    );
+  }
+
+  static bool _isLegMachineByName(String exerciseName) {
+    final n = _normalize(exerciseName);
+    return _hasAny(n, [
+      'leg extension',
+      'leg curl',
+      'leg press',
+      'extension de piernas',
+      'extension de cuadricep',
+      'curl femoral',
+      'prensa de piernas',
+      'prensa horizontal',
+      'hack squat',
+      'hip abductor',
+      'hip adductor',
+      'abductor',
+      'aductor',
+    ]);
   }
 
   static bool resolvePerArmWeight({

@@ -1907,6 +1907,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get next => 'Siguiente';
 
   @override
+  String get endTraining => 'Finalizar entreno';
+
+  @override
+  String get confirmEndTrainingMessage =>
+      '¿Seguro quieres dar por finalizado este entreno?';
+
+  @override
   String exerciseProgress(int current, int total) {
     return 'Ejercicio $current de $total';
   }
@@ -1955,6 +1962,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loadModePerLeg => 'Por pierna';
+
+  @override
+  String get loadModeCombinedLeg => 'Ambas piernas';
 
   @override
   String get loadModeCombined => 'Conjunto';

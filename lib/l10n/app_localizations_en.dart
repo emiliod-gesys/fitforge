@@ -1892,6 +1892,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get next => 'Next';
 
   @override
+  String get endTraining => 'End Training';
+
+  @override
+  String get confirmEndTrainingMessage =>
+      'Are you sure you want to finish this workout?';
+
+  @override
   String exerciseProgress(int current, int total) {
     return 'Exercise $current of $total';
   }
@@ -1939,6 +1946,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadModePerLeg => 'Per leg';
+
+  @override
+  String get loadModeCombinedLeg => 'Both legs';
 
   @override
   String get loadModeCombined => 'Combined';

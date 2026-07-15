@@ -1,3 +1,4 @@
+import 'package:fitforge/core/theme/app_colors.dart';
 import 'package:fitforge/core/utils/body_metric_health.dart';
 import 'package:fitforge/models/body_metric.dart';
 import 'package:fitforge/models/profile.dart';
@@ -48,27 +49,6 @@ void main() {
       );
     });
 
-    test('metabolic age below chronological is ideal', () {
-      expect(
-        BodyMetricHealthEvaluator.evaluate(
-          key: 'metabolic_age',
-          snapshot: const BodyMetricSnapshot(type: 'metabolic_age', rawValue: 29),
-          profile: UserProfile(id: 'u1', age: 35, createdAt: DateTime.utc(2026)),
-        ),
-        BodyMetricHealthLevel.ideal,
-      );
-    });
-
-    test('protein in ideal range is dark green', () {
-      expect(
-        BodyMetricHealthEvaluator.evaluate(
-          key: 'protein',
-          snapshot: const BodyMetricSnapshot(type: 'protein', rawValue: 18.3),
-        ),
-        BodyMetricHealthLevel.ideal,
-      );
-    });
-
     test('colors map to expected palette', () {
       expect(
         BodyMetricHealthColors.forLevel(BodyMetricHealthLevel.veryLow),
@@ -84,13 +64,12 @@ void main() {
       expect(BodyMetricHealthEvaluator.usesColorCoding('weight'), isTrue);
       expect(BodyMetricHealthEvaluator.usesColorCoding('bmi'), isTrue);
       expect(BodyMetricHealthEvaluator.usesColorCoding('body_fat'), isTrue);
-      expect(BodyMetricHealthEvaluator.usesColorCoding('subcutaneous_fat'), isTrue);
-      expect(BodyMetricHealthEvaluator.usesColorCoding('skeletal_muscle'), isFalse);
+      expect(BodyMetricHealthEvaluator.usesColorCoding('bmr'), isFalse);
 
-      const snap = BodyMetricSnapshot(type: 'skeletal_muscle', rawValue: 47.5);
+      const snap = BodyMetricSnapshot(type: 'bmr', rawValue: 1800);
       expect(
-        BodyMetricHealthEvaluator.colorFor(key: 'skeletal_muscle', snapshot: snap),
-        const Color(0xFFF5F5F5),
+        BodyMetricHealthEvaluator.colorFor(key: 'bmr', snapshot: snap),
+        AppColors.textPrimary,
       );
     });
   });

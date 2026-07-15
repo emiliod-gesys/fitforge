@@ -3428,6 +3428,18 @@ abstract class AppLocalizations {
   /// **'Siguiente'**
   String get next;
 
+  /// No description provided for @endTraining.
+  ///
+  /// In es, this message translates to:
+  /// **'Finalizar entreno'**
+  String get endTraining;
+
+  /// No description provided for @confirmEndTrainingMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Seguro quieres dar por finalizado este entreno?'**
+  String get confirmEndTrainingMessage;
+
   /// No description provided for @exerciseProgress.
   ///
   /// In es, this message translates to:
@@ -3505,6 +3517,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Por pierna'**
   String get loadModePerLeg;
+
+  /// No description provided for @loadModeCombinedLeg.
+  ///
+  /// In es, this message translates to:
+  /// **'Ambas piernas'**
+  String get loadModeCombinedLeg;
 
   /// No description provided for @loadModeCombined.
   ///

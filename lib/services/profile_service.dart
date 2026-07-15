@@ -178,6 +178,11 @@ class ProfileService {
 
     final snapshots = <String, BodyMetricSnapshot>{};
     for (final def in BodyMetricDefinition.all) {
+      if (def.isComputed) {
+        snapshots[def.key] = BodyMetricSnapshot(type: def.key);
+        continue;
+      }
+
       final entries = byType[def.key];
       if (entries == null || entries.isEmpty) {
         if (def.key == 'weight' && profileWeight != null) {

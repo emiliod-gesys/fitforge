@@ -220,6 +220,11 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final unit = UnitConverter.massLabel(widget.unitSystem);
+    final showSideToggle = ExerciseLoad.supportsPerArmToggle(
+      widget.exercise.exerciseId,
+      widget.catalog,
+      widget.exercise.exerciseName,
+    );
     final useLegLabel = ExerciseLoad.isLowerBodySideLoad(
       exerciseName: widget.exercise.exerciseName,
       exerciseId: widget.exercise.exerciseId,
@@ -237,32 +242,34 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.loadModeToggleHint,
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+        if (showSideToggle) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.loadModeToggleHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                ),
               ),
-            ),
-            Text(
-              _perArmEnabled
-                  ? (useLegLabel ? l10n.loadModePerLeg : l10n.loadModePerArm)
-                  : l10n.loadModeCombined,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
-            SizedBox(width: 8),
-            Switch.adaptive(
-              value: _perArmEnabled,
-              activeThumbColor: context.accentColor,
-              onChanged: (value) {
-                setState(() => _perArmWeight = value);
-                _commit();
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+              Text(
+                _perArmEnabled
+                    ? (useLegLabel ? l10n.loadModePerLeg : l10n.loadModePerArm)
+                    : (useLegLabel ? l10n.loadModeCombinedLeg : l10n.loadModeCombined),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              const SizedBox(width: 8),
+              Switch.adaptive(
+                value: _perArmEnabled,
+                activeThumbColor: context.accentColor,
+                onChanged: (value) {
+                  setState(() => _perArmWeight = value);
+                  _commit();
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         ...List.generate(_rows.length, (index) {
           final row = _rows[index];
           return Padding(

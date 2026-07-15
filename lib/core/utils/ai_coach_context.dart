@@ -346,16 +346,7 @@ abstract final class AiCoachContextBuilder {
       'weight' => 'Peso',
       'bmi' => 'IMC',
       'body_fat' => 'Grasa corporal',
-      'skeletal_muscle' => 'Músculo esquelético',
-      'fat_free_mass' => 'Masa libre de grasa',
-      'subcutaneous_fat' => 'Grasa subcutánea',
-      'visceral_fat' => 'Grasa visceral',
-      'body_water' => 'Agua corporal',
-      'muscle_mass' => 'Masa muscular',
-      'bone_mass' => 'Masa ósea',
-      'protein' => 'Proteína',
       'bmr' => 'Tasa metabólica basal',
-      'metabolic_age' => 'Edad metabólica',
       _ => key,
     };
   }

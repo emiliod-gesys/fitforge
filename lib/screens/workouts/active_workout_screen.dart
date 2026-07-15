@@ -366,6 +366,28 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     return leave == true;
   }
 
+  Future<bool> _confirmEndTraining() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.endTraining),
+        content: Text(l10n.confirmEndTrainingMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.finish),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1389,6 +1411,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                 currentIndex: WorkoutExerciseNavigation.visibleIndex(visibleExercises, exercise.id)
                     .clamp(0, visibleExercises.length - 1),
                 total: visibleExercises.length,
+                completing: _completing,
                 onPrevious: () {
                   final previousIndex = WorkoutExerciseNavigation.resolvePreviousWorkoutIndex(
                     workoutExercises: displayWorkout.exercises,
@@ -1408,6 +1431,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   if (nextIndex != null) {
                     setState(() => _currentExerciseIndex = nextIndex);
                   }
+                },
+                onEndTraining: () async {
+                  if (!await _confirmEndTraining() || !mounted) return;
+                  await _completeWorkout(displayWorkout);
                 },
                 hasPrevious: WorkoutExerciseNavigation.hasPrevious(visibleExercises, exercise.id),
                 hasNext: WorkoutExerciseNavigation.hasNext(visibleExercises, exercise.id),
@@ -1791,8 +1818,10 @@ class _ExerciseNavigator extends StatelessWidget {
   final int total;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
+  final Future<void> Function()? onEndTraining;
   final bool hasPrevious;
   final bool hasNext;
+  final bool completing;
 
   const _ExerciseNavigator({
     required this.l10n,
@@ -1800,12 +1829,16 @@ class _ExerciseNavigator extends StatelessWidget {
     required this.total,
     required this.hasPrevious,
     required this.hasNext,
+    this.completing = false,
     this.onPrevious,
     this.onNext,
+    this.onEndTraining,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isLastExercise = !hasNext;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
@@ -1833,12 +1866,18 @@ class _ExerciseNavigator extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: hasNext ? onNext : null,
-                    icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: Text(l10n.next),
-                    iconAlignment: IconAlignment.end,
-                  ),
+                  child: isLastExercise
+                      ? ElevatedButton.icon(
+                          onPressed: completing ? null : () => onEndTraining?.call(),
+                          icon: const Icon(Icons.flag_outlined, size: 18),
+                          label: Text(l10n.endTraining),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: hasNext ? onNext : null,
+                          icon: const Icon(Icons.arrow_forward, size: 18),
+                          label: Text(l10n.next),
+                          iconAlignment: IconAlignment.end,
+                        ),
                 ),
               ],
             ),

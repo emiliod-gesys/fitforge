@@ -49,6 +49,8 @@ class ExerciseLoadControls extends StatelessWidget {
       catalog: catalog,
     );
     final perSideLabel = useLegLabel ? l10n.loadModePerLeg : l10n.loadModePerArm;
+    final combinedLabel =
+        useLegLabel ? l10n.loadModeCombinedLeg : l10n.loadModeCombined;
 
     if (!showToggle && !isBodyweight && !showUnitToggle) {
       return const SizedBox.shrink();
@@ -95,7 +97,7 @@ class ExerciseLoadControls extends StatelessWidget {
                 ),
               ),
               Text(
-                perArmEnabled ? perSideLabel : l10n.loadModeCombined,
+                perArmEnabled ? perSideLabel : combinedLabel,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
               const SizedBox(width: 8),

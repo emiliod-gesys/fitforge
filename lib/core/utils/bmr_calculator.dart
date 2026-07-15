@@ -19,7 +19,7 @@ abstract final class BmrCalculator {
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? snapshots,
   }) {
-    final weightKg = _resolveWeightKg(profile, snapshots);
+    final weightKg = resolveWeightKg(profile, snapshots);
     final heightCm = profile?.heightCm;
     final age = profile?.age;
     final gender = profile?.gender;
@@ -42,7 +42,7 @@ abstract final class BmrCalculator {
     );
   }
 
-  static double? _resolveWeightKg(
+  static double? resolveWeightKg(
     UserProfile? profile,
     Map<String, BodyMetricSnapshot>? snapshots,
   ) {
@@ -71,22 +71,59 @@ abstract final class BmrCalculator {
   }
 }
 
+/// Índice de masa corporal (kg/m²) a partir de peso y altura del perfil.
+abstract final class BmiCalculator {
+  static const _minWeightKg = 20.0;
+  static const _minHeightCm = 100.0;
+
+  static double? calculate({
+    UserProfile? profile,
+    Map<String, BodyMetricSnapshot>? snapshots,
+  }) {
+    final weightKg = BmrCalculator.resolveWeightKg(profile, snapshots);
+    final heightCm = profile?.heightCm;
+    if (weightKg == null ||
+        heightCm == null ||
+        weightKg <= _minWeightKg ||
+        heightCm < _minHeightCm) {
+      return null;
+    }
+
+    final heightM = heightCm / 100;
+    return weightKg / (heightM * heightM);
+  }
+}
+
 abstract final class BodyMetricCalculator {
   static Map<String, BodyMetricSnapshot> enrich(
     Map<String, BodyMetricSnapshot> snapshots,
     UserProfile? profile,
   ) {
+    final enriched = {...snapshots};
+
     final bmr = BmrCalculator.calculate(profile: profile, snapshots: snapshots);
-    if (bmr == null) {
-      return {...snapshots, 'bmr': const BodyMetricSnapshot(type: 'bmr')};
+    enriched['bmr'] = bmr == null
+        ? const BodyMetricSnapshot(type: 'bmr')
+        : BodyMetricSnapshot(type: 'bmr', rawValue: bmr.roundToDouble());
+
+    final bmi = BmiCalculator.calculate(profile: profile, snapshots: snapshots);
+    if (bmi == null) {
+      enriched['bmi'] = const BodyMetricSnapshot(type: 'bmi');
+    } else {
+      final weight = snapshots['weight'];
+      double? deltaRaw;
+      if (weight?.deltaKg != null && profile?.heightCm != null) {
+        final heightM = profile!.heightCm! / 100;
+        final previousWeight = weight!.valueKg! - weight.deltaKg!;
+        deltaRaw = bmi - (previousWeight / (heightM * heightM));
+      }
+      enriched['bmi'] = BodyMetricSnapshot(
+        type: 'bmi',
+        rawValue: double.parse(bmi.toStringAsFixed(1)),
+        deltaRaw: deltaRaw != null ? double.parse(deltaRaw.toStringAsFixed(1)) : null,
+      );
     }
 
-    return {
-      ...snapshots,
-      'bmr': BodyMetricSnapshot(
-        type: 'bmr',
-        rawValue: bmr.roundToDouble(),
-      ),
-    };
+    return enriched;
   }
 }
