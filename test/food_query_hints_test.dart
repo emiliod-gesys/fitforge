@@ -123,5 +123,75 @@ void main() {
         closeTo(400, 1),
       );
     });
+
+    test('ensurePlausibleCalories derives kcal from macros when AI returns 0', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pollo con arroz',
+        caloriesKcal: 0,
+        proteinG: 40,
+        carbsG: 50,
+        fatG: 10,
+        referenceAmount: 350,
+      );
+
+      final fixed = FoodQueryHints.ensurePlausibleCalories(ai);
+
+      expect(fixed.caloriesKcal, 450); // 40*4 + 50*4 + 10*9
+    });
+
+    test('reconcilePhotoEstimate recovers kcal from ingredient anchors when all zero', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pechuga de pollo con arroz blanco y brócoli',
+        caloriesKcal: 0,
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+        referenceAmount: 320,
+        ingredients: ['pechuga de pollo', 'arroz blanco', 'brócoli'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'pechuga de pollo', gramsG: 150),
+          FoodIngredientPortion(name: 'arroz blanco', gramsG: 120),
+          FoodIngredientPortion(name: 'brócoli', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcilePhotoEstimate(ai);
+
+      expect(fixed.caloriesKcal, greaterThan(300));
+      expect(fixed.caloriesKcal, lessThan(550));
+      expect(fixed.proteinG, greaterThan(30));
+      expect(fixed.carbsG, greaterThan(20));
+    });
+
+    test('reconcilePhotoEstimate recovers single common food from name and grams', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Manzana verde',
+        caloriesKcal: 0,
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+        referenceAmount: 180,
+        ingredients: ['manzana'],
+      );
+
+      final fixed = FoodQueryHints.reconcilePhotoEstimate(ai);
+
+      expect(fixed.caloriesKcal, closeTo(94, 5)); // ~52 * 1.8
+    });
+
+    test('ensurePlausibleCalories raises tiny kcal when macros imply much more', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pasta con pollo',
+        caloriesKcal: 50,
+        proteinG: 35,
+        carbsG: 60,
+        fatG: 12,
+        referenceAmount: 400,
+      );
+
+      final fixed = FoodQueryHints.ensurePlausibleCalories(ai);
+
+      expect(fixed.caloriesKcal, greaterThan(400));
+    });
   });
 }

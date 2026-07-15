@@ -1103,13 +1103,13 @@ Comida descrita: "$query"
 $hintsBlock$userGramsBlock
 JSON:
 {
-  "name": "nombre específico del plato con ingredientes visibles",
+  "name": "Huevos estrellados con tortillas de maíz",
   "brand": null,
-  "calories_kcal": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "fiber_g": 0,
+  "calories_kcal": 310,
+  "protein_g": 18,
+  "carbs_g": 24,
+  "fat_g": 14,
+  "fiber_g": 3,
   "serving_description": "2 huevos + 2 tortillas",
   "reference_amount_g": 180,
   "ingredients": ["huevos", "tortillas de maíz"],
@@ -1151,7 +1151,8 @@ Reglas:
 - Lee dígitos de la pantalla (g, kg, oz, lb) y convierte todo a gramos totales del alimento pesado.
 - Si la foto muestra comida en un plato/bowl Y una balanza en la misma imagen, el número de la balanza es el peso de referencia.
 - reference_amount_g: peso total estimado en gramos de TODO lo visible (no uses 100 por defecto).
-- calories_kcal, protein_g, carbs_g, fat_g: TOTALES para esa porción (no valores por 100 g).
+- calories_kcal, protein_g, carbs_g, fat_g: TOTALES reales para esa porción (nunca dejes 0 si hay comida visible; estima valores típicos).
+- Los macros deben ser coherentes con calorías (~4·proteína + 4·carbs + 9·grasa).
 - serving_description: describe la porción real (ej. "1 plato ~280 g", "2 tacos ~180 g").
 - Si hay varios ítems, inclúyelos en ingredients y suma todo en reference_amount_g.
 - name: identifica el plato con DETALLE: proteína principal, guarnición, salsa o método de cocción si se ven (máx. ~70 caracteres).
@@ -1162,17 +1163,17 @@ Reglas:
   La suma de grams_g debe aproximar reference_amount_g.
   Ejemplo: [{"name": "pechuga de pollo", "grams_g": 150}, {"name": "arroz blanco", "grams_g": 120}, {"name": "brócoli", "grams_g": 50}]
 
-JSON:
+JSON de ejemplo (rellena con valores REALES de la foto; no copies ceros):
 {
-  "name": "nombre específico del plato con ingredientes visibles",
+  "name": "Pechuga de pollo a la plancha con arroz blanco y brócoli",
   "brand": null,
-  "calories_kcal": 0,
-  "protein_g": 0,
-  "carbs_g": 0,
-  "fat_g": 0,
-  "fiber_g": 0,
-  "serving_description": "1 plato ~280 g",
-  "reference_amount_g": 280,
+  "calories_kcal": 420,
+  "protein_g": 48,
+  "carbs_g": 38,
+  "fat_g": 8,
+  "fiber_g": 4,
+  "serving_description": "1 plato ~320 g",
+  "reference_amount_g": 320,
   "ingredients": ["pechuga de pollo", "arroz blanco", "brócoli"],
   "ingredient_portions": [
     {"name": "pechuga de pollo", "grams_g": 150},
@@ -1194,7 +1195,9 @@ JSON:
         case AiProvider.none:
           return null;
       }
-      return _parseFoodEstimate(response);
+      final parsed = _parseFoodEstimate(response);
+      if (parsed == null) return null;
+      return FoodQueryHints.reconcilePhotoEstimate(parsed);
     } catch (_) {
       return null;
     }
@@ -1241,11 +1244,12 @@ JSON:
 
       final parsed = _parseFoodEstimate(response);
       if (parsed == null) return null;
-      return FoodEstimateParser.stabilizeRevision(
+      final stabilized = FoodEstimateParser.stabilizeRevision(
         previous: previous,
         revised: parsed,
         correction: trimmed,
       );
+      return FoodQueryHints.reconcile(trimmed, stabilized);
     } catch (_) {
       return null;
     }
@@ -1265,8 +1269,8 @@ Reglas obligatorias:
 - ingredients debe listar TODOS los componentes finales del plato, no solo el corregido.
 - ingredient_portions: si hay varios componentes, incluye name y grams_g de cada uno; la suma debe aproximar reference_amount_g.
 - Si actualizas ingredientes o preparación, actualiza también name para que siga siendo específico y descriptivo.
-- calories_kcal y macros son TOTALES para reference_amount_g del plato completo.
-- Los macros deben ser coherentes con las calorías.
+- calories_kcal y macros son TOTALES para reference_amount_g del plato completo (nunca dejes calories_kcal en 0 si hay comida).
+- Los macros deben ser coherentes con las calorías (~4·proteína + 4·carbs + 9·grasa).
 ''';
   }
 

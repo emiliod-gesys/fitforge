@@ -149,11 +149,11 @@ abstract final class FoodEstimateParser {
       return FoodNutritionEstimate(
         name: name,
         brand: json['brand'] as String?,
-        caloriesKcal: (json['calories_kcal'] as num?)?.round().clamp(0, 9999) ?? 0,
-        proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0,
-        carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0,
-        fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,
-        fiberG: (json['fiber_g'] as num?)?.toDouble() ?? 0,
+        caloriesKcal: _readCalories(json),
+        proteinG: _readMacro(json, const ['protein_g', 'protein', 'proteins_g']),
+        carbsG: _readMacro(json, const ['carbs_g', 'carbohydrates_g', 'carbs', 'carbohydrates']),
+        fatG: _readMacro(json, const ['fat_g', 'fats_g', 'fat', 'fats']),
+        fiberG: _readMacro(json, const ['fiber_g', 'fibre_g', 'fiber', 'fibre']),
         servingDescription: servingDescription,
         ingredients: ingredients,
         ingredientPortions: ingredientPortions,
@@ -163,5 +163,31 @@ abstract final class FoodEstimateParser {
     } catch (_) {
       return null;
     }
+  }
+
+  static int _readCalories(Map<String, dynamic> json) {
+    for (final key in const ['calories_kcal', 'calories', 'kcal', 'energy_kcal', 'calorie']) {
+      final value = _asNum(json[key]);
+      if (value != null) return value.round().clamp(0, 9999);
+    }
+    return 0;
+  }
+
+  static double _readMacro(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = _asNum(json[key]);
+      if (value != null) return value.toDouble();
+    }
+    return 0;
+  }
+
+  static num? _asNum(dynamic raw) {
+    if (raw is num) return raw;
+    if (raw is String) {
+      final cleaned = raw.trim().replaceAll(RegExp(r'[^0-9.,\-]'), '').replaceAll(',', '.');
+      if (cleaned.isEmpty) return null;
+      return num.tryParse(cleaned);
+    }
+    return null;
   }
 }
