@@ -1932,7 +1932,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightPerArmSuffix => '(per arm)';
 
   @override
+  String get weightPerLegSuffix => '(per leg)';
+
+  @override
   String get loadModePerArm => 'Per arm';
+
+  @override
+  String get loadModePerLeg => 'Per leg';
 
   @override
   String get loadModeCombined => 'Combined';
@@ -2307,6 +2313,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rest => 'Rest';
+
+  @override
+  String get workoutWeightUnit => 'Weight';
+
+  @override
+  String get workoutUnitToggleHint =>
+      'Switch between kg and lb for this workout only';
 
   @override
   String restRemaining(int seconds) {

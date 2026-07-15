@@ -77,6 +77,25 @@ void main() {
       expect(estimate.ingredients, ['pechuga de pollo', 'arroz blanco', 'brócoli']);
     });
 
+    test('parses alternate calorie and macro keys', () {
+      final estimate = FoodEstimateParser.parse('''
+{
+  "name": "Arroz con pollo",
+  "calories": "380",
+  "protein": 32,
+  "carbohydrates": 40,
+  "fat": 8,
+  "reference_amount_g": 280
+}
+''');
+
+      expect(estimate, isNotNull);
+      expect(estimate!.caloriesKcal, 380);
+      expect(estimate.proteinG, 32);
+      expect(estimate.carbsG, 40);
+      expect(estimate.fatG, 8);
+    });
+
     test('stabilizeRevision restores dropped ingredients on partial correction', () {
       const previous = FoodNutritionEstimate(
         name: 'Arroz con cerdo y brócoli',
