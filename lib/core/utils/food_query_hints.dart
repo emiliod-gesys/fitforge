@@ -245,7 +245,171 @@ abstract final class FoodQueryHints {
     'arroz cocido': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
     'arroz blanco': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
     'white rice': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    'arroz': (kcal: 130, protein: 2.7, carbs: 28.0, fat: 0.3, fiber: 0.4),
+    // Proteínas y platos comunes (valores típicos cocidos / listos para comer).
+    'pechuga de pollo': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'pollo a la plancha': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'pollo asado': (kcal: 190, protein: 27.0, carbs: 0.0, fat: 8.0, fiber: 0.0),
+    'pollo': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'chicken breast': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'chicken': (kcal: 165, protein: 31.0, carbs: 0.0, fat: 3.6, fiber: 0.0),
+    'carne de res': (kcal: 250, protein: 26.0, carbs: 0.0, fat: 15.0, fiber: 0.0),
+    'bistec': (kcal: 271, protein: 25.0, carbs: 0.0, fat: 19.0, fiber: 0.0),
+    'res': (kcal: 250, protein: 26.0, carbs: 0.0, fat: 15.0, fiber: 0.0),
+    'carne de cerdo': (kcal: 242, protein: 27.0, carbs: 0.0, fat: 14.0, fiber: 0.0),
+    'cerdo': (kcal: 242, protein: 27.0, carbs: 0.0, fat: 14.0, fiber: 0.0),
+    'salmón': (kcal: 208, protein: 20.0, carbs: 0.0, fat: 13.0, fiber: 0.0),
+    'salmon': (kcal: 208, protein: 20.0, carbs: 0.0, fat: 13.0, fiber: 0.0),
+    'atún': (kcal: 132, protein: 28.0, carbs: 0.0, fat: 1.0, fiber: 0.0),
+    'atun': (kcal: 132, protein: 28.0, carbs: 0.0, fat: 1.0, fiber: 0.0),
+    'huevos estrellados': (kcal: 196, protein: 13.6, carbs: 0.8, fat: 15.0, fiber: 0.0),
+    'huevo estrellado': (kcal: 196, protein: 13.6, carbs: 0.8, fat: 15.0, fiber: 0.0),
+    'huevos': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'huevo': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'egg': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'tortilla de maíz': (kcal: 218, protein: 5.7, carbs: 44.0, fat: 2.9, fiber: 6.3),
+    'tortilla de maiz': (kcal: 218, protein: 5.7, carbs: 44.0, fat: 2.9, fiber: 6.3),
+    'tortilla de harina': (kcal: 312, protein: 8.0, carbs: 51.0, fat: 8.0, fiber: 3.0),
+    'tortillas': (kcal: 218, protein: 5.7, carbs: 44.0, fat: 2.9, fiber: 6.3),
+    'tortilla': (kcal: 218, protein: 5.7, carbs: 44.0, fat: 2.9, fiber: 6.3),
+    'frijoles negros': (kcal: 132, protein: 8.9, carbs: 23.7, fat: 0.5, fiber: 8.7),
+    'frijoles': (kcal: 127, protein: 8.7, carbs: 22.8, fat: 0.5, fiber: 7.6),
+    'beans': (kcal: 127, protein: 8.7, carbs: 22.8, fat: 0.5, fiber: 7.6),
+    'brócoli': (kcal: 35, protein: 2.4, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'brocoli': (kcal: 35, protein: 2.4, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'broccoli': (kcal: 35, protein: 2.4, carbs: 7.0, fat: 0.4, fiber: 2.6),
+    'aguacate': (kcal: 160, protein: 2.0, carbs: 8.5, fat: 15.0, fiber: 6.7),
+    'avocado': (kcal: 160, protein: 2.0, carbs: 8.5, fat: 15.0, fiber: 6.7),
+    'papa cocida': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'papas': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'papa': (kcal: 87, protein: 1.9, carbs: 20.0, fat: 0.1, fiber: 1.8),
+    'pan de caja': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
+    'pan': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
+    'queso': (kcal: 350, protein: 22.0, carbs: 2.4, fat: 28.0, fiber: 0.0),
   };
+
+  static ({int kcal, double protein, double carbs, double fat, double fiber})? _lookupAnchor(
+    String rawName,
+  ) {
+    final lower = rawName.toLowerCase().trim();
+    if (lower.isEmpty) return null;
+    final sortedKeys = _anchorPer100g.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final token in sortedKeys) {
+      if (lower.contains(token)) return _anchorPer100g[token];
+    }
+    return null;
+  }
+
+  /// Atwater: 4 kcal/g proteína + 4 kcal/g carbs + 9 kcal/g grasa.
+  static int kcalFromMacros({
+    required double proteinG,
+    required double carbsG,
+    required double fatG,
+  }) {
+    return ((proteinG * 4) + (carbsG * 4) + (fatG * 9)).round().clamp(0, 9999);
+  }
+
+  /// Estima nutrición sumando anclas por [ingredientPortions] (o ingredients + total).
+  static FoodNutritionEstimate? estimateFromIngredientAnchors(FoodNutritionEstimate ai) {
+    final portions = ai.ingredientPortions.isNotEmpty
+        ? ai.ingredientPortions
+        : (ai.ingredients.length == 1 && ai.referenceAmount > 0
+            ? [FoodIngredientPortion(name: ai.ingredients.first, gramsG: ai.referenceAmount)]
+            : const <FoodIngredientPortion>[]);
+
+    if (portions.isEmpty) {
+      final fromName = _lookupAnchor(ai.name);
+      if (fromName == null || ai.referenceAmount <= 0) return null;
+      final factor = ai.referenceAmount / 100;
+      return ai.copyWith(
+        caloriesKcal: (fromName.kcal * factor).round().clamp(0, 9999),
+        proteinG: double.parse((fromName.protein * factor).toStringAsFixed(1)),
+        carbsG: double.parse((fromName.carbs * factor).toStringAsFixed(1)),
+        fatG: double.parse((fromName.fat * factor).toStringAsFixed(1)),
+        fiberG: double.parse((fromName.fiber * factor).toStringAsFixed(1)),
+      );
+    }
+
+    var totalKcal = 0.0;
+    var protein = 0.0;
+    var carbs = 0.0;
+    var fat = 0.0;
+    var fiber = 0.0;
+    var matchedGrams = 0.0;
+    for (final portion in portions) {
+      final anchor = _lookupAnchor(portion.name);
+      if (anchor == null || portion.gramsG <= 0) continue;
+      final factor = portion.gramsG / 100;
+      totalKcal += anchor.kcal * factor;
+      protein += anchor.protein * factor;
+      carbs += anchor.carbs * factor;
+      fat += anchor.fat * factor;
+      fiber += anchor.fiber * factor;
+      matchedGrams += portion.gramsG;
+    }
+
+    if (matchedGrams <= 0 || totalKcal < 1) return null;
+
+    // Si faltan ingredientes sin ancla, escala el total al peso de referencia.
+    final targetGrams = ai.referenceAmount > 0
+        ? ai.referenceAmount
+        : portions.fold<double>(0, (sum, p) => sum + p.gramsG);
+    if (targetGrams > matchedGrams * 1.15) {
+      final scale = targetGrams / matchedGrams;
+      totalKcal *= scale;
+      protein *= scale;
+      carbs *= scale;
+      fat *= scale;
+      fiber *= scale;
+    }
+
+    return ai.copyWith(
+      caloriesKcal: totalKcal.round().clamp(0, 9999),
+      proteinG: double.parse(protein.toStringAsFixed(1)),
+      carbsG: double.parse(carbs.toStringAsFixed(1)),
+      fatG: double.parse(fat.toStringAsFixed(1)),
+      fiberG: double.parse(fiber.toStringAsFixed(1)),
+    );
+  }
+
+  /// Recupera kcal cuando la IA deja 0 (o macros incoherentes) pese a gramos/macros.
+  /// Pensado sobre todo para estimación por foto, donde no hay texto del usuario.
+  static FoodNutritionEstimate ensurePlausibleCalories(FoodNutritionEstimate ai) {
+    final macroKcal = kcalFromMacros(
+      proteinG: ai.proteinG,
+      carbsG: ai.carbsG,
+      fatG: ai.fatG,
+    );
+
+    if (ai.caloriesKcal > 0) {
+      // Macros rellenos pero kcal muy por debajo de Atwater → confía en macros.
+      if (macroKcal >= 40 && ai.caloriesKcal < (macroKcal * 0.5).round()) {
+        return ai.copyWith(caloriesKcal: macroKcal);
+      }
+      return ai;
+    }
+
+    if (macroKcal >= 20) {
+      return ai.copyWith(caloriesKcal: macroKcal);
+    }
+
+    final fromAnchors = estimateFromIngredientAnchors(ai);
+    if (fromAnchors != null && fromAnchors.caloriesKcal > 0) {
+      return fromAnchors;
+    }
+
+    return ai;
+  }
+
+  /// Post-proceso para estimaciones por foto (sin query de texto del usuario).
+  static FoodNutritionEstimate reconcilePhotoEstimate(FoodNutritionEstimate ai) {
+    var result = ai;
+    if (result.ingredientPortions.isEmpty && result.ingredients.length > 1) {
+      result = ensureIngredientPortions(result.name, result);
+    }
+    return ensurePlausibleCalories(result);
+  }
 
   static const _lowCalorieProduce = [
     'lechuga',
@@ -355,7 +519,7 @@ abstract final class FoodQueryHints {
     final eggs = eggCount(query);
 
     if (labeledKcal == 0 && eggs == 0) {
-      return ensureIngredientPortions(query, gramCorrected);
+      return ensurePlausibleCalories(ensureIngredientPortions(query, gramCorrected));
     }
 
     var kcal = labeledKcal + eggs * eggKcal;
@@ -382,28 +546,32 @@ abstract final class FoodQueryHints {
       }
     }
 
-    if (kcal <= 0) return ensureIngredientPortions(query, gramCorrected);
+    if (kcal <= 0) {
+      return ensurePlausibleCalories(ensureIngredientPortions(query, gramCorrected));
+    }
 
     final floor = (kcal * 0.95).round();
     if (gramCorrected.caloriesKcal >= floor) {
-      return ensureIngredientPortions(query, gramCorrected);
+      return ensurePlausibleCalories(ensureIngredientPortions(query, gramCorrected));
     }
 
-    return ensureIngredientPortions(
-      query,
-      FoodNutritionEstimate(
-      name: gramCorrected.name,
-      brand: gramCorrected.brand,
-      caloriesKcal: kcal.round(),
-      proteinG: double.parse(protein.toStringAsFixed(1)),
-      carbsG: double.parse(carbs.toStringAsFixed(1)),
-      fatG: double.parse(fat.toStringAsFixed(1)),
-      fiberG: gramCorrected.fiberG,
-      servingDescription: gramCorrected.servingDescription,
-      ingredients: gramCorrected.ingredients,
-      ingredientPortions: gramCorrected.ingredientPortions,
-      referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
-      amountUnit: gramCorrected.amountUnit,
+    return ensurePlausibleCalories(
+      ensureIngredientPortions(
+        query,
+        FoodNutritionEstimate(
+          name: gramCorrected.name,
+          brand: gramCorrected.brand,
+          caloriesKcal: kcal.round(),
+          proteinG: double.parse(protein.toStringAsFixed(1)),
+          carbsG: double.parse(carbs.toStringAsFixed(1)),
+          fatG: double.parse(fat.toStringAsFixed(1)),
+          fiberG: gramCorrected.fiberG,
+          servingDescription: gramCorrected.servingDescription,
+          ingredients: gramCorrected.ingredients,
+          ingredientPortions: gramCorrected.ingredientPortions,
+          referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
+          amountUnit: gramCorrected.amountUnit,
+        ),
       ),
     );
   }
