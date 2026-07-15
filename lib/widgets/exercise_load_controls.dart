@@ -30,6 +30,11 @@ class ExerciseLoadControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final perLeg = ExerciseLoad.usesPerLegLabel(
+      exerciseId: exerciseId,
+      exerciseName: exerciseName,
+      catalog: catalog,
+    );
     final showToggle = ExerciseLoad.supportsPerArmToggle(
       exerciseId,
       catalog,
@@ -56,7 +61,9 @@ class ExerciseLoadControls extends StatelessWidget {
                 ),
               ),
               Text(
-                perArmEnabled ? l10n.loadModePerArm : l10n.loadModeCombined,
+                perArmEnabled
+                    ? l10n.loadModePerSide(perLeg: perLeg)
+                    : l10n.loadModeCombined,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
               SizedBox(width: 8),

@@ -1331,6 +1331,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           set: entry.value,
                           unitSystem: unitSystem,
                           exerciseName: exercise.exerciseName,
+                          exerciseId: exercise.exerciseId,
+                          exerciseCatalog: exerciseCatalog,
                           perArmWeight: perArm,
                           weightOptional: weightOptional,
                           loadMode: loadMode,

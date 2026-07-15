@@ -3,6 +3,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
+import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
 import '../models/workout.dart';
 import '../core/theme/app_accent.dart';
@@ -11,6 +12,8 @@ class SetLogTile extends StatefulWidget {
   final WorkoutSet set;
   final String unitSystem;
   final String exerciseName;
+  final String? exerciseId;
+  final Iterable<Exercise> exerciseCatalog;
   final bool? perArmWeight;
   final bool? weightOptional;
   final ExerciseLoadMode? loadMode;
@@ -26,6 +29,8 @@ class SetLogTile extends StatefulWidget {
     required this.set,
     required this.unitSystem,
     required this.exerciseName,
+    this.exerciseId,
+    this.exerciseCatalog = const [],
     this.perArmWeight,
     this.weightOptional,
     this.loadMode,
@@ -212,6 +217,11 @@ class _SetLogTileState extends State<SetLogTile> {
   Widget _buildTile(BuildContext context) {
     final l10n = context.l10n;
     final unitLabel = UnitConverter.massLabel(widget.unitSystem);
+    final perLeg = ExerciseLoad.usesPerLegLabel(
+      exerciseName: widget.exerciseName,
+      exerciseId: widget.exerciseId,
+      catalog: widget.exerciseCatalog,
+    );
     final weightLabel = ExerciseLoad.weightLabel(
       unitLabel,
       widget.exerciseName,
@@ -219,7 +229,7 @@ class _SetLogTileState extends State<SetLogTile> {
       weightOptional: widget.weightOptional,
       loadMode: widget.loadMode,
       additionalSuffix: l10n.weightAdditionalSuffix,
-      perArmSuffix: l10n.weightPerArmSuffix,
+      perArmSuffix: l10n.weightPerSideSuffix(perLeg: perLeg),
     );
     final parsedKg = _parsedWeightKg();
     final effectiveKg = ExerciseLoad.effectiveWeightKg(
