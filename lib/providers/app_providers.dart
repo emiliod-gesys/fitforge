@@ -18,6 +18,7 @@ import '../models/leaderboard.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
+import '../models/workout_summary.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/custom_exercise_repository.dart';
@@ -60,6 +61,9 @@ final runnerServiceProvider = Provider(
   (ref) => RunnerService(ref.watch(routineServiceProvider)),
 );
 final pendingRunnerSurfaceProvider = StateProvider<RunningSurface?>((ref) => null);
+
+/// Resumen pendiente tras finalizar entreno; sobrevive a rebuilds de GoRouter sin `extra`.
+final pendingWorkoutSummaryProvider = StateProvider<WorkoutSummaryData?>((ref) => null);
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider((ref) => ProfileService());

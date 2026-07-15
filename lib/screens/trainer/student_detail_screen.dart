@@ -175,6 +175,7 @@ class _StudentDetailScreenState extends ConsumerState<StudentDetailScreen> {
     );
 
     if (!context.mounted) return;
+    ref.read(pendingWorkoutSummaryProvider.notifier).state = summary;
     context.push('/workout/summary', extra: summary);
   }
 }

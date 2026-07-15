@@ -336,7 +336,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     ref.invalidate(personalRecordsProvider);
     ref.invalidate(muscleRecoveryProvider);
     ref.invalidate(workoutWeeklyStatsProvider);
-    ref.invalidate(profileProvider);
     ref.invalidate(leaderboardProvider);
     ref.invalidate(dailyNutritionProvider);
     ref.invalidate(foodEntriesProvider);
@@ -680,6 +679,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       );
 
       if (!mounted) return;
+      ref.read(pendingWorkoutSummaryProvider.notifier).state = summary;
       context.pushReplacement('/workout/summary', extra: summary);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _invalidateWorkoutProviders();

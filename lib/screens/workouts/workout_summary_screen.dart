@@ -164,6 +164,9 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
 
     if (!mounted) return;
 
+    ref.read(pendingWorkoutSummaryProvider.notifier).state = null;
+    ref.invalidate(profileProvider);
+
     final messenger = ScaffoldMessenger.of(context);
     if (publishedCount > 0) {
       messenger.showSnackBar(
@@ -864,6 +867,40 @@ class _FeedShareSection extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Fallback cuando GoRouter reconstruye `/workout/summary` sin `extra`.
+class WorkoutSummaryMissingScreen extends ConsumerStatefulWidget {
+  const WorkoutSummaryMissingScreen({super.key});
+
+  @override
+  ConsumerState<WorkoutSummaryMissingScreen> createState() => _WorkoutSummaryMissingScreenState();
+}
+
+class _WorkoutSummaryMissingScreenState extends ConsumerState<WorkoutSummaryMissingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pending = ref.read(pendingWorkoutSummaryProvider);
+      if (pending == null) {
+        context.go('/');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = ref.watch(pendingWorkoutSummaryProvider);
+    if (pending != null) {
+      return WorkoutSummaryScreen(summary: pending);
+    }
+
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

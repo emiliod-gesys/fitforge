@@ -6,6 +6,7 @@ abstract final class OnboardingRoutes {
     if (matchedLocation == '/food') return true;
     if (matchedLocation.startsWith('/food/add')) return true;
     if (matchedLocation.startsWith('/food/detail')) return true;
+    if (matchedLocation.startsWith('/workout/')) return true;
     return false;
   }
 }

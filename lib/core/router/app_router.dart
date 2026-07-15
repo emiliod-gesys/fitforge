@@ -163,9 +163,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/workout/summary',
-        builder: (_, state) => WorkoutSummaryScreen(
-          summary: state.extra! as WorkoutSummaryData,
-        ),
+        builder: (_, state) {
+          final extra = state.extra;
+          final summary = extra is WorkoutSummaryData
+              ? extra
+              : ref.read(pendingWorkoutSummaryProvider);
+          if (summary == null) {
+            return const WorkoutSummaryMissingScreen();
+          }
+          return WorkoutSummaryScreen(summary: summary);
+        },
       ),
       GoRoute(
         path: '/workouts/history',
