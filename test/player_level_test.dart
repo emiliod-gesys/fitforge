@@ -127,5 +127,19 @@ void main() {
       );
       expect(xp, 66);
     });
+
+    test('runner routines earn 2.5x run XP', () {
+      final normal = PlayerLevelCalculator.xpFromRunDistance(
+        distanceMeters: 5000,
+        streakWeeks: 0,
+      );
+      final runner = PlayerLevelCalculator.xpFromRunDistance(
+        distanceMeters: 5000,
+        streakWeeks: 0,
+        isRunnerRoutine: true,
+      );
+      expect(normal, 60);
+      expect(runner, 150);
+    });
   });
 }

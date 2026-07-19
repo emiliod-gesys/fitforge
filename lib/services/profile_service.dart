@@ -252,6 +252,7 @@ class ProfileService {
     required double totalVolumeKg,
     required int streakWeeks,
     double? runDistanceMeters,
+    bool isRunnerRoutine = false,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) return null;
@@ -273,6 +274,7 @@ class ProfileService {
         ? PlayerLevelCalculator.xpFromRunDistance(
             distanceMeters: runDistanceMeters,
             streakWeeks: streakWeeks,
+            isRunnerRoutine: isRunnerRoutine,
           )
         : 0;
     final xpEarned = volumeXp + runXp;

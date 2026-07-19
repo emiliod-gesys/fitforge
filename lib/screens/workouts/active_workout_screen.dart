@@ -673,6 +673,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               totalVolumeKg: volume,
               streakWeeks: streakWeeks,
               runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
+              isRunnerRoutine: _isRunnerWorkout,
             );
       }
 

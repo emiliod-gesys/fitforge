@@ -36,13 +36,22 @@ abstract final class PlayerLevelCalculator {
   static const minRunDistanceForXpMeters = 200.0;
   static const maxRunXpPerWorkout = 360;
 
+  /// Bonus XP for the two built-in runner routines (outdoor + treadmill).
+  static const runnerRoutineXpMultiplier = 2.5;
+
   static int xpFromRunDistance({
     required double distanceMeters,
     required int streakWeeks,
+    bool isRunnerRoutine = false,
   }) {
     if (distanceMeters < minRunDistanceForXpMeters) return 0;
-    final baseXp = ((distanceMeters / 1000) * xpPerRunKm).round();
-    final capped = baseXp.clamp(0, maxRunXpPerWorkout);
+    final perKm =
+        isRunnerRoutine ? xpPerRunKm * runnerRoutineXpMultiplier : xpPerRunKm.toDouble();
+    final maxXp = isRunnerRoutine
+        ? (maxRunXpPerWorkout * runnerRoutineXpMultiplier).round()
+        : maxRunXpPerWorkout;
+    final baseXp = ((distanceMeters / 1000) * perKm).round();
+    final capped = baseXp.clamp(0, maxXp);
     final multiplier = streakMultiplier(streakWeeks);
     return (capped * multiplier).round();
   }
