@@ -7,8 +7,11 @@ import '../core/utils/muscle_inference.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
+import '../providers/cloud_exercise_search_notifier.dart';
+import 'cloud_exercise_load_more_footer.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_thumbnail.dart';
+import 'localized_exercise_name.dart';
 import '../core/theme/app_accent.dart';
 
 enum ExercisePickerFilter { all, inRoutine, custom }
@@ -39,46 +42,42 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
     super.dispose();
   }
 
-  List<Exercise> _filteredFrom(List<Exercise> source) {
-    Iterable<Exercise> list = source;
-
-    if (_filter == ExercisePickerFilter.inRoutine) {
-      list = list.where((e) => widget.selectedExerciseIds.contains(e.id));
-    } else if (_filter == ExercisePickerFilter.custom) {
-      list = list.where((e) => e.isUserCustom);
-    }
-
-    if (_muscleFilter != null) {
-      list = list.where(
-        (e) => MuscleInference.matchesMuscleGroup(exercise: e, muscleGroup: _muscleFilter!),
-      );
-    }
-
-    if (_search.isNotEmpty) {
-      final q = _search.toLowerCase();
-      list = list.where(
-        (e) =>
-            e.name.toLowerCase().contains(q) ||
-            e.category.toLowerCase().contains(q) ||
-            e.muscles.any((m) => m.toLowerCase().contains(q)),
-      );
-    }
-
-    return list.toList();
+  List<Exercise> _filteredFrom(List<Exercise> bundled, List<Exercise> cloud) {
+    final filteredBundled = filterBundledPickerExercises(
+      exercises: bundled,
+      search: _search,
+      muscleFilter: _muscleFilter,
+      customOnly: _filter == ExercisePickerFilter.custom,
+      inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
+      selectedExerciseIds: widget.selectedExerciseIds,
+    );
+    final filteredCloud = filterCloudPickerExercises(
+      exercises: cloud,
+      muscleFilter: _muscleFilter,
+      customOnly: _filter == ExercisePickerFilter.custom,
+      inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
+      selectedExerciseIds: widget.selectedExerciseIds,
+    );
+    return mergeBundledAndCloudExercises(bundled: filteredBundled, cloud: filteredCloud);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
-    final cloudAsync = shouldQueryCloudExerciseCatalog(_search)
-        ? ref.watch(cloudExerciseSearchProvider(_search))
-        : const AsyncValue.data(<Exercise>[]);
-    final merged = mergeBundledAndCloudExercises(
-      bundled: exercises,
-      cloud: cloudAsync.valueOrNull ?? const [],
+    final cloudDisabled = _filter == ExercisePickerFilter.custom ||
+        _filter == ExercisePickerFilter.inRoutine;
+    final cloudKey = cloudExerciseCatalogNotifierKey(
+      search: _search,
+      muscleFilter: _muscleFilter,
+      cloudDisabled: cloudDisabled,
     );
-    final filtered = _filteredFrom(merged);
+    final cloudState = cloudKey != null
+        ? ref.watch(cloudExerciseSearchNotifierProvider(cloudKey))
+        : const CloudExerciseSearchState();
+    final filtered = _filteredFrom(exercises, cloudState.exercises);
+    final showCloudLoadMore =
+        cloudKey != null && cloudState.hasMore && !cloudDisabled;
     final inRoutineCount = widget.selectedExerciseIds.length;
 
     return Column(
@@ -112,7 +111,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: l10n.searchByMuscle,
+                  hintText: l10n.searchExercises,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _search.isNotEmpty
                       ? IconButton(
@@ -125,6 +124,17 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                       : null,
                 ),
                 onChanged: (v) => setState(() => _search = v),
+              ),
+              if (cloudKey == null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  l10n.cloudCatalogSearchHint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+                ),
+              ],
+              CloudExerciseSearchStatus(
+                isLoading: cloudState.isLoading,
+                error: cloudState.error,
               ),
               const SizedBox(height: 10),
               SingleChildScrollView(
@@ -203,8 +213,16 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                   ),
                 )
               : ListView.builder(
-                  itemCount: filtered.length,
+                  itemCount: filtered.length + (showCloudLoadMore ? 1 : 0),
                   itemBuilder: (_, i) {
+                    if (showCloudLoadMore && i == filtered.length) {
+                      return CloudExerciseLoadMoreFooter(
+                        isLoadingMore: cloudState.isLoadingMore,
+                        onLoadMore: () => ref
+                            .read(cloudExerciseSearchNotifierProvider(cloudKey).notifier)
+                            .loadMore(),
+                      );
+                    }
                     final ex = filtered[i];
                     final inRoutine = widget.selectedExerciseIds.contains(ex.id);
                     return ListTile(
@@ -219,7 +237,12 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                       ),
                       title: Row(
                         children: [
-                          Expanded(child: Text(ex.name)),
+                          Expanded(
+                            child: LocalizedExerciseName(
+                              ex.name,
+                              exerciseId: ex.id,
+                            ),
+                          ),
                           if (ex.isUserCustom)
                             Padding(
                               padding: const EdgeInsets.only(left: 6),
@@ -239,9 +262,15 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                             muscles: ex.muscles,
                           );
                           final parts = <String>[
-                            if (primaryGroup != null) primaryGroup else ex.category,
-                            if (ex.muscles.isNotEmpty) ex.muscles.first,
+                            if (primaryGroup != null)
+                              l10n.muscleLabel(primaryGroup)
+                            else
+                              l10n.exerciseCategoryLabel(ex.category),
+                            if (ex.muscles.isNotEmpty) l10n.muscleLabel(ex.muscles.first),
                           ];
+                          if (parts.length == 2 && parts[0] == parts[1]) {
+                            return parts[0];
+                          }
                           return parts.join(' · ');
                         }(),
                       ),

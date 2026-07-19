@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import 'exercise_thumbnail.dart';
+import 'localized_exercise_name.dart';
 
 class ExerciseCard extends ConsumerWidget {
   final Exercise exercise;
@@ -40,7 +41,11 @@ class ExerciseCard extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(exercise.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          child: LocalizedExerciseName(
+                            exercise.name,
+                            exerciseId: exercise.id,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ),
                         if (exercise.isUserCustom) ...[
                           const SizedBox(width: 6),
@@ -55,7 +60,16 @@ class ExerciseCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${exercise.category}${exercise.muscles.isNotEmpty ? ' · ${exercise.muscles.first}' : ''}',
+                      () {
+                        final parts = <String>[
+                          l10n.exerciseCategoryLabel(exercise.category),
+                          if (exercise.muscles.isNotEmpty) l10n.muscleLabel(exercise.muscles.first),
+                        ];
+                        if (parts.length == 2 && parts[0] == parts[1]) {
+                          return parts[0];
+                        }
+                        return parts.join(' · ');
+                      }(),
                       style: const TextStyle(color: Colors.white54, fontSize: 13),
                     ),
                   ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/connection_error.dart';
+import '../core/utils/catalog_muscle_labels.dart';
 import '../core/utils/feed_personal_record.dart';
 import '../core/utils/milestones.dart';
 import '../core/utils/player_level_badge.dart';
@@ -70,7 +71,8 @@ extension ProfileL10n on AppLocalizations {
   }
 
   String muscleLabel(String muscle) {
-    return switch (muscle) {
+    final key = CatalogMuscleLabels.canonicalMuscleKey(muscle);
+    final core = switch (key) {
       'Pecho' => muscleChest,
       'Espalda' => muscleBack,
       'Hombros' => muscleShoulders,
@@ -82,8 +84,36 @@ extension ProfileL10n on AppLocalizations {
       'Antebrazos' => muscleForearms,
       'Cardio' => muscleCardio,
       'Pantorrillas' => muscleCalves,
-      _ => muscle,
+      _ => null,
     };
+    if (core != null) return core;
+    if (localeName.startsWith('en')) {
+      return CatalogMuscleLabels.englishMuscleLabel(key);
+    }
+    return key;
+  }
+
+  String exerciseCategoryLabel(String category) {
+    final key = CatalogMuscleLabels.canonicalCategoryKey(category);
+    final core = switch (key) {
+      'Pecho' => muscleChest,
+      'Espalda' => muscleBack,
+      'Hombros' => muscleShoulders,
+      'Bíceps' => muscleBiceps,
+      'Tríceps' => muscleTriceps,
+      'Piernas' => muscleLegs,
+      'Glúteos' => muscleGlutes,
+      'Abdominales' => muscleAbs,
+      'Antebrazos' => muscleForearms,
+      'Cardio' => muscleCardio,
+      'Pantorrillas' => muscleCalves,
+      _ => null,
+    };
+    if (core != null) return core;
+    if (localeName.startsWith('en')) {
+      return CatalogMuscleLabels.englishCategoryLabel(key);
+    }
+    return key;
   }
 
   String bodyMetricLabel(String key) {

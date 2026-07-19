@@ -1296,10 +1296,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wgerAttribution => 'Imágenes y videos de wger.de (CC-BY-SA)';
 
   @override
-  String get gymVisualAttribution => 'Ilustraciones © Gym visual — gymvisual.com';
+  String get gymVisualAttribution =>
+      'Ilustraciones © Gym visual — gymvisual.com';
 
   @override
   String get cloudCatalogSearching => 'Buscando en catálogo extendido…';
+
+  @override
+  String get cloudCatalogSearchHint =>
+      'Escribe 2+ letras o elige un grupo muscular para ver más de 1100 ejercicios del catálogo extendido.';
+
+  @override
+  String get cloudCatalogLoadMore => 'Cargar más';
+
+  @override
+  String get cloudCatalogSearchError =>
+      'No se pudo cargar el catálogo extendido. Revisa tu conexión.';
 
   @override
   String get loadingImage => 'Cargando imagen…';

@@ -1,4 +1,6 @@
 import '../core/constants/cloud_exercise_catalog.dart';
+import '../core/utils/catalog_muscle_labels.dart';
+import '../core/utils/cloud_exercise_name_localizer.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
 import '../services/supabase_service.dart';
@@ -10,14 +12,53 @@ class CloudExerciseCatalog {
   Future<List<Exercise>> search({
     required String query,
     required String locale,
-    int limit = 40,
+    int limit = CloudExerciseCatalogIds.pageSize,
+    int offset = 0,
   }) async {
     final trimmed = query.trim();
     if (trimmed.length < 2) return const [];
 
+    await CloudExerciseNameLocalizer.ensureLoaded();
+
+    final cappedLimit = limit.clamp(1, CloudExerciseCatalogIds.maxPageSize);
+    final cappedOffset = offset < 0 ? 0 : offset;
+
     final response = await SupabaseService.client.rpc(
       'search_catalog_exercises',
-      params: {'p_query': trimmed, 'p_limit': limit},
+      params: {
+        'p_query': trimmed,
+        'p_limit': cappedLimit,
+        'p_offset': cappedOffset,
+      },
+    );
+
+    final rows = response as List? ?? const [];
+    final exercises = <Exercise>[];
+    for (final row in rows) {
+      if (row is! Map<String, dynamic>) continue;
+      final exercise = _parseRow(row, locale);
+      _cache[exercise.id] = exercise;
+      exercises.add(exercise);
+    }
+    return exercises;
+  }
+
+  Future<List<Exercise>> browse({
+    required String locale,
+    int limit = CloudExerciseCatalogIds.pageSize,
+    int offset = 0,
+  }) async {
+    await CloudExerciseNameLocalizer.ensureLoaded();
+
+    final cappedLimit = limit.clamp(1, CloudExerciseCatalogIds.maxPageSize);
+    final cappedOffset = offset < 0 ? 0 : offset;
+
+    final response = await SupabaseService.client.rpc(
+      'browse_catalog_exercises',
+      params: {
+        'p_limit': cappedLimit,
+        'p_offset': cappedOffset,
+      },
     );
 
     final rows = response as List? ?? const [];
@@ -43,6 +84,7 @@ class CloudExerciseCatalog {
         .eq('id', catalogId)
         .maybeSingle();
     if (response == null) return null;
+    await CloudExerciseNameLocalizer.ensureLoaded();
     final exercise = _parseRow(Map<String, dynamic>.from(response), locale);
     _cache[catalogId] = exercise;
     return exercise;
@@ -55,9 +97,11 @@ class CloudExerciseCatalog {
     final id = json['id'] as String? ?? '';
     final nameEn = (json['name_en'] as String? ?? '').trim();
     final nameEs = (json['name_es'] as String? ?? '').trim();
-    final name = lang == 'en'
-        ? (nameEn.isNotEmpty ? nameEn : nameEs)
-        : (nameEs.isNotEmpty ? nameEs : nameEn);
+    final name = CloudExerciseNameLocalizer.localize(
+      nameEn: nameEn,
+      nameEs: nameEs,
+      locale: lang,
+    );
 
     final loggingType = ExerciseLoggingType.fromJson(json['logging_type'] as String?);
     final loadMode = ExerciseLoadMode.fromJson(json['load_mode'] as String?);
@@ -74,17 +118,21 @@ class CloudExerciseCatalog {
 
     final musclesRaw = json['muscles'];
     final muscles = musclesRaw is List
-        ? musclesRaw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList()
+        ? CatalogMuscleLabels.canonicalizeMuscles(
+            musclesRaw.map((e) => e.toString()).where((s) => s.isNotEmpty),
+          )
         : const <String>[];
 
     final equipment = (json['equipment'] as String? ?? '').trim();
+    final categoryRaw = (json['category'] as String? ?? 'Otros').trim();
+    final category = CatalogMuscleLabels.canonicalCategoryKey(categoryRaw);
 
     return Exercise(
       catalogId: id,
       supabaseId: id,
       name: name.isNotEmpty ? name : nameEn,
       description: description,
-      category: (json['category'] as String? ?? 'Otros').trim(),
+      category: category,
       muscles: muscles,
       equipment: equipment.isEmpty ? const [] : [equipment],
       imageUrl: json['image_url'] as String?,

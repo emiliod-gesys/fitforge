@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/constants/cloud_exercise_catalog.dart';
+import '../core/utils/cloud_exercise_name_localizer.dart';
 import '../providers/app_providers.dart';
 
 /// Nombre de ejercicio según idioma del perfil (catálogo local → nombre guardado).
@@ -31,7 +33,13 @@ class LocalizedExerciseName extends ConsumerWidget {
       locale: lang,
     );
 
-    if (name == fallbackName && catalog != null) {
+    if (CloudExerciseCatalogIds.isCloudId(exerciseId)) {
+      name = CloudExerciseNameLocalizer.localize(
+        nameEn: fallbackName,
+        nameEs: fallbackName,
+        locale: lang,
+      );
+    } else if (name == fallbackName && catalog != null) {
       final match = ref.read(exerciseServiceProvider).findInCatalog(
             exerciseId: exerciseId,
             exerciseName: fallbackName,

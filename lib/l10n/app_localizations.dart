@@ -2391,10 +2391,34 @@ abstract class AppLocalizations {
   String get wgerAttribution;
 
   /// No description provided for @gymVisualAttribution.
+  ///
+  /// In es, this message translates to:
+  /// **'Ilustraciones © Gym visual — gymvisual.com'**
   String get gymVisualAttribution;
 
   /// No description provided for @cloudCatalogSearching.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando en catálogo extendido…'**
   String get cloudCatalogSearching;
+
+  /// No description provided for @cloudCatalogSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe 2+ letras o elige un grupo muscular para ver más de 1100 ejercicios del catálogo extendido.'**
+  String get cloudCatalogSearchHint;
+
+  /// No description provided for @cloudCatalogLoadMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar más'**
+  String get cloudCatalogLoadMore;
+
+  /// No description provided for @cloudCatalogSearchError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar el catálogo extendido. Revisa tu conexión.'**
+  String get cloudCatalogSearchError;
 
   /// No description provided for @loadingImage.
   ///

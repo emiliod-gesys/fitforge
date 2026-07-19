@@ -71,8 +71,28 @@ class ExerciseService {
   }
 
   /// Catálogo extendido en Supabase (búsqueda bajo demanda, no embebido).
-  Future<List<Exercise>> searchCloudExercises(String query) {
-    return _cloudCatalog.search(query: query, locale: _preferredLanguage);
+  Future<List<Exercise>> searchCloudExercises(
+    String query, {
+    int limit = CloudExerciseCatalogIds.pageSize,
+    int offset = 0,
+  }) {
+    return _cloudCatalog.search(
+      query: query,
+      locale: _preferredLanguage,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  Future<List<Exercise>> browseCloudExercises({
+    int limit = CloudExerciseCatalogIds.pageSize,
+    int offset = 0,
+  }) {
+    return _cloudCatalog.browse(
+      locale: _preferredLanguage,
+      limit: limit,
+      offset: offset,
+    );
   }
 
   Future<Exercise?> getCloudExerciseById(String catalogId) {

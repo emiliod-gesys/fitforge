@@ -1,6 +1,8 @@
 /// IDs del catálogo extendido en Supabase (`catalog_exercises`).
 abstract final class CloudExerciseCatalogIds {
   static const prefix = 'ext_';
+  static const pageSize = 40;
+  static const maxPageSize = 80;
 
   static bool isCloudId(String id) => id.startsWith(prefix);
 

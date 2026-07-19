@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/exercise_picker_merge.dart';
-import '../core/utils/muscle_inference.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
+import '../providers/cloud_exercise_search_notifier.dart';
+import 'cloud_exercise_load_more_footer.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_card.dart';
+import 'localized_exercise_name.dart';
 import 'fitforge_loading_indicator.dart';
 
 class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
@@ -47,26 +49,19 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
   String? _muscleFilter;
   bool _customOnly = false;
 
-  List<Exercise> _filterExercises(List<Exercise> exercises) {
-    return exercises.where((e) {
-      if (widget.excludeExerciseIds.contains(e.id)) return false;
-      if (_customOnly && !e.isUserCustom) return false;
-      if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search)) return false;
-      if (_muscleFilter != null &&
-          !MuscleInference.matchesMuscleGroup(exercise: e, muscleGroup: _muscleFilter!)) {
-        return false;
-      }
-      return true;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
-    final cloudAsync = shouldQueryCloudExerciseCatalog(_search)
-        ? ref.watch(cloudExerciseSearchProvider(_search))
-        : const AsyncValue.data(<Exercise>[]);
+    final cloudKey = cloudExerciseCatalogNotifierKey(
+      search: _search,
+      muscleFilter: _muscleFilter,
+      cloudDisabled: _customOnly,
+    );
+    final cloudState = cloudKey != null
+        ? ref.watch(cloudExerciseSearchNotifierProvider(cloudKey))
+        : const CloudExerciseSearchState();
+    final showCloudLoadMore = cloudKey != null && cloudState.hasMore && !_customOnly;
 
     return Column(
       children: [
@@ -109,10 +104,21 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
               const SizedBox(height: 8),
               TextField(
                 decoration: InputDecoration(
-                  hintText: l10n.searchExercise,
+                  hintText: l10n.searchExercises,
                   prefixIcon: const Icon(Icons.search),
                 ),
-                onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
+                onChanged: (v) => setState(() => _search = v),
+              ),
+              if (cloudKey == null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  l10n.cloudCatalogSearchHint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+                ),
+              ],
+              CloudExerciseSearchStatus(
+                isLoading: cloudState.isLoading,
+                error: cloudState.error,
               ),
             ],
           ),
@@ -122,11 +128,23 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
           loading: () => const Expanded(child: Center(child: FitForgeLoadingIndicator(size: 48))),
           error: (e, _) => Expanded(child: Center(child: Text(l10n.errorGeneric('$e')))),
           data: (exercises) {
-            final merged = mergeBundledAndCloudExercises(
-              bundled: exercises,
-              cloud: cloudAsync.valueOrNull ?? const [],
+            final filteredBundled = filterBundledPickerExercises(
+              exercises: exercises,
+              search: _search,
+              muscleFilter: _muscleFilter,
+              customOnly: _customOnly,
+              excludeExerciseIds: widget.excludeExerciseIds,
             );
-            final filtered = _filterExercises(merged);
+            final filteredCloud = filterCloudPickerExercises(
+              exercises: cloudState.exercises,
+              muscleFilter: _muscleFilter,
+              customOnly: _customOnly,
+              excludeExerciseIds: widget.excludeExerciseIds,
+            );
+            final filtered = mergeBundledAndCloudExercises(
+              bundled: filteredBundled,
+              cloud: filteredCloud,
+            );
 
             return Expanded(
               child: Column(
@@ -189,8 +207,18 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            itemCount: filtered.length,
+                            itemCount: filtered.length + (showCloudLoadMore ? 1 : 0),
                             itemBuilder: (_, i) {
+                              if (showCloudLoadMore && i == filtered.length) {
+                                return CloudExerciseLoadMoreFooter(
+                                  isLoadingMore: cloudState.isLoadingMore,
+                                  onLoadMore: cloudKey == null
+                                      ? null
+                                      : () => ref
+                                          .read(cloudExerciseSearchNotifierProvider(cloudKey).notifier)
+                                          .loadMore(),
+                                );
+                              }
                               final exercise = filtered[i];
                               return ExerciseCard(
                                 exercise: exercise,

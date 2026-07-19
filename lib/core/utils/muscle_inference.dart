@@ -269,19 +269,11 @@ abstract final class MuscleInference {
     }
 
     if (muscleGroup == 'Antebrazos') {
-      if (primaryRecoveryGroup(
+      return primaryRecoveryGroup(
             category: exercise.category,
             muscles: exercise.muscles,
           ) ==
-          'Antebrazos') {
-        return true;
-      }
-
-      for (final muscle in exercise.muscles) {
-        if (_mapToRecoveryGroup(muscle) == 'Antebrazos') return true;
-      }
-
-      return _isForearmExercise(_normalize(exercise.name));
+          'Antebrazos';
     }
 
     final primary = primaryRecoveryGroup(
@@ -373,6 +365,7 @@ abstract final class MuscleInference {
     if (_containsAny(c, ['triceps', 'tríceps'])) return 'Tríceps';
     if (_containsAny(c, ['antebrazo', 'forearm'])) return 'Antebrazos';
     if (_containsAny(c, ['cardio'])) return 'Cardio';
+    if (_containsAny(c, ['cuello', 'neck'])) return 'Hombros';
     if (_containsAny(c, ['brazo', 'arm'])) return null;
     return null;
   }

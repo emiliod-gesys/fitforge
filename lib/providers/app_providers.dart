@@ -151,13 +151,6 @@ final exercisesProvider = FutureProvider((ref) async {
 
 final cloudExerciseCatalogProvider = Provider((ref) => CloudExerciseCatalog());
 
-final cloudExerciseSearchProvider = FutureProvider.family<List<Exercise>, String>((ref, query) async {
-  final trimmed = query.trim();
-  if (trimmed.length < 2) return const [];
-  final lang = ref.watch(preferredLanguageProvider);
-  return ref.read(exerciseServiceProvider).searchCloudExercises(trimmed);
-});
-
 final cloudExerciseByIdProvider = FutureProvider.family<Exercise?, String>((ref, id) async {
   if (!CloudExerciseCatalog.isCloudExerciseId(id)) return null;
   final lang = ref.watch(preferredLanguageProvider);
