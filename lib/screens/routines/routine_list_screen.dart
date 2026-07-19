@@ -56,7 +56,13 @@ abstract final class RoutineListActions {
                     .toList();
                 final profile = await ref.read(profileProvider.future);
                 final workouts = await ref.read(workoutsProvider.future);
-                final catalog = await ref.read(exercisesProvider.future);
+                final effectiveMuscles = muscles.isEmpty ? ['Pecho', 'Espalda'] : muscles;
+                final lang = ref.read(preferredLanguageProvider);
+                final exerciseService = ref.read(exerciseServiceProvider);
+                exerciseService.configure(language: lang);
+                final catalog = await exerciseService.fetchAiCoachCatalog(
+                  targetMuscles: effectiveMuscles,
+                );
                 final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
                 final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
                 final personalRecords = await ref.read(personalRecordsProvider.future);
@@ -87,7 +93,7 @@ abstract final class RoutineListActions {
                     context,
                     message: l10n.generatingRoutine,
                     task: () => ref.read(aiCoachServiceProvider).generateRoutine(
-                          targetMuscles: muscles.isEmpty ? ['Pecho', 'Espalda'] : muscles,
+                          targetMuscles: effectiveMuscles,
                           durationMinutes: duration,
                           profile: profile,
                           recentWorkouts: workouts,

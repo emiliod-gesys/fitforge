@@ -2,6 +2,7 @@ import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import 'exercise_catalog_visibility.dart';
 import 'exercise_matcher.dart';
+import 'muscle_inference.dart';
 
 /// Limpia rutinas generadas por IA: catálogo filtrado, sin duplicados ni nombres basura.
 abstract final class AiRoutineSanitizer {
@@ -188,21 +189,11 @@ abstract final class AiRoutineSanitizer {
   }
 
   static bool _matchesTargetMuscles(Exercise exercise, List<String> targetMuscles) {
-    final category = exercise.category.toLowerCase();
-    final muscles = exercise.muscles.map((m) => m.toLowerCase()).join(' ');
-    for (final target in targetMuscles) {
-      final t = target.toLowerCase();
-      if (category.contains(t) || muscles.contains(t)) return true;
-      if (t == 'piernas' && (category.contains('pierna') || category.contains('leg'))) {
-        return true;
-      }
-      if (t == 'bíceps' && (muscles.contains('bicep') || category.contains('brazo'))) {
-        return true;
-      }
-      if (t == 'tríceps' && (muscles.contains('tricep') || category.contains('brazo'))) {
-        return true;
-      }
-    }
-    return false;
+    return targetMuscles.any(
+      (target) => MuscleInference.matchesMuscleGroup(
+        exercise: exercise,
+        muscleGroup: target,
+      ),
+    );
   }
 }

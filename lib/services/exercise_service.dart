@@ -4,6 +4,10 @@ import '../core/constants/app_constants.dart';
 import '../core/constants/exercise_catalog_source.dart';
 import '../core/utils/exercise_catalog_visibility.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/ai_coach_catalog.dart';
+import '../core/utils/exercise_picker_merge.dart';
+import '../core/utils/muscle_inference.dart';
+import '../core/utils/similar_exercises.dart';
 import '../core/constants/cloud_exercise_catalog.dart';
 import '../data/bundled_exercise_catalog.dart';
 import '../data/cloud_exercise_catalog.dart';
@@ -93,6 +97,55 @@ class ExerciseService {
       limit: limit,
       offset: offset,
     );
+  }
+
+  /// Catálogo embebido + ejercicios cloud relevantes para generación con AI Coach.
+  Future<List<Exercise>> fetchAiCoachCatalog({
+    List<String> targetMuscles = const [],
+    int maxCloudExercises = AiCoachCatalog.maxCloudExercises,
+  }) async {
+    final bundled = await fetchExercises();
+    final muscles = AiCoachCatalog.musclesToQuery(targetMuscles);
+    final perMuscleLimit = (maxCloudExercises / muscles.length).ceil().clamp(40, 120);
+
+    final cloud = <Exercise>[];
+    final seen = <String>{};
+
+    for (final muscle in muscles) {
+      var addedForMuscle = 0;
+      final query = SimilarExercises.cloudSearchQueryForPrimaryGroup(muscle);
+      var offset = 0;
+
+      while (addedForMuscle < perMuscleLimit && cloud.length < maxCloudExercises) {
+        final page = await searchCloudExercises(
+          query,
+          limit: AiCoachCatalog.cloudPageSize,
+          offset: offset,
+        );
+        if (page.isEmpty) break;
+
+        for (final exercise in page) {
+          if (seen.contains(exercise.id)) continue;
+          if (!MuscleInference.matchesMuscleGroup(
+            exercise: exercise,
+            muscleGroup: muscle,
+          )) {
+            continue;
+          }
+          seen.add(exercise.id);
+          cloud.add(exercise);
+          addedForMuscle++;
+          if (addedForMuscle >= perMuscleLimit || cloud.length >= maxCloudExercises) break;
+        }
+
+        if (page.length < AiCoachCatalog.cloudPageSize) break;
+        offset += page.length;
+      }
+    }
+
+    final merged = mergeBundledAndCloudExercises(bundled: bundled, cloud: cloud);
+    merged.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return merged;
   }
 
   Future<Exercise?> getCloudExerciseById(String catalogId) {

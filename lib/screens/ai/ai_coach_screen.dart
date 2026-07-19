@@ -98,7 +98,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       final profile = await ref.read(profileProvider.future);
       final workouts = await ref.read(workoutsProvider.future);
       final routines = await ref.read(routinesProvider.future);
-      final catalog = await ref.read(exercisesProvider.future);
       final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
       final weeklyStats = await ref.read(workoutWeeklyStatsProvider.future);
       final personalRecords = await ref.read(personalRecordsProvider.future);
@@ -135,7 +134,16 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             );
           });
         }
-      } else if (AiCoachService.isRoutineCreationRequest(trimmed)) {
+        return;
+      }
+
+      final muscles = AiCoachService.parseTargetMuscles(trimmed);
+      final lang = ref.read(preferredLanguageProvider);
+      final exerciseService = ref.read(exerciseServiceProvider);
+      exerciseService.configure(language: lang);
+      final catalog = await exerciseService.fetchAiCoachCatalog(targetMuscles: muscles);
+
+      if (AiCoachService.isRoutineCreationRequest(trimmed)) {
         await _handleRoutineGeneration(
           text: trimmed,
           profile: profile,
@@ -163,7 +171,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           nutrition: nutrition,
         );
 
-        final muscles = AiCoachService.parseTargetMuscles(trimmed);
         final parsedRoutine = coach.tryParseRoutineFromResponse(
           response,
           targetMuscles: muscles,
