@@ -138,7 +138,7 @@ abstract final class FoodQueryHints {
     double totalGrams,
     String fullName,
   ) {
-    final parts = RegExp(r'\s+con\s+', caseSensitive: false).split(fullName);
+    final parts = fullName.split(RegExp(r'\s+con\s+', caseSensitive: false));
     final mainName = _cleanIngredientName(parts.first);
     if (parts.length <= 1) {
       return [FoodIngredientPortion(name: mainName, gramsG: totalGrams)];
@@ -173,8 +173,8 @@ abstract final class FoodQueryHints {
   static String _primaryQueryText(String query) {
     final totalPlate = parseTotalPlateGrams(query);
     if (totalPlate != null) {
-      return RegExp(r'\s+con\s+', caseSensitive: false)
-          .split(totalPlate.name)
+      return totalPlate.name
+          .split(RegExp(r'\s+con\s+', caseSensitive: false))
           .first
           .trim();
     }
