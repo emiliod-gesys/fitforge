@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
+import '../core/utils/ai_coach_routine_prompt.dart';
 import '../core/utils/ai_routine_sanitizer.dart';
 import '../core/utils/exercise_matcher.dart';
 import '../core/utils/food_estimate_parser.dart';
@@ -20,6 +21,7 @@ import '../models/profile.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
 import 'profile_service.dart';
+import 'routine_limit_service.dart';
 
 class AiCoachService {
   AiCoachService(this._profileService);
@@ -278,14 +280,30 @@ class AiCoachService {
         m.contains('plan');
   }
 
+  /// Petición de rutina que debe resolverse con JSON estructurado (preview guardable).
+  static bool shouldGenerateStructuredRoutine(String message) {
+    if (isRoutineSaveIntent(message)) return false;
+    if (isRoutineCreationRequest(message)) return true;
+
+    final m = _normalizeRoutineTypos(message);
+    if (!_hasTrainingPlanIntent(m)) return false;
+
+    return _mentionsRoutineOrPlan(m) ||
+        isMultiRoutineProgramRequest(message) ||
+        parseTargetMuscles(message).isNotEmpty;
+  }
+
   static const _routineRules = '''
 REGLAS OBLIGATORIAS:
-- Entre 4 y 8 ejercicios DIFERENTES; nunca repitas el mismo ejercicio.
+- Cuando el usuario pida una rutina o plan de entrenamiento para FitForge, responde SOLO con JSON válido de rutina(s). La app lo convierte en rutina editable para guardar; no des solo consejos en prosa.
+- Entre 4 y 8 ejercicios DIFERENTES por rutina; nunca repitas el mismo ejercicio.
 - Usa SOLO nombres EXACTOS copiados de la lista proporcionada (todos tienen imagen ilustrativa).
 - No uses nombres genéricos de músculo (ej. "bíceps", "tríceps", "pecho") ni inventados.
 - No inventes nombres como "ejercicio de prueba" o "ejercicio 1".
 - Si el objetivo incluye varios músculos, incluye ejercicios variados para cada uno.
 - Para bíceps y tríceps: mínimo 2 ejercicios de bíceps y 2 de tríceps, todos distintos.
+- Si el usuario indica equipamiento disponible, cada ejercicio debe poder hacerse solo con ese equipamiento.
+- Respeta el límite de rutinas guardadas del usuario e infórmale si no puede guardar más o le quedan pocos espacios.
 ''';
 
   /// Intenta extraer una rutina JSON embebida en una respuesta de chat libre.
@@ -420,6 +438,7 @@ REGLAS OBLIGATORIAS:
     List<PersonalRecord>? personalRecords,
     String? languageCode,
     CoachNutritionSnapshot? nutrition,
+    RoutineLimitStatus? routineLimit,
   }) async {
     final credentials = await _resolveCredentials(profile);
     final aiProvider = credentials.provider;
@@ -433,6 +452,7 @@ REGLAS OBLIGATORIAS:
       recentWorkouts: recentWorkouts,
       routines: routines,
       nutrition: nutrition,
+      routineLimit: routineLimit,
     );
     final usesLb = profile != null && UnitConverter.isLb(profile.unitSystem);
     final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
@@ -448,8 +468,8 @@ Usa esa información para personalizar ejercicios, volumen, series, reps, progre
 Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
-Si el usuario pide crear una rutina editable, responde solo con un resumen breve (la app generará la rutina estructurada por separado).
-No escribas rutinas completas en markdown cuando pidan crearlas en la app.
+${AiCoachRoutinePrompt.routineGenerationInstruction(lang)}
+Si el usuario pide crear o generar una rutina guardable, indícale que lo formule claramente (por ejemplo "crea una rutina de pecho") para que la app genere la rutina estructurada lista para guardar.
 
 Contexto del usuario:
 $context
@@ -478,6 +498,7 @@ $context
     List<Routine>? routines,
     String? languageCode,
     CoachNutritionSnapshot? nutrition,
+    RoutineLimitStatus? routineLimit,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
@@ -488,8 +509,16 @@ $context
     final routineLanguageHint = lang == 'en'
         ? 'Write the routine name and description in English.'
         : 'Escribe el nombre y la descripción de la rutina en español.';
-    final aiCatalog = AiRoutineSanitizer.catalogForAi(catalog);
+    final preparedCatalog = _prepareRoutineCatalog(
+      catalog: catalog,
+      userMessage: userMessage,
+    );
+    final aiCatalog = AiRoutineSanitizer.catalogForAi(preparedCatalog);
     final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
+    final equipmentSection = AiCoachRoutinePrompt.buildEquipmentSection(
+      availableEquipment: AiCoachRoutinePrompt.parseAvailableEquipment(userMessage),
+      languageCode: lang,
+    );
     final userContext = await _loadUserContext(
       profile: profile,
       bodyMetrics: bodyMetrics,
@@ -498,13 +527,14 @@ $context
       recentWorkouts: recentWorkouts,
       routines: routines,
       nutrition: nutrition,
+      routineLimit: routineLimit,
     );
 
     final prompt = '''
 El usuario pidió lo siguiente:
 "$userMessage"
 
-Genera una rutina de gimnasio.
+Genera una rutina de gimnasio lista para guardar en FitForge (JSON obligatorio).
 $durationLine
 Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y el perfil' : targetMuscles.join(', ')}.
 
@@ -512,6 +542,7 @@ Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificul
 $userContext
 
 $routineLanguageHint
+${equipmentSection.isEmpty ? '' : '\n$equipmentSection\n'}
 
 $_routineRules
 
@@ -547,7 +578,7 @@ $_routineRules
     );
     if (routine == null) return null;
 
-    return ExerciseMatcher.enrich(routine, catalog);
+    return ExerciseMatcher.enrich(routine, preparedCatalog);
   }
 
   Future<List<Routine>> generateRoutineProgramFromMessage({
@@ -561,6 +592,7 @@ $_routineRules
     List<Routine>? routines,
     String? languageCode,
     CoachNutritionSnapshot? nutrition,
+    RoutineLimitStatus? routineLimit,
   }) async {
     final targetMuscles = parseTargetMuscles(userMessage);
     final duration = parseDurationMinutes(userMessage);
@@ -572,8 +604,16 @@ $_routineRules
     final routineLanguageHint = lang == 'en'
         ? 'Write routine names and descriptions in English.'
         : 'Escribe nombres y descripciones en español.';
-    final aiCatalog = AiRoutineSanitizer.catalogForAi(catalog);
+    final preparedCatalog = _prepareRoutineCatalog(
+      catalog: catalog,
+      userMessage: userMessage,
+    );
+    final aiCatalog = AiRoutineSanitizer.catalogForAi(preparedCatalog);
     final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
+    final equipmentSection = AiCoachRoutinePrompt.buildEquipmentSection(
+      availableEquipment: AiCoachRoutinePrompt.parseAvailableEquipment(userMessage),
+      languageCode: lang,
+    );
     final userContext = await _loadUserContext(
       profile: profile,
       bodyMetrics: bodyMetrics,
@@ -582,13 +622,14 @@ $_routineRules
       recentWorkouts: recentWorkouts,
       routines: routines,
       nutrition: nutrition,
+      routineLimit: routineLimit,
     );
 
     final prompt = '''
 El usuario pidió lo siguiente:
 "$userMessage"
 
-Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento).
+Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento), listas para guardar en FitForge.
 $durationLine
 Músculos objetivo globales: ${targetMuscles.isEmpty ? 'según el split y el perfil' : targetMuscles.join(', ')}.
 
@@ -596,6 +637,7 @@ Perfil y contexto del usuario:
 $userContext
 
 $routineLanguageHint
+${equipmentSection.isEmpty ? '' : '\n$equipmentSection\n'}
 
 $_routineRules
 - Cada rutina es un día de entrenamiento independiente con nombre claro (ej. "Upper (Fuerza)", "Push hipertrofia").
@@ -638,7 +680,7 @@ $_routineRules
     if (parsed.isEmpty) return const [];
 
     return parsed
-        .map((routine) => ExerciseMatcher.enrich(routine, catalog))
+        .map((routine) => ExerciseMatcher.enrich(routine, preparedCatalog))
         .where((routine) => routine.exercises.length >= 2)
         .toList();
   }
@@ -654,10 +696,24 @@ $_routineRules
     List<PersonalRecord>? personalRecords,
     List<Routine>? routines,
     CoachNutritionSnapshot? nutrition,
+    String? userMessage,
+    RoutineLimitStatus? routineLimit,
   }) async {
-    final names = catalog != null
-        ? AiRoutineSanitizer.namesForMuscles(AiRoutineSanitizer.catalogForAi(catalog), targetMuscles)
+    final promptText = userMessage ?? targetMuscles.join(', ');
+    final preparedCatalog = catalog == null
+        ? null
+        : _prepareRoutineCatalog(catalog: catalog, userMessage: promptText);
+    final names = preparedCatalog != null
+        ? AiRoutineSanitizer.namesForMuscles(
+            AiRoutineSanitizer.catalogForAi(preparedCatalog),
+            targetMuscles,
+          )
         : <String>[];
+    final lang = _resolveLanguageCode(profile: profile);
+    final equipmentSection = AiCoachRoutinePrompt.buildEquipmentSection(
+      availableEquipment: AiCoachRoutinePrompt.parseAvailableEquipment(promptText),
+      languageCode: lang,
+    );
     final userContext = await _loadUserContext(
       profile: profile,
       bodyMetrics: bodyMetrics,
@@ -666,6 +722,7 @@ $_routineRules
       recentWorkouts: recentWorkouts,
       routines: routines,
       nutrition: nutrition,
+      routineLimit: routineLimit,
     );
 
     final catalogHint = names.isEmpty
@@ -674,10 +731,12 @@ $_routineRules
 
     final prompt = '''
 Genera una rutina de gimnasio de $durationMinutes minutos enfocada en: ${targetMuscles.join(', ')}.
+La rutina debe estar en JSON listo para guardar en FitForge.
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
 $userContext
 $catalogHint
+${equipmentSection.isEmpty ? '' : '\n$equipmentSection\n'}
 
 $_routineRules
 
@@ -693,7 +752,6 @@ Responde SOLO con JSON válido (sin markdown):
 }
 ''';
 
-    final lang = _resolveLanguageCode(profile: profile);
     final response = await _complete(
       profile: profile,
       systemPrompt: '''
@@ -710,9 +768,18 @@ $_routineRules
       targetMuscles: targetMuscles,
       profile: profile,
     );
-    if (routine == null || catalog == null) return routine;
+    if (routine == null || preparedCatalog == null) return routine;
 
-    return ExerciseMatcher.enrich(routine, catalog);
+    return ExerciseMatcher.enrich(routine, preparedCatalog);
+  }
+
+  List<Exercise> _prepareRoutineCatalog({
+    required List<Exercise> catalog,
+    required String userMessage,
+  }) {
+    final equipment = AiCoachRoutinePrompt.parseAvailableEquipment(userMessage);
+    final filtered = AiCoachRoutinePrompt.filterCatalogByEquipment(catalog, equipment);
+    return filtered.isEmpty ? catalog : filtered;
   }
 
   Future<String> _complete({
@@ -878,6 +945,7 @@ $_routineRules
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
     CoachNutritionSnapshot? nutrition,
+    RoutineLimitStatus? routineLimit,
   }) async {
     final metrics = bodyMetrics ?? await _profileService.getBodyMetricSnapshots();
     return AiCoachContextBuilder.build(
@@ -888,6 +956,7 @@ $_routineRules
       recentWorkouts: recentWorkouts,
       routines: routines,
       nutrition: nutrition,
+      routineLimit: routineLimit,
     );
   }
 

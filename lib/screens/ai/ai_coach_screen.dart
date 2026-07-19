@@ -14,6 +14,7 @@ import '../../models/routine.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/ai_coach_service.dart';
+import '../../services/routine_limit_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/fitforge_app_bar.dart';
@@ -105,6 +106,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             profile: profile,
             bodyMetrics: bodyMetrics,
           );
+      final routineLimit = await ref.read(routineLimitStatusProvider.future);
       final coach = ref.read(aiCoachServiceProvider);
 
       if (AiCoachService.isRoutineSaveIntent(trimmed)) {
@@ -143,7 +145,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       exerciseService.configure(language: lang);
       final catalog = await exerciseService.fetchAiCoachCatalog(targetMuscles: muscles);
 
-      if (AiCoachService.isRoutineCreationRequest(trimmed)) {
+      if (AiCoachService.shouldGenerateStructuredRoutine(trimmed)) {
         await _handleRoutineGeneration(
           text: trimmed,
           profile: profile,
@@ -156,6 +158,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           coach: coach,
           languageCode: languageCode,
           nutrition: nutrition,
+          routineLimit: routineLimit,
         );
         await recordCoachUsage();
       } else {
@@ -169,6 +172,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           personalRecords: personalRecords,
           languageCode: languageCode,
           nutrition: nutrition,
+          routineLimit: routineLimit,
         );
 
         final parsedRoutine = coach.tryParseRoutineFromResponse(
@@ -182,7 +186,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           if (parsedRoutine != null && parsedRoutine.exercises.isNotEmpty) {
             _messages.add(
               CoachMessage(
-                text: l10n.coachRoutineReady,
+                text: _routineReadyMessage(routineLimit),
                 routineSlots: [CoachRoutineSlot(routine: parsedRoutine)],
               ),
             );
@@ -214,8 +218,10 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     required AiCoachService coach,
     required String languageCode,
     CoachNutritionSnapshot? nutrition,
+    required RoutineLimitStatus routineLimit,
   }) async {
     final l10n = context.l10n;
+    final readyMessage = _routineReadyMessage(routineLimit);
     final isProgram = AiCoachService.isMultiRoutineProgramRequest(text);
 
     if (isProgram) {
@@ -230,6 +236,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         routines: routines,
         languageCode: languageCode,
         nutrition: nutrition,
+        routineLimit: routineLimit,
       );
 
       if (!mounted) return;
@@ -246,7 +253,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         } else if (generated.length == 1) {
           _messages.add(
             CoachMessage(
-              text: l10n.coachRoutineReady,
+              text: readyMessage,
               routineSlots: [CoachRoutineSlot(routine: generated.first)],
             ),
           );
@@ -280,7 +287,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       if (routine != null && routine.exercises.length >= 2) {
         _messages.add(
           CoachMessage(
-            text: l10n.coachRoutineReady,
+            text: readyMessage,
             routineSlots: [CoachRoutineSlot(routine: routine)],
           ),
         );
@@ -300,6 +307,18 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         );
       }
     });
+  }
+
+  String _routineReadyMessage(RoutineLimitStatus status) {
+    final l10n = context.l10n;
+    final base = l10n.coachRoutineReady;
+    if (!status.canCreate) {
+      return '$base\n\n${l10n.routineLimitReached(status.limit)}';
+    }
+    if (status.remaining <= 2) {
+      return '$base\n\n${l10n.routineLimitUsage(status.used, status.limit)}';
+    }
+    return base;
   }
 
   Future<void> _saveRoutine(int messageIndex, int slotIndex) async {

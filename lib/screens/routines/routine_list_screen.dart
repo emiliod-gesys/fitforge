@@ -49,7 +49,8 @@ abstract final class RoutineListActions {
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(ctx);
-                final muscles = musclesController.text
+                final muscleText = musclesController.text;
+                final muscles = muscleText
                     .split(',')
                     .map((s) => s.trim())
                     .where((s) => s.isNotEmpty)
@@ -57,6 +58,7 @@ abstract final class RoutineListActions {
                 final profile = await ref.read(profileProvider.future);
                 final workouts = await ref.read(workoutsProvider.future);
                 final effectiveMuscles = muscles.isEmpty ? ['Pecho', 'Espalda'] : muscles;
+                final routineLimit = await ref.read(routineLimitStatusProvider.future);
                 final lang = ref.read(preferredLanguageProvider);
                 final exerciseService = ref.read(exerciseServiceProvider);
                 exerciseService.configure(language: lang);
@@ -103,6 +105,8 @@ abstract final class RoutineListActions {
                           personalRecords: personalRecords,
                           routines: routines,
                           nutrition: nutrition,
+                          userMessage: muscleText,
+                          routineLimit: routineLimit,
                         ),
                   );
 

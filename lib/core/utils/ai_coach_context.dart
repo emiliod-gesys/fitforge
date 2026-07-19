@@ -5,6 +5,8 @@ import '../../models/food_entry.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
+import '../../services/routine_limit_service.dart';
+import 'ai_coach_routine_prompt.dart';
 import 'cardio_format.dart';
 import 'player_level.dart';
 import 'unit_converter.dart';
@@ -20,6 +22,7 @@ abstract final class AiCoachContextBuilder {
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
     CoachNutritionSnapshot? nutrition,
+    RoutineLimitStatus? routineLimit,
   }) {
     final buffer = StringBuffer();
 
@@ -68,6 +71,7 @@ abstract final class AiCoachContextBuilder {
     _appendPersonalRecords(buffer, personalRecords, profile?.unitSystem ?? 'kg');
     _appendWorkouts(buffer, recentWorkouts, profile?.unitSystem ?? 'kg');
     _appendRoutines(buffer, routines);
+    _appendRoutineLimit(buffer, routineLimit, profile?.preferredLanguage ?? 'es');
     _appendNutrition(buffer, nutrition);
 
     final text = buffer.toString().trim();
@@ -173,6 +177,20 @@ abstract final class AiCoachContextBuilder {
         }
       }
     }
+  }
+
+  static void _appendRoutineLimit(
+    StringBuffer buffer,
+    RoutineLimitStatus? status,
+    String languageCode,
+  ) {
+    if (status == null) return;
+    buffer.writeln(
+      AiCoachRoutinePrompt.buildRoutineLimitSection(
+        status: status,
+        languageCode: languageCode,
+      ),
+    );
   }
 
   static void _appendRoutines(StringBuffer buffer, List<Routine>? routines) {
