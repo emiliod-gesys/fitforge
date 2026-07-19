@@ -124,6 +124,66 @@ void main() {
       );
     });
 
+    test('parseTotalPlateGrams treats weight as full dish not addon', () {
+      const query = '315g de tacos al pastor con costra de queso';
+
+      final total = FoodQueryHints.parseTotalPlateGrams(query);
+      expect(total, isNotNull);
+      expect(total!.grams, 315);
+      expect(total.name.toLowerCase(), contains('tacos al pastor'));
+
+      final portions = FoodQueryHints.parseIngredientGramsFromQuery(query);
+      expect(portions.length, 2);
+      expect(
+        portions.any((p) => p.name.contains('tacos al pastor') && p.gramsG > 250),
+        isTrue,
+      );
+      expect(
+        portions.any((p) => p.name.contains('costra de queso') && p.gramsG < 60),
+        isTrue,
+      );
+      expect(portions.fold<double>(0, (sum, p) => sum + p.gramsG), closeTo(315, 0.5));
+    });
+
+    test('reconcile fixes tacos al pastor when AI assigns all grams to cheese', () {
+      const query = '315g de tacos al pastor con costra de queso';
+      const ai = FoodNutritionEstimate(
+        name: 'Tacos al pastor con costra de queso',
+        caloriesKcal: 1103,
+        proteinG: 79,
+        carbsG: 6,
+        fatG: 89,
+        referenceAmount: 315,
+        ingredients: ['queso'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'queso', gramsG: 315),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.ingredientPortions.length, greaterThanOrEqualTo(2));
+      expect(
+        fixed.ingredientPortions.any((p) => p.name.toLowerCase().contains('taco')),
+        isTrue,
+      );
+      expect(fixed.caloriesKcal, lessThan(950));
+      expect(fixed.caloriesKcal, greaterThan(650));
+      expect(fixed.referenceAmount, closeTo(315, 1));
+    });
+
+    test('anchoredEstimateForQuery estimates composite plate from total grams', () {
+      const query = '315g de tacos al pastor con costra de queso';
+      const ai = FoodNutritionEstimate(name: 'Tacos al pastor');
+
+      final anchored = FoodQueryHints.anchoredEstimateForQuery(query, ai);
+
+      expect(anchored, isNotNull);
+      expect(anchored!.caloriesKcal, greaterThan(650));
+      expect(anchored.caloriesKcal, lessThan(950));
+      expect(anchored.ingredientPortions.length, 2);
+    });
+
     test('reconcilePhotoEstimate fills calories from ingredient portions when AI returns 0', () {
       const ai = FoodNutritionEstimate(
         name: 'Pechuga de pollo con arroz y brócoli',

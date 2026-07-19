@@ -1296,6 +1296,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wgerAttribution => 'Imágenes y videos de wger.de (CC-BY-SA)';
 
   @override
+  String get gymVisualAttribution => 'Ilustraciones © Gym visual — gymvisual.com';
+
+  @override
+  String get cloudCatalogSearching => 'Buscando en catálogo extendido…';
+
+  @override
   String get loadingImage => 'Cargando imagen…';
 
   @override
@@ -1892,6 +1898,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get viewList => 'Ver lista';
 
   @override
+  String get backToMenu => 'Menú';
+
+  @override
   String get exerciseList => 'Lista de ejercicios';
 
   @override
@@ -2223,6 +2232,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get coachAskHint => 'Pregunta o pide una rutina…';
+
+  @override
+  String coachMessageCharCounter(int current, int max) {
+    return '$current de $max caracteres';
+  }
 
   @override
   String get coachRoutineReady =>

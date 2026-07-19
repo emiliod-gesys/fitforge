@@ -9,7 +9,9 @@ import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/workout_streak.dart';
+import '../core/constants/cloud_exercise_catalog.dart';
 import '../data/exercise_translation_store.dart';
+import '../models/exercise.dart';
 import '../models/exercise_history.dart';
 import '../models/body_metric.dart';
 import '../models/food_entry.dart';
@@ -22,6 +24,7 @@ import '../models/workout_summary.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
 import '../services/custom_exercise_repository.dart';
+import '../data/cloud_exercise_catalog.dart';
 import '../services/exercise_service.dart';
 import '../services/activity_log_service.dart';
 import '../services/food_service.dart';
@@ -144,6 +147,22 @@ final exercisesProvider = FutureProvider((ref) async {
   service.setTranslationStore(store);
   service.setCustomExerciseRepository(customRepo);
   return service.fetchExercises();
+});
+
+final cloudExerciseCatalogProvider = Provider((ref) => CloudExerciseCatalog());
+
+final cloudExerciseSearchProvider = FutureProvider.family<List<Exercise>, String>((ref, query) async {
+  final trimmed = query.trim();
+  if (trimmed.length < 2) return const [];
+  final lang = ref.watch(preferredLanguageProvider);
+  return ref.read(exerciseServiceProvider).searchCloudExercises(trimmed);
+});
+
+final cloudExerciseByIdProvider = FutureProvider.family<Exercise?, String>((ref, id) async {
+  if (!CloudExerciseCatalog.isCloudExerciseId(id)) return null;
+  final lang = ref.watch(preferredLanguageProvider);
+  ref.read(exerciseServiceProvider).configure(language: lang);
+  return ref.read(exerciseServiceProvider).getCloudExerciseById(id);
 });
 
 final exerciseMediaProvider = FutureProvider.family<ExerciseMedia, int>((ref, wgerId) async {

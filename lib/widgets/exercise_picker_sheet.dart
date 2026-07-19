@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/exercise_picker_merge.dart';
 import '../core/utils/muscle_inference.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -70,7 +71,14 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
-    final filtered = _filteredFrom(exercises);
+    final cloudAsync = shouldQueryCloudExerciseCatalog(_search)
+        ? ref.watch(cloudExerciseSearchProvider(_search))
+        : const AsyncValue.data(<Exercise>[]);
+    final merged = mergeBundledAndCloudExercises(
+      bundled: exercises,
+      cloud: cloudAsync.valueOrNull ?? const [],
+    );
+    final filtered = _filteredFrom(merged);
     final inRoutineCount = widget.selectedExerciseIds.length;
 
     return Column(

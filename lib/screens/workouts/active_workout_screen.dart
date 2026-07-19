@@ -161,6 +161,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       exercises: exercises,
       notes: workout.notes,
       totalVolume: workout.totalVolume,
+      runnerSurface: workout.runnerSurface,
+      runnerRoute: workout.runnerRoute,
+      runnerSplits: workout.runnerSplits,
+      runnerAvgPaceSecPerKm: workout.runnerAvgPaceSecPerKm,
+      runnerElevationGainMeters: workout.runnerElevationGainMeters,
+      runnerElevationLossMeters: workout.runnerElevationLossMeters,
+      hyroxValidationStatus: workout.hyroxValidationStatus,
+      hyroxValidationReasons: workout.hyroxValidationReasons,
     );
   }
 
@@ -366,6 +374,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     return leave == true;
   }
 
+  Future<void> _leaveActiveWorkoutToMenu() async {
+    if (!await _confirmLeaveActiveWorkout() || !mounted) return;
+    context.go('/');
+  }
+
   Future<bool> _confirmEndTraining() async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
@@ -502,8 +515,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       final elapsed = snapshot.elapsedSeconds(frozen);
       final avgPace = snapshot.avgPaceSecPerKm(frozen);
 
-      await ref.read(workoutServiceProvider).beginWorkoutTimer(workout.id);
-
       final set = WorkoutSet(
         id: exercise.sets.isNotEmpty ? exercise.sets.first.id : '',
         setNumber: 1,
@@ -548,8 +559,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
     try {
       final exercise = workout.exercises.first;
-
-      await ref.read(workoutServiceProvider).beginWorkoutTimer(workout.id);
 
       final set = WorkoutSet(
         id: exercise.sets.isNotEmpty ? exercise.sets.first.id : '',
@@ -596,7 +605,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
       final startAt = _workoutTimerStart(effectiveWorkout);
       final endAt = _workoutTimerStop()?.toUtc() ?? SupabaseDateTime.nowUtc;
-      final duration = endAt.difference(startAt.toUtc()).inMinutes;
+      var duration = endAt.difference(startAt.toUtc()).inMinutes;
+      if (_isRunnerWorkout) {
+        duration = WorkoutCalorieEstimator.resolveDurationMinutes(
+          workout: effectiveWorkout,
+          wallClockMinutes: duration,
+        );
+      }
       final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
       final profile = ref.read(profileProvider).valueOrNull;
       final bodyWeightKg = profile?.bodyWeight;
@@ -1042,9 +1057,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (await _confirmLeaveActiveWorkout() && context.mounted) {
-          context.pop();
-        }
+        await _leaveActiveWorkoutToMenu();
       },
       child: Scaffold(
       appBar: activeAsync.whenOrNull(
@@ -1065,7 +1078,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     tooltip: l10n.viewList,
                     onPressed: () => setState(() => _showExerciseList = true),
                   )
-                : null,
+                : IconButton(
+                    icon: const Icon(Icons.menu),
+                    tooltip: l10n.backToMenu,
+                    onPressed: _completing ? null : _leaveActiveWorkoutToMenu,
+                  ),
             actions: [
               TextButton(
                 onPressed: _completing ? null : () => _cancelWorkout(displayWorkout),

@@ -1287,6 +1287,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wgerAttribution => 'Images and videos from wger.de (CC-BY-SA)';
 
   @override
+  String get gymVisualAttribution => 'Illustrations © Gym visual — gymvisual.com';
+
+  @override
+  String get cloudCatalogSearching => 'Searching extended catalog…';
+
+  @override
   String get loadingImage => 'Loading image…';
 
   @override
@@ -1877,6 +1883,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewList => 'View list';
 
   @override
+  String get backToMenu => 'Menu';
+
+  @override
   String get exerciseList => 'Exercise list';
 
   @override
@@ -2208,6 +2217,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachAskHint => 'Ask a question or request a routine…';
+
+  @override
+  String coachMessageCharCounter(int current, int max) {
+    return '$current of $max characters';
+  }
 
   @override
   String get coachRoutineReady =>

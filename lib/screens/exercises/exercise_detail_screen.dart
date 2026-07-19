@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants/cloud_exercise_catalog.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
 import '../../providers/app_providers.dart';
@@ -49,6 +50,27 @@ class ExerciseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+
+    if (CloudExerciseCatalogIds.isCloudId(exerciseId)) {
+      final cloudAsync = ref.watch(cloudExerciseByIdProvider(exerciseId));
+      return Scaffold(
+        appBar: FitForgeAppBar(title: l10n.exerciseDetailTitle),
+        body: cloudAsync.when(
+          data: (exercise) {
+            if (exercise == null) {
+              return Center(child: Text(l10n.exerciseNotFound));
+            }
+            return _ExerciseBody(
+              exercise: exercise,
+              media: ExerciseMedia(videoUrl: exercise.videoUrl),
+            );
+          },
+          loading: () => const FitForgeLoadingScreen(),
+          error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
+        ),
+      );
+    }
+
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Scaffold(
@@ -173,12 +195,14 @@ class _ExerciseBody extends StatelessWidget {
                 Text(
                   exercise.isUserCustom
                       ? l10n.customExerciseAttribution
-                      : exercise.imageUrl != null &&
-                              exercise.imageUrl!.contains('exercisedb.dev')
-                          ? l10n.wgerAttribution
-                          : exercise.isBundled
-                              ? l10n.fitforgeCatalog
-                              : l10n.wgerAttribution,
+                      : CloudExerciseCatalogIds.isCloudId(exercise.id)
+                          ? l10n.gymVisualAttribution
+                          : exercise.imageUrl != null &&
+                                  exercise.imageUrl!.contains('exercisedb.dev')
+                              ? l10n.wgerAttribution
+                              : exercise.isBundled
+                                  ? l10n.fitforgeCatalog
+                                  : l10n.wgerAttribution,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white38),
                 ),
               ],

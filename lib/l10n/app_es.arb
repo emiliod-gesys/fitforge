@@ -436,6 +436,8 @@
     }
   },
   "wgerAttribution": "Imágenes y videos de wger.de (CC-BY-SA)",
+  "gymVisualAttribution": "Ilustraciones © Gym visual — gymvisual.com",
+  "cloudCatalogSearching": "Buscando en catálogo extendido…",
   "loadingImage": "Cargando imagen…",
   "metricWeight": "Peso",
   "metricBmi": "Índice de masa corporal",
@@ -671,6 +673,7 @@
   "leaveActiveWorkoutMessage": "Tu progreso se guarda. Puedes volver a entrar desde Entrenar.",
   "leaveActiveWorkoutConfirm": "Salir",
   "viewList": "Ver lista",
+  "backToMenu": "Menú",
   "exerciseList": "Lista de ejercicios",
   "noActiveWorkout": "No hay entrenamiento activo",
   "addSet": "Añadir serie",
@@ -807,6 +810,13 @@
     }
   },
   "coachAskHint": "Pregunta o pide una rutina…",
+  "coachMessageCharCounter": "{current} de {max} caracteres",
+  "@coachMessageCharCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
   "coachRoutineReady": "Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.",
   "coachRoutinesReady": "Aquí tienes {count} rutinas para la semana. Revísalas y guarda las que quieras.",
   "@coachRoutinesReady": {

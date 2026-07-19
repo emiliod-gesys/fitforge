@@ -420,6 +420,8 @@
     }
   },
   "wgerAttribution": "Images and videos from wger.de (CC-BY-SA)",
+  "gymVisualAttribution": "Illustrations © Gym visual — gymvisual.com",
+  "cloudCatalogSearching": "Searching extended catalog…",
   "loadingImage": "Loading image…",
   "metricWeight": "Weight",
   "metricBmi": "Body mass index",
@@ -665,6 +667,7 @@
   "leaveActiveWorkoutMessage": "Your progress is saved. You can resume from Workouts.",
   "leaveActiveWorkoutConfirm": "Leave",
   "viewList": "View list",
+  "backToMenu": "Menu",
   "exerciseList": "Exercise list",
   "noActiveWorkout": "No active workout",
   "addSet": "Add set",
@@ -790,6 +793,13 @@
     }
   },
   "coachAskHint": "Ask a question or request a routine…",
+  "coachMessageCharCounter": "{current} of {max} characters",
+  "@coachMessageCharCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
   "coachRoutineReady": "Here is your routine. Review it and tap Save when ready.",
   "coachRoutinesReady": "Here are your {count} routines for the week. Review each one and save the ones you want.",
   "@coachRoutinesReady": {

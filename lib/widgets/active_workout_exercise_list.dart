@@ -257,9 +257,12 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                   },
                 ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: _AddExerciseRow(onTap: widget.onAddExercise),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: _AddExerciseRow(onTap: widget.onAddExercise),
+          ),
         ),
       ],
     );

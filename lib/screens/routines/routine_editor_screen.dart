@@ -143,6 +143,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     final selected = await showModalBottomSheet<Exercise>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.85,

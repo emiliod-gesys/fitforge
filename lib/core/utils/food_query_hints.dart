@@ -74,6 +74,15 @@ abstract final class FoodQueryHints {
 
   /// Extrae gramos explícitos por ítem (ej. "300g espagueti", "pollo 150 g").
   static List<FoodIngredientPortion> parseIngredientGramsFromQuery(String query) {
+    final totalPlate = parseTotalPlateGrams(query);
+    if (totalPlate != null) {
+      return compositePortionsFromQuery(
+        query,
+        totalPlate.grams,
+        totalPlate.name,
+      );
+    }
+
     final portions = <FoodIngredientPortion>[];
 
     final forward = RegExp(
@@ -100,6 +109,78 @@ abstract final class FoodQueryHints {
     }
 
     return portions;
+  }
+
+  /// Peso total del plato cuando el usuario escribe "315g de tacos con queso".
+  static ({double grams, String name})? parseTotalPlateGrams(String query) {
+    final trimmed = query.trim();
+    final gramMatches = RegExp(
+      r'(\d+(?:[.,]\d+)?)\s*g(?:ramos?)?\b',
+      caseSensitive: false,
+    ).allMatches(trimmed);
+    if (gramMatches.length != 1) return null;
+
+    final match = RegExp(
+      r'^(\d+(?:[.,]\d+)?)\s*g(?:ramos?)?\s+de\s+(.+)$',
+      caseSensitive: false,
+    ).firstMatch(trimmed);
+    if (match == null) return null;
+
+    final grams = double.tryParse(match.group(1)!.replaceAll(',', '.'));
+    final name = match.group(2)!.trim();
+    if (grams == null || grams <= 0 || name.isEmpty) return null;
+    return (grams: grams, name: name);
+  }
+
+  /// Reparte el peso total entre plato principal y complementos ("con …").
+  static List<FoodIngredientPortion> compositePortionsFromQuery(
+    String query,
+    double totalGrams,
+    String fullName,
+  ) {
+    final parts = RegExp(r'\s+con\s+', caseSensitive: false).split(fullName);
+    final mainName = _cleanIngredientName(parts.first);
+    if (parts.length <= 1) {
+      return [FoodIngredientPortion(name: mainName, gramsG: totalGrams)];
+    }
+
+    final addonText = parts.sublist(1).join(' con ').toLowerCase();
+    final cheeseAddon = RegExp(
+      r'costra de queso|queso fundido|gratinado|cheese crust',
+      caseSensitive: false,
+    ).hasMatch(addonText);
+
+    if (cheeseAddon) {
+      const cheeseShare = 0.12;
+      final cheeseGrams = totalGrams * cheeseShare;
+      return [
+        FoodIngredientPortion(name: mainName, gramsG: totalGrams - cheeseGrams),
+        FoodIngredientPortion(name: 'costra de queso', gramsG: cheeseGrams),
+      ];
+    }
+
+    const addonShare = 0.15;
+    final addonGrams = totalGrams * addonShare;
+    return [
+      FoodIngredientPortion(name: mainName, gramsG: totalGrams - addonGrams),
+      FoodIngredientPortion(
+        name: _cleanIngredientName(parts.sublist(1).join(' con ')),
+        gramsG: addonGrams,
+      ),
+    ];
+  }
+
+  static String _primaryQueryText(String query) {
+    final totalPlate = parseTotalPlateGrams(query);
+    if (totalPlate != null) {
+      return RegExp(r'\s+con\s+', caseSensitive: false)
+          .split(totalPlate.name)
+          .first
+          .trim();
+    }
+    final conMatch = RegExp(r'\s+con\s+', caseSensitive: false).firstMatch(query);
+    if (conMatch != null) return query.substring(0, conMatch.start);
+    return query;
   }
 
   static String _cleanIngredientName(String raw) {
@@ -302,6 +383,11 @@ abstract final class FoodQueryHints {
     'tortilla de maiz': (kcal: 218, protein: 5.7, carbs: 45.0, fat: 2.9, fiber: 6.3),
     'tortilla de harina': (kcal: 312, protein: 8.0, carbs: 51.0, fat: 8.0, fiber: 2.0),
     'tortilla': (kcal: 218, protein: 5.7, carbs: 45.0, fat: 2.9, fiber: 6.3),
+    'tacos al pastor': (kcal: 230, protein: 12.0, carbs: 18.0, fat: 13.0, fiber: 1.5),
+    'taco al pastor': (kcal: 230, protein: 12.0, carbs: 18.0, fat: 13.0, fiber: 1.5),
+    'tacos': (kcal: 210, protein: 10.0, carbs: 20.0, fat: 11.0, fiber: 1.5),
+    'taco': (kcal: 210, protein: 10.0, carbs: 20.0, fat: 11.0, fiber: 1.5),
+    'costra de queso': (kcal: 350, protein: 18.0, carbs: 2.0, fat: 28.0, fiber: 0.0),
     'pan': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
     'bread': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
     'queso': (kcal: 350, protein: 25.0, carbs: 2.0, fat: 27.0, fiber: 0.0),
@@ -491,14 +577,34 @@ abstract final class FoodQueryHints {
     String query,
     FoodNutritionEstimate ai,
   ) {
+    final totalPlate = parseTotalPlateGrams(query);
+    if (totalPlate != null) {
+      final portions = compositePortionsFromQuery(
+        query,
+        totalPlate.grams,
+        totalPlate.name,
+      );
+      final fromPortions = estimateFromIngredientPortions(
+        ai.copyWith(
+          name: ai.name.trim().isNotEmpty ? ai.name : totalPlate.name,
+          ingredientPortions: portions,
+          ingredients: portions.map((p) => p.name).toList(),
+          referenceAmount: totalPlate.grams,
+          amountUnit: 'g',
+          servingDescription: FoodServingParser.formatAmount(totalPlate.grams, 'g'),
+        ),
+      );
+      if (fromPortions != null) return fromPortions;
+    }
+
     final grams = parseGrams(query);
     if (grams == null || grams <= 0) return null;
 
-    final lower = query.toLowerCase();
+    final primaryText = _primaryQueryText(query).toLowerCase();
     final sortedKeys = _anchorPer100g.keys.toList()
       ..sort((a, b) => b.length.compareTo(a.length));
     for (final token in sortedKeys) {
-      if (!lower.contains(token)) continue;
+      if (!primaryText.contains(token)) continue;
       final anchor = _anchorPer100g[token]!;
       final factor = grams / 100;
       return FoodNutritionEstimate(
@@ -526,7 +632,7 @@ abstract final class FoodQueryHints {
     final eggs = eggCount(query);
 
     if (labeledKcal == 0 && eggs == 0) {
-      return ensureIngredientPortions(query, gramCorrected);
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
     }
 
     var kcal = labeledKcal + eggs * eggKcal;
@@ -553,30 +659,66 @@ abstract final class FoodQueryHints {
       }
     }
 
-    if (kcal <= 0) return ensureIngredientPortions(query, gramCorrected);
+    if (kcal <= 0) {
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
+    }
 
     final floor = (kcal * 0.95).round();
     if (gramCorrected.caloriesKcal >= floor) {
-      return ensureIngredientPortions(query, gramCorrected);
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
     }
 
-    return ensureIngredientPortions(
+    return _finalizePortionEstimate(
       query,
-      FoodNutritionEstimate(
-      name: gramCorrected.name,
-      brand: gramCorrected.brand,
-      caloriesKcal: kcal.round(),
-      proteinG: double.parse(protein.toStringAsFixed(1)),
-      carbsG: double.parse(carbs.toStringAsFixed(1)),
-      fatG: double.parse(fat.toStringAsFixed(1)),
-      fiberG: gramCorrected.fiberG,
-      servingDescription: gramCorrected.servingDescription,
-      ingredients: gramCorrected.ingredients,
-      ingredientPortions: gramCorrected.ingredientPortions,
-      referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
-      amountUnit: gramCorrected.amountUnit,
+      ensureIngredientPortions(
+        query,
+        FoodNutritionEstimate(
+          name: gramCorrected.name,
+          brand: gramCorrected.brand,
+          caloriesKcal: kcal.round(),
+          proteinG: double.parse(protein.toStringAsFixed(1)),
+          carbsG: double.parse(carbs.toStringAsFixed(1)),
+          fatG: double.parse(fat.toStringAsFixed(1)),
+          fiberG: gramCorrected.fiberG,
+          servingDescription: gramCorrected.servingDescription,
+          ingredients: gramCorrected.ingredients,
+          ingredientPortions: gramCorrected.ingredientPortions,
+          referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
+          amountUnit: gramCorrected.amountUnit,
+        ),
       ),
     );
+  }
+
+  static FoodNutritionEstimate _finalizePortionEstimate(
+    String query,
+    FoodNutritionEstimate estimate,
+  ) {
+    final fromPortions = estimateFromIngredientPortions(estimate);
+    if (fromPortions == null) return estimate;
+
+    if (estimate.ingredientPortions.length >= 2) return fromPortions;
+
+    if (parseTotalPlateGrams(query) != null) {
+      final solo = estimate.ingredientPortions.length == 1
+          ? estimate.ingredientPortions.first.name.toLowerCase()
+          : '';
+      if (solo.contains('queso') && !solo.contains('taco')) {
+        return fromPortions;
+      }
+      if (estimate.ingredientPortions.length >= 2) return fromPortions;
+    }
+
+    if (estimate.caloriesKcal <= 0) return fromPortions;
+
+    final kcalPerG = estimate.referenceAmount > 0
+        ? estimate.caloriesKcal / estimate.referenceAmount
+        : 0.0;
+    if (kcalPerG > 3.2 && fromPortions.caloriesKcal < estimate.caloriesKcal) {
+      return fromPortions;
+    }
+
+    return estimate;
   }
 }
 

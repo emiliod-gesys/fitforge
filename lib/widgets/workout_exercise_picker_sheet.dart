@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../core/utils/exercise_picker_merge.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
@@ -22,13 +23,17 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<Exercise>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: AppColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (ctx) => SizedBox(
-        height: MediaQuery.sizeOf(ctx).height * 0.85,
-        child: WorkoutExercisePickerSheet(excludeExerciseIds: excludeExerciseIds),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, __) => WorkoutExercisePickerSheet(excludeExerciseIds: excludeExerciseIds),
       ),
     );
   }
@@ -59,6 +64,9 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercisesAsync = ref.watch(exercisesProvider);
+    final cloudAsync = shouldQueryCloudExerciseCatalog(_search)
+        ? ref.watch(cloudExerciseSearchProvider(_search))
+        : const AsyncValue.data(<Exercise>[]);
 
     return Column(
       children: [
@@ -114,7 +122,11 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
           loading: () => const Expanded(child: Center(child: FitForgeLoadingIndicator(size: 48))),
           error: (e, _) => Expanded(child: Center(child: Text(l10n.errorGeneric('$e')))),
           data: (exercises) {
-            final filtered = _filterExercises(exercises);
+            final merged = mergeBundledAndCloudExercises(
+              bundled: exercises,
+              cloud: cloudAsync.valueOrNull ?? const [],
+            );
+            final filtered = _filterExercises(merged);
 
             return Expanded(
               child: Column(
@@ -129,7 +141,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
-                    height: 40,
+                    height: 44,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -176,7 +188,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                             child: Text(l10n.noResults, style: const TextStyle(color: AppColors.textMuted)),
                           )
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: filtered.length,
                             itemBuilder: (_, i) {
                               final exercise = filtered[i];

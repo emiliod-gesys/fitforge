@@ -21,3 +21,6 @@ dart_defines.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Third-party datasets (local ZIP extract; keep JSON only)
+tools/third_party/

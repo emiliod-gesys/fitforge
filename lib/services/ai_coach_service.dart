@@ -24,6 +24,8 @@ import 'profile_service.dart';
 class AiCoachService {
   AiCoachService(this._profileService);
 
+  static const maxUserMessageLength = 800;
+
   final ProfileService _profileService;
 
   Future<({AiProvider provider, String apiKey})> _resolveCredentials(
@@ -1065,6 +1067,8 @@ Reglas:
 - reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
 - Si el usuario indica gramos (ej. "300 g espagueti cocido"), calories_kcal = (kcal por 100 g) × (gramos / 100). Pasta cocida ~131 kcal/100g, arroz cocido ~130 kcal/100g.
+- Si escribe "Ng de [plato] con [extra]" (ej. "315g de tacos al pastor con costra de queso"), los N gramos son el PESO TOTAL del plato completo, NO del extra. Reparte entre componentes (tacos ~85–90%, extra ~10–15%).
+- NUNCA asignes todos los gramos solo al ingrediente después de "con" (ej. NO "queso 315g" para ese ejemplo).
 - NUNCA pongas reference_amount_g=300 con calories_kcal de solo 100 g de comida.
 - Frutas por peso: manzana ~52 kcal/100g, plátano ~89 kcal/100g.
 - Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
@@ -1089,11 +1093,13 @@ ${hints > 0 ? '- Ítems con kcal explícitas en el texto: mínimo $hints kcal (s
 '''
         : '';
 
+    final totalPlate = FoodQueryHints.parseTotalPlateGrams(query);
     final userGrams = FoodQueryHints.parseIngredientGramsFromQuery(query);
     final userGramsBlock = userGrams.isNotEmpty
         ? '''
 
 GRAMOS EXPLÍCITOS del usuario (respétalos en ingredient_portions):
+${totalPlate != null ? '- Peso total del plato: ${totalPlate.grams.toStringAsFixed(0)} g (NO asignar todo a un solo complemento)' : ''}
 ${userGrams.map((p) => '- ${p.name}: ${p.gramsG.toStringAsFixed(0)} g').join('\n')}
 '''
         : '';

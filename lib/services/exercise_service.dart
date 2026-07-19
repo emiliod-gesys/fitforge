@@ -4,7 +4,9 @@ import '../core/constants/app_constants.dart';
 import '../core/constants/exercise_catalog_source.dart';
 import '../core/utils/exercise_catalog_visibility.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/constants/cloud_exercise_catalog.dart';
 import '../data/bundled_exercise_catalog.dart';
+import '../data/cloud_exercise_catalog.dart';
 import '../data/exercise_translation_store.dart';
 import '../data/wger_exercise_catalog.dart';
 import '../models/exercise.dart';
@@ -39,6 +41,7 @@ class ExerciseImageLookup {
 
 class ExerciseService {
   final WgerExerciseCatalog _wgerCatalog = WgerExerciseCatalog();
+  final CloudExerciseCatalog _cloudCatalog = CloudExerciseCatalog();
   List<Exercise>? _fullCache;
   final _mediaCache = <int, ExerciseMedia>{};
   String _preferredLanguage = 'es';
@@ -65,6 +68,15 @@ class ExerciseService {
     final full = await _fetchFullExercises();
     var list = _filterFullList(full, search: search, category: category);
     return ExerciseCatalogVisibility.filterBrowsable(list);
+  }
+
+  /// Catálogo extendido en Supabase (búsqueda bajo demanda, no embebido).
+  Future<List<Exercise>> searchCloudExercises(String query) {
+    return _cloudCatalog.search(query: query, locale: _preferredLanguage);
+  }
+
+  Future<Exercise?> getCloudExerciseById(String catalogId) {
+    return _cloudCatalog.getById(catalogId: catalogId, locale: _preferredLanguage);
   }
 
   /// Catálogo completo en memoria + ejercicios wger resueltos bajo demanda (entrenos antiguos).
@@ -158,6 +170,10 @@ class ExerciseService {
     required String exerciseName,
     required List<Exercise> catalog,
   }) {
+    if (CloudExerciseCatalogIds.isCloudId(exerciseId)) {
+      return _cloudCatalog.getCached(exerciseId);
+    }
+
     for (final e in catalog) {
       if (e.id == exerciseId) return e;
     }
@@ -180,6 +196,12 @@ class ExerciseService {
   /// Prioridad de imagen en UI:
   /// 1. URL del catálogo · 2. maniquí por categoría · 3. isotipo FitForge.
   Future<String?> resolveImageUrl(ExerciseImageLookup lookup) async {
+    if (CloudExerciseCatalogIds.isCloudId(lookup.exerciseId)) {
+      final cloud = await getCloudExerciseById(lookup.exerciseId);
+      final url = cloud?.imageUrl;
+      if (url != null && url.isNotEmpty) return url;
+    }
+
     final catalog = await fetchFullExercises();
     var match = findInCatalog(
       exerciseId: lookup.exerciseId,
@@ -215,6 +237,10 @@ class ExerciseService {
   }
 
   Future<Exercise?> getExerciseByCatalogId(String catalogId) async {
+    if (CloudExerciseCatalogIds.isCloudId(catalogId)) {
+      return getCloudExerciseById(catalogId);
+    }
+
     final exercises = await fetchFullExercises();
     try {
       return exercises.firstWhere((e) => e.catalogId == catalogId);
@@ -227,6 +253,12 @@ class ExerciseService {
     required String exerciseId,
     required String fallback,
   }) {
+    if (CloudExerciseCatalogIds.isCloudId(exerciseId)) {
+      final cached = _cloudCatalog.getCached(exerciseId);
+      if (cached != null) return cached.name;
+      return fallback;
+    }
+
     final store = _translationStore;
     if (store != null && store.isLoaded) {
       final fromStore = store.resolveName(
@@ -265,5 +297,6 @@ class ExerciseService {
     _fullCache = null;
     BundledExerciseCatalog.clearCache();
     _wgerCatalog.clearCache();
+    _cloudCatalog.clearCache();
   }
 }

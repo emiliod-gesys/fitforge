@@ -35,6 +35,12 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   int? _savingMessageIndex;
   int? _savingSlotIndex;
 
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() => setState(() {}));
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -47,11 +53,13 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   }
 
   Future<void> _send(String text) async {
-    if (text.trim().isEmpty || _loading) return;
+    final trimmed = text.trim();
+    if (trimmed.isEmpty || _loading) return;
+    if (trimmed.length > AiCoachService.maxUserMessageLength) return;
 
     final l10n = context.l10n;
     final languageCode = Localizations.localeOf(context).languageCode;
-    final isSaveOnly = AiCoachService.isRoutineSaveIntent(text);
+    final isSaveOnly = AiCoachService.isRoutineSaveIntent(trimmed);
 
     if (!isSaveOnly) {
       final profile = await ref.read(profileProvider.future);
@@ -71,7 +79,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     }
 
     setState(() {
-      _messages.add(CoachMessage(text: text, isUser: true));
+      _messages.add(CoachMessage(text: trimmed, isUser: true));
       _loading = true;
     });
     _controller.clear();
@@ -100,7 +108,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           );
       final coach = ref.read(aiCoachServiceProvider);
 
-      if (AiCoachService.isRoutineSaveIntent(text)) {
+      if (AiCoachService.isRoutineSaveIntent(trimmed)) {
         final pendingIndex = _messages.lastIndexWhere((m) => m.hasActiveRoutinePreview);
         if (pendingIndex >= 0) {
           final slots = _messages[pendingIndex].allRoutineSlots;
@@ -127,9 +135,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             );
           });
         }
-      } else if (AiCoachService.isRoutineCreationRequest(text)) {
+      } else if (AiCoachService.isRoutineCreationRequest(trimmed)) {
         await _handleRoutineGeneration(
-          text: text,
+          text: trimmed,
           profile: profile,
           workouts: workouts,
           routines: routines,
@@ -144,7 +152,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         await recordCoachUsage();
       } else {
         final response = await coach.getRecommendation(
-          userMessage: text,
+          userMessage: trimmed,
           recentWorkouts: workouts,
           routines: routines,
           profile: profile,
@@ -155,7 +163,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           nutrition: nutrition,
         );
 
-        final muscles = AiCoachService.parseTargetMuscles(text);
+        final muscles = AiCoachService.parseTargetMuscles(trimmed);
         final parsedRoutine = coach.tryParseRoutineFromResponse(
           response,
           targetMuscles: muscles,
@@ -468,15 +476,48 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      maxLength: AiCoachService.maxUserMessageLength,
+                      minLines: 1,
+                      maxLines: 4,
+                      textInputAction: TextInputAction.newline,
                       decoration: InputDecoration(
                         hintText: l10n.coachAskHint,
+                        counterText: '',
                       ),
-                      onSubmitted: inputBlocked ? null : _send,
+                      buildCounter: (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) {
+                        if (maxLength == null) return null;
+                        final nearLimit = currentLength >= maxLength - 100;
+                        if (!nearLimit && !isFocused) return null;
+                        return Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              l10n.coachMessageCharCounter(currentLength, maxLength),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: currentLength >= maxLength
+                                    ? Theme.of(context).colorScheme.error
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                       enabled: !_loading && !inputBlocked,
                     ),
                   ),
                   IconButton(
-                    onPressed: _loading || inputBlocked ? null : () => _send(_controller.text),
+                    onPressed: _loading ||
+                            inputBlocked ||
+                            _controller.text.trim().isEmpty
+                        ? null
+                        : () => _send(_controller.text),
                     icon: const Icon(Icons.send),
                   ),
                 ],

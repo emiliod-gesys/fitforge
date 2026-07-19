@@ -2390,6 +2390,12 @@ abstract class AppLocalizations {
   /// **'Imágenes y videos de wger.de (CC-BY-SA)'**
   String get wgerAttribution;
 
+  /// No description provided for @gymVisualAttribution.
+  String get gymVisualAttribution;
+
+  /// No description provided for @cloudCatalogSearching.
+  String get cloudCatalogSearching;
+
   /// No description provided for @loadingImage.
   ///
   /// In es, this message translates to:
@@ -3398,6 +3404,12 @@ abstract class AppLocalizations {
   /// **'Ver lista'**
   String get viewList;
 
+  /// No description provided for @backToMenu.
+  ///
+  /// In es, this message translates to:
+  /// **'Menú'**
+  String get backToMenu;
+
   /// No description provided for @exerciseList.
   ///
   /// In es, this message translates to:
@@ -3967,6 +3979,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pregunta o pide una rutina…'**
   String get coachAskHint;
+
+  /// No description provided for @coachMessageCharCounter.
+  ///
+  /// In es, this message translates to:
+  /// **'{current} de {max} caracteres'**
+  String coachMessageCharCounter(int current, int max);
 
   /// No description provided for @coachRoutineReady.
   ///

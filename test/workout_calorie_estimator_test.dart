@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitforge/core/utils/workout_calorie_estimator.dart';
 import 'package:fitforge/models/body_metric.dart';
+import 'package:fitforge/models/exercise_logging.dart';
 import 'package:fitforge/models/profile.dart';
 import 'package:fitforge/models/workout.dart';
 
@@ -105,5 +106,61 @@ void main() {
       WorkoutCalorieEstimator.resolvedActiveCalories(workout: workout),
       390,
     );
+  });
+
+  test('estimates runner calories from cardio set when wall clock duration is zero', () {
+    final profile = UserProfile(
+      id: 'u1',
+      bodyWeight: 75,
+      age: 30,
+      heightCm: 175,
+      gender: Gender.male,
+      createdAt: DateTime.utc(2026),
+    );
+
+    final workout = Workout(
+      id: 'w-run',
+      userId: 'u1',
+      name: 'Salir a correr',
+      startedAt: DateTime.utc(2026, 7, 18, 2, 59, 38),
+      completedAt: DateTime.utc(2026, 7, 18, 2, 59, 40),
+      durationMinutes: 0,
+      runnerAvgPaceSecPerKm: 360,
+      exercises: [
+        WorkoutExercise(
+          id: 'ex1',
+          exerciseId: 'ff_runner_outdoor',
+          exerciseName: 'Salir a correr',
+          orderIndex: 0,
+          sets: const [
+            WorkoutSet(
+              id: 's1',
+              setNumber: 1,
+              completed: true,
+              loggingType: ExerciseLoggingType.cardio,
+              durationSeconds: 1800,
+              distanceMeters: 5000,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final estimate = WorkoutCalorieEstimator.estimateForWorkout(
+      workout: workout,
+      durationMinutes: 0,
+      totalVolumeKg: 0,
+      profile: profile,
+    );
+
+    expect(estimate.isAvailable, isTrue);
+    expect(estimate.caloriesKcal, inInclusiveRange(180, 420));
+    expect(WorkoutCalorieEstimator.resolveDurationMinutes(workout: workout, wallClockMinutes: 0), 30);
+  });
+
+  test('running MET increases with faster pace', () {
+    final slow = WorkoutCalorieEstimator.runningMetFromPaceSecPerKm(720);
+    final fast = WorkoutCalorieEstimator.runningMetFromPaceSecPerKm(300);
+    expect(fast, greaterThan(slow));
   });
 }

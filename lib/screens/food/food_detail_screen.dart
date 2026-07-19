@@ -199,8 +199,10 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     final l10n = context.l10n;
     final scaled = _scaled;
     final unit = _baseEstimate.amountUnit;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -211,7 +213,8 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
       body: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 96 + keyboardInset),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               if (_hasPhotoReference) ...[
                 GestureDetector(
@@ -411,23 +414,29 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _saving || _amount <= 0 || _nameController.text.trim().isEmpty ? null : _save,
-            style: FilledButton.styleFrom(
-              backgroundColor: context.accentColor,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(48),
+      bottomNavigationBar: AnimatedPadding(
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FilledButton(
+              onPressed: _saving || _amount <= 0 || _nameController.text.trim().isEmpty ? null : _save,
+              style: FilledButton.styleFrom(
+                backgroundColor: context.accentColor,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+              ),
+              child: _saving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(l10n.foodAddThis),
             ),
-            child: _saving
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : Text(l10n.foodAddThis),
           ),
         ),
       ),

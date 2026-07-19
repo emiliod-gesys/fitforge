@@ -27,13 +27,17 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
     return showModalBottomSheet<Exercise>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: AppColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (ctx) => SizedBox(
-        height: MediaQuery.sizeOf(ctx).height * 0.85,
-        child: SimilarExercisePickerSheet(
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, __) => SimilarExercisePickerSheet(
           current: current,
           excludeExerciseIds: excludeExerciseIds,
         ),
