@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/muscle_inference.dart';
+import '../core/utils/gym_weight.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
@@ -133,11 +134,11 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
 
     final lastCompleted = exercise.sets.where((s) => s.completed && s.weight != null).lastOrNull;
     if (lastCompleted != null) {
-      final w = UnitConverter.kgToDisplay(lastCompleted.weight!, widget.unitSystem);
+      final w = GymWeight.formatDisplay(lastCompleted.weight!, widget.unitSystem);
       final label = UnitConverter.massLabel(widget.unitSystem);
       return l10n.seriesWithWeight(
         total,
-        '${w.toStringAsFixed(0)} $label',
+        '$w $label',
         lastCompleted.reps,
       );
     }

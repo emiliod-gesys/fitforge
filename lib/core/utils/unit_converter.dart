@@ -1,3 +1,5 @@
+import 'gym_weight.dart';
+
 abstract final class UnitConverter {
   static const lbPerKg = 2.2046226218;
 
@@ -17,6 +19,12 @@ abstract final class UnitConverter {
     return '${display.toStringAsFixed(decimals)} ${massLabel(unitSystem)}';
   }
 
+  /// Peso de entrenamiento: lb enteras; kg solo .0 o .5.
+  static String formatGymMass(double? kg, String unitSystem) {
+    if (kg == null) return '—';
+    return '${GymWeight.formatDisplay(kg, unitSystem)} ${massLabel(unitSystem)}';
+  }
+
   static String formatDelta(double? delta, String unitSystem, {int decimals = 1}) {
     if (delta == null) return '';
     final display = isLb(unitSystem) ? delta * lbPerKg : delta;
@@ -30,7 +38,7 @@ abstract final class UnitConverter {
   }
 
   static String formatSetLine(double weightKg, int reps, String unitSystem) {
-    final w = kgToDisplay(weightKg, unitSystem).toStringAsFixed(1);
+    final w = GymWeight.formatDisplay(weightKg, unitSystem);
     return '$w ${massLabel(unitSystem)} × $reps';
   }
 

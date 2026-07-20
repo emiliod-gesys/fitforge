@@ -274,6 +274,8 @@
   "hyroxSplitsSummaryTitle": "Tiempos por estación",
   "hyroxValidationRejected": "Este Hyrox no cuenta para clasificación: detectamos tiempos o datos fuera de lo humanamente posible.",
   "hyroxValidationSuspicious": "Este Hyrox quedó marcado para revisión por métricas inusuales.",
+  "workoutValidationRejected": "Este entreno no cuenta para leaderboards: detectamos métricas fuera de lo humanamente posible.",
+  "workoutValidationSuspicious": "Este entreno quedó marcado para revisión y no sumará en leaderboards por métricas inusuales.",
   "leaderboardMetricHyrox": "Hyrox Race",
   "aiCoachSubtitle": "Recomendaciones personalizadas",
   "proactiveAi": "IA proactiva",

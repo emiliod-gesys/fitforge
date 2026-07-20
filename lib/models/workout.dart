@@ -1,4 +1,5 @@
 import '../core/hyrox/hyrox_validation.dart';
+import '../core/workout/workout_validation.dart';
 import '../core/runner/runner_models.dart';
 import '../core/runner/runner_standards.dart';
 import '../core/utils/supabase_datetime.dart';
@@ -164,6 +165,8 @@ class Workout {
   final double? runnerElevationLossMeters;
   final HyroxValidationStatus? hyroxValidationStatus;
   final List<String> hyroxValidationReasons;
+  final WorkoutValidationStatus? validationStatus;
+  final List<String> validationReasons;
 
   const Workout({
     required this.id,
@@ -186,6 +189,8 @@ class Workout {
     this.runnerElevationLossMeters,
     this.hyroxValidationStatus,
     this.hyroxValidationReasons = const [],
+    this.validationStatus,
+    this.validationReasons = const [],
   });
 
   factory Workout.fromJson(Map<String, dynamic> json, {List<WorkoutExercise>? exercises}) {
@@ -219,6 +224,9 @@ class Workout {
       hyroxValidationStatus:
           HyroxValidationStatus.fromCode(json['hyrox_validation_status'] as String?),
       hyroxValidationReasons: _parseReasons(json['hyrox_validation_reasons']),
+      validationStatus:
+          WorkoutValidationStatus.fromCode(json['validation_status'] as String?),
+      validationReasons: _parseReasons(json['validation_reasons']),
     );
   }
 

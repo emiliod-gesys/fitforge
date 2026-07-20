@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
+import '../core/utils/gym_weight.dart';
+import '../core/utils/gym_weight_input_formatter.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_logging.dart';
@@ -70,8 +73,8 @@ class _SetLogTileState extends State<SetLogTile> {
 
   void _syncWeightField() {
     if (widget.set.weight != null) {
-      final display = UnitConverter.kgToDisplay(widget.set.weight!, widget.unitSystem);
-      _weightController.text = display.toStringAsFixed(1);
+      _weightController.text =
+          GymWeight.formatDisplay(widget.set.weight!, widget.unitSystem);
     } else if (_weightController.text.isEmpty) {
       _weightController.text = '';
     }
@@ -84,8 +87,7 @@ class _SetLogTileState extends State<SetLogTile> {
       final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
       if (parsed != null && _fieldsEnabled) {
         final kg = UnitConverter.displayToKg(parsed, _lastUnitSystem);
-        final display = UnitConverter.kgToDisplay(kg, widget.unitSystem);
-        _weightController.text = display.toStringAsFixed(1);
+        _weightController.text = GymWeight.formatDisplay(kg, widget.unitSystem);
       } else {
         _syncWeightField();
       }
@@ -126,7 +128,7 @@ class _SetLogTileState extends State<SetLogTile> {
     } else if (parsed <= 0) {
       return null;
     }
-    return UnitConverter.displayToKg(parsed, widget.unitSystem);
+    return GymWeight.displayToSnappedKg(parsed, widget.unitSystem);
   }
 
   double? _parsedDistanceMeters() {
@@ -174,6 +176,10 @@ class _SetLogTileState extends State<SetLogTile> {
 
   void _submit({bool markCompleted = true}) {
     if (markCompleted && !_validateForComplete()) return;
+    final kg = _parsedWeightKg();
+    if (kg != null) {
+      _weightController.text = GymWeight.formatDisplay(kg, widget.unitSystem);
+    }
     widget.onChanged(_buildSet(completed: markCompleted ? true : widget.set.completed));
     setState(() => _editing = false);
   }
@@ -237,7 +243,7 @@ class _SetLogTileState extends State<SetLogTile> {
         (parsedKg == null || (effectiveKg - parsedKg).abs() > 0.01);
     final effectiveLabel = showEffectiveLabel
         ? l10n.effectiveWeightLabel(
-            UnitConverter.formatMass(effectiveKg!, widget.unitSystem),
+            UnitConverter.formatGymMass(effectiveKg!, widget.unitSystem),
           )
         : null;
     final reserveEffectiveSlot = widget.loadMode == ExerciseLoadMode.bodyweight ||
@@ -308,6 +314,9 @@ class _SetLogTileState extends State<SetLogTile> {
                             controller: _weightController,
                             enabled: _fieldsEnabled,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              GymWeightInputFormatter(unitSystem: widget.unitSystem),
+                            ],
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),

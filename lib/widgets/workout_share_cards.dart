@@ -507,7 +507,7 @@ class _GymShareCard extends StatelessWidget {
                 child: _ShareStatTile(
                   label: l10n.maxWeight,
                   value: summary.maxWeightKg != null
-                      ? UnitConverter.formatMass(summary.maxWeightKg, unitSystem, decimals: 0)
+                      ? UnitConverter.formatGymMass(summary.maxWeightKg, unitSystem)
                       : '—',
                   highlight: summary.isMaxWeightRecord,
                 ),

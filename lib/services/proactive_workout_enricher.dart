@@ -29,10 +29,7 @@ class ProactiveWorkoutEnricher {
     if (exercises.isEmpty) {
       return (exercises: exercises, aiApplied: false);
     }
-    if (!profile.subscriptionTier.hasProactiveAi) {
-      return (exercises: exercises, aiApplied: false);
-    }
-    if (!profile.hasAiKey) {
+    if (!profile.canUseProactiveAi) {
       return (exercises: exercises, aiApplied: false);
     }
 

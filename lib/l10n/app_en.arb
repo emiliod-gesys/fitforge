@@ -260,6 +260,8 @@
   "hyroxSplitsSummaryTitle": "Station splits",
   "hyroxValidationRejected": "This Hyrox does not count for rankings: we detected times or data beyond humanly plausible limits.",
   "hyroxValidationSuspicious": "This Hyrox was flagged for review due to unusual metrics.",
+  "workoutValidationRejected": "This workout does not count for leaderboards: we detected metrics beyond humanly plausible limits.",
+  "workoutValidationSuspicious": "This workout was flagged for review and will not count on leaderboards due to unusual metrics.",
   "leaderboardMetricHyrox": "Hyrox Race",
   "aiCoachSubtitle": "Personalized recommendations",
   "proactiveAi": "Proactive AI",

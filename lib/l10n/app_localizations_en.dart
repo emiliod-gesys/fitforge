@@ -831,6 +831,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This Hyrox was flagged for review due to unusual metrics.';
 
   @override
+  String get workoutValidationRejected =>
+      'This workout does not count for leaderboards: we detected metrics beyond humanly plausible limits.';
+
+  @override
+  String get workoutValidationSuspicious =>
+      'This workout was flagged for review and will not count on leaderboards due to unusual metrics.';
+
+  @override
   String get leaderboardMetricHyrox => 'Hyrox Race';
 
   @override

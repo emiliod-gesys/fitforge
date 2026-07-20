@@ -838,6 +838,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este Hyrox quedó marcado para revisión por métricas inusuales.';
 
   @override
+  String get workoutValidationRejected =>
+      'Este entreno no cuenta para leaderboards: detectamos métricas fuera de lo humanamente posible.';
+
+  @override
+  String get workoutValidationSuspicious =>
+      'Este entreno quedó marcado para revisión y no sumará en leaderboards por métricas inusuales.';
+
+  @override
   String get leaderboardMetricHyrox => 'Hyrox Race';
 
   @override

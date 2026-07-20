@@ -14,6 +14,7 @@ import '../models/exercise_history.dart';
 import '../models/exercise_logging.dart';
 import '../models/profile.dart';
 import '../core/hyrox/hyrox_validation.dart';
+import '../core/workout/workout_validation.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../models/workout.dart';
 import 'supabase_service.dart';
@@ -866,7 +867,7 @@ class WorkoutService {
     }).eq('id', workoutId);
   }
 
-  Future<HyroxValidationResult?> completeWorkout(
+  Future<WorkoutCompletionValidation?> completeWorkout(
     String workoutId, {
     int durationMinutes = 0,
     double totalVolume = 0,
@@ -881,20 +882,37 @@ class WorkoutService {
           if (activeCaloriesKcal != null) 'active_calories_kcal': activeCaloriesKcal,
         })
         .eq('id', workoutId)
-        .select('hyrox_validation_status, hyrox_validation_reasons')
+        .select(
+          'validation_status, validation_reasons, hyrox_validation_status, hyrox_validation_reasons',
+        )
         .maybeSingle();
 
     await _updatePersonalRecords(workoutId);
 
     if (row == null) return null;
     final map = Map<String, dynamic>.from(row);
-    final status = HyroxValidationStatus.fromCode(map['hyrox_validation_status'] as String?);
-    if (status == null) return null;
-    final reasonsRaw = map['hyrox_validation_reasons'];
-    final reasons = reasonsRaw is List
-        ? reasonsRaw.map((e) => e.toString()).toList()
+
+    final validationReasonsRaw = map['validation_reasons'];
+    final validationReasons = validationReasonsRaw is List
+        ? validationReasonsRaw.map((e) => e.toString()).toList()
         : const <String>[];
-    return HyroxValidationResult(status: status, reasons: reasons);
+
+    final hyroxReasonsRaw = map['hyrox_validation_reasons'];
+    final hyroxReasons = hyroxReasonsRaw is List
+        ? hyroxReasonsRaw.map((e) => e.toString()).toList()
+        : const <String>[];
+
+    final hyroxStatus = HyroxValidationStatus.fromCode(map['hyrox_validation_status'] as String?);
+
+    return WorkoutCompletionValidation(
+      validation: WorkoutValidationResult(
+        status: WorkoutValidationStatus.fromCode(map['validation_status'] as String?),
+        reasons: validationReasons,
+      ),
+      hyroxValidation: hyroxStatus == null
+          ? null
+          : HyroxValidationResult(status: hyroxStatus, reasons: hyroxReasons),
+    );
   }
 
   /// Elimina un entrenamiento en curso sin guardarlo en el historial.

@@ -120,7 +120,7 @@ class ExerciseLoadControls extends StatelessWidget {
             ),
             child: Text(
               l10n.bodyweightLoadHint(
-                UnitConverter.formatMass(bodyWeightKg!, unitSystem),
+                UnitConverter.formatGymMass(bodyWeightKg!, unitSystem),
               ),
               style: const TextStyle(fontSize: 12, height: 1.35),
             ),

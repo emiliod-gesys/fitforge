@@ -151,7 +151,7 @@ abstract final class WorkoutSummaryShare {
 
     if (summary.maxWeightKg != null) {
       buffer.writeln(
-        l10n.shareMaxWeight(UnitConverter.formatMass(summary.maxWeightKg, unitSystem)),
+        l10n.shareMaxWeight(UnitConverter.formatGymMass(summary.maxWeightKg, unitSystem)),
       );
     }
     buffer.writeln(
@@ -225,7 +225,7 @@ abstract final class WorkoutSummaryShare {
       ..writeln(l10n.shareExercisesHeader);
     for (final ex in summary.exercises) {
       final weight = ex.bestWeightKg != null
-          ? ' · ${UnitConverter.formatMass(ex.bestWeightKg, unitSystem)}'
+          ? ' · ${UnitConverter.formatGymMass(ex.bestWeightKg, unitSystem)}'
           : '';
       buffer.writeln(
         l10n.shareExerciseLine(ex.exerciseName, ex.completedSets, ex.totalReps, weight),

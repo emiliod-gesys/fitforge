@@ -8,6 +8,8 @@ import '../../models/workout.dart';
 import 'exercise_history_utils.dart';
 import 'gym_weight.dart';
 import 'muscle_inference.dart';
+import 'proactive_workout_ai_rules.dart';
+import 'unit_converter.dart';
 
 /// Contexto compacto para sugerencias de IA al iniciar un entrenamiento.
 class WorkoutSuggestionExerciseContext {
@@ -22,6 +24,7 @@ class WorkoutSuggestionExerciseContext {
   final double recoveryPercent;
   final int? daysSinceLastSession;
   final bool isCompound;
+  final bool warmupSetsAllowed;
   final List<WorkoutSuggestionHistorySession> history;
 
   const WorkoutSuggestionExerciseContext({
@@ -36,6 +39,7 @@ class WorkoutSuggestionExerciseContext {
     required this.recoveryPercent,
     this.daysSinceLastSession,
     this.isCompound = false,
+    this.warmupSetsAllowed = false,
     this.history = const [],
   });
 
@@ -51,6 +55,7 @@ class WorkoutSuggestionExerciseContext {
         'muscles': muscleGroups,
         'recovery_pct': recoveryPercent.round(),
         if (daysSinceLastSession != null) 'days_since_last': daysSinceLastSession,
+        'warmup_sets_allowed': warmupSetsAllowed,
         'history': history.map((h) => h.toJson()).toList(),
       };
 }
@@ -99,6 +104,15 @@ abstract final class WorkoutSuggestionContextBuilder {
               .round();
 
       final anchoring = ExerciseHistoryUtils.anchoringSession(history);
+      final latestSummary = anchoring == null
+          ? null
+          : _sessionSummary(anchoring, isCardio);
+      final workingWeight = latestSummary?['working_weight_kg'] as num?;
+      final hasWorkingHistory =
+          (workingWeight != null && workingWeight > 0) ||
+              (history.isNotEmpty &&
+                  history.any((session) =>
+                      session.sets.any((set) => (set.weight ?? 0) > 0)));
 
       return WorkoutSuggestionExerciseContext(
         exerciseId: ex.exerciseId,
@@ -106,14 +120,19 @@ abstract final class WorkoutSuggestionContextBuilder {
         isCardio: isCardio,
         setCount: ex.sets.length,
         historyAvgSetCount: historyAvgSets,
-        latestSessionSummary: anchoring == null
-            ? null
-            : _sessionSummary(anchoring, isCardio),
+        latestSessionSummary: latestSummary,
         recentTopSet: _recentTopSet(history, isCardio),
         muscleGroups: muscles,
         recoveryPercent: recovery,
         daysSinceLastSession: daysSince,
         isCompound: !isCardio && _isCompoundLift(ex.exerciseName),
+        warmupSetsAllowed: ProactiveWorkoutAiRules.warmupSetsAllowed(
+          isCompound: !isCardio && _isCompoundLift(ex.exerciseName),
+          isCardio: isCardio,
+          recoveryPercent: recovery,
+          hasWorkingHistory: hasWorkingHistory,
+          fitnessGoal: profile.fitnessGoal,
+        ),
         history: history
             .take(historyLimit)
             .map((session) => _historySession(session, isCardio))
@@ -130,6 +149,13 @@ abstract final class WorkoutSuggestionContextBuilder {
       'goal': profile.fitnessGoal ?? 'Mantenimiento',
       'experience': profile.experienceLevel ?? 'Intermedio',
       'unit_system': profile.unitSystem,
+      'weight_display_rules': {
+        'lb_whole_numbers_only': UnitConverter.isLb(profile.unitSystem),
+        'kg_half_kg_steps_only': !UnitConverter.isLb(profile.unitSystem),
+        'hint': UnitConverter.isLb(profile.unitSystem)
+            ? 'User sees whole lb only (no decimals). Pick weight_kg that converts to integer lb.'
+            : 'User sees kg with .0 or .5 only. weight_kg must be a multiple of 0.5.',
+      },
       'exercises': exercises.map((e) => e.toJson()).toList(),
     });
   }
@@ -303,7 +329,7 @@ class AiWorkoutSuggestions {
 }
 
 abstract final class AiWorkoutSuggestionsParser {
-  static AiWorkoutSuggestions? parse(String response) {
+  static AiWorkoutSuggestions? parse(String response, {String unitSystem = 'kg'}) {
     try {
       final cleaned = response.replaceAll(RegExp(r'```json|```'), '').trim();
       final start = cleaned.indexOf('{');
@@ -327,7 +353,10 @@ abstract final class AiWorkoutSuggestionsParser {
           sets.add(
             AiExerciseSetSuggestion(
               setNumber: setNumber,
-              weightKg: _positiveDouble(setItem['weight_kg']),
+              weightKg: GymWeight.snapKgOrNull(
+                _positiveDouble(setItem['weight_kg']),
+                unitSystem,
+              ),
               reps: (setItem['reps'] as num?)?.toInt().clamp(0, 100) ?? 0,
               durationSeconds: _positiveInt(setItem['duration_seconds']),
               distanceMeters: _positiveDouble(setItem['distance_meters']),

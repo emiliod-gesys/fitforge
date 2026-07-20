@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/hyrox/hyrox_standards.dart';
 import '../../core/hyrox/hyrox_validation.dart';
+import '../../core/workout/workout_validation.dart';
 import '../../core/runner/runner_models.dart';
 import '../../core/runner/runner_standards.dart';
 import '../../core/theme/app_colors.dart';
@@ -169,6 +170,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       runnerElevationLossMeters: workout.runnerElevationLossMeters,
       hyroxValidationStatus: workout.hyroxValidationStatus,
       hyroxValidationReasons: workout.hyroxValidationReasons,
+      validationStatus: workout.validationStatus,
+      validationReasons: workout.validationReasons,
     );
   }
 
@@ -645,7 +648,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           .getMilestoneTotals(profile: profile);
       final personalRecordsBefore = await ref.read(personalRecordsProvider.future);
 
-      final hyroxValidationFromServer = await ref.read(workoutServiceProvider).completeWorkout(
+      final completionValidation = await ref.read(workoutServiceProvider).completeWorkout(
             effectiveWorkout.id,
             durationMinutes: duration,
             totalVolume: volume,
@@ -653,7 +656,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           );
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
-      HyroxValidationResult? hyroxValidation = hyroxValidationFromServer;
+      WorkoutValidationResult validation = completionValidation?.validation ??
+          WorkoutValidator.validate(
+            workout: effectiveWorkout,
+            startedAt: startAt,
+            completedAt: endAt,
+            durationMinutes: duration,
+            totalVolumeKg: volume,
+            activeCaloriesKcal: calorieEstimate.caloriesKcal,
+            runnerAvgPaceSecPerKm: effectiveWorkout.runnerAvgPaceSecPerKm,
+            isHyroxSystem: _isHyroxWorkout,
+            workoutsCompletedSameDay: completedDates.where((date) {
+              final utc = date.toUtc();
+              final endUtc = endAt.toUtc();
+              return utc.year == endUtc.year &&
+                  utc.month == endUtc.month &&
+                  utc.day == endUtc.day;
+            }).length,
+          );
+
+      HyroxValidationResult? hyroxValidation = completionValidation?.hyroxValidation;
       if (hyroxValidation == null && _isHyroxWorkout && _hyroxLevel != null) {
         hyroxValidation = HyroxValidator.validate(
           workout: effectiveWorkout,
@@ -666,8 +688,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
 
       XpAwardResult? xpAward;
-      final skipHyroxXp = hyroxValidation?.status == HyroxValidationStatus.rejected;
-      if (!skipHyroxXp) {
+      final skipXp = completionValidation?.skipXp ??
+          (validation.status == WorkoutValidationStatus.rejected ||
+              hyroxValidation?.status == HyroxValidationStatus.rejected);
+      if (!skipXp) {
         xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
               workoutId: effectiveWorkout.id,
               totalVolumeKg: volume,
@@ -716,6 +740,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         isHyrox: _isHyroxWorkout,
         isRunner: _isRunnerWorkout,
         hyroxValidation: hyroxValidation,
+        validation: validation,
       );
 
       if (!mounted) return;
@@ -1486,7 +1511,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     final weight = set?.weight;
     if (weight != null && weight > 0) {
       final perArm = _perArmOverrides[exercise.exerciseId] ?? false;
-      final w = UnitConverter.formatMass(weight, unitSystem, decimals: 0);
+      final w = UnitConverter.formatGymMass(weight, unitSystem);
       parts.add(perArm ? '2 × $w' : w);
     }
     return parts;

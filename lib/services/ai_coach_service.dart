@@ -1056,8 +1056,8 @@ $_routineRules
     final lang = _resolveLanguageCode(profile: profile);
     final usesLb = UnitConverter.isLb(profile.unitSystem);
     final weightNote = usesLb
-        ? 'El usuario ve libras en la app, pero responde pesos en weight_kg (kilogramos, como en el historial). Usa incrementos de gimnasio: pesos que en lb sean múltiplos de 2.5 (ej. 10, 12.5, 15 lb por mancuerna).'
-        : 'Express strength weights as weight_kg (kilograms). Use gym increments: multiples of 0.5 kg (e.g. 10, 12.5, 20 kg).';
+        ? 'El usuario ve libras ENTERAS en entrenos (sin decimales). Responde pesos en weight_kg, pero elige valores que convertidos a lb sean números enteros (ej. 55 lb, no 55.3 lb).'
+        : 'Express strength weights as weight_kg. The user only sees kg in .0 or .5 steps (10, 10.5, 20 kg). Never suggest odd decimals like 20.3 kg.';
 
     final goalBlock = ProactiveWorkoutAiRules.goalProgrammingBlock(profile);
 
@@ -1078,8 +1078,10 @@ Reglas generales:
 - Si existe latest_session_summary o recent_top_set, ancla el peso de TRABAJO en working_weight_kg o recent_top_set, no en series de aproximación ni en sesiones con peso claramente inferior al historial reciente.
 - Si weight_pattern es warmup_then_work, pyramid o varied: las series ligeras del inicio NO definen el peso de trabajo; usa working_weight_kg y las reps de las series al ≥85% del máximo.
 - Si el usuario ya hizo por ejemplo 30 kg x 10 recientemente con buena recuperación, no sugieras 20 kg x 10 por defecto. Mantén o micro-progresa.
-- set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo.
-- Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps.
+- set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo (incluidas aproximaciones).
+- warmup_sets_allowed (por ejercicio): si es true, incluye 1-3 series de aproximación progresivas ANTES del trabajo; si es false, solo series de trabajo directas.
+- Puedes devolver MÁS series que set_count cuando añades aproximaciones (hasta 10 totales en fuerza).
+- Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps ni aproximaciones.
 - Si no hay historial, usa valores conservadores según objetivo y experiencia.
 - Devuelve TODOS los ejercicios del payload con su exercise_id exacto.
 - En el historial, rir = repeticiones en reserva (0 = al fallo, 3 = fácil). Si el último set tuvo rir 0-1, no subas peso salvo objetivo Fuerza con buena recuperación. Si rir ≥ 2, puedes progresar.
@@ -1089,17 +1091,25 @@ Reglas generales:
 Datos del entrenamiento a iniciar:
 $payloadJson
 
-Responde SOLO con este JSON (ejemplo con aproximaciones + trabajo en un compuesto):
+Responde SOLO con este JSON (ejemplo: compuesto con aproximaciones + aislamiento directo):
 {
   "exercises": [
     {
-      "exercise_id": "id del ejercicio",
+      "exercise_id": "id_compuesto",
       "sets": [
         {"set_number": 1, "weight_kg": 40, "reps": 10},
         {"set_number": 2, "weight_kg": 60, "reps": 5},
         {"set_number": 3, "weight_kg": 80, "reps": 5},
         {"set_number": 4, "weight_kg": 80, "reps": 5},
         {"set_number": 5, "weight_kg": 80, "reps": 5}
+      ]
+    },
+    {
+      "exercise_id": "id_aislamiento",
+      "sets": [
+        {"set_number": 1, "weight_kg": 12, "reps": 12},
+        {"set_number": 2, "weight_kg": 12, "reps": 12},
+        {"set_number": 3, "weight_kg": 12, "reps": 12}
       ]
     }
   ]
@@ -1112,7 +1122,10 @@ Responde SOLO con este JSON (ejemplo con aproximaciones + trabajo en un compuest
         systemPrompt: systemPrompt,
         userPrompt: userPrompt,
       );
-      return AiWorkoutSuggestionsParser.parse(response);
+      return AiWorkoutSuggestionsParser.parse(
+        response,
+        unitSystem: profile.unitSystem,
+      );
     } catch (_) {
       return null;
     }

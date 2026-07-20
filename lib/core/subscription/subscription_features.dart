@@ -29,3 +29,19 @@ extension SubscriptionFeatures on SubscriptionTier {
         SubscriptionTier.gymratPro => 50,
       };
 }
+
+/// Acceso efectivo según plan + API key propia (BYOK en Free).
+extension ProfileSubscriptionAccess on UserProfile {
+  /// Key guardada por el usuario (no la embebida de respaldo del plan).
+  bool get hasUserOwnedApiKey => aiProvider != AiProvider.none && hasAiKey;
+
+  /// IA proactiva al entrenar (plan de pago o Free con BYOK).
+  bool get canUseProactiveAi =>
+      subscriptionTier.hasProactiveAi ||
+      (subscriptionTier.isFree && hasUserOwnedApiKey);
+
+  /// Foto de comida con visión (Gymrat Pro o Free con BYOK).
+  bool get canUseFoodPhotoAi =>
+      subscriptionTier.hasFoodPhotoAi ||
+      (subscriptionTier.isFree && hasUserOwnedApiKey);
+}

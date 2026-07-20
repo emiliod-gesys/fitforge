@@ -297,7 +297,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ref.watch(aiProactiveEnabledProvider).when(
                   skipLoadingOnReload: true,
                   data: (enabled) {
-                    final canProactive = profile?.subscriptionTier.hasProactiveAi ?? false;
+                    final canProactive = profile?.canUseProactiveAi ?? false;
                     return SwitchListTile(
                       secondary: Icon(
                         Icons.psychology_outlined,
@@ -306,7 +306,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       title: Text(l10n.proactiveAi),
                       subtitle: Text(
                         !canProactive
-                            ? l10n.featureGymratPlansOnly
+                            ? (profile?.hasUserOwnedApiKey == true
+                                ? l10n.proactiveAiSubtitleOff
+                                : profile?.subscriptionTier.isFree == true
+                                    ? l10n.bringYourOwnAiSubtitle
+                                    : l10n.featureGymratPlansOnly)
                             : (enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff),
                       ),
                       value: canProactive && enabled,
@@ -322,7 +326,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     subtitle: Text(l10n.loading),
                   ),
                   error: (_, __) {
-                    final canProactive = profile?.subscriptionTier.hasProactiveAi ?? false;
+                    final canProactive = profile?.canUseProactiveAi ?? false;
                     return SwitchListTile(
                       secondary: Icon(
                         Icons.psychology_outlined,

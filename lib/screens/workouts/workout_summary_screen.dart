@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../core/hyrox/hyrox_validation.dart';
+import '../../core/workout/workout_validation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/unit_converter.dart';
@@ -217,6 +218,11 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                   _RunnerSummarySection(summary: summary, unitSystem: unit, l10n: l10n),
                   const SizedBox(height: 20),
                 ],
+                if (summary.validation?.status == WorkoutValidationStatus.rejected ||
+                    summary.validation?.status == WorkoutValidationStatus.suspicious) ...[
+                  _WorkoutValidationBanner(validation: summary.validation!, l10n: l10n),
+                  const SizedBox(height: 16),
+                ],
                 if (summary.hyroxValidation?.status == HyroxValidationStatus.rejected ||
                     summary.hyroxValidation?.status == HyroxValidationStatus.suspicious) ...[
                   _HyroxValidationBanner(summary: summary, l10n: l10n),
@@ -268,7 +274,7 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                                 ? l10n.setsRepsBest(
                                     ex.completedSets,
                                     ex.totalReps,
-                                    UnitConverter.formatMass(ex.bestWeightKg, unit),
+                                    UnitConverter.formatGymMass(ex.bestWeightKg, unit),
                                   )
                                 : l10n.setsReps(ex.completedSets, ex.totalReps),
                           ),
@@ -527,6 +533,47 @@ class _RunnerStat extends StatelessWidget {
   }
 }
 
+class _WorkoutValidationBanner extends StatelessWidget {
+  final WorkoutValidationResult validation;
+  final AppLocalizations l10n;
+
+  const _WorkoutValidationBanner({
+    required this.validation,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final rejected = validation.status == WorkoutValidationStatus.rejected;
+    final color = rejected ? AppColors.error : const Color(0xFFE6A700);
+    final message =
+        rejected ? l10n.workoutValidationRejected : l10n.workoutValidationSuspicious;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(rejected ? Icons.block : Icons.warning_amber_rounded, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: color, fontWeight: FontWeight.w600, height: 1.35),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HyroxValidationBanner extends StatelessWidget {
   final WorkoutSummaryData summary;
   final AppLocalizations l10n;
@@ -736,10 +783,10 @@ class _ComparisonSection extends StatelessWidget {
               context,
               l10n.maxWeight,
               summary.maxWeightKg != null
-                  ? UnitConverter.formatMass(summary.maxWeightKg, unitSystem, decimals: 0)
+                  ? UnitConverter.formatGymMass(summary.maxWeightKg, unitSystem)
                   : '—',
               summary.previousMaxWeightKg != null
-                  ? UnitConverter.formatMass(summary.previousMaxWeightKg, unitSystem, decimals: 0)
+                  ? UnitConverter.formatGymMass(summary.previousMaxWeightKg, unitSystem)
                   : null,
               _delta(summary.maxWeightKg, summary.previousMaxWeightKg, isWeight: true),
               summary.isMaxWeightRecord,

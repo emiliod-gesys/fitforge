@@ -1580,6 +1580,18 @@ abstract class AppLocalizations {
   /// **'Este Hyrox quedó marcado para revisión por métricas inusuales.'**
   String get hyroxValidationSuspicious;
 
+  /// No description provided for @workoutValidationRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Este entreno no cuenta para leaderboards: detectamos métricas fuera de lo humanamente posible.'**
+  String get workoutValidationRejected;
+
+  /// No description provided for @workoutValidationSuspicious.
+  ///
+  /// In es, this message translates to:
+  /// **'Este entreno quedó marcado para revisión y no sumará en leaderboards por métricas inusuales.'**
+  String get workoutValidationSuspicious;
+
   /// No description provided for @leaderboardMetricHyrox.
   ///
   /// In es, this message translates to:

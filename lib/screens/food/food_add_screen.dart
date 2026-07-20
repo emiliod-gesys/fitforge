@@ -8,6 +8,7 @@ import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/speech_locale_utils.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
@@ -156,11 +157,11 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   }
 
   Future<void> _processFoodImage(XFile image) async {
-    final tier = (await ref.read(profileProvider.future))?.subscriptionTier ?? SubscriptionTier.free;
-    if (!tier.hasFoodPhotoAi) {
+    final profile = await ref.read(profileProvider.future);
+    if (profile == null || !profile.canUseFoodPhotoAi) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.featureGymratProOnly)),
+          SnackBar(content: Text(_foodPhotoLockMessage(context.l10n, profile))),
         );
       }
       return;
@@ -169,7 +170,6 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     setState(() => _loading = true);
     try {
       final bytes = await image.readAsBytes();
-      final profile = await ref.read(profileProvider.future);
       final estimate = await ref.read(aiCoachServiceProvider).estimateFoodFromImage(
             imageBytes: bytes,
             profile: profile,
@@ -193,11 +193,18 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     await _processFoodImage(image);
   }
 
+  String _foodPhotoLockMessage(AppLocalizations l10n, UserProfile? profile) {
+    if (profile?.subscriptionTier.isFree ?? true) {
+      return l10n.bringYourOwnAiSubtitle;
+    }
+    return l10n.featureGymratProOnly;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final tier = ref.watch(profileProvider).value?.subscriptionTier ?? SubscriptionTier.free;
-    final photoAllowed = tier.hasFoodPhotoAi;
+    final profile = ref.watch(profileProvider).value;
+    final photoAllowed = profile?.canUseFoodPhotoAi ?? false;
     final summaryAsync = ref.watch(dailyNutritionProvider);
     final mealEaten = summaryAsync.valueOrNull?.eatenForMeal(widget.mealType).caloriesKcal ?? 0;
     final mealGoal = summaryAsync.valueOrNull?.mealCalorieGoal(widget.mealType) ?? 0;
@@ -231,13 +238,13 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                   photoLocked: !photoAllowed,
                   onPhotoLockedTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.featureGymratProOnly)),
+                      SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
                     );
                   },
                   onChanged: (m) {
                     if (m == FoodAddMode.photo && !photoAllowed) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.featureGymratProOnly)),
+                        SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
                       );
                       return;
                     }
@@ -277,7 +284,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                       ),
                     FoodAddMode.photo => _PhotoPane(
                         locked: !photoAllowed,
-                        lockedMessage: l10n.featureGymratProOnly,
+                        lockedMessage: _foodPhotoLockMessage(l10n, profile),
                         onPickImage: _pickFoodImage,
                       ),
                   },

@@ -32,8 +32,7 @@ Future<void> startWorkoutAndNavigate(
   final profile = proactive ? await ref.read(profileProvider.future) : null;
   final useAi = proactive &&
       profile != null &&
-      profile.subscriptionTier.hasProactiveAi &&
-      profile.hasAiKey &&
+      profile.canUseProactiveAi &&
       exercises != null &&
       exercises.isNotEmpty;
 
