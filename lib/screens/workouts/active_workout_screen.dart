@@ -404,6 +404,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     return confirmed == true;
   }
 
+  Future<void> _requestCompleteWorkout(Workout workout) async {
+    if (!await _confirmEndTraining() || !mounted) return;
+    await _completeWorkout(workout);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1119,7 +1124,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               ),
               if ((!_isHyroxWorkout || _hyroxRaceStarted) && !_isRunnerWorkout)
                 TextButton(
-                  onPressed: _completing ? null : () => _completeWorkout(displayWorkout),
+                  onPressed: _completing ? null : () => _requestCompleteWorkout(displayWorkout),
                   child: _completing
                       ? const SizedBox(
                           width: 18,
@@ -1155,7 +1160,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               unitSystem: unitSystem,
               surface: _runnerSurface,
               onCancel: () => _cancelWorkout(displayWorkout),
-              onFinish: (snap) => _completeRunnerOutdoor(displayWorkout, snap),
+              onFinish: (snap) async {
+                if (!await _confirmEndTraining() || !mounted) return;
+                await _completeRunnerOutdoor(displayWorkout, snap);
+              },
             );
           }
 
@@ -1163,7 +1171,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             return RunnerTreadmillSession(
               unitSystem: unitSystem,
               onCancel: () => _cancelWorkout(displayWorkout),
-              onFinish: (result) => _completeRunnerTreadmill(displayWorkout, result),
+              onFinish: (result) async {
+                if (!await _confirmEndTraining() || !mounted) return;
+                await _completeRunnerTreadmill(displayWorkout, result);
+              },
             );
           }
 
@@ -1475,10 +1486,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     setState(() => _currentExerciseIndex = nextIndex);
                   }
                 },
-                onEndTraining: () async {
-                  if (!await _confirmEndTraining() || !mounted) return;
-                  await _completeWorkout(displayWorkout);
-                },
+                onEndTraining: () => _requestCompleteWorkout(displayWorkout),
                 hasPrevious: WorkoutExerciseNavigation.hasPrevious(visibleExercises, exercise.id),
                 hasNext: WorkoutExerciseNavigation.hasNext(visibleExercises, exercise.id),
               ),
