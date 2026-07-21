@@ -190,11 +190,122 @@ abstract final class FoodQueryHints {
     return name.trim();
   }
 
+  static String _normalizeName(String raw) {
+    var name = raw.toLowerCase().trim();
+    const accents = {
+      'á': 'a',
+      'é': 'e',
+      'í': 'i',
+      'ó': 'o',
+      'ú': 'u',
+      'ü': 'u',
+      'ñ': 'n',
+      'à': 'a',
+      'è': 'e',
+      'ì': 'i',
+      'ò': 'o',
+      'ù': 'u',
+    };
+    for (final entry in accents.entries) {
+      name = name.replaceAll(entry.key, entry.value);
+    }
+    return name;
+  }
+
   static bool _namesOverlap(String a, String b) {
-    final x = a.toLowerCase().trim();
-    final y = b.toLowerCase().trim();
+    final x = _normalizeName(a);
+    final y = _normalizeName(b);
     if (x.isEmpty || y.isEmpty) return false;
     return x == y || x.contains(y) || y.contains(x);
+  }
+
+  /// Multiplicador de porción según adjetivos de tamaño (gran, pequeña, etc.).
+  static double parsePortionSizeMultiplier(String query) {
+    final lower = query.toLowerCase();
+    const small = r'\b(pequeñ[oa]s?|chic[oa]s?|mini|small|tiny)\b';
+    const large = r'\b(gran(?:de)?s?|gigante?s?|enorme?s?|jumbo|big|large|extra\s+grande)\b';
+    if (RegExp(small, caseSensitive: false).hasMatch(lower)) return 0.65;
+    if (RegExp(large, caseSensitive: false).hasMatch(lower)) return 1.75;
+    return 1.0;
+  }
+
+  static bool _isSingleItemQuery(String query) {
+    final lower = query.toLowerCase();
+    if (RegExp(r'\s+y\s+', caseSensitive: false).hasMatch(lower)) return false;
+    if (RegExp(r'\s+con\s+', caseSensitive: false).hasMatch(lower)) return false;
+    if (RegExp(r'[,+]').hasMatch(lower)) return false;
+    return true;
+  }
+
+  static double _defaultPortionGramsForQuery(String query) {
+    const genericDefault = 100.0;
+    final primary = _normalizeName(_primaryQueryText(query));
+    const portionDefaults = {
+      'pechuga de pollo': 120.0,
+      'pechuga': 120.0,
+      'pollo a la plancha': 120.0,
+      'pollo asado': 130.0,
+      'pollo': 120.0,
+      'chicken breast': 120.0,
+      'huevo': 50.0,
+      'huevos': 50.0,
+      'banana': 118.0,
+      'platano': 118.0,
+      'plátano': 118.0,
+      'manzana': 180.0,
+      'tortilla': 30.0,
+      'taco': 80.0,
+      'tacos': 160.0,
+    };
+    final sortedKeys = portionDefaults.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final token in sortedKeys) {
+      if (primary.contains(_normalizeName(token))) return portionDefaults[token]!;
+    }
+    return genericDefault;
+  }
+
+  static double _resolveBasePortionGrams(String query, FoodNutritionEstimate ai) {
+    const genericDefault = 100.0;
+    if (ai.referenceAmount > 0 && (ai.referenceAmount - genericDefault).abs() > 1) {
+      return ai.referenceAmount;
+    }
+    return _defaultPortionGramsForQuery(query);
+  }
+
+  /// Ajusta gramos cuando el usuario describe tamaño (ej. "gran pechuga") sin peso explícito.
+  static FoodNutritionEstimate applyPortionSizeModifier(String query, FoodNutritionEstimate ai) {
+    if (parseGrams(query) != null || parseIngredientGramsFromQuery(query).isNotEmpty) {
+      return ai;
+    }
+    final multiplier = parsePortionSizeMultiplier(query);
+    if (multiplier == 1.0) return ai;
+
+    const genericDefault = 100.0;
+    // La IA ya devolvió una porción no genérica (p. ej. interpretó "big" como ~220 g).
+    // No volver a multiplicar por el adjetivo de tamaño.
+    if (ai.referenceAmount > 0 && (ai.referenceAmount - genericDefault).abs() > 5) {
+      return ai;
+    }
+
+    final baseGrams = _defaultPortionGramsForQuery(query);
+    final targetGrams = baseGrams * multiplier;
+    if (targetGrams <= 0 || (targetGrams - ai.referenceAmount).abs() < 1) return ai;
+
+    var scaled = ai.scaledTo(targetGrams);
+    if (ai.ingredientPortions.isNotEmpty) {
+      scaled = scaled.copyWith(
+        ingredientPortions: ai.ingredientPortions.map((p) => p.scaledBy(multiplier)).toList(),
+        ingredients: ai.ingredientPortions.map((p) => p.name).toList(),
+      );
+    } else if (ai.ingredients.length == 1) {
+      scaled = scaled.copyWith(
+        ingredientPortions: [
+          FoodIngredientPortion(name: ai.ingredients.first, gramsG: targetGrams),
+        ],
+      );
+    }
+    return scaled;
   }
 
   static void _upsertPortion(List<FoodIngredientPortion> portions, String name, double grams) {
@@ -209,7 +320,7 @@ abstract final class FoodQueryHints {
   /// Completa o corrige gramos por ingrediente usando texto del usuario y totales.
   static FoodNutritionEstimate ensureIngredientPortions(String query, FoodNutritionEstimate ai) {
     final userPortions = parseIngredientGramsFromQuery(query);
-    final portions = [...ai.ingredientPortions];
+    var portions = [...ai.ingredientPortions];
 
     for (final userPortion in userPortions) {
       final index = portions.indexWhere((p) => _namesOverlap(p.name, userPortion.name));
@@ -221,6 +332,15 @@ abstract final class FoodQueryHints {
       } else {
         portions.add(userPortion);
       }
+    }
+
+    portions = _mergeOverlappingPortions(portions, userPortions);
+
+    final explicitGrams = parseGrams(query);
+    if (userPortions.isNotEmpty && explicitGrams != null && _isSingleItemQuery(query)) {
+      portions = userPortions
+          .map((p) => FoodIngredientPortion(name: p.name, gramsG: p.gramsG))
+          .toList();
     }
 
     final eggs = eggCount(query);
@@ -285,13 +405,45 @@ abstract final class FoodQueryHints {
 
     final referenceAmount = sumGrams > 0 ? sumGrams : ai.referenceAmount;
 
-    return ai.copyWith(
+    var result = ai.copyWith(
       ingredientPortions: portions,
       ingredients: portions.map((p) => p.name).toList(),
       referenceAmount: referenceAmount,
       amountUnit: 'g',
       servingDescription: FoodServingParser.formatAmount(referenceAmount, 'g'),
     );
+
+    if (userPortions.isNotEmpty &&
+        ai.referenceAmount > 0 &&
+        referenceAmount > 0 &&
+        (referenceAmount - ai.referenceAmount).abs() > 0.5) {
+      result = result.scaledTo(referenceAmount);
+    }
+
+    return result;
+  }
+
+  static List<FoodIngredientPortion> _mergeOverlappingPortions(
+    List<FoodIngredientPortion> portions,
+    List<FoodIngredientPortion> userPortions,
+  ) {
+    final merged = <FoodIngredientPortion>[];
+    for (final portion in portions) {
+      final index = merged.indexWhere((p) => _namesOverlap(p.name, portion.name));
+      if (index < 0) {
+        merged.add(portion);
+        continue;
+      }
+      final userGrams = userPortions
+          .where((u) => _namesOverlap(u.name, portion.name))
+          .map((u) => u.gramsG)
+          .firstOrNull;
+      merged[index] = FoodIngredientPortion(
+        name: merged[index].name,
+        gramsG: userGrams ?? merged[index].gramsG,
+      );
+    }
+    return merged;
   }
 
   /// Extrae gramos del texto del usuario (ej. "100g", "100 gramos").
@@ -395,6 +547,10 @@ abstract final class FoodQueryHints {
     'aceite de oliva': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
     'olive oil': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
     'aceite': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
+    'mantequilla de mani': (kcal: 588, protein: 25.0, carbs: 20.0, fat: 50.0, fiber: 6.0),
+    'mantequilla de maní': (kcal: 588, protein: 25.0, carbs: 20.0, fat: 50.0, fiber: 6.0),
+    'peanut butter': (kcal: 588, protein: 25.0, carbs: 20.0, fat: 50.0, fiber: 6.0),
+    'crema de cacahuate': (kcal: 588, protein: 25.0, carbs: 20.0, fat: 50.0, fiber: 6.0),
   };
 
   static ({int kcal, double protein, double carbs, double fat, double fiber})?
@@ -631,8 +787,12 @@ abstract final class FoodQueryHints {
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
 
+    final sizeAdjusted = parseGrams(query) == null && parseIngredientGramsFromQuery(query).isEmpty
+        ? applyPortionSizeModifier(query, gramCorrected)
+        : gramCorrected;
+
     if (labeledKcal == 0 && eggs == 0) {
-      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, sizeAdjusted));
     }
 
     var kcal = labeledKcal + eggs * eggKcal;
@@ -660,12 +820,12 @@ abstract final class FoodQueryHints {
     }
 
     if (kcal <= 0) {
-      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, sizeAdjusted));
     }
 
     final floor = (kcal * 0.95).round();
-    if (gramCorrected.caloriesKcal >= floor) {
-      return _finalizePortionEstimate(query, ensureIngredientPortions(query, gramCorrected));
+    if (sizeAdjusted.caloriesKcal >= floor) {
+      return _finalizePortionEstimate(query, ensureIngredientPortions(query, sizeAdjusted));
     }
 
     return _finalizePortionEstimate(
@@ -673,18 +833,18 @@ abstract final class FoodQueryHints {
       ensureIngredientPortions(
         query,
         FoodNutritionEstimate(
-          name: gramCorrected.name,
-          brand: gramCorrected.brand,
+          name: sizeAdjusted.name,
+          brand: sizeAdjusted.brand,
           caloriesKcal: kcal.round(),
           proteinG: double.parse(protein.toStringAsFixed(1)),
           carbsG: double.parse(carbs.toStringAsFixed(1)),
           fatG: double.parse(fat.toStringAsFixed(1)),
-          fiberG: gramCorrected.fiberG,
-          servingDescription: gramCorrected.servingDescription,
-          ingredients: gramCorrected.ingredients,
-          ingredientPortions: gramCorrected.ingredientPortions,
-          referenceAmount: gramCorrected.referenceAmount > 0 ? gramCorrected.referenceAmount : 180,
-          amountUnit: gramCorrected.amountUnit,
+          fiberG: sizeAdjusted.fiberG,
+          servingDescription: sizeAdjusted.servingDescription,
+          ingredients: sizeAdjusted.ingredients,
+          ingredientPortions: sizeAdjusted.ingredientPortions,
+          referenceAmount: sizeAdjusted.referenceAmount > 0 ? sizeAdjusted.referenceAmount : 180,
+          amountUnit: sizeAdjusted.amountUnit,
         ),
       ),
     );

@@ -14,6 +14,7 @@ import '../../core/workout/workout_validation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../core/utils/workout_share_capture.dart';
 import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -57,31 +58,20 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     return offset & box.size;
   }
 
-  String _shareImageFileName(String displayName) {
-    final label = displayName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').trim();
-    return '${label.isEmpty ? 'FitForge' : label} — FitForge.png';
-  }
+  String _shareImageFileName() => WorkoutShareCapture.safeFileName();
 
   Future<bool> _shareWithImageCard({
     required String text,
-    required String displayName,
     required String shareSubject,
     Rect? shareOrigin,
   }) async {
-    final boundary =
-        _shareCardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) return false;
+    final pngBytes = await WorkoutShareCapture.capturePng(_shareCardKey);
+    if (pngBytes == null || !mounted) return false;
 
-    await WidgetsBinding.instance.endOfFrame;
-
-    final image = await boundary.toImage(pixelRatio: 3);
-    final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (data == null || !mounted) return false;
-
-    final fileName = _shareImageFileName(displayName);
+    final fileName = _shareImageFileName();
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+    await file.writeAsBytes(pngBytes, flush: true);
 
     // iOS lists image + text as separate items ("1 Document" / "Plain Text").
     // The summary card image already contains the workout details.
@@ -108,7 +98,6 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     try {
       final sharedWithImage = await _shareWithImageCard(
         text: text,
-        displayName: displayName,
         shareSubject: shareSubject,
         shareOrigin: shareOrigin,
       );
@@ -118,6 +107,11 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
           subject: shareSubject,
           sharePositionOrigin: shareOrigin,
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.shareImageFallback)),
+          );
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -203,16 +197,16 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
           onPressed: _finishing ? null : _finishSummary,
         ),
       ),
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         children: [
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               children: [
-                RepaintBoundary(
-                  key: _shareCardKey,
-                  child: WorkoutShareCard(summary: summary, unitSystem: unit, l10n: l10n),
-                ),
+                WorkoutShareCard(summary: summary, unitSystem: unit, l10n: l10n),
                 const SizedBox(height: 20),
                 if (summary.hasRunnerSummary) ...[
                   _RunnerSummarySection(summary: summary, unitSystem: unit, l10n: l10n),
@@ -355,7 +349,51 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
           ),
         ],
       ),
+          _OffscreenShareCardCapture(
+            captureKey: _shareCardKey,
+            width: MediaQuery.sizeOf(context).width - 32,
+            summary: summary,
+            unitSystem: unit,
+            l10n: l10n,
+          ),
+        ],
+      ),
     ),
+    );
+  }
+}
+
+/// Tarjeta fuera de pantalla para captura fiable (no depende del scroll).
+class _OffscreenShareCardCapture extends StatelessWidget {
+  final GlobalKey captureKey;
+  final double width;
+  final WorkoutSummaryData summary;
+  final String unitSystem;
+  final AppLocalizations l10n;
+
+  const _OffscreenShareCardCapture({
+    required this.captureKey,
+    required this.width,
+    required this.summary,
+    required this.unitSystem,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: -12000,
+      top: 0,
+      width: width,
+      child: IgnorePointer(
+        child: RepaintBoundary(
+          key: captureKey,
+          child: ColoredBox(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: WorkoutShareCard(summary: summary, unitSystem: unitSystem, l10n: l10n),
+          ),
+        ),
+      ),
     );
   }
 }

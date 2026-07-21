@@ -174,7 +174,13 @@ void main() {
 
     test('anchoredEstimateForQuery estimates composite plate from total grams', () {
       const query = '315g de tacos al pastor con costra de queso';
-      const ai = FoodNutritionEstimate(name: 'Tacos al pastor');
+      const ai = FoodNutritionEstimate(
+        name: 'Tacos al pastor',
+        caloriesKcal: 0,
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+      );
 
       final anchored = FoodQueryHints.anchoredEstimateForQuery(query, ai);
 
@@ -206,6 +212,99 @@ void main() {
       expect(fixed.caloriesKcal, lessThan(500));
       expect(fixed.proteinG, greaterThan(40));
       expect(fixed.referenceAmount, 320);
+    });
+
+    test('reconcile respects explicit grams for peanut butter despite accent mismatch', () {
+      const query = '14g de mantequilla de mani';
+      const ai = FoodNutritionEstimate(
+        name: 'Mantequilla de maní',
+        caloriesKcal: 180,
+        proteinG: 7,
+        carbsG: 6,
+        fatG: 15,
+        referenceAmount: 28,
+        ingredients: ['mantequilla de maní'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'mantequilla de maní', gramsG: 28),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.referenceAmount, closeTo(14, 0.5));
+      expect(fixed.ingredientPortions.length, 1);
+      expect(fixed.ingredientPortions.first.gramsG, closeTo(14, 0.5));
+      expect(fixed.caloriesKcal, lessThan(120));
+    });
+
+    test('reconcile scales large chicken breast from size adjective', () {
+      const query = 'Gran pechuga de pollo';
+      const ai = FoodNutritionEstimate(
+        name: 'Pechuga de pollo',
+        caloriesKcal: 165,
+        proteinG: 31,
+        carbsG: 0,
+        fatG: 3.6,
+        referenceAmount: 100,
+        ingredients: ['pechuga de pollo'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'pechuga de pollo', gramsG: 100),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.referenceAmount, greaterThan(170));
+      expect(fixed.referenceAmount, lessThan(230));
+      expect(fixed.caloriesKcal, greaterThan(250));
+    });
+
+    test('parsePortionSizeMultiplier detects large and small adjectives', () {
+      expect(FoodQueryHints.parsePortionSizeMultiplier('Gran pechuga de pollo'), 1.75);
+      expect(FoodQueryHints.parsePortionSizeMultiplier('pechuga pequeña'), 0.65);
+      expect(FoodQueryHints.parsePortionSizeMultiplier('pechuga de pollo'), 1.0);
+    });
+
+    test('reconcile does not double-apply size modifier when AI already sized portion', () {
+      const query = 'big chicken breast';
+      const ai = FoodNutritionEstimate(
+        name: 'Big chicken breast',
+        caloriesKcal: 363,
+        proteinG: 68,
+        carbsG: 0,
+        fatG: 7.9,
+        referenceAmount: 220,
+        ingredients: ['chicken breast'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'chicken breast', gramsG: 220),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.referenceAmount, closeTo(220, 1));
+      expect(fixed.referenceAmount, lessThan(280));
+    });
+
+    test('reconcile applies size modifier when AI returns generic 100g', () {
+      const query = 'big chicken breast';
+      const ai = FoodNutritionEstimate(
+        name: 'Chicken breast',
+        caloriesKcal: 165,
+        proteinG: 31,
+        carbsG: 0,
+        fatG: 3.6,
+        referenceAmount: 100,
+        ingredients: ['chicken breast'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'chicken breast', gramsG: 100),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.referenceAmount, greaterThan(170));
+      expect(fixed.referenceAmount, lessThan(230));
     });
   });
 }

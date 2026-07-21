@@ -595,6 +595,8 @@
   "history": "History",
   "noWorkoutsYet": "No workouts yet. Start today!",
   "noWorkoutsRegistered": "No workouts recorded",
+  "workoutSummaryNotFound": "That workout could not be found.",
+  "shareImageFallback": "Could not generate the image; shared text only.",
   "startToday": "Start today",
   "viewFullHistory": "View full history",
   "activeWorkout": "Workout in progress",

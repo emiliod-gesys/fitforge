@@ -638,6 +638,8 @@
   "exercisesInRoutine": "{count} ejercicios",
   "@exercisesInRoutine": { "placeholders": { "count": {"type": "int"} } },
   "noWorkoutsRegistered": "Sin entrenamientos registrados",
+  "workoutSummaryNotFound": "No se encontró ese entreno.",
+  "shareImageFallback": "No se pudo generar la imagen; se compartió solo el texto.",
   "summaryTitle": "Resumen",
   "summaryWorkoutComplete": "¡Entreno completado!",
   "summaryVolumeUp": "+{percent}% volumen vs última vez",

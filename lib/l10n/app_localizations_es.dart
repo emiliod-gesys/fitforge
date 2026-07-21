@@ -1802,6 +1802,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noWorkoutsRegistered => 'Sin entrenamientos registrados';
 
   @override
+  String get workoutSummaryNotFound => 'No se encontró ese entreno.';
+
+  @override
+  String get shareImageFallback =>
+      'No se pudo generar la imagen; se compartió solo el texto.';
+
+  @override
   String get summaryTitle => 'Resumen';
 
   @override

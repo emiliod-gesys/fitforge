@@ -1148,7 +1148,8 @@ Reglas:
 - serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
 - reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
-- Si el usuario indica gramos (ej. "300 g espagueti cocido"), calories_kcal = (kcal por 100 g) × (gramos / 100). Pasta cocida ~131 kcal/100g, arroz cocido ~130 kcal/100g.
+- Si el usuario indica gramos (ej. "300 g espagueti", "14g de mantequilla de maní"), usa EXACTAMENTE esos gramos. NUNCA dupliques ni uses porción estándar (ej. 2 cucharadas ~28g) si el usuario dijo otro peso.
+- Adjetivos de tamaño modifican el peso estimado: pequeña/chica ~65% de porción típica, grande/gran ~175%. Ej. "gran pechuga de pollo" ≈ 200–220 g, no 100 g genérico.
 - Si escribe "Ng de [plato] con [extra]" (ej. "315g de tacos al pastor con costra de queso"), los N gramos son el PESO TOTAL del plato completo, NO del extra. Reparte entre componentes (tacos ~85–90%, extra ~10–15%).
 - NUNCA asignes todos los gramos solo al ingrediente después de "con" (ej. NO "queso 315g" para ese ejemplo).
 - NUNCA pongas reference_amount_g=300 con calories_kcal de solo 100 g de comida.
@@ -1186,9 +1187,17 @@ ${userGrams.map((p) => '- ${p.name}: ${p.gramsG.toStringAsFixed(0)} g').join('\n
 '''
         : '';
 
+    final sizeHint = FoodQueryHints.parsePortionSizeMultiplier(query);
+    final sizeBlock = sizeHint != 1.0
+        ? '''
+
+TAMAÑO indicado en el texto: aplica ~${(sizeHint * 100).round()}% de la porción típica del alimento (no uses 100 g por defecto).
+'''
+        : '';
+
     final user = '''
 Comida descrita: "$query"
-$hintsBlock$userGramsBlock
+$hintsBlock$userGramsBlock$sizeBlock
 JSON:
 {
   "name": "nombre específico del plato con ingredientes visibles",

@@ -3248,6 +3248,18 @@ abstract class AppLocalizations {
   /// **'Sin entrenamientos registrados'**
   String get noWorkoutsRegistered;
 
+  /// No description provided for @workoutSummaryNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró ese entreno.'**
+  String get workoutSummaryNotFound;
+
+  /// No description provided for @shareImageFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo generar la imagen; se compartió solo el texto.'**
+  String get shareImageFallback;
+
   /// No description provided for @summaryTitle.
   ///
   /// In es, this message translates to:

@@ -5,6 +5,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/workout_tile.dart';
+import 'workout_summary_helper.dart';
 
 class WorkoutHistoryScreen extends ConsumerWidget {
   const WorkoutHistoryScreen({super.key});
@@ -33,7 +34,16 @@ class WorkoutHistoryScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               itemCount: workouts.length,
               separatorBuilder: (_, __) => const SizedBox(height: 0),
-              itemBuilder: (_, i) => WorkoutTile(workout: workouts[i], unitSystem: unitSystem),
+              itemBuilder: (_, i) {
+                final workout = workouts[i];
+                return WorkoutTile(
+                  workout: workout,
+                  unitSystem: unitSystem,
+                  onTap: workout.isActive
+                      ? null
+                      : () => openCompletedWorkoutSummary(context, ref, workout.id),
+                );
+              },
             );
           },
           loading: () => const FitForgeLoadingScreen(),

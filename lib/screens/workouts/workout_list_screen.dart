@@ -17,6 +17,7 @@ import '../../widgets/train/train_hero_card.dart';
 import '../../widgets/train/train_start_sheet.dart';
 import '../../widgets/workout_tile.dart';
 import 'workout_start_helper.dart';
+import 'workout_summary_helper.dart';
 import '../../core/theme/app_accent.dart';
 
 class WorkoutTodayTab extends ConsumerWidget {
@@ -117,11 +118,11 @@ class WorkoutTodayTab extends ConsumerWidget {
                   child: Center(child: Text(l10n.noWorkoutsYet)),
                 );
               }
-              final preview = workouts.take(_previewCount).toList();
-              final hasMore = workouts.length > _previewCount;
-              final topVolume = preview
-                  .where((w) => !w.isActive)
-                  .fold<double>(0, (max, w) => w.totalVolume > max ? w.totalVolume : max);
+              final completed = workouts.where((w) => !w.isActive).toList();
+              final preview = completed.take(_previewCount).toList();
+              final hasMore = completed.length > _previewCount;
+              final topVolume = preview.fold<double>(
+                  0, (max, w) => w.totalVolume > max ? w.totalVolume : max);
 
               return Column(
                 children: [
@@ -130,11 +131,11 @@ class WorkoutTodayTab extends ConsumerWidget {
                       workout: workout,
                       unitSystem: ref.watch(unitSystemProvider),
                       muscleGroups: trainedMuscleGroupsForWorkout(workout, catalog),
-                      showTopVolumeBadge: !workout.isActive &&
-                          workout.totalVolume > 0 &&
+                      showTopVolumeBadge: workout.totalVolume > 0 &&
                           workout.totalVolume >= topVolume,
                       enableSwipeRepeat: true,
                       onRepeat: () => _repeatWorkout(context, ref, workout, routinesAsync.valueOrNull ?? []),
+                      onTap: () => openCompletedWorkoutSummary(context, ref, workout.id),
                     ),
                   ),
                   if (hasMore) ...[
