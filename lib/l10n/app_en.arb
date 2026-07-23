@@ -1090,7 +1090,8 @@
   "foodBarcodeLookupFailed": "Could not look up the barcode. Check your connection.",
   "foodPer100gNote": "Nutrition values scale per 100 g/ml consumed.",
   "foodQuickAddHint": "Describe what you are eating and AI will estimate calories and macros.",
-  "foodQuickAddPlaceholder": "E.g. 2 scrambled eggs with cheese and whole wheat toast",
+  "foodQuickAddSpecificityHint": "The more specific you are, the more accurate the AI will be.",
+  "foodQuickAddPlaceholder": "E.g. 2 scrambled eggs with 2 tbsp cottage cheese and a slice of whole wheat bread\n\nE.g. 120 g grilled chicken breast and 50 g white rice with onion",
   "foodQuickAddAction": "Estimate with AI",
   "foodQuickAddDictate": "Dictate",
   "foodQuickAddDictateListening": "Listening… Speak now.",
@@ -1099,6 +1100,19 @@
   "foodQuickAddDictateUnavailable": "Dictation is not available on this device.",
   "foodQuickAddDictateLocaleUnavailable": "Spanish voice recognition is not installed on this phone. Add the language pack in system Settings, or use your keyboard's dictation.",
   "foodQuickAddDictatePermissionDenied": "Enable microphone access to dictate.",
+  "foodQuickAddVoiceNote": "Voice note",
+  "foodQuickAddVoiceNoteHint": "Record up to 15 s and AI will transcribe your meal.",
+  "foodQuickAddVoiceNoteRecording": "Recording… {seconds}s / 15 s",
+  "@foodQuickAddVoiceNoteRecording": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "foodQuickAddVoiceNoteStop": "Stop and send",
+  "foodQuickAddVoiceNoteProcessing": "Transcribing voice note…",
+  "foodQuickAddVoiceNoteFailed": "Could not transcribe the voice note. Try again or type your meal.",
+  "foodQuickAddVoiceNoteUnavailable": "Voice notes are not available on this device.",
+  "foodQuickAddVoiceNoteUnsupportedProvider": "Voice notes require OpenAI or Gemini configured in your profile.",
   "foodManualAddHint": "Enter nutrition for one serving. It is saved on this device for quick reuse.",
   "foodManualAddAction": "Continue",
   "foodManualSavedFoods": "Saved on this device",

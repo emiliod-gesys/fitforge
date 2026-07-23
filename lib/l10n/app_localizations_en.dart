@@ -3123,8 +3123,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Describe what you are eating and AI will estimate calories and macros.';
 
   @override
+  String get foodQuickAddSpecificityHint =>
+      'The more specific you are, the more accurate the AI will be.';
+
+  @override
   String get foodQuickAddPlaceholder =>
-      'E.g. 2 scrambled eggs with cheese and whole wheat toast';
+      'E.g. 2 scrambled eggs with 2 tbsp cottage cheese and a slice of whole wheat bread\n\nE.g. 120 g grilled chicken breast and 50 g white rice with onion';
 
   @override
   String get foodQuickAddAction => 'Estimate with AI';
@@ -3152,6 +3156,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get foodQuickAddDictatePermissionDenied =>
       'Enable microphone access to dictate.';
+
+  @override
+  String get foodQuickAddVoiceNote => 'Voice note';
+
+  @override
+  String get foodQuickAddVoiceNoteHint =>
+      'Record up to 15 s and AI will transcribe your meal.';
+
+  @override
+  String foodQuickAddVoiceNoteRecording(int seconds) {
+    return 'Recording… ${seconds}s / 15 s';
+  }
+
+  @override
+  String get foodQuickAddVoiceNoteStop => 'Stop and send';
+
+  @override
+  String get foodQuickAddVoiceNoteProcessing => 'Transcribing voice note…';
+
+  @override
+  String get foodQuickAddVoiceNoteFailed =>
+      'Could not transcribe the voice note. Try again or type your meal.';
+
+  @override
+  String get foodQuickAddVoiceNoteUnavailable =>
+      'Voice notes are not available on this device.';
+
+  @override
+  String get foodQuickAddVoiceNoteUnsupportedProvider =>
+      'Voice notes require OpenAI or Gemini configured in your profile.';
 
   @override
   String get foodManualAddHint =>

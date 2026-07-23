@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../../core/config/ai_secrets.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/speech_locale_utils.dart';
@@ -14,6 +17,7 @@ import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../services/food_voice_note_recorder.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_accent.dart';
 
@@ -156,6 +160,60 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     }
   }
 
+  Future<void> _quickAddWithVoiceNote(FoodVoiceNoteResult recording) async {
+    final l10n = context.l10n;
+    setState(() => _loading = true);
+    try {
+      final profile = await ref.read(profileProvider.future);
+      final ai = ref.read(aiCoachServiceProvider);
+
+      final transcript = await ai.transcribeFoodVoiceNote(
+        audioBytes: recording.bytes,
+        mimeType: recording.mimeType,
+        fileExtension: recording.fileExtension,
+        profile: profile,
+      );
+
+      if (!mounted) return;
+
+      final query = transcript?.trim();
+      if (query == null || query.isEmpty) {
+        final provider = profile?.aiProvider ?? AiProvider.none;
+        final unsupportedAnthropic = provider == AiProvider.anthropic &&
+            !AiSecrets.hasEmbeddedOpenAi &&
+            (await ref.read(profileServiceProvider).getUserStoredApiKey(AiProvider.openai))?.isNotEmpty != true;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              unsupportedAnthropic
+                  ? l10n.foodQuickAddVoiceNoteUnsupportedProvider
+                  : l10n.foodQuickAddVoiceNoteFailed,
+            ),
+          ),
+        );
+        return;
+      }
+
+      _quickController.text = query;
+
+      final estimate = await ai.estimateFoodFromText(
+        query: query,
+        profile: profile,
+      );
+
+      if (!mounted) return;
+      if (estimate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.foodAiFailed)),
+        );
+        return;
+      }
+      _openDetail(estimate, FoodEntrySource.quick, originalQuery: query);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _processFoodImage(XFile image) async {
     final profile = await ref.read(profileProvider.future);
     if (profile == null || !profile.canUseFoodPhotoAi) {
@@ -266,6 +324,8 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                     FoodAddMode.quick => _QuickAddPane(
                         controller: _quickController,
                         onSubmit: _quickAddWithAi,
+                        onVoiceNote: _quickAddWithVoiceNote,
+                        busy: _loading,
                         languageCode: ref.watch(preferredLanguageProvider),
                       ),
                     FoodAddMode.manual => _ManualAddPane(
@@ -634,11 +694,15 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
 class _QuickAddPane extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onSubmit;
+  final Future<void> Function(FoodVoiceNoteResult recording) onVoiceNote;
+  final bool busy;
   final String languageCode;
 
   const _QuickAddPane({
     required this.controller,
     required this.onSubmit,
+    required this.onVoiceNote,
+    required this.busy,
     required this.languageCode,
   });
 
@@ -646,17 +710,22 @@ class _QuickAddPane extends StatefulWidget {
   State<_QuickAddPane> createState() => _QuickAddPaneState();
 }
 
-class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderStateMixin {
+class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final SpeechToText _speech = SpeechToText();
+  final FoodVoiceNoteRecorder _voiceNoteRecorder = FoodVoiceNoteRecorder();
   bool _speechReady = false;
   bool _listening = false;
   bool _starting = false;
+  bool _voiceNoteRecording = false;
+  bool _voiceNoteFinishing = false;
+  Duration _voiceNoteElapsed = Duration.zero;
   String _dictationPrefix = '';
   late final AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -674,11 +743,22 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     if (_listening) {
       _speech.stop();
     }
+    unawaited(_voiceNoteRecorder.shutdown());
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (_voiceNoteRecording && !_voiceNoteFinishing) {
+        unawaited(_finishVoiceNote());
+      }
+    }
   }
 
   void _setListening(bool value) {
@@ -725,6 +805,8 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
 
   Future<void> _toggleDictation() async {
     final l10n = context.l10n;
+
+    if (_voiceNoteRecording || _voiceNoteFinishing || widget.busy) return;
 
     if (_listening || _starting) {
       await _speech.stop();
@@ -807,6 +889,98 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
   }
 
   bool get _dictationActive => _starting || _listening;
+  bool get _voiceNoteActive => _voiceNoteRecording || _voiceNoteFinishing;
+  bool get _inputLocked => widget.busy || _voiceNoteActive;
+
+  Future<void> _startVoiceNote() async {
+    final l10n = context.l10n;
+    if (_dictationActive || _voiceNoteActive || widget.busy) return;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final permission = await Permission.microphone.request();
+    if (!mounted) return;
+    if (!permission.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddDictatePermissionDenied)),
+      );
+      return;
+    }
+
+    if (!await _voiceNoteRecorder.hasPermission()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddVoiceNoteUnavailable)),
+      );
+      return;
+    }
+
+    try {
+      await _voiceNoteRecorder.start(
+        onTick: (elapsed) {
+          if (!mounted) return;
+          setState(() {
+            _voiceNoteRecording = true;
+            _voiceNoteElapsed = elapsed;
+          });
+        },
+        onMaxDuration: _finishVoiceNote,
+      );
+      if (!mounted) return;
+      setState(() {
+        _voiceNoteRecording = true;
+        _voiceNoteElapsed = Duration.zero;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _voiceNoteRecording = false;
+        _voiceNoteElapsed = Duration.zero;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.foodQuickAddVoiceNoteUnavailable)),
+      );
+    }
+  }
+
+  Future<void> _finishVoiceNote() async {
+    if (!_voiceNoteRecording || _voiceNoteFinishing) return;
+    if (!mounted) return;
+
+    final l10n = context.l10n;
+
+    setState(() {
+      _voiceNoteFinishing = true;
+      _voiceNoteRecording = false;
+    });
+
+    try {
+      final recording = await _voiceNoteRecorder.stop();
+      if (!mounted) return;
+      if (recording == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.foodQuickAddVoiceNoteFailed)),
+        );
+        return;
+      }
+      await widget.onVoiceNote(recording);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _voiceNoteFinishing = false;
+          _voiceNoteElapsed = Duration.zero;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleVoiceNote() async {
+    if (_voiceNoteRecording) {
+      await _finishVoiceNote();
+      return;
+    }
+    await _startVoiceNote();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -885,14 +1059,89 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
               ],
             ),
           ),
+          if (_voiceNoteActive)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: _voiceNoteRecording ? 0.75 : 0.35),
+                  width: _voiceNoteRecording ? 1.5 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  if (_voiceNoteFinishing)
+                    const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.error),
+                    )
+                  else
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.fiber_manual_record, color: Colors.white, size: 20),
+                    ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _voiceNoteFinishing
+                              ? l10n.foodQuickAddVoiceNoteProcessing
+                              : l10n.foodQuickAddVoiceNoteRecording(_voiceNoteElapsed.inSeconds),
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (_voiceNoteRecording) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.foodQuickAddVoiceNoteStop,
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (_voiceNoteRecording)
+                    IconButton(
+                      tooltip: l10n.foodQuickAddVoiceNoteStop,
+                      onPressed: _toggleVoiceNote,
+                      icon: const Icon(Icons.stop_circle, color: AppColors.error, size: 28),
+                    ),
+                ],
+              ),
+            ),
         Text(
           l10n.foodQuickAddHint,
           style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.foodQuickAddSpecificityHint,
+          style: TextStyle(
+            color: accent.withValues(alpha: 0.85),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: widget.controller,
           autofocus: true,
+          enabled: !_inputLocked,
           minLines: 3,
           maxLines: 5,
           decoration: InputDecoration(
@@ -901,22 +1150,30 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: _listening ? accent : AppColors.border,
-                width: _listening ? 2 : 1,
+                color: _voiceNoteRecording
+                    ? AppColors.error
+                    : _listening
+                        ? accent
+                        : AppColors.border,
+                width: (_voiceNoteRecording || _listening) ? 2 : 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: _listening ? accent : accent.withValues(alpha: 0.8),
-                width: _listening ? 2 : 1.5,
+                color: _voiceNoteRecording
+                    ? AppColors.error
+                    : _listening
+                        ? accent
+                        : accent.withValues(alpha: 0.8),
+                width: (_voiceNoteRecording || _listening) ? 2 : 1.5,
               ),
             ),
             suffixIcon: Padding(
               padding: const EdgeInsets.only(right: 4),
               child: IconButton(
                 tooltip: _dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate,
-                onPressed: _toggleDictation,
+                onPressed: _inputLocked ? null : _toggleDictation,
                 icon: Container(
                   width: 36,
                   height: 36,
@@ -939,7 +1196,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: _toggleDictation,
+          onPressed: _inputLocked ? null : _toggleDictation,
           icon: Icon(
             _dictationActive ? Icons.stop_circle_outlined : Icons.mic_none_outlined,
             color: _dictationActive ? AppColors.error : accent,
@@ -955,9 +1212,34 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
             minimumSize: const Size.fromHeight(44),
           ),
         ),
+        const SizedBox(height: 10),
+        Text(
+          l10n.foodQuickAddVoiceNoteHint,
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: (_inputLocked && !_voiceNoteRecording) ? null : _toggleVoiceNote,
+          icon: Icon(
+            _voiceNoteRecording ? Icons.stop_circle_outlined : Icons.graphic_eq_rounded,
+            color: _voiceNoteRecording ? AppColors.error : accent,
+          ),
+          label: Text(
+            _voiceNoteRecording ? l10n.foodQuickAddVoiceNoteStop : l10n.foodQuickAddVoiceNote,
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _voiceNoteRecording ? AppColors.error : accent,
+            side: BorderSide(
+              color: _voiceNoteRecording
+                  ? AppColors.error.withValues(alpha: 0.55)
+                  : accent.withValues(alpha: 0.45),
+            ),
+            minimumSize: const Size.fromHeight(44),
+          ),
+        ),
         const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: widget.onSubmit,
+          onPressed: _inputLocked ? null : widget.onSubmit,
           icon: const Icon(Icons.auto_awesome),
           label: Text(l10n.foodQuickAddAction),
           style: FilledButton.styleFrom(

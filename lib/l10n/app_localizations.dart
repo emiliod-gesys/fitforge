@@ -5480,10 +5480,16 @@ abstract class AppLocalizations {
   /// **'Describe lo que estás comiendo y la IA calculará calorías y macros.'**
   String get foodQuickAddHint;
 
+  /// No description provided for @foodQuickAddSpecificityHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Entre más específico seas, más precisa será la IA.'**
+  String get foodQuickAddSpecificityHint;
+
   /// No description provided for @foodQuickAddPlaceholder.
   ///
   /// In es, this message translates to:
-  /// **'Ej.: 2 huevos revueltos con queso y pan integral'**
+  /// **'Ej.: 2 huevos revueltos con 2 cucharadas de queso cottage y una rebanada de pan integral\n\nEj2.: 120 g de pechuga de pollo a la parrilla y 50 g de arroz blanco con cebolla'**
   String get foodQuickAddPlaceholder;
 
   /// No description provided for @foodQuickAddAction.
@@ -5533,6 +5539,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Activa el permiso de micrófono para dictar.'**
   String get foodQuickAddDictatePermissionDenied;
+
+  /// No description provided for @foodQuickAddVoiceNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota de voz'**
+  String get foodQuickAddVoiceNote;
+
+  /// No description provided for @foodQuickAddVoiceNoteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Graba hasta 15 s y la IA transcribirá tu comida.'**
+  String get foodQuickAddVoiceNoteHint;
+
+  /// No description provided for @foodQuickAddVoiceNoteRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando… {seconds}s / 15 s'**
+  String foodQuickAddVoiceNoteRecording(int seconds);
+
+  /// No description provided for @foodQuickAddVoiceNoteStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener y enviar'**
+  String get foodQuickAddVoiceNoteStop;
+
+  /// No description provided for @foodQuickAddVoiceNoteProcessing.
+  ///
+  /// In es, this message translates to:
+  /// **'Transcribiendo nota de voz…'**
+  String get foodQuickAddVoiceNoteProcessing;
+
+  /// No description provided for @foodQuickAddVoiceNoteFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo transcribir la nota de voz. Intenta de nuevo o escribe la comida.'**
+  String get foodQuickAddVoiceNoteFailed;
+
+  /// No description provided for @foodQuickAddVoiceNoteUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'La nota de voz no está disponible en este dispositivo.'**
+  String get foodQuickAddVoiceNoteUnavailable;
+
+  /// No description provided for @foodQuickAddVoiceNoteUnsupportedProvider.
+  ///
+  /// In es, this message translates to:
+  /// **'Las notas de voz requieren OpenAI o Gemini configurado en tu perfil.'**
+  String get foodQuickAddVoiceNoteUnsupportedProvider;
 
   /// No description provided for @foodManualAddHint.
   ///

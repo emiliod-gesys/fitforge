@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/config/ai_secrets.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/ai_coach_context.dart';
 import '../core/utils/ai_coach_routine_prompt.dart';
@@ -1224,6 +1225,171 @@ JSON:
     } catch (_) {
       return null;
     }
+  }
+
+  /// Transcribe una nota de voz corta (Quick Add) con Whisper o Gemini.
+  Future<String?> transcribeFoodVoiceNote({
+    required List<int> audioBytes,
+    required String mimeType,
+    required String fileExtension,
+    UserProfile? profile,
+  }) async {
+    if (audioBytes.isEmpty) return null;
+
+    final lang = _resolveLanguageCode(profile: profile);
+    final provider = _profileService.resolveAiProvider(profile);
+
+    try {
+      switch (provider) {
+        case AiProvider.openai:
+          final apiKey = await _profileService.getApiKey(AiProvider.openai);
+          if (apiKey == null || apiKey.isEmpty) return null;
+          return _callOpenAIWhisper(
+            apiKey: apiKey,
+            audioBytes: audioBytes,
+            fileExtension: fileExtension,
+            language: lang,
+          );
+        case AiProvider.gemini:
+          final apiKey = await _profileService.getApiKey(AiProvider.gemini);
+          if (apiKey == null || apiKey.isEmpty) return null;
+          return _callGeminiTranscribe(
+            apiKey: apiKey,
+            audioBytes: audioBytes,
+            mimeType: mimeType,
+            language: lang,
+          );
+        case AiProvider.anthropic:
+          final openAiKey =
+              await _profileService.getApiKey(AiProvider.openai) ?? AiSecrets.openAiDefaultKey;
+          if (openAiKey == null || openAiKey.isEmpty) return null;
+          return _callOpenAIWhisper(
+            apiKey: openAiKey,
+            audioBytes: audioBytes,
+            fileExtension: fileExtension,
+            language: lang,
+          );
+        case AiProvider.none:
+          return null;
+      }
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Transcribe audio y estima nutrición (Quick Add por nota de voz).
+  Future<FoodNutritionEstimate?> estimateFoodFromVoiceNote({
+    required List<int> audioBytes,
+    required String mimeType,
+    required String fileExtension,
+    UserProfile? profile,
+  }) async {
+    final transcript = await transcribeFoodVoiceNote(
+      audioBytes: audioBytes,
+      mimeType: mimeType,
+      fileExtension: fileExtension,
+      profile: profile,
+    );
+    final query = transcript?.trim();
+    if (query == null || query.isEmpty) return null;
+    return estimateFoodFromText(query: query, profile: profile);
+  }
+
+  Future<String?> _callOpenAIWhisper({
+    required String apiKey,
+    required List<int> audioBytes,
+    required String fileExtension,
+    required String language,
+  }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://api.openai.com/v1/audio/transcriptions'),
+    );
+    request.headers['Authorization'] = 'Bearer $apiKey';
+    request.fields['model'] = 'whisper-1';
+    request.fields['language'] = language == 'en' ? 'en' : 'es';
+    request.fields['prompt'] = language == 'en'
+        ? 'Food description with portions, grams, and ingredients.'
+        : 'Descripción de comida con porciones, gramos e ingredientes.';
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        audioBytes,
+        filename: 'voice_note.$fileExtension',
+      ),
+    );
+
+    final streamed = await request.send().timeout(const Duration(seconds: 45));
+    final response = await http.Response.fromStream(streamed).timeout(const Duration(seconds: 45));
+    if (response.statusCode != 200) {
+      throw Exception('Whisper error: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body);
+    if (data is Map<String, dynamic>) {
+      return (data['text'] as String?)?.trim();
+    }
+    return null;
+  }
+
+  Future<String?> _callGeminiTranscribe({
+    required String apiKey,
+    required List<int> audioBytes,
+    required String mimeType,
+    required String language,
+  }) async {
+    final prompt = language == 'en'
+        ? 'Transcribe exactly what the speaker says about food they are eating, '
+            'including portions and grams if mentioned. Return ONLY the transcription.'
+        : 'Transcribe exactamente lo que dice sobre la comida que está comiendo, '
+            'incluyendo porciones y gramos si los menciona. Devuelve SOLO la transcripción.';
+
+    final response = await http
+        .post(
+          Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
+          ),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {'text': prompt},
+                  {
+                    'inline_data': {
+                      'mime_type': mimeType,
+                      'data': base64Encode(audioBytes),
+                    },
+                  },
+                ],
+              },
+            ],
+            'generationConfig': {'maxOutputTokens': 500, 'temperature': 0},
+          }),
+        )
+        .timeout(const Duration(seconds: 45));
+
+    if (response.statusCode != 200) {
+      throw Exception('Gemini transcribe error: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return _readGeminiText(data)?.trim();
+  }
+
+  String? _readGeminiText(Map<String, dynamic> data) {
+    final candidates = data['candidates'];
+    if (candidates is! List || candidates.isEmpty) return null;
+    final first = candidates.first;
+    if (first is! Map<String, dynamic>) return null;
+    final content = first['content'];
+    if (content is! Map<String, dynamic>) return null;
+    final parts = content['parts'];
+    if (parts is! List || parts.isEmpty) return null;
+    final part = parts.first;
+    if (part is! Map<String, dynamic>) return null;
+    final text = part['text'];
+    return text is String ? text : null;
   }
 
   /// Estima macros desde foto (OpenAI vision o Gemini).

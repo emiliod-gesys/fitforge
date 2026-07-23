@@ -1129,7 +1129,8 @@
   "foodBarcodeLookupFailed": "Error al consultar el código. Revisa tu conexión.",
   "foodPer100gNote": "Los valores nutricionales se calculan por cada 100 g/ml.",
   "foodQuickAddHint": "Describe lo que estás comiendo y la IA calculará calorías y macros.",
-  "foodQuickAddPlaceholder": "Ej.: 2 huevos revueltos con queso y pan integral",
+  "foodQuickAddSpecificityHint": "Entre más específico seas, más precisa será la IA.",
+  "foodQuickAddPlaceholder": "Ej.: 2 huevos revueltos con 2 cucharadas de queso cottage y una rebanada de pan integral\n\nEj2.: 120 g de pechuga de pollo a la parrilla y 50 g de arroz blanco con cebolla",
   "foodQuickAddAction": "Estimar con IA",
   "foodQuickAddDictate": "Dictar",
   "foodQuickAddDictateListening": "Te estoy escuchando… Habla ahora.",
@@ -1138,6 +1139,19 @@
   "foodQuickAddDictateUnavailable": "El dictado no está disponible en este dispositivo.",
   "foodQuickAddDictateLocaleUnavailable": "No hay reconocimiento de voz en español en el teléfono. Instala el paquete de idioma en Ajustes del sistema o dicta con el teclado Samsung.",
   "foodQuickAddDictatePermissionDenied": "Activa el permiso de micrófono para dictar.",
+  "foodQuickAddVoiceNote": "Nota de voz",
+  "foodQuickAddVoiceNoteHint": "Graba hasta 15 s y la IA transcribirá tu comida.",
+  "foodQuickAddVoiceNoteRecording": "Grabando… {seconds}s / 15 s",
+  "@foodQuickAddVoiceNoteRecording": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "foodQuickAddVoiceNoteStop": "Detener y enviar",
+  "foodQuickAddVoiceNoteProcessing": "Transcribiendo nota de voz…",
+  "foodQuickAddVoiceNoteFailed": "No se pudo transcribir la nota de voz. Intenta de nuevo o escribe la comida.",
+  "foodQuickAddVoiceNoteUnavailable": "La nota de voz no está disponible en este dispositivo.",
+  "foodQuickAddVoiceNoteUnsupportedProvider": "Las notas de voz requieren OpenAI o Gemini configurado en tu perfil.",
   "foodManualAddHint": "Introduce los datos de una porción. Se guardará en tu dispositivo para reutilizarlo.",
   "foodManualAddAction": "Continuar",
   "foodManualSavedFoods": "Guardados en este dispositivo",

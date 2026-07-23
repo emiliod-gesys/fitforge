@@ -3147,8 +3147,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Describe lo que estás comiendo y la IA calculará calorías y macros.';
 
   @override
+  String get foodQuickAddSpecificityHint =>
+      'Entre más específico seas, más precisa será la IA.';
+
+  @override
   String get foodQuickAddPlaceholder =>
-      'Ej.: 2 huevos revueltos con queso y pan integral';
+      'Ej.: 2 huevos revueltos con 2 cucharadas de queso cottage y una rebanada de pan integral\n\nEj2.: 120 g de pechuga de pollo a la parrilla y 50 g de arroz blanco con cebolla';
 
   @override
   String get foodQuickAddAction => 'Estimar con IA';
@@ -3177,6 +3181,36 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get foodQuickAddDictatePermissionDenied =>
       'Activa el permiso de micrófono para dictar.';
+
+  @override
+  String get foodQuickAddVoiceNote => 'Nota de voz';
+
+  @override
+  String get foodQuickAddVoiceNoteHint =>
+      'Graba hasta 15 s y la IA transcribirá tu comida.';
+
+  @override
+  String foodQuickAddVoiceNoteRecording(int seconds) {
+    return 'Grabando… ${seconds}s / 15 s';
+  }
+
+  @override
+  String get foodQuickAddVoiceNoteStop => 'Detener y enviar';
+
+  @override
+  String get foodQuickAddVoiceNoteProcessing => 'Transcribiendo nota de voz…';
+
+  @override
+  String get foodQuickAddVoiceNoteFailed =>
+      'No se pudo transcribir la nota de voz. Intenta de nuevo o escribe la comida.';
+
+  @override
+  String get foodQuickAddVoiceNoteUnavailable =>
+      'La nota de voz no está disponible en este dispositivo.';
+
+  @override
+  String get foodQuickAddVoiceNoteUnsupportedProvider =>
+      'Las notas de voz requieren OpenAI o Gemini configurado en tu perfil.';
 
   @override
   String get foodManualAddHint =>
