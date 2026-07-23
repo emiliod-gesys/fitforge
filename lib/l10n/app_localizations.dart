@@ -5767,6 +5767,516 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ser. {number}'**
   String routineSetNumber(int number);
+
+  /// No description provided for @dailyTipOfDayTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tip del día'**
+  String get dailyTipOfDayTitle;
+
+  /// No description provided for @dailyTipCategoryTip.
+  ///
+  /// In es, this message translates to:
+  /// **'Consejo'**
+  String get dailyTipCategoryTip;
+
+  /// No description provided for @dailyTipCategoryMyth.
+  ///
+  /// In es, this message translates to:
+  /// **'Mito desmentido'**
+  String get dailyTipCategoryMyth;
+
+  /// No description provided for @dailyTipGotIt.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get dailyTipGotIt;
+
+  /// No description provided for @dailyTip_general_doms.
+  ///
+  /// In es, this message translates to:
+  /// **'Sentir el músculo resentido al día siguiente no dice si el entrenamiento fue bueno. Puedes mejorar sin ese dolor intenso.'**
+  String get dailyTip_general_doms;
+
+  /// No description provided for @dailyTip_general_sweat.
+  ///
+  /// In es, this message translates to:
+  /// **'Sudar más no quema más grasa. El sudor es sobre todo agua y sales; importa el esfuerzo y tu balance calórico.'**
+  String get dailyTip_general_sweat;
+
+  /// No description provided for @dailyTip_general_sleep.
+  ///
+  /// In es, this message translates to:
+  /// **'Dormir entre 7 y 9 horas ayuda a recuperar músculo, regular el apetito y rendir mejor.'**
+  String get dailyTip_general_sleep;
+
+  /// No description provided for @dailyTip_general_spot.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes quemar grasa solo en el abdomen haciendo abdominales. La grasa baja en todo el cuerpo según genética y déficit calórico.'**
+  String get dailyTip_general_spot;
+
+  /// No description provided for @dailyTip_general_progressive.
+  ///
+  /// In es, this message translates to:
+  /// **'La sobrecarga progresiva — más peso, repeticiones o series con el tiempo — es la base para mejorar.'**
+  String get dailyTip_general_progressive;
+
+  /// No description provided for @dailyTip_general_bulky.
+  ///
+  /// In es, this message translates to:
+  /// **'Levantar pesas no hace que la mayoría de mujeres se vean muy musculosas de la noche a la mañana. Ganar mucho músculo lleva años y mucho volumen.'**
+  String get dailyTip_general_bulky;
+
+  /// No description provided for @dailyTip_general_warmup.
+  ///
+  /// In es, this message translates to:
+  /// **'Calentar 5–10 minutos con movimientos específicos reduce lesiones y mejora la calidad de tus series.'**
+  String get dailyTip_general_warmup;
+
+  /// No description provided for @dailyTip_general_carbs_night.
+  ///
+  /// In es, this message translates to:
+  /// **'Los carbohidratos por la noche no engordan por la hora. Lo que cuenta es el total de calorías del día.'**
+  String get dailyTip_general_carbs_night;
+
+  /// No description provided for @dailyTip_general_hydration.
+  ///
+  /// In es, this message translates to:
+  /// **'Incluso una deshidratación leve puede bajar tu fuerza y concentración. Bebe agua durante el día, no solo en el gimnasio.'**
+  String get dailyTip_general_hydration;
+
+  /// No description provided for @dailyTip_general_stretch_cold.
+  ///
+  /// In es, this message translates to:
+  /// **'Estirar en frío antes de levantar peso no protege mejor que un calentamiento activo con movimiento.'**
+  String get dailyTip_general_stretch_cold;
+
+  /// No description provided for @dailyTip_general_scale_daily.
+  ///
+  /// In es, this message translates to:
+  /// **'El peso en la báscula varía por agua, sal y digestión. Fíjate en la tendencia semanal, no en un solo día.'**
+  String get dailyTip_general_scale_daily;
+
+  /// No description provided for @dailyTip_general_meal_timing.
+  ///
+  /// In es, this message translates to:
+  /// **'No hace falta comer cada 3 horas para perder grasa o ganar músculo. Importa el total diario de calorías y proteína.'**
+  String get dailyTip_general_meal_timing;
+
+  /// No description provided for @dailyTip_general_detox.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu hígado y riñones ya depuran el cuerpo. Los jugos detox o tés milagro no reemplazan buena alimentación y descanso.'**
+  String get dailyTip_general_detox;
+
+  /// No description provided for @dailyTip_general_rest_days.
+  ///
+  /// In es, this message translates to:
+  /// **'Los días de descanso no son tiempo perdido: ahí el cuerpo asimila gran parte del entrenamiento.'**
+  String get dailyTip_general_rest_days;
+
+  /// No description provided for @dailyTip_general_form_first.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir peso con mala técnica frena el progreso y aumenta el riesgo de lesión.'**
+  String get dailyTip_general_form_first;
+
+  /// No description provided for @dailyTip_general_steps.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina más en el día a día: esa actividad extra puede ayudar tanto como añadir cardio formal.'**
+  String get dailyTip_general_steps;
+
+  /// No description provided for @dailyTip_general_fasted_cardio.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenar en ayunas no quema más grasa por arte de magia. Lo que importa es el déficit calórico total del día.'**
+  String get dailyTip_general_fasted_cardio;
+
+  /// No description provided for @dailyTip_general_bcaa.
+  ///
+  /// In es, this message translates to:
+  /// **'Si ya comes suficiente proteína, los BCAA aportan poco extra. Prioriza comidas completas antes que suplementos sueltos.'**
+  String get dailyTip_general_bcaa;
+
+  /// No description provided for @dailyTip_general_creatine.
+  ///
+  /// In es, this message translates to:
+  /// **'La creatina monohidrato está muy estudiada: suele mejorar fuerza y rendimiento en series repetidas, con buen perfil de seguridad.'**
+  String get dailyTip_general_creatine;
+
+  /// No description provided for @dailyTip_general_pain_vs_soreness.
+  ///
+  /// In es, this message translates to:
+  /// **'La molestia muscular al día siguiente es normal; el dolor agudo, punzante o en la articulación no lo es. Aprende a distinguirlos.'**
+  String get dailyTip_general_pain_vs_soreness;
+
+  /// No description provided for @dailyTip_general_consistency.
+  ///
+  /// In es, this message translates to:
+  /// **'Tres entrenamientos buenos por semana, todo el año, superan un mes perfecto que luego abandonas.'**
+  String get dailyTip_general_consistency;
+
+  /// No description provided for @dailyTip_general_track_progress.
+  ///
+  /// In es, this message translates to:
+  /// **'Anotar pesos, repeticiones o tiempos te muestra progreso real cuando el espejo no cambia de un día para otro.'**
+  String get dailyTip_general_track_progress;
+
+  /// No description provided for @dailyTip_general_fiber.
+  ///
+  /// In es, this message translates to:
+  /// **'Más fibra mejora la saciedad y la digestión. Frutas, legumbres y verduras ayudan a cumplir tus metas sin pasar hambre.'**
+  String get dailyTip_general_fiber;
+
+  /// No description provided for @dailyTip_general_toning_machines.
+  ///
+  /// In es, this message translates to:
+  /// **'Las máquinas vibratorias de tonificar no sustituyen entrenar con carga progresiva y buena alimentación.'**
+  String get dailyTip_general_toning_machines;
+
+  /// No description provided for @dailyTip_general_sweat_detox.
+  ///
+  /// In es, this message translates to:
+  /// **'Sudar en sauna o con chaleco no elimina toxinas ni grasa: solo pierdes agua que recuperarás al hidratarte.'**
+  String get dailyTip_general_sweat_detox;
+
+  /// No description provided for @dailyTip_hypertrophy_failure.
+  ///
+  /// In es, this message translates to:
+  /// **'No hace falta llegar al fallo en cada serie. Dejar 1–3 repeticiones en reserva suele bastar para ganar músculo.'**
+  String get dailyTip_hypertrophy_failure;
+
+  /// No description provided for @dailyTip_hypertrophy_confusion.
+  ///
+  /// In es, this message translates to:
+  /// **'No necesitas cambiar todos los ejercicios cada semana para confundir al músculo. Constancia y progresión importan más.'**
+  String get dailyTip_hypertrophy_confusion;
+
+  /// No description provided for @dailyTip_hypertrophy_protein.
+  ///
+  /// In es, this message translates to:
+  /// **'La proteína total del día importa más que tomarla justo después del entreno.'**
+  String get dailyTip_hypertrophy_protein;
+
+  /// No description provided for @dailyTip_hypertrophy_compounds.
+  ///
+  /// In es, this message translates to:
+  /// **'Prioriza ejercicios compuestos (sentadilla, peso muerto, press) y añade aislamiento donde haga falta.'**
+  String get dailyTip_hypertrophy_compounds;
+
+  /// No description provided for @dailyTip_hypertrophy_volume.
+  ///
+  /// In es, this message translates to:
+  /// **'La mayoría progresa bien con unas 10–20 series efectivas por grupo muscular a la semana, bien repartidas.'**
+  String get dailyTip_hypertrophy_volume;
+
+  /// No description provided for @dailyTip_hypertrophy_tempo.
+  ///
+  /// In es, this message translates to:
+  /// **'Las repeticiones ultra lentas no son obligatorias para ganar músculo. Controla el movimiento, pero no renuncies a subir carga.'**
+  String get dailyTip_hypertrophy_tempo;
+
+  /// No description provided for @dailyTip_hypertrophy_pump.
+  ///
+  /// In es, this message translates to:
+  /// **'La congestión muscular se siente bien, pero no es la única señal de un buen entreno. Fuerza y volumen progresivo también cuentan.'**
+  String get dailyTip_hypertrophy_pump;
+
+  /// No description provided for @dailyTip_hypertrophy_frequency.
+  ///
+  /// In es, this message translates to:
+  /// **'Trabajar cada músculo 2 veces por semana suele ser más eficiente que una sola sesión muy larga.'**
+  String get dailyTip_hypertrophy_frequency;
+
+  /// No description provided for @dailyTip_hypertrophy_eccentric.
+  ///
+  /// In es, this message translates to:
+  /// **'La fase de bajada importa: controla el peso al bajar en lugar de dejar caer la barra.'**
+  String get dailyTip_hypertrophy_eccentric;
+
+  /// No description provided for @dailyTip_hypertrophy_mind_muscle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pensar en el músculo que trabajas puede ayudar en aislamiento, pero no reemplaza mover cargas suficientes en compuestos pesados.'**
+  String get dailyTip_hypertrophy_mind_muscle;
+
+  /// No description provided for @dailyTip_hypertrophy_deload.
+  ///
+  /// In es, this message translates to:
+  /// **'Una semana con menos volumen cada 4–8 semanas puede ayudarte a superar estancamientos.'**
+  String get dailyTip_hypertrophy_deload;
+
+  /// No description provided for @dailyTip_hypertrophy_sleep_growth.
+  ///
+  /// In es, this message translates to:
+  /// **'Gran parte de la recuperación muscular ocurre mientras duermes. Dormir poco frena tus ganancias aunque entrenes duro.'**
+  String get dailyTip_hypertrophy_sleep_growth;
+
+  /// No description provided for @dailyTip_strength_rest.
+  ///
+  /// In es, this message translates to:
+  /// **'En series pesadas (3–6 repeticiones), descansar 2–4 minutos suele dar mejor resultado que apresurarse.'**
+  String get dailyTip_strength_rest;
+
+  /// No description provided for @dailyTip_strength_failure.
+  ///
+  /// In es, this message translates to:
+  /// **'No hace falta entrenar siempre al fallo para ganar fuerza. Primero van la técnica y subir carga con progresión.'**
+  String get dailyTip_strength_failure;
+
+  /// No description provided for @dailyTip_strength_technique.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir peso sin perder técnica es más seguro y sostenible que forzar repeticiones mal hechas.'**
+  String get dailyTip_strength_technique;
+
+  /// No description provided for @dailyTip_strength_specificity.
+  ///
+  /// In es, this message translates to:
+  /// **'Para sentadilla más pesada, necesitas practicar sentadillas con carga de forma regular, no solo accesorios.'**
+  String get dailyTip_strength_specificity;
+
+  /// No description provided for @dailyTip_strength_belt.
+  ///
+  /// In es, this message translates to:
+  /// **'Un cinturón de levantamiento no debilita el abdomen si lo usas en series muy pesadas y sigues entrenando sin él en accesorios.'**
+  String get dailyTip_strength_belt;
+
+  /// No description provided for @dailyTip_strength_warmup_sets.
+  ///
+  /// In es, this message translates to:
+  /// **'Series de aproximación graduales preparan la técnica y el sistema nervioso antes del trabajo pesado.'**
+  String get dailyTip_strength_warmup_sets;
+
+  /// No description provided for @dailyTip_strength_cns.
+  ///
+  /// In es, this message translates to:
+  /// **'Las sesiones muy pesadas cansan el sistema nervioso. Alterna días duros con días moderados o técnicos.'**
+  String get dailyTip_strength_cns;
+
+  /// No description provided for @dailyTip_strength_accessories.
+  ///
+  /// In es, this message translates to:
+  /// **'Accesorios bien elegidos (espalda, tríceps, abdomen) corrigen puntos débiles que limitan tus levantamientos principales.'**
+  String get dailyTip_strength_accessories;
+
+  /// No description provided for @dailyTip_strength_1rm_test.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar tu máximo de una repetición cada semana suma fatiga y riesgo. Usa series submáximas y estima el progreso.'**
+  String get dailyTip_strength_1rm_test;
+
+  /// No description provided for @dailyTip_strength_grip.
+  ///
+  /// In es, this message translates to:
+  /// **'Un agarre débil puede limitar peso muerto y remos antes que espalda o piernas. Vale la pena entrenarlo.'**
+  String get dailyTip_strength_grip;
+
+  /// No description provided for @dailyTip_strength_leg_drive.
+  ///
+  /// In es, this message translates to:
+  /// **'Empujar con las piernas y tensar la espalda en press banca transmite más fuerza que empujar solo con brazos.'**
+  String get dailyTip_strength_leg_drive;
+
+  /// No description provided for @dailyTip_strength_program_hopping.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar de rutina cada dos semanas impide adaptarte. Dale tiempo a un plan antes de cambiarlo.'**
+  String get dailyTip_strength_program_hopping;
+
+  /// No description provided for @dailyTip_fatloss_cardio.
+  ///
+  /// In es, this message translates to:
+  /// **'El cardio ayuda, pero combinarlo con fuerza y déficit calórico preserva músculo y mejora tu composición corporal.'**
+  String get dailyTip_fatloss_cardio;
+
+  /// No description provided for @dailyTip_fatloss_strength.
+  ///
+  /// In es, this message translates to:
+  /// **'Sigue entrenando fuerza en déficit: ayuda a conservar masa muscular.'**
+  String get dailyTip_fatloss_strength;
+
+  /// No description provided for @dailyTip_fatloss_starve.
+  ///
+  /// In es, this message translates to:
+  /// **'Comer demasiado poco frena el progreso, aumenta el hambre y puede hacerte perder músculo.'**
+  String get dailyTip_fatloss_starve;
+
+  /// No description provided for @dailyTip_fatloss_scale.
+  ///
+  /// In es, this message translates to:
+  /// **'En déficit es normal retener agua algunos días. Confía en la tendencia, medidas y rendimiento, no en una sola pesada.'**
+  String get dailyTip_fatloss_scale;
+
+  /// No description provided for @dailyTip_fatloss_cheat_meal.
+  ///
+  /// In es, this message translates to:
+  /// **'Una comida libre no acelera el metabolismo varios días. Puede ayudarte a nivel mental si encaja en tus calorías semanales.'**
+  String get dailyTip_fatloss_cheat_meal;
+
+  /// No description provided for @dailyTip_fatloss_protein.
+  ///
+  /// In es, this message translates to:
+  /// **'Más proteína en déficit reduce el hambre y protege músculo. Apunta a unos 1,6–2,2 g por kg de peso, según lo que puedas sostener.'**
+  String get dailyTip_fatloss_protein;
+
+  /// No description provided for @dailyTip_fatloss_neat.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina más, usa escaleras y muévete fuera del gimnasio. Ese gasto extra del día a día suma mucho en una etapa de definición.'**
+  String get dailyTip_fatloss_neat;
+
+  /// No description provided for @dailyTip_fatloss_fat_burn_zone.
+  ///
+  /// In es, this message translates to:
+  /// **'Existe la zona de quema de grasa, pero quemar más grasa por minuto no sirve si el gasto total de la semana es menor.'**
+  String get dailyTip_fatloss_fat_burn_zone;
+
+  /// No description provided for @dailyTip_fatloss_slow_cut.
+  ///
+  /// In es, this message translates to:
+  /// **'Déficits moderados (unos 300–500 kcal) suelen preservar más músculo y energía que cortes muy agresivos.'**
+  String get dailyTip_fatloss_slow_cut;
+
+  /// No description provided for @dailyTip_fatloss_liquids.
+  ///
+  /// In es, this message translates to:
+  /// **'Refrescos, alcohol y cafés con crema suman calorías sin llenarte. Revisar lo que bebes es un cambio fácil y efectivo.'**
+  String get dailyTip_fatloss_liquids;
+
+  /// No description provided for @dailyTip_fatloss_steps.
+  ///
+  /// In es, this message translates to:
+  /// **'Apuntar a 8–10 mil pasos al día en definición mejora la adherencia sin horas extra de cardio.'**
+  String get dailyTip_fatloss_steps;
+
+  /// No description provided for @dailyTip_fatloss_sleep.
+  ///
+  /// In es, this message translates to:
+  /// **'Dormir poco aumenta el hambre y cuesta más seguir la dieta. El descanso también forma parte del déficit.'**
+  String get dailyTip_fatloss_sleep;
+
+  /// No description provided for @dailyTip_endurance_easy.
+  ///
+  /// In es, this message translates to:
+  /// **'La mayoría de tus carreras o sesiones deberían ser a ritmo cómodo, donde puedas hablar, para construir base.'**
+  String get dailyTip_endurance_easy;
+
+  /// No description provided for @dailyTip_endurance_more.
+  ///
+  /// In es, this message translates to:
+  /// **'Más kilometraje no siempre es mejor. Entrenar de más empeora tiempos y sube el riesgo de lesión.'**
+  String get dailyTip_endurance_more;
+
+  /// No description provided for @dailyTip_endurance_8020.
+  ///
+  /// In es, this message translates to:
+  /// **'Regla 80/20: unos 80 % del volumen a ritmo fácil y un 20 % intenso. Así construyes base sin agotarte.'**
+  String get dailyTip_endurance_8020;
+
+  /// No description provided for @dailyTip_endurance_strength.
+  ///
+  /// In es, this message translates to:
+  /// **'La fuerza de piernas y abdomen mejora la economía de carrera y reduce lesiones por sobrecarga.'**
+  String get dailyTip_endurance_strength;
+
+  /// No description provided for @dailyTip_endurance_shoes.
+  ///
+  /// In es, this message translates to:
+  /// **'Rotar zapatillas y no acumular demasiados kilómetros en un solo par alarga su vida útil y protege las articulaciones.'**
+  String get dailyTip_endurance_shoes;
+
+  /// No description provided for @dailyTip_endurance_hydration.
+  ///
+  /// In es, this message translates to:
+  /// **'En sesiones largas, hidratarte antes y durante evita bajones bruscos de ritmo por sed o calor.'**
+  String get dailyTip_endurance_hydration;
+
+  /// No description provided for @dailyTip_endurance_intervals.
+  ///
+  /// In es, this message translates to:
+  /// **'Los intervalos bien planificados mejoran tu capacidad aeróbica, pero no reemplazan el volumen fácil de base.'**
+  String get dailyTip_endurance_intervals;
+
+  /// No description provided for @dailyTip_endurance_recovery.
+  ///
+  /// In es, this message translates to:
+  /// **'Dormir, comer bien e hidratarte después de una sesión larga importan tanto como el entrenamiento en sí.'**
+  String get dailyTip_endurance_recovery;
+
+  /// No description provided for @dailyTip_endurance_taper.
+  ///
+  /// In es, this message translates to:
+  /// **'Bajar el volumen 1–2 semanas antes de una carrera importante deja las piernas frescas sin perder forma.'**
+  String get dailyTip_endurance_taper;
+
+  /// No description provided for @dailyTip_endurance_only_cardio.
+  ///
+  /// In es, this message translates to:
+  /// **'Correr solo, sin fuerza, puede aumentar el riesgo de tendinitis. Incluye 1–2 sesiones de fuerza por semana.'**
+  String get dailyTip_endurance_only_cardio;
+
+  /// No description provided for @dailyTip_maintenance_consistency.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenar 3–4 días por semana de forma constante supera ciclos perfectos que acabas abandonando.'**
+  String get dailyTip_maintenance_consistency;
+
+  /// No description provided for @dailyTip_maintenance_deload.
+  ///
+  /// In es, this message translates to:
+  /// **'Una semana más ligera cada 4–8 semanas puede ayudarte a recuperar y mantener el progreso.'**
+  String get dailyTip_maintenance_deload;
+
+  /// No description provided for @dailyTip_maintenance_variety.
+  ///
+  /// In es, this message translates to:
+  /// **'Pequeños cambios de ejercicios cada mes mantienen la motivación sin echar por tierra tu progresión.'**
+  String get dailyTip_maintenance_variety;
+
+  /// No description provided for @dailyTip_maintenance_microcycles.
+  ///
+  /// In es, this message translates to:
+  /// **'Alternar semanas más duras y más ligeras evita estancarte sin tener que dejar de entrenar.'**
+  String get dailyTip_maintenance_microcycles;
+
+  /// No description provided for @dailyTip_maintenance_mobility.
+  ///
+  /// In es, this message translates to:
+  /// **'Unos 10 minutos de movilidad, 2–3 veces por semana, mejoran tu rango de movimiento y comodidad al entrenar.'**
+  String get dailyTip_maintenance_mobility;
+
+  /// No description provided for @dailyTip_maintenance_perfect_week.
+  ///
+  /// In es, this message translates to:
+  /// **'No necesitas una semana perfecta para mantenerte en forma. Un 80 % de adherencia constante basta.'**
+  String get dailyTip_maintenance_perfect_week;
+
+  /// No description provided for @dailyTip_maintenance_habits.
+  ///
+  /// In es, this message translates to:
+  /// **'Enlaza el entreno a una hora fija (después del trabajo, antes de cenar) para que cueste menos saltártelo.'**
+  String get dailyTip_maintenance_habits;
+
+  /// No description provided for @dailyTip_maintenance_social.
+  ///
+  /// In es, this message translates to:
+  /// **'Las comidas sociales caben en mantenimiento: equilibra el día o la semana en lugar de compensar con ayunos extremos.'**
+  String get dailyTip_maintenance_social;
+
+  /// No description provided for @dailyTip_maintenance_health.
+  ///
+  /// In es, this message translates to:
+  /// **'Presión arterial, energía diaria y calidad del sueño son señales tan válidas como el peso en la báscula.'**
+  String get dailyTip_maintenance_health;
+
+  /// No description provided for @dailyTip_maintenance_enjoy.
+  ///
+  /// In es, this message translates to:
+  /// **'El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir.'**
+  String get dailyTip_maintenance_enjoy;
 }
 
 class _AppLocalizationsDelegate

@@ -3314,4 +3314,340 @@ class AppLocalizationsEs extends AppLocalizations {
   String routineSetNumber(int number) {
     return 'Ser. $number';
   }
+
+  @override
+  String get dailyTipOfDayTitle => 'Tip del día';
+
+  @override
+  String get dailyTipCategoryTip => 'Consejo';
+
+  @override
+  String get dailyTipCategoryMyth => 'Mito desmentido';
+
+  @override
+  String get dailyTipGotIt => 'Entendido';
+
+  @override
+  String get dailyTip_general_doms =>
+      'Sentir el músculo resentido al día siguiente no dice si el entrenamiento fue bueno. Puedes mejorar sin ese dolor intenso.';
+
+  @override
+  String get dailyTip_general_sweat =>
+      'Sudar más no quema más grasa. El sudor es sobre todo agua y sales; importa el esfuerzo y tu balance calórico.';
+
+  @override
+  String get dailyTip_general_sleep =>
+      'Dormir entre 7 y 9 horas ayuda a recuperar músculo, regular el apetito y rendir mejor.';
+
+  @override
+  String get dailyTip_general_spot =>
+      'No puedes quemar grasa solo en el abdomen haciendo abdominales. La grasa baja en todo el cuerpo según genética y déficit calórico.';
+
+  @override
+  String get dailyTip_general_progressive =>
+      'La sobrecarga progresiva — más peso, repeticiones o series con el tiempo — es la base para mejorar.';
+
+  @override
+  String get dailyTip_general_bulky =>
+      'Levantar pesas no hace que la mayoría de mujeres se vean muy musculosas de la noche a la mañana. Ganar mucho músculo lleva años y mucho volumen.';
+
+  @override
+  String get dailyTip_general_warmup =>
+      'Calentar 5–10 minutos con movimientos específicos reduce lesiones y mejora la calidad de tus series.';
+
+  @override
+  String get dailyTip_general_carbs_night =>
+      'Los carbohidratos por la noche no engordan por la hora. Lo que cuenta es el total de calorías del día.';
+
+  @override
+  String get dailyTip_general_hydration =>
+      'Incluso una deshidratación leve puede bajar tu fuerza y concentración. Bebe agua durante el día, no solo en el gimnasio.';
+
+  @override
+  String get dailyTip_general_stretch_cold =>
+      'Estirar en frío antes de levantar peso no protege mejor que un calentamiento activo con movimiento.';
+
+  @override
+  String get dailyTip_general_scale_daily =>
+      'El peso en la báscula varía por agua, sal y digestión. Fíjate en la tendencia semanal, no en un solo día.';
+
+  @override
+  String get dailyTip_general_meal_timing =>
+      'No hace falta comer cada 3 horas para perder grasa o ganar músculo. Importa el total diario de calorías y proteína.';
+
+  @override
+  String get dailyTip_general_detox =>
+      'Tu hígado y riñones ya depuran el cuerpo. Los jugos detox o tés milagro no reemplazan buena alimentación y descanso.';
+
+  @override
+  String get dailyTip_general_rest_days =>
+      'Los días de descanso no son tiempo perdido: ahí el cuerpo asimila gran parte del entrenamiento.';
+
+  @override
+  String get dailyTip_general_form_first =>
+      'Subir peso con mala técnica frena el progreso y aumenta el riesgo de lesión.';
+
+  @override
+  String get dailyTip_general_steps =>
+      'Camina más en el día a día: esa actividad extra puede ayudar tanto como añadir cardio formal.';
+
+  @override
+  String get dailyTip_general_fasted_cardio =>
+      'Entrenar en ayunas no quema más grasa por arte de magia. Lo que importa es el déficit calórico total del día.';
+
+  @override
+  String get dailyTip_general_bcaa =>
+      'Si ya comes suficiente proteína, los BCAA aportan poco extra. Prioriza comidas completas antes que suplementos sueltos.';
+
+  @override
+  String get dailyTip_general_creatine =>
+      'La creatina monohidrato está muy estudiada: suele mejorar fuerza y rendimiento en series repetidas, con buen perfil de seguridad.';
+
+  @override
+  String get dailyTip_general_pain_vs_soreness =>
+      'La molestia muscular al día siguiente es normal; el dolor agudo, punzante o en la articulación no lo es. Aprende a distinguirlos.';
+
+  @override
+  String get dailyTip_general_consistency =>
+      'Tres entrenamientos buenos por semana, todo el año, superan un mes perfecto que luego abandonas.';
+
+  @override
+  String get dailyTip_general_track_progress =>
+      'Anotar pesos, repeticiones o tiempos te muestra progreso real cuando el espejo no cambia de un día para otro.';
+
+  @override
+  String get dailyTip_general_fiber =>
+      'Más fibra mejora la saciedad y la digestión. Frutas, legumbres y verduras ayudan a cumplir tus metas sin pasar hambre.';
+
+  @override
+  String get dailyTip_general_toning_machines =>
+      'Las máquinas vibratorias de tonificar no sustituyen entrenar con carga progresiva y buena alimentación.';
+
+  @override
+  String get dailyTip_general_sweat_detox =>
+      'Sudar en sauna o con chaleco no elimina toxinas ni grasa: solo pierdes agua que recuperarás al hidratarte.';
+
+  @override
+  String get dailyTip_hypertrophy_failure =>
+      'No hace falta llegar al fallo en cada serie. Dejar 1–3 repeticiones en reserva suele bastar para ganar músculo.';
+
+  @override
+  String get dailyTip_hypertrophy_confusion =>
+      'No necesitas cambiar todos los ejercicios cada semana para confundir al músculo. Constancia y progresión importan más.';
+
+  @override
+  String get dailyTip_hypertrophy_protein =>
+      'La proteína total del día importa más que tomarla justo después del entreno.';
+
+  @override
+  String get dailyTip_hypertrophy_compounds =>
+      'Prioriza ejercicios compuestos (sentadilla, peso muerto, press) y añade aislamiento donde haga falta.';
+
+  @override
+  String get dailyTip_hypertrophy_volume =>
+      'La mayoría progresa bien con unas 10–20 series efectivas por grupo muscular a la semana, bien repartidas.';
+
+  @override
+  String get dailyTip_hypertrophy_tempo =>
+      'Las repeticiones ultra lentas no son obligatorias para ganar músculo. Controla el movimiento, pero no renuncies a subir carga.';
+
+  @override
+  String get dailyTip_hypertrophy_pump =>
+      'La congestión muscular se siente bien, pero no es la única señal de un buen entreno. Fuerza y volumen progresivo también cuentan.';
+
+  @override
+  String get dailyTip_hypertrophy_frequency =>
+      'Trabajar cada músculo 2 veces por semana suele ser más eficiente que una sola sesión muy larga.';
+
+  @override
+  String get dailyTip_hypertrophy_eccentric =>
+      'La fase de bajada importa: controla el peso al bajar en lugar de dejar caer la barra.';
+
+  @override
+  String get dailyTip_hypertrophy_mind_muscle =>
+      'Pensar en el músculo que trabajas puede ayudar en aislamiento, pero no reemplaza mover cargas suficientes en compuestos pesados.';
+
+  @override
+  String get dailyTip_hypertrophy_deload =>
+      'Una semana con menos volumen cada 4–8 semanas puede ayudarte a superar estancamientos.';
+
+  @override
+  String get dailyTip_hypertrophy_sleep_growth =>
+      'Gran parte de la recuperación muscular ocurre mientras duermes. Dormir poco frena tus ganancias aunque entrenes duro.';
+
+  @override
+  String get dailyTip_strength_rest =>
+      'En series pesadas (3–6 repeticiones), descansar 2–4 minutos suele dar mejor resultado que apresurarse.';
+
+  @override
+  String get dailyTip_strength_failure =>
+      'No hace falta entrenar siempre al fallo para ganar fuerza. Primero van la técnica y subir carga con progresión.';
+
+  @override
+  String get dailyTip_strength_technique =>
+      'Subir peso sin perder técnica es más seguro y sostenible que forzar repeticiones mal hechas.';
+
+  @override
+  String get dailyTip_strength_specificity =>
+      'Para sentadilla más pesada, necesitas practicar sentadillas con carga de forma regular, no solo accesorios.';
+
+  @override
+  String get dailyTip_strength_belt =>
+      'Un cinturón de levantamiento no debilita el abdomen si lo usas en series muy pesadas y sigues entrenando sin él en accesorios.';
+
+  @override
+  String get dailyTip_strength_warmup_sets =>
+      'Series de aproximación graduales preparan la técnica y el sistema nervioso antes del trabajo pesado.';
+
+  @override
+  String get dailyTip_strength_cns =>
+      'Las sesiones muy pesadas cansan el sistema nervioso. Alterna días duros con días moderados o técnicos.';
+
+  @override
+  String get dailyTip_strength_accessories =>
+      'Accesorios bien elegidos (espalda, tríceps, abdomen) corrigen puntos débiles que limitan tus levantamientos principales.';
+
+  @override
+  String get dailyTip_strength_1rm_test =>
+      'Probar tu máximo de una repetición cada semana suma fatiga y riesgo. Usa series submáximas y estima el progreso.';
+
+  @override
+  String get dailyTip_strength_grip =>
+      'Un agarre débil puede limitar peso muerto y remos antes que espalda o piernas. Vale la pena entrenarlo.';
+
+  @override
+  String get dailyTip_strength_leg_drive =>
+      'Empujar con las piernas y tensar la espalda en press banca transmite más fuerza que empujar solo con brazos.';
+
+  @override
+  String get dailyTip_strength_program_hopping =>
+      'Cambiar de rutina cada dos semanas impide adaptarte. Dale tiempo a un plan antes de cambiarlo.';
+
+  @override
+  String get dailyTip_fatloss_cardio =>
+      'El cardio ayuda, pero combinarlo con fuerza y déficit calórico preserva músculo y mejora tu composición corporal.';
+
+  @override
+  String get dailyTip_fatloss_strength =>
+      'Sigue entrenando fuerza en déficit: ayuda a conservar masa muscular.';
+
+  @override
+  String get dailyTip_fatloss_starve =>
+      'Comer demasiado poco frena el progreso, aumenta el hambre y puede hacerte perder músculo.';
+
+  @override
+  String get dailyTip_fatloss_scale =>
+      'En déficit es normal retener agua algunos días. Confía en la tendencia, medidas y rendimiento, no en una sola pesada.';
+
+  @override
+  String get dailyTip_fatloss_cheat_meal =>
+      'Una comida libre no acelera el metabolismo varios días. Puede ayudarte a nivel mental si encaja en tus calorías semanales.';
+
+  @override
+  String get dailyTip_fatloss_protein =>
+      'Más proteína en déficit reduce el hambre y protege músculo. Apunta a unos 1,6–2,2 g por kg de peso, según lo que puedas sostener.';
+
+  @override
+  String get dailyTip_fatloss_neat =>
+      'Camina más, usa escaleras y muévete fuera del gimnasio. Ese gasto extra del día a día suma mucho en una etapa de definición.';
+
+  @override
+  String get dailyTip_fatloss_fat_burn_zone =>
+      'Existe la zona de quema de grasa, pero quemar más grasa por minuto no sirve si el gasto total de la semana es menor.';
+
+  @override
+  String get dailyTip_fatloss_slow_cut =>
+      'Déficits moderados (unos 300–500 kcal) suelen preservar más músculo y energía que cortes muy agresivos.';
+
+  @override
+  String get dailyTip_fatloss_liquids =>
+      'Refrescos, alcohol y cafés con crema suman calorías sin llenarte. Revisar lo que bebes es un cambio fácil y efectivo.';
+
+  @override
+  String get dailyTip_fatloss_steps =>
+      'Apuntar a 8–10 mil pasos al día en definición mejora la adherencia sin horas extra de cardio.';
+
+  @override
+  String get dailyTip_fatloss_sleep =>
+      'Dormir poco aumenta el hambre y cuesta más seguir la dieta. El descanso también forma parte del déficit.';
+
+  @override
+  String get dailyTip_endurance_easy =>
+      'La mayoría de tus carreras o sesiones deberían ser a ritmo cómodo, donde puedas hablar, para construir base.';
+
+  @override
+  String get dailyTip_endurance_more =>
+      'Más kilometraje no siempre es mejor. Entrenar de más empeora tiempos y sube el riesgo de lesión.';
+
+  @override
+  String get dailyTip_endurance_8020 =>
+      'Regla 80/20: unos 80 % del volumen a ritmo fácil y un 20 % intenso. Así construyes base sin agotarte.';
+
+  @override
+  String get dailyTip_endurance_strength =>
+      'La fuerza de piernas y abdomen mejora la economía de carrera y reduce lesiones por sobrecarga.';
+
+  @override
+  String get dailyTip_endurance_shoes =>
+      'Rotar zapatillas y no acumular demasiados kilómetros en un solo par alarga su vida útil y protege las articulaciones.';
+
+  @override
+  String get dailyTip_endurance_hydration =>
+      'En sesiones largas, hidratarte antes y durante evita bajones bruscos de ritmo por sed o calor.';
+
+  @override
+  String get dailyTip_endurance_intervals =>
+      'Los intervalos bien planificados mejoran tu capacidad aeróbica, pero no reemplazan el volumen fácil de base.';
+
+  @override
+  String get dailyTip_endurance_recovery =>
+      'Dormir, comer bien e hidratarte después de una sesión larga importan tanto como el entrenamiento en sí.';
+
+  @override
+  String get dailyTip_endurance_taper =>
+      'Bajar el volumen 1–2 semanas antes de una carrera importante deja las piernas frescas sin perder forma.';
+
+  @override
+  String get dailyTip_endurance_only_cardio =>
+      'Correr solo, sin fuerza, puede aumentar el riesgo de tendinitis. Incluye 1–2 sesiones de fuerza por semana.';
+
+  @override
+  String get dailyTip_maintenance_consistency =>
+      'Entrenar 3–4 días por semana de forma constante supera ciclos perfectos que acabas abandonando.';
+
+  @override
+  String get dailyTip_maintenance_deload =>
+      'Una semana más ligera cada 4–8 semanas puede ayudarte a recuperar y mantener el progreso.';
+
+  @override
+  String get dailyTip_maintenance_variety =>
+      'Pequeños cambios de ejercicios cada mes mantienen la motivación sin echar por tierra tu progresión.';
+
+  @override
+  String get dailyTip_maintenance_microcycles =>
+      'Alternar semanas más duras y más ligeras evita estancarte sin tener que dejar de entrenar.';
+
+  @override
+  String get dailyTip_maintenance_mobility =>
+      'Unos 10 minutos de movilidad, 2–3 veces por semana, mejoran tu rango de movimiento y comodidad al entrenar.';
+
+  @override
+  String get dailyTip_maintenance_perfect_week =>
+      'No necesitas una semana perfecta para mantenerte en forma. Un 80 % de adherencia constante basta.';
+
+  @override
+  String get dailyTip_maintenance_habits =>
+      'Enlaza el entreno a una hora fija (después del trabajo, antes de cenar) para que cueste menos saltártelo.';
+
+  @override
+  String get dailyTip_maintenance_social =>
+      'Las comidas sociales caben en mantenimiento: equilibra el día o la semana en lugar de compensar con ayunos extremos.';
+
+  @override
+  String get dailyTip_maintenance_health =>
+      'Presión arterial, energía diaria y calidad del sueño son señales tan válidas como el peso en la báscula.';
+
+  @override
+  String get dailyTip_maintenance_enjoy =>
+      'El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir.';
 }

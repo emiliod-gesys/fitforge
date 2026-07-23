@@ -3288,4 +3288,340 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineSetNumber(int number) {
     return 'Set $number';
   }
+
+  @override
+  String get dailyTipOfDayTitle => 'Tip of the day';
+
+  @override
+  String get dailyTipCategoryTip => 'Tip';
+
+  @override
+  String get dailyTipCategoryMyth => 'Myth busted';
+
+  @override
+  String get dailyTipGotIt => 'Got it';
+
+  @override
+  String get dailyTip_general_doms =>
+      'DOMS does not tell you whether a workout was effective. You can progress without soreness the next day.';
+
+  @override
+  String get dailyTip_general_sweat =>
+      'Sweating more does not burn more fat. Sweat is water and salt; workload and calorie balance matter.';
+
+  @override
+  String get dailyTip_general_sleep =>
+      'Sleeping 7–9 hours helps muscle recovery, appetite control, and performance.';
+
+  @override
+  String get dailyTip_general_spot =>
+      'You cannot spot-reduce fat with ab work. Fat loss follows genetics and overall deficit.';
+
+  @override
+  String get dailyTip_general_progressive =>
+      'Progressive overload — more weight, reps, or sets over time — is the foundation of improvement.';
+
+  @override
+  String get dailyTip_general_bulky =>
+      'Lifting weights will not make most women look bulky overnight. Hypertrophy takes years and high volume.';
+
+  @override
+  String get dailyTip_general_warmup =>
+      '5–10 minutes of specific warm-up reduces injury risk and improves working-set quality.';
+
+  @override
+  String get dailyTip_general_carbs_night =>
+      'Carbs at night do not make you gain fat because of the clock. Daily calories matter most.';
+
+  @override
+  String get dailyTip_general_hydration =>
+      'Even mild dehydration can hurt strength and focus. Drink water through the day, not only at the gym.';
+
+  @override
+  String get dailyTip_general_stretch_cold =>
+      'Static stretching cold before heavy lifting does not beat an active movement warm-up for injury prevention.';
+
+  @override
+  String get dailyTip_general_scale_daily =>
+      'Scale weight swings with water, salt, and digestion. Look at weekly trends, not one reading.';
+
+  @override
+  String get dailyTip_general_meal_timing =>
+      'You do not need to eat every 3 hours to lose fat or build muscle. Daily calories and protein matter more.';
+
+  @override
+  String get dailyTip_general_detox =>
+      'Your liver and kidneys already detox. Juice cleanses do not replace good nutrition and sleep.';
+
+  @override
+  String get dailyTip_general_rest_days =>
+      'Rest days are not wasted time — much of training adaptation happens while you recover.';
+
+  @override
+  String get dailyTip_general_form_first =>
+      'Adding load with poor technique stalls long-term progress and raises injury risk.';
+
+  @override
+  String get dailyTip_general_steps =>
+      'More daily steps (NEAT) can matter as much as formal cardio for body composition.';
+
+  @override
+  String get dailyTip_general_fasted_cardio =>
+      'Fasted training does not magically burn more fat. Total daily deficit still drives fat loss.';
+
+  @override
+  String get dailyTip_general_bcaa =>
+      'If protein intake is already adequate, BCAAs add little. Whole meals beat isolated supplements first.';
+
+  @override
+  String get dailyTip_general_creatine =>
+      'Creatine monohydrate is well studied: it often improves strength and repeated-set performance with a strong safety profile.';
+
+  @override
+  String get dailyTip_general_pain_vs_soreness =>
+      'Muscle soreness is normal; sharp, stabbing, or joint pain is not. Learn the difference.';
+
+  @override
+  String get dailyTip_general_consistency =>
+      'Three solid workouts per week for a year beats one perfect month you quit.';
+
+  @override
+  String get dailyTip_general_track_progress =>
+      'Logging weights, reps, or times reveals progress when the mirror does not change overnight.';
+
+  @override
+  String get dailyTip_general_fiber =>
+      'More fiber improves fullness and digestion. Fruit, legumes, and vegetables help you hit goals without starving.';
+
+  @override
+  String get dailyTip_general_toning_machines =>
+      'Vibration toning machines do not replace progressive resistance training and solid nutrition.';
+
+  @override
+  String get dailyTip_general_sweat_detox =>
+      'Sweating in a sauna or sauna suit does not remove toxins or fat — only water you regain when hydrated.';
+
+  @override
+  String get dailyTip_hypertrophy_failure =>
+      'You do not need to train to failure every set. Leaving 1–3 reps in reserve is often enough to grow.';
+
+  @override
+  String get dailyTip_hypertrophy_confusion =>
+      'Muscle confusion by changing exercises every week is not required. Consistency with progression matters more.';
+
+  @override
+  String get dailyTip_hypertrophy_protein =>
+      'Total daily protein matters more than taking it immediately post-workout.';
+
+  @override
+  String get dailyTip_hypertrophy_compounds =>
+      'Prioritize compound lifts (squat, deadlift, press) and add isolation where needed.';
+
+  @override
+  String get dailyTip_hypertrophy_volume =>
+      'Most people grow well on roughly 10–20 hard sets per muscle group per week, spread out.';
+
+  @override
+  String get dailyTip_hypertrophy_tempo =>
+      'Ultra-slow reps are not required for hypertrophy. Control the movement without sacrificing load progression.';
+
+  @override
+  String get dailyTip_hypertrophy_pump =>
+      'The pump feels great but is not the only sign of a good session. Progressive load and volume also count.';
+
+  @override
+  String get dailyTip_hypertrophy_frequency =>
+      'Training a muscle twice per week is usually more efficient than one massive session.';
+
+  @override
+  String get dailyTip_hypertrophy_eccentric =>
+      'The eccentric phase matters: lower loads with control instead of dropping the bar.';
+
+  @override
+  String get dailyTip_hypertrophy_mind_muscle =>
+      'Mind-muscle connection may help isolation work but does not replace sufficient load on heavy compounds.';
+
+  @override
+  String get dailyTip_hypertrophy_deload =>
+      'A lower-volume week every 4–8 weeks can break hypertrophy plateaus.';
+
+  @override
+  String get dailyTip_hypertrophy_sleep_growth =>
+      'Much muscle recovery happens while you sleep. Shortchanging sleep slows gains even with hard training.';
+
+  @override
+  String get dailyTip_strength_rest =>
+      'On heavy sets (3–6 reps), 2–4 minute rests usually beat rushing back in.';
+
+  @override
+  String get dailyTip_strength_failure =>
+      'Training to failure every session is not required for strength. Technique and progressive load come first.';
+
+  @override
+  String get dailyTip_strength_technique =>
+      'Adding weight while keeping form is safer and more sustainable than grinding ugly reps.';
+
+  @override
+  String get dailyTip_strength_specificity =>
+      'To squat more, you need to squat heavy regularly — not only accessory work.';
+
+  @override
+  String get dailyTip_strength_belt =>
+      'A lifting belt does not weaken your core when used on very heavy sets and you still train accessories without it.';
+
+  @override
+  String get dailyTip_strength_warmup_sets =>
+      'Gradual warm-up sets prepare technique and the nervous system before heavy work.';
+
+  @override
+  String get dailyTip_strength_cns =>
+      'Very heavy sessions fatigue the nervous system. Alternate hard days with moderate or technique days.';
+
+  @override
+  String get dailyTip_strength_accessories =>
+      'Well-chosen accessories (back, triceps, core) fix weak links that limit main lifts.';
+
+  @override
+  String get dailyTip_strength_1rm_test =>
+      'Testing true 1RM every week adds fatigue and risk. Use submax reps and RPE to track progress.';
+
+  @override
+  String get dailyTip_strength_grip =>
+      'Weak grip can limit deadlifts and rows before back or legs fail. Training grip pays off.';
+
+  @override
+  String get dailyTip_strength_leg_drive =>
+      'Leg drive and upper-back tension on bench press transfer more force than arms alone.';
+
+  @override
+  String get dailyTip_strength_program_hopping =>
+      'Switching programs every two weeks stops adaptation. Give a plan time before changing.';
+
+  @override
+  String get dailyTip_fatloss_cardio =>
+      'Cardio helps, but strength plus a deficit preserves muscle and improves body composition.';
+
+  @override
+  String get dailyTip_fatloss_strength =>
+      'Keep lifting in a deficit: it helps preserve muscle mass.';
+
+  @override
+  String get dailyTip_fatloss_starve =>
+      'Eating too little slows progress, increases hunger, and can cost muscle.';
+
+  @override
+  String get dailyTip_fatloss_scale =>
+      'Water retention is normal in a cut. Trust trends, measurements, and performance — not one weigh-in.';
+
+  @override
+  String get dailyTip_fatloss_cheat_meal =>
+      'A cheat meal does not boost metabolism for days. It can help mentally if it fits weekly calories.';
+
+  @override
+  String get dailyTip_fatloss_protein =>
+      'Higher protein in a deficit reduces hunger and protects muscle. Aim around 1.6–2.2 g/kg if you can adhere.';
+
+  @override
+  String get dailyTip_fatloss_neat =>
+      'Walk more, take stairs, move outside the gym. Non-exercise activity adds up during a cut.';
+
+  @override
+  String get dailyTip_fatloss_fat_burn_zone =>
+      'The fat-burn zone burns more fat per minute but not necessarily more total fat loss if weekly output is lower.';
+
+  @override
+  String get dailyTip_fatloss_slow_cut =>
+      'Moderate deficits (~300–500 kcal) usually preserve more muscle and energy than aggressive cuts.';
+
+  @override
+  String get dailyTip_fatloss_liquids =>
+      'Sugary drinks, alcohol, and creamy coffees add calories without filling you up. Liquids are an easy win.';
+
+  @override
+  String get dailyTip_fatloss_steps =>
+      'Targeting 8–10k daily steps during a cut improves adherence without extra hours of cardio.';
+
+  @override
+  String get dailyTip_fatloss_sleep =>
+      'Short sleep raises hunger and wrecks diet adherence. Sleep is part of the deficit plan.';
+
+  @override
+  String get dailyTip_endurance_easy =>
+      'Most runs or sessions should feel conversational to build an aerobic base.';
+
+  @override
+  String get dailyTip_endurance_more =>
+      'More mileage is not always better. Overtraining hurts pace and raises injury risk.';
+
+  @override
+  String get dailyTip_endurance_8020 =>
+      '80/20 rule: ~80% easy volume, ~20% hard. Build base without burning out.';
+
+  @override
+  String get dailyTip_endurance_strength =>
+      'Leg and core strength improve running economy and reduce overload injuries.';
+
+  @override
+  String get dailyTip_endurance_shoes =>
+      'Rotate shoes and avoid stacking huge mileage on one worn pair.';
+
+  @override
+  String get dailyTip_endurance_hydration =>
+      'On long sessions, hydrating before and during prevents sharp pace drops from thirst or heat.';
+
+  @override
+  String get dailyTip_endurance_intervals =>
+      'Well-planned intervals improve VO₂ max but do not replace easy aerobic volume.';
+
+  @override
+  String get dailyTip_endurance_recovery =>
+      'Sleep, food, and hydration after long sessions matter as much as the session itself.';
+
+  @override
+  String get dailyTip_endurance_taper =>
+      'Cutting volume 1–2 weeks before a key race leaves legs fresh without losing fitness.';
+
+  @override
+  String get dailyTip_endurance_only_cardio =>
+      'Running only without strength can raise overuse injury risk. Include 1–2 strength sessions weekly.';
+
+  @override
+  String get dailyTip_maintenance_consistency =>
+      'Training 3–4 days per week consistently beats perfect cycles you quit.';
+
+  @override
+  String get dailyTip_maintenance_deload =>
+      'A lighter week every 4–8 weeks helps recovery and long-term progress.';
+
+  @override
+  String get dailyTip_maintenance_variety =>
+      'Small exercise changes each month keep motivation without trashing progression.';
+
+  @override
+  String get dailyTip_maintenance_microcycles =>
+      'Alternating harder and lighter weeks prevents stalls without stopping completely.';
+
+  @override
+  String get dailyTip_maintenance_mobility =>
+      '10 minutes of mobility 2–3 times weekly improves range and comfort — not just for yoga people.';
+
+  @override
+  String get dailyTip_maintenance_perfect_week =>
+      'You do not need a perfect week to stay fit. Sustainable 80% adherence is enough.';
+
+  @override
+  String get dailyTip_maintenance_habits =>
+      'Tie training to a fixed time or routine so skipping takes more effort than showing up.';
+
+  @override
+  String get dailyTip_maintenance_social =>
+      'Social meals fit maintenance: balance the day or week instead of extreme compensation fasting.';
+
+  @override
+  String get dailyTip_maintenance_health =>
+      'Blood pressure, daily energy, and sleep quality are valid progress markers besides scale weight.';
+
+  @override
+  String get dailyTip_maintenance_enjoy =>
+      'The plan you enjoy is the one you will keep for years. Pick training you want to repeat.';
 }

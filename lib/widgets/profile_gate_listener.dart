@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/utils/profile_completeness.dart';
+import '../core/content/fitness_daily_tips.dart';
 import '../models/profile.dart';
 import '../providers/app_providers.dart';
+import '../services/daily_tip_preferences.dart';
+import 'daily_tip_dialog.dart';
 import 'profile/weight_update_dialog.dart';
 
 /// Muestra onboarding obligatorio o actualización de peso al abrir la app.
@@ -70,7 +73,12 @@ class _ProfileGateListenerState extends ConsumerState<ProfileGateListener>
 
       if (ProfileCompleteness.needsWeightUpdate(lastWeightAt)) {
         await _showWeightUpdate(profile);
+        if (!mounted) return;
+        profile = ref.read(profileProvider).valueOrNull;
+        if (profile == null) return;
       }
+
+      await _maybeShowDailyTip(profile);
     } finally {
       _gateRunning = false;
     }
@@ -86,6 +94,26 @@ class _ProfileGateListenerState extends ConsumerState<ProfileGateListener>
         child: WeightUpdateDialog(profile: profile),
       ),
     );
+  }
+
+  Future<void> _maybeShowDailyTip(UserProfile profile) async {
+    if (!await DailyTipPreferences.shouldShowToday()) return;
+    if (!mounted) return;
+
+    final tip = FitnessDailyTips.pickFor(
+      date: DateTime.now(),
+      userId: profile.id,
+      fitnessGoal: profile.fitnessGoal,
+    );
+
+    final languageCode = ref.read(preferredLanguageProvider);
+    await showDailyTipDialog(
+      context,
+      tip: tip,
+      languageCode: languageCode,
+    );
+    if (!mounted) return;
+    await DailyTipPreferences.markShownToday();
   }
 
   @override

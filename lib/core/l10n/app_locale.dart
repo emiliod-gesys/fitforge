@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Idiomas soportados en la app y mapeo a wger.de (language id).
 abstract final class AppLocale {
   static const defaultCode = 'es';
@@ -9,6 +11,11 @@ abstract final class AppLocale {
   static Locale toLocale(String? code) {
     final normalized = code ?? defaultCode;
     return Locale(supportedCodes.contains(normalized) ? normalized : defaultCode);
+  }
+
+  /// Cadenas localizadas para el idioma preferido del usuario (es / en).
+  static AppLocalizations localizations(String? code) {
+    return lookupAppLocalizations(toLocale(code));
   }
 
   /// wger API: 2 = English, 4 = Spanish
