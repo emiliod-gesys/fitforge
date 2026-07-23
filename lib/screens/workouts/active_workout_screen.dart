@@ -47,6 +47,7 @@ import '../../widgets/set_log_tile.dart';
 import '../../widgets/workout_exercise_picker_sheet.dart';
 import '../../widgets/workout_elapsed_timer.dart';
 import '../../widgets/active_workout_exercise_list.dart';
+import '../../widgets/workout_unit_toggle.dart';
 import '../../widgets/runner_outdoor_session.dart';
 import '../../widgets/runner_treadmill_session.dart';
 import '../../widgets/hyrox_phase_timer.dart';
@@ -80,6 +81,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, List<WorkoutSet>> _insertedSets = {};
   final Set<String> _savingSetIds = {};
   final Map<String, bool> _perArmOverrides = {};
+  String? _sessionUnitOverride;
   bool _perArmSeeded = false;
   /// Unidad por ejercicio en la sesión (`kg`/`lb`); no persiste ni cambia el perfil.
   final Map<String, String> _unitOverrides = {};
@@ -223,7 +225,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
-  Future<void> _publishWatchSession([Workout? workout]) async {
+  String _effectiveUnitSystem(String profileUnit) =>
+      _sessionUnitOverride ?? profileUnit;
+
+  void _onWorkoutUnitChanged(String unit, Workout workout) {
+    setState(() => _sessionUnitOverride = unit);
+    unawaited(_publishWatchSession(_mergedWorkout(workout), unit));
+  }
+
+  Widget _buildWorkoutUnitToggle(Workout workout, String unitSystem) {
+    return WorkoutUnitToggle(
+      unitSystem: unitSystem,
+      onChanged: (unit) => _onWorkoutUnitChanged(unit, workout),
+    );
+  }
+
+  Future<void> _publishWatchSession([Workout? workout, String? unitSystem]) async {
     final coordinator = ref.read(watchWorkoutCoordinatorProvider);
     workout ??= ref.read(activeWorkoutProvider).valueOrNull;
     if (workout != null) workout = _mergedWorkout(workout);
@@ -248,7 +265,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     await coordinator.syncFromWorkout(
       workout: workout,
       exercise: exercise,
-      unitSystem: ref.read(unitSystemProvider),
+      unitSystem: unitSystem ?? _effectiveUnitSystem(ref.read(unitSystemProvider)),
       removedSetIds: _removedSetIds,
       restEndsAt: _showRestTimer ? _restEndsAt : null,
       restTotalSeconds: _showRestTimer ? _restTotalSeconds : null,
@@ -1073,7 +1090,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final activeAsync = ref.watch(activeWorkoutProvider);
-    final unitSystem = ref.watch(unitSystemProvider);
+    final profileUnitSystem = ref.watch(unitSystemProvider);
+    final unitSystem = _effectiveUnitSystem(profileUnitSystem);
     final exerciseCatalog = ref.watch(exercisesProvider).valueOrNull ?? [];
 
     final workoutForSeed = activeAsync.valueOrNull;
@@ -1191,6 +1209,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     stoppedAt: _workoutTimerStop(),
                   ),
                 if (_showRestTimer) _buildActiveRestTimer(),
+                if (!_isRunnerWorkout) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _buildWorkoutUnitToggle(displayWorkout, unitSystem),
+                    ),
+                  ),
+                ],
                 Expanded(
                   child: ActiveWorkoutExerciseList(
                     workout: displayWorkout,
@@ -1291,9 +1318,23 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     ),
                     const SizedBox(height: 16),
                     if (!isCardio && !_isHyroxWorkout) ...[
-                      RestTimeSelector(
-                        selectedSeconds: _restSeconds,
-                        onChanged: _onRestSecondsChanged,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: RestTimeSelector(
+                              selectedSeconds: _restSeconds,
+                              onChanged: _onRestSecondsChanged,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          _buildWorkoutUnitToggle(displayWorkout, unitSystem),
+                        ],
+                      ),
+                    ] else ...[
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: _buildWorkoutUnitToggle(displayWorkout, unitSystem),
                       ),
                     ],
                     const SizedBox(height: 8),

@@ -2376,6 +2376,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rest => 'Rest';
 
   @override
+  String get workoutWeightUnit => 'Weight';
+
+  @override
+  String get workoutUnitToggleHint =>
+      'Switch between kg and lb for this workout only';
+
+  @override
   String restRemaining(int seconds) {
     return '${seconds}s remaining';
   }
