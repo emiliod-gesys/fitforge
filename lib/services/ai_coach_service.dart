@@ -1143,7 +1143,9 @@ Eres un nutricionista de FitForge. ${languageInstruction(lang)}
 Responde SOLO JSON válido sin markdown.
 
 Reglas:
-- Si el usuario lista varios alimentos, SUMA cada uno por separado.
+- Si el usuario lista varios alimentos, SUMA cada uno por separado. calories_kcal y macros deben ser el TOTAL del plato, nunca solo del ingrediente principal.
+- Si hay 2+ ítems en ingredient_portions, calories_kcal DEBE reflejar la suma nutricional de TODOS (ej. huevos + avena, no solo huevos).
+- Medidas de volumen: 1 cup avena/oatmeal cruda ≈ 80 g (~300 kcal, ~54 g carbs). 1 large egg ≈ 50 g (~78 kcal).
 - Si da calorías explícitas (ej. "56 kcal cada una"), usa ese valor exacto para ese ítem.
 - "Sin aceite" en huevos = sin grasa añadida, pero conserva la grasa natural del huevo (~5 g grasa por huevo grande).
 - serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
@@ -1167,13 +1169,16 @@ Reglas:
 ''';
     final hints = FoodQueryHints.labeledKcalTotal(query);
     final eggs = FoodQueryHints.eggCount(query);
-    final hintsBlock = (hints > 0 || eggs > 0)
+    final volumePortions = FoodQueryHints.parseVolumePortionsFromQuery(query);
+    final hintsBlock = (hints > 0 || eggs > 0 || volumePortions.isNotEmpty)
         ? '''
 
 DATOS OBLIGATORIOS del usuario (debes respetarlos en el total):
 ${eggs > 0 ? '- $eggs huevo(s) grande(s) sin aceite añadido: ~${eggs * FoodQueryHints.eggKcal} kcal' : ''}
 ${hints > 0 ? '- Ítems con kcal explícitas en el texto: mínimo $hints kcal (suma exacta de lo indicado)' : ''}
+${volumePortions.isNotEmpty ? volumePortions.map((p) => '- ${p.name}: ${p.gramsG.round()} g (respeta este peso en ingredient_portions)').join('\n') : ''}
 - calories_kcal DEBE ser >= ${(hints + eggs * FoodQueryHints.eggKcal)} kcal
+- Si hay varios alimentos, suma las kcal de CADA ingrediente; no subestimes carbohidratos de cereales (avena, arroz, pasta).
 '''
         : '';
 

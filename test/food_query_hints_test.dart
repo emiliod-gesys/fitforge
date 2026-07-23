@@ -12,6 +12,48 @@ void main() {
       expect(FoodQueryHints.eggCount(query), 2);
     });
 
+    test('parses English egg count', () {
+      expect(
+        FoodQueryHints.eggCount('Three scrambled eggs and a cup of raw oatmeal'),
+        3,
+      );
+    });
+
+    test('parses cup of dry oats as grams', () {
+      final portions = FoodQueryHints.parseVolumePortionsFromQuery(
+        'Three scrambled eggs and a cup of raw oatmeal',
+      );
+
+      expect(portions.length, 1);
+      expect(portions.first.name, contains('avena'));
+      expect(portions.first.gramsG, 80);
+    });
+
+    test('reconcile fixes eggs plus oatmeal when AI drops oat macros', () {
+      const query = 'Three scrambled eggs and a cup of raw oatmeal';
+      const ai = FoodNutritionEstimate(
+        name: 'Three scrambled eggs and a cup of raw oatmeal',
+        caloriesKcal: 233,
+        proteinG: 19.5,
+        carbsG: 1.7,
+        fatG: 16.5,
+        fiberG: 0,
+        referenceAmount: 210,
+        ingredients: ['huevos', 'avena cruda'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'huevos', gramsG: 150),
+          FoodIngredientPortion(name: 'avena cruda', gramsG: 60),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(query, ai);
+
+      expect(fixed.caloriesKcal, greaterThan(400));
+      expect(fixed.carbsG, greaterThan(35));
+      expect(fixed.fiberG, greaterThan(4));
+      expect(fixed.ingredientPortions.length, greaterThanOrEqualTo(2));
+    });
+
     test('reconcile raises underestimated AI calories', () {
       const ai = FoodNutritionEstimate(
         name: 'huevos con tortillas',

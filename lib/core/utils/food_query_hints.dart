@@ -7,11 +7,19 @@ abstract final class FoodQueryHints {
     'un': 1,
     'una': 1,
     'uno': 1,
+    'a': 1,
+    'an': 1,
+    'one': 1,
     'dos': 2,
+    'two': 2,
     'tres': 3,
+    'three': 3,
     'cuatro': 4,
+    'four': 4,
     'cinco': 5,
+    'five': 5,
     'seis': 6,
+    'six': 6,
   };
 
   /// Huevo grande estrellado sin aceite añadido.
@@ -55,12 +63,49 @@ abstract final class FoodQueryHints {
 
   static int eggCount(String query) {
     final lower = query.toLowerCase();
-    final match = RegExp(
+    final esMatch = RegExp(
       r'(\d+|un|una|uno|dos|tres|cuatro|cinco|seis)\s+huevos?',
       caseSensitive: false,
     ).firstMatch(lower);
-    if (match == null) return 0;
-    return _parseCount(match.group(1)!) ?? 0;
+    if (esMatch != null) return _parseCount(esMatch.group(1)!) ?? 0;
+
+    final enMatch = RegExp(
+      r'(\d+|one|two|three|four|five|six|a|an)\s+(?:(?:scrambled|fried|boiled|poached|large)\s+)*eggs?',
+      caseSensitive: false,
+    ).firstMatch(lower);
+    if (enMatch != null) return _parseCount(enMatch.group(1)!) ?? 0;
+
+    final enDigits = RegExp(
+      r'(\d+)\s+(?:(?:scrambled|fried|boiled|poached|large)\s+)*eggs?',
+      caseSensitive: false,
+    ).firstMatch(lower);
+    if (enDigits != null) return int.tryParse(enDigits.group(1)!) ?? 0;
+
+    return 0;
+  }
+
+  static double _parseCupMultiplier(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return 1;
+    final lower = raw.trim().toLowerCase();
+    return double.tryParse(lower.replaceAll(',', '.')) ?? _parseCount(lower)?.toDouble() ?? 1;
+  }
+
+  /// Porciones en medidas de volumen (ej. 1 cup dry oats ≈ 80 g).
+  static List<FoodIngredientPortion> parseVolumePortionsFromQuery(String query) {
+    final lower = query.toLowerCase();
+    final portions = <FoodIngredientPortion>[];
+
+    const dryOatsCupGrams = 80.0;
+    final oats = RegExp(
+      r'(?:(\d+(?:[.,]\d+)?)|a|an|one|un|una)\s+cups?\s+(?:of\s+)?(?:(?:raw|dry|rolled)\s+)?(?:oatmeal|oats|avena(?:\s+cruda)?)',
+      caseSensitive: false,
+    ).firstMatch(lower);
+    if (oats != null) {
+      final cups = _parseCupMultiplier(oats.group(1));
+      _upsertPortion(portions, 'avena cruda', cups * dryOatsCupGrams);
+    }
+
+    return portions;
   }
 
   /// Macros típicos por tortilla pequeña ~56 kcal (si no hay más datos).
@@ -212,7 +257,13 @@ abstract final class FoodQueryHints {
     return name;
   }
 
+  static bool _isEggPortionName(String name) {
+    final n = _normalizeName(name);
+    return n.contains('huevo') || RegExp(r'\beggs?\b').hasMatch(n);
+  }
+
   static bool _namesOverlap(String a, String b) {
+    if (_isEggPortionName(a) && _isEggPortionName(b)) return true;
     final x = _normalizeName(a);
     final y = _normalizeName(b);
     if (x.isEmpty || y.isEmpty) return false;
@@ -320,6 +371,7 @@ abstract final class FoodQueryHints {
   /// Completa o corrige gramos por ingrediente usando texto del usuario y totales.
   static FoodNutritionEstimate ensureIngredientPortions(String query, FoodNutritionEstimate ai) {
     final userPortions = parseIngredientGramsFromQuery(query);
+    final volumePortions = parseVolumePortionsFromQuery(query);
     var portions = [...ai.ingredientPortions];
 
     for (final userPortion in userPortions) {
@@ -334,7 +386,11 @@ abstract final class FoodQueryHints {
       }
     }
 
-    portions = _mergeOverlappingPortions(portions, userPortions);
+    for (final volumePortion in volumePortions) {
+      _upsertPortion(portions, volumePortion.name, volumePortion.gramsG);
+    }
+
+    portions = _mergeOverlappingPortions(portions, [...userPortions, ...volumePortions]);
 
     final explicitGrams = parseGrams(query);
     if (userPortions.isNotEmpty && explicitGrams != null && _isSingleItemQuery(query)) {
@@ -345,7 +401,17 @@ abstract final class FoodQueryHints {
 
     final eggs = eggCount(query);
     if (eggs > 0) {
-      _upsertPortion(portions, 'huevos', eggs * 50.0);
+      final eggGrams = eggs * 50.0;
+      final eggIndex = portions.indexWhere((p) => _isEggPortionName(p.name));
+      if (eggIndex >= 0) {
+        portions[eggIndex] = FoodIngredientPortion(
+          name: portions[eggIndex].name,
+          gramsG: eggGrams,
+        );
+      } else {
+        final eggLabel = RegExp(r'\beggs?\b', caseSensitive: false).hasMatch(query) ? 'eggs' : 'huevos';
+        _upsertPortion(portions, eggLabel, eggGrams);
+      }
     }
 
     if (portions.isEmpty && ai.ingredients.length > 1) {
@@ -395,7 +461,10 @@ abstract final class FoodQueryHints {
       sumGrams = portions.fold<double>(0, (sum, p) => sum + p.gramsG);
     }
 
-    if ((sumGrams - targetTotal).abs() > 1 && sumGrams > 0 && userPortions.isEmpty) {
+    if ((sumGrams - targetTotal).abs() > 1 &&
+        sumGrams > 0 &&
+        userPortions.isEmpty &&
+        volumePortions.isEmpty) {
       final factor = targetTotal / sumGrams;
       for (var i = 0; i < portions.length; i++) {
         portions[i] = portions[i].scaledBy(factor);
@@ -505,7 +574,15 @@ abstract final class FoodQueryHints {
     'fish': (kcal: 130, protein: 25.0, carbs: 0.0, fat: 3.0, fiber: 0.0),
     'huevos': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
     'huevo': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'eggs': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
     'egg': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'scrambled eggs': (kcal: 155, protein: 13.0, carbs: 1.1, fat: 11.0, fiber: 0.0),
+    'avena cruda': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
+    'raw oatmeal': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
+    'rolled oats': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
+    'oatmeal': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
+    'avena': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
+    'oats': (kcal: 389, protein: 13.2, carbs: 66.3, fat: 6.9, fiber: 10.6),
     'tofu': (kcal: 76, protein: 8.0, carbs: 1.9, fat: 4.8, fiber: 0.3),
     // Guarniciones / verduras.
     'brócoli': (kcal: 35, protein: 2.8, carbs: 7.0, fat: 0.4, fiber: 2.6),
@@ -575,13 +652,17 @@ abstract final class FoodQueryHints {
     var totalFat = 0.0;
     var totalFiber = 0.0;
     var matchedGrams = 0.0;
+    var unmatchedGrams = 0.0;
     var totalGrams = 0.0;
 
     for (final portion in ai.ingredientPortions) {
       if (portion.gramsG <= 0) continue;
       totalGrams += portion.gramsG;
       final anchor = _lookupAnchor(portion.name);
-      if (anchor == null) continue;
+      if (anchor == null) {
+        if (portion.gramsG >= 15) unmatchedGrams += portion.gramsG;
+        continue;
+      }
       final factor = portion.gramsG / 100;
       matchedGrams += portion.gramsG;
       totalKcal += anchor.kcal * factor;
@@ -592,6 +673,11 @@ abstract final class FoodQueryHints {
     }
 
     if (totalKcal <= 0) return null;
+    // No devolver suma parcial si queda peso significativo sin ancla (ej. avena olvidada).
+    final substantialPortions =
+        ai.ingredientPortions.where((p) => p.gramsG >= 15).length;
+    if (substantialPortions >= 2 && unmatchedGrams >= 25) return null;
+    if (totalGrams > 0 && unmatchedGrams / totalGrams > 0.12) return null;
     // Exigir cobertura razonable para no inventar el plato entero con 1 ancla.
     if (matchedGrams < 40 && matchedGrams < totalGrams * 0.35) return null;
 
@@ -850,6 +936,16 @@ abstract final class FoodQueryHints {
     );
   }
 
+  static bool _portionCoverageComplete(FoodNutritionEstimate estimate) {
+    var substantial = 0;
+    for (final portion in estimate.ingredientPortions) {
+      if (portion.gramsG < 15) continue;
+      substantial++;
+      if (_lookupAnchor(portion.name) == null) return false;
+    }
+    return substantial >= 1;
+  }
+
   static FoodNutritionEstimate _finalizePortionEstimate(
     String query,
     FoodNutritionEstimate estimate,
@@ -857,7 +953,13 @@ abstract final class FoodQueryHints {
     final fromPortions = estimateFromIngredientPortions(estimate);
     if (fromPortions == null) return estimate;
 
-    if (estimate.ingredientPortions.length >= 2) return fromPortions;
+    if (estimate.ingredientPortions.length >= 2) {
+      if (_portionCoverageComplete(estimate)) return fromPortions;
+      if (fromPortions.caloriesKcal > estimate.caloriesKcal * 1.12) return fromPortions;
+      if (fromPortions.carbsG > estimate.carbsG + 8) return fromPortions;
+      if (fromPortions.caloriesKcal > estimate.caloriesKcal + 80) return fromPortions;
+      return estimate;
+    }
 
     if (parseTotalPlateGrams(query) != null) {
       final solo = estimate.ingredientPortions.length == 1
