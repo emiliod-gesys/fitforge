@@ -867,6 +867,7 @@ class _SharePersonalRecordsSection extends StatelessWidget {
   String _value(PersonalRecord pr) {
     switch (pr.recordType) {
       case PersonalRecordType.strength:
+      case PersonalRecordType.strengthMaxWeight:
         return UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem);
       case PersonalRecordType.cardioDistance:
         return CardioFormat.distance(pr.distanceMeters, unitSystem);

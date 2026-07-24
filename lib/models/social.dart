@@ -111,22 +111,59 @@ class SocialNotification {
   bool get isUnread => readAt == null;
   bool get isRoutineShare => type == 'routine_share';
   bool get isTrainerRequest => type == 'trainer_request';
+  bool get isFriendRequest => type == 'friend_request';
+  bool get isFeedComment => type == 'feed_comment';
+  bool get isFeedReaction => type == 'feed_reaction';
+  bool get isFeedCommentReaction => type == 'feed_comment_reaction';
   bool get isWorkoutCompleted => type == 'workout_completed';
   bool get isMilestoneUnlock => type == 'milestone_unlocked';
   bool get isLevelUp => type == 'level_up';
   bool get isPrUnlock => type == 'pr_unlocked';
+  bool get isUserPost => type == 'user_post';
 
   bool get isFeedItem =>
-      isWorkoutCompleted || isMilestoneUnlock || isLevelUp || isPrUnlock;
+      isWorkoutCompleted || isMilestoneUnlock || isLevelUp || isPrUnlock || isUserPost;
+
+  bool get isBellItem => SocialFeed.bellTypes.contains(type);
 
   static const feedTypes = SocialFeed.feedTypes;
+  static const bellTypes = SocialFeed.bellTypes;
 
   bool isOwnPost(String? currentUserId) =>
       currentUserId != null && currentUserId.isNotEmpty && actorId == currentUserId;
 
   String? get feedWorkoutName => metadata?['workout_name'] as String?;
 
-  PersonalRecord? get feedPersonalRecord => FeedPersonalRecord.fromMetadata(metadata);
+  PersonalRecord? get feedPersonalRecord {
+    if (isUserPost) return feedAttachedPersonalRecord;
+    return FeedPersonalRecord.fromMetadata(metadata);
+  }
+
+  PersonalRecord? get feedAttachedPersonalRecord {
+    final prRaw = metadata?['pr'];
+    if (prRaw is Map) {
+      return FeedPersonalRecord.fromMetadata(Map<String, dynamic>.from(prRaw));
+    }
+    return FeedPersonalRecord.fromMetadata(metadata);
+  }
+
+  String? get feedPostText {
+    final fromMeta = metadata?['text'] as String?;
+    if (fromMeta != null && fromMeta.trim().isNotEmpty) return fromMeta.trim();
+    if (isUserPost && message.trim().isNotEmpty) return message.trim();
+    return null;
+  }
+
+  String? get feedImagePath => metadata?['image_path'] as String?;
+
+  String? get feedPostId => metadata?['post_id'] as String?;
+
+  String? get bellPostId {
+    final fromMeta = metadata?['post_id'] as String?;
+    if (fromMeta != null && fromMeta.isNotEmpty) return fromMeta;
+    if (referenceId != null && referenceId!.isNotEmpty) return referenceId;
+    return null;
+  }
 
   MilestoneCategory? get milestoneCategory {
     final raw = metadata?['category'] as String?;
@@ -181,6 +218,8 @@ class SocialRealtimeEvent {
   });
 
   bool get isFeedItem => SocialNotification.feedTypes.contains(type);
+
+  bool get isBellItem => SocialNotification.bellTypes.contains(type);
 
   factory SocialRealtimeEvent.fromRecord(Map<String, dynamic> record) {
     final metadataRaw = record['metadata'];

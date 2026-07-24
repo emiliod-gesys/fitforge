@@ -214,10 +214,26 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { user_id: userId, message, actor_id: actorId } = payload.record;
+  const { user_id: userId, message, actor_id: actorId, type: notificationType } = payload.record;
   if (!userId || !message) {
     return new Response(JSON.stringify({ error: "Missing user_id or message" }), {
       status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const bellTypes = new Set([
+    "friend_request",
+    "feed_comment",
+    "feed_reaction",
+    "feed_comment_reaction",
+    "routine_share",
+    "trainer_request",
+  ]);
+
+  if (!notificationType || !bellTypes.has(notificationType)) {
+    return new Response(JSON.stringify({ skipped: true, reason: "feed_event" }), {
+      status: 200,
       headers: { "Content-Type": "application/json" },
     });
   }

@@ -524,12 +524,30 @@ class _RoutineCard extends ConsumerWidget {
               PopupMenuButton(
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                  PopupMenuItem(value: 'duplicate', child: Text(l10n.duplicate)),
                   PopupMenuItem(value: 'share', child: Text(l10n.share)),
                   PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
                 ],
                 onSelected: (value) async {
                   if (value == 'edit') {
                     context.push('/routines/${routine.id}/edit');
+                  } else if (value == 'duplicate') {
+                    if (!await ensureCanCreateRoutine(context, ref)) return;
+                    final clone = routine.copyForCurrentUser().copyWith(
+                          name: l10n.routineDuplicateName(routine.name),
+                        );
+                    try {
+                      final created =
+                          await ref.read(routineServiceProvider).createRoutine(clone);
+                      ref.invalidate(routinesProvider);
+                      ref.invalidate(routineLimitStatusProvider);
+                      ref.invalidate(friendFavoriteRoutinesProvider);
+                      if (context.mounted) {
+                        context.push('/routines/${created.id}/edit');
+                      }
+                    } catch (e) {
+                      if (context.mounted) showRoutineSaveErrorSnackBar(context, e);
+                    }
                   } else if (value == 'share') {
                     await RoutineShareFriendSheet.show(context, routine);
                   } else if (value == 'delete') {

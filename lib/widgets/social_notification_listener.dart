@@ -6,6 +6,7 @@ import '../core/constants/app_scaffold.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/social.dart';
 import '../providers/app_providers.dart';
+import 'social_notifications_sheet.dart';
 
 /// Escucha notificaciones sociales en tiempo real y muestra un aviso breve.
 class SocialNotificationListener extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _SocialNotificationListenerState extends ConsumerState<SocialNotificationL
       return;
     }
 
-    if (event.message.isEmpty) return;
+    if (!event.isBellItem || event.message.isEmpty) return;
 
     ref.invalidate(socialNotificationsProvider);
     ref.invalidate(socialUnreadCountProvider);
@@ -70,6 +71,24 @@ class _SocialNotificationListenerState extends ConsumerState<SocialNotificationL
     } catch (_) {}
 
     if (!mounted) return;
+
+    final postId = event.metadata?['post_id'] as String?;
+    if (postId != null &&
+        postId.isNotEmpty &&
+        (event.type == 'feed_comment' ||
+            event.type == 'feed_reaction' ||
+            event.type == 'feed_comment_reaction')) {
+      context.push('/social/post/$postId');
+      return;
+    }
+
+    if (event.type == 'routine_share' || event.type == 'trainer_request' ||
+        event.type == 'friend_request') {
+      context.go('/social');
+      SocialNotificationsSheet.show(context);
+      return;
+    }
+
     if (event.actorId.isNotEmpty) {
       context.push('/social/friend/${event.actorId}');
     } else {

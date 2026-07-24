@@ -16,6 +16,7 @@ import '../../screens/profile/profile_screen.dart';
 import '../../screens/progress/progress_screen.dart';
 import '../../screens/routines/routine_editor_screen.dart';
 import '../../screens/social/friend_profile_screen.dart';
+import '../../screens/social/feed_post_detail_screen.dart';
 import '../../screens/social/social_screen.dart';
 import '../../screens/food/food_screen.dart';
 import '../../screens/food/food_add_screen.dart';
@@ -154,6 +155,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => FriendProfileScreen(friendId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: '/social/post/:postId',
+        builder: (_, state) => FeedPostDetailScreen(postId: state.pathParameters['postId']!),
+      ),
+      GoRoute(
         path: '/students/:id',
         builder: (_, state) => StudentDetailScreen(studentId: state.pathParameters['id']!),
       ),
@@ -165,13 +170,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/workout/summary',
         builder: (_, state) {
           final extra = state.extra;
-          final summary = extra is WorkoutSummaryData
-              ? extra
-              : ref.read(pendingWorkoutSummaryProvider);
-          if (summary == null) {
-            return const WorkoutSummaryMissingScreen();
-          }
-          return WorkoutSummaryScreen(summary: summary);
+          final fromExtra = extra is WorkoutSummaryData ? extra : null;
+          final fromPending = ref.read(pendingWorkoutSummaryProvider);
+          final initial = fromExtra ?? fromPending;
+          final sessionId = ref.read(workoutSummarySessionIdProvider);
+          final hostKey = initial?.workout.id ?? sessionId ?? 'workout-summary-empty';
+          return WorkoutSummaryHost(
+            key: ValueKey('workout-summary-$hostKey'),
+            initialSummary: initial,
+          );
         },
       ),
       GoRoute(

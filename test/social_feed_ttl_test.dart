@@ -10,8 +10,22 @@ void main() {
     expect(now.difference(cutoff), SocialFeed.maxAge);
   });
 
-  test('feed types include passive social events only', () {
+  test('feed types include social events and user posts', () {
     expect(SocialFeed.feedTypes, contains('pr_unlocked'));
+    expect(SocialFeed.feedTypes, contains('user_post'));
     expect(SocialFeed.feedTypes, isNot(contains('trainer_request')));
+  });
+
+  test('bell types include actionable social notifications only', () {
+    expect(SocialFeed.bellTypes, containsAll([
+      'friend_request',
+      'feed_comment',
+      'feed_reaction',
+      'feed_comment_reaction',
+      'routine_share',
+      'trainer_request',
+    ]));
+    expect(SocialFeed.bellTypes, isNot(contains('workout_completed')));
+    expect(SocialFeed.bellTypes, isNot(contains('user_post')));
   });
 }

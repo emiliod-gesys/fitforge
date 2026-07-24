@@ -21,6 +21,26 @@ class FeedReactionRow {
   }
 }
 
+class FeedCommentReactionRow {
+  final String commentId;
+  final String userId;
+  final String emoji;
+
+  const FeedCommentReactionRow({
+    required this.commentId,
+    required this.userId,
+    required this.emoji,
+  });
+
+  factory FeedCommentReactionRow.fromJson(Map<String, dynamic> json) {
+    return FeedCommentReactionRow(
+      commentId: json['comment_id'] as String,
+      userId: json['user_id'] as String,
+      emoji: json['emoji'] as String,
+    );
+  }
+}
+
 class FeedReactionSummary {
   final Map<String, int> counts;
   final String? myEmoji;
@@ -75,14 +95,50 @@ class FeedReactionSummary {
 
     return FeedReactionSummary(counts: counts, myEmoji: myEmoji);
   }
+
+  static Map<String, FeedReactionSummary> aggregateComments(
+    List<FeedCommentReactionRow> rows, {
+    required String? currentUserId,
+  }) {
+    final grouped = <String, List<FeedCommentReactionRow>>{};
+    for (final row in rows) {
+      grouped.putIfAbsent(row.commentId, () => []).add(row);
+    }
+
+    return {
+      for (final entry in grouped.entries)
+        entry.key: _summaryForComment(entry.value, currentUserId: currentUserId),
+    };
+  }
+
+  static FeedReactionSummary _summaryForComment(
+    List<FeedCommentReactionRow> rows, {
+    required String? currentUserId,
+  }) {
+    final counts = <String, int>{};
+    String? myEmoji;
+
+    for (final row in rows) {
+      counts[row.emoji] = (counts[row.emoji] ?? 0) + 1;
+      if (currentUserId != null && row.userId == currentUserId) {
+        myEmoji = row.emoji;
+      }
+    }
+
+    return FeedReactionSummary(counts: counts, myEmoji: myEmoji);
+  }
 }
 
 class FeedPost {
   final SocialNotification notification;
   final FeedReactionSummary reactions;
+  final String? imageUrl;
+  final int commentCount;
 
   const FeedPost({
     required this.notification,
     required this.reactions,
+    this.imageUrl,
+    this.commentCount = 0,
   });
 }

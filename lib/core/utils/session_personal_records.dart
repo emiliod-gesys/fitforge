@@ -52,6 +52,58 @@ abstract final class SessionPersonalRecords {
         }
       }
 
+      final strengthSets = completedSets.where((s) => !s.isCardio).toList();
+      if (strengthSets.isNotEmpty) {
+        double? maxWeight;
+        var maxWeightReps = 1;
+        for (final set in strengthSets) {
+          final effective = ExerciseLoad.effectiveWeightKg(
+            set,
+            exerciseName: ex.exerciseName,
+            loadMode: loadMode,
+            bodyWeightKg: bodyWeightKg,
+          );
+          if (effective == null || effective <= 0) continue;
+          if (maxWeight == null || effective > maxWeight) {
+            maxWeight = effective;
+            maxWeightReps = set.reps;
+          }
+        }
+        if (maxWeight != null) {
+          final prevMax = _find(
+            existing,
+            ex.exerciseId,
+            PersonalRecordType.strengthMaxWeight,
+          );
+          final prevStrength = _find(
+            existing,
+            ex.exerciseId,
+            PersonalRecordType.strength,
+          );
+          final previousMaxWeight = [
+            prevMax?.weight,
+            prevStrength?.weight,
+          ].whereType<double>().fold<double?>(
+                null,
+                (best, weight) => best == null || weight > best ? weight : best,
+              );
+          if (previousMaxWeight == null || previousMaxWeight < maxWeight) {
+            _replaceOrAdd(
+              highlights,
+              PersonalRecord(
+                id: '',
+                exerciseId: ex.exerciseId,
+                exerciseName: ex.exerciseName,
+                weight: maxWeight,
+                reps: maxWeightReps,
+                achievedAt: DateTime.now(),
+                recordType: PersonalRecordType.strengthMaxWeight,
+              ),
+            );
+          }
+        }
+      }
+
       final cardioSets = completedSets.where((s) => s.isCardio).toList();
       if (cardioSets.isEmpty) continue;
 

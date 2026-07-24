@@ -38,6 +38,7 @@ import '../services/routine_share_service.dart';
 import '../services/exercise_report_service.dart';
 import '../services/workout_service.dart';
 import '../models/trainer.dart';
+import '../models/feed_comment.dart';
 import '../models/feed_reaction.dart';
 import '../models/social.dart';
 import '../services/social_service.dart';
@@ -67,6 +68,9 @@ final pendingRunnerSurfaceProvider = StateProvider<RunningSurface?>((ref) => nul
 
 /// Resumen pendiente tras finalizar entreno; sobrevive a rebuilds de GoRouter sin `extra`.
 final pendingWorkoutSummaryProvider = StateProvider<WorkoutSummaryData?>((ref) => null);
+
+/// Id del entreno cuyo resumen está en pantalla; estabiliza la key del host al reconstruir rutas.
+final workoutSummarySessionIdProvider = StateProvider<String?>((ref) => null);
 final workoutServiceProvider = Provider((ref) => WorkoutService());
 final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider((ref) => ProfileService());
@@ -364,6 +368,11 @@ final socialNotificationsProvider = FutureProvider<List<SocialNotification>>((re
 final socialFeedProvider = FutureProvider<List<FeedPost>>((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getFeedWithReactions();
+});
+
+final feedPostDetailProvider = FutureProvider.family<FeedPostDetailData?, String>((ref, postId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(socialServiceProvider).getFeedPostDetail(postId);
 });
 
 final socialUnreadCountProvider = FutureProvider<int>((ref) async {

@@ -496,9 +496,79 @@
   "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Clasificaciones",
   "feedEmptyTitle": "Tu feed está vacío",
-  "feedEmptySubtitle": "Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.",
+  "feedEmptySubtitle": "Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.",
   "feedExpiryHint": "Solo se muestran publicaciones de las últimas 24 horas.",
   "feedLongPressToReact": "Mantén pulsado una publicación para reaccionar.",
+  "feedUserPost": "{name}: {text}",
+  "@feedUserPost": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "text": { "type": "String" }
+    }
+  },
+  "feedUserPostSelf": "{text}",
+  "@feedUserPostSelf": {
+    "placeholders": {
+      "text": { "type": "String" }
+    }
+  },
+  "feedUserPostMedia": "{name} compartió una publicación",
+  "@feedUserPostMedia": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "feedUserPostMediaSelf": "Compartiste una publicación",
+  "feedComposeTitle": "Nueva publicación",
+  "feedComposeHint": "¿Qué quieres compartir? (máx. 150 caracteres)",
+  "feedComposePublish": "Publicar",
+  "feedComposePublished": "Publicado en tu feed",
+  "feedComposeFailed": "No se pudo publicar: {error}",
+  "@feedComposeFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "feedComposeEmpty": "Añade texto, una foto o un PR reciente",
+  "feedComposeTextTooLong": "El texto debe tener 150 caracteres o menos",
+  "feedComposeImageTooLarge": "La imagen sigue siendo demasiado grande tras comprimirla",
+  "feedComposeAddPhoto": "Elegir foto",
+  "feedComposeTakePhoto": "Tomar foto",
+  "feedComposeAttachPr": "Adjuntar PR reciente",
+  "feedComposeNoPrs": "Aún no tienes récords personales registrados",
+  "feedComposeNoRecentPrs": "No hay PRs de los últimos 30 días",
+  "feedComposeCompressionHint": "Las fotos se comprimen antes de subirlas para ahorrar almacenamiento.",
+  "feedPostDetailTitle": "Publicación",
+  "feedPostNotFound": "Esta publicación ya no está disponible.",
+  "feedCommentsTitle": "Comentarios ({count})",
+  "@feedCommentsTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedCommentsEmpty": "Sin comentarios aún. ¡Sé el primero!",
+  "feedCommentHint": "Escribe un comentario…",
+  "feedCommentFailed": "No se pudo comentar: {error}",
+  "@feedCommentFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "feedCommentCount": "{count} comentarios",
+  "@feedCommentCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedCommentsUnavailable": "Los comentarios no están disponibles en publicaciones antiguas.",
+  "feedTapToComment": "Toca una publicación para ver comentarios.",
+  "feedLongPressCommentToReact": "Mantén pulsado un comentario para reaccionar.",
+  "feedDeletePostTitle": "Eliminar publicación",
+  "feedDeletePostBody": "Esta publicación se quitará del feed de todos.",
+  "feedPostDeleted": "Publicación eliminada",
+  "feedDeleteCommentTitle": "Eliminar comentario",
+  "feedDeleteCommentBody": "¿Quitar este comentario permanentemente?",
+  "feedCommentDeleted": "Comentario eliminado",
   "feedMilestoneUnlock": "{name} desbloqueó medalla {category} — {tier}",
   "@feedMilestoneUnlock": {
     "placeholders": {
@@ -639,6 +709,7 @@
   "@exercisesInRoutine": { "placeholders": { "count": {"type": "int"} } },
   "noWorkoutsRegistered": "Sin entrenamientos registrados",
   "workoutSummaryNotFound": "No se encontró ese entreno.",
+  "loadingWorkoutSummary": "Cargando resumen del entreno…",
   "shareImageFallback": "No se pudo generar la imagen; se compartió solo el texto.",
   "summaryTitle": "Resumen",
   "summaryWorkoutComplete": "¡Entreno completado!",
@@ -648,6 +719,21 @@
   "summaryPersonalRecords": "Récords personales nuevos",
   "summaryPersonalRecordBadge": "PR",
   "summaryExerciseImproved": "Mejor que la última vez",
+  "summaryUpdateRoutineTitle": "Actualizar rutina",
+  "summaryUpdateRoutineSubtitle": "Guarda los ejercicios y series de este entreno en \"{name}\".",
+  "@summaryUpdateRoutineSubtitle": { "placeholders": { "name": {"type": "String"} } },
+  "summaryUpdateRoutineCheckbox": "Actualizar mi rutina con este entrenamiento",
+  "summaryCreateRoutineTitle": "Guardar como rutina",
+  "summaryCreateRoutineSubtitle": "Convierte este entreno libre en una rutina reutilizable.",
+  "summaryCreateRoutineCheckbox": "Crear rutina de este entrenamiento",
+  "summaryRoutineUpdated": "Rutina \"{name}\" actualizada.",
+  "@summaryRoutineUpdated": { "placeholders": { "name": {"type": "String"} } },
+  "summaryRoutineCreated": "Rutina creada. Puedes ajustarla en el editor.",
+  "summaryRoutineFromWorkoutName": "{name} (rutina)",
+  "@summaryRoutineFromWorkoutName": { "placeholders": { "name": {"type": "String"} } },
+  "duplicate": "Duplicar",
+  "routineDuplicateName": "{name} (copia)",
+  "@routineDuplicateName": { "placeholders": { "name": {"type": "String"} } },
   "vsLastTime": "vs última vez ({name})",
   "@vsLastTime": { "placeholders": { "name": {"type": "String"} } },
   "exercisesCompleted": "Ejercicios realizados",
@@ -865,6 +951,9 @@
   "friendUnmuted": "{name} ya no está silenciado",
   "@friendUnmuted": { "placeholders": { "name": {"type": "String"} } },
   "friendWorkoutNotify": "Cuando un amigo complete un entreno, te avisaremos aquí.",
+  "socialNotificationsEmpty": "Sin notificaciones. Comentarios, reacciones, solicitudes de amistad y rutinas compartidas aparecerán aquí.",
+  "friendRequestAccepted": "Solicitud de amistad aceptada.",
+  "friendRequestDeclined": "Solicitud de amistad rechazada.",
   "noProfileAccess": "No tienes acceso a este perfil o no sois amigos.",
   "levelLabel": "Nivel: {level}",
   "@levelLabel": { "placeholders": { "level": {"type": "String"} } },

@@ -28,6 +28,7 @@ class PersonalRecordCard extends ConsumerWidget {
   String _subtitle(dynamic l10n) {
     switch (record.recordType) {
       case PersonalRecordType.strength:
+      case PersonalRecordType.strengthMaxWeight:
         return UnitConverter.formatSetLine(record.weight ?? 0, record.reps, unitSystem);
       case PersonalRecordType.cardioDistance:
         return l10n.cardioPrDistance;
@@ -46,6 +47,8 @@ class PersonalRecordCard extends ConsumerWidget {
     switch (record.recordType) {
       case PersonalRecordType.strength:
         return '${l10n.oneRm}: ${UnitConverter.formatMass(record.oneRepMax ?? 0, unitSystem)}';
+      case PersonalRecordType.strengthMaxWeight:
+        return '${l10n.maxWeight}: ${UnitConverter.formatMass(record.weight ?? 0, unitSystem)}';
       case PersonalRecordType.cardioDistance:
         return CardioFormat.distance(record.distanceMeters, unitSystem);
       case PersonalRecordType.cardioDuration:

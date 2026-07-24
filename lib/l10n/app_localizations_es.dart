@@ -1479,7 +1479,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get feedEmptySubtitle =>
-      'Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.';
+      'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.';
 
   @override
   String get feedExpiryHint =>
@@ -1488,6 +1488,129 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get feedLongPressToReact =>
       'Mantén pulsado una publicación para reaccionar.';
+
+  @override
+  String feedUserPost(String name, String text) {
+    return '$name: $text';
+  }
+
+  @override
+  String feedUserPostSelf(String text) {
+    return '$text';
+  }
+
+  @override
+  String feedUserPostMedia(String name) {
+    return '$name compartió una publicación';
+  }
+
+  @override
+  String get feedUserPostMediaSelf => 'Compartiste una publicación';
+
+  @override
+  String get feedComposeTitle => 'Nueva publicación';
+
+  @override
+  String get feedComposeHint => '¿Qué quieres compartir? (máx. 150 caracteres)';
+
+  @override
+  String get feedComposePublish => 'Publicar';
+
+  @override
+  String get feedComposePublished => 'Publicado en tu feed';
+
+  @override
+  String feedComposeFailed(String error) {
+    return 'No se pudo publicar: $error';
+  }
+
+  @override
+  String get feedComposeEmpty => 'Añade texto, una foto o un PR reciente';
+
+  @override
+  String get feedComposeTextTooLong =>
+      'El texto debe tener 150 caracteres o menos';
+
+  @override
+  String get feedComposeImageTooLarge =>
+      'La imagen sigue siendo demasiado grande tras comprimirla';
+
+  @override
+  String get feedComposeAddPhoto => 'Elegir foto';
+
+  @override
+  String get feedComposeTakePhoto => 'Tomar foto';
+
+  @override
+  String get feedComposeAttachPr => 'Adjuntar PR reciente';
+
+  @override
+  String get feedComposeNoPrs => 'Aún no tienes récords personales registrados';
+
+  @override
+  String get feedComposeNoRecentPrs => 'No hay PRs de los últimos 30 días';
+
+  @override
+  String get feedComposeCompressionHint =>
+      'Las fotos se comprimen antes de subirlas para ahorrar almacenamiento.';
+
+  @override
+  String get feedPostDetailTitle => 'Publicación';
+
+  @override
+  String get feedPostNotFound => 'Esta publicación ya no está disponible.';
+
+  @override
+  String feedCommentsTitle(int count) {
+    return 'Comentarios ($count)';
+  }
+
+  @override
+  String get feedCommentsEmpty => 'Sin comentarios aún. ¡Sé el primero!';
+
+  @override
+  String get feedCommentHint => 'Escribe un comentario…';
+
+  @override
+  String feedCommentFailed(String error) {
+    return 'No se pudo comentar: $error';
+  }
+
+  @override
+  String feedCommentCount(int count) {
+    return '$count comentarios';
+  }
+
+  @override
+  String get feedCommentsUnavailable =>
+      'Los comentarios no están disponibles en publicaciones antiguas.';
+
+  @override
+  String get feedTapToComment => 'Toca una publicación para ver comentarios.';
+
+  @override
+  String get feedLongPressCommentToReact =>
+      'Mantén pulsado un comentario para reaccionar.';
+
+  @override
+  String get feedDeletePostTitle => 'Eliminar publicación';
+
+  @override
+  String get feedDeletePostBody =>
+      'Esta publicación se quitará del feed de todos.';
+
+  @override
+  String get feedPostDeleted => 'Publicación eliminada';
+
+  @override
+  String get feedDeleteCommentTitle => 'Eliminar comentario';
+
+  @override
+  String get feedDeleteCommentBody =>
+      '¿Quitar este comentario permanentemente?';
+
+  @override
+  String get feedCommentDeleted => 'Comentario eliminado';
 
   @override
   String feedMilestoneUnlock(String name, String category, String tier) {
@@ -1805,6 +1928,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get workoutSummaryNotFound => 'No se encontró ese entreno.';
 
   @override
+  String get loadingWorkoutSummary => 'Cargando resumen del entreno…';
+
+  @override
   String get shareImageFallback =>
       'No se pudo generar la imagen; se compartió solo el texto.';
 
@@ -1830,6 +1956,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get summaryExerciseImproved => 'Mejor que la última vez';
+
+  @override
+  String get summaryUpdateRoutineTitle => 'Actualizar rutina';
+
+  @override
+  String summaryUpdateRoutineSubtitle(String name) {
+    return 'Guarda los ejercicios y series de este entreno en \"$name\".';
+  }
+
+  @override
+  String get summaryUpdateRoutineCheckbox =>
+      'Actualizar mi rutina con este entrenamiento';
+
+  @override
+  String get summaryCreateRoutineTitle => 'Guardar como rutina';
+
+  @override
+  String get summaryCreateRoutineSubtitle =>
+      'Convierte este entreno libre en una rutina reutilizable.';
+
+  @override
+  String get summaryCreateRoutineCheckbox =>
+      'Crear rutina de este entrenamiento';
+
+  @override
+  String summaryRoutineUpdated(String name) {
+    return 'Rutina \"$name\" actualizada.';
+  }
+
+  @override
+  String get summaryRoutineCreated =>
+      'Rutina creada. Puedes ajustarla en el editor.';
+
+  @override
+  String summaryRoutineFromWorkoutName(String name) {
+    return '$name (rutina)';
+  }
+
+  @override
+  String get duplicate => 'Duplicar';
+
+  @override
+  String routineDuplicateName(String name) {
+    return '$name (copia)';
+  }
 
   @override
   String vsLastTime(String name) {
@@ -2371,6 +2542,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get friendWorkoutNotify =>
       'Cuando un amigo complete un entreno, te avisaremos aquí.';
+
+  @override
+  String get socialNotificationsEmpty =>
+      'Sin notificaciones. Comentarios, reacciones, solicitudes de amistad y rutinas compartidas aparecerán aquí.';
+
+  @override
+  String get friendRequestAccepted => 'Solicitud de amistad aceptada.';
+
+  @override
+  String get friendRequestDeclined => 'Solicitud de amistad rechazada.';
 
   @override
   String get noProfileAccess =>

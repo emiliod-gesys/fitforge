@@ -10,9 +10,16 @@ abstract final class FeedReactionPicker {
   static Future<void> show(
     BuildContext context,
     WidgetRef ref, {
-    required String notificationId,
+    String? notificationId,
+    String? commentId,
     String? selectedEmoji,
+    String? refreshPostDetailId,
   }) async {
+    assert(
+      (notificationId != null) ^ (commentId != null),
+      'Provide notificationId or commentId',
+    );
+
     final emoji = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.card,
@@ -51,11 +58,19 @@ abstract final class FeedReactionPicker {
 
     if (emoji == null || !context.mounted) return;
 
-    await ref.read(socialServiceProvider).toggleFeedReaction(
-          notificationId: notificationId,
-          emoji: emoji,
-        );
-    ref.invalidate(socialFeedProvider);
+    final service = ref.read(socialServiceProvider);
+    if (commentId != null) {
+      await service.toggleFeedCommentReaction(commentId: commentId, emoji: emoji);
+      if (refreshPostDetailId != null) {
+        ref.invalidate(feedPostDetailProvider(refreshPostDetailId));
+      }
+    } else if (notificationId != null) {
+      await service.toggleFeedReaction(notificationId: notificationId, emoji: emoji);
+      ref.invalidate(socialFeedProvider);
+      if (refreshPostDetailId != null) {
+        ref.invalidate(feedPostDetailProvider(refreshPostDetailId));
+      }
+    }
   }
 }
 
@@ -65,18 +80,20 @@ class FeedReactionBar extends StatelessWidget {
     required this.entries,
     required this.myEmoji,
     required this.onEmojiTap,
+    this.compact = false,
   });
 
   final List<MapEntry<String, int>> entries;
   final String? myEmoji;
   final ValueChanged<String> onEmojiTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     if (entries.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: EdgeInsets.only(top: compact ? 4 : 8),
       child: Wrap(
         spacing: 6,
         runSpacing: 6,
@@ -86,7 +103,10 @@ class FeedReactionBar extends StatelessWidget {
             onTap: () => onEmojiTap(entry.key),
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 6 : 8,
+                vertical: compact ? 2 : 4,
+              ),
               decoration: BoxDecoration(
                 color: isMine
                     ? context.accentColor.withValues(alpha: 0.18)
@@ -99,7 +119,7 @@ class FeedReactionBar extends StatelessWidget {
               child: Text(
                 '${entry.key} ${entry.value}',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: compact ? 12 : 13,
                   fontWeight: isMine ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),

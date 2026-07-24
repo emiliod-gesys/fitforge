@@ -299,16 +299,19 @@ class _FriendPersonalRecordsSectionState
       );
     }
     final weight = UnitConverter.kgToDisplay(pr.weight ?? 0, unitSystem);
-    final orm = UnitConverter.kgToDisplay(pr.oneRepMax ?? 0, unitSystem);
     final label = UnitConverter.massLabel(unitSystem);
+    final subtitle = pr.recordType == PersonalRecordType.strengthMaxWeight
+        ? '${l10n.maxWeight}: ${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps}'
+        : () {
+            final orm = UnitConverter.kgToDisplay(pr.oneRepMax ?? 0, unitSystem);
+            return '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label';
+          }();
     return Card(
       color: AppColors.card,
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: LocalizedExerciseName(pr.exerciseName, exerciseId: pr.exerciseId),
-        subtitle: Text(
-          '${weight.toStringAsFixed(1)} $label × ${pr.reps} ${l10n.reps} · ${l10n.oneRm} ~${orm.toStringAsFixed(1)} $label',
-        ),
+        subtitle: Text(subtitle),
         trailing: Text(
           DateFormat('d MMM', widget.locale).format(pr.achievedAt),
           style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
@@ -331,6 +334,7 @@ String _friendCardioPrLine(PersonalRecord pr, String unitSystem, AppLocalization
     case PersonalRecordType.cardioDifficulty:
       return '${l10n.cardioPrDifficulty}: ${CardioFormat.difficulty(pr.inclinePercent)}';
     case PersonalRecordType.strength:
+    case PersonalRecordType.strengthMaxWeight:
       return '';
   }
 }

@@ -281,7 +281,9 @@ class PersonalRecord {
     this.steps,
   });
 
-  bool get isCardio => recordType != PersonalRecordType.strength;
+  bool get isCardio =>
+      recordType != PersonalRecordType.strength &&
+      recordType != PersonalRecordType.strengthMaxWeight;
 
   factory PersonalRecord.fromJson(Map<String, dynamic> json) {
     return PersonalRecord(

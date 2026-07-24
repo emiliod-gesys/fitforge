@@ -750,6 +750,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
       if (!mounted) return;
       ref.read(pendingWorkoutSummaryProvider.notifier).state = summary;
+      ref.read(workoutSummarySessionIdProvider.notifier).state = summary.workout.id;
       context.pushReplacement('/workout/summary', extra: summary);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _invalidateWorkoutProviders();

@@ -978,6 +978,38 @@ class WorkoutService {
         );
       }
 
+      if (strengthSets.isNotEmpty) {
+        WorkoutSet? maxWeightSet;
+        for (final set in strengthSets) {
+          final weight = set.weight!;
+          if (maxWeightSet == null || weight > maxWeightSet.weight!) {
+            maxWeightSet = set;
+          }
+        }
+        if (maxWeightSet != null) {
+          final previousMax = await _maxRecordedWeightKg(
+            userId: userId,
+            exerciseId: ex.exerciseId,
+          );
+          if (maxWeightSet.weight! <= previousMax) continue;
+
+          await _upsertPersonalRecord(
+            userId: userId,
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            recordType: PersonalRecordType.strengthMaxWeight,
+            payload: {
+              'weight': maxWeightSet.weight,
+              'reps': maxWeightSet.reps,
+            },
+            isBetter: (existing) =>
+                existing == null ||
+                ((existing['weight'] as num?)?.toDouble() ?? 0) <
+                    maxWeightSet!.weight!,
+          );
+        }
+      }
+
       final cardioSets = completedSets.where((s) => s.isCardio).toList();
       if (cardioSets.isEmpty) continue;
 
@@ -1071,6 +1103,28 @@ class WorkoutService {
         }
       }
     }
+  }
+
+  Future<double> _maxRecordedWeightKg({
+    required String userId,
+    required String exerciseId,
+  }) async {
+    final rows = await _client
+        .from('personal_records')
+        .select('weight, record_type')
+        .eq('user_id', userId)
+        .eq('exercise_id', exerciseId)
+        .inFilter('record_type', [
+          PersonalRecordType.strength.toJson(),
+          PersonalRecordType.strengthMaxWeight.toJson(),
+        ]);
+
+    var maxWeight = 0.0;
+    for (final row in rows as List) {
+      final weight = (row['weight'] as num?)?.toDouble() ?? 0;
+      if (weight > maxWeight) maxWeight = weight;
+    }
+    return maxWeight;
   }
 
   Future<void> _upsertPersonalRecord({

@@ -518,6 +518,7 @@ class CardioLoggingConfig {
 
 enum PersonalRecordType {
   strength,
+  strengthMaxWeight,
   cardioDistance,
   cardioDuration,
   cardioSteps,
@@ -526,6 +527,8 @@ enum PersonalRecordType {
 
   static PersonalRecordType fromJson(String? value) {
     switch (value) {
+      case 'strength_max_weight':
+        return PersonalRecordType.strengthMaxWeight;
       case 'cardio_distance':
         return PersonalRecordType.cardioDistance;
       case 'cardio_duration':
@@ -545,6 +548,8 @@ enum PersonalRecordType {
     switch (this) {
       case PersonalRecordType.strength:
         return 'strength';
+      case PersonalRecordType.strengthMaxWeight:
+        return 'strength_max_weight';
       case PersonalRecordType.cardioDistance:
         return 'cardio_distance';
       case PersonalRecordType.cardioDuration:

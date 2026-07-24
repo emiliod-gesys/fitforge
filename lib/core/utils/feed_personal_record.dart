@@ -48,6 +48,7 @@ abstract final class FeedPersonalRecord {
   static String formatValue(PersonalRecord pr, String unitSystem) {
     switch (pr.recordType) {
       case PersonalRecordType.strength:
+      case PersonalRecordType.strengthMaxWeight:
         return UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem);
       case PersonalRecordType.cardioDistance:
         return CardioFormat.distance(pr.distanceMeters, unitSystem);

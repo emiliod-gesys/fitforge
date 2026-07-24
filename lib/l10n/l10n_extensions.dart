@@ -399,6 +399,15 @@ extension ProfileL10n on AppLocalizations {
       final workoutName = item.feedWorkoutName ?? item.message;
       return feedWorkoutCompletedSelf(workoutName);
     }
+    if (item.isUserPost) {
+      final text = item.feedPostText;
+      if (text != null && text.isNotEmpty) {
+        if (isSelf) return feedUserPostSelf(text);
+        return feedUserPost(name, text);
+      }
+      if (isSelf) return feedUserPostMediaSelf;
+      return feedUserPostMedia(name);
+    }
     return item.message;
   }
 

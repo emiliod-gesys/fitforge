@@ -115,6 +115,11 @@ abstract final class AiCoachContextBuilder {
           '- ${pr.exerciseName}: ${UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem)} '
           '(1RM ~${UnitConverter.formatMass(pr.oneRepMax ?? 0, unitSystem)})',
         );
+      } else if (pr.recordType == PersonalRecordType.strengthMaxWeight) {
+        buffer.writeln(
+          '- ${pr.exerciseName}: ${UnitConverter.formatMass(pr.weight ?? 0, unitSystem)} '
+          '(peso máx × ${pr.reps} reps)',
+        );
       } else {
         buffer.writeln('- ${pr.exerciseName}: ${_cardioRecordLine(pr, unitSystem)}');
       }
@@ -125,6 +130,8 @@ abstract final class AiCoachContextBuilder {
     switch (pr.recordType) {
       case PersonalRecordType.strength:
         return pr.oneRepMax ?? 0;
+      case PersonalRecordType.strengthMaxWeight:
+        return pr.weight ?? 0;
       case PersonalRecordType.cardioDistance:
         return pr.distanceMeters ?? 0;
       case PersonalRecordType.cardioDuration:
@@ -151,6 +158,7 @@ abstract final class AiCoachContextBuilder {
       case PersonalRecordType.cardioDifficulty:
         return 'dificultad ${CardioFormat.difficulty(pr.inclinePercent)}';
       case PersonalRecordType.strength:
+      case PersonalRecordType.strengthMaxWeight:
         return '';
     }
   }

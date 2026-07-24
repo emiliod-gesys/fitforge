@@ -10,14 +10,18 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../core/hyrox/hyrox_validation.dart';
+import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/workout/workout_validation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/cardio_format.dart';
+import '../../core/utils/routine_workout_sync.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../core/utils/workout_muscle_groups.dart';
 import '../../core/utils/workout_share_capture.dart';
 import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/exercise.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
@@ -46,8 +50,31 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
   bool _finishing = false;
   bool _allowPop = false;
   final Set<String> _selectedPrKeys = {};
+  bool _updateRoutineFromWorkout = false;
+  bool _createRoutineFromWorkout = false;
+  String? _pendingRoutineEditId;
 
   WorkoutSummaryData get summary => widget.summary;
+
+  bool get _canUpdateLinkedRoutine =>
+      summary.workout.routineId != null &&
+      !summary.isHyrox &&
+      !summary.isRunner &&
+      RoutineWorkoutSync.hasSavableExercises(summary.workout);
+
+  bool get _canCreateRoutineFromWorkout =>
+      summary.workout.routineId == null &&
+      !summary.isHyrox &&
+      !summary.isRunner &&
+      RoutineWorkoutSync.hasSavableExercises(summary.workout);
+
+  Future<List<Exercise>> _fullExerciseCatalog() async {
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+    final customs = (await ref.read(customExerciseRepositoryProvider).loadAll())
+        .map((c) => c.toExercise())
+        .toList();
+    return [...catalog, ...customs];
+  }
 
   Rect? _shareOriginRect() {
     final context = _shareButtonKey.currentContext;
@@ -136,6 +163,68 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     return ref.read(socialServiceProvider).publishPersonalRecords(selected);
   }
 
+  Future<void> _applyRoutineActions() async {
+    final l10n = context.l10n;
+    final catalog = await _fullExerciseCatalog();
+
+    if (_updateRoutineFromWorkout && _canUpdateLinkedRoutine) {
+      final routineId = summary.workout.routineId!;
+      final existing = await ref.read(routineServiceProvider).getRoutineById(routineId);
+      if (existing == null) {
+        throw StateError('routine_not_found');
+      }
+      if (existing.isHyroxSystem || existing.isRunnerSystem) {
+        throw StateError('routine_system_locked');
+      }
+
+      final exercises = RoutineWorkoutSync.routineExercisesFromWorkout(
+        summary.workout,
+        catalog: catalog,
+      );
+      if (exercises.isEmpty) return;
+
+      final muscles = trainedMuscleGroupsForWorkout(summary.workout, catalog);
+      await ref.read(routineServiceProvider).updateRoutine(
+            existing.copyWith(
+              exercises: exercises,
+              targetMuscles: muscles.isNotEmpty ? muscles : existing.targetMuscles,
+            ),
+          );
+      ref.invalidate(routinesProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.summaryRoutineUpdated(existing.name))),
+        );
+      }
+    }
+
+    if (_createRoutineFromWorkout && _canCreateRoutineFromWorkout) {
+      if (!await ensureCanCreateRoutine(context, ref)) return;
+
+      final muscles = trainedMuscleGroupsForWorkout(summary.workout, catalog);
+      final draft = RoutineWorkoutSync.routineFromWorkout(
+        summary.workout,
+        catalog: catalog,
+        name: l10n.summaryRoutineFromWorkoutName(summary.workout.name),
+        targetMuscles: muscles,
+      );
+
+      if (draft.exercises.isEmpty) return;
+
+      final created = await ref.read(routineServiceProvider).createRoutine(draft);
+      ref.invalidate(routinesProvider);
+      ref.invalidate(routineLimitStatusProvider);
+      _pendingRoutineEditId = created.id;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.summaryRoutineCreated)),
+        );
+      }
+    }
+  }
+
   Future<void> _finishSummary() async {
     if (_finishing) return;
     setState(() => _finishing = true);
@@ -157,10 +246,15 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
       }
     }
 
-    if (!mounted) return;
+    try {
+      await _applyRoutineActions();
+    } catch (e) {
+      if (mounted) {
+        showRoutineSaveErrorSnackBar(context, e);
+      }
+    }
 
-    ref.read(pendingWorkoutSummaryProvider.notifier).state = null;
-    ref.invalidate(profileProvider);
+    if (!mounted) return;
 
     final messenger = ScaffoldMessenger.of(context);
     if (publishedCount > 0) {
@@ -170,10 +264,22 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     }
 
     setState(() => _allowPop = true);
-    if (context.canPop()) {
+    final pendingEditId = _pendingRoutineEditId;
+    final reviewingPastWorkout = context.canPop();
+
+    if (reviewingPastWorkout) {
       context.pop();
     } else {
       context.go('/');
+      Future.delayed(const Duration(milliseconds: 400), () {
+        ref.read(pendingWorkoutSummaryProvider.notifier).state = null;
+        ref.read(workoutSummarySessionIdProvider.notifier).state = null;
+        ref.invalidate(profileProvider);
+      });
+    }
+
+    if (pendingEditId != null && context.mounted) {
+      context.push('/routines/$pendingEditId/edit');
     }
   }
 
@@ -307,6 +413,31 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
                     l10n: l10n,
                   ),
                 ],
+                if (_canUpdateLinkedRoutine) ...[
+                  const SizedBox(height: 20),
+                  _RoutineSyncSection(
+                    title: l10n.summaryUpdateRoutineTitle,
+                    subtitle: l10n.summaryUpdateRoutineSubtitle(
+                      summary.workout.routineName ?? summary.workout.name,
+                    ),
+                    checkboxLabel: l10n.summaryUpdateRoutineCheckbox,
+                    checked: _updateRoutineFromWorkout,
+                    icon: Icons.sync_outlined,
+                    onChanged: (value) => setState(() => _updateRoutineFromWorkout = value),
+                  ),
+                ],
+                if (_canCreateRoutineFromWorkout) ...[
+                  const SizedBox(height: 20),
+                  _RoutineSyncSection(
+                    title: l10n.summaryCreateRoutineTitle,
+                    subtitle: l10n.summaryCreateRoutineSubtitle,
+                    checkboxLabel: l10n.summaryCreateRoutineCheckbox,
+                    checked: _createRoutineFromWorkout,
+                    icon: Icons.playlist_add_outlined,
+                    onChanged: (value) => setState(() => _createRoutineFromWorkout = value),
+                  ),
+                ],
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -881,6 +1012,72 @@ class _PrBadge extends StatelessWidget {
   }
 }
 
+class _RoutineSyncSection extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String checkboxLabel;
+  final bool checked;
+  final IconData icon;
+  final ValueChanged<bool> onChanged;
+
+  const _RoutineSyncSection({
+    required this.title,
+    required this.subtitle,
+    required this.checkboxLabel,
+    required this.checked,
+    required this.icon,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, color: context.accentColor, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            CheckboxListTile(
+              value: checked,
+              onChanged: (value) => onChanged(value ?? false),
+              activeColor: context.accentColor,
+              title: Text(checkboxLabel),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _FeedShareSection extends StatelessWidget {
   final List<PersonalRecord> records;
   final String unitSystem;
@@ -956,36 +1153,45 @@ class _FeedShareSection extends StatelessWidget {
   }
 }
 
-/// Fallback cuando GoRouter reconstruye `/workout/summary` sin `extra`.
-class WorkoutSummaryMissingScreen extends ConsumerStatefulWidget {
-  const WorkoutSummaryMissingScreen({super.key});
+/// Mantiene el resumen en memoria local aunque GoRouter reconstruya la ruta sin `extra`.
+class WorkoutSummaryHost extends StatefulWidget {
+  final WorkoutSummaryData? initialSummary;
+
+  const WorkoutSummaryHost({super.key, required this.initialSummary});
 
   @override
-  ConsumerState<WorkoutSummaryMissingScreen> createState() => _WorkoutSummaryMissingScreenState();
+  State<WorkoutSummaryHost> createState() => _WorkoutSummaryHostState();
 }
 
-class _WorkoutSummaryMissingScreenState extends ConsumerState<WorkoutSummaryMissingScreen> {
+class _WorkoutSummaryHostState extends State<WorkoutSummaryHost> {
+  WorkoutSummaryData? _summary;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final pending = ref.read(pendingWorkoutSummaryProvider);
-      if (pending == null) {
-        context.go('/');
-      }
-    });
+    _summary = widget.initialSummary;
+  }
+
+  @override
+  void didUpdateWidget(covariant WorkoutSummaryHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _summary ??= widget.initialSummary;
   }
 
   @override
   Widget build(BuildContext context) {
-    final pending = ref.watch(pendingWorkoutSummaryProvider);
-    if (pending != null) {
-      return WorkoutSummaryScreen(summary: pending);
+    final summary = _summary;
+    if (summary == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/');
+        }
+      });
+      return const SizedBox.shrink();
     }
-
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return WorkoutSummaryScreen(summary: summary);
   }
 }

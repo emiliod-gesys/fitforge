@@ -1470,13 +1470,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedEmptySubtitle =>
-      'When you or friends work out, level up, or unlock badges, you\'ll see it here. Posts last 24 hours.';
+      'When you or friends work out, level up, unlock badges, or post updates, you\'ll see it here. Posts last 24 hours.';
 
   @override
   String get feedExpiryHint => 'Only posts from the last 24 hours are shown.';
 
   @override
   String get feedLongPressToReact => 'Long-press a post to react.';
+
+  @override
+  String feedUserPost(String name, String text) {
+    return '$name: $text';
+  }
+
+  @override
+  String feedUserPostSelf(String text) {
+    return '$text';
+  }
+
+  @override
+  String feedUserPostMedia(String name) {
+    return '$name shared an update';
+  }
+
+  @override
+  String get feedUserPostMediaSelf => 'You shared an update';
+
+  @override
+  String get feedComposeTitle => 'New post';
+
+  @override
+  String get feedComposeHint => 'What\'s on your mind? (150 characters max)';
+
+  @override
+  String get feedComposePublish => 'Post';
+
+  @override
+  String get feedComposePublished => 'Posted to your feed';
+
+  @override
+  String feedComposeFailed(String error) {
+    return 'Could not post: $error';
+  }
+
+  @override
+  String get feedComposeEmpty => 'Add text, a photo, or a recent PR';
+
+  @override
+  String get feedComposeTextTooLong => 'Text must be 150 characters or less';
+
+  @override
+  String get feedComposeImageTooLarge => 'Image is too large after compression';
+
+  @override
+  String get feedComposeAddPhoto => 'Choose photo';
+
+  @override
+  String get feedComposeTakePhoto => 'Take photo';
+
+  @override
+  String get feedComposeAttachPr => 'Attach recent PR';
+
+  @override
+  String get feedComposeNoPrs => 'You don\'t have any personal records yet';
+
+  @override
+  String get feedComposeNoRecentPrs => 'No PRs from the last 30 days';
+
+  @override
+  String get feedComposeCompressionHint =>
+      'Photos are compressed before upload to save storage.';
+
+  @override
+  String get feedPostDetailTitle => 'Post';
+
+  @override
+  String get feedPostNotFound => 'This post is no longer available.';
+
+  @override
+  String feedCommentsTitle(int count) {
+    return 'Comments ($count)';
+  }
+
+  @override
+  String get feedCommentsEmpty => 'No comments yet. Be the first!';
+
+  @override
+  String get feedCommentHint => 'Write a comment…';
+
+  @override
+  String feedCommentFailed(String error) {
+    return 'Could not post comment: $error';
+  }
+
+  @override
+  String feedCommentCount(int count) {
+    return '$count comments';
+  }
+
+  @override
+  String get feedCommentsUnavailable =>
+      'Comments are not available on older posts.';
+
+  @override
+  String get feedTapToComment => 'Tap a post to view comments.';
+
+  @override
+  String get feedLongPressCommentToReact => 'Long-press a comment to react.';
+
+  @override
+  String get feedDeletePostTitle => 'Delete post';
+
+  @override
+  String get feedDeletePostBody =>
+      'This post will be removed from everyone\'s feed.';
+
+  @override
+  String get feedPostDeleted => 'Post deleted';
+
+  @override
+  String get feedDeleteCommentTitle => 'Delete comment';
+
+  @override
+  String get feedDeleteCommentBody => 'Remove this comment permanently?';
+
+  @override
+  String get feedCommentDeleted => 'Comment deleted';
 
   @override
   String feedMilestoneUnlock(String name, String category, String tier) {
@@ -1790,6 +1909,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutSummaryNotFound => 'That workout could not be found.';
 
   @override
+  String get loadingWorkoutSummary => 'Loading workout summary…';
+
+  @override
   String get shareImageFallback =>
       'Could not generate the image; shared text only.';
 
@@ -1815,6 +1937,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summaryExerciseImproved => 'Better than last time';
+
+  @override
+  String get summaryUpdateRoutineTitle => 'Update routine';
+
+  @override
+  String summaryUpdateRoutineSubtitle(String name) {
+    return 'Save the exercises and sets from this workout to \"$name\".';
+  }
+
+  @override
+  String get summaryUpdateRoutineCheckbox =>
+      'Update my routine with this workout';
+
+  @override
+  String get summaryCreateRoutineTitle => 'Save as routine';
+
+  @override
+  String get summaryCreateRoutineSubtitle =>
+      'Turn this free workout into a reusable routine.';
+
+  @override
+  String get summaryCreateRoutineCheckbox =>
+      'Create a routine from this workout';
+
+  @override
+  String summaryRoutineUpdated(String name) {
+    return 'Routine \"$name\" updated.';
+  }
+
+  @override
+  String get summaryRoutineCreated =>
+      'Routine created. You can adjust it in the editor.';
+
+  @override
+  String summaryRoutineFromWorkoutName(String name) {
+    return '$name (routine)';
+  }
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String routineDuplicateName(String name) {
+    return '$name (copy)';
+  }
 
   @override
   String vsLastTime(String name) {
@@ -2353,6 +2520,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get friendWorkoutNotify =>
       'When a friend completes a workout, we\'ll notify you here.';
+
+  @override
+  String get socialNotificationsEmpty =>
+      'No notifications yet. Comments, reactions, friend requests, and routine shares will appear here.';
+
+  @override
+  String get friendRequestAccepted => 'Friend request accepted.';
+
+  @override
+  String get friendRequestDeclined => 'Friend request declined.';
 
   @override
   String get noProfileAccess =>

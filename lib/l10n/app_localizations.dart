@@ -2729,7 +2729,7 @@ abstract class AppLocalizations {
   /// No description provided for @feedEmptySubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Cuando tú o tus amigos entrenen, suban de nivel o desbloqueen medallas, lo verás aquí. Las publicaciones duran 24 horas.'**
+  /// **'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.'**
   String get feedEmptySubtitle;
 
   /// No description provided for @feedExpiryHint.
@@ -2743,6 +2743,210 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Mantén pulsado una publicación para reaccionar.'**
   String get feedLongPressToReact;
+
+  /// No description provided for @feedUserPost.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}: {text}'**
+  String feedUserPost(String name, String text);
+
+  /// No description provided for @feedUserPostSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'{text}'**
+  String feedUserPostSelf(String text);
+
+  /// No description provided for @feedUserPostMedia.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} compartió una publicación'**
+  String feedUserPostMedia(String name);
+
+  /// No description provided for @feedUserPostMediaSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartiste una publicación'**
+  String get feedUserPostMediaSelf;
+
+  /// No description provided for @feedComposeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva publicación'**
+  String get feedComposeTitle;
+
+  /// No description provided for @feedComposeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué quieres compartir? (máx. 150 caracteres)'**
+  String get feedComposeHint;
+
+  /// No description provided for @feedComposePublish.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicar'**
+  String get feedComposePublish;
+
+  /// No description provided for @feedComposePublished.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicado en tu feed'**
+  String get feedComposePublished;
+
+  /// No description provided for @feedComposeFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo publicar: {error}'**
+  String feedComposeFailed(String error);
+
+  /// No description provided for @feedComposeEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade texto, una foto o un PR reciente'**
+  String get feedComposeEmpty;
+
+  /// No description provided for @feedComposeTextTooLong.
+  ///
+  /// In es, this message translates to:
+  /// **'El texto debe tener 150 caracteres o menos'**
+  String get feedComposeTextTooLong;
+
+  /// No description provided for @feedComposeImageTooLarge.
+  ///
+  /// In es, this message translates to:
+  /// **'La imagen sigue siendo demasiado grande tras comprimirla'**
+  String get feedComposeImageTooLarge;
+
+  /// No description provided for @feedComposeAddPhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir foto'**
+  String get feedComposeAddPhoto;
+
+  /// No description provided for @feedComposeTakePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get feedComposeTakePhoto;
+
+  /// No description provided for @feedComposeAttachPr.
+  ///
+  /// In es, this message translates to:
+  /// **'Adjuntar PR reciente'**
+  String get feedComposeAttachPr;
+
+  /// No description provided for @feedComposeNoPrs.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes récords personales registrados'**
+  String get feedComposeNoPrs;
+
+  /// No description provided for @feedComposeNoRecentPrs.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay PRs de los últimos 30 días'**
+  String get feedComposeNoRecentPrs;
+
+  /// No description provided for @feedComposeCompressionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Las fotos se comprimen antes de subirlas para ahorrar almacenamiento.'**
+  String get feedComposeCompressionHint;
+
+  /// No description provided for @feedPostDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicación'**
+  String get feedPostDetailTitle;
+
+  /// No description provided for @feedPostNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta publicación ya no está disponible.'**
+  String get feedPostNotFound;
+
+  /// No description provided for @feedCommentsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comentarios ({count})'**
+  String feedCommentsTitle(int count);
+
+  /// No description provided for @feedCommentsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin comentarios aún. ¡Sé el primero!'**
+  String get feedCommentsEmpty;
+
+  /// No description provided for @feedCommentHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un comentario…'**
+  String get feedCommentHint;
+
+  /// No description provided for @feedCommentFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo comentar: {error}'**
+  String feedCommentFailed(String error);
+
+  /// No description provided for @feedCommentCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} comentarios'**
+  String feedCommentCount(int count);
+
+  /// No description provided for @feedCommentsUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Los comentarios no están disponibles en publicaciones antiguas.'**
+  String get feedCommentsUnavailable;
+
+  /// No description provided for @feedTapToComment.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca una publicación para ver comentarios.'**
+  String get feedTapToComment;
+
+  /// No description provided for @feedLongPressCommentToReact.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantén pulsado un comentario para reaccionar.'**
+  String get feedLongPressCommentToReact;
+
+  /// No description provided for @feedDeletePostTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar publicación'**
+  String get feedDeletePostTitle;
+
+  /// No description provided for @feedDeletePostBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta publicación se quitará del feed de todos.'**
+  String get feedDeletePostBody;
+
+  /// No description provided for @feedPostDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicación eliminada'**
+  String get feedPostDeleted;
+
+  /// No description provided for @feedDeleteCommentTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar comentario'**
+  String get feedDeleteCommentTitle;
+
+  /// No description provided for @feedDeleteCommentBody.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar este comentario permanentemente?'**
+  String get feedDeleteCommentBody;
+
+  /// No description provided for @feedCommentDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Comentario eliminado'**
+  String get feedCommentDeleted;
 
   /// No description provided for @feedMilestoneUnlock.
   ///
@@ -3254,6 +3458,12 @@ abstract class AppLocalizations {
   /// **'No se encontró ese entreno.'**
   String get workoutSummaryNotFound;
 
+  /// No description provided for @loadingWorkoutSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargando resumen del entreno…'**
+  String get loadingWorkoutSummary;
+
   /// No description provided for @shareImageFallback.
   ///
   /// In es, this message translates to:
@@ -3301,6 +3511,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Mejor que la última vez'**
   String get summaryExerciseImproved;
+
+  /// No description provided for @summaryUpdateRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar rutina'**
+  String get summaryUpdateRoutineTitle;
+
+  /// No description provided for @summaryUpdateRoutineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda los ejercicios y series de este entreno en \"{name}\".'**
+  String summaryUpdateRoutineSubtitle(String name);
+
+  /// No description provided for @summaryUpdateRoutineCheckbox.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar mi rutina con este entrenamiento'**
+  String get summaryUpdateRoutineCheckbox;
+
+  /// No description provided for @summaryCreateRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar como rutina'**
+  String get summaryCreateRoutineTitle;
+
+  /// No description provided for @summaryCreateRoutineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Convierte este entreno libre en una rutina reutilizable.'**
+  String get summaryCreateRoutineSubtitle;
+
+  /// No description provided for @summaryCreateRoutineCheckbox.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rutina de este entrenamiento'**
+  String get summaryCreateRoutineCheckbox;
+
+  /// No description provided for @summaryRoutineUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina \"{name}\" actualizada.'**
+  String summaryRoutineUpdated(String name);
+
+  /// No description provided for @summaryRoutineCreated.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina creada. Puedes ajustarla en el editor.'**
+  String get summaryRoutineCreated;
+
+  /// No description provided for @summaryRoutineFromWorkoutName.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} (rutina)'**
+  String summaryRoutineFromWorkoutName(String name);
+
+  /// No description provided for @duplicate.
+  ///
+  /// In es, this message translates to:
+  /// **'Duplicar'**
+  String get duplicate;
+
+  /// No description provided for @routineDuplicateName.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} (copia)'**
+  String routineDuplicateName(String name);
 
   /// No description provided for @vsLastTime.
   ///
@@ -4201,6 +4477,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cuando un amigo complete un entreno, te avisaremos aquí.'**
   String get friendWorkoutNotify;
+
+  /// No description provided for @socialNotificationsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin notificaciones. Comentarios, reacciones, solicitudes de amistad y rutinas compartidas aparecerán aquí.'**
+  String get socialNotificationsEmpty;
+
+  /// No description provided for @friendRequestAccepted.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud de amistad aceptada.'**
+  String get friendRequestAccepted;
+
+  /// No description provided for @friendRequestDeclined.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud de amistad rechazada.'**
+  String get friendRequestDeclined;
 
   /// No description provided for @noProfileAccess.
   ///

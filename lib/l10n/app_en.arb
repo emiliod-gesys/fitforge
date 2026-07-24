@@ -489,9 +489,79 @@
   "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Leaderboards",
   "feedEmptyTitle": "Your feed is empty",
-  "feedEmptySubtitle": "When you or friends work out, level up, or unlock badges, you'll see it here. Posts last 24 hours.",
+  "feedEmptySubtitle": "When you or friends work out, level up, unlock badges, or post updates, you'll see it here. Posts last 24 hours.",
   "feedExpiryHint": "Only posts from the last 24 hours are shown.",
   "feedLongPressToReact": "Long-press a post to react.",
+  "feedUserPost": "{name}: {text}",
+  "@feedUserPost": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "text": { "type": "String" }
+    }
+  },
+  "feedUserPostSelf": "{text}",
+  "@feedUserPostSelf": {
+    "placeholders": {
+      "text": { "type": "String" }
+    }
+  },
+  "feedUserPostMedia": "{name} shared an update",
+  "@feedUserPostMedia": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "feedUserPostMediaSelf": "You shared an update",
+  "feedComposeTitle": "New post",
+  "feedComposeHint": "What's on your mind? (150 characters max)",
+  "feedComposePublish": "Post",
+  "feedComposePublished": "Posted to your feed",
+  "feedComposeFailed": "Could not post: {error}",
+  "@feedComposeFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "feedComposeEmpty": "Add text, a photo, or a recent PR",
+  "feedComposeTextTooLong": "Text must be 150 characters or less",
+  "feedComposeImageTooLarge": "Image is too large after compression",
+  "feedComposeAddPhoto": "Choose photo",
+  "feedComposeTakePhoto": "Take photo",
+  "feedComposeAttachPr": "Attach recent PR",
+  "feedComposeNoPrs": "You don't have any personal records yet",
+  "feedComposeNoRecentPrs": "No PRs from the last 30 days",
+  "feedComposeCompressionHint": "Photos are compressed before upload to save storage.",
+  "feedPostDetailTitle": "Post",
+  "feedPostNotFound": "This post is no longer available.",
+  "feedCommentsTitle": "Comments ({count})",
+  "@feedCommentsTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedCommentsEmpty": "No comments yet. Be the first!",
+  "feedCommentHint": "Write a comment…",
+  "feedCommentFailed": "Could not post comment: {error}",
+  "@feedCommentFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "feedCommentCount": "{count} comments",
+  "@feedCommentCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "feedCommentsUnavailable": "Comments are not available on older posts.",
+  "feedTapToComment": "Tap a post to view comments.",
+  "feedLongPressCommentToReact": "Long-press a comment to react.",
+  "feedDeletePostTitle": "Delete post",
+  "feedDeletePostBody": "This post will be removed from everyone's feed.",
+  "feedPostDeleted": "Post deleted",
+  "feedDeleteCommentTitle": "Delete comment",
+  "feedDeleteCommentBody": "Remove this comment permanently?",
+  "feedCommentDeleted": "Comment deleted",
   "feedMilestoneUnlock": "{name} unlocked {category} badge — {tier}",
   "@feedMilestoneUnlock": {
     "placeholders": {
@@ -596,6 +666,7 @@
   "noWorkoutsYet": "No workouts yet. Start today!",
   "noWorkoutsRegistered": "No workouts recorded",
   "workoutSummaryNotFound": "That workout could not be found.",
+  "loadingWorkoutSummary": "Loading workout summary…",
   "shareImageFallback": "Could not generate the image; shared text only.",
   "startToday": "Start today",
   "viewFullHistory": "View full history",
@@ -639,6 +710,21 @@
   "summaryPersonalRecords": "New personal records",
   "summaryPersonalRecordBadge": "PR",
   "summaryExerciseImproved": "Better than last time",
+  "summaryUpdateRoutineTitle": "Update routine",
+  "summaryUpdateRoutineSubtitle": "Save the exercises and sets from this workout to \"{name}\".",
+  "@summaryUpdateRoutineSubtitle": { "placeholders": { "name": {"type": "String"} } },
+  "summaryUpdateRoutineCheckbox": "Update my routine with this workout",
+  "summaryCreateRoutineTitle": "Save as routine",
+  "summaryCreateRoutineSubtitle": "Turn this free workout into a reusable routine.",
+  "summaryCreateRoutineCheckbox": "Create a routine from this workout",
+  "summaryRoutineUpdated": "Routine \"{name}\" updated.",
+  "@summaryRoutineUpdated": { "placeholders": { "name": {"type": "String"} } },
+  "summaryRoutineCreated": "Routine created. You can adjust it in the editor.",
+  "summaryRoutineFromWorkoutName": "{name} (routine)",
+  "@summaryRoutineFromWorkoutName": { "placeholders": { "name": {"type": "String"} } },
+  "duplicate": "Duplicate",
+  "routineDuplicateName": "{name} (copy)",
+  "@routineDuplicateName": { "placeholders": { "name": {"type": "String"} } },
   "close": "Close",
   "share": "Share",
   "vsLastTime": "vs last time ({name})",
@@ -844,6 +930,9 @@
   "friendUnmuted": "{name} unmuted",
   "@friendUnmuted": { "placeholders": { "name": {"type": "String"} } },
   "friendWorkoutNotify": "When a friend completes a workout, we'll notify you here.",
+  "socialNotificationsEmpty": "No notifications yet. Comments, reactions, friend requests, and routine shares will appear here.",
+  "friendRequestAccepted": "Friend request accepted.",
+  "friendRequestDeclined": "Friend request declined.",
   "noProfileAccess": "You don't have access to this profile or you're not friends.",
   "levelLabel": "Level: {level}",
   "noRecordsFriend": "No personal records yet.",
