@@ -81,4 +81,22 @@ void main() {
 
     expect(filtered.map((e) => e.id), ['ext_1']);
   });
+
+  test('searchInPrimaryGroup filters by name within the same muscle group', () {
+    const catalog = [
+      Exercise(catalogId: 'ff_1', name: 'Bench Press', category: 'Pecho', muscles: ['Pectoral']),
+      Exercise(catalogId: 'ff_2', name: 'Incline Press', category: 'Pecho', muscles: ['Pectoral']),
+      Exercise(catalogId: 'ff_3', name: 'Lat Pulldown', category: 'Espalda', muscles: ['Dorsal']),
+      Exercise(catalogId: 'ff_4', name: 'Cable Fly', category: 'Pecho', muscles: ['Pectoral']),
+    ];
+
+    final matches = SimilarExercises.searchInPrimaryGroup(
+      catalog: catalog,
+      primaryGroup: 'Pecho',
+      search: 'press',
+      exerciseId: 'ff_1',
+    );
+
+    expect(matches.map((e) => e.id).toList(), ['ff_2']);
+  });
 }

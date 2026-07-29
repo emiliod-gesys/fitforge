@@ -1,4 +1,5 @@
 import '../../models/exercise.dart';
+import 'exercise_picker_merge.dart';
 import 'muscle_inference.dart';
 
 abstract final class SimilarExercises {
@@ -100,6 +101,28 @@ abstract final class SimilarExercises {
 
   static void sortByRelevance(List<Exercise> exercises, {String sourceCategory = ''}) {
     exercises.sort((a, b) => _compareCandidates(a, b, sourceCategory));
+  }
+
+  /// Todos los ejercicios del mismo grupo muscular que coinciden con la búsqueda.
+  static List<Exercise> searchInPrimaryGroup({
+    required List<Exercise> catalog,
+    required String primaryGroup,
+    required String search,
+    required String exerciseId,
+    Set<String> excludeIds = const {},
+  }) {
+    final query = search.trim();
+    if (query.isEmpty) return const [];
+
+    final matches = <Exercise>[];
+    for (final candidate in catalog) {
+      if (candidate.id == exerciseId || excludeIds.contains(candidate.id)) continue;
+      if (!matchesPrimaryGroup(exercise: candidate, primaryGroup: primaryGroup)) continue;
+      if (!exerciseMatchesTextFilter(candidate, query)) continue;
+      matches.add(candidate);
+    }
+    matches.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return matches;
   }
 
   static int _compareCandidates(Exercise a, Exercise b, String sourceCategory) {

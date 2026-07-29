@@ -906,23 +906,21 @@ class WorkoutService {
       templateCount: templateSetCount,
       previous: previous,
     );
+    const defaultReps = 10;
     final sets = List.generate(resolvedSetCount, (i) {
       final setNumber = i + 1;
       final prev = previous != null
           ? PreviousSetUtils.forSetNumber(previous, setNumber)
           : null;
-      final oldSet = PreviousSetUtils.forSetNumber(current.sets, setNumber);
       return WorkoutSet(
         id: _uuid.v4(),
         setNumber: i + 1,
-        weight: isCardio ? null : (prev?.weight ?? oldSet?.weight),
+        weight: isCardio ? null : prev?.weight,
         reps: isCardio || isLoadedDistance
             ? 0
-            : ((prev?.reps ?? 0) > 0 ? prev!.reps : (oldSet?.reps ?? 10)),
+            : ((prev?.reps ?? 0) > 0 ? prev!.reps : defaultReps),
         durationSeconds: isCardio ? prev?.durationSeconds : null,
-        distanceMeters: isCardio || isLoadedDistance
-            ? (prev?.distanceMeters ?? oldSet?.distanceMeters)
-            : null,
+        distanceMeters: isCardio || isLoadedDistance ? prev?.distanceMeters : null,
         inclinePercent: isCardio ? prev?.inclinePercent : null,
         steps: isCardio ? prev?.steps : null,
         loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
@@ -1137,9 +1135,18 @@ class WorkoutService {
   Future<void> cancelWorkout(String workoutId) async {
     final userId = SupabaseService.currentUser?.id;
     final offline = _offline;
+    final needsRemoteDelete =
+        offline != null && await offline.wasWorkoutSyncedToServer(workoutId);
 
     if (offline != null && userId != null) {
       await offline.cancelLocal(workoutId, userId);
+    }
+
+    if (offline != null && !offline.isOnline) {
+      if (needsRemoteDelete) {
+        await offline.enqueueCancelWorkout(workoutId);
+      }
+      return;
     }
 
     try {

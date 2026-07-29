@@ -143,7 +143,7 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
   }
 }
 
-class _SimilarExerciseResults extends ConsumerWidget {
+class _SimilarExerciseResults extends ConsumerStatefulWidget {
   final List<Exercise> catalog;
   final WorkoutExercise current;
   final Set<String> excludeExerciseIds;
@@ -159,43 +159,100 @@ class _SimilarExerciseResults extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final cloudQuery = SimilarExercises.cloudSearchQueryForPrimaryGroup(primaryGroup);
-    final cloudState = ref.watch(cloudExerciseSearchNotifierProvider(cloudQuery));
-    final sourceCategory = sourceExercise?.category ?? '';
+  ConsumerState<_SimilarExerciseResults> createState() => _SimilarExerciseResultsState();
+}
 
-    final bundledSimilar = SimilarExercises.find(
-      exerciseName: current.exerciseName,
-      exerciseId: current.exerciseId,
-      catalog: catalog,
-      excludeIds: excludeExerciseIds,
-      primaryGroup: primaryGroup,
-      sourceExercise: sourceExercise,
-    );
-    final cloudSimilar = SimilarExercises.filterCloudCandidates(
-      cloud: cloudState.exercises,
-      primaryGroup: primaryGroup,
-      exerciseId: current.exerciseId,
-      excludeIds: excludeExerciseIds,
-      sourceCategory: sourceCategory,
-    );
-    final similar = mergeBundledAndCloudExercises(
-      bundled: bundledSimilar,
-      cloud: cloudSimilar,
-    );
-    SimilarExercises.sortByRelevance(similar, sourceCategory: sourceCategory);
+class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults> {
+  final _searchController = TextEditingController();
+  String _search = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final sourceCategory = widget.sourceExercise?.category ?? '';
+    final hasSearch = _search.trim().isNotEmpty;
+
+    final String cloudKey;
+    if (hasSearch) {
+      cloudKey = cloudExerciseCatalogNotifierKey(
+            search: _search,
+            muscleFilter: widget.primaryGroup,
+          ) ??
+          SimilarExercises.cloudSearchQueryForPrimaryGroup(widget.primaryGroup);
+    } else {
+      cloudKey = SimilarExercises.cloudSearchQueryForPrimaryGroup(widget.primaryGroup);
+    }
+
+    final cloudState = ref.watch(cloudExerciseSearchNotifierProvider(cloudKey));
+
+    final List<Exercise> similar;
+    if (hasSearch) {
+      final bundledMatches = SimilarExercises.searchInPrimaryGroup(
+        catalog: widget.catalog,
+        primaryGroup: widget.primaryGroup,
+        search: _search,
+        exerciseId: widget.current.exerciseId,
+        excludeIds: widget.excludeExerciseIds,
+      );
+      final cloudMatches = SimilarExercises.filterCloudCandidates(
+        cloud: cloudState.exercises,
+        primaryGroup: widget.primaryGroup,
+        exerciseId: widget.current.exerciseId,
+        excludeIds: widget.excludeExerciseIds,
+        sourceCategory: sourceCategory,
+      ).where((e) => exerciseMatchesTextFilter(e, _search)).toList();
+      similar = mergeBundledAndCloudExercises(
+        bundled: bundledMatches,
+        cloud: cloudMatches,
+      );
+      similar.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    } else {
+      final bundledSimilar = SimilarExercises.find(
+        exerciseName: widget.current.exerciseName,
+        exerciseId: widget.current.exerciseId,
+        catalog: widget.catalog,
+        excludeIds: widget.excludeExerciseIds,
+        primaryGroup: widget.primaryGroup,
+        sourceExercise: widget.sourceExercise,
+      );
+      final cloudSimilar = SimilarExercises.filterCloudCandidates(
+        cloud: cloudState.exercises,
+        primaryGroup: widget.primaryGroup,
+        exerciseId: widget.current.exerciseId,
+        excludeIds: widget.excludeExerciseIds,
+        sourceCategory: sourceCategory,
+      );
+      similar = mergeBundledAndCloudExercises(
+        bundled: bundledSimilar,
+        cloud: cloudSimilar,
+      );
+      SimilarExercises.sortByRelevance(similar, sourceCategory: sourceCategory);
+    }
 
     if (similar.isEmpty && !cloudState.isLoading) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            l10n.noSimilarFound,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textMuted),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSearchField(),
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  l10n.noSimilarFound,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
 
@@ -204,6 +261,7 @@ class _SimilarExerciseResults extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _buildSearchField(),
         CloudExerciseSearchStatus(
           isLoading: cloudState.isLoading,
           error: cloudState.error,
@@ -224,7 +282,7 @@ class _SimilarExerciseResults extends ConsumerWidget {
                 return CloudExerciseLoadMoreFooter(
                   isLoadingMore: cloudState.isLoadingMore,
                   onLoadMore: () => ref
-                      .read(cloudExerciseSearchNotifierProvider(cloudQuery).notifier)
+                      .read(cloudExerciseSearchNotifierProvider(cloudKey).notifier)
                       .loadMore(),
                 );
               }
@@ -237,6 +295,30 @@ class _SimilarExerciseResults extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchField() {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: l10n.searchExercises,
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _search.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _search = '');
+                  },
+                )
+              : null,
+        ),
+        onChanged: (value) => setState(() => _search = value),
+      ),
     );
   }
 }

@@ -101,8 +101,23 @@ class OfflineWorkoutSupport {
     Workout workout, {
     bool pendingSync = false,
   }) async {
-    await _localStore.saveWorkout(workout, pendingSync: pendingSync);
+    await _localStore.saveWorkout(
+      workout,
+      pendingSync: pendingSync,
+      syncedToServer: !pendingSync,
+    );
     await _localStore.setActiveWorkoutId(workout.userId, workout.id);
+  }
+
+  Future<bool> wasWorkoutSyncedToServer(String workoutId) =>
+      _localStore.wasSyncedToServer(workoutId);
+
+  Future<void> enqueueCancelWorkout(String workoutId) async {
+    await _outbox.enqueue(
+      type: SyncOperationType.cancelWorkout,
+      workoutId: workoutId,
+      payload: const {},
+    );
   }
 
   Future<void> enqueueStartWorkout(Workout workout) async {

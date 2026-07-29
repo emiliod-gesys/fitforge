@@ -492,6 +492,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     setState(() => _completing = true);
     try {
       await ref.read(workoutServiceProvider).cancelWorkout(workout.id);
+      ref.invalidate(pendingSyncCountProvider);
       await ref.read(watchWorkoutCoordinatorProvider).clear();
       ref.invalidate(activeWorkoutProvider);
       ref.invalidate(workoutsProvider);

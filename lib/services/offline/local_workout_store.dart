@@ -17,13 +17,21 @@ class LocalWorkoutStore {
     await _writeState({});
   }
 
-  Future<void> saveWorkout(Workout workout, {required bool pendingSync}) async {
+  Future<void> saveWorkout(Workout workout, {required bool pendingSync, bool? syncedToServer}) async {
     final state = await _readState();
     final workouts = Map<String, dynamic>.from(state['workouts'] as Map? ?? {});
-    workouts[workout.id] = WorkoutLocalSerializer.toJson(
+    final existing = workouts[workout.id];
+    final preserveSynced = syncedToServer ??
+        (existing is Map ? existing['synced_to_server'] as bool? : null) ??
+        false;
+    final json = WorkoutLocalSerializer.toJson(
       workout,
       pendingSync: pendingSync,
     );
+    if (preserveSynced) {
+      json['synced_to_server'] = true;
+    }
+    workouts[workout.id] = json;
 
     await _writeState({
       'user_id': workout.userId,
@@ -75,6 +83,14 @@ class LocalWorkoutStore {
     return raw['pending_sync'] as bool? ?? false;
   }
 
+  Future<bool> wasSyncedToServer(String workoutId) async {
+    final state = await _readState();
+    final workouts = state['workouts'] as Map?;
+    final raw = workouts?[workoutId];
+    if (raw is! Map) return false;
+    return raw['synced_to_server'] as bool? ?? false;
+  }
+
   Future<void> markSynced(String workoutId) async {
     final state = await _readState();
     final workouts = Map<String, dynamic>.from(state['workouts'] as Map? ?? {});
@@ -82,6 +98,7 @@ class LocalWorkoutStore {
     if (raw is Map) {
       final copy = Map<String, dynamic>.from(raw);
       copy['pending_sync'] = false;
+      copy['synced_to_server'] = true;
       workouts[workoutId] = copy;
       state['workouts'] = workouts;
       await _writeState(state);
