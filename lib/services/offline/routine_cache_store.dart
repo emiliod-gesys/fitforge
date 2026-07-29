@@ -18,16 +18,24 @@ class RoutineCacheStore {
     final state = await OfflineJsonFile.readMap(_fileName);
     if (state['user_id'] != userId) return [];
     final raw = state['routines'] as List? ?? [];
-    return raw
-        .whereType<Map>()
-        .map((r) => Routine.fromJson(
-              Map<String, dynamic>.from(r),
-              exercises: (r['exercises'] as List? ?? [])
-                  .whereType<Map>()
-                  .map((e) => RoutineExercise.fromJson(Map<String, dynamic>.from(e)))
-                  .toList(),
-            ))
-        .toList();
+    final routines = <Routine>[];
+    for (final item in raw.whereType<Map>()) {
+      try {
+        final r = Map<String, dynamic>.from(item);
+        routines.add(
+          Routine.fromJson(
+            r,
+            exercises: (r['exercises'] as List? ?? [])
+                .whereType<Map>()
+                .map((e) => RoutineExercise.fromJson(Map<String, dynamic>.from(e)))
+                .toList(),
+          ),
+        );
+      } catch (_) {
+        // Ignora entradas de caché antiguas/incompletas.
+      }
+    }
+    return routines;
   }
 
   Future<void> saveRoutine(Routine routine) async {
@@ -43,7 +51,19 @@ class RoutineCacheStore {
 
   Map<String, dynamic> _routineToJson(Routine routine) {
     return {
-      ...routine.toJson(),
+      'id': routine.id,
+      'user_id': routine.userId,
+      'name': routine.name,
+      'description': routine.description,
+      'target_muscles': routine.targetMuscles,
+      'created_at': routine.createdAt.toUtc().toIso8601String(),
+      'updated_at': routine.updatedAt.toUtc().toIso8601String(),
+      'is_ai_generated': routine.isAiGenerated,
+      'is_favorite': routine.isFavorite,
+      'is_hyrox_system': routine.isHyroxSystem,
+      if (routine.hyroxLevel != null) 'hyrox_level': routine.hyroxLevel!.code,
+      'is_runner_system': routine.isRunnerSystem,
+      if (routine.runnerType != null) 'runner_type': routine.runnerType!.code,
       'exercises': routine.exercises.map((e) => e.toJson()).toList(),
     };
   }

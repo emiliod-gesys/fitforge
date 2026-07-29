@@ -135,7 +135,10 @@ final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationSt
 final routineShareServiceProvider = Provider((ref) => RoutineShareService());
 
 final routineServiceProvider = Provider(
-  (ref) => RoutineService(routineCache: ref.watch(routineCacheStoreProvider)),
+  (ref) => RoutineService(
+    routineCache: ref.watch(routineCacheStoreProvider),
+    connectivity: ref.watch(connectivityServiceProvider),
+  ),
 );
 final hyroxServiceProvider = Provider(
   (ref) => HyroxService(ref.watch(routineServiceProvider)),

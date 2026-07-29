@@ -4,6 +4,7 @@ import '../core/subscription/subscription_features.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
 import '../core/utils/connection_error.dart';
+import 'offline/connectivity_service.dart';
 import 'offline/routine_cache_store.dart';
 import 'supabase_service.dart';
 
@@ -11,8 +12,13 @@ class RoutineService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
   final RoutineCacheStore? _routineCache;
+  final ConnectivityService? _connectivity;
 
-  RoutineService({RoutineCacheStore? routineCache}) : _routineCache = routineCache;
+  RoutineService({
+    RoutineCacheStore? routineCache,
+    ConnectivityService? connectivity,
+  })  : _routineCache = routineCache,
+        _connectivity = connectivity;
 
   static const maxFavoriteRoutines = 5;
 
@@ -23,6 +29,11 @@ class RoutineService {
   }
 
   Future<List<Routine>> getRoutinesForUser(String userId) async {
+    if (_connectivity?.isOnline == false && _routineCache != null) {
+      final cached = await _routineCache!.loadAll(userId);
+      if (cached.isNotEmpty) return cached;
+    }
+
     try {
       if (_isStudentRoutine(userId)) {
         final data = await _client.rpc(
@@ -47,10 +58,13 @@ class RoutineService {
       await _routineCache?.saveAll(userId, routines);
       return routines;
     } catch (e) {
-      if (_routineCache != null && isConnectionError(e)) {
-        final cached = await _routineCache!.loadAll(userId);
-        if (cached.isNotEmpty) return cached;
+      if (_routineCache != null) {
+        try {
+          final cached = await _routineCache!.loadAll(userId);
+          if (cached.isNotEmpty) return cached;
+        } catch (_) {}
       }
+      if (isConnectionError(e)) return [];
       rethrow;
     }
   }
