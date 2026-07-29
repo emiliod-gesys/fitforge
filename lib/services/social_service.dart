@@ -508,7 +508,6 @@ class SocialService {
       if (notifRow == null) return null;
 
       cachedNotification = SocialNotification.fromJson(Map<String, dynamic>.from(notifRow as Map));
-      notificationId = cachedNotification.id;
       canonicalPostId = cachedNotification.feedPostId;
 
       if (canonicalPostId != null && canonicalPostId.isNotEmpty) {
@@ -530,15 +529,8 @@ class SocialService {
           .eq('id', actorId)
           .maybeSingle();
 
-      if (notificationId.isEmpty) {
-        final viewerNotif = await _client
-            .from('social_notifications')
-            .select('id')
-            .eq('user_id', uid)
-            .filter('metadata->>post_id', 'eq', canonicalPostId)
-            .maybeSingle();
-        notificationId = viewerNotif?['id'] as String? ?? '';
-      }
+      notificationId =
+          await _feedNotificationIdForPost(userId: uid, postId: canonicalPostId) ?? '';
 
       final actor = actorData != null
           ? FriendUser.fromJson(Map<String, dynamic>.from(actorData as Map))
@@ -560,9 +552,13 @@ class SocialService {
           .eq('id', cachedNotification.actorId)
           .maybeSingle();
 
+      final feedNotificationId = canonicalPostId != null
+          ? await _feedNotificationIdForPost(userId: uid, postId: canonicalPostId)
+          : null;
+
       if (actorData != null) {
         cachedNotification = SocialNotification(
-          id: cachedNotification.id,
+          id: feedNotificationId ?? '',
           actorId: cachedNotification.actorId,
           type: cachedNotification.type,
           referenceId: cachedNotification.referenceId,
@@ -597,6 +593,25 @@ class SocialService {
       comments: comments,
       commentPostId: canonicalPostId,
     );
+  }
+
+  /// Notificación del feed del usuario para un post (excluye campana: reacciones/comentarios).
+  Future<String?> _feedNotificationIdForPost({
+    required String userId,
+    required String postId,
+  }) async {
+    final rows = await _client
+        .from('social_notifications')
+        .select('id')
+        .eq('user_id', userId)
+        .inFilter('type', _feedTypes)
+        .filter('metadata->>post_id', 'eq', postId)
+        .order('created_at', ascending: false)
+        .limit(1);
+
+    final list = rows as List;
+    if (list.isEmpty) return null;
+    return (list.first as Map)['id'] as String?;
   }
 
   /// Publicación manual: texto (≤150), imagen opcional y/o PR de los últimos 30 días.

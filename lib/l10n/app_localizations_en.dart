@@ -3835,4 +3835,130 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dailyTip_maintenance_enjoy =>
       'The plan you enjoy is the one you will keep for years. Pick training you want to repeat.';
+
+  @override
+  String get offlineModeBanner =>
+      'Offline — only Train and Profile are available. Routines and workouts are saved on this device';
+
+  @override
+  String get offlineProfileUnavailable =>
+      'No cached profile data. Connect to the internet at least once to use Profile offline.';
+
+  @override
+  String offlinePendingSyncBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count workouts waiting to upload',
+      one: '1 workout waiting to upload',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get offlineSyncNow => 'Upload now';
+
+  @override
+  String get offlinePrepareTitle => 'Prepare offline mode';
+
+  @override
+  String get offlinePrepareSubtitle =>
+      'Download routines and previous sets to train without signal';
+
+  @override
+  String offlinePrepareDone(int routines, int sets) {
+    return 'Ready: $routines routines and $sets exercises with history saved';
+  }
+
+  @override
+  String offlinePrepareFailed(String message) {
+    return 'Could not prepare offline mode: $message';
+  }
+
+  @override
+  String get offlineDownloadExercisesTitle => 'Download cloud exercises';
+
+  @override
+  String get offlineDownloadExercisesSubtitleEmpty =>
+      'Save the extended catalog (~1100 exercises) with GIFs on your device';
+
+  @override
+  String offlineDownloadExercisesSubtitleDone(int count) {
+    return '$count exercises saved on your device';
+  }
+
+  @override
+  String offlineDownloadExercisesProgress(int downloaded, int total) {
+    return 'Downloading data: $downloaded of $total exercises…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressUnknown(int downloaded) {
+    return 'Downloading data: $downloaded exercises…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressMedia(int downloaded, int total) {
+    return 'Downloading GIFs: $downloaded of $total illustrations…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressMediaUnknown(int downloaded) {
+    return 'Downloading GIFs: $downloaded illustrations…';
+  }
+
+  @override
+  String offlineDownloadExercisesDone(int count, int media) {
+    return 'Catalog downloaded: $count exercises, $media with GIF';
+  }
+
+  @override
+  String offlineDownloadExercisesFailed(String message) {
+    return 'Could not download catalog: $message';
+  }
+
+  @override
+  String offlineDownloadExercisesUpToDate(int count, int media) {
+    return 'Catalog is up to date: $count exercises, $media with GIF. Nothing new to download.';
+  }
+
+  @override
+  String get offlineDownloadExercisesConfirmTitle => 'Update catalog';
+
+  @override
+  String offlineDownloadExercisesConfirmBody(
+      int local, int missing, int media) {
+    return 'You already have $local exercises saved. There are $missing new exercises and $media GIFs pending. Download only what\'s missing?';
+  }
+
+  @override
+  String get offlineDownloadExercisesConfirmAction => 'Download missing';
+
+  @override
+  String offlineDownloadExercisesSubtitleUpToDate(int count) {
+    return '$count exercises · up to date';
+  }
+
+  @override
+  String offlineDownloadExercisesSubtitleUpdates(int count, int pending) {
+    return '$count exercises · $pending updates available';
+  }
+
+  @override
+  String offlineDownloadExercisesDoneIncremental(
+      int count, int media, int newExercises, int newMedia) {
+    return 'Updated: $count exercises ($newExercises new), $media with GIF ($newMedia downloaded)';
+  }
+
+  @override
+  String get offlineRecentWorkoutsEmpty =>
+      'Offline — connect to see your full history. Workouts done offline will appear here.';
+
+  @override
+  String get trainRecentWorkoutsUnavailable =>
+      'Could not load recent workouts.';
+
+  @override
+  String get offlineSetSavedLocally =>
+      'Set saved locally — will upload when back online';
 }

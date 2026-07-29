@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/exercise_load.dart';
@@ -15,13 +17,26 @@ import '../models/exercise_logging.dart';
 import '../models/profile.dart';
 import '../core/hyrox/hyrox_validation.dart';
 import '../core/workout/workout_validation.dart';
+import '../core/utils/connection_error.dart';
 import '../core/utils/supabase_datetime.dart';
 import '../models/workout.dart';
 import 'supabase_service.dart';
+import 'offline/offline_workout_support.dart';
+import 'offline/routine_cache_store.dart';
+import 'offline/sync_outbox.dart';
+import 'offline/workout_local_serializer.dart';
 
 class WorkoutService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
+  final OfflineWorkoutSupport? _offline;
+  final PreviousSetsCache? _previousSetsCache;
+
+  WorkoutService({
+    OfflineWorkoutSupport? offline,
+    PreviousSetsCache? previousSetsCache,
+  })  : _offline = offline,
+        _previousSetsCache = previousSetsCache ?? offline?.previousSetsCache;
 
   Future<List<Workout>> getWorkoutSummaries({int limit = 20}) {
     final userId = SupabaseService.currentUser?.id;
@@ -34,24 +49,45 @@ class WorkoutService {
     int limit = 20,
     bool completedOnly = false,
   }) async {
-    var query = _client
-        .from('workouts')
-        .select('*, routines(name)')
-        .eq('user_id', userId);
-
-    if (completedOnly) {
-      query = query.not('completed_at', 'is', null);
+    final offline = _offline;
+    if (offline != null && !offline.isOnline) {
+      return offline.localWorkoutSummaries(
+        userId,
+        limit: limit,
+        completedOnly: completedOnly,
+      );
     }
 
-    final workoutsData = await query.order('started_at', ascending: false).limit(limit);
+    try {
+      var query = _client
+          .from('workouts')
+          .select('*, routines(name)')
+          .eq('user_id', userId);
 
-    return (workoutsData as List).map((w) {
-      final map = Map<String, dynamic>.from(w as Map);
-      if (map['routines'] != null) {
-        map['routine_name'] = (map['routines'] as Map)['name'];
+      if (completedOnly) {
+        query = query.not('completed_at', 'is', null);
       }
-      return Workout.fromJson(map, exercises: const []);
-    }).toList();
+
+      final workoutsData =
+          await withNetworkTimeout(query.order('started_at', ascending: false).limit(limit));
+
+      return (workoutsData as List).map((w) {
+        final map = Map<String, dynamic>.from(w as Map);
+        if (map['routines'] != null) {
+          map['routine_name'] = (map['routines'] as Map)['name'];
+        }
+        return Workout.fromJson(map, exercises: const []);
+      }).toList();
+    } catch (e) {
+      if (offline != null && isConnectionError(e)) {
+        return offline.localWorkoutSummaries(
+          userId,
+          limit: limit,
+          completedOnly: completedOnly,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Entrenos completados en un día (sin ejercicios/series — para presupuesto calórico de Comida).
@@ -218,78 +254,104 @@ class WorkoutService {
   }
 
   Future<List<Workout>> getWorkoutsForMuscleRecoveryForUser(String userId, {int limit = 10}) async {
-    final workoutsData = await _client
-        .from('workouts')
-        .select(
-          'id, user_id, routine_id, name, started_at, completed_at, duration_minutes, total_volume, notes',
-        )
-        .eq('user_id', userId)
-        .not('completed_at', 'is', null)
-        .order('completed_at', ascending: false)
-        .limit(limit);
-
-    final workoutRows = workoutsData as List;
-    if (workoutRows.isEmpty) return [];
-
-    final workoutIds = workoutRows.map((w) => (w as Map)['id'] as String).toList();
-
-    final exercisesData = await _client
-        .from('workout_exercises')
-        .select('id, workout_id, exercise_id, exercise_name, order_index')
-        .inFilter('workout_id', workoutIds);
-
-    final exerciseRows = exercisesData as List;
-    if (exerciseRows.isEmpty) {
-      return workoutRows
-          .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map), exercises: const []))
-          .toList();
+    final offline = _offline;
+    if (offline != null && !offline.isOnline) {
+      return offline.localWorkoutSummaries(
+        userId,
+        limit: limit,
+        completedOnly: true,
+      );
     }
 
-    final exerciseIds = exerciseRows.map((e) => (e as Map)['id'] as String).toList();
+    try {
+      final workoutsData = await withNetworkTimeout(
+        _client
+            .from('workouts')
+            .select(
+              'id, user_id, routine_id, name, started_at, completed_at, duration_minutes, total_volume, notes',
+            )
+            .eq('user_id', userId)
+            .not('completed_at', 'is', null)
+            .order('completed_at', ascending: false)
+            .limit(limit),
+      );
 
-    final setsData = await _client
-        .from('workout_sets')
-        .select('workout_exercise_id, set_number, completed')
-        .inFilter('workout_exercise_id', exerciseIds);
+      final workoutRows = workoutsData as List;
+      if (workoutRows.isEmpty) return [];
 
-    final setsByExercise = <String, List<WorkoutSet>>{};
-    for (final row in setsData as List) {
-      final map = row as Map<String, dynamic>;
-      final exId = map['workout_exercise_id'] as String;
-      setsByExercise.putIfAbsent(exId, () => []).add(
-            WorkoutSet(
-              id: '',
-              setNumber: map['set_number'] as int? ?? 1,
-              completed: map['completed'] as bool? ?? false,
-            ),
-          );
+      final workoutIds = workoutRows.map((w) => (w as Map)['id'] as String).toList();
+
+      final exercisesData = await withNetworkTimeout(
+        _client
+            .from('workout_exercises')
+            .select('id, workout_id, exercise_id, exercise_name, order_index')
+            .inFilter('workout_id', workoutIds),
+      );
+
+      final exerciseRows = exercisesData as List;
+      if (exerciseRows.isEmpty) {
+        return workoutRows
+            .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map), exercises: const []))
+            .toList();
+      }
+
+      final exerciseIds = exerciseRows.map((e) => (e as Map)['id'] as String).toList();
+
+      final setsData = await withNetworkTimeout(
+        _client
+            .from('workout_sets')
+            .select('workout_exercise_id, set_number, completed')
+            .inFilter('workout_exercise_id', exerciseIds),
+      );
+
+      final setsByExercise = <String, List<WorkoutSet>>{};
+      for (final row in setsData as List) {
+        final map = row as Map<String, dynamic>;
+        final exId = map['workout_exercise_id'] as String;
+        setsByExercise.putIfAbsent(exId, () => []).add(
+              WorkoutSet(
+                id: '',
+                setNumber: map['set_number'] as int? ?? 1,
+                completed: map['completed'] as bool? ?? false,
+              ),
+            );
+      }
+
+      final exercisesByWorkout = <String, List<WorkoutExercise>>{};
+      for (final row in exerciseRows) {
+        final map = row as Map<String, dynamic>;
+        final workoutId = map['workout_id'] as String;
+        final exRowId = map['id'] as String;
+        exercisesByWorkout.putIfAbsent(workoutId, () => []).add(
+              WorkoutExercise(
+                id: exRowId,
+                exerciseId: map['exercise_id'] as String,
+                exerciseName: map['exercise_name'] as String? ?? '',
+                orderIndex: map['order_index'] as int? ?? 0,
+                sets: setsByExercise[exRowId] ?? const [],
+              ),
+            );
+      }
+
+      for (final list in exercisesByWorkout.values) {
+        list.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+      }
+
+      return workoutRows.map((w) {
+        final map = Map<String, dynamic>.from(w as Map);
+        final id = map['id'] as String;
+        return Workout.fromJson(map, exercises: exercisesByWorkout[id] ?? const []);
+      }).toList();
+    } catch (e) {
+      if (offline != null && isConnectionError(e)) {
+        return offline.localWorkoutSummaries(
+          userId,
+          limit: limit,
+          completedOnly: true,
+        );
+      }
+      rethrow;
     }
-
-    final exercisesByWorkout = <String, List<WorkoutExercise>>{};
-    for (final row in exerciseRows) {
-      final map = row as Map<String, dynamic>;
-      final workoutId = map['workout_id'] as String;
-      final exRowId = map['id'] as String;
-      exercisesByWorkout.putIfAbsent(workoutId, () => []).add(
-            WorkoutExercise(
-              id: exRowId,
-              exerciseId: map['exercise_id'] as String,
-              exerciseName: map['exercise_name'] as String? ?? '',
-              orderIndex: map['order_index'] as int? ?? 0,
-              sets: setsByExercise[exRowId] ?? const [],
-            ),
-          );
-    }
-
-    for (final list in exercisesByWorkout.values) {
-      list.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
-    }
-
-    return workoutRows.map((w) {
-      final map = Map<String, dynamic>.from(w as Map);
-      final id = map['id'] as String;
-      return Workout.fromJson(map, exercises: exercisesByWorkout[id] ?? const []);
-    }).toList();
   }
 
   Future<Workout?> getCompletedWorkoutById(String workoutId) async {
@@ -314,41 +376,83 @@ class WorkoutService {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return [];
 
-    final data = await _client
-        .from('workouts')
-        .select('completed_at')
-        .eq('user_id', userId)
-        .not('completed_at', 'is', null)
-        .order('completed_at', ascending: false);
+    final offline = _offline;
+    if (offline != null && !offline.isOnline) {
+      final local = await offline.localWorkoutSummaries(userId, completedOnly: true);
+      return local
+          .where((w) => w.completedAt != null)
+          .map((w) => w.completedAt!)
+          .toList();
+    }
 
-    return (data as List)
-        .map((row) => SupabaseDateTime.parse((row as Map<String, dynamic>)['completed_at'] as String))
-        .toList();
+    try {
+      final data = await withNetworkTimeout(
+        _client
+            .from('workouts')
+            .select('completed_at')
+            .eq('user_id', userId)
+            .not('completed_at', 'is', null)
+            .order('completed_at', ascending: false),
+      );
+
+      return (data as List)
+          .map((row) => SupabaseDateTime.parse((row as Map<String, dynamic>)['completed_at'] as String))
+          .toList();
+    } catch (e) {
+      if (offline != null && isConnectionError(e)) {
+        final local = await offline.localWorkoutSummaries(userId, completedOnly: true);
+        return local
+            .where((w) => w.completedAt != null)
+            .map((w) => w.completedAt!)
+            .toList();
+      }
+      rethrow;
+    }
   }
 
   Future<Workout?> getActiveWorkout() async {
     final userId = SupabaseService.currentUser?.id;
     if (userId == null) return null;
 
-    final rows = await _client
-        .from('workouts')
-        .select()
-        .eq('user_id', userId)
-        .filter('completed_at', 'is', null)
-        .order('started_at', ascending: false);
-
-    final list = rows as List;
-    if (list.isEmpty) return null;
-
-    final active = Map<String, dynamic>.from(list.first as Map);
-    final activeId = active['id'] as String;
-
-    if (list.length > 1) {
-      await _closeStaleActiveWorkouts(userId, keepWorkoutId: activeId);
+    final offline = _offline;
+    Workout? localActive;
+    if (offline != null) {
+      localActive = await offline.localActiveWorkout(userId);
+      if (!offline.isOnline) {
+        return localActive;
+      }
     }
 
-    final exercises = await _getWorkoutExercises(activeId);
-    return Workout.fromJson(active, exercises: exercises);
+    try {
+      final rows = await withNetworkTimeout(
+        _client
+            .from('workouts')
+            .select()
+            .eq('user_id', userId)
+            .filter('completed_at', 'is', null)
+            .order('started_at', ascending: false),
+      );
+
+      final list = rows as List;
+      if (list.isEmpty) return localActive;
+
+      final active = Map<String, dynamic>.from(list.first as Map);
+      final activeId = active['id'] as String;
+
+      if (list.length > 1) {
+        await _closeStaleActiveWorkouts(userId, keepWorkoutId: activeId);
+      }
+
+      final exercises = await _getWorkoutExercises(activeId);
+      final remote = Workout.fromJson(active, exercises: exercises);
+      if (offline != null) {
+        await offline.persistActiveWorkout(remote, pendingSync: false);
+      }
+      return remote;
+    } catch (e) {
+      if (isConnectionError(e) || localActive != null) return localActive;
+      rethrow;
+    }
   }
 
   Future<void> _closeStaleActiveWorkouts(String userId, {String? keepWorkoutId}) async {
@@ -397,17 +501,9 @@ class WorkoutService {
     )? applyProactiveSuggestions,
   }) async {
     final userId = SupabaseService.currentUser!.id;
-    await _closeStaleActiveWorkouts(userId);
-
+    final offline = _offline;
     final workoutId = _uuid.v4();
-
-    await _client.from('workouts').insert({
-      'id': workoutId,
-      'user_id': userId,
-      'routine_id': routineId,
-      'name': name,
-      'started_at': SupabaseDateTime.nowUtc.toIso8601String(),
-    });
+    final startedAt = SupabaseDateTime.nowUtc;
 
     var workoutExercises = exercises;
     if (workoutExercises != null) {
@@ -419,23 +515,74 @@ class WorkoutService {
         try {
           enriched = await applyProactiveSuggestions(enriched, workoutId);
         } catch (_) {
-          // Mantiene sugerencias locales si la IA falla.
+          // Mantiene sugerencias locales si la IA falla o no hay red.
         }
-      }
-      for (final ex in enriched) {
-        await _addExerciseToWorkout(workoutId, ex);
       }
       workoutExercises = enriched;
     }
 
-    return Workout(
-      id: workoutId,
-      userId: userId,
-      routineId: routineId,
-      name: name,
-      startedAt: SupabaseDateTime.nowUtc,
-      exercises: workoutExercises ?? [],
+    if (offline == null) {
+      await _closeStaleActiveWorkouts(userId);
+      await _client.from('workouts').insert({
+        'id': workoutId,
+        'user_id': userId,
+        'routine_id': routineId,
+        'name': name,
+        'started_at': startedAt.toIso8601String(),
+      });
+      if (workoutExercises != null) {
+        for (final ex in workoutExercises) {
+          await _addExerciseToWorkout(workoutId, ex);
+        }
+      }
+      return Workout(
+        id: workoutId,
+        userId: userId,
+        routineId: routineId,
+        name: name,
+        startedAt: startedAt,
+        exercises: workoutExercises ?? [],
+      );
+    }
+
+    var workout = offline.assignClientIds(
+      Workout(
+        id: workoutId,
+        userId: userId,
+        routineId: routineId,
+        name: name,
+        startedAt: startedAt,
+        exercises: workoutExercises ?? [],
+      ),
     );
+    await offline.persistActiveWorkout(workout, pendingSync: true);
+
+    final synced = await offline.runRemoteOrQueue(
+      () async {
+        await _closeStaleActiveWorkouts(userId);
+        await _client.from('workouts').insert({
+          'id': workout.id,
+          'user_id': userId,
+          'routine_id': routineId,
+          'name': name,
+          'started_at': startedAt.toIso8601String(),
+        });
+        for (final ex in workout.exercises) {
+          await _addExerciseToWorkout(workout.id, ex);
+        }
+      },
+      fallbackType: SyncOperationType.startWorkout,
+      workoutId: workout.id,
+      payload: {
+        'workout': WorkoutLocalSerializer.toJson(workout, pendingSync: true),
+      },
+      occurredAt: startedAt,
+    );
+    if (synced) {
+      await offline.markWorkoutSynced(workout.id);
+    }
+    unawaited(offline.triggerSync());
+    return workout;
   }
 
   Future<List<WorkoutExercise>> _applyPreviousSetSuggestions(
@@ -554,15 +701,34 @@ class WorkoutService {
     String exerciseId, {
     String? excludeWorkoutId,
   }) async {
-    final entry = await _lastCompletedWorkoutExerciseEntry(
-      exerciseId,
-      excludeWorkoutId: excludeWorkoutId,
-    );
-    if (entry == null) return null;
+    if (_offline != null && !_offline!.isOnline) {
+      return _previousSetsCache?.load(exerciseId);
+    }
 
-    final sets = await _loadSetsForWorkoutExercise(entry.weId);
-    if (sets.isEmpty) return null;
-    return ExerciseHistoryUtils.setsForNextWorkoutSuggestion(sets);
+    try {
+      final entry = await withNetworkTimeout(
+        _lastCompletedWorkoutExerciseEntry(
+          exerciseId,
+          excludeWorkoutId: excludeWorkoutId,
+        ),
+      );
+      if (entry == null) {
+        return _previousSetsCache?.load(exerciseId);
+      }
+
+      final sets = await withNetworkTimeout(_loadSetsForWorkoutExercise(entry.weId));
+      if (sets.isEmpty) return _previousSetsCache?.load(exerciseId);
+      final suggestion = ExerciseHistoryUtils.setsForNextWorkoutSuggestion(sets);
+      if (suggestion.isNotEmpty) {
+        unawaited(_previousSetsCache?.save(exerciseId, suggestion));
+      }
+      return suggestion;
+    } catch (e) {
+      if (isConnectionError(e)) {
+        return _previousSetsCache?.load(exerciseId);
+      }
+      return _previousSetsCache?.load(exerciseId);
+    }
   }
 
   Future<WorkoutExerciseEntry?> _lastCompletedWorkoutExerciseEntry(
@@ -873,10 +1039,62 @@ class WorkoutService {
     double totalVolume = 0,
     int? activeCaloriesKcal,
   }) async {
+    final completedAt = SupabaseDateTime.nowUtc;
+    final offline = _offline;
+
+    if (offline != null) {
+      final local = await offline.localWorkout(workoutId);
+      if (local != null) {
+        await offline.completeLocal(
+          workout: local,
+          completedAt: completedAt,
+          durationMinutes: durationMinutes,
+          totalVolume: totalVolume,
+          activeCaloriesKcal: activeCaloriesKcal,
+        );
+      }
+    }
+
+    try {
+      final result = await _remoteCompleteWorkout(
+        workoutId,
+        completedAt: completedAt,
+        durationMinutes: durationMinutes,
+        totalVolume: totalVolume,
+        activeCaloriesKcal: activeCaloriesKcal,
+      );
+      if (offline != null) {
+        await offline.markWorkoutSynced(workoutId);
+        unawaited(offline.triggerSync());
+      }
+      return result;
+    } catch (e) {
+      if (offline != null && isConnectionError(e)) {
+        await offline.enqueueComplete(
+          workoutId: workoutId,
+          completedAt: completedAt,
+          durationMinutes: durationMinutes,
+          totalVolume: totalVolume,
+          activeCaloriesKcal: activeCaloriesKcal,
+        );
+        unawaited(offline.triggerSync());
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  Future<WorkoutCompletionValidation?> _remoteCompleteWorkout(
+    String workoutId, {
+    required DateTime completedAt,
+    int durationMinutes = 0,
+    double totalVolume = 0,
+    int? activeCaloriesKcal,
+  }) async {
     final row = await _client
         .from('workouts')
         .update({
-          'completed_at': SupabaseDateTime.nowUtc.toIso8601String(),
+          'completed_at': completedAt.toIso8601String(),
           'duration_minutes': durationMinutes,
           'total_volume': totalVolume,
           if (activeCaloriesKcal != null) 'active_calories_kcal': activeCaloriesKcal,
@@ -917,7 +1135,24 @@ class WorkoutService {
 
   /// Elimina un entrenamiento en curso sin guardarlo en el historial.
   Future<void> cancelWorkout(String workoutId) async {
-    await _client.from('workouts').delete().eq('id', workoutId);
+    final userId = SupabaseService.currentUser?.id;
+    final offline = _offline;
+
+    if (offline != null && userId != null) {
+      await offline.cancelLocal(workoutId, userId);
+    }
+
+    try {
+      await _client.from('workouts').delete().eq('id', workoutId);
+    } catch (e) {
+      if (offline == null || !isConnectionError(e)) rethrow;
+      await offline.runRemoteOrQueue(
+        () => _client.from('workouts').delete().eq('id', workoutId),
+        fallbackType: SyncOperationType.cancelWorkout,
+        workoutId: workoutId,
+        payload: const {},
+      );
+    }
   }
 
   /// Último entrenamiento completado de la misma rutina (excluye el actual).
@@ -1160,30 +1395,155 @@ class WorkoutService {
     );
   }
 
-  Future<void> logSet(String workoutExerciseId, WorkoutSet set) async {
+  Future<void> logSet(String workoutExerciseId, WorkoutSet set, {String? workoutId}) async {
+    final resolvedSet = set.id.isEmpty
+        ? WorkoutSet(
+            id: _uuid.v4(),
+            setNumber: set.setNumber,
+            weight: set.weight,
+            reps: set.reps,
+            rir: set.rir,
+            completed: set.completed,
+            restTaken: set.restTaken,
+            durationSeconds: set.durationSeconds,
+            distanceMeters: set.distanceMeters,
+            inclinePercent: set.inclinePercent,
+            steps: set.steps,
+            loggingType: set.loggingType,
+          )
+        : set;
+
+    final offline = _offline;
+    if (offline != null && workoutId != null) {
+      await offline.updateLocalSet(
+        workoutId: workoutId,
+        workoutExerciseId: workoutExerciseId,
+        set: resolvedSet,
+      );
+    }
+
+    if (offline != null && workoutId != null && workoutId.isNotEmpty) {
+      await offline.runRemoteOrQueue(
+        () => _client.from('workout_sets').upsert({
+          'id': resolvedSet.id,
+          'workout_exercise_id': workoutExerciseId,
+          ...resolvedSet.toJson(),
+        }),
+        fallbackType: SyncOperationType.logSet,
+        workoutId: workoutId,
+        payload: {
+          'workout_exercise_id': workoutExerciseId,
+          'set': {
+            'id': resolvedSet.id,
+            ...resolvedSet.toJson(),
+          },
+        },
+      );
+      return;
+    }
+
     await _client.from('workout_sets').upsert({
-      'id': set.id.isEmpty ? _uuid.v4() : set.id,
+      'id': resolvedSet.id,
       'workout_exercise_id': workoutExerciseId,
-      ...set.toJson(),
+      ...resolvedSet.toJson(),
     });
   }
 
-  Future<void> deleteSet(String workoutExerciseId, String setId) async {
-    await _client.from('workout_sets').delete().eq('id', setId);
-
-    final data = await _client
-        .from('workout_sets')
-        .select('id')
-        .eq('workout_exercise_id', workoutExerciseId)
-        .order('set_number', ascending: true);
-
-    final rows = data as List;
-    for (var i = 0; i < rows.length; i++) {
-      await _client
-          .from('workout_sets')
-          .update({'set_number': i + 1})
-          .eq('id', (rows[i] as Map<String, dynamic>)['id'] as String);
+  Future<void> deleteSet(
+    String workoutExerciseId,
+    String setId, {
+    String? workoutId,
+  }) async {
+    final offline = _offline;
+    if (offline != null && workoutId != null) {
+      final local = await offline.localWorkout(workoutId);
+      if (local != null) {
+        final exercises = local.exercises.map((ex) {
+          if (ex.id != workoutExerciseId) return ex;
+          final sets = ex.sets.where((s) => s.id != setId).toList();
+          for (var i = 0; i < sets.length; i++) {
+            sets[i] = WorkoutSet(
+              id: sets[i].id,
+              setNumber: i + 1,
+              weight: sets[i].weight,
+              reps: sets[i].reps,
+              rir: sets[i].rir,
+              completed: sets[i].completed,
+              restTaken: sets[i].restTaken,
+              durationSeconds: sets[i].durationSeconds,
+              distanceMeters: sets[i].distanceMeters,
+              inclinePercent: sets[i].inclinePercent,
+              steps: sets[i].steps,
+              loggingType: sets[i].loggingType,
+            );
+          }
+          return WorkoutExercise(
+            id: ex.id,
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            imageUrl: ex.imageUrl,
+            orderIndex: ex.orderIndex,
+            sets: sets,
+            notes: ex.notes,
+          );
+        }).toList();
+        await offline.persistActiveWorkout(
+          Workout(
+            id: local.id,
+            userId: local.userId,
+            routineId: local.routineId,
+            routineName: local.routineName,
+            name: local.name,
+            startedAt: local.startedAt,
+            completedAt: local.completedAt,
+            durationMinutes: local.durationMinutes,
+            activeCaloriesKcal: local.activeCaloriesKcal,
+            exercises: exercises,
+            notes: local.notes,
+            totalVolume: local.totalVolume,
+            runnerSurface: local.runnerSurface,
+            runnerRoute: local.runnerRoute,
+            runnerSplits: local.runnerSplits,
+            runnerAvgPaceSecPerKm: local.runnerAvgPaceSecPerKm,
+            runnerElevationGainMeters: local.runnerElevationGainMeters,
+            runnerElevationLossMeters: local.runnerElevationLossMeters,
+          ),
+        );
+      }
     }
+
+    Future<void> remoteDelete() async {
+      await _client.from('workout_sets').delete().eq('id', setId);
+
+      final data = await _client
+          .from('workout_sets')
+          .select('id')
+          .eq('workout_exercise_id', workoutExerciseId)
+          .order('set_number', ascending: true);
+
+      final rows = data as List;
+      for (var i = 0; i < rows.length; i++) {
+        await _client
+            .from('workout_sets')
+            .update({'set_number': i + 1})
+            .eq('id', (rows[i] as Map<String, dynamic>)['id'] as String);
+      }
+    }
+
+    if (offline != null && workoutId != null) {
+      await offline.runRemoteOrQueue(
+        remoteDelete,
+        fallbackType: SyncOperationType.deleteSet,
+        workoutId: workoutId,
+        payload: {
+          'workout_exercise_id': workoutExerciseId,
+          'set_id': setId,
+        },
+      );
+      return;
+    }
+
+    await remoteDelete();
   }
 
   Future<List<PersonalRecord>> getPersonalRecords() async {

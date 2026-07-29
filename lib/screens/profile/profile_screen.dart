@@ -7,11 +7,14 @@ import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/cloud_exercise_download_provider.dart';
+import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../data/avatar_catalog.dart';
 import '../../services/supabase_service.dart';
 import '../../services/rest_preferences.dart';
@@ -37,6 +40,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _trainerModeUpdating = false;
   bool _hyroxModeUpdating = false;
   bool _runnerModeUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(cloudExerciseDownloadProvider.notifier).refreshMeta(checkRemote: true);
+    });
+  }
 
   @override
   void dispose() {
@@ -344,6 +355,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     );
                   },
                 ),
+                _buildCloudExerciseDownloadSection(context),
                 ListTile(
                   leading: Icon(Icons.auto_awesome, color: context.accentColor),
                   title: Text(l10n.coachAi),
@@ -400,7 +412,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           );
         },
         loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
+        error: (e, _) {
+          final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
+          if (!online) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  l10n.offlineProfileUnavailable,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            );
+          }
+          return Center(child: Text(l10n.errorGeneric(e.toString())));
+        },
       ),
     );
   }
@@ -830,7 +857,169 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _setTrainerMode({required bool enabled}) async {
+  Widget _buildCloudExerciseDownloadSection(BuildContext context) {
+    final l10n = context.l10n;
+    final download = ref.watch(cloudExerciseDownloadProvider);
+    final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
+
+    final subtitle = switch (download.cachedCount) {
+      > 0 when download.isUpToDate =>
+        l10n.offlineDownloadExercisesSubtitleUpToDate(download.cachedCount),
+      > 0 when download.pendingUpdateCount > 0 =>
+        l10n.offlineDownloadExercisesSubtitleUpdates(
+          download.cachedCount,
+          download.pendingUpdateCount,
+        ),
+      > 0 => l10n.offlineDownloadExercisesSubtitleDone(download.cachedCount),
+      _ => l10n.offlineDownloadExercisesSubtitleEmpty,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(Icons.cloud_download_outlined, color: context.accentColor),
+          title: Text(l10n.offlineDownloadExercisesTitle),
+          subtitle: Text(subtitle),
+          trailing: download.isDownloading
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.accentColor,
+                  ),
+                )
+              : const Icon(Icons.chevron_right),
+          enabled: online && !download.isDownloading,
+          onTap: online && !download.isDownloading
+              ? () => _downloadCloudExercises(context)
+              : null,
+        ),
+        if (download.isDownloading) ...[
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            value: download.progress,
+            minHeight: 6,
+            borderRadius: BorderRadius.circular(3),
+            backgroundColor: AppColors.border,
+            color: context.accentColor,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _downloadProgressLabel(l10n, download),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _downloadCloudExercises(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final notifier = ref.read(cloudExerciseDownloadProvider.notifier);
+
+    CloudExerciseDownloadStatus status;
+    try {
+      status = await notifier.analyzeStatus();
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
+      );
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    if (status.isUpToDate && status.hasLocalCache) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.offlineDownloadExercisesUpToDate(status.localCount, status.localMediaCount),
+          ),
+        ),
+      );
+      await notifier.refreshMeta(checkRemote: true);
+      return;
+    }
+
+    if (status.hasLocalCache && status.pendingCount > 0) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.offlineDownloadExercisesConfirmTitle),
+          content: Text(
+            l10n.offlineDownloadExercisesConfirmBody(
+              status.localCount,
+              status.missingExerciseCount,
+              status.missingMediaCount,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.offlineDownloadExercisesConfirmAction),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !context.mounted) return;
+    }
+
+    try {
+      final result = await notifier.download();
+      if (!context.mounted) return;
+
+      if (result.newlyDownloadedExercises == 0 && result.newlyDownloadedMedia == 0) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.offlineDownloadExercisesUpToDate(result.exerciseCount, result.mediaCount))),
+        );
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.offlineDownloadExercisesDoneIncremental(
+              result.exerciseCount,
+              result.mediaCount,
+              result.newlyDownloadedExercises,
+              result.newlyDownloadedMedia,
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
+      );
+    }
+  }
+
+  String _downloadProgressLabel(AppLocalizations l10n, CloudExerciseDownloadState download) {
+    if (download.phase == CloudExerciseDownloadPhase.media) {
+      if (download.total != null) {
+        return l10n.offlineDownloadExercisesProgressMedia(download.downloaded, download.total!);
+      }
+      return l10n.offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
+    }
+    if (download.total != null) {
+      return l10n.offlineDownloadExercisesProgress(download.downloaded, download.total!);
+    }
+    return l10n.offlineDownloadExercisesProgressUnknown(download.downloaded);
+  }
+
+  Future<void> _setTrainerMode({
+    required bool enabled,
+  }) async {
     if (_trainerModeUpdating) return;
 
     final profile = ref.read(profileProvider).value;

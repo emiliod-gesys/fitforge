@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
 import '../../core/utils/onboarding_routes.dart';
 import '../../core/utils/profile_completeness.dart';
+import '../../core/utils/online_only_routes.dart';
 import '../../screens/onboarding/onboarding_screen.dart';
 import '../../providers/password_recovery_provider.dart';
 import '../../screens/ai/ai_coach_screen.dart';
@@ -42,6 +43,7 @@ class _RouterRefreshNotifier extends ChangeNotifier {
     _ref.listen(authStateProvider, (_, __) => notifyListeners());
     _ref.listen(profileProvider, (_, __) => notifyListeners());
     _ref.listen(passwordRecoveryPendingProvider, (_, __) => notifyListeners());
+    _ref.listen(isOnlineProvider, (_, __) => notifyListeners());
   }
 
   final Ref _ref;
@@ -75,6 +77,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (isLoggedIn) {
         if (profileAsync.isLoading) return null;
+
+        final online = ref.read(isOnlineProvider).valueOrNull ?? true;
+        if (!online && isOnlineOnlyShellRoute(state.matchedLocation)) {
+          return '/';
+        }
 
         final profile = profileAsync.valueOrNull;
         final needsOnboarding = ProfileCompleteness.needsOnboarding(profile);

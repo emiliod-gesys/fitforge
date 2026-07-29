@@ -3,11 +3,16 @@ import '../core/errors/routine_limit_exception.dart';
 import '../core/subscription/subscription_features.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
+import '../core/utils/connection_error.dart';
+import 'offline/routine_cache_store.dart';
 import 'supabase_service.dart';
 
 class RoutineService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
+  final RoutineCacheStore? _routineCache;
+
+  RoutineService({RoutineCacheStore? routineCache}) : _routineCache = routineCache;
 
   static const maxFavoriteRoutines = 5;
 
@@ -18,25 +23,36 @@ class RoutineService {
   }
 
   Future<List<Routine>> getRoutinesForUser(String userId) async {
-    if (_isStudentRoutine(userId)) {
-      final data = await _client.rpc(
-        'get_student_routines',
-        params: {'p_student_id': userId},
-      );
-      return _routinesFromRpcList(data);
-    }
+    try {
+      if (_isStudentRoutine(userId)) {
+        final data = await _client.rpc(
+          'get_student_routines',
+          params: {'p_student_id': userId},
+        );
+        final routines = _routinesFromRpcList(data);
+        await _routineCache?.saveAll(userId, routines);
+        return routines;
+      }
 
-    final routinesData = await _client
-        .from('routines')
-        .select()
-        .eq('user_id', userId)
-        .order('updated_at', ascending: false);
+      final routinesData = await _client
+          .from('routines')
+          .select()
+          .eq('user_id', userId)
+          .order('updated_at', ascending: false);
 
-    final routines = <Routine>[];
-    for (final r in routinesData as List) {
-      routines.add(await _routineFromRow(r as Map<String, dynamic>));
+      final routines = <Routine>[];
+      for (final r in routinesData as List) {
+        routines.add(await _routineFromRow(r as Map<String, dynamic>));
+      }
+      await _routineCache?.saveAll(userId, routines);
+      return routines;
+    } catch (e) {
+      if (_routineCache != null && isConnectionError(e)) {
+        final cached = await _routineCache!.loadAll(userId);
+        if (cached.isNotEmpty) return cached;
+      }
+      rethrow;
     }
-    return routines;
   }
 
   Future<List<Routine>> getFavoriteRoutinesForUser(String userId) async {

@@ -3865,4 +3865,130 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dailyTip_maintenance_enjoy =>
       'El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir.';
+
+  @override
+  String get offlineModeBanner =>
+      'Sin conexión — solo Entrenar y Perfil están disponibles. Tus rutinas y entrenos se guardan en el dispositivo';
+
+  @override
+  String get offlineProfileUnavailable =>
+      'No hay datos de perfil guardados. Conéctate a internet al menos una vez para usar el perfil offline.';
+
+  @override
+  String offlinePendingSyncBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entrenamientos pendientes de subir',
+      one: '1 entrenamiento pendiente de subir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get offlineSyncNow => 'Subir ahora';
+
+  @override
+  String get offlinePrepareTitle => 'Preparar modo offline';
+
+  @override
+  String get offlinePrepareSubtitle =>
+      'Descarga rutinas y series previas para entrenar sin señal';
+
+  @override
+  String offlinePrepareDone(int routines, int sets) {
+    return 'Listo: $routines rutinas y $sets ejercicios con historial guardados';
+  }
+
+  @override
+  String offlinePrepareFailed(String message) {
+    return 'No se pudo preparar el modo offline: $message';
+  }
+
+  @override
+  String get offlineDownloadExercisesTitle => 'Descargar ejercicios del cloud';
+
+  @override
+  String get offlineDownloadExercisesSubtitleEmpty =>
+      'Guarda el catálogo extendido (~1100 ejercicios) con GIFs en tu dispositivo';
+
+  @override
+  String offlineDownloadExercisesSubtitleDone(int count) {
+    return '$count ejercicios guardados en el dispositivo';
+  }
+
+  @override
+  String offlineDownloadExercisesProgress(int downloaded, int total) {
+    return 'Descargando datos: $downloaded de $total ejercicios…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressUnknown(int downloaded) {
+    return 'Descargando datos: $downloaded ejercicios…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressMedia(int downloaded, int total) {
+    return 'Descargando GIFs: $downloaded de $total ilustraciones…';
+  }
+
+  @override
+  String offlineDownloadExercisesProgressMediaUnknown(int downloaded) {
+    return 'Descargando GIFs: $downloaded ilustraciones…';
+  }
+
+  @override
+  String offlineDownloadExercisesDone(int count, int media) {
+    return 'Catálogo descargado: $count ejercicios, $media con GIF';
+  }
+
+  @override
+  String offlineDownloadExercisesFailed(String message) {
+    return 'No se pudo descargar el catálogo: $message';
+  }
+
+  @override
+  String offlineDownloadExercisesUpToDate(int count, int media) {
+    return 'Ya tienes el catálogo completo: $count ejercicios, $media con GIF. No hay nada nuevo.';
+  }
+
+  @override
+  String get offlineDownloadExercisesConfirmTitle => 'Actualizar catálogo';
+
+  @override
+  String offlineDownloadExercisesConfirmBody(
+      int local, int missing, int media) {
+    return 'Ya tienes $local ejercicios guardados. Hay $missing ejercicios nuevos y $media GIFs pendientes. ¿Descargar solo lo faltante?';
+  }
+
+  @override
+  String get offlineDownloadExercisesConfirmAction => 'Descargar faltantes';
+
+  @override
+  String offlineDownloadExercisesSubtitleUpToDate(int count) {
+    return '$count ejercicios · todo al día';
+  }
+
+  @override
+  String offlineDownloadExercisesSubtitleUpdates(int count, int pending) {
+    return '$count ejercicios · $pending actualizaciones disponibles';
+  }
+
+  @override
+  String offlineDownloadExercisesDoneIncremental(
+      int count, int media, int newExercises, int newMedia) {
+    return 'Actualizado: $count ejercicios ($newExercises nuevos), $media con GIF ($newMedia descargados)';
+  }
+
+  @override
+  String get offlineRecentWorkoutsEmpty =>
+      'Sin conexión — conecta para ver tu historial completo. Los entrenos hechos offline aparecerán aquí.';
+
+  @override
+  String get trainRecentWorkoutsUnavailable =>
+      'No se pudo cargar el historial reciente.';
+
+  @override
+  String get offlineSetSavedLocally =>
+      'Serie guardada localmente — se subirá al reconectar';
 }

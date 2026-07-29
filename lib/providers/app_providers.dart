@@ -51,13 +51,92 @@ import '../services/coach_usage_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/watch_session_bridge.dart';
 import '../services/watch_workout_coordinator.dart';
+import '../services/offline/cloud_exercise_cache_store.dart';
+import '../services/offline/cloud_exercise_download_service.dart';
+import '../services/offline/cloud_exercise_media_cache.dart';
+import '../services/offline/connectivity_service.dart';
+import '../services/offline/local_workout_store.dart';
+import '../services/offline/offline_prep_service.dart';
+import '../services/offline/offline_workout_support.dart';
+import '../services/offline/profile_cache_store.dart';
+import '../services/offline/routine_cache_store.dart';
+import '../services/offline/sync_outbox.dart';
+import '../services/offline/workout_sync_service.dart';
 
+final connectivityServiceProvider = Provider((ref) {
+  final service = ConnectivityService();
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+final localWorkoutStoreProvider = Provider((ref) => LocalWorkoutStore());
+final syncOutboxProvider = Provider((ref) => SyncOutbox());
+final routineCacheStoreProvider = Provider((ref) => RoutineCacheStore());
+final profileCacheStoreProvider = Provider((ref) => ProfileCacheStore());
+final cloudExerciseCacheStoreProvider = Provider((ref) => CloudExerciseCacheStore());
+final cloudExerciseMediaCacheProvider = Provider((ref) => CloudExerciseMediaCache());
+final previousSetsCacheProvider = Provider((ref) => PreviousSetsCache());
+
+final offlineWorkoutSupportProvider = Provider((ref) {
+  return OfflineWorkoutSupport(
+    localStore: ref.watch(localWorkoutStoreProvider),
+    outbox: ref.watch(syncOutboxProvider),
+    connectivity: ref.watch(connectivityServiceProvider),
+    syncService: ref.watch(workoutSyncServiceProvider),
+    previousSetsCache: ref.watch(previousSetsCacheProvider),
+  );
+});
+
+final workoutSyncServiceProvider = Provider((ref) {
+  return WorkoutSyncService(
+    outbox: ref.watch(syncOutboxProvider),
+    localStore: ref.watch(localWorkoutStoreProvider),
+    connectivity: ref.watch(connectivityServiceProvider),
+  );
+});
+
+final offlinePrepServiceProvider = Provider((ref) {
+  return OfflinePrepService(
+    routineService: ref.watch(routineServiceProvider),
+    workoutService: ref.watch(workoutServiceProvider),
+    routineCache: ref.watch(routineCacheStoreProvider),
+    previousSetsCache: ref.watch(previousSetsCacheProvider),
+    customExerciseRepository: ref.watch(customExerciseRepositoryProvider),
+  );
+});
+
+final isOnlineProvider = StreamProvider<bool>((ref) async* {
+  final connectivity = ref.watch(connectivityServiceProvider);
+  await connectivity.initialize();
+  yield connectivity.isOnline;
+  yield* connectivity.onConnectivityChanged;
+});
+
+final pendingSyncCountProvider = FutureProvider<int>((ref) async {
+  final support = ref.watch(offlineWorkoutSupportProvider);
+  return support.pendingSyncCount();
+});
 final authServiceProvider = Provider((ref) => AuthService());
-final exerciseServiceProvider = Provider((ref) => ExerciseService());
+final exerciseServiceProvider = Provider((ref) {
+  return ExerciseService(
+    cloudCacheStore: ref.watch(cloudExerciseCacheStoreProvider),
+    connectivity: ref.watch(connectivityServiceProvider),
+  );
+});
+final cloudExerciseDownloadServiceProvider = Provider((ref) {
+  final exerciseService = ref.watch(exerciseServiceProvider);
+  return CloudExerciseDownloadService(
+    cloudCatalog: exerciseService.cloudCatalog,
+    cacheStore: ref.watch(cloudExerciseCacheStoreProvider),
+    mediaCache: ref.watch(cloudExerciseMediaCacheProvider),
+  );
+});
 final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationStore());
 final routineShareServiceProvider = Provider((ref) => RoutineShareService());
 
-final routineServiceProvider = Provider((ref) => RoutineService());
+final routineServiceProvider = Provider(
+  (ref) => RoutineService(routineCache: ref.watch(routineCacheStoreProvider)),
+);
 final hyroxServiceProvider = Provider(
   (ref) => HyroxService(ref.watch(routineServiceProvider)),
 );
@@ -71,9 +150,16 @@ final pendingWorkoutSummaryProvider = StateProvider<WorkoutSummaryData?>((ref) =
 
 /// Id del entreno cuyo resumen está en pantalla; estabiliza la key del host al reconstruir rutas.
 final workoutSummarySessionIdProvider = StateProvider<String?>((ref) => null);
-final workoutServiceProvider = Provider((ref) => WorkoutService());
+final workoutServiceProvider = Provider(
+  (ref) => WorkoutService(
+    offline: ref.watch(offlineWorkoutSupportProvider),
+    previousSetsCache: ref.watch(previousSetsCacheProvider),
+  ),
+);
 final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
-final profileServiceProvider = Provider((ref) => ProfileService());
+final profileServiceProvider = Provider(
+  (ref) => ProfileService(profileCache: ref.watch(profileCacheStoreProvider)),
+);
 final socialServiceProvider = Provider((ref) => SocialService());
 final trainerServiceProvider = Provider((ref) => TrainerService());
 final pushNotificationServiceProvider = Provider((ref) => PushNotificationService());

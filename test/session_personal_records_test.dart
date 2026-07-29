@@ -42,10 +42,9 @@ void main() {
         existing: existing,
       );
 
-      expect(detected, hasLength(2));
-      final strengthPr = detected.firstWhere(
-        (pr) => pr.recordType == PersonalRecordType.strength,
-      );
+      expect(detected, hasLength(1));
+      final strengthPr = detected.first;
+      expect(strengthPr.recordType, PersonalRecordType.strength);
       expect(strengthPr.oneRepMax, greaterThan(existing.first.oneRepMax!));
     });
 
@@ -163,11 +162,41 @@ void main() {
         existing: const [],
       );
 
-      expect(detected, hasLength(2));
-      expect(
-        detected.map((pr) => pr.recordType).toSet(),
-        {PersonalRecordType.strength, PersonalRecordType.strengthMaxWeight},
+      expect(detected, hasLength(1));
+      expect(detected.first.recordType, PersonalRecordType.strength);
+      expect(detected.first.weight, 120);
+      expect(detected.first.reps, 1);
+    });
+
+    test('collapses duplicate strength and max weight rows for summary', () {
+      final workout = Workout(
+        id: 'w1',
+        userId: 'u1',
+        name: 'Pull',
+        startedAt: DateTime(2026, 1, 1),
+        exercises: const [
+          WorkoutExercise(
+            id: 'we1',
+            exerciseId: 'row',
+            exerciseName: 'Incline Row',
+            orderIndex: 0,
+            sets: [
+              WorkoutSet(id: 's1', setNumber: 1, reps: 10, weight: 60, completed: true),
+            ],
+          ),
+        ],
       );
+
+      final detected = SessionPersonalRecords.detect(
+        workout: workout,
+        existing: const [],
+      );
+
+      expect(detected, hasLength(1));
+      expect(detected.first.exerciseId, 'row');
+      expect(detected.first.recordType, PersonalRecordType.strength);
+      expect(detected.first.weight, 60);
+      expect(detected.first.reps, 10);
     });
   });
 }

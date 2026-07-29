@@ -1,17 +1,21 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../core/config/ai_secrets.dart';
+import '../core/utils/connection_error.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/unit_converter.dart';
-import '../core/utils/bmr_calculator.dart';
 import '../models/body_metric.dart';
 import '../models/profile.dart';
+import 'offline/profile_cache_store.dart';
 import 'supabase_service.dart';
 
 class ProfileService {
+  ProfileService({ProfileCacheStore? profileCache}) : _profileCache = profileCache;
+
   final _client = SupabaseService.client;
   final _secureStorage = const FlutterSecureStorage();
   final _uuid = const Uuid();
+  final ProfileCacheStore? _profileCache;
 
   static const _openAiKeyStorage = 'openai_api_key';
   static const _geminiKeyStorage = 'gemini_api_key';
@@ -28,17 +32,26 @@ class ProfileService {
     final user = _client.auth.currentUser;
     if (user == null) return null;
 
-    final response = await _client
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    try {
+      final response = await _client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
 
-    if (response == null) return null;
+      if (response == null) return null;
 
-    final provider = response['ai_provider'] as String?;
-    final hasKey = await _hasKeyForProvider(provider);
-    return UserProfile.fromJson(response, hasAiKey: hasKey);
+      final provider = response['ai_provider'] as String?;
+      final hasKey = await _hasKeyForProvider(provider);
+      await _profileCache?.save(user.id, response, hasAiKey: hasKey);
+      return UserProfile.fromJson(response, hasAiKey: hasKey);
+    } catch (e) {
+      final cache = _profileCache;
+      if (cache != null && isConnectionError(e)) {
+        return cache.load(user.id);
+      }
+      rethrow;
+    }
   }
 
   Future<void> upsertProfile(UserProfile profile) async {
@@ -156,26 +169,41 @@ class ProfileService {
   }
 
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshotsForUser(String userId) async {
-    final data = await _client
-        .from('body_measurements')
-        .select()
-        .eq('user_id', userId)
-        .order('measured_at', ascending: false)
-        .limit(500);
+    try {
+      final data = await _client
+          .from('body_measurements')
+          .select()
+          .eq('user_id', userId)
+          .order('measured_at', ascending: false)
+          .limit(500);
 
-    final byType = <String, List<BodyMeasurement>>{};
-    for (final row in data as List) {
-      final m = BodyMeasurement.fromJson(row as Map<String, dynamic>);
-      byType.putIfAbsent(m.type, () => []).add(m);
+      final byType = <String, List<BodyMeasurement>>{};
+      for (final row in data as List) {
+        final m = BodyMeasurement.fromJson(row as Map<String, dynamic>);
+        byType.putIfAbsent(m.type, () => []).add(m);
+      }
+
+      final profileRow = await _client
+          .from('profiles')
+          .select('body_weight')
+          .eq('id', userId)
+          .maybeSingle();
+      final profileWeight = (profileRow?['body_weight'] as num?)?.toDouble();
+
+      return _buildBodyMetricSnapshots(byType, profileWeight);
+    } catch (e) {
+      if (!isConnectionError(e)) rethrow;
+      final profile = userId == _client.auth.currentUser?.id
+          ? await getProfile()
+          : await _profileCache?.load(userId);
+      return _buildBodyMetricSnapshots({}, profile?.bodyWeight);
     }
+  }
 
-    final profileRow = await _client
-        .from('profiles')
-        .select('body_weight')
-        .eq('id', userId)
-        .maybeSingle();
-    final profileWeight = (profileRow?['body_weight'] as num?)?.toDouble();
-
+  Map<String, BodyMetricSnapshot> _buildBodyMetricSnapshots(
+    Map<String, List<BodyMeasurement>> byType,
+    double? profileWeight,
+  ) {
     final snapshots = <String, BodyMetricSnapshot>{};
     for (final def in BodyMetricDefinition.all) {
       if (def.isComputed) {

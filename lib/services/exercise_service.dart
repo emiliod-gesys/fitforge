@@ -15,6 +15,8 @@ import '../data/exercise_translation_store.dart';
 import '../data/wger_exercise_catalog.dart';
 import '../models/exercise.dart';
 import 'custom_exercise_repository.dart';
+import 'offline/cloud_exercise_cache_store.dart';
+import 'offline/connectivity_service.dart';
 
 class ExerciseMedia {
   final String? videoUrl;
@@ -44,8 +46,18 @@ class ExerciseImageLookup {
 }
 
 class ExerciseService {
+  ExerciseService({
+    CloudExerciseCacheStore? cloudCacheStore,
+    ConnectivityService? connectivity,
+  }) : _cloudCatalog = CloudExerciseCatalog(
+          cacheStore: cloudCacheStore,
+          connectivity: connectivity,
+        );
+
   final WgerExerciseCatalog _wgerCatalog = WgerExerciseCatalog();
-  final CloudExerciseCatalog _cloudCatalog = CloudExerciseCatalog();
+  final CloudExerciseCatalog _cloudCatalog;
+
+  CloudExerciseCatalog get cloudCatalog => _cloudCatalog;
   List<Exercise>? _fullCache;
   final _mediaCache = <int, ExerciseMedia>{};
   String _preferredLanguage = 'es';
@@ -151,6 +163,8 @@ class ExerciseService {
   Future<Exercise?> getCloudExerciseById(String catalogId) {
     return _cloudCatalog.getById(catalogId: catalogId, locale: _preferredLanguage);
   }
+
+  Future<void> warmCloudExerciseCache() => _cloudCatalog.warmFromLocalStore();
 
   /// Catálogo completo en memoria + ejercicios wger resueltos bajo demanda (entrenos antiguos).
   Future<List<Exercise>> fetchFullExercises() async {
@@ -271,8 +285,12 @@ class ExerciseService {
   Future<String?> resolveImageUrl(ExerciseImageLookup lookup) async {
     if (CloudExerciseCatalogIds.isCloudId(lookup.exerciseId)) {
       final cloud = await getCloudExerciseById(lookup.exerciseId);
-      final url = cloud?.imageUrl;
-      if (url != null && url.isNotEmpty) return url;
+      if (cloud != null) {
+        final gif = cloud.videoUrl;
+        if (gif != null && gif.isNotEmpty) return gif;
+        final image = cloud.imageUrl;
+        if (image != null && image.isNotEmpty) return image;
+      }
     }
 
     final catalog = await fetchFullExercises();

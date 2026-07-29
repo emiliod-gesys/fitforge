@@ -209,7 +209,36 @@ abstract final class SessionPersonalRecords {
       }
     }
 
-    return highlights;
+    return _consolidateStrengthHighlights(highlights);
+  }
+
+  /// Una sola fila de fuerza por ejercicio en el resumen de sesión.
+  /// Si mejoró 1RM y peso máximo, prioriza el PR de 1RM (evita duplicados visuales).
+  static List<PersonalRecord> _consolidateStrengthHighlights(List<PersonalRecord> list) {
+    final hasStrengthPr = <String>{
+      for (final pr in list)
+        if (pr.recordType == PersonalRecordType.strength) pr.exerciseId,
+    };
+
+    final result = <PersonalRecord>[];
+    final emittedStrengthExercise = <String>{};
+
+    for (final pr in list) {
+      switch (pr.recordType) {
+        case PersonalRecordType.strength:
+          if (emittedStrengthExercise.add(pr.exerciseId)) {
+            result.add(pr);
+          }
+        case PersonalRecordType.strengthMaxWeight:
+          if (hasStrengthPr.contains(pr.exerciseId)) continue;
+          if (emittedStrengthExercise.add(pr.exerciseId)) {
+            result.add(pr);
+          }
+        default:
+          result.add(pr);
+      }
+    }
+    return result;
   }
 
   static PersonalRecord? _find(

@@ -27,9 +27,13 @@ Future<void> startWorkoutAndNavigate(
 
   final router = ref.read(routerProvider);
   final messenger = ScaffoldMessenger.maybeOf(context);
+  final online = ref.read(isOnlineProvider).valueOrNull ?? true;
 
-  final proactive = !isHyrox && !isRunner && await AiPreferences.isProactiveAiEnabled();
-  final profile = proactive ? await ref.read(profileProvider.future) : null;
+  final proactive = online &&
+      !isHyrox &&
+      !isRunner &&
+      await AiPreferences.isProactiveAiEnabled();
+  final profile = proactive ? ref.read(profileProvider).valueOrNull : null;
   final useAi = proactive &&
       profile != null &&
       profile.canUseProactiveAi &&

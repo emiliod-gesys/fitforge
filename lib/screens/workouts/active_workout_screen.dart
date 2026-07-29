@@ -24,7 +24,9 @@ import '../../core/utils/player_level.dart';
 import '../../core/utils/session_personal_records.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/body_metric.dart';
 import '../../models/exercise_logging.dart';
+import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/watch_session.dart';
 import '../../models/workout.dart';
@@ -210,7 +212,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     required String setId,
   }) async {
     try {
-      await ref.read(workoutServiceProvider).logSet(exercise.id, completedSet);
+      await ref.read(workoutServiceProvider).logSet(
+            exercise.id,
+            completedSet,
+            workoutId: ref.read(activeWorkoutProvider).valueOrNull?.id,
+          );
       if (!mounted) return;
       setState(() => _savingSetIds.remove(setId));
       unawaited(_refreshActiveWorkoutAfterSet(setId, exerciseId: exercise.id));
@@ -531,7 +537,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         durationSeconds: elapsed,
         distanceMeters: snapshot.distanceMeters,
       );
-      await ref.read(workoutServiceProvider).logSet(exercise.id, set);
+      await ref.read(workoutServiceProvider).logSet(exercise.id, set, workoutId: workout.id);
 
       await ref.read(workoutServiceProvider).saveRunnerSession(
             workoutId: workout.id,
@@ -577,7 +583,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         distanceMeters: result.distanceMeters,
         inclinePercent: result.inclinePercent,
       );
-      await ref.read(workoutServiceProvider).logSet(exercise.id, set);
+      await ref.read(workoutServiceProvider).logSet(exercise.id, set, workoutId: workout.id);
 
       await ref.read(workoutServiceProvider).saveRunnerSession(
             workoutId: workout.id,
@@ -634,12 +640,24 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               bodyWeightKg: bodyWeightKg,
             ),
       );
-      final completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
+      final isOnline = ref.read(isOnlineProvider).valueOrNull ?? true;
+
+      List<DateTime> completedDates = [];
+      if (isOnline) {
+        try {
+          completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
+        } catch (_) {}
+      }
       final streakWeeks = WorkoutStreakCalculator.weeklyStreak([
         DateTime.now(),
         ...completedDates,
       ]);
-      final bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+      Map<String, BodyMetricSnapshot>? bodyMetrics;
+      try {
+        bodyMetrics = await ref.read(bodyMetricSnapshotsProvider.future);
+      } catch (_) {
+        bodyMetrics = null;
+      }
       final calorieEstimate = WorkoutCalorieEstimator.estimateForWorkout(
         workout: effectiveWorkout,
         durationMinutes: duration,
@@ -648,10 +666,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         bodyMetrics: bodyMetrics,
       );
 
-      final milestoneTotalsBefore = await ref
-          .read(workoutServiceProvider)
-          .getMilestoneTotals(profile: profile);
-      final personalRecordsBefore = await ref.read(personalRecordsProvider.future);
+      MilestoneTotals milestoneTotalsBefore = MilestoneTotals.empty;
+      List<PersonalRecord> personalRecordsBefore = [];
+      if (isOnline) {
+        try {
+          milestoneTotalsBefore = await ref
+              .read(workoutServiceProvider)
+              .getMilestoneTotals(profile: profile);
+        } catch (_) {}
+        try {
+          personalRecordsBefore = await ref.read(personalRecordsProvider.future);
+        } catch (_) {}
+      }
 
       final completionValidation = await ref.read(workoutServiceProvider).completeWorkout(
             effectiveWorkout.id,
@@ -659,6 +685,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             totalVolume: volume,
             activeCaloriesKcal: calorieEstimate.caloriesKcal,
           );
+      ref.invalidate(pendingSyncCountProvider);
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
       WorkoutValidationResult validation = completionValidation?.validation ??
@@ -696,19 +723,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       final skipXp = completionValidation?.skipXp ??
           (validation.status == WorkoutValidationStatus.rejected ||
               hyroxValidation?.status == HyroxValidationStatus.rejected);
-      if (!skipXp) {
-        xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
-              workoutId: effectiveWorkout.id,
-              totalVolumeKg: volume,
-              streakWeeks: streakWeeks,
-              runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
-              isRunnerRoutine: _isRunnerWorkout,
-            );
+      if (!skipXp && isOnline) {
+        try {
+          xpAward = await ref.read(profileServiceProvider).awardWorkoutXp(
+                workoutId: effectiveWorkout.id,
+                totalVolumeKg: volume,
+                streakWeeks: streakWeeks,
+                runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
+                isRunnerRoutine: _isRunnerWorkout,
+              );
+        } catch (_) {}
       }
 
-      final milestoneTotalsAfter = await ref
-          .read(workoutServiceProvider)
-          .getMilestoneTotals(profile: profile);
+      MilestoneTotals milestoneTotalsAfter = milestoneTotalsBefore;
+      if (isOnline) {
+        try {
+          milestoneTotalsAfter = await ref
+              .read(workoutServiceProvider)
+              .getMilestoneTotals(profile: profile);
+        } catch (_) {}
+      }
       final newMilestones = MilestonesCalculator.newlyUnlocked(
         milestoneTotalsBefore,
         milestoneTotalsAfter,
@@ -721,10 +755,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             );
       } catch (_) {}
 
-      final previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
-            routineId: effectiveWorkout.routineId,
-            excludeWorkoutId: effectiveWorkout.id,
-          );
+      Workout? previous;
+      if (isOnline) {
+        try {
+          previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
+                routineId: effectiveWorkout.routineId,
+                excludeWorkoutId: effectiveWorkout.id,
+              );
+        } catch (_) {}
+      }
       final newPersonalRecords = SessionPersonalRecords.detect(
         workout: effectiveWorkout,
         existing: personalRecordsBefore,
@@ -1799,7 +1838,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   ) async {
     final setId = set.id;
     try {
-      await ref.read(workoutServiceProvider).deleteSet(exercise.id, setId);
+      await ref.read(workoutServiceProvider).deleteSet(
+            exercise.id,
+            setId,
+            workoutId: workout.id,
+          );
       await _syncActiveWorkout();
     } catch (e) {
       if (mounted) {

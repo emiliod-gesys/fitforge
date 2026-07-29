@@ -13,6 +13,8 @@ import 'services/local_notification_service.dart';
 import 'services/rest_sound_service.dart';
 import 'services/supabase_service.dart';
 import 'widgets/push_notification_bootstrap.dart';
+import 'widgets/offline_sync_bootstrap.dart';
+import 'widgets/offline_status_banner.dart';
 
 class FitForgeApp extends ConsumerWidget {
   const FitForgeApp({super.key});
@@ -23,22 +25,32 @@ class FitForgeApp extends ConsumerWidget {
     final locale = ref.watch(appLocaleProvider);
     final accent = ref.watch(accentProvider);
 
-    return PushNotificationBootstrap(
-      router: router,
-      child: MaterialApp.router(
-        scaffoldMessengerKey: rootScaffoldMessengerKey,
-        title: 'FitForge',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark(accent: accent),
-        locale: locale,
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        routerConfig: router,
+    return OfflineSyncBootstrap(
+      child: PushNotificationBootstrap(
+        router: router,
+        child: MaterialApp.router(
+          scaffoldMessengerKey: rootScaffoldMessengerKey,
+          title: 'FitForge',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark(accent: accent),
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: router,
+          builder: (context, child) {
+            return Column(
+              children: [
+                const OfflineStatusBanner(),
+                Expanded(child: child ?? const SizedBox.shrink()),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

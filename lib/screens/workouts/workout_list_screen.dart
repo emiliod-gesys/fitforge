@@ -34,6 +34,7 @@ class WorkoutTodayTab extends ConsumerWidget {
     final routinesAsync = ref.watch(routinesProvider);
     final statsAsync = ref.watch(workoutWeeklyStatsProvider);
     final catalog = ref.watch(exercisesProvider).valueOrNull ?? [];
+    final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
 
     Future<void> onRefresh() async {
       HapticFeedback.lightImpact();
@@ -115,7 +116,15 @@ class WorkoutTodayTab extends ConsumerWidget {
               if (workouts.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Center(child: Text(l10n.noWorkoutsYet)),
+                  child: Center(
+                    child: Text(
+                      online ? l10n.noWorkoutsYet : l10n.offlineRecentWorkoutsEmpty,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: online ? null : AppColors.textMuted,
+                      ),
+                    ),
+                  ),
                 );
               }
               final completed = workouts.where((w) => !w.isActive).toList();
@@ -153,7 +162,16 @@ class WorkoutTodayTab extends ConsumerWidget {
               );
             },
             loading: () => const FitForgeLoadingScreen(),
-            error: (e, _) => Text(l10n.errorGeneric('$e')),
+            error: (_, __) => Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Text(
+                  online ? l10n.trainRecentWorkoutsUnavailable : l10n.offlineRecentWorkoutsEmpty,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+              ),
+            ),
           ),
         ],
       ),

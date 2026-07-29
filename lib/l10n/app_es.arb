@@ -1372,5 +1372,118 @@
   "dailyTip_maintenance_habits": "Enlaza el entreno a una hora fija (después del trabajo, antes de cenar) para que cueste menos saltártelo.",
   "dailyTip_maintenance_social": "Las comidas sociales caben en mantenimiento: equilibra el día o la semana en lugar de compensar con ayunos extremos.",
   "dailyTip_maintenance_health": "Presión arterial, energía diaria y calidad del sueño son señales tan válidas como el peso en la báscula.",
-  "dailyTip_maintenance_enjoy": "El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir."
+  "dailyTip_maintenance_enjoy": "El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir.",
+  "offlineModeBanner": "Sin conexión — solo Entrenar y Perfil están disponibles. Tus rutinas y entrenos se guardan en el dispositivo",
+  "offlineProfileUnavailable": "No hay datos de perfil guardados. Conéctate a internet al menos una vez para usar el perfil offline.",
+  "offlinePendingSyncBanner": "{count, plural, =1{1 entrenamiento pendiente de subir} other{{count} entrenamientos pendientes de subir}}",
+  "@offlinePendingSyncBanner": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "offlineSyncNow": "Subir ahora",
+  "offlinePrepareTitle": "Preparar modo offline",
+  "offlinePrepareSubtitle": "Descarga rutinas y series previas para entrenar sin señal",
+  "offlinePrepareDone": "Listo: {routines} rutinas y {sets} ejercicios con historial guardados",
+  "@offlinePrepareDone": {
+    "placeholders": {
+      "routines": { "type": "int" },
+      "sets": { "type": "int" }
+    }
+  },
+  "offlinePrepareFailed": "No se pudo preparar el modo offline: {message}",
+  "@offlinePrepareFailed": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "offlineDownloadExercisesTitle": "Descargar ejercicios del cloud",
+  "offlineDownloadExercisesSubtitleEmpty": "Guarda el catálogo extendido (~1100 ejercicios) con GIFs en tu dispositivo",
+  "offlineDownloadExercisesSubtitleDone": "{count} ejercicios guardados en el dispositivo",
+  "@offlineDownloadExercisesSubtitleDone": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesProgress": "Descargando datos: {downloaded} de {total} ejercicios…",
+  "@offlineDownloadExercisesProgress": {
+    "placeholders": {
+      "downloaded": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesProgressUnknown": "Descargando datos: {downloaded} ejercicios…",
+  "@offlineDownloadExercisesProgressUnknown": {
+    "placeholders": {
+      "downloaded": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesProgressMedia": "Descargando GIFs: {downloaded} de {total} ilustraciones…",
+  "@offlineDownloadExercisesProgressMedia": {
+    "placeholders": {
+      "downloaded": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesProgressMediaUnknown": "Descargando GIFs: {downloaded} ilustraciones…",
+  "@offlineDownloadExercisesProgressMediaUnknown": {
+    "placeholders": {
+      "downloaded": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesDone": "Catálogo descargado: {count} ejercicios, {media} con GIF",
+  "@offlineDownloadExercisesDone": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "media": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesFailed": "No se pudo descargar el catálogo: {message}",
+  "@offlineDownloadExercisesFailed": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "offlineDownloadExercisesUpToDate": "Ya tienes el catálogo completo: {count} ejercicios, {media} con GIF. No hay nada nuevo.",
+  "@offlineDownloadExercisesUpToDate": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "media": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesConfirmTitle": "Actualizar catálogo",
+  "offlineDownloadExercisesConfirmBody": "Ya tienes {local} ejercicios guardados. Hay {missing} ejercicios nuevos y {media} GIFs pendientes. ¿Descargar solo lo faltante?",
+  "@offlineDownloadExercisesConfirmBody": {
+    "placeholders": {
+      "local": { "type": "int" },
+      "missing": { "type": "int" },
+      "media": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesConfirmAction": "Descargar faltantes",
+  "offlineDownloadExercisesSubtitleUpToDate": "{count} ejercicios · todo al día",
+  "@offlineDownloadExercisesSubtitleUpToDate": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesSubtitleUpdates": "{count} ejercicios · {pending} actualizaciones disponibles",
+  "@offlineDownloadExercisesSubtitleUpdates": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "pending": { "type": "int" }
+    }
+  },
+  "offlineDownloadExercisesDoneIncremental": "Actualizado: {count} ejercicios ({newExercises} nuevos), {media} con GIF ({newMedia} descargados)",
+  "@offlineDownloadExercisesDoneIncremental": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "media": { "type": "int" },
+      "newExercises": { "type": "int" },
+      "newMedia": { "type": "int" }
+    }
+  },
+  "offlineRecentWorkoutsEmpty": "Sin conexión — conecta para ver tu historial completo. Los entrenos hechos offline aparecerán aquí.",
+  "trainRecentWorkoutsUnavailable": "No se pudo cargar el historial reciente.",
+  "offlineSetSavedLocally": "Serie guardada localmente — se subirá al reconectar"
 }

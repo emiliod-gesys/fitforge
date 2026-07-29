@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/online_only_routes.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
 import '../../core/theme/app_accent.dart';
@@ -11,8 +12,18 @@ class HomeScreen extends ConsumerWidget {
 
   const HomeScreen({super.key, required this.child});
 
-  int _currentIndex(BuildContext context, {required bool isTrainer}) {
+  int _currentIndex(
+    BuildContext context, {
+    required bool isTrainer,
+    required bool isOnline,
+  }) {
     final location = GoRouterState.of(context).matchedLocation;
+
+    if (!isOnline) {
+      if (location.startsWith('/profile')) return 1;
+      return 0;
+    }
+
     if (location.startsWith('/ai-coach')) return 1;
     if (location.startsWith('/food')) return 2;
     if (location.startsWith('/progress')) return 3;
@@ -22,7 +33,22 @@ class HomeScreen extends ConsumerWidget {
     return 0;
   }
 
-  void _onDestinationSelected(BuildContext context, int index, {required bool isTrainer}) {
+  void _onDestinationSelected(
+    BuildContext context,
+    int index, {
+    required bool isTrainer,
+    required bool isOnline,
+  }) {
+    if (!isOnline) {
+      switch (index) {
+        case 0:
+          context.go('/');
+        case 1:
+          context.go('/profile');
+      }
+      return;
+    }
+
     switch (index) {
       case 0:
         context.go('/');
@@ -45,18 +71,30 @@ class HomeScreen extends ConsumerWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final unread = ref.watch(socialUnreadCountProvider).valueOrNull ?? 0;
-    final isTrainer = ref.watch(isTrainerProvider);
+  List<NavigationDestination> _destinations({
+    required dynamic l10n,
+    required bool isTrainer,
+    required bool isOnline,
+    required int unread,
+    required BuildContext context,
+  }) {
+    final train = NavigationDestination(
+      icon: const Icon(Icons.fitness_center_outlined),
+      selectedIcon: const Icon(Icons.fitness_center),
+      label: l10n.navTrain,
+    );
+    final profile = NavigationDestination(
+      icon: const Icon(Icons.person_outline),
+      selectedIcon: const Icon(Icons.person),
+      label: l10n.navProfile,
+    );
 
-    final destinations = <NavigationDestination>[
-      NavigationDestination(
-        icon: const Icon(Icons.fitness_center_outlined),
-        selectedIcon: const Icon(Icons.fitness_center),
-        label: l10n.navTrain,
-      ),
+    if (!isOnline) {
+      return [train, profile];
+    }
+
+    return [
+      train,
       NavigationDestination(
         icon: _NavAiIcon(color: AppColors.textMuted.withValues(alpha: 0.85)),
         selectedIcon: _NavAiIcon(color: context.accentColor),
@@ -91,12 +129,31 @@ class HomeScreen extends ConsumerWidget {
           selectedIcon: const Icon(Icons.school),
           label: l10n.navStudents,
         ),
-      NavigationDestination(
-        icon: const Icon(Icons.person_outline),
-        selectedIcon: const Icon(Icons.person),
-        label: l10n.navProfile,
-      ),
+      profile,
     ];
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final unread = ref.watch(socialUnreadCountProvider).valueOrNull ?? 0;
+    final isTrainer = ref.watch(isTrainerProvider);
+    final isOnline = ref.watch(isOnlineProvider).valueOrNull ?? true;
+    final location = GoRouterState.of(context).matchedLocation;
+
+    if (!isOnline && isOnlineOnlyShellRoute(location)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go('/');
+      });
+    }
+
+    final destinations = _destinations(
+      l10n: l10n,
+      isTrainer: isTrainer,
+      isOnline: isOnline,
+      unread: unread,
+      context: context,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.black,
@@ -107,9 +164,13 @@ class HomeScreen extends ConsumerWidget {
         ),
         child: NavigationBar(
           backgroundColor: AppColors.card,
-          selectedIndex: _currentIndex(context, isTrainer: isTrainer),
-          onDestinationSelected: (index) =>
-              _onDestinationSelected(context, index, isTrainer: isTrainer),
+          selectedIndex: _currentIndex(context, isTrainer: isTrainer, isOnline: isOnline),
+          onDestinationSelected: (index) => _onDestinationSelected(
+            context,
+            index,
+            isTrainer: isTrainer,
+            isOnline: isOnline,
+          ),
           destinations: destinations,
         ),
       ),

@@ -11,5 +11,12 @@ bool isConnectionError(Object error) {
       message.contains('network is unreachable') ||
       message.contains('handshakeexception') ||
       message.contains('timed out') ||
+      message.contains('timeoutexception') ||
       message.contains('no address associated with hostname');
+}
+
+const Duration networkRequestTimeout = Duration(seconds: 12);
+
+Future<T> withNetworkTimeout<T>(Future<T> operation) {
+  return operation.timeout(networkRequestTimeout);
 }

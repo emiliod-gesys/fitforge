@@ -6625,6 +6625,169 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El plan que disfrutas es el que mantendrás años. Elige entrenamientos que quieras repetir.'**
   String get dailyTip_maintenance_enjoy;
+
+  /// No description provided for @offlineModeBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión — solo Entrenar y Perfil están disponibles. Tus rutinas y entrenos se guardan en el dispositivo'**
+  String get offlineModeBanner;
+
+  /// No description provided for @offlineProfileUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay datos de perfil guardados. Conéctate a internet al menos una vez para usar el perfil offline.'**
+  String get offlineProfileUnavailable;
+
+  /// No description provided for @offlinePendingSyncBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 entrenamiento pendiente de subir} other{{count} entrenamientos pendientes de subir}}'**
+  String offlinePendingSyncBanner(int count);
+
+  /// No description provided for @offlineSyncNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir ahora'**
+  String get offlineSyncNow;
+
+  /// No description provided for @offlinePrepareTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Preparar modo offline'**
+  String get offlinePrepareTitle;
+
+  /// No description provided for @offlinePrepareSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descarga rutinas y series previas para entrenar sin señal'**
+  String get offlinePrepareSubtitle;
+
+  /// No description provided for @offlinePrepareDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo: {routines} rutinas y {sets} ejercicios con historial guardados'**
+  String offlinePrepareDone(int routines, int sets);
+
+  /// No description provided for @offlinePrepareFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo preparar el modo offline: {message}'**
+  String offlinePrepareFailed(String message);
+
+  /// No description provided for @offlineDownloadExercisesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar ejercicios del cloud'**
+  String get offlineDownloadExercisesTitle;
+
+  /// No description provided for @offlineDownloadExercisesSubtitleEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda el catálogo extendido (~1100 ejercicios) con GIFs en tu dispositivo'**
+  String get offlineDownloadExercisesSubtitleEmpty;
+
+  /// No description provided for @offlineDownloadExercisesSubtitleDone.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} ejercicios guardados en el dispositivo'**
+  String offlineDownloadExercisesSubtitleDone(int count);
+
+  /// No description provided for @offlineDownloadExercisesProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargando datos: {downloaded} de {total} ejercicios…'**
+  String offlineDownloadExercisesProgress(int downloaded, int total);
+
+  /// No description provided for @offlineDownloadExercisesProgressUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargando datos: {downloaded} ejercicios…'**
+  String offlineDownloadExercisesProgressUnknown(int downloaded);
+
+  /// No description provided for @offlineDownloadExercisesProgressMedia.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargando GIFs: {downloaded} de {total} ilustraciones…'**
+  String offlineDownloadExercisesProgressMedia(int downloaded, int total);
+
+  /// No description provided for @offlineDownloadExercisesProgressMediaUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargando GIFs: {downloaded} ilustraciones…'**
+  String offlineDownloadExercisesProgressMediaUnknown(int downloaded);
+
+  /// No description provided for @offlineDownloadExercisesDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Catálogo descargado: {count} ejercicios, {media} con GIF'**
+  String offlineDownloadExercisesDone(int count, int media);
+
+  /// No description provided for @offlineDownloadExercisesFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo descargar el catálogo: {message}'**
+  String offlineDownloadExercisesFailed(String message);
+
+  /// No description provided for @offlineDownloadExercisesUpToDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes el catálogo completo: {count} ejercicios, {media} con GIF. No hay nada nuevo.'**
+  String offlineDownloadExercisesUpToDate(int count, int media);
+
+  /// No description provided for @offlineDownloadExercisesConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar catálogo'**
+  String get offlineDownloadExercisesConfirmTitle;
+
+  /// No description provided for @offlineDownloadExercisesConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes {local} ejercicios guardados. Hay {missing} ejercicios nuevos y {media} GIFs pendientes. ¿Descargar solo lo faltante?'**
+  String offlineDownloadExercisesConfirmBody(int local, int missing, int media);
+
+  /// No description provided for @offlineDownloadExercisesConfirmAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar faltantes'**
+  String get offlineDownloadExercisesConfirmAction;
+
+  /// No description provided for @offlineDownloadExercisesSubtitleUpToDate.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} ejercicios · todo al día'**
+  String offlineDownloadExercisesSubtitleUpToDate(int count);
+
+  /// No description provided for @offlineDownloadExercisesSubtitleUpdates.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} ejercicios · {pending} actualizaciones disponibles'**
+  String offlineDownloadExercisesSubtitleUpdates(int count, int pending);
+
+  /// No description provided for @offlineDownloadExercisesDoneIncremental.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizado: {count} ejercicios ({newExercises} nuevos), {media} con GIF ({newMedia} descargados)'**
+  String offlineDownloadExercisesDoneIncremental(
+      int count, int media, int newExercises, int newMedia);
+
+  /// No description provided for @offlineRecentWorkoutsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión — conecta para ver tu historial completo. Los entrenos hechos offline aparecerán aquí.'**
+  String get offlineRecentWorkoutsEmpty;
+
+  /// No description provided for @trainRecentWorkoutsUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar el historial reciente.'**
+  String get trainRecentWorkoutsUnavailable;
+
+  /// No description provided for @offlineSetSavedLocally.
+  ///
+  /// In es, this message translates to:
+  /// **'Serie guardada localmente — se subirá al reconectar'**
+  String get offlineSetSavedLocally;
 }
 
 class _AppLocalizationsDelegate
