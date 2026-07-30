@@ -94,6 +94,26 @@ abstract final class WorkoutCalorieEstimator {
       return estimate.caloriesKcal ?? 0;
     }
 
+    if (isRunnerSummaryWorkout(workout)) {
+      final durationMinutes = resolveDurationMinutes(
+        workout: workout,
+        wallClockMinutes: workout.durationMinutes,
+      );
+      if (durationMinutes >= 1) {
+        final runnerEstimate = estimate(
+          durationMinutes: durationMinutes,
+          totalVolumeKg: 0,
+          completedSets: 0,
+          totalReps: 0,
+          profile: profile,
+          bodyMetrics: bodyMetrics,
+          cardioDurationSeconds: durationMinutes * 60,
+          runningPaceSecPerKm: workout.runnerAvgPaceSecPerKm,
+        );
+        return runnerEstimate.caloriesKcal ?? 0;
+      }
+    }
+
     return estimateFromSummary(
       durationMinutes: workout.durationMinutes,
       totalVolumeKg: workout.totalVolume,
@@ -101,6 +121,13 @@ abstract final class WorkoutCalorieEstimator {
       bodyMetrics: bodyMetrics,
     ).caloriesKcal ??
         0;
+  }
+
+  /// Entreno runner cargado solo con campos de resumen (sin series en memoria).
+  static bool isRunnerSummaryWorkout(Workout workout) {
+    return workout.runnerAvgPaceSecPerKm != null ||
+        workout.runnerRoute.isNotEmpty ||
+        workout.runnerSplits.isNotEmpty;
   }
 
   /// Estimación a partir del resumen guardado (sin detalle de series).

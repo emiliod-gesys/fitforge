@@ -66,7 +66,11 @@ abstract final class RoutineWorkoutSync {
           orderIndex: order++,
           imageUrl: ex.imageUrl,
           loggingType: lastSet.loggingType,
-          perArmWeight: ExerciseLoad.perArmWeightForExerciseId(ex.exerciseId, catalog),
+          perArmWeight: ExerciseLoad.resolvePerArmWeight(
+            exerciseId: ex.exerciseId,
+            catalog: catalog,
+            exerciseName: ex.exerciseName,
+          ),
           targetSetDetails: setDetails,
           targetDistanceMeters: lastSet.distanceMeters,
           restSeconds: AppConstants.defaultRestSeconds,

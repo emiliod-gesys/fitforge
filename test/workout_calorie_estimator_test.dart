@@ -158,6 +158,34 @@ void main() {
     expect(WorkoutCalorieEstimator.resolveDurationMinutes(workout: workout, wallClockMinutes: 0), 30);
   });
 
+  test('resolvedActiveCalories uses runner pace from summary without exercise detail', () {
+    final profile = UserProfile(
+      id: 'u1',
+      bodyWeight: 75,
+      age: 30,
+      heightCm: 175,
+      gender: Gender.male,
+      createdAt: DateTime.utc(2026),
+    );
+
+    final workout = Workout(
+      id: 'w-run',
+      userId: 'u1',
+      name: 'Salir a correr',
+      startedAt: DateTime.utc(2026, 7, 18, 12),
+      completedAt: DateTime.utc(2026, 7, 18, 12, 30),
+      durationMinutes: 30,
+      runnerAvgPaceSecPerKm: 360,
+    );
+
+    final calories = WorkoutCalorieEstimator.resolvedActiveCalories(
+      workout: workout,
+      profile: profile,
+    );
+
+    expect(calories, inInclusiveRange(180, 420));
+  });
+
   test('running MET increases with faster pace', () {
     final slow = WorkoutCalorieEstimator.runningMetFromPaceSecPerKm(720);
     final fast = WorkoutCalorieEstimator.runningMetFromPaceSecPerKm(300);

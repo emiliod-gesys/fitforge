@@ -126,6 +126,61 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     });
   }
 
+  bool _workoutHasCompletedCardio(Workout workout) {
+    return workout.exercises.any(
+      (ex) => ex.sets.any((s) => s.completed && s.isCardio && (s.durationSeconds ?? 0) >= 60),
+    );
+  }
+
+  Workout _workoutWithRunnerExercise(
+    Workout workout,
+    WorkoutExercise exercise,
+    WorkoutSet set, {
+    RunningSurface? runnerSurface,
+    List<RunnerRoutePoint>? runnerRoute,
+    List<RunnerKmSplit>? runnerSplits,
+    double? runnerAvgPaceSecPerKm,
+    double? runnerElevationGainMeters,
+    double? runnerElevationLossMeters,
+  }) {
+    return Workout(
+      id: workout.id,
+      userId: workout.userId,
+      routineId: workout.routineId,
+      routineName: workout.routineName,
+      name: workout.name,
+      startedAt: workout.startedAt,
+      completedAt: workout.completedAt,
+      durationMinutes: workout.durationMinutes,
+      activeCaloriesKcal: workout.activeCaloriesKcal,
+      exercises: [
+        WorkoutExercise(
+          id: exercise.id,
+          exerciseId: exercise.exerciseId,
+          exerciseName: exercise.exerciseName,
+          imageUrl: exercise.imageUrl,
+          orderIndex: exercise.orderIndex,
+          sets: [set],
+          notes: exercise.notes,
+        ),
+      ],
+      notes: workout.notes,
+      totalVolume: workout.totalVolume,
+      runnerSurface: runnerSurface ?? workout.runnerSurface,
+      runnerRoute: runnerRoute ?? workout.runnerRoute,
+      runnerSplits: runnerSplits ?? workout.runnerSplits,
+      runnerAvgPaceSecPerKm: runnerAvgPaceSecPerKm ?? workout.runnerAvgPaceSecPerKm,
+      runnerElevationGainMeters:
+          runnerElevationGainMeters ?? workout.runnerElevationGainMeters,
+      runnerElevationLossMeters:
+          runnerElevationLossMeters ?? workout.runnerElevationLossMeters,
+      hyroxValidationStatus: workout.hyroxValidationStatus,
+      hyroxValidationReasons: workout.hyroxValidationReasons,
+      validationStatus: workout.validationStatus,
+      validationReasons: workout.validationReasons,
+    );
+  }
+
   Workout _mergedWorkout(Workout workout) {
     if (_setOverrides.isEmpty && _insertedSets.isEmpty) return workout;
 
@@ -550,10 +605,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             elevationLossMeters: snapshot.elevationLossMeters,
           );
 
-      await _syncActiveWorkout();
-      final synced = ref.read(activeWorkoutProvider).valueOrNull;
-      final merged = synced != null ? _mergedWorkout(synced) : workout;
-      await _completeWorkout(merged, skipCompletingFlag: true);
+      final runnerWorkout = _workoutWithRunnerExercise(
+        workout,
+        exercise,
+        set,
+        runnerSurface: _runnerSurface ?? snapshot.surface,
+        runnerRoute: snapshot.route,
+        runnerSplits: snapshot.splits,
+        runnerAvgPaceSecPerKm: avgPace,
+        runnerElevationGainMeters: snapshot.elevationGainMeters,
+        runnerElevationLossMeters: snapshot.elevationLossMeters,
+      );
+      await _completeWorkout(runnerWorkout, skipCompletingFlag: true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -593,10 +656,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             avgPaceSecPerKm: result.avgPaceSecPerKm,
           );
 
-      await _syncActiveWorkout();
-      final synced = ref.read(activeWorkoutProvider).valueOrNull;
-      final merged = synced != null ? _mergedWorkout(synced) : workout;
-      await _completeWorkout(merged, skipCompletingFlag: true);
+      final runnerWorkout = _workoutWithRunnerExercise(
+        workout,
+        exercise,
+        set,
+        runnerAvgPaceSecPerKm: result.avgPaceSecPerKm,
+      );
+      await _completeWorkout(runnerWorkout, skipCompletingFlag: true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -615,8 +681,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
 
     try {
-      final fresh = await ref.read(workoutServiceProvider).getActiveWorkout();
-      var effectiveWorkout = fresh != null ? _mergedWorkout(fresh) : workout;
+      Workout effectiveWorkout;
+      if (_isRunnerWorkout && _workoutHasCompletedCardio(workout)) {
+        effectiveWorkout = _mergedWorkout(workout);
+      } else {
+        final fresh = await ref.read(workoutServiceProvider).getActiveWorkout();
+        effectiveWorkout = fresh != null ? _mergedWorkout(fresh) : workout;
+      }
 
       final startAt = _workoutTimerStart(effectiveWorkout);
       final endAt = _workoutTimerStop()?.toUtc() ?? SupabaseDateTime.nowUtc;

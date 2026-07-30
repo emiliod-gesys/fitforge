@@ -111,5 +111,41 @@ void main() {
       );
       expect(ExerciseLoad.combinedModeUsesLegLabel(exerciseName: legExt.name, exercise: legExt), isTrue);
     });
+
+    test('concentration curl supports per-arm toggle via dumbbell equipment', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final catalog = await BundledExerciseCatalog.load(locale: 'en');
+      final concentration = catalog.firstWhere(
+        (e) => e.catalogId == 'ff_biceps_concentration_curl',
+      );
+
+      expect(concentration.name, 'Concentration Curl');
+      expect(concentration.equipment, contains('Dumbbell'));
+      expect(concentration.unilateral, isTrue);
+      expect(
+        ExerciseLoad.supportsPerArmToggle(concentration.id, catalog, concentration.name),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: concentration.id,
+          catalog: catalog,
+          exerciseName: concentration.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.weightLabel(
+          'kg',
+          concentration.name,
+          perArmWeight: ExerciseLoad.resolvePerArmWeight(
+            exerciseId: concentration.id,
+            catalog: catalog,
+            exerciseName: concentration.name,
+          ),
+        ),
+        'kg (por brazo)',
+      );
+    });
   });
 }

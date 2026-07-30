@@ -101,7 +101,7 @@ class WorkoutService {
     final workoutsData = await _client
         .from('workouts')
         .select(
-          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes',
+          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes, runner_avg_pace_sec_per_km, runner_route, runner_splits',
         )
         .eq('user_id', uid)
         .gte('completed_at', start.toUtc().toIso8601String())
@@ -129,7 +129,7 @@ class WorkoutService {
     final workoutsData = await _client
         .from('workouts')
         .select(
-          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes',
+          'id, user_id, name, started_at, completed_at, duration_minutes, total_volume, active_calories_kcal, notes, runner_avg_pace_sec_per_km, runner_route, runner_splits',
         )
         .eq('user_id', uid)
         .gte('completed_at', startInclusive.toUtc().toIso8601String())

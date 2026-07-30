@@ -97,6 +97,11 @@ abstract final class ExerciseLoad {
           _isLegMachineByName(exerciseName);
     }
 
+    if (exercise != null && exercise.equipment.any(_isDumbbellEquipment)) {
+      final n = _normalize(exerciseName);
+      if (!_singleDumbbellBothHands(n)) return true;
+    }
+
     final n = _normalize(exerciseName);
     if (_usesDumbbell(n) && !_singleDumbbellBothHands(n)) return true;
     if (_isPerArmCable(n)) return true;
@@ -144,9 +149,22 @@ abstract final class ExerciseLoad {
     bool? sessionOverride,
   }) {
     if (sessionOverride != null) return sessionOverride;
+
+    final exercise = _findInCatalog(exerciseId, catalog);
+    final catalogPerArm = perArmWeightForExerciseId(exerciseId, catalog);
+
+    // Unilateral con mancuerna/kettlebell: el peso registrado es del brazo activo
+    // (p. ej. curl de concentración, cuyo nombre no incluye «dumbbell»).
+    if (exercise != null &&
+        exercise.unilateral &&
+        exercise.equipment.any(_isDumbbellEquipment) &&
+        catalogPerArm != true) {
+      return true;
+    }
+
     return isPerArmWeight(
       exerciseName,
-      perArmWeight: perArmWeightForExerciseId(exerciseId, catalog),
+      perArmWeight: catalogPerArm,
     );
   }
 
@@ -508,6 +526,14 @@ abstract final class ExerciseLoad {
   static bool _isMachineEquipment(String equipment) {
     final n = _normalize(equipment);
     return n.contains('maquina') || n == 'machine';
+  }
+
+  static bool _isDumbbellEquipment(String equipment) {
+    final n = _normalize(equipment);
+    return n.contains('mancuerna') ||
+        n.contains('dumbbell') ||
+        n.contains('kettlebell') ||
+        n.contains('pesa rusa');
   }
 
   static bool _inferBodyweightByName(String name) {

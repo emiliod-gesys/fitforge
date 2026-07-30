@@ -2677,7 +2677,7 @@
       "id": "ff_biceps_concentration_curl",
       "loggingType": "strength",
       "loadMode": "single_load",
-      "perArmWeight": false,
+      "perArmWeight": true,
       "unilateral": true,
       "weightOptional": false,
       "cardioPreset": null,

@@ -182,7 +182,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           targetSets: defaultSets.length,
           targetReps: AppConstants.defaultReps,
           targetSetDetails: defaultSets,
-          perArmWeight: ExerciseLoad.perArmWeightForExerciseId(selected.id, exercises),
+          perArmWeight: ExerciseLoad.resolvePerArmWeight(
+            exerciseId: selected.id,
+            catalog: exercises,
+            exerciseName: selected.name,
+          ),
           targetDurationSeconds: selected.isCardio ? 1200 : null,
           targetDistanceMeters: selected.isCardio ? 3000 : null,
         ));
