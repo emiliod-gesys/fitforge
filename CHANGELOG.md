@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.2.0+3 — 2026-07-30
+## 1.2.0+7 — 2026-07-30
+
+Build number raised above App Store Connect’s last uploaded build (`6`).
+
+## 1.2.0+3 — 2026-07-30 (superseded build)
 
 ### Added
 - Offline-first Train and Profile: cache routines/profile, complete workouts offline, sync when back online

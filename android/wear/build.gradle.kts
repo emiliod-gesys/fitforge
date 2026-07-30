@@ -12,7 +12,7 @@ android {
         applicationId = "io.fitforge.fitforge"
         minSdk = 30
         targetSdk = 35
-        versionCode = 3
+        versionCode = 7
         versionName = "1.2.0"
     }
 
