@@ -93,14 +93,15 @@ class HealthBodyMetricsImporter {
     required String unitSystem,
   }) async {
     final sample = proposal.sample;
-    final displayValue = sample.type == 'weight'
-        ? sample.value
-        : sample.value;
+    // Las muestras de salud ya vienen normalizadas: peso en kg, grasa en %.
+    // Hay que persistir el peso con unitSystem 'kg'; si se pasa el del perfil ('lb'),
+    // saveBodyMetric vuelve a convertir y corrompe el valor (~kg/2.2).
+    final persistUnit = sample.type == 'weight' ? 'kg' : unitSystem;
 
     await _profiles.saveBodyMetric(
       type: sample.type,
-      displayValue: displayValue,
-      unitSystem: unitSystem,
+      displayValue: sample.value,
+      unitSystem: persistUnit,
       measuredAt: sample.measuredAt,
       source: 'health',
     );

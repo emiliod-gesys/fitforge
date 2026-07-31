@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 
 import 'health_body_metric_sample.dart';
+import 'health_body_metrics_mapper.dart';
 
 /// Fachada de lectura sobre Apple Health / Health Connect (Fase A: solo lectura).
 class HealthIntegrationService {
@@ -88,8 +89,8 @@ class HealthIntegrationService {
   }
 
   HealthBodyMetricSample? _mapPoint(HealthDataPoint point) {
-    final value = _numericValue(point);
-    if (value == null || value <= 0) return null;
+    final raw = _numericValue(point);
+    if (raw == null || raw <= 0) return null;
 
     final type = switch (point.type) {
       HealthDataType.WEIGHT => 'weight',
@@ -98,21 +99,18 @@ class HealthIntegrationService {
     };
     if (type == null) return null;
 
-    final measuredAt = point.dateFrom;
-    final sourceKey = '${point.type.name}_${measuredAt.toUtc().millisecondsSinceEpoch}_$value';
+    final normalized = type == 'weight'
+        ? HealthBodyMetricsMapper.weightToKg(raw, point.unit)
+        : HealthBodyMetricsMapper.bodyFatToPercent(raw);
+    if (normalized == null) return null;
 
-    if (type == 'body_fat' && value <= 1) {
-      return HealthBodyMetricSample(
-        type: type,
-        value: value * 100,
-        measuredAt: measuredAt,
-        sourceKey: sourceKey,
-      );
-    }
+    final measuredAt = point.dateFrom;
+    final sourceKey =
+        '${point.type.name}_${measuredAt.toUtc().millisecondsSinceEpoch}_$normalized';
 
     return HealthBodyMetricSample(
       type: type,
-      value: value,
+      value: normalized,
       measuredAt: measuredAt,
       sourceKey: sourceKey,
     );

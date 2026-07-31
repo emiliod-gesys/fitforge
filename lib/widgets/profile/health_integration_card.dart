@@ -72,9 +72,10 @@ class _HealthIntegrationCardState extends ConsumerState<HealthIntegrationCard> {
         builder: (ctx) => AlertDialog(
           title: Text(_proposalTitle(context, proposal)),
           content: Text(
-            context.l10n.healthIntegrationImportConfirm(
+            '${context.l10n.healthIntegrationImportConfirm(
               _formatProposalValue(context, proposal, unit),
-            ),
+            )}\n\n'
+            '${DateFormat.yMMMd().add_Hm().format(proposal.sample.measuredAt.toLocal())}',
           ),
           actions: [
             TextButton(
