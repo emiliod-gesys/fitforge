@@ -6788,6 +6788,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Serie guardada localmente — se subirá al reconectar'**
   String get offlineSetSavedLocally;
+
+  /// No description provided for @healthIntegrationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Apple Salud / Health Connect'**
+  String get healthIntegrationTitle;
+
+  /// No description provided for @healthIntegrationSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Importa peso y grasa corporal desde tu báscula o app de salud.'**
+  String get healthIntegrationSubtitle;
+
+  /// No description provided for @healthIntegrationDisclaimer.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo importamos métricas corporales. No modificamos tus entrenos ni el presupuesto de comida directamente.'**
+  String get healthIntegrationDisclaimer;
+
+  /// No description provided for @healthIntegrationConnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectar'**
+  String get healthIntegrationConnect;
+
+  /// No description provided for @healthIntegrationDisconnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Desconectar'**
+  String get healthIntegrationDisconnect;
+
+  /// No description provided for @healthIntegrationSyncNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Sincronizar métricas'**
+  String get healthIntegrationSyncNow;
+
+  /// No description provided for @healthIntegrationImportWeight.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar peso'**
+  String get healthIntegrationImportWeight;
+
+  /// No description provided for @healthIntegrationImportBodyFat.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar grasa corporal'**
+  String get healthIntegrationImportBodyFat;
+
+  /// No description provided for @healthIntegrationConnected.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectado'**
+  String get healthIntegrationConnected;
+
+  /// No description provided for @healthIntegrationNotConnected.
+  ///
+  /// In es, this message translates to:
+  /// **'No conectado'**
+  String get healthIntegrationNotConnected;
+
+  /// No description provided for @healthIntegrationLastSync.
+  ///
+  /// In es, this message translates to:
+  /// **'Última sync: {when}'**
+  String healthIntegrationLastSync(String when);
+
+  /// No description provided for @healthIntegrationNeverSynced.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no se ha sincronizado'**
+  String get healthIntegrationNeverSynced;
+
+  /// No description provided for @healthIntegrationHealthConnectMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Instala Health Connect para importar métricas en Android.'**
+  String get healthIntegrationHealthConnectMissing;
+
+  /// No description provided for @healthIntegrationInstallHealthConnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Instalar Health Connect'**
+  String get healthIntegrationInstallHealthConnect;
+
+  /// No description provided for @healthIntegrationUnsupported.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible solo en iPhone y Android.'**
+  String get healthIntegrationUnsupported;
+
+  /// No description provided for @healthIntegrationPermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Permiso denegado. Actívalo en Ajustes de salud.'**
+  String get healthIntegrationPermissionDenied;
+
+  /// No description provided for @healthIntegrationSyncFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo sincronizar con salud.'**
+  String get healthIntegrationSyncFailed;
+
+  /// No description provided for @healthIntegrationImportWeightTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo peso en Salud'**
+  String get healthIntegrationImportWeightTitle;
+
+  /// No description provided for @healthIntegrationImportBodyFatTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva grasa corporal en Salud'**
+  String get healthIntegrationImportBodyFatTitle;
+
+  /// No description provided for @healthIntegrationImportConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Actualizar tu perfil con {value}?'**
+  String healthIntegrationImportConfirm(String value);
+
+  /// No description provided for @healthIntegrationImportApply.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar perfil'**
+  String get healthIntegrationImportApply;
+
+  /// No description provided for @healthIntegrationImportDismiss.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get healthIntegrationImportDismiss;
+
+  /// No description provided for @healthIntegrationNoUpdates.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay métricas nuevas para importar.'**
+  String get healthIntegrationNoUpdates;
 }
 
 class _AppLocalizationsDelegate

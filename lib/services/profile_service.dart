@@ -162,6 +162,23 @@ class ProfileService {
     return null;
   }
 
+  Future<DateTime?> getLastBodyFatMeasuredAt() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return null;
+
+    final measurement = await _client
+        .from('body_measurements')
+        .select('measured_at')
+        .eq('user_id', user.id)
+        .eq('type', 'body_fat')
+        .order('measured_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (measurement == null) return null;
+    return DateTime.parse(measurement['measured_at'] as String);
+  }
+
   Future<Map<String, BodyMetricSnapshot>> getBodyMetricSnapshots() async {
     final user = _client.auth.currentUser;
     if (user == null) return {};
@@ -245,6 +262,8 @@ class ProfileService {
     required String type,
     required double displayValue,
     required String unitSystem,
+    DateTime? measuredAt,
+    String? source,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) return;
@@ -256,6 +275,7 @@ class ProfileService {
         ? UnitConverter.displayToKg(displayValue, unitSystem)
         : displayValue;
     final storedUnit = def.kind == BodyMetricKind.mass ? 'kg' : def.unitLabel(unitSystem);
+    final when = measuredAt ?? DateTime.now();
 
     await _client.from('body_measurements').insert({
       'id': _uuid.v4(),
@@ -263,7 +283,7 @@ class ProfileService {
       'type': type,
       'value': storedValue,
       'unit': storedUnit,
-      'measured_at': DateTime.now().toIso8601String(),
+      'measured_at': when.toIso8601String(),
     });
 
     if (type == 'weight') {

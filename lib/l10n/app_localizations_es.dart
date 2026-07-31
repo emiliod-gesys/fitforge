@@ -3991,4 +3991,84 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get offlineSetSavedLocally =>
       'Serie guardada localmente — se subirá al reconectar';
+
+  @override
+  String get healthIntegrationTitle => 'Apple Salud / Health Connect';
+
+  @override
+  String get healthIntegrationSubtitle =>
+      'Importa peso y grasa corporal desde tu báscula o app de salud.';
+
+  @override
+  String get healthIntegrationDisclaimer =>
+      'Solo importamos métricas corporales. No modificamos tus entrenos ni el presupuesto de comida directamente.';
+
+  @override
+  String get healthIntegrationConnect => 'Conectar';
+
+  @override
+  String get healthIntegrationDisconnect => 'Desconectar';
+
+  @override
+  String get healthIntegrationSyncNow => 'Sincronizar métricas';
+
+  @override
+  String get healthIntegrationImportWeight => 'Importar peso';
+
+  @override
+  String get healthIntegrationImportBodyFat => 'Importar grasa corporal';
+
+  @override
+  String get healthIntegrationConnected => 'Conectado';
+
+  @override
+  String get healthIntegrationNotConnected => 'No conectado';
+
+  @override
+  String healthIntegrationLastSync(String when) {
+    return 'Última sync: $when';
+  }
+
+  @override
+  String get healthIntegrationNeverSynced => 'Aún no se ha sincronizado';
+
+  @override
+  String get healthIntegrationHealthConnectMissing =>
+      'Instala Health Connect para importar métricas en Android.';
+
+  @override
+  String get healthIntegrationInstallHealthConnect => 'Instalar Health Connect';
+
+  @override
+  String get healthIntegrationUnsupported =>
+      'Disponible solo en iPhone y Android.';
+
+  @override
+  String get healthIntegrationPermissionDenied =>
+      'Permiso denegado. Actívalo en Ajustes de salud.';
+
+  @override
+  String get healthIntegrationSyncFailed => 'No se pudo sincronizar con salud.';
+
+  @override
+  String get healthIntegrationImportWeightTitle => 'Nuevo peso en Salud';
+
+  @override
+  String get healthIntegrationImportBodyFatTitle =>
+      'Nueva grasa corporal en Salud';
+
+  @override
+  String healthIntegrationImportConfirm(String value) {
+    return '¿Actualizar tu perfil con $value?';
+  }
+
+  @override
+  String get healthIntegrationImportApply => 'Actualizar perfil';
+
+  @override
+  String get healthIntegrationImportDismiss => 'Ahora no';
+
+  @override
+  String get healthIntegrationNoUpdates =>
+      'No hay métricas nuevas para importar.';
 }

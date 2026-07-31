@@ -1485,5 +1485,38 @@
   },
   "offlineRecentWorkoutsEmpty": "Sin conexión — conecta para ver tu historial completo. Los entrenos hechos offline aparecerán aquí.",
   "trainRecentWorkoutsUnavailable": "No se pudo cargar el historial reciente.",
-  "offlineSetSavedLocally": "Serie guardada localmente — se subirá al reconectar"
+  "offlineSetSavedLocally": "Serie guardada localmente — se subirá al reconectar",
+  "healthIntegrationTitle": "Apple Salud / Health Connect",
+  "healthIntegrationSubtitle": "Importa peso y grasa corporal desde tu báscula o app de salud.",
+  "healthIntegrationDisclaimer": "Solo importamos métricas corporales. No modificamos tus entrenos ni el presupuesto de comida directamente.",
+  "healthIntegrationConnect": "Conectar",
+  "healthIntegrationDisconnect": "Desconectar",
+  "healthIntegrationSyncNow": "Sincronizar métricas",
+  "healthIntegrationImportWeight": "Importar peso",
+  "healthIntegrationImportBodyFat": "Importar grasa corporal",
+  "healthIntegrationConnected": "Conectado",
+  "healthIntegrationNotConnected": "No conectado",
+  "healthIntegrationLastSync": "Última sync: {when}",
+  "@healthIntegrationLastSync": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "healthIntegrationNeverSynced": "Aún no se ha sincronizado",
+  "healthIntegrationHealthConnectMissing": "Instala Health Connect para importar métricas en Android.",
+  "healthIntegrationInstallHealthConnect": "Instalar Health Connect",
+  "healthIntegrationUnsupported": "Disponible solo en iPhone y Android.",
+  "healthIntegrationPermissionDenied": "Permiso denegado. Actívalo en Ajustes de salud.",
+  "healthIntegrationSyncFailed": "No se pudo sincronizar con salud.",
+  "healthIntegrationImportWeightTitle": "Nuevo peso en Salud",
+  "healthIntegrationImportBodyFatTitle": "Nueva grasa corporal en Salud",
+  "healthIntegrationImportConfirm": "¿Actualizar tu perfil con {value}?",
+  "@healthIntegrationImportConfirm": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "healthIntegrationImportApply": "Actualizar perfil",
+  "healthIntegrationImportDismiss": "Ahora no",
+  "healthIntegrationNoUpdates": "No hay métricas nuevas para importar."
 }

@@ -7,6 +7,7 @@ import 'bmr_calculator.dart';
 import 'workout_calorie_estimator.dart';
 
 /// Calcula objetivo calórico diario, macros y balance con entrenos del día.
+/// Las kcal importadas desde Apple Health / Health Connect no entran aquí (Fase A).
 abstract final class DailyNutritionBudget {
   static const _defaultCalorieGoal = 2200;
 

@@ -14,6 +14,7 @@ import '../../models/profile.dart';
 import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/cloud_exercise_download_provider.dart';
+import '../../providers/health_integration_provider.dart';
 import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../data/avatar_catalog.dart';
 import '../../services/supabase_service.dart';
@@ -26,6 +27,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/profile/accent_color_selector.dart';
+import '../../widgets/profile/health_integration_card.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -204,6 +206,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
                       const BodyMetricHealthLegend(),
+                      const SizedBox(height: 16),
+                      HealthIntegrationCard(profile: profile),
                     ],
                   ),
                   loading: () => const Padding(
@@ -1151,6 +1155,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             displayValue: result,
             unitSystem: unitSystem,
           );
+      if (def.key == 'weight') {
+        await ref.read(healthImportStoreProvider).recordManualWeightEdit();
+      }
       ref.invalidate(bodyMetricSnapshotsProvider);
       ref.invalidate(profileProvider);
       ref.invalidate(bodyMeasurementsProvider);

@@ -6,6 +6,7 @@ import '../../core/utils/unit_converter.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/health_integration_provider.dart';
 
 /// Solicita actualizar el peso cuando el último registro supera 15 días.
 class WeightUpdateDialog extends ConsumerStatefulWidget {
@@ -52,6 +53,7 @@ class _WeightUpdateDialogState extends ConsumerState<WeightUpdateDialog> {
             displayValue: display,
             unitSystem: unit,
           );
+      await ref.read(healthImportStoreProvider).recordManualWeightEdit();
 
       ref.invalidate(profileProvider);
       ref.invalidate(bodyMetricSnapshotsProvider);

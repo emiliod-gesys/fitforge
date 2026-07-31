@@ -78,6 +78,8 @@
 	<string>FitForge usa tu ubicación para registrar la ruta y distancia de tus carreras.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>FitForge sigue registrando tu carrera cuando la app está en segundo plano.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>FitForge puede importar tu peso y grasa corporal desde Apple Salud para mantener tu perfil al día.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

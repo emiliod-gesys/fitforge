@@ -3961,4 +3961,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineSetSavedLocally =>
       'Set saved locally — will upload when back online';
+
+  @override
+  String get healthIntegrationTitle => 'Apple Health / Health Connect';
+
+  @override
+  String get healthIntegrationSubtitle =>
+      'Import weight and body fat from your scale or health app.';
+
+  @override
+  String get healthIntegrationDisclaimer =>
+      'We only import body metrics. Your workouts and food budget logic stay in FitForge.';
+
+  @override
+  String get healthIntegrationConnect => 'Connect';
+
+  @override
+  String get healthIntegrationDisconnect => 'Disconnect';
+
+  @override
+  String get healthIntegrationSyncNow => 'Sync metrics';
+
+  @override
+  String get healthIntegrationImportWeight => 'Import weight';
+
+  @override
+  String get healthIntegrationImportBodyFat => 'Import body fat';
+
+  @override
+  String get healthIntegrationConnected => 'Connected';
+
+  @override
+  String get healthIntegrationNotConnected => 'Not connected';
+
+  @override
+  String healthIntegrationLastSync(String when) {
+    return 'Last sync: $when';
+  }
+
+  @override
+  String get healthIntegrationNeverSynced => 'Not synced yet';
+
+  @override
+  String get healthIntegrationHealthConnectMissing =>
+      'Install Health Connect to import metrics on Android.';
+
+  @override
+  String get healthIntegrationInstallHealthConnect => 'Install Health Connect';
+
+  @override
+  String get healthIntegrationUnsupported =>
+      'Available on iPhone and Android only.';
+
+  @override
+  String get healthIntegrationPermissionDenied =>
+      'Permission denied. Enable it in Health settings.';
+
+  @override
+  String get healthIntegrationSyncFailed => 'Could not sync with health apps.';
+
+  @override
+  String get healthIntegrationImportWeightTitle => 'New weight in Health';
+
+  @override
+  String get healthIntegrationImportBodyFatTitle => 'New body fat in Health';
+
+  @override
+  String healthIntegrationImportConfirm(String value) {
+    return 'Update your profile with $value?';
+  }
+
+  @override
+  String get healthIntegrationImportApply => 'Update profile';
+
+  @override
+  String get healthIntegrationImportDismiss => 'Not now';
+
+  @override
+  String get healthIntegrationNoUpdates => 'No new metrics to import.';
 }

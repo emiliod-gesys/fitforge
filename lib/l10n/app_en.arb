@@ -1446,5 +1446,38 @@
   },
   "offlineRecentWorkoutsEmpty": "Offline — connect to see your full history. Workouts done offline will appear here.",
   "trainRecentWorkoutsUnavailable": "Could not load recent workouts.",
-  "offlineSetSavedLocally": "Set saved locally — will upload when back online"
+  "offlineSetSavedLocally": "Set saved locally — will upload when back online",
+  "healthIntegrationTitle": "Apple Health / Health Connect",
+  "healthIntegrationSubtitle": "Import weight and body fat from your scale or health app.",
+  "healthIntegrationDisclaimer": "We only import body metrics. Your workouts and food budget logic stay in FitForge.",
+  "healthIntegrationConnect": "Connect",
+  "healthIntegrationDisconnect": "Disconnect",
+  "healthIntegrationSyncNow": "Sync metrics",
+  "healthIntegrationImportWeight": "Import weight",
+  "healthIntegrationImportBodyFat": "Import body fat",
+  "healthIntegrationConnected": "Connected",
+  "healthIntegrationNotConnected": "Not connected",
+  "healthIntegrationLastSync": "Last sync: {when}",
+  "@healthIntegrationLastSync": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "healthIntegrationNeverSynced": "Not synced yet",
+  "healthIntegrationHealthConnectMissing": "Install Health Connect to import metrics on Android.",
+  "healthIntegrationInstallHealthConnect": "Install Health Connect",
+  "healthIntegrationUnsupported": "Available on iPhone and Android only.",
+  "healthIntegrationPermissionDenied": "Permission denied. Enable it in Health settings.",
+  "healthIntegrationSyncFailed": "Could not sync with health apps.",
+  "healthIntegrationImportWeightTitle": "New weight in Health",
+  "healthIntegrationImportBodyFatTitle": "New body fat in Health",
+  "healthIntegrationImportConfirm": "Update your profile with {value}?",
+  "@healthIntegrationImportConfirm": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "healthIntegrationImportApply": "Update profile",
+  "healthIntegrationImportDismiss": "Not now",
+  "healthIntegrationNoUpdates": "No new metrics to import."
 }
