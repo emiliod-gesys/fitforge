@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/runner/runner_standards.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
@@ -456,126 +457,163 @@ class _RoutineCard extends ConsumerWidget {
     }
 
     return Card(
-      margin: EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isHyrox
-              ? context.accentColor.withValues(alpha: 0.2)
-              : routine.isAiGenerated
-                  ? context.accentColor.withValues(alpha: 0.15)
-                  : AppColors.slate.withValues(alpha: 0.4),
-          child: Icon(
-            isHyrox
-                ? Icons.directions_run
-                : routine.isAiGenerated
-                    ? Icons.auto_awesome_outlined
-                    : Icons.list_alt,
-            color: context.accentColor,
-          ),
-        ),
-        title: Row(
-          children: [
-            Flexible(child: Text(l10n.routineDisplayName(routine))),
-            if (isHyrox) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: context.accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  l10n.hyroxSystemBadge,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: context.accentColor,
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/routines/${routine.id}/edit'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _RoutineListIcon(
+                    accent: context.accentColor,
+                    isAiGenerated: routine.isAiGenerated,
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.routineDisplayName(routine),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
+                            height: 1.25,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _routineMetaLine(routine, l10n),
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Spacer(),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(
+                      routine.isFavorite ? Icons.star : Icons.star_border,
+                      color: routine.isFavorite ? context.accentColor : AppColors.textMuted,
+                    ),
+                    tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
+                    onPressed: () => _toggleFavorite(context, ref),
+                  ),
+                  Tooltip(
+                    message: l10n.startWorkout,
+                    child: FilledButton(
+                      onPressed: () => startWorkoutFromRoutine(context, ref, routine),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(44, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        backgroundColor: context.accentColor,
+                        foregroundColor: Colors.black,
+                      ),
+                      child: const Icon(Icons.play_arrow, size: 22),
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+                    padding: EdgeInsets.zero,
+                    onSelected: (value) => _onRoutineMenuSelected(context, ref, value),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                      PopupMenuItem(value: 'duplicate', child: Text(l10n.duplicate)),
+                      PopupMenuItem(value: 'share', child: Text(l10n.share)),
+                      PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                    ],
+                  ),
+                ],
               ),
             ],
-          ],
+          ),
         ),
-        subtitle: Text(
-          isHyrox
-              ? (l10n.routineDisplaySubtitle(routine) ??
-                  l10n.exercisesInRoutine(routine.exercises.length))
-              : '${l10n.exercisesInRoutine(routine.exercises.length)} · ${routine.targetMuscles.join(', ')}',
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isHyrox)
-              IconButton(
-                icon: Icon(
-                  routine.isFavorite ? Icons.star : Icons.star_border,
-                  color: routine.isFavorite ? context.accentColor : AppColors.textMuted,
-                ),
-                tooltip: routine.isFavorite ? l10n.routineUnfavorite : l10n.routineFavorite,
-                onPressed: () => _toggleFavorite(context, ref),
-              ),
-            IconButton(
-              icon: Icon(Icons.play_arrow),
-              tooltip: l10n.startWorkout,
-              color: context.accentColor,
-              onPressed: () => startWorkoutFromRoutine(context, ref, routine),
-            ),
-            if (!isHyrox)
-              PopupMenuButton(
-                itemBuilder: (_) => [
-                  PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                  PopupMenuItem(value: 'duplicate', child: Text(l10n.duplicate)),
-                  PopupMenuItem(value: 'share', child: Text(l10n.share)),
-                  PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-                ],
-                onSelected: (value) async {
-                  if (value == 'edit') {
-                    context.push('/routines/${routine.id}/edit');
-                  } else if (value == 'duplicate') {
-                    if (!await ensureCanCreateRoutine(context, ref)) return;
-                    final clone = routine.copyForCurrentUser().copyWith(
-                          name: l10n.routineDuplicateName(routine.name),
-                        );
-                    try {
-                      final created =
-                          await ref.read(routineServiceProvider).createRoutine(clone);
-                      ref.invalidate(routinesProvider);
-                      ref.invalidate(routineLimitStatusProvider);
-                      ref.invalidate(friendFavoriteRoutinesProvider);
-                      if (context.mounted) {
-                        context.push('/routines/${created.id}/edit');
-                      }
-                    } catch (e) {
-                      if (context.mounted) showRoutineSaveErrorSnackBar(context, e);
-                    }
-                  } else if (value == 'share') {
-                    await RoutineShareFriendSheet.show(context, routine);
-                  } else if (value == 'delete') {
-                    await ref.read(routineServiceProvider).deleteRoutine(routine.id);
-                    ref.invalidate(routinesProvider);
-                    ref.invalidate(friendFavoriteRoutinesProvider);
-                  }
-                },
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.info_outline),
-                tooltip: l10n.hyroxSystemLocked,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.hyroxSystemLocked)),
-                  );
-                },
-              ),
-          ],
-        ),
-        onTap: isHyrox
-            ? () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.hyroxSystemLocked)),
-                );
-              }
-            : () => context.push('/routines/${routine.id}/edit'),
+      ),
+    );
+  }
+
+  Future<void> _onRoutineMenuSelected(
+    BuildContext context,
+    WidgetRef ref,
+    String value,
+  ) async {
+    final l10n = context.l10n;
+    if (value == 'edit') {
+      context.push('/routines/${routine.id}/edit');
+    } else if (value == 'duplicate') {
+      if (!await ensureCanCreateRoutine(context, ref)) return;
+      final clone = routine.copyForCurrentUser().copyWith(
+            name: l10n.routineDuplicateName(routine.name),
+          );
+      try {
+        final created = await ref.read(routineServiceProvider).createRoutine(clone);
+        ref.invalidate(routinesProvider);
+        ref.invalidate(routineLimitStatusProvider);
+        ref.invalidate(friendFavoriteRoutinesProvider);
+        if (context.mounted) {
+          context.push('/routines/${created.id}/edit');
+        }
+      } catch (e) {
+        if (context.mounted) showRoutineSaveErrorSnackBar(context, e);
+      }
+    } else if (value == 'share') {
+      await RoutineShareFriendSheet.show(context, routine);
+    } else if (value == 'delete') {
+      await ref.read(routineServiceProvider).deleteRoutine(routine.id);
+      ref.invalidate(routinesProvider);
+      ref.invalidate(friendFavoriteRoutinesProvider);
+    }
+  }
+}
+
+String _routineMetaLine(Routine routine, AppLocalizations l10n) {
+  final count = l10n.exercisesInRoutine(routine.exercises.length);
+  if (routine.targetMuscles.isEmpty) return count;
+  return '$count · ${routine.targetMuscles.join(' · ')}';
+}
+
+class _RoutineListIcon extends StatelessWidget {
+  const _RoutineListIcon({
+    required this.accent,
+    required this.isAiGenerated,
+  });
+
+  final Color accent;
+  final bool isAiGenerated;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: isAiGenerated ? 0.15 : 0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        isAiGenerated ? Icons.auto_awesome_outlined : Icons.fitness_center_outlined,
+        color: accent,
+        size: 22,
       ),
     );
   }
