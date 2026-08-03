@@ -11,6 +11,7 @@ import '../../providers/app_providers.dart';
 import '../../services/routine_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
+import '../../widgets/ff/ff_empty_state.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
@@ -220,33 +221,20 @@ class RoutinesTab extends ConsumerWidget {
         final atLimit = limitStatus != null && !limitStatus.canCreate;
 
         if (routines.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.list_alt, size: 64, color: Colors.white24),
-                const SizedBox(height: 16),
-                Text(l10n.noRoutines),
-                if (limitStatus != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.routineLimitUsage(limitStatus.used, limitStatus.limit),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: atLimit
-                      ? null
-                      : () async {
-                          if (await ensureCanCreateRoutine(context, ref)) {
-                            if (context.mounted) context.push('/routines/new');
-                          }
-                        },
-                  child: Text(l10n.createRoutine),
-                ),
-              ],
-            ),
+          return FfEmptyState(
+            icon: Icons.fitness_center_rounded,
+            title: l10n.emptyRoutinesTitle,
+            subtitle: limitStatus != null
+                ? '${l10n.emptyRoutinesSubtitle}\n${l10n.routineLimitUsage(limitStatus.used, limitStatus.limit)}'
+                : l10n.emptyRoutinesSubtitle,
+            actionLabel: atLimit ? null : l10n.emptyRoutinesAction,
+            onAction: atLimit
+                ? null
+                : () async {
+                    if (await ensureCanCreateRoutine(context, ref)) {
+                      if (context.mounted) context.push('/routines/new');
+                    }
+                  },
           );
         }
         final sorted = [...routines]..sort((a, b) {

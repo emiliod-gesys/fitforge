@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../data/avatar_catalog.dart';
 
-/// Muestra avatar de catálogo, URL externa o inicial por defecto.
+/// Muestra avatar de catálogo, URL externa o inicial por defecto (circular).
 class ProfileAvatar extends StatelessWidget {
   final String? avatarUrl;
   final double radius;
@@ -17,11 +17,11 @@ class ProfileAvatar extends StatelessWidget {
 
   double get size => radius * 2;
 
-  Widget _square({required Widget child}) {
+  Widget _circle({required Widget child}) {
     return SizedBox(
       width: size,
       height: size,
-      child: ClipRect(
+      child: ClipOval(
         child: ColoredBox(
           color: AppColors.card,
           child: child,
@@ -31,7 +31,7 @@ class ProfileAvatar extends StatelessWidget {
   }
 
   Widget _image(ImageProvider provider) {
-    return _square(
+    return _circle(
       child: Image(
         image: provider,
         width: size,
@@ -58,7 +58,7 @@ class ProfileAvatar extends StatelessWidget {
     }
 
     final letter = fallbackLetter?.trim();
-    return _square(
+    return _circle(
       child: Center(
         child: letter != null && letter.isNotEmpty
             ? Text(

@@ -178,9 +178,7 @@ class _MuscleRecoveryMapState extends ConsumerState<MuscleRecoveryMap> {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(l10n.recoveryHint, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             if (widget.isLoading)
               Shimmer.fromColors(
                 baseColor: AppColors.cardElevated,

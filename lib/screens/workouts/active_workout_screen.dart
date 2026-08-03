@@ -1246,7 +1246,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
           return FitForgeAppBar(
             title: l10n.training,
-            showWordmark: !inExerciseView,
+            showBrandMark: false,
+            showWordmark: false,
             automaticallyImplyLeading: false,
             leading: inExerciseView
                 ? IconButton(

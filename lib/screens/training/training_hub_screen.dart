@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/subscription/routine_limit_gate.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../routines/routine_list_screen.dart';
 import '../workouts/workout_list_screen.dart';
-import '../../core/theme/app_accent.dart';
 
 class TrainingHubScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -71,16 +72,17 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
     return Scaffold(
       appBar: FitForgeAppBar(
         title: l10n.navTrain,
+        showBrandMark: true,
         actions: [
           if (_tabController.index == 0)
             IconButton(
-              icon: const Icon(Icons.history),
+              icon: const Icon(Icons.history_rounded),
               tooltip: l10n.history,
               onPressed: () => context.push('/workouts/history'),
             )
           else ...[
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded),
               tooltip: l10n.newRoutine,
               onPressed: () async {
                 if (await ensureCanCreateRoutine(context, ref)) {
@@ -89,21 +91,44 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
               },
             ),
             IconButton(
-              icon: const Icon(Icons.auto_awesome_outlined),
+              icon: const Icon(Icons.auto_awesome_rounded),
               tooltip: l10n.generateWithAi,
               onPressed: () => RoutineListActions.showAiGenerator(context, ref),
             ),
           ],
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: context.accentColor,
-          labelColor: context.accentColor,
-          unselectedLabelColor: AppColors.textMuted,
-          tabs: [
-            Tab(text: l10n.trainTabToday),
-            Tab(text: l10n.trainTabRoutines),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppTokens.space16,
+              0,
+              AppTokens.space16,
+              AppTokens.space8,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.cardElevated,
+                borderRadius: AppTokens.borderRadiusMd,
+                border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: context.accentColor.withValues(alpha: 0.18),
+                  borderRadius: AppTokens.borderRadiusSm,
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelColor: context.accentColor,
+                unselectedLabelColor: AppColors.textMuted,
+                tabs: [
+                  Tab(text: l10n.trainTabToday),
+                  Tab(text: l10n.trainTabRoutines),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       body: TabBarView(

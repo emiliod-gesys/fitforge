@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'fitforge_logo.dart';
 
 class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const double _logoHeight = 50;
+  static const double _logoHeight = 36;
   static const double _toolbarHeight = kToolbarHeight;
 
   final String? title;
   final List<Widget>? actions;
   final bool showWordmark;
+  /// Marca/isotipo a la izquierda. En pantallas de tarea conviene `false`.
+  final bool showBrandMark;
   final Widget? leading;
   final bool automaticallyImplyLeading;
   final PreferredSizeWidget? bottom;
@@ -16,7 +18,8 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.title,
     this.actions,
-    this.showWordmark = true,
+    this.showWordmark = false,
+    this.showBrandMark = false,
     this.leading,
     this.automaticallyImplyLeading = true,
     this.bottom,
@@ -29,21 +32,19 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: _toolbarHeight,
-      titleSpacing: leading == null && automaticallyImplyLeading ? 16 : 0,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      leading: leading,
-      title: Row(
+    final Widget titleWidget;
+    if (showBrandMark || showWordmark) {
+      titleWidget = Row(
         children: [
-          SizedBox(
-            height: _toolbarHeight,
-            child: const Center(
-              child: FitForgeLogo.icon(height: _logoHeight),
+          if (showBrandMark)
+            SizedBox(
+              height: _toolbarHeight,
+              child: const Center(
+                child: FitForgeLogo.icon(height: _logoHeight),
+              ),
             ),
-          ),
           if (showWordmark || title != null) ...[
-            const SizedBox(width: 8),
+            if (showBrandMark) const SizedBox(width: 10),
             if (title != null)
               Flexible(
                 child: Text(
@@ -52,11 +53,25 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   maxLines: 1,
                 ),
               )
-            else
+            else if (showWordmark)
               const FitForgeLogo.wordmark(height: 22),
           ],
         ],
-      ),
+      );
+    } else {
+      titleWidget = Text(
+        title ?? '',
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      );
+    }
+
+    return AppBar(
+      toolbarHeight: _toolbarHeight,
+      titleSpacing: leading == null && automaticallyImplyLeading ? 16 : 0,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      leading: leading,
+      title: titleWidget,
       actions: actions,
       bottom: bottom,
     );

@@ -12,6 +12,8 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../widgets/ff/ff_section_header.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/progress/personal_record_card.dart';
 import '../../widgets/progress/progress_body_snapshot.dart';
@@ -96,8 +98,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       body: RefreshIndicator(
         onRefresh: onRefresh,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppTokens.pagePadding,
           children: [
+            FfSectionHeader(title: l10n.progressOverviewSection),
             profileAsync.when(
               data: (profile) {
                 if (profile == null) return const SizedBox.shrink();
@@ -231,8 +234,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 12),
+                    FfSectionHeader(title: l10n.progressRecordsSection),
                     ProgressMuscleFilterBar(
                       selectedMuscle: selected,
                       muscles: available,

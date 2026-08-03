@@ -15,22 +15,16 @@ import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/onboarding_progress_provider.dart';
 
-import '../../widgets/fitforge_app_bar.dart';
-
-import '../../widgets/fitforge_loading_indicator.dart';
-
-import '../../widgets/food/energy_output_section.dart';
-
-import '../../widgets/food/food_budget_header.dart';
-
-import '../../widgets/food/food_week_strip.dart';
-
-import '../../widgets/food/macro_chip_grid.dart';
-
-import '../../widgets/food/manual_activity_sheet.dart';
-
-import '../../widgets/food/meal_timeline.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/food/energy_output_section.dart';
+import '../../widgets/food/food_budget_header.dart';
+import '../../widgets/food/food_week_strip.dart';
+import '../../widgets/food/macro_chip_grid.dart';
+import '../../widgets/food/manual_activity_sheet.dart';
+import '../../widgets/food/meal_timeline.dart';
 
 
 
@@ -246,7 +240,7 @@ class _FoodBody extends ConsumerWidget {
 
           child: ListView(
 
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            padding: AppTokens.pagePadding,
 
             children: [
 

@@ -848,6 +848,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proactiveAi => 'Proactive AI';
 
   @override
+  String get proactiveAiDescription =>
+      'Suggests weights, reps, and tips during workouts without you asking';
+
+  @override
   String get proactiveAiSubtitleOff => 'AI only responds when you message it';
 
   @override
@@ -858,7 +862,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proactiveAiEnableMessage =>
-      'FitForge may use your API key to send suggestions without you asking. This can increase token usage.';
+      'FitForge may send workout suggestions without you asking. This can increase AI usage.';
 
   @override
   String get proactiveAiEnableConfirm => 'Enable';
@@ -4219,4 +4223,128 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingPlanPaidSoon =>
       'In-app purchase is coming soon. For now you\'ll enter on Free; your choice is saved.';
+
+  @override
+  String get profileHubTitle => 'Your space';
+
+  @override
+  String get profileHubSubtitle =>
+      'Everything that shapes how you train and progress';
+
+  @override
+  String get profileHubAccount => 'Account';
+
+  @override
+  String get profileHubPersonalSubtitle => 'Name, age, gender, and language';
+
+  @override
+  String get profileHubBodySubtitle =>
+      'Weight, measurements, and health integrations';
+
+  @override
+  String get profileHubTrainingSubtitle =>
+      'Goals, Hyrox/Runner modes, and rest timer';
+
+  @override
+  String get profileHubPreferencesSubtitle =>
+      'Proactive AI, Coach, and accent color';
+
+  @override
+  String get profileHubAppearanceTitle => 'Look & AI';
+
+  @override
+  String get profileHubAppearanceSubtitle =>
+      'Proactive AI and app accent color';
+
+  @override
+  String get profileHubOfflineSubtitle => 'Offline exercise catalog';
+
+  @override
+  String get profileHubAccountSubtitle =>
+      'Students, security, and delete account';
+
+  @override
+  String get profileHubStudents => 'My students';
+
+  @override
+  String get profileHubStudentsSubtitle => 'Manage your athlete roster';
+
+  @override
+  String get emptyRoutinesTitle => 'Your library is empty';
+
+  @override
+  String get emptyRoutinesSubtitle =>
+      'Create your first routine or generate one with AI Coach.';
+
+  @override
+  String get emptyRoutinesAction => 'Create routine';
+
+  @override
+  String get emptyWorkoutsTitle => 'No workouts yet';
+
+  @override
+  String get emptyWorkoutsSubtitle =>
+      'When you finish a session, your history will show up here.';
+
+  @override
+  String get emptyFeedTitle => 'The feed is quiet';
+
+  @override
+  String get emptyFeedSubtitle =>
+      'Train, share a PR, or add friends to see activity.';
+
+  @override
+  String get coachWelcomeTitle => 'Your personal coach';
+
+  @override
+  String get coachWelcomeSubtitle =>
+      'Ask about routines, nutrition, or form. Start with a suggestion.';
+
+  @override
+  String get progressRecordsSection => 'Personal records';
+
+  @override
+  String get progressOverviewSection => 'Overview';
+
+  @override
+  String get feedReactAction => 'React';
+
+  @override
+  String get feedCommentAction => 'Comment';
+
+  @override
+  String get feedEmptyCreatePost => 'Create post';
+
+  @override
+  String get feedEmptyFindFriends => 'Find friends';
+
+  @override
+  String get friendStatusAdd => 'Add';
+
+  @override
+  String get friendStatusPending => 'Pending';
+
+  @override
+  String get friendStatusFriends => 'Friends';
+
+  @override
+  String get leaderboardFilterScope => 'Scope';
+
+  @override
+  String get leaderboardFilterPeriod => 'Period';
+
+  @override
+  String get leaderboardFilterMetric => 'Metric';
+
+  @override
+  String get socialHeroInvite => 'Invite friend';
+
+  @override
+  String get feedComposePhoto => 'Photo';
+
+  @override
+  String get feedComposeCamera => 'Camera';
+
+  @override
+  String get feedComposePr => 'PR';
 }

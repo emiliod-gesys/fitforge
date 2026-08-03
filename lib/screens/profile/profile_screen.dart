@@ -7,6 +7,7 @@ import '../../core/subscription/subscription_features.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/utils/age_calculator.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
@@ -32,6 +33,20 @@ import '../../widgets/profile/accent_color_selector.dart';
 import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
+import '../../widgets/ff/ff_hub_tile.dart';
+import '../../widgets/ff/ff_list_row.dart';
+import '../../widgets/ff/ff_section_header.dart';
+import '../../widgets/ff/ff_surface.dart';
+
+enum _ProfileSection {
+  hub,
+  personal,
+  body,
+  training,
+  appearance,
+  offline,
+  account,
+}
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -45,6 +60,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _trainerModeUpdating = false;
   bool _hyroxModeUpdating = false;
   bool _runnerModeUpdating = false;
+  _ProfileSection _section = _ProfileSection.hub;
+  String? _sectionTitle;
 
   @override
   void initState() {
@@ -60,363 +77,143 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
+  void _openSection(_ProfileSection section, String title) {
+    setState(() {
+      _section = section;
+      _sectionTitle = title;
+    });
+  }
+
+  void _closeSection() {
+    if (_section == _ProfileSection.hub) return;
+    setState(() {
+      _section = _ProfileSection.hub;
+      _sectionTitle = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final profileAsync = ref.watch(profileProvider);
     final metricsAsync = ref.watch(bodyMetricSnapshotsProvider);
+    final inSection = _section != _ProfileSection.hub;
 
-    return Scaffold(
-      appBar: FitForgeAppBar(
-        title: l10n.profileTitle,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authServiceProvider).signOut();
-            },
-          ),
-        ],
-      ),
-      body: profileAsync.when(
-        skipLoadingOnReload: true,
-        data: (profile) {
-          final unitSystem = ref.watch(unitSystemProvider);
-          final accent = ref.watch(accentProvider);
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(profileProvider);
-              ref.invalidate(bodyMetricSnapshotsProvider);
-            },
-            child: ListView(
-              key: const PageStorageKey<String>('profile_scroll'),
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              children: [
-                Center(
-                  child: Column(
-                    children: [
-                      Stack(
-                        children: [
-                          ProfileAvatar(
-                            avatarUrl: profile?.avatarUrl,
-                            radius: 44,
-                            fallbackLetter: profile?.displayName,
-                          ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Material(
-                              color: context.accentColor,
-                              shape: const CircleBorder(),
-                              child: InkWell(
-                                onTap: () => _pickAvatar(profile),
-                                customBorder: const CircleBorder(),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(6),
-                                  child: Icon(Icons.edit, size: 16, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => _pickAvatar(profile),
-                        child: Text(l10n.changeAvatar),
-                      ),
-                    ],
+    return PopScope(
+      canPop: !inSection,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeSection();
+      },
+      child: Scaffold(
+        appBar: FitForgeAppBar(
+          title: inSection ? (_sectionTitle ?? l10n.profileTitle) : l10n.profileTitle,
+          leading: inSection
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _closeSection,
+                )
+              : null,
+          automaticallyImplyLeading: !inSection,
+          actions: [
+            if (!inSection)
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () async {
+                  await ref.read(authServiceProvider).signOut();
+                },
+              ),
+          ],
+        ),
+        body: profileAsync.when(
+          skipLoadingOnReload: true,
+          data: (profile) {
+            final unitSystem = ref.watch(unitSystemProvider);
+            if (inSection) {
+              return switch (_section) {
+                _ProfileSection.hub => const SizedBox.shrink(),
+                _ProfileSection.personal => _personalSection(profile, unitSystem),
+                _ProfileSection.body => _bodySection(profile, unitSystem, metricsAsync),
+                _ProfileSection.training => _trainingSection(profile),
+                _ProfileSection.appearance => _preferencesSection(profile),
+                _ProfileSection.offline => _offlineSection(context),
+                _ProfileSection.account => _accountSection(),
+              };
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(profileProvider);
+                ref.invalidate(bodyMetricSnapshotsProvider);
+              },
+              child: ListView(
+                key: const PageStorageKey<String>('profile_scroll'),
+                controller: _scrollController,
+                padding: AppTokens.pagePadding,
+                children: [
+                  _buildHero(profile),
+                  const SizedBox(height: AppTokens.space28),
+                  FfSectionHeader(
+                    title: l10n.profileHubTitle,
+                    subtitle: l10n.profileHubSubtitle,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        profile?.displayName ?? l10n.user,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      if (profile != null)
-                        SubscriptionTierLabel(tier: profile.subscriptionTier),
-                    ],
+                  FfHubTile(
+                    icon: Icons.person_outline,
+                    title: l10n.personalData,
+                    subtitle: l10n.profileHubPersonalSubtitle,
+                    onTap: () => _openSection(_ProfileSection.personal, l10n.personalData),
                   ),
-                ),
-                const SizedBox(height: 20),
-                _SectionTitle(l10n.personalData),
-                const SizedBox(height: 4),
-                ListTile(
-                  leading: Icon(Icons.person_outline, color: context.accentColor),
-                  title: Text(l10n.displayName),
-                  subtitle: Text(profile?.displayName ?? l10n.notDefined),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editDisplayName(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.cake_outlined, color: context.accentColor),
-                  title: Text(l10n.dateOfBirthTitle),
-                  subtitle: Text(
-                    profile?.dateOfBirth != null
-                        ? l10n.dateOfBirthSubtitle(
-                            DateFormat.yMMMMd(Localizations.localeOf(context).toString())
-                                .format(profile!.dateOfBirth!),
-                            profile.effectiveAge ?? 0,
-                          )
-                        : (profile?.effectiveAge != null
-                            ? '${profile!.effectiveAge} ${l10n.years}'
-                            : l10n.notDefined),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.monitor_weight_outlined,
+                    title: l10n.bodyMetrics,
+                    subtitle: l10n.profileHubBodySubtitle,
+                    onTap: () => _openSection(_ProfileSection.body, l10n.bodyMetrics),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editDateOfBirth(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.wc_outlined, color: context.accentColor),
-                  title: Text(l10n.gender),
-                  subtitle: Text(l10n.genderLabel(profile?.gender)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editGender(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.height, color: context.accentColor),
-                  title: Text(l10n.height),
-                  subtitle: Text(
-                    profile?.heightCm != null
-                        ? UnitConverter.formatHeight(profile!.heightCm)
-                        : l10n.notDefined,
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.fitness_center_outlined,
+                    title: l10n.trainingConfig,
+                    subtitle: l10n.profileHubTrainingSubtitle,
+                    onTap: () => _openSection(_ProfileSection.training, l10n.trainingConfig),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editHeight(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.language, color: context.accentColor),
-                  title: Text(l10n.preferredLanguage),
-                  subtitle: Text(l10n.languageLabel(profile?.preferredLanguage ?? 'es')),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editLanguage(profile),
-                ),
-                const SizedBox(height: 16),
-                _SectionTitle(l10n.unitSystem),
-                const SizedBox(height: 8),
-                _UnitSelector(
-                  unitSystem: unitSystem,
-                  onChanged: (unit) async {
-                    await ref.read(profileServiceProvider).updateUnitSystem(unit);
-                    ref.invalidate(profileProvider);
-                  },
-                ),
-                const SizedBox(height: 20),
-                _SectionTitle(l10n.bodyMetrics),
-                const SizedBox(height: 8),
-                metricsAsync.when(
-                  skipLoadingOnReload: true,
-                  data: (snapshots) => Column(
-                    children: [
-                      _MetricsGrid(
-                        snapshots: snapshots,
-                        profile: profile,
-                        unitSystem: unitSystem,
-                        onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
-                      ),
-                      const SizedBox(height: 12),
-                      const BodyMetricHealthLegend(),
-                      const SizedBox(height: 16),
-                      HealthIntegrationCard(profile: profile),
-                    ],
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.palette_outlined,
+                    title: l10n.profileHubAppearanceTitle,
+                    subtitle: l10n.profileHubAppearanceSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.appearance,
+                      l10n.profileHubAppearanceTitle,
+                    ),
                   ),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(child: FitForgeLoadingIndicator(size: 100)),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.cloud_download_outlined,
+                    title: l10n.offlineDownloadExercisesTitle,
+                    subtitle: l10n.profileHubOfflineSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.offline,
+                      l10n.offlineDownloadExercisesTitle,
+                    ),
                   ),
-                  error: (e, _) => Text(l10n.errorGeneric(e.toString())),
-                ),
-                const SizedBox(height: 24),
-                _SectionTitle(l10n.trainingConfig),
-                ListTile(
-                  leading: Icon(Icons.flag, color: context.accentColor),
-                  title: Text(l10n.goal),
-                  subtitle: Text(l10n.goalLabel(profile?.fitnessGoal)),
-                  onTap: () => _editGoal(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.directions_walk, color: context.accentColor),
-                  title: Text(l10n.activityLevel),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate)),
-                      Text(
-                        l10n.activityLevelHint,
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                      ),
-                    ],
+                  if (profile?.isTrainer ?? false) ...[
+                    const SizedBox(height: AppTokens.space12),
+                    FfHubTile(
+                      icon: Icons.groups_outlined,
+                      title: l10n.profileHubStudents,
+                      subtitle: l10n.profileHubStudentsSubtitle,
+                      onTap: () => context.go('/students'),
+                    ),
+                  ],
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.manage_accounts_outlined,
+                    title: l10n.profileHubAccount,
+                    subtitle: l10n.profileHubAccountSubtitle,
+                    onTap: () => _openSection(_ProfileSection.account, l10n.profileHubAccount),
                   ),
-                  onTap: () => _editActivityLevel(profile),
-                ),
-                ListTile(
-                  leading: Icon(Icons.trending_up, color: context.accentColor),
-                  title: Text(l10n.experienceLevel),
-                  subtitle: Text(l10n.experienceLabel(profile?.experienceLevel)),
-                  onTap: () => _editExperience(profile),
-                ),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.school_outlined,
-                    color: (profile?.subscriptionTier.hasTrainerMode ?? false)
-                        ? context.accentColor
-                        : AppColors.textMuted,
-                  ),
-                  title: Text(l10n.personalTrainerMode),
-                  subtitle: Text(
-                    (profile?.subscriptionTier.hasTrainerMode ?? false)
-                        ? l10n.personalTrainerModeSubtitle
-                        : l10n.featureGymratProOnly,
-                  ),
-                  value: (profile?.isTrainer ?? false) &&
-                      (profile?.subscriptionTier.hasTrainerMode ?? false),
-                  activeThumbColor: context.accentColor,
-                  onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) &&
-                          !_trainerModeUpdating
-                      ? (value) => _setTrainerMode(enabled: value)
-                      : null,
-                ),
-                SwitchListTile(
-                  secondary: Icon(Icons.directions_run, color: context.accentColor),
-                  title: Text(l10n.hyroxMode),
-                  subtitle: Text(l10n.hyroxModeSubtitle),
-                  value: profile?.hyroxMode ?? false,
-                  activeThumbColor: context.accentColor,
-                  onChanged: _hyroxModeUpdating
-                      ? null
-                      : (value) => _setHyroxMode(enabled: value, profile: profile),
-                ),
-                SwitchListTile(
-                  secondary: Icon(Icons.nordic_walking, color: context.accentColor),
-                  title: Text(l10n.runnerMode),
-                  subtitle: Text(l10n.runnerModeSubtitle),
-                  value: profile?.runnerMode ?? false,
-                  activeThumbColor: context.accentColor,
-                  onChanged: _runnerModeUpdating
-                      ? null
-                      : (value) => _setRunnerMode(enabled: value, profile: profile),
-                ),
-                ref.watch(restTimerAlertModeProvider).when(
-                  skipLoadingOnReload: true,
-                  data: (mode) => ListTile(
-                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
-                    title: Text(l10n.restTimerAlert),
-                    subtitle: Text(l10n.restTimerAlertModeLabel(mode)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _editRestTimerAlert(mode),
-                  ),
-                  loading: () => ListTile(
-                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
-                    title: Text(l10n.restTimerAlert),
-                    subtitle: Text(l10n.loading),
-                  ),
-                  error: (_, __) => ListTile(
-                    leading: Icon(Icons.timer_outlined, color: context.accentColor),
-                    title: Text(l10n.restTimerAlert),
-                    subtitle: Text(l10n.notDefined),
-                    onTap: () => _editRestTimerAlert(RestTimerAlertMode.both),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _SectionTitle(l10n.aiSection),
-                ref.watch(aiProactiveEnabledProvider).when(
-                  skipLoadingOnReload: true,
-                  data: (enabled) {
-                    final canProactive = profile?.canUseProactiveAi ?? false;
-                    return SwitchListTile(
-                      secondary: Icon(
-                        Icons.psychology_outlined,
-                        color: canProactive ? context.accentColor : AppColors.textMuted,
-                      ),
-                      title: Text(l10n.proactiveAi),
-                      subtitle: Text(
-                        !canProactive
-                            ? (profile?.hasUserOwnedApiKey == true
-                                ? l10n.proactiveAiSubtitleOff
-                                : profile?.subscriptionTier.isFree == true
-                                    ? l10n.bringYourOwnAiSubtitle
-                                    : l10n.featureGymratPlansOnly)
-                            : (enabled ? l10n.proactiveAiSubtitleOn : l10n.proactiveAiSubtitleOff),
-                      ),
-                      value: canProactive && enabled,
-                      activeThumbColor: context.accentColor,
-                      onChanged: canProactive
-                          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled)
-                          : null,
-                    );
-                  },
-                  loading: () => ListTile(
-                    leading: Icon(Icons.psychology_outlined, color: context.accentColor),
-                    title: Text(l10n.proactiveAi),
-                    subtitle: Text(l10n.loading),
-                  ),
-                  error: (_, __) {
-                    final canProactive = profile?.canUseProactiveAi ?? false;
-                    return SwitchListTile(
-                      secondary: Icon(
-                        Icons.psychology_outlined,
-                        color: canProactive ? context.accentColor : AppColors.textMuted,
-                      ),
-                      title: Text(l10n.proactiveAi),
-                      subtitle: Text(
-                        !canProactive ? l10n.featureGymratPlansOnly : l10n.proactiveAiSubtitleOff,
-                      ),
-                      value: false,
-                      activeThumbColor: context.accentColor,
-                      onChanged: canProactive
-                          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: false)
-                          : null,
-                    );
-                  },
-                ),
-                _buildCloudExerciseDownloadSection(context),
-                ListTile(
-                  leading: Icon(Icons.auto_awesome, color: context.accentColor),
-                  title: Text(l10n.coachAi),
-                  subtitle: Text(l10n.aiCoachSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.go('/ai-coach'),
-                ),
-                const SizedBox(height: 24),
-                _SectionTitle(l10n.accentColor),
-                const SizedBox(height: 4),
-                Text(
-                  (profile?.subscriptionTier.hasCustomAccent ?? false)
-                      ? l10n.accentColorHint
-                      : l10n.featureGymratPlansOnly,
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                ),
-                const SizedBox(height: 12),
-                AccentColorSelector(
-                  selected: accent,
-                  lockedMessage: l10n.featureGymratPlansOnly,
-                  onChanged: (profile?.subscriptionTier.hasCustomAccent ?? false)
-                      ? (value) async {
-                          await ref.read(profileServiceProvider).updateProfile({
-                            'accent_color': value.name,
-                          });
-                          ref.invalidate(profileProvider);
-                        }
-                      : null,
-                ),
-                if (profile?.subscriptionTier.isFree ?? true) ...[
-                  const SizedBox(height: 24),
-                  _FreeAdvancedSettings(profile: profile),
-                ],
-                const SizedBox(height: 32),
-                const DeleteAccountSection(),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    8,
-                    0,
-                    8,
-                    16 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  child: Text(
+                  const SizedBox(height: AppTokens.space32),
+                  Text(
                     l10n.profileDedication,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -425,30 +222,349 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           fontSize: 11,
                         ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
-        loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) {
-          final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
-          if (!online) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  l10n.offlineProfileUnavailable,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                  SizedBox(height: AppTokens.space24 + MediaQuery.paddingOf(context).bottom),
+                ],
               ),
             );
-          }
-          return Center(child: Text(l10n.errorGeneric(e.toString())));
-        },
+          },
+          loading: () => const FitForgeLoadingScreen(),
+          error: (e, _) {
+            final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
+            if (!online) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    l10n.offlineProfileUnavailable,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              );
+            }
+            return Center(child: Text(l10n.errorGeneric(e.toString())));
+          },
+        ),
       ),
     );
+  }
+
+  void _leaveSectionAndGo(String location) {
+    context.go(location);
+  }
+
+  Widget _buildHero(UserProfile? profile) {
+    final l10n = context.l10n;
+    final meta = [
+      if (profile?.fitnessGoal != null) l10n.goalLabel(profile?.fitnessGoal),
+      if (profile?.experienceLevel != null) l10n.experienceLabel(profile?.experienceLevel),
+    ].join(' · ');
+    return FfSurface(
+      elevated: true,
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [context.accentColor.withValues(alpha: 0.22), AppColors.cardElevated],
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [context.accentColor, context.accentColor.withValues(alpha: 0.35)],
+                  ),
+                ),
+                child: ProfileAvatar(
+                  avatarUrl: profile?.avatarUrl,
+                  radius: 48,
+                  fallbackLetter: profile?.displayName,
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Material(
+                  color: context.accentColor,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    onTap: () => _pickAvatar(profile),
+                    customBorder: const CircleBorder(),
+                    child: const Padding(
+                      padding: EdgeInsets.all(AppTokens.space8),
+                      child: Icon(Icons.edit_rounded, size: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTokens.space12),
+          Text(
+            profile?.displayName ?? l10n.user,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          if (profile != null) SubscriptionTierLabel(tier: profile.subscriptionTier),
+          if (meta.isNotEmpty) ...[
+            const SizedBox(height: AppTokens.space4),
+            Text(meta, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionList(List<Widget> children) {
+    return ListView(
+      padding: AppTokens.pagePadding,
+      children: [
+        FfSurface(child: Column(children: children)),
+        const SizedBox(height: AppTokens.space24),
+      ],
+    );
+  }
+
+  Widget _personalSection(UserProfile? profile, String unitSystem) {
+    final l10n = context.l10n;
+    final birthDate = profile?.dateOfBirth;
+    final birthSubtitle = birthDate != null
+        ? l10n.dateOfBirthSubtitle(
+            DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(birthDate),
+            profile?.effectiveAge ?? 0,
+          )
+        : profile?.effectiveAge != null
+            ? '${profile!.effectiveAge} ${l10n.years}'
+            : l10n.notDefined;
+    return _sectionList([
+      FfListRow(
+        icon: Icons.person_outline,
+        title: l10n.displayName,
+        subtitle: profile?.displayName ?? l10n.notDefined,
+        onTap: () => _editDisplayName(profile),
+      ),
+      FfListRow(
+        icon: Icons.cake_outlined,
+        title: l10n.dateOfBirthTitle,
+        subtitle: birthSubtitle,
+        onTap: () => _editDateOfBirth(profile),
+      ),
+      FfListRow(
+        icon: Icons.wc_outlined,
+        title: l10n.gender,
+        subtitle: l10n.genderLabel(profile?.gender),
+        onTap: () => _editGender(profile),
+      ),
+      FfListRow(
+        icon: Icons.height,
+        title: l10n.height,
+        subtitle: profile?.heightCm != null
+            ? UnitConverter.formatHeight(profile!.heightCm)
+            : l10n.notDefined,
+        onTap: () => _editHeight(profile),
+      ),
+      FfListRow(
+        icon: Icons.language,
+        title: l10n.preferredLanguage,
+        subtitle: l10n.languageLabel(profile?.preferredLanguage ?? 'es'),
+        onTap: () => _editLanguage(profile),
+      ),
+      const SizedBox(height: AppTokens.space20),
+      FfSectionHeader(title: l10n.unitSystem),
+      _UnitSelector(
+        unitSystem: unitSystem,
+        onChanged: (unit) async {
+          await ref.read(profileServiceProvider).updateUnitSystem(unit);
+          ref.invalidate(profileProvider);
+        },
+      ),
+    ]);
+  }
+
+  Widget _bodySection(
+    UserProfile? profile,
+    String unitSystem,
+    AsyncValue<Map<String, BodyMetricSnapshot>> metricsAsync,
+  ) {
+    final l10n = context.l10n;
+    return _sectionList([
+      metricsAsync.when(
+        skipLoadingOnReload: true,
+        data: (snapshots) => Column(
+          children: [
+            _MetricsGrid(
+              snapshots: snapshots,
+              profile: profile,
+              unitSystem: unitSystem,
+              onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
+            ),
+            const SizedBox(height: AppTokens.space16),
+            const BodyMetricHealthLegend(),
+            const SizedBox(height: AppTokens.space20),
+            HealthIntegrationCard(profile: profile),
+          ],
+        ),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppTokens.space32),
+          child: Center(child: FitForgeLoadingIndicator(size: 100)),
+        ),
+        error: (e, _) => Text(l10n.errorGeneric(e.toString())),
+      ),
+    ]);
+  }
+
+  Widget _trainingSection(UserProfile? profile) {
+    final l10n = context.l10n;
+    return _sectionList([
+      FfListRow(
+        icon: Icons.flag_outlined,
+        title: l10n.goal,
+        subtitle: l10n.goalLabel(profile?.fitnessGoal),
+        onTap: () => _editGoal(profile),
+      ),
+      FfListRow(
+        icon: Icons.directions_walk_outlined,
+        title: l10n.activityLevel,
+        subtitle: l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate),
+        onTap: () => _editActivityLevel(profile),
+      ),
+      FfListRow(
+        icon: Icons.trending_up,
+        title: l10n.experienceLevel,
+        subtitle: l10n.experienceLabel(profile?.experienceLevel),
+        onTap: () => _editExperience(profile),
+      ),
+      SwitchListTile(
+        secondary: Icon(Icons.school_outlined, color: context.accentColor),
+        title: Text(l10n.personalTrainerMode),
+        subtitle: Text(
+          (profile?.subscriptionTier.hasTrainerMode ?? false)
+              ? l10n.personalTrainerModeSubtitle
+              : l10n.featureGymratProOnly,
+        ),
+        value: (profile?.isTrainer ?? false) &&
+            (profile?.subscriptionTier.hasTrainerMode ?? false),
+        activeThumbColor: context.accentColor,
+        onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) && !_trainerModeUpdating
+            ? (value) => _setTrainerMode(enabled: value)
+            : null,
+      ),
+      SwitchListTile(
+        secondary: Icon(Icons.directions_run, color: context.accentColor),
+        title: Text(l10n.hyroxMode),
+        subtitle: Text(l10n.hyroxModeSubtitle),
+        value: profile?.hyroxMode ?? false,
+        activeThumbColor: context.accentColor,
+        onChanged: _hyroxModeUpdating ? null : (value) => _setHyroxMode(enabled: value, profile: profile),
+      ),
+      SwitchListTile(
+        secondary: Icon(Icons.nordic_walking, color: context.accentColor),
+        title: Text(l10n.runnerMode),
+        subtitle: Text(l10n.runnerModeSubtitle),
+        value: profile?.runnerMode ?? false,
+        activeThumbColor: context.accentColor,
+        onChanged: _runnerModeUpdating ? null : (value) => _setRunnerMode(enabled: value, profile: profile),
+      ),
+      ref.watch(restTimerAlertModeProvider).when(
+            skipLoadingOnReload: true,
+            data: (mode) => FfListRow(
+              icon: Icons.timer_outlined,
+              title: l10n.restTimerAlert,
+              subtitle: l10n.restTimerAlertModeLabel(mode),
+              onTap: () => _editRestTimerAlert(mode),
+            ),
+            loading: () => FfListRow(
+              icon: Icons.timer_outlined,
+              title: l10n.restTimerAlert,
+              subtitle: l10n.restTimerAlertModeLabel(RestTimerAlertMode.both),
+              onTap: () => _editRestTimerAlert(RestTimerAlertMode.both),
+            ),
+            error: (_, __) => FfListRow(
+              icon: Icons.timer_outlined,
+              title: l10n.restTimerAlert,
+              subtitle: l10n.restTimerAlertModeLabel(RestTimerAlertMode.both),
+              onTap: () => _editRestTimerAlert(RestTimerAlertMode.both),
+            ),
+          ),
+    ]);
+  }
+
+  Widget _preferencesSection(UserProfile? profile) {
+    final l10n = context.l10n;
+    final accent = ref.watch(accentProvider);
+    final proactiveEnabled = ref.watch(aiProactiveEnabledProvider).valueOrNull ?? false;
+    return ListView(
+      padding: AppTokens.pagePadding,
+      children: [
+        FfSurface(
+          child: Column(
+            children: [
+              _proactiveAiTile(profile, proactiveEnabled),
+              FfListRow(
+                icon: Icons.auto_awesome,
+                title: l10n.coachAi,
+                subtitle: l10n.aiCoachSubtitle,
+                onTap: () => _leaveSectionAndGo('/ai-coach'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppTokens.space20),
+        FfSectionHeader(
+          title: l10n.accentColor,
+          subtitle: (profile?.subscriptionTier.hasCustomAccent ?? false)
+              ? l10n.accentColorHint
+              : l10n.featureGymratPlansOnly,
+        ),
+        FfSurface(
+          child: AccentColorSelector(
+            selected: accent,
+            lockedMessage: l10n.featureGymratPlansOnly,
+            onChanged: (profile?.subscriptionTier.hasCustomAccent ?? false)
+                ? (value) async {
+                    await ref.read(profileServiceProvider).updateProfile({'accent_color': value.name});
+                    ref.invalidate(profileProvider);
+                  }
+                : null,
+          ),
+        ),
+        if (profile?.subscriptionTier.isFree ?? true) ...[
+          const SizedBox(height: AppTokens.space20),
+          FfSurface(child: _FreeAdvancedSettings(profile: profile)),
+        ],
+        const SizedBox(height: AppTokens.space24),
+      ],
+    );
+  }
+
+  Widget _proactiveAiTile(UserProfile? profile, bool enabled) {
+    final l10n = context.l10n;
+    final canProactive = profile?.canUseProactiveAi ?? false;
+    return SwitchListTile(
+      secondary: Icon(
+        Icons.psychology_outlined,
+        color: canProactive ? context.accentColor : AppColors.textMuted,
+      ),
+      title: Text(l10n.proactiveAi),
+      subtitle: Text(l10n.proactiveAiDescription),
+      value: canProactive && enabled,
+      activeThumbColor: context.accentColor,
+      onChanged: canProactive
+          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled)
+          : null,
+    );
+  }
+
+  Widget _offlineSection(BuildContext pageContext) {
+    return _sectionList([_buildCloudExerciseDownloadSection(pageContext)]);
+  }
+
+  Widget _accountSection() {
+    return _sectionList([
+      const DeleteAccountSection(),
+    ]);
   }
 
   Future<void> _pickAvatar(UserProfile? profile) async {
@@ -1100,7 +1216,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     if (mode == current)
                       Padding(
-                        padding: EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.only(right: 8),
                         child: Icon(Icons.check, color: context.accentColor, size: 20),
                       ),
                     Expanded(child: Text(l10n.restTimerAlertModeLabel(mode))),
@@ -1292,7 +1408,7 @@ class _MetricsGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
-        childAspectRatio: 1.35,
+        childAspectRatio: 1.22,
       ),
       itemCount: BodyMetricDefinition.all.length,
       itemBuilder: (context, index) {
@@ -1310,19 +1426,6 @@ class _MetricsGrid extends StatelessWidget {
           onTap: def.isComputed ? null : () => onEdit(def),
         );
       },
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textMuted),
     );
   }
 }

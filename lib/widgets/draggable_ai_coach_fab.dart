@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/theme/app_colors.dart';
-import '../l10n/l10n_extensions.dart';
 import '../core/theme/app_accent.dart';
+import '../core/theme/app_tokens.dart';
+import '../l10n/l10n_extensions.dart';
 
 /// FAB del AI Coach arrastrable. Debe ser hijo directo de un [Stack].
 class DraggableAiCoachFab extends StatefulWidget {
@@ -13,13 +13,12 @@ class DraggableAiCoachFab extends StatefulWidget {
     required this.areaSize,
   });
 
-  /// Área disponible sobre la que se puede mover el botón (body del shell).
   final Size areaSize;
 
   static const _prefsNormX = 'ai_coach_fab_norm_x';
   static const _prefsNormY = 'ai_coach_fab_norm_y';
   static const _tapSlop = 12.0;
-  static const _fabEstimate = Size(132, 48);
+  static const _fabEstimate = Size(56, 56);
 
   @override
   State<DraggableAiCoachFab> createState() => _DraggableAiCoachFabState();
@@ -68,7 +67,7 @@ class _DraggableAiCoachFabState extends State<DraggableAiCoachFab> {
   _FabBounds _bounds(MediaQueryData media) {
     const edge = 16.0;
     final topInset = media.padding.top + edge;
-    final bottomInset = media.padding.bottom + 68 + edge;
+    final bottomInset = media.padding.bottom + AppTokens.navBarHeight + edge;
     final fab = _fabSize();
     final w = widget.areaSize.width;
     final h = widget.areaSize.height;
@@ -107,6 +106,7 @@ class _DraggableAiCoachFabState extends State<DraggableAiCoachFab> {
     final media = MediaQuery.of(context);
     final bounds = _bounds(media);
     final pos = _resolvePosition(bounds);
+    final accent = context.accentColor;
 
     return Positioned(
       left: pos.dx,
@@ -141,27 +141,18 @@ class _DraggableAiCoachFabState extends State<DraggableAiCoachFab> {
           );
           _saveNormalized(norm);
         },
-        child: Material(
-          key: _fabKey,
-          elevation: 4,
-          borderRadius: BorderRadius.circular(8),
-          color: context.accentColor,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.auto_awesome_outlined, color: Colors.white, size: 22),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.coachAi,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+        child: Tooltip(
+          message: l10n.coachAi,
+            child: Material(
+            key: _fabKey,
+            elevation: 8,
+            shadowColor: accent.withValues(alpha: 0.45),
+            shape: const CircleBorder(),
+            color: accent,
+            child: const SizedBox(
+              width: 56,
+              height: 56,
+              child: Icon(Icons.auto_awesome_rounded, color: Colors.black, size: 26),
             ),
           ),
         ),

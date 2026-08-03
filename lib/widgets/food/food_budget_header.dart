@@ -95,7 +95,7 @@ class FoodBudgetHeader extends StatelessWidget {
                   icon: Icons.restaurant_outlined,
                   label: l10n.foodEaten,
                   value: eaten,
-                  accent: const Color(0xFF5BB8F0),
+                  accent: AppColors.eaten,
                 ),
               ),
               SizedBox(width: 8),

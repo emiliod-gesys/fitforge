@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/online_only_routes.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
-import '../../core/theme/app_accent.dart';
+import '../../widgets/ff/ff_nav_spinner.dart';
 
 class HomeScreen extends ConsumerWidget {
   final Widget child;
 
   const HomeScreen({super.key, required this.child});
 
-  int _currentIndex(
-    BuildContext context, {
-    required bool isTrainer,
-    required bool isOnline,
-  }) {
+  int _currentIndex(BuildContext context, {required bool isOnline}) {
     final location = GoRouterState.of(context).matchedLocation;
 
     if (!isOnline) {
@@ -28,15 +25,15 @@ class HomeScreen extends ConsumerWidget {
     if (location.startsWith('/food')) return 2;
     if (location.startsWith('/progress')) return 3;
     if (location.startsWith('/social')) return 4;
-    if (isTrainer && location.startsWith('/students')) return 5;
-    if (location.startsWith('/profile')) return isTrainer ? 6 : 5;
+    if (location.startsWith('/profile') || location.startsWith('/students')) {
+      return 5;
+    }
     return 0;
   }
 
   void _onDestinationSelected(
     BuildContext context,
     int index, {
-    required bool isTrainer,
     required bool isOnline,
   }) {
     if (!isOnline) {
@@ -61,31 +58,23 @@ class HomeScreen extends ConsumerWidget {
       case 4:
         context.go('/social');
       case 5:
-        if (isTrainer) {
-          context.go('/students');
-        } else {
-          context.go('/profile');
-        }
-      case 6:
         context.go('/profile');
     }
   }
 
-  List<NavigationDestination> _destinations({
+  List<FfNavSpinnerItem> _items({
     required dynamic l10n,
-    required bool isTrainer,
     required bool isOnline,
     required int unread,
-    required BuildContext context,
   }) {
-    final train = NavigationDestination(
-      icon: const Icon(Icons.fitness_center_outlined),
-      selectedIcon: const Icon(Icons.fitness_center),
+    final train = FfNavSpinnerItem(
+      icon: Icons.fitness_center_outlined,
+      selectedIcon: Icons.fitness_center,
       label: l10n.navTrain,
     );
-    final profile = NavigationDestination(
-      icon: const Icon(Icons.person_outline),
-      selectedIcon: const Icon(Icons.person),
+    final profile = FfNavSpinnerItem(
+      icon: Icons.person_outline,
+      selectedIcon: Icons.person,
       label: l10n.navProfile,
     );
 
@@ -95,40 +84,27 @@ class HomeScreen extends ConsumerWidget {
 
     return [
       train,
-      NavigationDestination(
-        icon: _NavAiIcon(color: AppColors.textMuted.withValues(alpha: 0.85)),
-        selectedIcon: _NavAiIcon(color: context.accentColor),
+      FfNavSpinnerItem(
+        icon: Icons.auto_awesome_outlined,
+        selectedIcon: Icons.auto_awesome,
         label: l10n.navCoach,
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.restaurant_outlined),
-        selectedIcon: const Icon(Icons.restaurant),
+      FfNavSpinnerItem(
+        icon: Icons.restaurant_outlined,
+        selectedIcon: Icons.restaurant,
         label: l10n.navFood,
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.show_chart_outlined),
-        selectedIcon: const Icon(Icons.show_chart),
+      FfNavSpinnerItem(
+        icon: Icons.show_chart_outlined,
+        selectedIcon: Icons.show_chart,
         label: l10n.navProgress,
       ),
-      NavigationDestination(
-        icon: Badge(
-          isLabelVisible: unread > 0,
-          label: Text(unread > 9 ? '9+' : '$unread'),
-          child: const Icon(Icons.people_outline),
-        ),
-        selectedIcon: Badge(
-          isLabelVisible: unread > 0,
-          label: Text(unread > 9 ? '9+' : '$unread'),
-          child: const Icon(Icons.people),
-        ),
+      FfNavSpinnerItem(
+        icon: Icons.people_outline,
+        selectedIcon: Icons.people,
         label: l10n.navSocial,
+        badgeCount: unread,
       ),
-      if (isTrainer)
-        NavigationDestination(
-          icon: const Icon(Icons.school_outlined),
-          selectedIcon: const Icon(Icons.school),
-          label: l10n.navStudents,
-        ),
       profile,
     ];
   }
@@ -137,7 +113,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final unread = ref.watch(socialUnreadCountProvider).valueOrNull ?? 0;
-    final isTrainer = ref.watch(isTrainerProvider);
     final isOnline = ref.watch(isOnlineProvider).valueOrNull ?? true;
     final location = GoRouterState.of(context).matchedLocation;
 
@@ -147,52 +122,20 @@ class HomeScreen extends ConsumerWidget {
       });
     }
 
-    final destinations = _destinations(
-      l10n: l10n,
-      isTrainer: isTrainer,
-      isOnline: isOnline,
-      unread: unread,
-      context: context,
-    );
+    final items = _items(l10n: l10n, isOnline: isOnline, unread: unread);
+    final selected = _currentIndex(context, isOnline: isOnline).clamp(0, items.length - 1);
 
     return Scaffold(
       backgroundColor: AppColors.black,
       body: child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.border)),
+      bottomNavigationBar: FfNavSpinner(
+        items: items,
+        selectedIndex: selected,
+        onSelected: (index) => _onDestinationSelected(
+          context,
+          index,
+          isOnline: isOnline,
         ),
-        child: NavigationBar(
-          backgroundColor: AppColors.card,
-          selectedIndex: _currentIndex(context, isTrainer: isTrainer, isOnline: isOnline),
-          onDestinationSelected: (index) => _onDestinationSelected(
-            context,
-            index,
-            isTrainer: isTrainer,
-            isOnline: isOnline,
-          ),
-          destinations: destinations,
-        ),
-      ),
-    );
-  }
-}
-
-class _NavAiIcon extends StatelessWidget {
-  final Color color;
-
-  const _NavAiIcon({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      'AI',
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.4,
-        height: 1,
-        color: color,
       ),
     );
   }

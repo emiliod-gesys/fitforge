@@ -17,6 +17,7 @@ import '../../core/theme/app_accent.dart';
 
 class SocialFriendsTab extends ConsumerWidget {
   final TextEditingController searchController;
+  final FocusNode? searchFocusNode;
   final String query;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onSearchClear;
@@ -27,10 +28,13 @@ class SocialFriendsTab extends ConsumerWidget {
   final Future<void> Function(Friendship friendship) onAccept;
   final Future<void> Function(Friendship friendship) onRemove;
   final void Function(BuildContext context, String name, VoidCallback onConfirm) onConfirmRemove;
+  final VoidCallback? onOpenLeaderboards;
+  final GlobalKey? pendingSectionKey;
 
   const SocialFriendsTab({
     super.key,
     required this.searchController,
+    this.searchFocusNode,
     required this.query,
     required this.onSearchChanged,
     required this.onSearchClear,
@@ -41,7 +45,20 @@ class SocialFriendsTab extends ConsumerWidget {
     required this.onAccept,
     required this.onRemove,
     required this.onConfirmRemove,
+    this.onOpenLeaderboards,
+    this.pendingSectionKey,
   });
+
+  _FriendRelation _relationFor(String userId, String? uid, List<Friendship> friendships) {
+    if (uid == null) return _FriendRelation.none;
+    for (final f in friendships) {
+      final other = f.friendFor(uid);
+      if (other.id != userId) continue;
+      if (f.status == FriendshipStatus.accepted) return _FriendRelation.friends;
+      return _FriendRelation.pending;
+    }
+    return _FriendRelation.none;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,6 +95,20 @@ class SocialFriendsTab extends ConsumerWidget {
                 globalRank: globalRank,
                 isLoading: friendshipsAsync.isLoading,
                 l10n: l10n,
+                onPendingTap: incomingPending > 0
+                    ? () {
+                        final ctx = pendingSectionKey?.currentContext;
+                        if (ctx != null) {
+                          Scrollable.ensureVisible(
+                            ctx,
+                            duration: const Duration(milliseconds: 280),
+                            curve: Curves.easeOutCubic,
+                          );
+                        }
+                      }
+                    : null,
+                onRankTap: onOpenLeaderboards,
+                onInviteTap: () => searchFocusNode?.requestFocus(),
               );
             },
             loading: () => SocialHeroCard(
@@ -97,12 +128,15 @@ class SocialFriendsTab extends ConsumerWidget {
               globalRank: globalRank,
               isLoading: false,
               l10n: l10n,
+              onRankTap: onOpenLeaderboards,
+              onInviteTap: () => searchFocusNode?.requestFocus(),
             ),
           ),
           const SizedBox(height: 16),
           SocialSearchBar(
             hintText: l10n.searchFriendsHint,
             controller: searchController,
+            focusNode: searchFocusNode,
             showClear: searchController.text.isNotEmpty,
             onChanged: onSearchChanged,
             onClear: onSearchClear,
@@ -126,24 +160,44 @@ class SocialFriendsTab extends ConsumerWidget {
                   );
                 }
                 return Column(
-                  children: users
-                      .map(
-                        (user) => FriendTile(
-                          friend: user,
-                          trailing: IconButton(
-                            icon: Icon(Icons.person_add_outlined, color: context.accentColor),
-                            onPressed: () => onSendRequest(user.id),
+                  children: users.map((user) {
+                    final relation = _relationFor(user.id, uid, friendships);
+                    return FriendTile(
+                      friend: user,
+                      trailing: switch (relation) {
+                        _FriendRelation.friends => Text(
+                            l10n.friendStatusFriends,
+                            style: TextStyle(
+                              color: context.accentColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        _FriendRelation.pending => Text(
+                            l10n.friendStatusPending,
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        _FriendRelation.none => TextButton(
+                            onPressed: () => onSendRequest(user.id),
+                            child: Text(l10n.friendStatusAdd),
+                          ),
+                      },
+                    );
+                  }).toList(),
                 );
               },
             ),
           ],
           if (pending.isNotEmpty) ...[
             const SizedBox(height: 20),
-            SocialSectionHeader(title: l10n.pendingRequests),
+            KeyedSubtree(
+              key: pendingSectionKey,
+              child: SocialSectionHeader(title: l10n.pendingRequests),
+            ),
             ...pending.map((f) {
               final friend = uid != null ? f.friendFor(uid) : FriendUser(id: f.addresseeId);
               final incoming = uid != null && f.isIncoming(uid);
@@ -236,6 +290,8 @@ class SocialFriendsTab extends ConsumerWidget {
     );
   }
 }
+
+enum _FriendRelation { none, pending, friends }
 
 class _FriendsSkeleton extends StatelessWidget {
   const _FriendsSkeleton();

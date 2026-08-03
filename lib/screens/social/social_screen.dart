@@ -24,6 +24,8 @@ class SocialScreen extends ConsumerStatefulWidget {
 
 class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  final _pendingSectionKey = GlobalKey();
   String _query = '';
   Timer? _searchDebounce;
   late TabController _tabController;
@@ -52,6 +54,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -174,9 +177,13 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          SocialFeedTab(onRefresh: _onFriendsRefresh),
+          SocialFeedTab(
+            onRefresh: _onFriendsRefresh,
+            onFindFriends: () => _tabController.animateTo(1),
+          ),
           SocialFriendsTab(
             searchController: _searchController,
+            searchFocusNode: _searchFocusNode,
             query: _query,
             onSearchChanged: _onSearchChanged,
             onSearchClear: _onSearchClear,
@@ -187,6 +194,8 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
             onAccept: _accept,
             onRemove: _remove,
             onConfirmRemove: _confirmRemove,
+            onOpenLeaderboards: () => _tabController.animateTo(2),
+            pendingSectionKey: _pendingSectionKey,
           ),
           const LeaderboardsSection(),
         ],

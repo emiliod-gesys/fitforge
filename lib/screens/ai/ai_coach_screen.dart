@@ -15,11 +15,13 @@ import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../services/ai_coach_service.dart';
 import '../../services/routine_limit_service.dart';
+import '../../core/theme/app_accent.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
+import '../../widgets/ff/ff_surface.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
-import '../../core/theme/app_accent.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
   const AiCoachScreen({super.key});
@@ -441,28 +443,87 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           if (_messages.isEmpty)
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: AppTokens.pagePadding,
                 children: [
-                  Icon(Icons.auto_awesome_outlined, size: 64, color: context.accentColor),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.coachWelcome,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  FfSurface(
+                    elevated: true,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        context.accentColor.withValues(alpha: 0.22),
+                        AppColors.cardElevated,
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: context.accentColor.withValues(alpha: 0.18),
+                            border: Border.all(
+                              color: context.accentColor.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 34,
+                            color: context.accentColor,
+                          ),
+                        ),
+                        const SizedBox(height: AppTokens.space16),
+                        Text(
+                          l10n.coachWelcomeTitle,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                        ),
+                        const SizedBox(height: AppTokens.space8),
+                        Text(
+                          l10n.coachWelcomeSubtitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.coachWelcomeHint,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppTokens.space24),
                   ...suggestions.map(
                     (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: ActionChip(
-                        label: Text(s),
-                        onPressed: inputBlocked ? null : () => _send(s),
+                      padding: const EdgeInsets.only(bottom: AppTokens.space8),
+                      child: FfSurface(
+                        onTap: inputBlocked ? null : () => _send(s),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTokens.space16,
+                          vertical: AppTokens.space14,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.bolt_rounded, color: context.accentColor, size: 20),
+                            const SizedBox(width: AppTokens.space12),
+                            Expanded(
+                              child: Text(
+                                s,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

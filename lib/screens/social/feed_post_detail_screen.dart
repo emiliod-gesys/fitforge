@@ -285,19 +285,52 @@ class _FeedPostDetailScreenState extends ConsumerState<FeedPostDetailScreen> {
                                 unitSystem: unitSystem,
                               ),
                             ],
-                            if (detail.commentPostId != null)
-                              FeedReactionBar(
-                                entries: post.reactions.sortedEntries,
-                                myEmoji: post.reactions.myEmoji,
-                                onEmojiTap: (emoji) async {
-                                  await ref.read(socialServiceProvider).toggleFeedReaction(
-                                        postId: detail.commentPostId!,
-                                        emoji: emoji,
-                                      );
-                                  ref.invalidate(feedPostDetailProvider(widget.postId));
-                                  ref.invalidate(socialFeedProvider);
-                                },
+                            if (detail.commentPostId != null) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () => FeedReactionPicker.show(
+                                      context,
+                                      ref,
+                                      postId: detail.commentPostId,
+                                      selectedEmoji: post.reactions.myEmoji,
+                                      refreshPostDetailId: widget.postId,
+                                    ),
+                                    icon: Icon(
+                                      Icons.add_reaction_outlined,
+                                      size: 18,
+                                      color: post.reactions.myEmoji != null
+                                          ? context.accentColor
+                                          : AppColors.textMuted,
+                                    ),
+                                    label: Text(
+                                      l10n.feedReactAction,
+                                      style: TextStyle(
+                                        color: post.reactions.myEmoji != null
+                                            ? context.accentColor
+                                            : AppColors.textMuted,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: FeedReactionBar(
+                                      entries: post.reactions.sortedEntries,
+                                      myEmoji: post.reactions.myEmoji,
+                                      onEmojiTap: (emoji) async {
+                                        await ref.read(socialServiceProvider).toggleFeedReaction(
+                                              postId: detail.commentPostId!,
+                                              emoji: emoji,
+                                            );
+                                        ref.invalidate(feedPostDetailProvider(widget.postId));
+                                        ref.invalidate(socialFeedProvider);
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ],
                             ],
                           ),
                         ),
@@ -311,11 +344,24 @@ class _FeedPostDetailScreenState extends ConsumerState<FeedPostDetailScreen> {
                     const SizedBox(height: 8),
                     if (detail.comments.isEmpty)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          l10n.feedCommentsEmpty,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.textMuted),
+                        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 12),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 36,
+                              color: AppColors.textMuted.withValues(alpha: 0.7),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              l10n.feedCommentsEmpty,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     else
@@ -416,10 +462,22 @@ class _CommentTile extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ProfileAvatar(
-            avatarUrl: comment.author?.avatarUrl,
-            radius: 16,
-            fallbackLetter: authorName,
+          InkWell(
+            onTap: comment.userId.isEmpty
+                ? null
+                : () {
+                    if (_isOwn) {
+                      context.push('/profile');
+                    } else {
+                      context.push('/social/friend/${comment.userId}');
+                    }
+                  },
+            borderRadius: BorderRadius.circular(20),
+            child: ProfileAvatar(
+              avatarUrl: comment.author?.avatarUrl,
+              radius: 16,
+              fallbackLetter: authorName,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -447,9 +505,20 @@ class _CommentTile extends ConsumerWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              authorName,
-                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            child: InkWell(
+                              onTap: comment.userId.isEmpty
+                                  ? null
+                                  : () {
+                                      if (_isOwn) {
+                                        context.push('/profile');
+                                      } else {
+                                        context.push('/social/friend/${comment.userId}');
+                                      }
+                                    },
+                              child: Text(
+                                authorName,
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                              ),
                             ),
                           ),
                           if (_isOwn)

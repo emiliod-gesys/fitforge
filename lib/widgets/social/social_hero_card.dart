@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/utils/player_level.dart';
@@ -15,6 +16,9 @@ class SocialHeroCard extends StatelessWidget {
   final int? globalRank;
   final bool isLoading;
   final AppLocalizations l10n;
+  final VoidCallback? onPendingTap;
+  final VoidCallback? onRankTap;
+  final VoidCallback? onInviteTap;
 
   const SocialHeroCard({
     super.key,
@@ -25,6 +29,9 @@ class SocialHeroCard extends StatelessWidget {
     required this.globalRank,
     required this.isLoading,
     required this.l10n,
+    this.onPendingTap,
+    this.onRankTap,
+    this.onInviteTap,
   });
 
   @override
@@ -78,29 +85,43 @@ class SocialHeroCard extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         )
-                      else ...[
-                        Text(
-                          friendsRank != null
-                              ? l10n.socialHeroRank(friendsRank!)
-                              : l10n.socialHeroNoRank,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.88),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (globalRank != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            l10n.socialHeroRankGlobal(globalRank!),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.78),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                      else
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onRankTap,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    friendsRank != null
+                                        ? l10n.socialHeroRank(friendsRank!)
+                                        : l10n.socialHeroNoRank,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.88),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (globalRank != null) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      l10n.socialHeroRankGlobal(globalRank!),
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.78),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
-                        ],
-                      ],
+                        ),
                     ],
                   ),
                 ),
@@ -135,9 +156,29 @@ class SocialHeroCard extends StatelessWidget {
                   icon: Icons.mail_outline,
                   label: isLoading ? '—' : l10n.socialHeroPending(pendingCount),
                   highlight: pendingCount > 0,
+                  onTap: onPendingTap,
                 ),
               ],
             ),
+            if (onInviteTap != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onInviteTap,
+                  icon: const Icon(Icons.person_add_alt_1, color: Colors.white, size: 18),
+                  label: Text(
+                    l10n.socialHeroInvite,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.35)),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(42),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -149,48 +190,61 @@ class _StatPill extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool highlight;
+  final VoidCallback? onTap;
 
   const _StatPill({
     required this.icon,
     required this.label,
     this.highlight = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
+    final child = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: highlight
+            ? Colors.white.withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
           color: highlight
-              ? Colors.white.withValues(alpha: 0.22)
-              : Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: highlight
-                ? Colors.white.withValues(alpha: 0.35)
-                : Colors.white.withValues(alpha: 0.16),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+              ? Colors.white.withValues(alpha: 0.35)
+              : Colors.white.withValues(alpha: 0.16),
         ),
       ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Expanded(
+      child: onTap == null
+          ? child
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(14),
+                child: child,
+              ),
+            ),
     );
   }
 }

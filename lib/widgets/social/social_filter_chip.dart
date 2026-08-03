@@ -25,19 +25,21 @@ class SocialFilterChip extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            constraints: const BoxConstraints(minHeight: 42),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: selected ? context.accentColor : AppColors.border,
               ),
             ),
+            alignment: Alignment.center,
             child: Text(
               label,
               style: TextStyle(
                 color: selected ? context.accentColor : AppColors.textMuted,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                fontSize: 12,
+                fontSize: 13,
               ),
             ),
           ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/utils/feed_personal_record.dart';
 import '../../core/utils/milestone_badge.dart';
 import '../../core/utils/player_level_badge.dart';
@@ -13,15 +14,27 @@ import '../../models/feed_reaction.dart';
 import '../../models/profile.dart';
 import '../../models/social.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/ff/ff_button.dart';
+import '../../widgets/ff/ff_empty_state.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/social/feed_compose_sheet.dart';
 import '../../widgets/social/feed_reaction_picker.dart';
 
 class SocialFeedTab extends ConsumerWidget {
-  const SocialFeedTab({super.key, required this.onRefresh});
+  const SocialFeedTab({
+    super.key,
+    required this.onRefresh,
+    this.onFindFriends,
+  });
 
   final Future<void> Function() onRefresh;
+  final VoidCallback? onFindFriends;
+
+  Future<void> _compose(BuildContext context) async {
+    final published = await FeedComposeSheet.show(context);
+    if (published == true) onRefresh();
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,21 +53,30 @@ class SocialFeedTab extends ConsumerWidget {
                 onRefresh: onRefresh,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(24),
                   children: [
-                    const SizedBox(height: 48),
-                    Icon(Icons.dynamic_feed_outlined, size: 56, color: context.accentColor.withValues(alpha: 0.7)),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.feedEmptyTitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.feedEmptySubtitle,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.textMuted, height: 1.4),
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.62,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FfEmptyState(
+                            icon: Icons.dynamic_feed_rounded,
+                            title: l10n.emptyFeedTitle,
+                            subtitle: l10n.emptyFeedSubtitle,
+                            actionLabel: l10n.feedEmptyCreatePost,
+                            onAction: () => _compose(context),
+                          ),
+                          if (onFindFriends != null) ...[
+                            const SizedBox(height: AppTokens.space12),
+                            FfButton(
+                              label: l10n.feedEmptyFindFriends,
+                              variant: FfButtonVariant.secondary,
+                              icon: Icons.person_search_outlined,
+                              onPressed: onFindFriends,
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -66,41 +88,8 @@ class SocialFeedTab extends ConsumerWidget {
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
-                itemCount: items.length + 1,
+                itemCount: items.length,
                 itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: Column(
-                        children: [
-                          Text(
-                            l10n.feedLongPressToReact,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.4),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.feedTapToComment,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.4),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.feedLongPressCommentToReact,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.4),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.feedExpiryHint,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.4),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
                   final post = items[index];
                   return _FeedItemTile(
                     post: post,
@@ -115,17 +104,14 @@ class SocialFeedTab extends ConsumerWidget {
               ),
             );
           },
-          loading: () => Center(child: FitForgeLoadingIndicator(size: 100)),
+          loading: () => const Center(child: FitForgeLoadingIndicator(size: 100)),
           error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
         ),
         Positioned(
           right: 16,
           bottom: 16,
           child: FloatingActionButton(
-            onPressed: () async {
-              final published = await FeedComposeSheet.show(context);
-              if (published == true) onRefresh();
-            },
+            onPressed: () => _compose(context),
             child: const Icon(Icons.edit_outlined),
           ),
         ),
@@ -158,141 +144,167 @@ class _FeedItemTile extends ConsumerWidget {
     }
   }
 
+  Future<void> _react(BuildContext context, WidgetRef ref) async {
+    final postId = item.feedPostId;
+    if (postId == null) return;
+    await FeedReactionPicker.show(
+      context,
+      ref,
+      postId: postId,
+      selectedEmoji: post.reactions.myEmoji,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final accent = context.accentColor;
     final actor = item.actor;
     final actorName = actor?.label ?? l10n.user;
+    final canReact = item.feedPostId != null;
 
     return Card(
       color: AppColors.card,
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+        side: BorderSide(color: AppColors.border.withValues(alpha: 0.75)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _openProfile(context),
-                borderRadius: BorderRadius.circular(22),
-                child: ProfileAvatar(
-                  avatarUrl: actor?.avatarUrl,
-                  radius: 22,
-                  fallbackLetter: actorName,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _openProfile(context),
+                    borderRadius: BorderRadius.circular(22),
+                    child: ProfileAvatar(
+                      avatarUrl: actor?.avatarUrl,
+                      radius: 22,
+                      fallbackLetter: actorName,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InkWell(
+                        onTap: () => _openProfile(context),
+                        child: Text(
+                          actorName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.timeAgo(item.createdAt),
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                _FeedItemBadge(item: item),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onOpenComments,
-                  onLongPress: item.feedPostId == null
-                      ? null
-                      : () => FeedReactionPicker.show(
-                            context,
-                            ref,
-                            postId: item.feedPostId,
-                            selectedEmoji: post.reactions.myEmoji,
-                          ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(
-                      l10n.feedItemMessage(
-                        item,
-                        unitSystem: unitSystem,
-                        currentUserId: currentUserId,
-                      ),
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        height: 1.35,
-                      ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.feedItemMessage(
+                item,
+                unitSystem: unitSystem,
+                currentUserId: currentUserId,
+              ),
+              style: const TextStyle(color: AppColors.textPrimary, height: 1.4, fontSize: 14.5),
+            ),
+            if (item.isUserPost && post.imageUrl != null) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                child: AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: CachedNetworkImage(
+                    imageUrl: post.imageUrl!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    placeholder: (_, __) => Container(
+                      color: AppColors.surface,
+                      alignment: Alignment.center,
+                      child: const FitForgeLoadingIndicator(size: 48),
                     ),
-                    if (item.isUserPost && post.imageUrl != null) ...[
-                      const SizedBox(height: 10),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: CachedNetworkImage(
-                          imageUrl: post.imageUrl!,
-                          fit: BoxFit.cover,
-                          height: 180,
-                          width: double.infinity,
-                          placeholder: (_, __) => Container(
-                            height: 180,
-                            color: AppColors.surface,
-                            alignment: Alignment.center,
-                            child: const FitForgeLoadingIndicator(size: 48),
-                          ),
-                          errorWidget: (_, __, ___) => Container(
-                            height: 120,
-                            color: AppColors.surface,
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (item.isUserPost && item.feedAttachedPersonalRecord != null) ...[
-                      const SizedBox(height: 8),
-                      _FeedPrChip(
-                        record: item.feedAttachedPersonalRecord!,
-                        unitSystem: unitSystem,
-                      ),
-                    ],
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.timeAgo(item.createdAt),
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                    ),
-                    if (item.feedPostId != null)
-                      FeedReactionBar(
-                        entries: post.reactions.sortedEntries,
-                        myEmoji: post.reactions.myEmoji,
-                        onEmojiTap: (emoji) async {
-                          await ref.read(socialServiceProvider).toggleFeedReaction(
-                                postId: item.feedPostId!,
-                                emoji: emoji,
-                              );
-                          ref.invalidate(socialFeedProvider);
-                        },
-                      ),
-                    if (post.commentCount > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Row(
-                          children: [
-                            Icon(Icons.chat_bubble_outline, size: 14, color: context.accentColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              l10n.feedCommentCount(post.commentCount),
-                              style: TextStyle(
-                                color: context.accentColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ],
+                    errorWidget: (_, __, ___) => Container(
+                      color: AppColors.surface,
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
                     ),
                   ),
                 ),
               ),
+            ],
+            if (item.isUserPost && item.feedAttachedPersonalRecord != null) ...[
+              const SizedBox(height: 10),
+              _FeedPrChip(
+                record: item.feedAttachedPersonalRecord!,
+                unitSystem: unitSystem,
+              ),
+            ],
+            if (canReact)
+              FeedReactionBar(
+                entries: post.reactions.sortedEntries,
+                myEmoji: post.reactions.myEmoji,
+                onEmojiTap: (emoji) async {
+                  await ref.read(socialServiceProvider).toggleFeedReaction(
+                        postId: item.feedPostId!,
+                        emoji: emoji,
+                      );
+                  ref.invalidate(socialFeedProvider);
+                },
+              ),
+            const SizedBox(height: 8),
+            const Divider(height: 1, color: AppColors.border),
+            Row(
+              children: [
+                if (canReact)
+                  TextButton.icon(
+                    onPressed: () => _react(context, ref),
+                    icon: Icon(
+                      Icons.emoji_emotions_outlined,
+                      size: 18,
+                      color: post.reactions.myEmoji != null ? accent : AppColors.textMuted,
+                    ),
+                    label: Text(
+                      l10n.feedReactAction,
+                      style: TextStyle(
+                        color: post.reactions.myEmoji != null ? accent : AppColors.textMuted,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                TextButton.icon(
+                  onPressed: onOpenComments,
+                  icon: Icon(Icons.chat_bubble_outline, size: 18, color: accent),
+                  label: Text(
+                    post.commentCount > 0
+                        ? l10n.feedCommentCount(post.commentCount)
+                        : l10n.feedCommentAction,
+                    style: TextStyle(
+                      color: accent,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            _FeedItemBadge(item: item),
           ],
         ),
       ),
@@ -311,9 +323,9 @@ class _FeedItemBadge extends StatelessWidget {
       final tier = item.milestoneTier ?? 1;
       return Image.asset(
         MilestoneBadge.assetPathForTier(tier),
-        width: 40,
-        height: 40,
-        errorBuilder: (_, __, ___) => Icon(Icons.emoji_events, color: context.accentColor, size: 32),
+        width: 36,
+        height: 36,
+        errorBuilder: (_, __, ___) => Icon(Icons.emoji_events, color: context.accentColor, size: 28),
       );
     }
 
@@ -323,23 +335,23 @@ class _FeedItemBadge extends StatelessWidget {
       if (asset != null) {
         return Image.asset(
           asset,
-          width: 40,
-          height: 40,
-          errorBuilder: (_, __, ___) => Icon(Icons.trending_up, color: context.accentColor, size: 32),
+          width: 36,
+          height: 36,
+          errorBuilder: (_, __, ___) => Icon(Icons.trending_up, color: context.accentColor, size: 28),
         );
       }
-      return Icon(Icons.trending_up, color: context.accentColor, size: 32);
+      return Icon(Icons.trending_up, color: context.accentColor, size: 28);
     }
 
     if (item.isPrUnlock) {
-      return Icon(Icons.emoji_events, color: context.accentColor, size: 32);
+      return Icon(Icons.emoji_events, color: context.accentColor, size: 28);
     }
 
     if (item.isUserPost) {
-      return Icon(Icons.chat_bubble_outline, color: context.accentColor, size: 28);
+      return Icon(Icons.chat_bubble_outline, color: AppColors.textMuted, size: 22);
     }
 
-    return Icon(Icons.fitness_center, color: context.accentColor, size: 28);
+    return Icon(Icons.fitness_center, color: context.accentColor, size: 24);
   }
 }
 
@@ -354,9 +366,9 @@ class _FeedPrChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.accentColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.accentColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -366,7 +378,7 @@ class _FeedPrChip extends StatelessWidget {
           Flexible(
             child: Text(
               '${record.exerciseName} · ${FeedPersonalRecord.formatValue(record, unitSystem)}',
-              style: const TextStyle(fontSize: 13, height: 1.3),
+              style: const TextStyle(fontSize: 13, height: 1.3, fontWeight: FontWeight.w600),
             ),
           ),
         ],

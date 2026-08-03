@@ -855,6 +855,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proactiveAi => 'IA proactiva';
 
   @override
+  String get proactiveAiDescription =>
+      'Sugiere pesos, reps y tips durante el entreno sin que se lo pidas';
+
+  @override
   String get proactiveAiSubtitleOff => 'La IA solo responde cuando le escribes';
 
   @override
@@ -865,7 +869,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get proactiveAiEnableMessage =>
-      'FitForge podrá usar tu API key para enviarte sugerencias sin que las pidas. Esto puede aumentar el consumo de tokens.';
+      'FitForge podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.';
 
   @override
   String get proactiveAiEnableConfirm => 'Activar';
@@ -4253,4 +4257,127 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingPlanPaidSoon =>
       'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.';
+
+  @override
+  String get profileHubTitle => 'Tu espacio';
+
+  @override
+  String get profileHubSubtitle =>
+      'Todo lo que define cómo entrenas y progresas';
+
+  @override
+  String get profileHubAccount => 'Cuenta';
+
+  @override
+  String get profileHubPersonalSubtitle => 'Nombre, edad, género e idioma';
+
+  @override
+  String get profileHubBodySubtitle => 'Peso, medidas e integraciones de salud';
+
+  @override
+  String get profileHubTrainingSubtitle =>
+      'Objetivos, modos Hyrox/Runner y descanso';
+
+  @override
+  String get profileHubPreferencesSubtitle =>
+      'IA proactiva, Coach y color de acento';
+
+  @override
+  String get profileHubAppearanceTitle => 'Apariencia e IA';
+
+  @override
+  String get profileHubAppearanceSubtitle =>
+      'IA proactiva y color de acento de la app';
+
+  @override
+  String get profileHubOfflineSubtitle => 'Catálogo de ejercicios sin conexión';
+
+  @override
+  String get profileHubAccountSubtitle =>
+      'Alumnos, seguridad y eliminar cuenta';
+
+  @override
+  String get profileHubStudents => 'Mis alumnos';
+
+  @override
+  String get profileHubStudentsSubtitle => 'Gestiona tu roster de atletas';
+
+  @override
+  String get emptyRoutinesTitle => 'Tu biblioteca está vacía';
+
+  @override
+  String get emptyRoutinesSubtitle =>
+      'Crea tu primera rutina o genera una con el Coach IA.';
+
+  @override
+  String get emptyRoutinesAction => 'Crear rutina';
+
+  @override
+  String get emptyWorkoutsTitle => 'Aún no hay entrenos';
+
+  @override
+  String get emptyWorkoutsSubtitle =>
+      'Cuando completes una sesión, aparecerá aquí tu historial.';
+
+  @override
+  String get emptyFeedTitle => 'El feed está en silencio';
+
+  @override
+  String get emptyFeedSubtitle =>
+      'Entrena, comparte un PR o añade amigos para ver actividad.';
+
+  @override
+  String get coachWelcomeTitle => 'Tu coach personal';
+
+  @override
+  String get coachWelcomeSubtitle =>
+      'Pregunta por rutinas, nutrición o técnica. Empieza con una sugerencia.';
+
+  @override
+  String get progressRecordsSection => 'Récords personales';
+
+  @override
+  String get progressOverviewSection => 'Resumen';
+
+  @override
+  String get feedReactAction => 'Reaccionar';
+
+  @override
+  String get feedCommentAction => 'Comentar';
+
+  @override
+  String get feedEmptyCreatePost => 'Crear publicación';
+
+  @override
+  String get feedEmptyFindFriends => 'Buscar amigos';
+
+  @override
+  String get friendStatusAdd => 'Añadir';
+
+  @override
+  String get friendStatusPending => 'Pendiente';
+
+  @override
+  String get friendStatusFriends => 'Amigos';
+
+  @override
+  String get leaderboardFilterScope => 'Alcance';
+
+  @override
+  String get leaderboardFilterPeriod => 'Período';
+
+  @override
+  String get leaderboardFilterMetric => 'Métrica';
+
+  @override
+  String get socialHeroInvite => 'Invitar amigo';
+
+  @override
+  String get feedComposePhoto => 'Foto';
+
+  @override
+  String get feedComposeCamera => 'Cámara';
+
+  @override
+  String get feedComposePr => 'Récord';
 }

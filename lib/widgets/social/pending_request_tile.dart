@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../l10n/l10n_extensions.dart';
 import '../../models/social.dart';
 import '../profile_avatar.dart';
-import '../../core/theme/app_accent.dart';
 
 class PendingRequestTile extends StatelessWidget {
   final FriendUser friend;
@@ -22,64 +25,91 @@ class PendingRequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final accent = context.accentColor;
+
     return Card(
       color: AppColors.card,
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
         side: BorderSide(
-          color: incoming ? context.accentColor.withValues(alpha: 0.35) : AppColors.border,
+          color: incoming ? accent.withValues(alpha: 0.35) : AppColors.border,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        child: Column(
           children: [
-            ProfileAvatar(
-              avatarUrl: friend.avatarUrl,
-              radius: 22,
-              fallbackLetter: friend.label,
+            Row(
+              children: [
+                ProfileAvatar(
+                  avatarUrl: friend.avatarUrl,
+                  radius: 22,
+                  fallbackLetter: friend.label,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        friend.label,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: incoming ? accent : AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: incoming ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (incoming) ...[
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  Text(
-                    friend.label,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onDecline,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textMuted,
+                        side: BorderSide(color: AppColors.border.withValues(alpha: 0.9)),
+                        minimumSize: const Size(0, 40),
+                      ),
+                      child: Text(l10n.decline),
                     ),
                   ),
-                  SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: incoming ? context.accentColor : AppColors.textMuted,
-                      fontSize: 12,
-                      fontWeight: incoming ? FontWeight.w600 : FontWeight.normal,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: onAccept,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: accent,
+                        foregroundColor: Colors.black,
+                        minimumSize: const Size(0, 40),
+                      ),
+                      child: Text(l10n.accept),
                     ),
                   ),
                 ],
               ),
-            ),
-            if (incoming) ...[
-              IconButton(
-                icon: Icon(Icons.check_circle_outline),
-                color: context.accentColor,
-                onPressed: onAccept,
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                color: AppColors.textMuted,
-                onPressed: onDecline,
-              ),
             ] else
-              IconButton(
-                icon: const Icon(Icons.close),
-                color: AppColors.textMuted,
-                onPressed: onDecline,
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: onDecline,
+                  child: Text(l10n.cancel),
+                ),
               ),
           ],
         ),

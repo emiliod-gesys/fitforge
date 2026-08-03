@@ -180,6 +180,17 @@ class _FeedComposeSheetState extends ConsumerState<FeedComposeSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
               Row(
                 children: [
                   Expanded(
@@ -279,24 +290,22 @@ class _FeedComposeSheetState extends ConsumerState<FeedComposeSheet> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  IconButton(
-                    tooltip: l10n.feedComposeAddPhoto,
-                    onPressed: _submitting
-                        ? null
-                        : () => _pickImage(ImageSource.gallery),
-                    icon: const Icon(Icons.photo_outlined),
+                  _AttachAction(
+                    icon: Icons.photo_outlined,
+                    label: l10n.feedComposePhoto,
+                    onTap: _submitting ? null : () => _pickImage(ImageSource.gallery),
                   ),
-                  IconButton(
-                    tooltip: l10n.feedComposeTakePhoto,
-                    onPressed: _submitting
-                        ? null
-                        : () => _pickImage(ImageSource.camera),
-                    icon: const Icon(Icons.photo_camera_outlined),
+                  const SizedBox(width: 8),
+                  _AttachAction(
+                    icon: Icons.photo_camera_outlined,
+                    label: l10n.feedComposeCamera,
+                    onTap: _submitting ? null : () => _pickImage(ImageSource.camera),
                   ),
-                  IconButton(
-                    tooltip: l10n.feedComposeAttachPr,
-                    onPressed: _submitting ? null : _pickPersonalRecord,
-                    icon: const Icon(Icons.emoji_events_outlined),
+                  const SizedBox(width: 8),
+                  _AttachAction(
+                    icon: Icons.emoji_events_outlined,
+                    label: l10n.feedComposePr,
+                    onTap: _submitting ? null : _pickPersonalRecord,
                   ),
                   const Spacer(),
                   FilledButton(
@@ -314,9 +323,53 @@ class _FeedComposeSheetState extends ConsumerState<FeedComposeSheet> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
               Text(
                 l10n.feedComposeCompressionHint,
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AttachAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  const _AttachAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = context.accentColor;
+    return Material(
+      color: AppColors.cardElevated,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: onTap == null ? AppColors.textMuted : accent),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: onTap == null ? AppColors.textMuted : AppColors.textPrimary,
+                ),
               ),
             ],
           ),

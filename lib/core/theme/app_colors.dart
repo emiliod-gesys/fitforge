@@ -24,4 +24,11 @@ abstract final class AppColors {
 
   /// Fondo claro para ilustraciones wger (siluetas negras sobre PNG transparente).
   static const exerciseIllustrationBackground = Color(0xFFFFFFFF);
+
+  /// Semántica de producto (independiente del acento de marca).
+  static const success = Color(0xFF3DCF8E);
+  static const warning = Color(0xFFE6B35A);
+  static const info = Color(0xFF6AA9FF);
+  static const prHighlight = Color(0xFFE6C35C);
+  static const eaten = Color(0xFF5B9FE3);
 }

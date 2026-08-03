@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 class SocialSearchBar extends StatelessWidget {
   final String hintText;
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final bool showClear;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
@@ -12,6 +13,7 @@ class SocialSearchBar extends StatelessWidget {
     super.key,
     required this.hintText,
     required this.controller,
+    this.focusNode,
     required this.showClear,
     required this.onChanged,
     required this.onClear,
@@ -27,6 +29,7 @@ class SocialSearchBar extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         onChanged: onChanged,
         style: const TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(

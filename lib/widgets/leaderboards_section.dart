@@ -68,10 +68,9 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+          _FilterGroup(
+            label: l10n.leaderboardFilterScope,
+            child: Row(
               children: [
                 SocialFilterChip(
                   label: l10n.leaderboardScopeFriends,
@@ -83,9 +82,14 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
                   selected: _scope == LeaderboardScope.global,
                   onTap: () => _updateFilters(() => _scope = LeaderboardScope.global),
                 ),
-                const SizedBox(width: 4),
-                Container(width: 1, height: 22, color: AppColors.border),
-                const SizedBox(width: 4),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _FilterGroup(
+            label: l10n.leaderboardFilterPeriod,
+            child: Row(
+              children: [
                 SocialFilterChip(
                   label: l10n.leaderboardPeriodWeek,
                   selected: _period == LeaderboardPeriod.week,
@@ -104,21 +108,23 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 36,
-            child: ListView(
+          const SizedBox(height: 12),
+          _FilterGroup(
+            label: l10n.leaderboardFilterMetric,
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              children: LeaderboardMetric.values.map((metric) {
-                return SocialFilterChip(
-                  label: LeaderboardFormat.metricLabel(l10n, metric),
-                  selected: _metric == metric,
-                  onTap: () => _updateFilters(() => _metric = metric),
-                );
-              }).toList(),
+              child: Row(
+                children: LeaderboardMetric.values.map((metric) {
+                  return SocialFilterChip(
+                    label: LeaderboardFormat.metricLabel(l10n, metric),
+                    selected: _metric == metric,
+                    onTap: () => _updateFilters(() => _metric = metric),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           leaderboardAsync.when(
             skipLoadingOnReload: true,
             loading: () => const _LeaderboardSkeleton(),
@@ -138,6 +144,33 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FilterGroup extends StatelessWidget {
+  const _FilterGroup({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textMuted,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        child,
+      ],
     );
   }
 }

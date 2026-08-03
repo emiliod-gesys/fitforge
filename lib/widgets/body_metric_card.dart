@@ -48,7 +48,7 @@ class BodyMetricCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
@@ -58,12 +58,12 @@ class BodyMetricCard extends StatelessWidget {
             children: [
               Text(
                 displayLabel,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textMuted,
-                  height: 1.2,
+                  height: 1.15,
                 ),
               ),
               if (computedHint != null) ...[
@@ -74,24 +74,33 @@ class BodyMetricCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10,
+                    height: 1.1,
                     color: AppColors.textMuted.withValues(alpha: 0.85),
                   ),
                 ),
               ],
               const Spacer(),
-              Text(
-                valueText,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: snapshot.hasValue ? valueColor : AppColors.textMuted,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  valueText,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
+                    color: snapshot.hasValue ? valueColor : AppColors.textMuted,
+                  ),
                 ),
               ),
               if (deltaText.isNotEmpty) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   deltaText,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
               ],
             ],

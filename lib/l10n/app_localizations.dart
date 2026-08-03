@@ -1610,6 +1610,12 @@ abstract class AppLocalizations {
   /// **'IA proactiva'**
   String get proactiveAi;
 
+  /// No description provided for @proactiveAiDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Sugiere pesos, reps y tips durante el entreno sin que se lo pidas'**
+  String get proactiveAiDescription;
+
   /// No description provided for @proactiveAiSubtitleOff.
   ///
   /// In es, this message translates to:
@@ -1631,7 +1637,7 @@ abstract class AppLocalizations {
   /// No description provided for @proactiveAiEnableMessage.
   ///
   /// In es, this message translates to:
-  /// **'FitForge podrá usar tu API key para enviarte sugerencias sin que las pidas. Esto puede aumentar el consumo de tokens.'**
+  /// **'FitForge podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.'**
   String get proactiveAiEnableMessage;
 
   /// No description provided for @proactiveAiEnableConfirm.
@@ -7250,6 +7256,234 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.'**
   String get onboardingPlanPaidSoon;
+
+  /// No description provided for @profileHubTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu espacio'**
+  String get profileHubTitle;
+
+  /// No description provided for @profileHubSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo lo que define cómo entrenas y progresas'**
+  String get profileHubSubtitle;
+
+  /// No description provided for @profileHubAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta'**
+  String get profileHubAccount;
+
+  /// No description provided for @profileHubPersonalSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre, edad, género e idioma'**
+  String get profileHubPersonalSubtitle;
+
+  /// No description provided for @profileHubBodySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso, medidas e integraciones de salud'**
+  String get profileHubBodySubtitle;
+
+  /// No description provided for @profileHubTrainingSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Objetivos, modos Hyrox/Runner y descanso'**
+  String get profileHubTrainingSubtitle;
+
+  /// No description provided for @profileHubPreferencesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'IA proactiva, Coach y color de acento'**
+  String get profileHubPreferencesSubtitle;
+
+  /// No description provided for @profileHubAppearanceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Apariencia e IA'**
+  String get profileHubAppearanceTitle;
+
+  /// No description provided for @profileHubAppearanceSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'IA proactiva y color de acento de la app'**
+  String get profileHubAppearanceSubtitle;
+
+  /// No description provided for @profileHubOfflineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Catálogo de ejercicios sin conexión'**
+  String get profileHubOfflineSubtitle;
+
+  /// No description provided for @profileHubAccountSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos, seguridad y eliminar cuenta'**
+  String get profileHubAccountSubtitle;
+
+  /// No description provided for @profileHubStudents.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis alumnos'**
+  String get profileHubStudents;
+
+  /// No description provided for @profileHubStudentsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestiona tu roster de atletas'**
+  String get profileHubStudentsSubtitle;
+
+  /// No description provided for @emptyRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu biblioteca está vacía'**
+  String get emptyRoutinesTitle;
+
+  /// No description provided for @emptyRoutinesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu primera rutina o genera una con el Coach IA.'**
+  String get emptyRoutinesSubtitle;
+
+  /// No description provided for @emptyRoutinesAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rutina'**
+  String get emptyRoutinesAction;
+
+  /// No description provided for @emptyWorkoutsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay entrenos'**
+  String get emptyWorkoutsTitle;
+
+  /// No description provided for @emptyWorkoutsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando completes una sesión, aparecerá aquí tu historial.'**
+  String get emptyWorkoutsSubtitle;
+
+  /// No description provided for @emptyFeedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'El feed está en silencio'**
+  String get emptyFeedTitle;
+
+  /// No description provided for @emptyFeedSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrena, comparte un PR o añade amigos para ver actividad.'**
+  String get emptyFeedSubtitle;
+
+  /// No description provided for @coachWelcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu coach personal'**
+  String get coachWelcomeTitle;
+
+  /// No description provided for @coachWelcomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pregunta por rutinas, nutrición o técnica. Empieza con una sugerencia.'**
+  String get coachWelcomeSubtitle;
+
+  /// No description provided for @progressRecordsSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Récords personales'**
+  String get progressRecordsSection;
+
+  /// No description provided for @progressOverviewSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get progressOverviewSection;
+
+  /// No description provided for @feedReactAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Reaccionar'**
+  String get feedReactAction;
+
+  /// No description provided for @feedCommentAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Comentar'**
+  String get feedCommentAction;
+
+  /// No description provided for @feedEmptyCreatePost.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear publicación'**
+  String get feedEmptyCreatePost;
+
+  /// No description provided for @feedEmptyFindFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar amigos'**
+  String get feedEmptyFindFriends;
+
+  /// No description provided for @friendStatusAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get friendStatusAdd;
+
+  /// No description provided for @friendStatusPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get friendStatusPending;
+
+  /// No description provided for @friendStatusFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get friendStatusFriends;
+
+  /// No description provided for @leaderboardFilterScope.
+  ///
+  /// In es, this message translates to:
+  /// **'Alcance'**
+  String get leaderboardFilterScope;
+
+  /// No description provided for @leaderboardFilterPeriod.
+  ///
+  /// In es, this message translates to:
+  /// **'Período'**
+  String get leaderboardFilterPeriod;
+
+  /// No description provided for @leaderboardFilterMetric.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica'**
+  String get leaderboardFilterMetric;
+
+  /// No description provided for @socialHeroInvite.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar amigo'**
+  String get socialHeroInvite;
+
+  /// No description provided for @feedComposePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto'**
+  String get feedComposePhoto;
+
+  /// No description provided for @feedComposeCamera.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara'**
+  String get feedComposeCamera;
+
+  /// No description provided for @feedComposePr.
+  ///
+  /// In es, this message translates to:
+  /// **'Récord'**
+  String get feedComposePr;
 }
 
 class _AppLocalizationsDelegate

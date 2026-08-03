@@ -54,17 +54,17 @@ class WorkoutTile extends StatelessWidget {
                 margin: const EdgeInsets.only(left: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD54F).withValues(alpha: 0.18),
+                  color: AppColors.prHighlight.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.emoji_events_outlined, size: 14, color: Color(0xFFFFD54F)),
+                    const Icon(Icons.emoji_events_outlined, size: 14, color: AppColors.prHighlight),
                     const SizedBox(width: 4),
                     Text(
                       l10n.trainVolumePr,
-                      style: const TextStyle(fontSize: 11, color: Color(0xFFFFD54F)),
+                      style: const TextStyle(fontSize: 11, color: AppColors.prHighlight),
                     ),
                   ],
                 ),
