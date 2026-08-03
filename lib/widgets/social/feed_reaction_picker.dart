@@ -10,14 +10,14 @@ abstract final class FeedReactionPicker {
   static Future<void> show(
     BuildContext context,
     WidgetRef ref, {
-    String? notificationId,
+    String? postId,
     String? commentId,
     String? selectedEmoji,
     String? refreshPostDetailId,
   }) async {
     assert(
-      (notificationId != null) ^ (commentId != null),
-      'Provide notificationId or commentId',
+      (postId != null) ^ (commentId != null),
+      'Provide postId or commentId',
     );
 
     final emoji = await showModalBottomSheet<String>(
@@ -64,8 +64,8 @@ abstract final class FeedReactionPicker {
       if (refreshPostDetailId != null) {
         ref.invalidate(feedPostDetailProvider(refreshPostDetailId));
       }
-    } else if (notificationId != null) {
-      await service.toggleFeedReaction(notificationId: notificationId, emoji: emoji);
+    } else if (postId != null) {
+      await service.toggleFeedReaction(postId: postId, emoji: emoji);
       ref.invalidate(socialFeedProvider);
       if (refreshPostDetailId != null) {
         ref.invalidate(feedPostDetailProvider(refreshPostDetailId));

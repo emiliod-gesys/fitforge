@@ -190,12 +190,12 @@ class _FeedPostDetailScreenState extends ConsumerState<FeedPostDetailScreen> {
                         side: const BorderSide(color: AppColors.border),
                       ),
                       child: InkWell(
-                        onLongPress: item.id.isEmpty
+                        onLongPress: detail.commentPostId == null
                             ? null
                             : () => FeedReactionPicker.show(
                                   context,
                                   ref,
-                                  notificationId: item.id,
+                                  postId: detail.commentPostId,
                                   selectedEmoji: post.reactions.myEmoji,
                                   refreshPostDetailId: widget.postId,
                                 ),
@@ -285,13 +285,13 @@ class _FeedPostDetailScreenState extends ConsumerState<FeedPostDetailScreen> {
                                 unitSystem: unitSystem,
                               ),
                             ],
-                            if (item.id.isNotEmpty)
+                            if (detail.commentPostId != null)
                               FeedReactionBar(
                                 entries: post.reactions.sortedEntries,
                                 myEmoji: post.reactions.myEmoji,
                                 onEmojiTap: (emoji) async {
                                   await ref.read(socialServiceProvider).toggleFeedReaction(
-                                        notificationId: item.id,
+                                        postId: detail.commentPostId!,
                                         emoji: emoji,
                                       );
                                   ref.invalidate(feedPostDetailProvider(widget.postId));

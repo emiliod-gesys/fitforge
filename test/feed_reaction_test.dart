@@ -8,15 +8,15 @@ void main() {
     expect(FeedReactions.emojis.length, 5);
   });
 
-  test('aggregates reaction counts and tracks current user emoji', () {
+  test('aggregates reaction counts by post and tracks current user emoji', () {
     final summary = FeedReactionSummary.aggregate(
       const [
-        FeedReactionRow(notificationId: 'n1', userId: 'u1', emoji: '💪'),
-        FeedReactionRow(notificationId: 'n1', userId: 'u2', emoji: '🔥'),
-        FeedReactionRow(notificationId: 'n1', userId: 'u3', emoji: '💪'),
+        FeedReactionRow(postId: 'p1', userId: 'u1', emoji: '💪'),
+        FeedReactionRow(postId: 'p1', userId: 'u2', emoji: '🔥'),
+        FeedReactionRow(postId: 'p1', userId: 'u3', emoji: '💪'),
       ],
       currentUserId: 'u2',
-    )['n1']!;
+    )['p1']!;
 
     expect(summary.counts['💪'], 2);
     expect(summary.counts['🔥'], 1);

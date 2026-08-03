@@ -194,12 +194,14 @@ class _FeedItemTile extends ConsumerWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: onOpenComments,
-                  onLongPress: () => FeedReactionPicker.show(
-                    context,
-                    ref,
-                    notificationId: item.id,
-                    selectedEmoji: post.reactions.myEmoji,
-                  ),
+                  onLongPress: item.feedPostId == null
+                      ? null
+                      : () => FeedReactionPicker.show(
+                            context,
+                            ref,
+                            postId: item.feedPostId,
+                            selectedEmoji: post.reactions.myEmoji,
+                          ),
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
@@ -253,17 +255,18 @@ class _FeedItemTile extends ConsumerWidget {
                       l10n.timeAgo(item.createdAt),
                       style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                     ),
-                    FeedReactionBar(
-                      entries: post.reactions.sortedEntries,
-                      myEmoji: post.reactions.myEmoji,
-                      onEmojiTap: (emoji) async {
-                        await ref.read(socialServiceProvider).toggleFeedReaction(
-                              notificationId: item.id,
-                              emoji: emoji,
-                            );
-                        ref.invalidate(socialFeedProvider);
-                      },
-                    ),
+                    if (item.feedPostId != null)
+                      FeedReactionBar(
+                        entries: post.reactions.sortedEntries,
+                        myEmoji: post.reactions.myEmoji,
+                        onEmojiTap: (emoji) async {
+                          await ref.read(socialServiceProvider).toggleFeedReaction(
+                                postId: item.feedPostId!,
+                                emoji: emoji,
+                              );
+                          ref.invalidate(socialFeedProvider);
+                        },
+                      ),
                     if (post.commentCount > 0)
                       Padding(
                         padding: const EdgeInsets.only(top: 6),

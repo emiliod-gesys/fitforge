@@ -329,12 +329,12 @@ class SocialService {
     final notifications = await getFeed(limit: limit);
     if (notifications.isEmpty) return [];
 
-    final reactions = await getFeedReactions(notifications.map((n) => n.id).toList());
     final postIds = notifications
         .map((n) => n.feedPostId)
         .whereType<String>()
         .where((id) => id.isNotEmpty)
         .toList();
+    final reactions = await getFeedReactions(postIds);
     final commentCounts = await getFeedCommentCounts(postIds);
     final imagePaths = notifications
         .map((n) => n.feedImagePath)
@@ -346,7 +346,9 @@ class SocialService {
         .map(
           (n) => FeedPost(
             notification: n,
-            reactions: reactions[n.id] ?? FeedReactionSummary.empty,
+            reactions: n.feedPostId != null
+                ? (reactions[n.feedPostId!] ?? FeedReactionSummary.empty)
+                : FeedReactionSummary.empty,
             imageUrl: n.feedImagePath != null ? signedUrls[n.feedImagePath!] : null,
             commentCount: n.feedPostId != null ? (commentCounts[n.feedPostId!] ?? 0) : 0,
           ),
@@ -574,9 +576,9 @@ class SocialService {
     final notification = cachedNotification;
     if (notification == null) return null;
 
-    final reactions = notification.id.isEmpty
+    final reactions = canonicalPostId == null || canonicalPostId.isEmpty
         ? FeedReactionSummary.empty
-        : (await getFeedReactions([notification.id]))[notification.id] ??
+        : (await getFeedReactions([canonicalPostId]))[canonicalPostId] ??
             FeedReactionSummary.empty;
 
     final imagePath = notification.feedImagePath;
@@ -652,13 +654,13 @@ class SocialService {
     return [...all]..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
   }
 
-  Future<Map<String, FeedReactionSummary>> getFeedReactions(List<String> notificationIds) async {
-    if (_userId == null || notificationIds.isEmpty) return {};
+  Future<Map<String, FeedReactionSummary>> getFeedReactions(List<String> postIds) async {
+    if (_userId == null || postIds.isEmpty) return {};
 
     final data = await _client
         .from('feed_reactions')
-        .select('notification_id, user_id, emoji')
-        .inFilter('notification_id', notificationIds);
+        .select('post_id, user_id, emoji')
+        .inFilter('post_id', postIds);
 
     final rows = (data as List)
         .map((r) => FeedReactionRow.fromJson(Map<String, dynamic>.from(r as Map)))
@@ -668,17 +670,18 @@ class SocialService {
   }
 
   Future<void> toggleFeedReaction({
-    required String notificationId,
+    required String postId,
     required String emoji,
   }) async {
     final uid = _userId;
     if (uid == null) return;
     if (!FeedReactions.isAllowed(emoji)) return;
+    if (postId.isEmpty) return;
 
     final existing = await _client
         .from('feed_reactions')
         .select('id, emoji')
-        .eq('notification_id', notificationId)
+        .eq('post_id', postId)
         .eq('user_id', uid)
         .maybeSingle();
 
@@ -696,7 +699,7 @@ class SocialService {
     }
 
     await _client.from('feed_reactions').insert({
-      'notification_id': notificationId,
+      'post_id': postId,
       'user_id': uid,
       'emoji': emoji,
     });

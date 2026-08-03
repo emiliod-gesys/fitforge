@@ -2,19 +2,19 @@ import '../core/constants/feed_reactions.dart';
 import 'social.dart';
 
 class FeedReactionRow {
-  final String notificationId;
+  final String postId;
   final String userId;
   final String emoji;
 
   const FeedReactionRow({
-    required this.notificationId,
+    required this.postId,
     required this.userId,
     required this.emoji,
   });
 
   factory FeedReactionRow.fromJson(Map<String, dynamic> json) {
     return FeedReactionRow(
-      notificationId: json['notification_id'] as String,
+      postId: json['post_id'] as String,
       userId: json['user_id'] as String,
       emoji: json['emoji'] as String,
     );
@@ -70,7 +70,7 @@ class FeedReactionSummary {
   }) {
     final grouped = <String, List<FeedReactionRow>>{};
     for (final row in rows) {
-      grouped.putIfAbsent(row.notificationId, () => []).add(row);
+      grouped.putIfAbsent(row.postId, () => []).add(row);
     }
 
     return {
