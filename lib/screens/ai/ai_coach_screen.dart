@@ -5,6 +5,7 @@ import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
+import '../../models/coach_chat_turn.dart';
 import '../../models/coach_message.dart';
 import '../../models/coach_nutrition_snapshot.dart';
 import '../../models/coach_routine_slot.dart';
@@ -42,6 +43,23 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() {}));
+  }
+
+  /// Chat turns before the just-added user message (for LLM context).
+  List<CoachChatTurn> _conversationHistoryBeforeCurrent() {
+    if (_messages.length <= 1) return const [];
+    return AiCoachService.trimChatHistory(
+      _messages
+          .sublist(0, _messages.length - 1)
+          .where((m) => !m.isError && (m.text?.trim().isNotEmpty ?? false))
+          .map(
+            (m) => CoachChatTurn(
+              isUser: m.isUser,
+              content: m.text!.trim(),
+            ),
+          )
+          .toList(),
+    );
   }
 
   void _scrollToBottom() {
@@ -141,7 +159,11 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         return;
       }
 
-      final muscles = AiCoachService.parseTargetMuscles(trimmed);
+      final history = _conversationHistoryBeforeCurrent();
+      final muscles = AiCoachService.resolveTargetMuscles(
+        currentMessage: trimmed,
+        history: history,
+      );
       final lang = ref.read(preferredLanguageProvider);
       final exerciseService = ref.read(exerciseServiceProvider);
       exerciseService.configure(language: lang);
@@ -150,6 +172,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       if (AiCoachService.shouldGenerateStructuredRoutine(trimmed)) {
         await _handleRoutineGeneration(
           text: trimmed,
+          history: history,
           profile: profile,
           workouts: workouts,
           routines: routines,
@@ -166,6 +189,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       } else {
         final response = await coach.getRecommendation(
           userMessage: trimmed,
+          conversationHistory: history,
           recentWorkouts: workouts,
           routines: routines,
           profile: profile,
@@ -210,6 +234,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
 
   Future<void> _handleRoutineGeneration({
     required String text,
+    required List<CoachChatTurn> history,
     required UserProfile? profile,
     required List<Workout> workouts,
     required List<Routine> routines,
@@ -230,6 +255,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       final generated = await coach.generateRoutineProgramFromMessage(
         userMessage: text,
         catalog: catalog,
+        conversationHistory: history,
         profile: profile,
         recentWorkouts: workouts,
         bodyMetrics: bodyMetrics,
@@ -274,6 +300,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     final routine = await coach.generateRoutineFromMessage(
       userMessage: text,
       catalog: catalog,
+      conversationHistory: history,
       profile: profile,
       recentWorkouts: workouts,
       bodyMetrics: bodyMetrics,

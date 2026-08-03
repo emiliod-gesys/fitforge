@@ -1,5 +1,6 @@
 import 'package:fitforge/core/utils/ai_routine_sanitizer.dart';
 import 'package:fitforge/core/utils/exercise_matcher.dart';
+import 'package:fitforge/models/coach_chat_turn.dart';
 import 'package:fitforge/models/exercise.dart';
 import 'package:fitforge/models/routine.dart';
 import 'package:fitforge/services/ai_coach_service.dart';
@@ -255,6 +256,63 @@ void main() {
       expect(names, isNot(contains('Ejercicio de prueba')));
       expect(names.toSet().length, names.length);
       expect(names.length, greaterThanOrEqualTo(3));
+    });
+  });
+
+  group('conversation context', () {
+    test('follow-up create routine inherits chest from prior user message', () {
+      expect(
+        AiCoachService.isRoutineCreationRequest('crea la rutina en el app'),
+        isTrue,
+      );
+      expect(
+        AiCoachService.parseTargetMuscles('crea la rutina en el app'),
+        isEmpty,
+      );
+
+      final history = [
+        const CoachChatTurn(
+          isUser: true,
+          content: '¿Qué ejercicios me recomiendas para pecho hoy?',
+        ),
+        const CoachChatTurn(
+          isUser: false,
+          content: '### Ejercicios para Pecho\n1. Press de Banca Plano',
+        ),
+      ];
+
+      final muscles = AiCoachService.resolveTargetMuscles(
+        currentMessage: 'crea la rutina en el app',
+        history: history,
+      );
+      expect(muscles, contains('Pecho'));
+      expect(
+        AiCoachService.priorCoachAdvice(history),
+        contains('Press de Banca Plano'),
+      );
+    });
+
+    test('current message muscles win over history', () {
+      final history = [
+        const CoachChatTurn(isUser: true, content: 'rutina de pecho'),
+      ];
+      final muscles = AiCoachService.resolveTargetMuscles(
+        currentMessage: 'crea una rutina de piernas',
+        history: history,
+      );
+      expect(muscles, contains('Piernas'));
+      expect(muscles, isNot(contains('Pecho')));
+    });
+
+    test('trimChatHistory keeps newest turns', () {
+      final history = List.generate(
+        20,
+        (i) => CoachChatTurn(isUser: i.isEven, content: 'mensaje $i'),
+      );
+      final trimmed = AiCoachService.trimChatHistory(history, maxTurns: 4);
+      expect(trimmed.length, 4);
+      expect(trimmed.first.content, 'mensaje 16');
+      expect(trimmed.last.content, 'mensaje 19');
     });
   });
 }

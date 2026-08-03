@@ -14,6 +14,7 @@ import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
 import '../core/utils/workout_suggestion_context.dart';
 import '../models/body_metric.dart';
+import '../models/coach_chat_turn.dart';
 import '../models/coach_nutrition_snapshot.dart';
 import '../models/exercise.dart';
 import '../models/exercise_logging.dart';
@@ -28,6 +29,9 @@ class AiCoachService {
   AiCoachService(this._profileService);
 
   static const maxUserMessageLength = 800;
+  static const maxChatHistoryTurns = 12;
+  static const maxChatHistoryChars = 8000;
+  static const maxPriorAdviceChars = 2500;
 
   final ProfileService _profileService;
 
@@ -393,6 +397,57 @@ REGLAS OBLIGATORIAS:
     return found.toList();
   }
 
+  /// Keeps recent chat turns within turn/char budgets for provider calls.
+  static List<CoachChatTurn> trimChatHistory(
+    List<CoachChatTurn> history, {
+    int maxTurns = maxChatHistoryTurns,
+    int maxChars = maxChatHistoryChars,
+  }) {
+    if (history.isEmpty) return const [];
+    final kept = <CoachChatTurn>[];
+    var chars = 0;
+    for (var i = history.length - 1; i >= 0; i--) {
+      final turn = history[i];
+      final content = turn.content.trim();
+      if (content.isEmpty) continue;
+      if (kept.length >= maxTurns) break;
+      if (chars + content.length > maxChars && kept.isNotEmpty) break;
+      kept.add(CoachChatTurn(isUser: turn.isUser, content: content));
+      chars += content.length;
+    }
+    return kept.reversed.toList();
+  }
+
+  /// Prefer muscles from the current message; otherwise inherit from recent chat.
+  static List<String> resolveTargetMuscles({
+    required String currentMessage,
+    List<CoachChatTurn>? history,
+  }) {
+    final fromCurrent = parseTargetMuscles(currentMessage);
+    if (fromCurrent.isNotEmpty) return fromCurrent;
+    if (history == null || history.isEmpty) return const [];
+
+    for (var i = history.length - 1; i >= 0; i--) {
+      final found = parseTargetMuscles(history[i].content);
+      if (found.isNotEmpty) return found;
+    }
+    return const [];
+  }
+
+  /// Latest coach prose useful when the user says "create that routine".
+  static String? priorCoachAdvice(List<CoachChatTurn>? history) {
+    if (history == null || history.isEmpty) return null;
+    for (var i = history.length - 1; i >= 0; i--) {
+      final turn = history[i];
+      if (turn.isUser) continue;
+      final text = turn.content.trim();
+      if (text.isEmpty) continue;
+      if (text.length <= maxPriorAdviceChars) return text;
+      return text.substring(text.length - maxPriorAdviceChars);
+    }
+    return null;
+  }
+
   static String languageInstruction(String languageCode) {
     final normalized = languageCode == 'en' ? 'en' : 'es';
     if (normalized == 'en') {
@@ -431,6 +486,7 @@ REGLAS OBLIGATORIAS:
 
   Future<String> getRecommendation({
     required String userMessage,
+    List<CoachChatTurn>? conversationHistory,
     List<Workout>? recentWorkouts,
     List<Routine>? routines,
     UserProfile? profile,
@@ -459,6 +515,7 @@ REGLAS OBLIGATORIAS:
     final weightUnit = usesLb ? 'libras (lb)' : 'kilogramos (kg)';
     final progressionHint = usesLb ? '+5 lb o +5%' : '+2.5 kg o +5%';
     final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
+    final history = trimChatHistory(conversationHistory ?? const []);
     final systemPrompt = '''
 Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
 ${languageInstruction(lang)} Sé conciso pero útil.
@@ -466,11 +523,12 @@ ${fitnessScopeInstruction(lang)}
 Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records, historial de entrenos y nutrición.
 La ingesta del día se actualiza en tiempo real; también tienes el historial nutricional de los últimos 7 días.
 Usa esa información para personalizar ejercicios, volumen, series, reps, progresión y consejos de nutrición (macros, timing pre/post entreno, déficit/superávit) según su propósito y estado actual.
-Basándote en el historial del usuario, recomienda ejercicios, rutinas, pesos, series y reps.
+Basándote en el historial del usuario y en el hilo de esta conversación, recomienda ejercicios, rutinas, pesos, series y reps.
+Mantén coherencia con lo que ya recomendaste en mensajes anteriores de este chat.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
 Formato: usa listas y secciones claras.
 ${AiCoachRoutinePrompt.routineGenerationInstruction(lang)}
-Si el usuario pide crear o generar una rutina guardable, indícale que lo formule claramente (por ejemplo "crea una rutina de pecho") para que la app genere la rutina estructurada lista para guardar.
+Si el usuario pide crear o generar en la app la rutina que acabas de sugerir, la app usará ese consejo previo; no inventes otro enfoque distinto.
 
 Contexto del usuario:
 $context
@@ -478,11 +536,11 @@ $context
 
     switch (aiProvider) {
       case AiProvider.openai:
-        return _callOpenAI(apiKey, systemPrompt, userMessage);
+        return _callOpenAI(apiKey, systemPrompt, userMessage, history: history);
       case AiProvider.gemini:
-        return _callGemini(apiKey, systemPrompt, userMessage);
+        return _callGemini(apiKey, systemPrompt, userMessage, history: history);
       case AiProvider.anthropic:
-        return _callAnthropic(apiKey, systemPrompt, userMessage);
+        return _callAnthropic(apiKey, systemPrompt, userMessage, history: history);
       case AiProvider.none:
         throw Exception('Proveedor no configurado');
     }
@@ -491,6 +549,7 @@ $context
   Future<Routine?> generateRoutineFromMessage({
     required String userMessage,
     required List<Exercise> catalog,
+    List<CoachChatTurn>? conversationHistory,
     UserProfile? profile,
     List<Workout>? recentWorkouts,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
@@ -501,7 +560,12 @@ $context
     CoachNutritionSnapshot? nutrition,
     RoutineLimitStatus? routineLimit,
   }) async {
-    final targetMuscles = parseTargetMuscles(userMessage);
+    final history = trimChatHistory(conversationHistory ?? const []);
+    final targetMuscles = resolveTargetMuscles(
+      currentMessage: userMessage,
+      history: history,
+    );
+    final priorAdvice = priorCoachAdvice(history);
     final duration = parseDurationMinutes(userMessage);
     final durationLine = userSpecifiedDuration(userMessage)
         ? 'Duración solicitada: $duration minutos.'
@@ -530,14 +594,27 @@ $context
       nutrition: nutrition,
       routineLimit: routineLimit,
     );
+    final muscleLine = targetMuscles.isEmpty
+        ? (priorAdvice == null
+            ? 'equilibrada según el mensaje y el perfil'
+            : 'según el consejo previo del chat (no inventes una full-body genérica si ese consejo era de un grupo concreto)')
+        : targetMuscles.join(', ');
+    final priorBlock = priorAdvice == null
+        ? ''
+        : '''
+Consejo previo del coach en este chat (si el usuario pide crear/montar ESA rutina, basate en esto):
+"""
+$priorAdvice
+"""
+''';
 
     final prompt = '''
 El usuario pidió lo siguiente:
 "$userMessage"
-
+$priorBlock
 Genera una rutina de gimnasio lista para guardar en FitForge (JSON obligatorio).
 $durationLine
-Músculos objetivo: ${targetMuscles.isEmpty ? 'equilibrada según el mensaje y el perfil' : targetMuscles.join(', ')}.
+Músculos objetivo: $muscleLine.
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
 $userContext
@@ -568,6 +645,7 @@ Eres un generador de rutinas de gimnasio para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 ${fitnessScopeInstruction(lang)}
 $_routineRules
+Si hay un consejo previo en el mensaje del usuario, conviértelo en la rutina JSON; no cambies el enfoque muscular.
 ''',
       userPrompt: prompt,
     );
@@ -585,6 +663,7 @@ $_routineRules
   Future<List<Routine>> generateRoutineProgramFromMessage({
     required String userMessage,
     required List<Exercise> catalog,
+    List<CoachChatTurn>? conversationHistory,
     UserProfile? profile,
     List<Workout>? recentWorkouts,
     Map<String, BodyMetricSnapshot>? bodyMetrics,
@@ -595,7 +674,12 @@ $_routineRules
     CoachNutritionSnapshot? nutrition,
     RoutineLimitStatus? routineLimit,
   }) async {
-    final targetMuscles = parseTargetMuscles(userMessage);
+    final history = trimChatHistory(conversationHistory ?? const []);
+    final targetMuscles = resolveTargetMuscles(
+      currentMessage: userMessage,
+      history: history,
+    );
+    final priorAdvice = priorCoachAdvice(history);
     final duration = parseDurationMinutes(userMessage);
     final durationLine = userSpecifiedDuration(userMessage)
         ? 'Duración por sesión: $duration minutos.'
@@ -625,14 +709,27 @@ $_routineRules
       nutrition: nutrition,
       routineLimit: routineLimit,
     );
+    final muscleLine = targetMuscles.isEmpty
+        ? (priorAdvice == null
+            ? 'según el split y el perfil'
+            : 'según el consejo previo del chat')
+        : targetMuscles.join(', ');
+    final priorBlock = priorAdvice == null
+        ? ''
+        : '''
+Consejo previo del coach en este chat:
+"""
+$priorAdvice
+"""
+''';
 
     final prompt = '''
 El usuario pidió lo siguiente:
 "$userMessage"
-
+$priorBlock
 Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento), listas para guardar en FitForge.
 $durationLine
-Músculos objetivo globales: ${targetMuscles.isEmpty ? 'según el split y el perfil' : targetMuscles.join(', ')}.
+Músculos objetivo globales: $muscleLine.
 
 Perfil y contexto del usuario:
 $userContext
@@ -669,6 +766,7 @@ Eres un generador de programas de entrenamiento para FitForge.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 ${fitnessScopeInstruction(lang)}
 $_routineRules
+Si hay un consejo previo, respétalo al diseñar el programa.
 ''',
       userPrompt: prompt,
     );
@@ -787,21 +885,158 @@ $_routineRules
     required UserProfile? profile,
     required String systemPrompt,
     required String userPrompt,
+    List<CoachChatTurn>? history,
   }) async {
     final credentials = await _resolveCredentials(profile);
     final aiProvider = credentials.provider;
     final apiKey = credentials.apiKey;
+    final turns = trimChatHistory(history ?? const []);
 
     switch (aiProvider) {
       case AiProvider.openai:
-        return _callOpenAI(apiKey, systemPrompt, userPrompt);
+        return _callOpenAI(apiKey, systemPrompt, userPrompt, history: turns);
       case AiProvider.gemini:
-        return _callGemini(apiKey, systemPrompt, userPrompt);
+        return _callGemini(apiKey, systemPrompt, userPrompt, history: turns);
       case AiProvider.anthropic:
-        return _callAnthropic(apiKey, systemPrompt, userPrompt);
+        return _callAnthropic(apiKey, systemPrompt, userPrompt, history: turns);
       case AiProvider.none:
         throw Exception('Proveedor no configurado');
     }
+  }
+
+  /// Builds provider chat turns, merging consecutive same-role messages.
+  List<Map<String, String>> _providerChatMessages(
+    List<CoachChatTurn> history,
+    String userPrompt, {
+    required String assistantRole,
+  }) {
+    final messages = <Map<String, String>>[];
+    for (final turn in history) {
+      final role = turn.isUser ? 'user' : assistantRole;
+      if (messages.isNotEmpty && messages.last['role'] == role) {
+        messages.last = {
+          'role': role,
+          'content': '${messages.last['content']}\n\n${turn.content}',
+        };
+      } else {
+        messages.add({'role': role, 'content': turn.content});
+      }
+    }
+    // Providers require the conversation to start with a user turn.
+    if (messages.isNotEmpty && messages.first['role'] != 'user') {
+      messages.insert(0, {'role': 'user', 'content': '(contexto previo del coach)'});
+    }
+    if (messages.isNotEmpty && messages.last['role'] == 'user') {
+      messages.last = {
+        'role': 'user',
+        'content': '${messages.last['content']}\n\n$userPrompt',
+      };
+    } else {
+      messages.add({'role': 'user', 'content': userPrompt});
+    }
+    return messages;
+  }
+
+  Future<String> _callOpenAI(
+    String apiKey,
+    String system,
+    String user, {
+    List<CoachChatTurn> history = const [],
+  }) async {
+    final response = await http.post(
+      Uri.parse('https://api.openai.com/v1/chat/completions'),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': 'gpt-4o-mini',
+        'messages': [
+          {'role': 'system', 'content': system},
+          ..._providerChatMessages(history, user, assistantRole: 'assistant'),
+        ],
+        'max_tokens': 2000,
+        'temperature': 0.7,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error OpenAI: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return data['choices'][0]['message']['content'] as String;
+  }
+
+  Future<String> _callGemini(
+    String apiKey,
+    String system,
+    String user, {
+    List<CoachChatTurn> history = const [],
+  }) async {
+    final turns = _providerChatMessages(history, user, assistantRole: 'model');
+    final response = await http.post(
+      Uri.parse(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'system_instruction': {
+          'parts': [
+            {'text': system},
+          ],
+        },
+        'contents': turns
+            .map(
+              (turn) => {
+                'role': turn['role'],
+                'parts': [
+                  {'text': turn['content']},
+                ],
+              },
+            )
+            .toList(),
+        'generationConfig': {'maxOutputTokens': 2000, 'temperature': 0.7},
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error Gemini: ${response.statusCode} - ${response.body}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return data['candidates'][0]['content']['parts'][0]['text'] as String;
+  }
+
+  Future<String> _callAnthropic(
+    String apiKey,
+    String system,
+    String user, {
+    List<CoachChatTurn> history = const [],
+  }) async {
+    final response = await http.post(
+      Uri.parse('https://api.anthropic.com/v1/messages'),
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': 'claude-3-5-haiku-latest',
+        'max_tokens': 2000,
+        'system': system,
+        'messages': _providerChatMessages(history, user, assistantRole: 'assistant'),
+        'temperature': 0.7,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error Anthropic: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final content = data['content'] as List<dynamic>;
+    return content.first['text'] as String;
   }
 
   Routine? _parseRoutineJson(
@@ -959,92 +1194,6 @@ $_routineRules
       nutrition: nutrition,
       routineLimit: routineLimit,
     );
-  }
-
-  Future<String> _callOpenAI(String apiKey, String system, String user) async {
-    final response = await http.post(
-      Uri.parse('https://api.openai.com/v1/chat/completions'),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o-mini',
-        'messages': [
-          {'role': 'system', 'content': system},
-          {'role': 'user', 'content': user},
-        ],
-        'max_tokens': 2000,
-        'temperature': 0.7,
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Error OpenAI: ${response.statusCode}');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['choices'][0]['message']['content'] as String;
-  }
-
-  Future<String> _callGemini(String apiKey, String system, String user) async {
-    final response = await http.post(
-      Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey',
-      ),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'system_instruction': {
-          'parts': [
-            {'text': system},
-          ],
-        },
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {'text': user},
-            ],
-          },
-        ],
-        'generationConfig': {'maxOutputTokens': 2000, 'temperature': 0.7},
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Error Gemini: ${response.statusCode} - ${response.body}');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['candidates'][0]['content']['parts'][0]['text'] as String;
-  }
-
-  Future<String> _callAnthropic(String apiKey, String system, String user) async {
-    final response = await http.post(
-      Uri.parse('https://api.anthropic.com/v1/messages'),
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': 'claude-3-5-haiku-latest',
-        'max_tokens': 2000,
-        'system': system,
-        'messages': [
-          {'role': 'user', 'content': user},
-        ],
-        'temperature': 0.7,
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Error Anthropic: ${response.statusCode}');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final content = data['content'] as List<dynamic>;
-    return content.first['text'] as String;
   }
 
   /// Sugiere peso/reps (o cardio) para todos los ejercicios de un entreno en una sola llamada.

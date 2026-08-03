@@ -13,7 +13,11 @@ class HomeScreen extends ConsumerWidget {
 
   const HomeScreen({super.key, required this.child});
 
-  int _currentIndex(BuildContext context, {required bool isOnline}) {
+  int _currentIndex(
+    BuildContext context, {
+    required bool isOnline,
+    required bool isTrainer,
+  }) {
     final location = GoRouterState.of(context).matchedLocation;
 
     if (!isOnline) {
@@ -25,9 +29,8 @@ class HomeScreen extends ConsumerWidget {
     if (location.startsWith('/food')) return 2;
     if (location.startsWith('/progress')) return 3;
     if (location.startsWith('/social')) return 4;
-    if (location.startsWith('/profile') || location.startsWith('/students')) {
-      return 5;
-    }
+    if (location.startsWith('/students')) return 5;
+    if (location.startsWith('/profile')) return isTrainer ? 6 : 5;
     return 0;
   }
 
@@ -35,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context,
     int index, {
     required bool isOnline,
+    required bool isTrainer,
   }) {
     if (!isOnline) {
       switch (index) {
@@ -58,13 +62,16 @@ class HomeScreen extends ConsumerWidget {
       case 4:
         context.go('/social');
       case 5:
-        context.go('/profile');
+        context.go(isTrainer ? '/students' : '/profile');
+      case 6:
+        if (isTrainer) context.go('/profile');
     }
   }
 
   List<FfNavSpinnerItem> _items({
     required dynamic l10n,
     required bool isOnline,
+    required bool isTrainer,
     required int unread,
   }) {
     final train = FfNavSpinnerItem(
@@ -105,6 +112,12 @@ class HomeScreen extends ConsumerWidget {
         label: l10n.navSocial,
         badgeCount: unread,
       ),
+      if (isTrainer)
+        FfNavSpinnerItem(
+          icon: Icons.school_outlined,
+          selectedIcon: Icons.school,
+          label: l10n.navStudents,
+        ),
       profile,
     ];
   }
@@ -114,6 +127,7 @@ class HomeScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final unread = ref.watch(socialUnreadCountProvider).valueOrNull ?? 0;
     final isOnline = ref.watch(isOnlineProvider).valueOrNull ?? true;
+    final isTrainer = ref.watch(isTrainerProvider);
     final location = GoRouterState.of(context).matchedLocation;
 
     if (!isOnline && isOnlineOnlyShellRoute(location)) {
@@ -122,8 +136,17 @@ class HomeScreen extends ConsumerWidget {
       });
     }
 
-    final items = _items(l10n: l10n, isOnline: isOnline, unread: unread);
-    final selected = _currentIndex(context, isOnline: isOnline).clamp(0, items.length - 1);
+    final items = _items(
+      l10n: l10n,
+      isOnline: isOnline,
+      isTrainer: isTrainer,
+      unread: unread,
+    );
+    final selected = _currentIndex(
+      context,
+      isOnline: isOnline,
+      isTrainer: isTrainer,
+    ).clamp(0, items.length - 1);
 
     return Scaffold(
       backgroundColor: AppColors.black,
@@ -135,6 +158,7 @@ class HomeScreen extends ConsumerWidget {
           context,
           index,
           isOnline: isOnline,
+          isTrainer: isTrainer,
         ),
       ),
     );

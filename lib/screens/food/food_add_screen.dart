@@ -19,9 +19,10 @@ import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../services/food_voice_note_recorder.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/food/barcode_scanner_view.dart';
 import '../../core/theme/app_accent.dart';
 
-enum FoodAddMode { search, photo, quick, manual }
+enum FoodAddMode { search, barcode, photo, quick, manual }
 
 class FoodAddScreen extends ConsumerStatefulWidget {
   final MealType mealType;
@@ -93,13 +94,13 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
   String get _mealTitle => context.l10n.mealLabel(widget.mealType);
 
-  void _openDetail(
+  Future<void> _openDetail(
     FoodNutritionEstimate estimate,
     FoodEntrySource source, {
     String? originalQuery,
     List<int>? imageBytes,
   }) {
-    context.push(
+    return context.push<void>(
       '/food/detail',
       extra: {
         'estimate': estimate,
@@ -119,6 +120,32 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
   void _openFromManualTemplate(ManualFoodTemplate template) {
     _openDetail(template.toEstimate(), FoodEntrySource.manual);
+  }
+
+  Future<void> _lookupBarcode(String code) async {
+    if (_loading) return;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _loading = true);
+    try {
+      final estimate = await ref.read(openFoodFactsServiceProvider).lookupBarcode(code);
+      if (!mounted) return;
+      if (estimate == null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.foodBarcodeNotFound)),
+        );
+        return;
+      }
+      setState(() => _loading = false);
+      await _openDetail(estimate, FoodEntrySource.barcode);
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.foodBarcodeLookupFailed)),
+      );
+    } finally {
+      if (mounted && _loading) setState(() => _loading = false);
+    }
   }
 
   Future<void> _saveManualTemplate(ManualFoodTemplate template) async {
@@ -320,6 +347,9 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         filterController: _filterController,
                         recent: _recent,
                         onSelect: _openFromEntry,
+                      ),
+                    FoodAddMode.barcode => FoodBarcodeScannerView(
+                        onDetected: _lookupBarcode,
                       ),
                     FoodAddMode.quick => _QuickAddPane(
                         controller: _quickController,
@@ -1353,9 +1383,10 @@ class _ModeTabs extends StatelessWidget {
     final l10n = context.l10n;
     final items = [
       (FoodAddMode.search, Icons.search, l10n.foodModeSearch, false),
-      (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto, photoLocked),
+      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode, false),
       (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick, false),
       (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual, false),
+      (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto, photoLocked),
     ];
 
     return SingleChildScrollView(
