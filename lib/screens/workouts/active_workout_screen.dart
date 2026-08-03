@@ -32,6 +32,7 @@ import '../../models/watch_session.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/health_integration_provider.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/rest_sound_service.dart';
 import '../../services/exercise_service.dart';
@@ -757,6 +758,23 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             totalVolume: volume,
             activeCaloriesKcal: calorieEstimate.caloriesKcal,
           );
+
+      // Export a Apple Health / Health Connect (no bloquea el flujo si falla).
+      unawaited(
+        ref.read(healthWorkoutExporterProvider).exportIfEnabled(
+              workoutId: effectiveWorkout.id,
+              startAt: startAt,
+              endAt: endAt,
+              durationMinutes: duration,
+              title: effectiveWorkout.name,
+              activeCaloriesKcal: calorieEstimate.caloriesKcal,
+              distanceMeters: _distanceMetersForHealthExport(effectiveWorkout),
+              isRunner: _isRunnerWorkout,
+              isHyrox: _isHyroxWorkout,
+              runnerType: _runnerType,
+            ),
+      );
+
       ref.invalidate(pendingSyncCountProvider);
       await ref.read(watchWorkoutCoordinatorProvider).clear();
 
@@ -874,6 +892,21 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         setState(() => _completing = false);
       }
     }
+  }
+
+  double? _distanceMetersForHealthExport(Workout workout) {
+    var sum = 0.0;
+    for (final exercise in workout.exercises) {
+      for (final set in exercise.sets) {
+        final meters = set.distanceMeters;
+        if (meters != null && meters > 0) sum += meters;
+      }
+    }
+    if (sum > 0) return sum;
+    if (workout.runnerSplits.isNotEmpty) {
+      return workout.runnerSplits.last.km * 1000.0;
+    }
+    return null;
   }
 
   void _onRestSecondsChanged(int seconds) {

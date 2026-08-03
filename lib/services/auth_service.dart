@@ -86,6 +86,53 @@ class AuthService {
     await _client.auth.signOut();
   }
 
+  /// Borra la cuenta del usuario autenticado (irreversible).
+  /// [confirmation] debe ser `BORRAR` o `DELETE`.
+  ///
+  /// No reautenticamos con email/password aquí: Supabase Auth exige captcha en
+  /// `signInWithPassword` y rompería el flujo. La seguridad queda en sesión JWT
+  /// + confirmación tipada + validación en la Edge Function.
+  Future<void> deleteAccount({
+    required String confirmation,
+  }) async {
+    final normalized = confirmation.trim().toUpperCase();
+    if (normalized != 'BORRAR' && normalized != 'DELETE') {
+      throw const AuthException('invalid_confirmation');
+    }
+
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const AuthException('not_authenticated');
+    }
+
+    // Asegura un access token fresco para la función.
+    try {
+      await _client.auth.refreshSession();
+    } catch (_) {
+      // Si falla el refresh, intentamos igual con la sesión actual.
+    }
+
+    final response = await _client.functions.invoke(
+      'delete-account',
+      body: {'confirmation': normalized},
+    );
+
+    final status = response.status;
+    if (status < 200 || status >= 300) {
+      final data = response.data;
+      final message = data is Map && data['error'] != null
+          ? data['error'].toString()
+          : 'delete_failed';
+      throw AuthException(message);
+    }
+
+    try {
+      await signOut();
+    } catch (_) {
+      // La sesión puede quedar inválida tras borrar el usuario.
+    }
+  }
+
   Future<void> resetPassword(String email, {String? captchaToken}) async {
     await _client.auth.resetPasswordForEmail(
       email,

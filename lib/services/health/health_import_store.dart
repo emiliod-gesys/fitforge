@@ -6,18 +6,21 @@ class HealthImportPreferences {
     this.connected = false,
     this.importWeight = true,
     this.importBodyFat = true,
+    this.exportWorkouts = true,
     this.lastSyncAt,
   });
 
   final bool connected;
   final bool importWeight;
   final bool importBodyFat;
+  final bool exportWorkouts;
   final DateTime? lastSyncAt;
 
   HealthImportPreferences copyWith({
     bool? connected,
     bool? importWeight,
     bool? importBodyFat,
+    bool? exportWorkouts,
     DateTime? lastSyncAt,
     bool clearLastSyncAt = false,
   }) {
@@ -25,6 +28,7 @@ class HealthImportPreferences {
       connected: connected ?? this.connected,
       importWeight: importWeight ?? this.importWeight,
       importBodyFat: importBodyFat ?? this.importBodyFat,
+      exportWorkouts: exportWorkouts ?? this.exportWorkouts,
       lastSyncAt: clearLastSyncAt ? null : (lastSyncAt ?? this.lastSyncAt),
     );
   }
@@ -72,9 +76,11 @@ class HealthImportStore {
   static const _connected = 'health_connected';
   static const _importWeight = 'health_import_weight';
   static const _importBodyFat = 'health_import_body_fat';
+  static const _exportWorkouts = 'health_export_workouts';
   static const _lastSyncAt = 'health_last_sync_at';
   static const _manualWeightEditAt = 'health_manual_weight_edit_at';
   static const _ledgerPrefix = 'health_ledger_';
+  static const _exportedWorkoutPrefix = 'health_exported_workout_';
 
   Future<SharedPreferences> _ensurePrefs() async {
     return _prefs ??= await SharedPreferences.getInstance();
@@ -87,6 +93,7 @@ class HealthImportStore {
       connected: prefs.getBool(_connected) ?? false,
       importWeight: prefs.getBool(_importWeight) ?? true,
       importBodyFat: prefs.getBool(_importBodyFat) ?? true,
+      exportWorkouts: prefs.getBool(_exportWorkouts) ?? true,
       lastSyncAt: syncRaw != null ? DateTime.tryParse(syncRaw) : null,
     );
   }
@@ -96,11 +103,24 @@ class HealthImportStore {
     await prefs.setBool(_connected, value.connected);
     await prefs.setBool(_importWeight, value.importWeight);
     await prefs.setBool(_importBodyFat, value.importBodyFat);
+    await prefs.setBool(_exportWorkouts, value.exportWorkouts);
     if (value.lastSyncAt != null) {
       await prefs.setString(_lastSyncAt, value.lastSyncAt!.toIso8601String());
     } else {
       await prefs.remove(_lastSyncAt);
     }
+  }
+
+  Future<bool> wasWorkoutExported(String workoutId) async {
+    if (workoutId.isEmpty) return false;
+    final prefs = await _ensurePrefs();
+    return prefs.getBool('$_exportedWorkoutPrefix$workoutId') ?? false;
+  }
+
+  Future<void> markWorkoutExported(String workoutId) async {
+    if (workoutId.isEmpty) return;
+    final prefs = await _ensurePrefs();
+    await prefs.setBool('$_exportedWorkoutPrefix$workoutId', true);
   }
 
   Future<HealthImportLedgerEntry?> loadLedger(String type) async {
@@ -142,11 +162,13 @@ class HealthImportStore {
     await prefs.remove(_connected);
     await prefs.remove(_importWeight);
     await prefs.remove(_importBodyFat);
+    await prefs.remove(_exportWorkouts);
     await prefs.remove(_lastSyncAt);
     await prefs.remove(_manualWeightEditAt);
     for (final type in ['weight', 'body_fat']) {
       await prefs.remove('$_ledgerPrefix$type');
     }
+    // Conservamos marcas de export para no reenviar entrenos antiguos al reconectar.
   }
 
   Future<void> recordManualWeightEdit([DateTime? when]) async {

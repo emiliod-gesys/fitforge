@@ -228,6 +228,28 @@ class _HealthIntegrationCardState extends ConsumerState<HealthIntegrationCard> {
                     ? null
                     : (value) => ref.read(healthIntegrationProvider.notifier).setImportBodyFat(value),
               ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.healthIntegrationExportWorkouts),
+                subtitle: Text(
+                  l10n.healthIntegrationExportWorkoutsHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                ),
+                value: state.prefs.exportWorkouts,
+                activeThumbColor: context.accentColor,
+                onChanged: state.loading
+                    ? null
+                    : (value) async {
+                        final ok = await ref
+                            .read(healthIntegrationProvider.notifier)
+                            .setExportWorkouts(value);
+                        if (!ok && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.healthIntegrationPermissionDenied)),
+                          );
+                        }
+                      },
+              ),
             ],
             const SizedBox(height: 8),
             Row(

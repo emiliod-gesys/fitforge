@@ -17,7 +17,7 @@ abstract final class ProfileCompleteness {
     final name = profile.displayName?.trim();
     if (name == null || name.isEmpty) return false;
 
-    final age = profile.age;
+    final age = profile.effectiveAge;
     if (age == null || age < 13 || age >= 120) return false;
 
     if (profile.gender == null) return false;

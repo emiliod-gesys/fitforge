@@ -1,5 +1,6 @@
-import '../core/utils/json_parsing.dart';
 import '../core/theme/app_accent.dart';
+import '../core/utils/age_calculator.dart';
+import '../core/utils/json_parsing.dart';
 import 'exercise_logging.dart';
 
 enum AiProvider { none, openai, gemini, anthropic }
@@ -109,6 +110,7 @@ class UserProfile {
   final String? avatarUrl;
   final String unitSystem;
   final double? bodyWeight;
+  final DateTime? dateOfBirth;
   final int? age;
   final Gender? gender;
   final double? heightCm;
@@ -130,12 +132,21 @@ class UserProfile {
   bool get isTrainer => userType == UserType.trainer;
   bool get hasCompletedOnboarding => onboardingCompletedAt != null;
 
+  /// Edad efectiva: prioriza fecha de nacimiento.
+  int? get effectiveAge {
+    if (dateOfBirth != null) {
+      return AgeCalculator.yearsFromDateOfBirth(dateOfBirth!);
+    }
+    return age;
+  }
+
   const UserProfile({
     required this.id,
     this.displayName,
     this.avatarUrl,
     this.unitSystem = 'kg',
     this.bodyWeight,
+    this.dateOfBirth,
     this.age,
     this.gender,
     this.heightCm,
@@ -156,13 +167,16 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json, {bool hasAiKey = false}) {
+    final dob = AgeCalculator.tryParseDate(json['date_of_birth'] as String?);
+    final storedAge = json['age'] as int?;
     return UserProfile(
       id: json['id'] as String,
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       unitSystem: json['unit_system'] as String? ?? 'kg',
       bodyWeight: (json['body_weight'] as num?)?.toDouble(),
-      age: json['age'] as int?,
+      dateOfBirth: dob,
+      age: dob != null ? AgeCalculator.yearsFromDateOfBirth(dob) : storedAge,
       gender: Gender.fromCode(json['gender'] as String?),
       heightCm: (json['height_cm'] as num?)?.toDouble(),
       preferredLanguage: json['preferred_language'] as String? ?? 'es',
@@ -202,7 +216,8 @@ class UserProfile {
         'avatar_url': avatarUrl,
         'unit_system': unitSystem,
         'body_weight': bodyWeight,
-        'age': age,
+        'date_of_birth': dateOfBirth != null ? AgeCalculator.toDateString(dateOfBirth!) : null,
+        'age': effectiveAge,
         'gender': gender?.code,
         'height_cm': heightCm,
         'preferred_language': preferredLanguage,

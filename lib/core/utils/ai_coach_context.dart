@@ -31,8 +31,8 @@ abstract final class AiCoachContextBuilder {
       if (profile.displayName != null && profile.displayName!.isNotEmpty) {
         buffer.writeln('Nombre: ${profile.displayName}');
       }
-      if (profile.age != null) {
-        buffer.writeln('Edad: ${profile.age} años');
+      if (profile.effectiveAge != null) {
+        buffer.writeln('Edad: ${profile.effectiveAge} años');
       }
       buffer.writeln('Género: ${_genderLabel(profile.gender)}');
       if (profile.heightCm != null) {

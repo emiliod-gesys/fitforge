@@ -3967,11 +3967,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthIntegrationSubtitle =>
-      'Import weight and body fat from your scale or health app.';
+      'Sync body metrics and share workouts with Apple Health or Health Connect.';
 
   @override
   String get healthIntegrationDisclaimer =>
-      'We only import body metrics. Your workouts and food budget logic stay in FitForge.';
+      'Imported weight/body fat can update your profile. Exported workouts appear in other health apps. Food budget still uses FitForge data only.';
 
   @override
   String get healthIntegrationConnect => 'Connect';
@@ -3987,6 +3987,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthIntegrationImportBodyFat => 'Import body fat';
+
+  @override
+  String get healthIntegrationExportWorkouts => 'Export workouts';
+
+  @override
+  String get healthIntegrationExportWorkoutsHint =>
+      'Save completed sessions to Health so other apps can see them.';
 
   @override
   String get healthIntegrationConnected => 'Connected';
@@ -4039,4 +4046,177 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthIntegrationNoUpdates => 'No new metrics to import.';
+
+  @override
+  String get deleteAccountSectionTitle => 'Danger zone';
+
+  @override
+  String get deleteAccountSectionSubtitle =>
+      'Permanently delete your FitForge account and all associated data.';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountWarning =>
+      'This will permanently erase your profile, workouts, routines, food logs, and social data. This cannot be undone.';
+
+  @override
+  String get deleteAccountContinue => 'Continue';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Are you absolutely sure?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Your data will be deleted from FitForge servers and cannot be recovered.';
+
+  @override
+  String get deleteAccountUnderstand =>
+      'I understand that this action is permanent';
+
+  @override
+  String get deleteAccountTypeTitle => 'Type DELETE or BORRAR';
+
+  @override
+  String get deleteAccountTypeMessage =>
+      'To confirm, type DELETE or BORRAR in the box below.';
+
+  @override
+  String get deleteAccountTypeHint => 'Confirmation word';
+
+  @override
+  String get deleteAccountPasswordHint =>
+      'Enter your password to confirm it is you.';
+
+  @override
+  String get deleteAccountAction => 'Delete account';
+
+  @override
+  String get deleteAccountSuccess => 'Your account has been deleted.';
+
+  @override
+  String deleteAccountFailed(String message) {
+    return 'Could not delete account: $message';
+  }
+
+  @override
+  String get dateOfBirthTitle => 'Date of birth';
+
+  @override
+  String get dateOfBirthHint => 'Select your date of birth';
+
+  @override
+  String get dateOfBirthInvalid => 'Enter a valid date of birth (ages 13–119).';
+
+  @override
+  String dateOfBirthAgePreview(int age) {
+    return 'You are $age years old';
+  }
+
+  @override
+  String dateOfBirthSubtitle(String date, int age) {
+    return '$date · $age years';
+  }
+
+  @override
+  String get onboardingOfflineTitle => 'Offline catalog';
+
+  @override
+  String get onboardingOfflineSubtitle =>
+      'Download ~1100 exercises with GIFs to train without internet. You can also do this later in Profile.';
+
+  @override
+  String get onboardingOfflineSize =>
+      'Estimated size: 400–800 MB depending on your network';
+
+  @override
+  String get onboardingOfflineBenefit1 => 'Browse and start routines offline';
+
+  @override
+  String get onboardingOfflineBenefit2 =>
+      'GIFs and illustrations available instantly';
+
+  @override
+  String get onboardingOfflineBenefit3 =>
+      'Great when traveling or on limited data';
+
+  @override
+  String get onboardingOfflineDownload => 'Download now';
+
+  @override
+  String get onboardingOfflineSkip => 'Not now';
+
+  @override
+  String get onboardingOfflineDownloading => 'Downloading in the background…';
+
+  @override
+  String get onboardingOfflineContinue => 'Continue';
+
+  @override
+  String get onboardingPlanTitle => 'Choose your plan';
+
+  @override
+  String get onboardingPlanSubtitle => 'Start free. Upgrade whenever you want.';
+
+  @override
+  String get onboardingPlanFree => 'Free';
+
+  @override
+  String get onboardingPlanFreePrice => '\$0';
+
+  @override
+  String get onboardingPlanPerMonth => '/mo';
+
+  @override
+  String get onboardingPlanDiscount => 'Launch offer';
+
+  @override
+  String get onboardingPlanRecommended => 'Recommended';
+
+  @override
+  String get onboardingPlanSelectFree => 'Start free';
+
+  @override
+  String get onboardingPlanSelectGymrat => 'Choose Gymrat';
+
+  @override
+  String get onboardingPlanSelectGymratPro => 'Choose Gymrat Pro';
+
+  @override
+  String get onboardingPlanBenefitFree1 => '10 saved routines';
+
+  @override
+  String get onboardingPlanBenefitFree2 => '5 daily Coach AI messages';
+
+  @override
+  String get onboardingPlanBenefitFree3 => 'Workouts, food, and progress';
+
+  @override
+  String get onboardingPlanBenefitGymrat1 => '20 saved routines';
+
+  @override
+  String get onboardingPlanBenefitGymrat2 => '30 daily Coach AI messages';
+
+  @override
+  String get onboardingPlanBenefitGymrat3 => 'Proactive AI during workouts';
+
+  @override
+  String get onboardingPlanBenefitGymrat4 => 'Custom accent color';
+
+  @override
+  String get onboardingPlanBenefitPro1 => '50 saved routines';
+
+  @override
+  String get onboardingPlanBenefitPro2 => 'Unlimited Coach AI';
+
+  @override
+  String get onboardingPlanBenefitPro3 => 'Food photo AI';
+
+  @override
+  String get onboardingPlanBenefitPro4 => 'Trainer mode (students)';
+
+  @override
+  String get onboardingPlanPaidSoon =>
+      'In-app purchase is coming soon. For now you\'ll enter on Free; your choice is saved.';
 }

@@ -3997,11 +3997,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get healthIntegrationSubtitle =>
-      'Importa peso y grasa corporal desde tu báscula o app de salud.';
+      'Sincroniza métricas corporales y comparte entrenos con Apple Salud o Health Connect.';
 
   @override
   String get healthIntegrationDisclaimer =>
-      'Solo importamos métricas corporales. No modificamos tus entrenos ni el presupuesto de comida directamente.';
+      'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FitForge.';
 
   @override
   String get healthIntegrationConnect => 'Conectar';
@@ -4017,6 +4017,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get healthIntegrationImportBodyFat => 'Importar grasa corporal';
+
+  @override
+  String get healthIntegrationExportWorkouts => 'Exportar entrenamientos';
+
+  @override
+  String get healthIntegrationExportWorkoutsHint =>
+      'Guarda las sesiones completadas en Salud para que otras apps las vean.';
 
   @override
   String get healthIntegrationConnected => 'Conectado';
@@ -4071,4 +4078,179 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get healthIntegrationNoUpdates =>
       'No hay métricas nuevas para importar.';
+
+  @override
+  String get deleteAccountSectionTitle => 'Zona peligrosa';
+
+  @override
+  String get deleteAccountSectionSubtitle =>
+      'Elimina permanentemente tu cuenta de FitForge y todos los datos asociados.';
+
+  @override
+  String get deleteAccountTitle => '¿Borrar tu cuenta?';
+
+  @override
+  String get deleteAccountWarning =>
+      'Se borrarán para siempre tu perfil, entrenos, rutinas, comida y datos sociales. Esta acción no se puede deshacer.';
+
+  @override
+  String get deleteAccountContinue => 'Continuar';
+
+  @override
+  String get deleteAccountConfirmTitle => '¿Estás completamente seguro?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Tus datos se eliminarán de los servidores de FitForge y no se podrán recuperar.';
+
+  @override
+  String get deleteAccountUnderstand =>
+      'Entiendo que esta acción es permanente';
+
+  @override
+  String get deleteAccountTypeTitle => 'Escribe BORRAR o DELETE';
+
+  @override
+  String get deleteAccountTypeMessage =>
+      'Para confirmar, escribe BORRAR o DELETE en el campo de abajo.';
+
+  @override
+  String get deleteAccountTypeHint => 'Palabra de confirmación';
+
+  @override
+  String get deleteAccountPasswordHint =>
+      'Introduce tu contraseña para confirmar que eres tú.';
+
+  @override
+  String get deleteAccountAction => 'Borrar cuenta';
+
+  @override
+  String get deleteAccountSuccess => 'Tu cuenta ha sido eliminada.';
+
+  @override
+  String deleteAccountFailed(String message) {
+    return 'No se pudo borrar la cuenta: $message';
+  }
+
+  @override
+  String get dateOfBirthTitle => 'Fecha de nacimiento';
+
+  @override
+  String get dateOfBirthHint => 'Selecciona tu fecha de nacimiento';
+
+  @override
+  String get dateOfBirthInvalid =>
+      'Indica una fecha de nacimiento válida (13–119 años).';
+
+  @override
+  String dateOfBirthAgePreview(int age) {
+    return 'Tienes $age años';
+  }
+
+  @override
+  String dateOfBirthSubtitle(String date, int age) {
+    return '$date · $age años';
+  }
+
+  @override
+  String get onboardingOfflineTitle => 'Catálogo offline';
+
+  @override
+  String get onboardingOfflineSubtitle =>
+      'Descarga ~1100 ejercicios con GIFs para entrenar sin internet. Puedes hacerlo después en Perfil.';
+
+  @override
+  String get onboardingOfflineSize => 'Peso estimado: 400–800 MB según tu red';
+
+  @override
+  String get onboardingOfflineBenefit1 =>
+      'Busca y empieza rutinas sin conexión';
+
+  @override
+  String get onboardingOfflineBenefit2 =>
+      'GIFs e ilustraciones disponibles al instante';
+
+  @override
+  String get onboardingOfflineBenefit3 =>
+      'Ideal si viajas o tienes datos limitados';
+
+  @override
+  String get onboardingOfflineDownload => 'Descargar ahora';
+
+  @override
+  String get onboardingOfflineSkip => 'Ahora no';
+
+  @override
+  String get onboardingOfflineDownloading => 'Descargando en segundo plano…';
+
+  @override
+  String get onboardingOfflineContinue => 'Continuar';
+
+  @override
+  String get onboardingPlanTitle => 'Elige tu plan';
+
+  @override
+  String get onboardingPlanSubtitle =>
+      'Empieza gratis. Puedes mejorar cuando quieras.';
+
+  @override
+  String get onboardingPlanFree => 'Gratuito';
+
+  @override
+  String get onboardingPlanFreePrice => '\$0';
+
+  @override
+  String get onboardingPlanPerMonth => '/mes';
+
+  @override
+  String get onboardingPlanDiscount => 'Oferta de lanzamiento';
+
+  @override
+  String get onboardingPlanRecommended => 'Recomendado';
+
+  @override
+  String get onboardingPlanSelectFree => 'Empezar gratis';
+
+  @override
+  String get onboardingPlanSelectGymrat => 'Elegir Gymrat';
+
+  @override
+  String get onboardingPlanSelectGymratPro => 'Elegir Gymrat Pro';
+
+  @override
+  String get onboardingPlanBenefitFree1 => '10 rutinas guardadas';
+
+  @override
+  String get onboardingPlanBenefitFree2 => '5 mensajes diarios del Coach IA';
+
+  @override
+  String get onboardingPlanBenefitFree3 => 'Entrenos, comida y progreso';
+
+  @override
+  String get onboardingPlanBenefitGymrat1 => '20 rutinas guardadas';
+
+  @override
+  String get onboardingPlanBenefitGymrat2 => '30 mensajes diarios del Coach IA';
+
+  @override
+  String get onboardingPlanBenefitGymrat3 => 'IA proactiva al entrenar';
+
+  @override
+  String get onboardingPlanBenefitGymrat4 => 'Color de acento personalizable';
+
+  @override
+  String get onboardingPlanBenefitPro1 => '50 rutinas guardadas';
+
+  @override
+  String get onboardingPlanBenefitPro2 => 'Coach IA ilimitado';
+
+  @override
+  String get onboardingPlanBenefitPro3 => 'Foto de comida con IA';
+
+  @override
+  String get onboardingPlanBenefitPro4 => 'Modo entrenador (alumnos)';
+
+  @override
+  String get onboardingPlanPaidSoon =>
+      'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.';
 }

@@ -6,7 +6,7 @@ import 'package:health/health.dart';
 import 'health_body_metric_sample.dart';
 import 'health_body_metrics_mapper.dart';
 
-/// Fachada de lectura sobre Apple Health / Health Connect (Fase A: solo lectura).
+/// Fachada Apple Health / Health Connect: lectura de métricas + escritura de entrenos.
 class HealthIntegrationService {
   HealthIntegrationService({Health? health}) : _health = health ?? Health();
 
@@ -16,6 +16,10 @@ class HealthIntegrationService {
   static const readTypes = [
     HealthDataType.WEIGHT,
     HealthDataType.BODY_FAT_PERCENTAGE,
+  ];
+
+  static const writeTypes = [
+    HealthDataType.WORKOUT,
   ];
 
   Future<void> configure() async {
@@ -49,10 +53,39 @@ class HealthIntegrationService {
     return _health.requestAuthorization(readTypes, permissions: permissions);
   }
 
+  Future<bool> requestWritePermissions() async {
+    await configure();
+    final permissions = writeTypes.map((_) => HealthDataAccess.WRITE).toList();
+    return _health.requestAuthorization(writeTypes, permissions: permissions);
+  }
+
+  /// Pide lectura (peso/grasa) y escritura (entrenos) en un solo diálogo cuando sea posible.
+  Future<bool> requestConnectPermissions({bool includeWrite = true}) async {
+    await configure();
+    final types = <HealthDataType>[...readTypes];
+    final permissions = <HealthDataAccess>[
+      ...readTypes.map((_) => HealthDataAccess.READ),
+    ];
+    if (includeWrite) {
+      types.addAll(writeTypes);
+      permissions.addAll(writeTypes.map((_) => HealthDataAccess.WRITE));
+    }
+    return _health.requestAuthorization(types, permissions: permissions);
+  }
+
   Future<bool> hasReadPermissions() async {
     await configure();
     final permissions = readTypes.map((_) => HealthDataAccess.READ).toList();
     final granted = await _health.hasPermissions(readTypes, permissions: permissions);
+    return granted ?? false;
+  }
+
+  Future<bool> hasWritePermissions() async {
+    await configure();
+    final permissions = writeTypes.map((_) => HealthDataAccess.WRITE).toList();
+    final granted = await _health.hasPermissions(writeTypes, permissions: permissions);
+    // En iOS hasPermissions a menudo devuelve null; no bloquear la escritura.
+    if (granted == null && Platform.isIOS) return true;
     return granted ?? false;
   }
 
@@ -86,6 +119,30 @@ class HealthIntegrationService {
 
     samples.sort((a, b) => b.measuredAt.compareTo(a.measuredAt));
     return samples;
+  }
+
+  Future<bool> exportWorkout({
+    required HealthWorkoutActivityType activityType,
+    required DateTime start,
+    required DateTime end,
+    int? totalEnergyBurnedKcal,
+    int? totalDistanceMeters,
+    String? title,
+  }) async {
+    await configure();
+    if (kIsWeb) return false;
+
+    return _health.writeWorkoutData(
+      activityType: activityType,
+      start: start,
+      end: end,
+      totalEnergyBurned: totalEnergyBurnedKcal,
+      totalEnergyBurnedUnit: HealthDataUnit.KILOCALORIE,
+      totalDistance: totalDistanceMeters,
+      totalDistanceUnit: HealthDataUnit.METER,
+      title: title,
+      recordingMethod: RecordingMethod.manual,
+    );
   }
 
   HealthBodyMetricSample? _mapPoint(HealthDataPoint point) {

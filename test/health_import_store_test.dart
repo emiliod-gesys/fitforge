@@ -15,7 +15,11 @@ void main() {
 
     test('persists preferences and ledger', () async {
       await store.savePreferences(
-        HealthImportPreferences(connected: true, importWeight: true),
+        HealthImportPreferences(
+          connected: true,
+          importWeight: true,
+          exportWorkouts: false,
+        ),
       );
       await store.saveLedger(
         'weight',
@@ -30,8 +34,15 @@ void main() {
       final ledger = await store.loadLedger('weight');
 
       expect(prefs.connected, isTrue);
+      expect(prefs.exportWorkouts, isFalse);
       expect(ledger?.value, 72.5);
       expect(ledger?.lastImportedAt, isNotNull);
+    });
+
+    test('tracks exported workout ids', () async {
+      expect(await store.wasWorkoutExported('w1'), isFalse);
+      await store.markWorkoutExported('w1');
+      expect(await store.wasWorkoutExported('w1'), isTrue);
     });
 
     test('records manual weight edit timestamp', () async {

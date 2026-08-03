@@ -1,35 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/l10n/app_locale.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/age_calculator.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../data/avatar_catalog.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
-import '../../models/food_entry.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/cloud_exercise_download_provider.dart';
 import '../../providers/onboarding_progress_provider.dart';
-import '../../screens/food/food_add_screen.dart';
+import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../widgets/fitforge_logo.dart';
 import '../../widgets/profile_avatar.dart';
+import 'onboarding_plan_step.dart';
 
 enum _OnboardingStepKind {
-  welcome,
   language,
   aboutYou,
   body,
   goals,
   modes,
-  routine,
-  food,
-  done,
+  offlineCatalog,
+  plan,
 }
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -42,10 +44,12 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
+  late final TextEditingController _nameController;
 
   late int _pageIndex;
   late final PageController _pageController;
   Gender? _gender;
+  DateTime? _dateOfBirth;
   String _unitSystem = 'kg';
   String? _fitnessGoal;
   String? _experienceLevel;
@@ -55,26 +59,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _busy = false;
   String _preferredLanguage = AppLocale.defaultCode;
   late String _selectedAvatarId;
+  SubscriptionTier _selectedPlan = SubscriptionTier.gymratPro;
+  bool _offlineDecisionMade = false;
 
   final _formKeyBasics = GlobalKey<FormState>();
   final _formKeyBody = GlobalKey<FormState>();
-
-  late final TextEditingController _nameController;
-  late final TextEditingController _ageController;
 
   List<_OnboardingStepKind> get _steps {
     final profile = ref.read(profileProvider).valueOrNull;
     final isTrainer = profile?.isTrainer ?? false;
     return [
-      _OnboardingStepKind.welcome,
       _OnboardingStepKind.language,
       _OnboardingStepKind.aboutYou,
       _OnboardingStepKind.body,
       _OnboardingStepKind.goals,
       if (!isTrainer) _OnboardingStepKind.modes,
-      _OnboardingStepKind.routine,
-      _OnboardingStepKind.food,
-      _OnboardingStepKind.done,
+      _OnboardingStepKind.offlineCatalog,
+      _OnboardingStepKind.plan,
     ];
   }
 
@@ -83,11 +84,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    _pageIndex = ref.read(onboardingProgressProvider).stepIndex;
+    final saved = ref.read(onboardingProgressProvider).stepIndex;
+    _pageIndex = saved.clamp(0, _steps.length - 1);
+    if (saved != _pageIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(onboardingProgressProvider.notifier).setStepIndex(_pageIndex);
+      });
+    }
     _pageController = PageController(initialPage: _pageIndex);
     _selectedAvatarId = AvatarCatalog.toStorageId(AvatarCatalog.defaultOption().id);
     _nameController = TextEditingController();
-    _ageController = TextEditingController();
     _heightController = TextEditingController();
     _weightController = TextEditingController();
   }
@@ -98,7 +104,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_seededFromProfile || profile == null) return;
     _seededFromProfile = true;
     _nameController.text = profile.displayName ?? '';
-    _ageController.text = profile.age?.toString() ?? '';
+    _dateOfBirth = profile.dateOfBirth ??
+        (profile.age != null ? AgeCalculator.estimateDateOfBirthFromAge(profile.age!) : null);
     _heightController.text =
         profile.heightCm != null ? profile.heightCm!.toStringAsFixed(0) : '';
     _unitSystem = profile.unitSystem;
@@ -111,6 +118,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (profile.experienceLevel != null) _experienceLevel = profile.experienceLevel;
     _activityLevel = profile.activityLevel;
     _preferredLanguage = profile.preferredLanguage;
+    _hyroxMode = profile.hyroxMode;
+    _runnerMode = profile.runnerMode;
     if (AvatarCatalog.isCatalogValue(profile.avatarUrl)) {
       _selectedAvatarId = profile.avatarUrl!;
     }
@@ -154,7 +163,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void dispose() {
     _pageController.dispose();
     _nameController.dispose();
-    _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     super.dispose();
@@ -174,6 +182,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return UnitConverter.displayToKg(display, _unitSystem);
   }
 
+  Future<void> _goNextPage() async {
+    if (_pageIndex >= _steps.length - 1) return;
+    await _pageController.nextPage(
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   Future<void> _next() async {
     final l10n = context.l10n;
     final step = _currentStep;
@@ -183,11 +199,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.genderRequired)));
         return;
       }
+      if (_dateOfBirth == null || !AgeCalculator.isValidDateOfBirth(_dateOfBirth!)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.dateOfBirthInvalid)));
+        return;
+      }
       if (!_formKeyBasics.currentState!.validate()) return;
+      await _goNextPage();
+      return;
     }
 
     if (step == _OnboardingStepKind.body) {
       if (!_formKeyBody.currentState!.validate()) return;
+      await _goNextPage();
+      return;
     }
 
     if (step == _OnboardingStepKind.goals) {
@@ -205,34 +229,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       } catch (_) {
         return;
       }
-    }
-
-    if (step == _OnboardingStepKind.routine &&
-        !ref.read(onboardingProgressProvider).routineCompleted) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.onboardingRoutineExerciseRequired)));
+      await _goNextPage();
       return;
     }
 
-    if (step == _OnboardingStepKind.food &&
-        !ref.read(onboardingProgressProvider).foodTutorialCompleted) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.onboardingFoodDeleteHint)));
+    if (step == _OnboardingStepKind.offlineCatalog) {
+      setState(() => _offlineDecisionMade = true);
+      await _goNextPage();
       return;
     }
 
-    if (step == _OnboardingStepKind.done) {
+    if (step == _OnboardingStepKind.plan) {
       await _finishOnboarding();
       return;
     }
 
-    if (_pageIndex >= _steps.length - 1) return;
-    await _pageController.nextPage(
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
+    await _goNextPage();
   }
 
   void _back() {
@@ -248,7 +260,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _busy = true);
     try {
       final name = _nameController.text.trim();
-      final age = int.parse(_ageController.text.trim());
+      final dob = _dateOfBirth!;
       final heightCm = double.parse(_heightController.text.replaceAll(',', '.'));
       final weightKg = _parseWeightKg()!;
 
@@ -256,7 +268,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       await profileService.updateProfile({
         'display_name': name,
         'search_name': name.toLowerCase(),
-        'age': age,
+        'date_of_birth': AgeCalculator.toDateString(dob),
+        'age': AgeCalculator.yearsFromDateOfBirth(dob),
         'gender': _gender!.code,
         'height_cm': heightCm,
         'unit_system': _unitSystem,
@@ -287,45 +300,67 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  Future<void> _openRoutineEditor() async {
-    if (_busy || ref.read(onboardingProgressProvider).routineCompleted) return;
-    await context.push<bool>('/routines/new?onboarding=1');
-    if (mounted) setState(() {});
-  }
+  Future<void> _startOfflineDownload() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final online = ref.read(isOnlineProvider).valueOrNull ?? true;
+    if (!online) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric(l10n.onboardingOfflineSkip))));
+      return;
+    }
 
-  Future<void> _openFoodQuickAdd() async {
-    if (_busy) return;
-    final progress = ref.read(onboardingProgressProvider);
-    if (progress.foodTutorialCompleted) return;
-    await context.push(
-      '/food/add',
-      extra: {
-        'meal': MealType.breakfast,
-        'day': DateTime.now(),
-        'onboarding': true,
-        'initialMode': FoodAddMode.quick,
-      },
-    );
-    if (mounted) setState(() {});
-  }
+    final notifier = ref.read(cloudExerciseDownloadProvider.notifier);
+    if (ref.read(cloudExerciseDownloadProvider).isDownloading) {
+      setState(() => _offlineDecisionMade = true);
+      await _goNextPage();
+      return;
+    }
 
-  Future<void> _openFoodDiary() async {
-    if (_busy) return;
-    final progress = ref.read(onboardingProgressProvider);
-    if (!progress.foodLogged || progress.foodTutorialCompleted) return;
-    ref.read(foodSelectedDayProvider.notifier).state = DateTime.now();
-    await context.push('/food');
-    if (mounted) setState(() {});
+    setState(() => _busy = true);
+    try {
+      final status = await notifier.analyzeStatus();
+      if (!mounted) return;
+      if (!(status.isUpToDate && status.hasLocalCache)) {
+        // Fire-and-forget so the user can continue onboarding.
+        unawaited(() async {
+          try {
+            await notifier.download();
+          } catch (e) {
+            messenger.showSnackBar(
+              SnackBar(content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
+            );
+          }
+        }());
+      }
+      setState(() => _offlineDecisionMade = true);
+      await _goNextPage();
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _finishOnboarding() async {
     if (_busy) return;
     setState(() => _busy = true);
+    final l10n = context.l10n;
     try {
+      // Re-save in case the user edited fields after the goals step.
+      if (_dateOfBirth != null && _gender != null && _fitnessGoal != null) {
+        await _saveProfileDraftQuiet();
+      }
+
       await ref.read(profileServiceProvider).updateProfile({
         'onboarding_completed_at': DateTime.now().toUtc().toIso8601String(),
+        // Paid tiers require IAP — keep free until billing ships.
+        'subscription_tier': SubscriptionTier.free.code,
       });
 
+      ref.invalidate(profileProvider);
       final profile = await ref.read(profileProvider.future);
       if (profile != null) {
         if (_hyroxMode && !profile.hyroxMode) {
@@ -340,16 +375,62 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ref.invalidate(routinesProvider);
       ref.invalidate(dailyNutritionProvider);
       ref.invalidate(leaderboardProvider);
+      ref.invalidate(bodyMetricSnapshotsProvider);
       ref.read(onboardingProgressProvider.notifier).reset();
 
-      if (mounted) context.go('/');
+      if (!mounted) return;
+      if (!_selectedPlan.isFree) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.onboardingPlanPaidSoon)),
+        );
+      }
+      context.go('/');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.errorGeneric('$e'))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _saveProfileDraftQuiet() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty || _dateOfBirth == null || _gender == null) return;
+    final heightCm = double.tryParse(_heightController.text.replaceAll(',', '.'));
+    final weightKg = _parseWeightKg();
+    if (heightCm == null || weightKg == null) return;
+
+    final profileService = ref.read(profileServiceProvider);
+    await profileService.updateProfile({
+      'display_name': name,
+      'search_name': name.toLowerCase(),
+      'date_of_birth': AgeCalculator.toDateString(_dateOfBirth!),
+      'age': AgeCalculator.yearsFromDateOfBirth(_dateOfBirth!),
+      'gender': _gender!.code,
+      'height_cm': heightCm,
+      'unit_system': _unitSystem,
+      'fitness_goal': _fitnessGoal,
+      'experience_level': _experienceLevel,
+      'activity_level': _activityLevel.code,
+      'preferred_language': _preferredLanguage,
+      'avatar_url': _selectedAvatarId,
+    });
+    await profileService.saveBodyMetric(
+      type: 'weight',
+      displayValue: UnitConverter.kgToDisplay(weightKg, _unitSystem),
+      unitSystem: _unitSystem,
+    );
+  }
+
+  String _planCtaLabel(AppLocalizations l10n) {
+    return switch (_selectedPlan) {
+      SubscriptionTier.free => l10n.onboardingPlanSelectFree,
+      SubscriptionTier.gymrat => l10n.onboardingPlanSelectGymrat,
+      SubscriptionTier.gymratPro => l10n.onboardingPlanSelectGymratPro,
+    };
   }
 
   @override
@@ -357,161 +438,223 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final l10n = context.l10n;
     final accent = context.accentColor;
     final profile = ref.watch(profileProvider).valueOrNull;
-    final onboardingProgress = ref.watch(onboardingProgressProvider);
     _seedFromProfile(profile);
     final steps = _steps;
-    final isLast = _pageIndex >= steps.length - 1;
-    final showBack = _pageIndex > 0 && _currentStep != _OnboardingStepKind.done;
+    if (_pageIndex >= steps.length) {
+      _pageIndex = steps.length - 1;
+    }
+    final isPlan = _currentStep == _OnboardingStepKind.plan;
+    final isOffline = _currentStep == _OnboardingStepKind.offlineCatalog;
+    final showBack = _pageIndex > 0;
+    final download = ref.watch(cloudExerciseDownloadProvider);
 
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Row(
-                  children: [
-                    if (_currentStep != _OnboardingStepKind.welcome)
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF121316),
+                AppColors.black,
+                Color(0xFF0A0A0C),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: Row(
+                    children: [
                       const FitForgeLogo(height: 28),
-                    const Spacer(),
-                    Text(
-                      l10n.onboardingStepOf(_pageIndex + 1, steps.length),
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: (_pageIndex + 1) / steps.length,
-                backgroundColor: AppColors.border.withValues(alpha: 0.4),
-                color: accent,
-                minHeight: 4,
-              ),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: steps.length,
-                  onPageChanged: (index) {
-                    setState(() => _pageIndex = index);
-                    ref.read(onboardingProgressProvider.notifier).setStepIndex(index);
-                  },
-                  itemBuilder: (context, index) {
-                    return switch (steps[index]) {
-                      _OnboardingStepKind.welcome => _WelcomeStep(l10n: l10n, accent: accent),
-                      _OnboardingStepKind.language => _LanguageStep(
-                          l10n: l10n,
-                          accent: accent,
-                          preferredLanguage: _preferredLanguage,
-                          onLanguageChanged: _setLanguage,
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardElevated,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
                         ),
-                      _OnboardingStepKind.aboutYou => _AboutYouStep(
-                          l10n: l10n,
-                          accent: accent,
-                          formKey: _formKeyBasics,
-                          nameController: _nameController,
-                          ageController: _ageController,
-                          gender: _gender,
-                          selectedAvatarId: _selectedAvatarId,
-                          onGenderChanged: (g) => setState(() => _gender = g),
-                          onPickAvatar: _pickAvatar,
-                        ),
-                      _OnboardingStepKind.body => _BodyStep(
-                          l10n: l10n,
-                          formKey: _formKeyBody,
-                          heightController: _heightController,
-                          weightController: _weightController,
-                          unitSystem: _unitSystem,
-                          onUnitChanged: _onUnitChanged,
-                        ),
-                      _OnboardingStepKind.goals => _GoalsStep(
-                          l10n: l10n,
-                          accent: accent,
-                          fitnessGoal: _fitnessGoal,
-                          experienceLevel: _experienceLevel,
-                          activityLevel: _activityLevel,
-                          onGoalChanged: (g) => setState(() => _fitnessGoal = l10n.canonicalGoal(g)),
-                          onExperienceChanged: (e) =>
-                              setState(() => _experienceLevel = l10n.canonicalExperience(e)),
-                          onActivityChanged: (a) => setState(() => _activityLevel = a),
-                        ),
-                      _OnboardingStepKind.modes => _ModesStep(
-                          l10n: l10n,
-                          accent: accent,
-                          hyroxMode: _hyroxMode,
-                          runnerMode: _runnerMode,
-                          onHyroxChanged: (v) => setState(() => _hyroxMode = v),
-                          onRunnerChanged: (v) => setState(() => _runnerMode = v),
-                        ),
-                      _OnboardingStepKind.routine => _RoutineStep(
-                          l10n: l10n,
-                          accent: accent,
-                          routineCompleted: onboardingProgress.routineCompleted,
-                          onOpenEditor: _openRoutineEditor,
-                        ),
-                      _OnboardingStepKind.food => _FoodStep(
-                          l10n: l10n,
-                          accent: accent,
-                          foodLogged: onboardingProgress.foodLogged,
-                          foodTutorialCompleted: onboardingProgress.foodTutorialCompleted,
-                          onOpenQuickAdd: _openFoodQuickAdd,
-                          onOpenDiary: _openFoodDiary,
-                        ),
-                      _OnboardingStepKind.done => _DoneStep(l10n: l10n, accent: accent),
-                    };
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_currentStep == _OnboardingStepKind.modes)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: TextButton(
-                          onPressed: _busy ? null : _next,
-                          child: Text(
-                            l10n.onboardingSkipModes,
-                            textAlign: TextAlign.center,
+                        child: Text(
+                          l10n.onboardingStepOf(_pageIndex + 1, steps.length),
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                    Row(
-                      children: [
-                        if (showBack)
-                          TextButton(onPressed: _busy ? null : _back, child: Text(l10n.onboardingBack))
-                        else
-                          const SizedBox(width: 8),
-                        const Spacer(),
-                        FilledButton(
-                          onPressed: _busy ? null : _next,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: accent,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(120, 48),
-                          ),
-                          child: _busy && _currentStep == _OnboardingStepKind.done
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                )
-                              : Text(
-                                  isLast ? l10n.onboardingDoneAction : l10n.onboardingNext,
-                                ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: (_pageIndex + 1) / steps.length,
+                      backgroundColor: AppColors.border.withValues(alpha: 0.45),
+                      color: accent,
+                      minHeight: 5,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: steps.length,
+                    onPageChanged: (index) {
+                      setState(() => _pageIndex = index);
+                      ref.read(onboardingProgressProvider.notifier).setStepIndex(index);
+                    },
+                    itemBuilder: (context, index) {
+                      return switch (steps[index]) {
+                        _OnboardingStepKind.language => _LanguageStep(
+                            l10n: l10n,
+                            accent: accent,
+                            preferredLanguage: _preferredLanguage,
+                            onLanguageChanged: _setLanguage,
+                          ),
+                        _OnboardingStepKind.aboutYou => _AboutYouStep(
+                            l10n: l10n,
+                            accent: accent,
+                            formKey: _formKeyBasics,
+                            nameController: _nameController,
+                            dateOfBirth: _dateOfBirth,
+                            gender: _gender,
+                            selectedAvatarId: _selectedAvatarId,
+                            onGenderChanged: (g) => setState(() => _gender = g),
+                            onDateOfBirthChanged: (d) => setState(() => _dateOfBirth = d),
+                            onPickAvatar: _pickAvatar,
+                          ),
+                        _OnboardingStepKind.body => _BodyStep(
+                            l10n: l10n,
+                            formKey: _formKeyBody,
+                            heightController: _heightController,
+                            weightController: _weightController,
+                            unitSystem: _unitSystem,
+                            onUnitChanged: _onUnitChanged,
+                          ),
+                        _OnboardingStepKind.goals => _GoalsStep(
+                            l10n: l10n,
+                            accent: accent,
+                            fitnessGoal: _fitnessGoal,
+                            experienceLevel: _experienceLevel,
+                            activityLevel: _activityLevel,
+                            onGoalChanged: (g) => setState(() => _fitnessGoal = l10n.canonicalGoal(g)),
+                            onExperienceChanged: (e) =>
+                                setState(() => _experienceLevel = l10n.canonicalExperience(e)),
+                            onActivityChanged: (a) => setState(() => _activityLevel = a),
+                          ),
+                        _OnboardingStepKind.modes => _ModesStep(
+                            l10n: l10n,
+                            accent: accent,
+                            hyroxMode: _hyroxMode,
+                            runnerMode: _runnerMode,
+                            onHyroxChanged: (v) => setState(() => _hyroxMode = v),
+                            onRunnerChanged: (v) => setState(() => _runnerMode = v),
+                          ),
+                        _OnboardingStepKind.offlineCatalog => _OfflineCatalogStep(
+                            l10n: l10n,
+                            accent: accent,
+                            download: download,
+                            busy: _busy,
+                            decisionMade: _offlineDecisionMade,
+                            onDownload: _startOfflineDownload,
+                            onSkip: () async {
+                              setState(() => _offlineDecisionMade = true);
+                              await _goNextPage();
+                            },
+                          ),
+                        _OnboardingStepKind.plan => OnboardingPlanStep(
+                            l10n: l10n,
+                            accent: accent,
+                            selected: _selectedPlan,
+                            onSelected: (tier) => setState(() => _selectedPlan = tier),
+                          ),
+                      };
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_currentStep == _OnboardingStepKind.modes)
+                        TextButton(
+                          onPressed: _busy ? null : _next,
+                          child: Text(l10n.onboardingSkipModes, textAlign: TextAlign.center),
+                        ),
+                      if (!isOffline)
+                        Row(
+                          children: [
+                            if (showBack)
+                              TextButton(
+                                onPressed: _busy ? null : _back,
+                                child: Text(l10n.onboardingBack),
+                              )
+                            else
+                              const SizedBox(width: 8),
+                            const Spacer(),
+                            FilledButton(
+                              onPressed: _busy ? null : _next,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: accent,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(148, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: _busy && isPlan
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      isPlan ? _planCtaLabel(l10n) : l10n.onboardingNext,
+                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      if (isOffline)
+                        Row(
+                          children: [
+                            if (showBack)
+                              TextButton(
+                                onPressed: _busy ? null : _back,
+                                child: Text(l10n.onboardingBack),
+                              ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: _busy
+                                  ? null
+                                  : () async {
+                                      setState(() => _offlineDecisionMade = true);
+                                      await _goNextPage();
+                                    },
+                              child: Text(l10n.onboardingOfflineSkip),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -533,78 +676,20 @@ class _StepScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      padding: const EdgeInsets.fromLTRB(24, 22, 24, 16),
       children: [
-        Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+              ),
+        ),
         const SizedBox(height: 8),
-        Text(subtitle, style: const TextStyle(color: AppColors.textMuted, height: 1.4)),
+        Text(subtitle, style: const TextStyle(color: AppColors.textMuted, height: 1.45)),
         const SizedBox(height: 24),
         child,
       ],
-    );
-  }
-}
-
-class _WelcomeStep extends StatelessWidget {
-  final AppLocalizations l10n;
-  final Color accent;
-
-  const _WelcomeStep({required this.l10n, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const SizedBox(height: 24),
-        Center(child: FitForgeLogo(height: 56)),
-        const SizedBox(height: 32),
-        Text(
-          l10n.onboardingWelcomeTitle,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.onboardingWelcomeSubtitle,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textMuted, height: 1.4),
-        ),
-        const SizedBox(height: 32),
-        _Bullet(icon: Icons.fitness_center, text: l10n.onboardingWelcomeBulletTrain, accent: accent),
-        _Bullet(icon: Icons.restaurant, text: l10n.onboardingWelcomeBulletFood, accent: accent),
-        _Bullet(icon: Icons.insights, text: l10n.onboardingWelcomeBulletProgress, accent: accent),
-      ],
-    );
-  }
-}
-
-class _Bullet extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color accent;
-
-  const _Bullet({required this.icon, required this.text, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: accent, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(child: Text(text, style: const TextStyle(height: 1.35))),
-        ],
-      ),
     );
   }
 }
@@ -647,10 +732,11 @@ class _AboutYouStep extends StatelessWidget {
   final Color accent;
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
-  final TextEditingController ageController;
+  final DateTime? dateOfBirth;
   final Gender? gender;
   final String selectedAvatarId;
   final ValueChanged<Gender> onGenderChanged;
+  final ValueChanged<DateTime> onDateOfBirthChanged;
   final VoidCallback onPickAvatar;
 
   const _AboutYouStep({
@@ -658,15 +744,34 @@ class _AboutYouStep extends StatelessWidget {
     required this.accent,
     required this.formKey,
     required this.nameController,
-    required this.ageController,
+    required this.dateOfBirth,
     required this.gender,
     required this.selectedAvatarId,
     required this.onGenderChanged,
+    required this.onDateOfBirthChanged,
     required this.onPickAvatar,
   });
 
+  Future<void> _pickDate(BuildContext context) async {
+    final now = DateTime.now();
+    final initial = dateOfBirth ?? DateTime(now.year - 25, now.month, now.day);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year - 119, 1, 1),
+      lastDate: DateTime(now.year - 13, now.month, now.day),
+      helpText: l10n.dateOfBirthTitle,
+    );
+    if (picked != null) onDateOfBirthChanged(picked);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final age = dateOfBirth != null ? AgeCalculator.yearsFromDateOfBirth(dateOfBirth!) : null;
+    final dateLabel = dateOfBirth != null
+        ? DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(dateOfBirth!)
+        : l10n.dateOfBirthHint;
+
     return _StepScaffold(
       title: l10n.onboardingAboutYouTitle,
       subtitle: l10n.onboardingAboutYouSubtitle,
@@ -683,16 +788,25 @@ class _AboutYouStep extends StatelessWidget {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        ProfileAvatar(
-                          avatarUrl: selectedAvatarId,
-                          radius: 44,
-                          fallbackLetter: nameController.text,
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [accent, accent.withValues(alpha: 0.35)],
+                            ),
+                          ),
+                          child: ProfileAvatar(
+                            avatarUrl: selectedAvatarId,
+                            radius: 46,
+                            fallbackLetter: nameController.text,
+                          ),
                         ),
                         Positioned(
                           right: -2,
                           bottom: -2,
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
                               color: accent,
                               shape: BoxShape.circle,
@@ -705,10 +819,7 @@ class _AboutYouStep extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: onPickAvatar,
-                    child: Text(l10n.chooseAvatar),
-                  ),
+                  TextButton(onPressed: onPickAvatar, child: Text(l10n.chooseAvatar)),
                   Text(
                     l10n.chooseAvatarHint,
                     style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
@@ -725,20 +836,27 @@ class _AboutYouStep extends StatelessWidget {
               validator: (v) => v == null || v.trim().isEmpty ? l10n.displayNameRequired : null,
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              controller: ageController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(3),
-              ],
-              decoration: InputDecoration(labelText: l10n.ageTitle, suffixText: l10n.years),
-              validator: (v) {
-                final age = int.tryParse(v?.trim() ?? '');
-                if (age == null || age < 13 || age >= 120) return l10n.ageInvalid;
-                return null;
-              },
+            InkWell(
+              onTap: () => _pickDate(context),
+              borderRadius: BorderRadius.circular(12),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: l10n.dateOfBirthTitle,
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
+                ),
+                child: Text(
+                  dateLabel,
+                  style: TextStyle(color: dateOfBirth != null ? null : AppColors.textMuted),
+                ),
+              ),
             ),
+            if (age != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.dateOfBirthAgePreview(age),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 16),
             Text(l10n.genderTitle, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
@@ -854,7 +972,7 @@ class _GoalsStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.fitnessGoalTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(l10n.fitnessGoalTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           ...l10n.fitnessGoals.map((goal) {
             final canonical = l10n.canonicalGoal(goal);
@@ -869,7 +987,7 @@ class _GoalsStep extends StatelessWidget {
             );
           }),
           const SizedBox(height: 16),
-          Text(l10n.experienceLevel, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(l10n.experienceLevel, style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -884,7 +1002,7 @@ class _GoalsStep extends StatelessWidget {
             }).toList(),
           ),
           const SizedBox(height: 16),
-          Text(l10n.activityLevel, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(l10n.activityLevel, style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           ...l10n.activityLevels.map((level) {
             return _SelectableTile(
@@ -980,7 +1098,7 @@ class _ModeCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: enabled ? accent.withValues(alpha: 0.08) : AppColors.card,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: enabled ? accent.withValues(alpha: 0.4) : AppColors.border),
       ),
       child: Row(
@@ -1006,199 +1124,170 @@ class _ModeCard extends StatelessWidget {
   }
 }
 
-class _RoutineStep extends StatelessWidget {
+class _OfflineCatalogStep extends StatelessWidget {
   final AppLocalizations l10n;
   final Color accent;
-  final bool routineCompleted;
-  final VoidCallback onOpenEditor;
+  final CloudExerciseDownloadState download;
+  final bool busy;
+  final bool decisionMade;
+  final VoidCallback onDownload;
+  final VoidCallback onSkip;
 
-  const _RoutineStep({
+  const _OfflineCatalogStep({
     required this.l10n,
     required this.accent,
-    required this.routineCompleted,
-    required this.onOpenEditor,
+    required this.download,
+    required this.busy,
+    required this.decisionMade,
+    required this.onDownload,
+    required this.onSkip,
   });
+
+  String _progressLabel() {
+    if (download.phase == CloudExerciseDownloadPhase.media) {
+      if (download.total != null) {
+        return l10n.offlineDownloadExercisesProgressMedia(download.downloaded, download.total!);
+      }
+      return l10n.offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
+    }
+    if (download.total != null) {
+      return l10n.offlineDownloadExercisesProgress(download.downloaded, download.total!);
+    }
+    return l10n.offlineDownloadExercisesProgressUnknown(download.downloaded);
+  }
 
   @override
   Widget build(BuildContext context) {
     return _StepScaffold(
-      title: l10n.onboardingRoutineTitle,
-      subtitle: l10n.onboardingRoutineSubtitle,
+      title: l10n.onboardingOfflineTitle,
+      subtitle: l10n.onboardingOfflineSubtitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  accent.withValues(alpha: 0.16),
+                  AppColors.cardElevated,
+                ],
+              ),
+              border: Border.all(color: accent.withValues(alpha: 0.35)),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.edit_note, color: accent, size: 28),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    l10n.onboardingRoutineOpenHint,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: accent, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l10n.onboardingOfflineSize,
+                        style: const TextStyle(fontWeight: FontWeight.w700, height: 1.3),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 14),
+                _OfflineBullet(text: l10n.onboardingOfflineBenefit1, accent: accent),
+                _OfflineBullet(text: l10n.onboardingOfflineBenefit2, accent: accent),
+                _OfflineBullet(text: l10n.onboardingOfflineBenefit3, accent: accent),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          if (!routineCompleted)
-            FilledButton.icon(
-              onPressed: onOpenEditor,
-              icon: const Icon(Icons.open_in_new),
-              label: Text(l10n.onboardingRoutineOpenAction),
-              style: FilledButton.styleFrom(
-                backgroundColor: accent,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-              ),
-            )
-          else
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: accent.withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: accent),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(l10n.onboardingRoutineCreated)),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FoodStep extends StatelessWidget {
-  final AppLocalizations l10n;
-  final Color accent;
-  final bool foodLogged;
-  final bool foodTutorialCompleted;
-  final VoidCallback onOpenQuickAdd;
-  final VoidCallback onOpenDiary;
-
-  const _FoodStep({
-    required this.l10n,
-    required this.accent,
-    required this.foodLogged,
-    required this.foodTutorialCompleted,
-    required this.onOpenQuickAdd,
-    required this.onOpenDiary,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _StepScaffold(
-      title: l10n.onboardingFoodTitle,
-      subtitle: l10n.onboardingFoodSubtitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (!foodLogged && !foodTutorialCompleted) ...[
-            FilledButton.icon(
-              onPressed: onOpenQuickAdd,
-              icon: const Icon(Icons.bolt),
-              label: Text(l10n.onboardingFoodOpenAction),
-              style: FilledButton.styleFrom(
-                backgroundColor: accent,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-              ),
-            ),
-          ],
-          if (foodLogged && !foodTutorialCompleted) ...[
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: accent.withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: accent),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(l10n.onboardingFoodRegistered)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
+          const SizedBox(height: 20),
+          if (download.isDownloading) ...[
             Text(
-              l10n.onboardingFoodDeleteHint,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
+              l10n.onboardingOfflineDownloading,
+              style: const TextStyle(color: AppColors.textMuted),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onOpenDiary,
-              icon: Icon(Icons.restaurant, color: accent),
-              label: Text(l10n.onboardingFoodOpenDiary),
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: download.progress,
+              minHeight: 7,
+              borderRadius: BorderRadius.circular(4),
+              backgroundColor: AppColors.border,
+              color: accent,
+            ),
+            const SizedBox(height: 8),
+            Text(_progressLabel(), style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: busy ? null : onSkip,
+              style: FilledButton.styleFrom(
+                backgroundColor: accent,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: Text(l10n.onboardingOfflineContinue),
+            ),
+          ] else ...[
+            FilledButton.icon(
+              onPressed: busy ? null : onDownload,
+              icon: busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.download_rounded),
+              label: Text(l10n.onboardingOfflineDownload),
+              style: FilledButton.styleFrom(
+                backgroundColor: accent,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              onPressed: busy ? null : onSkip,
               style: OutlinedButton.styleFrom(
-                foregroundColor: accent,
-                side: BorderSide(color: accent.withValues(alpha: 0.5)),
-                minimumSize: const Size.fromHeight(48),
+                foregroundColor: AppColors.textPrimary,
+                side: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
+              child: Text(l10n.onboardingOfflineSkip),
             ),
+            if (decisionMade && download.cachedCount > 0) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.offlineDownloadExercisesSubtitleDone(download.cachedCount),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+            ],
           ],
-          if (foodTutorialCompleted)
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: accent.withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: accent),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(l10n.onboardingFoodDeleted)),
-                ],
-              ),
-            ),
         ],
       ),
     );
   }
 }
 
-class _DoneStep extends StatelessWidget {
-  final AppLocalizations l10n;
+class _OfflineBullet extends StatelessWidget {
+  final String text;
   final Color accent;
 
-  const _DoneStep({required this.l10n, required this.accent});
+  const _OfflineBullet({required this.text, required this.accent});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const SizedBox(height: 48),
-        Icon(Icons.celebration_outlined, size: 72, color: accent),
-        const SizedBox(height: 24),
-        Text(
-          l10n.onboardingDoneTitle,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.onboardingDoneSubtitle,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textMuted, height: 1.4),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.check_rounded, size: 18, color: accent),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: const TextStyle(height: 1.35, fontSize: 13.5))),
+        ],
+      ),
     );
   }
 }
@@ -1225,16 +1314,20 @@ class _SelectableTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: selected ? accent.withValues(alpha: 0.1) : AppColors.card,
-        borderRadius: BorderRadius.circular(12),
+        color: selected ? accent.withValues(alpha: 0.12) : AppColors.card,
+        borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(12),
+          borderRadius: BorderRadius.circular(14),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: selected ? accent : AppColors.border),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected ? accent : AppColors.border.withValues(alpha: 0.7),
+                width: selected ? 1.5 : 1,
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1243,7 +1336,7 @@ class _SelectableTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
                       if (badge != null) ...[
                         const SizedBox(height: 6),
                         Container(
@@ -1264,7 +1357,10 @@ class _SelectableTile extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: 4),
-                      Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35)),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35),
+                      ),
                     ],
                   ),
                 ),
@@ -1279,30 +1375,42 @@ class _SelectableTile extends StatelessWidget {
 }
 
 class _UnitToggle extends StatelessWidget {
-  const _UnitToggle({required this.unitSystem, required this.onChanged});
-
   final String unitSystem;
   final ValueChanged<String> onChanged;
+
+  const _UnitToggle({required this.unitSystem, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Row(
       children: [
-        Expanded(child: _UnitChip(label: l10n.kilograms, selected: unitSystem == 'kg', onTap: () => onChanged('kg'))),
+        Expanded(
+          child: _UnitChip(
+            label: l10n.kilograms,
+            selected: unitSystem == 'kg',
+            onTap: () => onChanged('kg'),
+          ),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: _UnitChip(label: l10n.pounds, selected: unitSystem == 'lb', onTap: () => onChanged('lb'))),
+        Expanded(
+          child: _UnitChip(
+            label: l10n.pounds,
+            selected: unitSystem == 'lb',
+            onTap: () => onChanged('lb'),
+          ),
+        ),
       ],
     );
   }
 }
 
 class _UnitChip extends StatelessWidget {
-  const _UnitChip({required this.label, required this.selected, required this.onTap});
-
   final String label;
   final bool selected;
   final VoidCallback onTap;
+
+  const _UnitChip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

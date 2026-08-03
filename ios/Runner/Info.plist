@@ -80,6 +80,8 @@
 	<string>FitForge sigue registrando tu carrera cuando la app está en segundo plano.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>FitForge puede importar tu peso y grasa corporal desde Apple Salud para mantener tu perfil al día.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>FitForge puede guardar tus entrenamientos en Apple Salud para compartirlos con otras apps.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

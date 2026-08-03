@@ -6,6 +6,7 @@ import '../services/health/health_body_metrics_evaluator.dart';
 import '../services/health/health_body_metrics_importer.dart';
 import '../services/health/health_import_store.dart';
 import '../services/health/health_integration_service.dart';
+import '../services/health/health_workout_exporter.dart';
 import 'app_providers.dart';
 
 final healthIntegrationServiceProvider = Provider((ref) => HealthIntegrationService());
@@ -17,6 +18,13 @@ final healthBodyMetricsImporterProvider = Provider((ref) {
     healthService: ref.watch(healthIntegrationServiceProvider),
     store: ref.watch(healthImportStoreProvider),
     profileService: ref.watch(profileServiceProvider),
+  );
+});
+
+final healthWorkoutExporterProvider = Provider((ref) {
+  return HealthWorkoutExporter(
+    healthService: ref.watch(healthIntegrationServiceProvider),
+    store: ref.watch(healthImportStoreProvider),
   );
 });
 
@@ -95,10 +103,11 @@ class HealthIntegrationNotifier extends StateNotifier<HealthIntegrationState> {
   Future<bool> connect() async {
     state = state.copyWith(loading: true, clearError: true);
     try {
-      final granted = await _health.requestReadPermissions();
-      final prefs = (await _store.loadPreferences()).copyWith(
-        connected: granted,
+      final prefsBefore = await _store.loadPreferences();
+      final granted = await _health.requestConnectPermissions(
+        includeWrite: prefsBefore.exportWorkouts,
       );
+      final prefs = prefsBefore.copyWith(connected: granted);
       await _store.savePreferences(prefs);
       state = state.copyWith(
         loading: false,
@@ -136,6 +145,20 @@ class HealthIntegrationNotifier extends StateNotifier<HealthIntegrationState> {
     final prefs = state.prefs.copyWith(importBodyFat: value);
     await _store.savePreferences(prefs);
     state = state.copyWith(prefs: prefs);
+  }
+
+  Future<bool> setExportWorkouts(bool value) async {
+    if (value && state.prefs.connected) {
+      final granted = await _health.requestWritePermissions();
+      if (!granted) {
+        state = state.copyWith(errorCode: 'permission_denied');
+        return false;
+      }
+    }
+    final prefs = state.prefs.copyWith(exportWorkouts: value);
+    await _store.savePreferences(prefs);
+    state = state.copyWith(prefs: prefs, clearError: true);
+    return true;
   }
 
   Future<void> installHealthConnect() async {

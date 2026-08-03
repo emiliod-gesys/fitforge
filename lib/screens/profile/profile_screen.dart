@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../core/l10n/app_locale.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/age_calculator.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -27,6 +29,7 @@ import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/profile/accent_color_selector.dart';
+import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
 
@@ -151,10 +154,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 ListTile(
                   leading: Icon(Icons.cake_outlined, color: context.accentColor),
-                  title: Text(l10n.age),
-                  subtitle: Text(profile?.age != null ? '${profile!.age} ${l10n.years}' : l10n.notDefined),
+                  title: Text(l10n.dateOfBirthTitle),
+                  subtitle: Text(
+                    profile?.dateOfBirth != null
+                        ? l10n.dateOfBirthSubtitle(
+                            DateFormat.yMMMMd(Localizations.localeOf(context).toString())
+                                .format(profile!.dateOfBirth!),
+                            profile.effectiveAge ?? 0,
+                          )
+                        : (profile?.effectiveAge != null
+                            ? '${profile!.effectiveAge} ${l10n.years}'
+                            : l10n.notDefined),
+                  ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _editAge(profile),
+                  onTap: () => _editDateOfBirth(profile),
                 ),
                 ListTile(
                   leading: Icon(Icons.wc_outlined, color: context.accentColor),
@@ -394,6 +407,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _FreeAdvancedSettings(profile: profile),
                 ],
                 const SizedBox(height: 32),
+                const DeleteAccountSection(),
+                const SizedBox(height: 32),
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     8,
@@ -489,32 +504,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _editAge(UserProfile? profile) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController(text: profile?.age?.toString() ?? '');
-    final result = await showDialog<int>(
+  Future<void> _editDateOfBirth(UserProfile? profile) async {
+    final now = DateTime.now();
+    final initial = profile?.dateOfBirth ??
+        (profile?.effectiveAge != null
+            ? AgeCalculator.estimateDateOfBirthFromAge(profile!.effectiveAge!)
+            : DateTime(now.year - 25, now.month, now.day));
+    final picked = await showDatePicker(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.ageTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(suffixText: l10n.years),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text.trim())),
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
+      initialDate: initial,
+      firstDate: DateTime(now.year - 119, 1, 1),
+      lastDate: DateTime(now.year - 13, now.month, now.day),
+      helpText: context.l10n.dateOfBirthTitle,
     );
-    if (result != null && result > 0 && result < 120) {
-      await ref.read(profileServiceProvider).updateProfile({'age': result});
-      ref.invalidate(profileProvider);
+    if (picked == null) return;
+    if (!AgeCalculator.isValidDateOfBirth(picked)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.dateOfBirthInvalid)),
+      );
+      return;
     }
+    await ref.read(profileServiceProvider).updateProfile({
+      'date_of_birth': AgeCalculator.toDateString(picked),
+      'age': AgeCalculator.yearsFromDateOfBirth(picked),
+    });
+    ref.invalidate(profileProvider);
   }
 
   Future<void> _editGender(UserProfile? profile) async {

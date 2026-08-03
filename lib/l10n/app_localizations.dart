@@ -6798,13 +6798,13 @@ abstract class AppLocalizations {
   /// No description provided for @healthIntegrationSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Importa peso y grasa corporal desde tu báscula o app de salud.'**
+  /// **'Sincroniza métricas corporales y comparte entrenos con Apple Salud o Health Connect.'**
   String get healthIntegrationSubtitle;
 
   /// No description provided for @healthIntegrationDisclaimer.
   ///
   /// In es, this message translates to:
-  /// **'Solo importamos métricas corporales. No modificamos tus entrenos ni el presupuesto de comida directamente.'**
+  /// **'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FitForge.'**
   String get healthIntegrationDisclaimer;
 
   /// No description provided for @healthIntegrationConnect.
@@ -6836,6 +6836,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Importar grasa corporal'**
   String get healthIntegrationImportBodyFat;
+
+  /// No description provided for @healthIntegrationExportWorkouts.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar entrenamientos'**
+  String get healthIntegrationExportWorkouts;
+
+  /// No description provided for @healthIntegrationExportWorkoutsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda las sesiones completadas en Salud para que otras apps las vean.'**
+  String get healthIntegrationExportWorkoutsHint;
 
   /// No description provided for @healthIntegrationConnected.
   ///
@@ -6926,6 +6938,318 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No hay métricas nuevas para importar.'**
   String get healthIntegrationNoUpdates;
+
+  /// No description provided for @deleteAccountSectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Zona peligrosa'**
+  String get deleteAccountSectionTitle;
+
+  /// No description provided for @deleteAccountSectionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elimina permanentemente tu cuenta de FitForge y todos los datos asociados.'**
+  String get deleteAccountSectionSubtitle;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar tu cuenta?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrarán para siempre tu perfil, entrenos, rutinas, comida y datos sociales. Esta acción no se puede deshacer.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @deleteAccountContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get deleteAccountContinue;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Estás completamente seguro?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus datos se eliminarán de los servidores de FitForge y no se podrán recuperar.'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @deleteAccountUnderstand.
+  ///
+  /// In es, this message translates to:
+  /// **'Entiendo que esta acción es permanente'**
+  String get deleteAccountUnderstand;
+
+  /// No description provided for @deleteAccountTypeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe BORRAR o DELETE'**
+  String get deleteAccountTypeTitle;
+
+  /// No description provided for @deleteAccountTypeMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Para confirmar, escribe BORRAR o DELETE en el campo de abajo.'**
+  String get deleteAccountTypeMessage;
+
+  /// No description provided for @deleteAccountTypeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Palabra de confirmación'**
+  String get deleteAccountTypeHint;
+
+  /// No description provided for @deleteAccountPasswordHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce tu contraseña para confirmar que eres tú.'**
+  String get deleteAccountPasswordHint;
+
+  /// No description provided for @deleteAccountAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar cuenta'**
+  String get deleteAccountAction;
+
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuenta ha sido eliminada.'**
+  String get deleteAccountSuccess;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo borrar la cuenta: {message}'**
+  String deleteAccountFailed(String message);
+
+  /// No description provided for @dateOfBirthTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de nacimiento'**
+  String get dateOfBirthTitle;
+
+  /// No description provided for @dateOfBirthHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona tu fecha de nacimiento'**
+  String get dateOfBirthHint;
+
+  /// No description provided for @dateOfBirthInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica una fecha de nacimiento válida (13–119 años).'**
+  String get dateOfBirthInvalid;
+
+  /// No description provided for @dateOfBirthAgePreview.
+  ///
+  /// In es, this message translates to:
+  /// **'Tienes {age} años'**
+  String dateOfBirthAgePreview(int age);
+
+  /// No description provided for @dateOfBirthSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{date} · {age} años'**
+  String dateOfBirthSubtitle(String date, int age);
+
+  /// No description provided for @onboardingOfflineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Catálogo offline'**
+  String get onboardingOfflineTitle;
+
+  /// No description provided for @onboardingOfflineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descarga ~1100 ejercicios con GIFs para entrenar sin internet. Puedes hacerlo después en Perfil.'**
+  String get onboardingOfflineSubtitle;
+
+  /// No description provided for @onboardingOfflineSize.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso estimado: 400–800 MB según tu red'**
+  String get onboardingOfflineSize;
+
+  /// No description provided for @onboardingOfflineBenefit1.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca y empieza rutinas sin conexión'**
+  String get onboardingOfflineBenefit1;
+
+  /// No description provided for @onboardingOfflineBenefit2.
+  ///
+  /// In es, this message translates to:
+  /// **'GIFs e ilustraciones disponibles al instante'**
+  String get onboardingOfflineBenefit2;
+
+  /// No description provided for @onboardingOfflineBenefit3.
+  ///
+  /// In es, this message translates to:
+  /// **'Ideal si viajas o tienes datos limitados'**
+  String get onboardingOfflineBenefit3;
+
+  /// No description provided for @onboardingOfflineDownload.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar ahora'**
+  String get onboardingOfflineDownload;
+
+  /// No description provided for @onboardingOfflineSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get onboardingOfflineSkip;
+
+  /// No description provided for @onboardingOfflineDownloading.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargando en segundo plano…'**
+  String get onboardingOfflineDownloading;
+
+  /// No description provided for @onboardingOfflineContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get onboardingOfflineContinue;
+
+  /// No description provided for @onboardingPlanTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu plan'**
+  String get onboardingPlanTitle;
+
+  /// No description provided for @onboardingPlanSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza gratis. Puedes mejorar cuando quieras.'**
+  String get onboardingPlanSubtitle;
+
+  /// No description provided for @onboardingPlanFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Gratuito'**
+  String get onboardingPlanFree;
+
+  /// No description provided for @onboardingPlanFreePrice.
+  ///
+  /// In es, this message translates to:
+  /// **'\$0'**
+  String get onboardingPlanFreePrice;
+
+  /// No description provided for @onboardingPlanPerMonth.
+  ///
+  /// In es, this message translates to:
+  /// **'/mes'**
+  String get onboardingPlanPerMonth;
+
+  /// No description provided for @onboardingPlanDiscount.
+  ///
+  /// In es, this message translates to:
+  /// **'Oferta de lanzamiento'**
+  String get onboardingPlanDiscount;
+
+  /// No description provided for @onboardingPlanRecommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Recomendado'**
+  String get onboardingPlanRecommended;
+
+  /// No description provided for @onboardingPlanSelectFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar gratis'**
+  String get onboardingPlanSelectFree;
+
+  /// No description provided for @onboardingPlanSelectGymrat.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir Gymrat'**
+  String get onboardingPlanSelectGymrat;
+
+  /// No description provided for @onboardingPlanSelectGymratPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir Gymrat Pro'**
+  String get onboardingPlanSelectGymratPro;
+
+  /// No description provided for @onboardingPlanBenefitFree1.
+  ///
+  /// In es, this message translates to:
+  /// **'10 rutinas guardadas'**
+  String get onboardingPlanBenefitFree1;
+
+  /// No description provided for @onboardingPlanBenefitFree2.
+  ///
+  /// In es, this message translates to:
+  /// **'5 mensajes diarios del Coach IA'**
+  String get onboardingPlanBenefitFree2;
+
+  /// No description provided for @onboardingPlanBenefitFree3.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenos, comida y progreso'**
+  String get onboardingPlanBenefitFree3;
+
+  /// No description provided for @onboardingPlanBenefitGymrat1.
+  ///
+  /// In es, this message translates to:
+  /// **'20 rutinas guardadas'**
+  String get onboardingPlanBenefitGymrat1;
+
+  /// No description provided for @onboardingPlanBenefitGymrat2.
+  ///
+  /// In es, this message translates to:
+  /// **'30 mensajes diarios del Coach IA'**
+  String get onboardingPlanBenefitGymrat2;
+
+  /// No description provided for @onboardingPlanBenefitGymrat3.
+  ///
+  /// In es, this message translates to:
+  /// **'IA proactiva al entrenar'**
+  String get onboardingPlanBenefitGymrat3;
+
+  /// No description provided for @onboardingPlanBenefitGymrat4.
+  ///
+  /// In es, this message translates to:
+  /// **'Color de acento personalizable'**
+  String get onboardingPlanBenefitGymrat4;
+
+  /// No description provided for @onboardingPlanBenefitPro1.
+  ///
+  /// In es, this message translates to:
+  /// **'50 rutinas guardadas'**
+  String get onboardingPlanBenefitPro1;
+
+  /// No description provided for @onboardingPlanBenefitPro2.
+  ///
+  /// In es, this message translates to:
+  /// **'Coach IA ilimitado'**
+  String get onboardingPlanBenefitPro2;
+
+  /// No description provided for @onboardingPlanBenefitPro3.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto de comida con IA'**
+  String get onboardingPlanBenefitPro3;
+
+  /// No description provided for @onboardingPlanBenefitPro4.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo entrenador (alumnos)'**
+  String get onboardingPlanBenefitPro4;
+
+  /// No description provided for @onboardingPlanPaidSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.'**
+  String get onboardingPlanPaidSoon;
 }
 
 class _AppLocalizationsDelegate
