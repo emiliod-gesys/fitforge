@@ -19,6 +19,7 @@ import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/food/calorie_budget_editor_sheet.dart';
 import '../../widgets/food/energy_output_section.dart';
 import '../../widgets/food/food_budget_header.dart';
 import '../../widgets/food/food_week_strip.dart';
@@ -314,6 +315,36 @@ class _FoodBody extends ConsumerWidget {
 
                 fiberLabel: l10n.macroFiber,
 
+              ),
+
+              const SizedBox(height: 8),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => CalorieBudgetEditorSheet.show(
+                    context,
+                    profile: profile,
+                    bodyMetrics: bodyMetrics,
+                    onSaved: () => ref.invalidate(dailyNutritionProvider),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.accentColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    l10n.foodEditCalorieBudget,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.accentColor,
+                      decoration: TextDecoration.underline,
+                      decorationColor: context.accentColor.withValues(alpha: 0.65),
+                    ),
+                  ),
+                ),
               ),
 
               if (!summary.bmrAvailable) ...[

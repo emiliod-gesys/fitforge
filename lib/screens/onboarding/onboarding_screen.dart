@@ -20,6 +20,7 @@ import '../../providers/onboarding_progress_provider.dart';
 import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
+import '../../widgets/ff/ff_selectable_tile.dart';
 import '../../widgets/fitforge_logo.dart';
 import '../../widgets/profile_avatar.dart';
 import 'onboarding_plan_step.dart';
@@ -738,7 +739,7 @@ class _LanguageStep extends StatelessWidget {
       subtitle: l10n.onboardingLanguageSubtitle,
       child: Column(
         children: AppLocale.supportedCodes.map((code) {
-          return _SelectableTile(
+          return FfSelectableTile(
             title: l10n.languageLabel(code),
             subtitle: code == 'es' ? 'Español · Spanish' : 'English · Inglés',
             selected: preferredLanguage == code,
@@ -996,7 +997,7 @@ class _GoalsStep extends StatelessWidget {
           const SizedBox(height: 8),
           ...l10n.fitnessGoals.map((goal) {
             final canonical = l10n.canonicalGoal(goal);
-            return _SelectableTile(
+            return FfSelectableTile(
               title: goal,
               badge: l10n.fitnessGoalCalorieModeLabel(goal),
               subtitle:
@@ -1054,7 +1055,7 @@ class _ActivityLevelStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ...l10n.activityLevels.map((level) {
-            return _SelectableTile(
+            return FfSelectableTile(
               title: l10n.activityLevelLabel(level),
               subtitle: l10n.activityLevelDescription(level),
               selected: activityLevel == level,
@@ -1341,88 +1342,6 @@ class _OfflineBullet extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(child: Text(text, style: const TextStyle(height: 1.35, fontSize: 13.5))),
         ],
-      ),
-    );
-  }
-}
-
-class _SelectableTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final String? badge;
-  final bool selected;
-  final Color accent;
-  final VoidCallback onTap;
-
-  const _SelectableTile({
-    required this.title,
-    required this.subtitle,
-    this.badge,
-    required this.selected,
-    required this.accent,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: selected ? accent.withValues(alpha: 0.12) : AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? accent : AppColors.border.withValues(alpha: 0.7),
-                width: selected ? 1.5 : 1,
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      if (badge != null) ...[
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: accent.withValues(alpha: 0.35)),
-                          ),
-                          child: Text(
-                            badge!,
-                            style: TextStyle(
-                              color: accent,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35),
-                      ),
-                    ],
-                  ),
-                ),
-                if (selected) Icon(Icons.check_circle, color: accent, size: 20),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

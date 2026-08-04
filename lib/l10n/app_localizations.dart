@@ -5558,6 +5558,234 @@ abstract class AppLocalizations {
   /// **'+{count} kcal activas por entrenamiento hoy'**
   String foodWorkoutBonus(int count);
 
+  /// No description provided for @foodEditCalorieBudget.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar presupuesto calórico'**
+  String get foodEditCalorieBudget;
+
+  /// No description provided for @calorieBudgetEditorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto calórico'**
+  String get calorieBudgetEditorTitle;
+
+  /// No description provided for @calorieBudgetCurrentGoal.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu objetivo actual'**
+  String get calorieBudgetCurrentGoal;
+
+  /// No description provided for @calorieBudgetEditorSubtitleDeficit.
+  ///
+  /// In es, this message translates to:
+  /// **'Sube el déficit para bajar calorías; bájalo para comer un poco más manteniendo la pérdida de grasa.'**
+  String get calorieBudgetEditorSubtitleDeficit;
+
+  /// No description provided for @calorieBudgetEditorSubtitleSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'Sube el superávit para aumentar calorías y favorecer ganancia muscular.'**
+  String get calorieBudgetEditorSubtitleSurplus;
+
+  /// No description provided for @calorieBudgetEditorSubtitleMaintenance.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta ligeramente arriba o abajo del mantenimiento según cómo te sientas.'**
+  String get calorieBudgetEditorSubtitleMaintenance;
+
+  /// No description provided for @calorieBudgetTdeeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Gasto diario estimado (TDEE)'**
+  String get calorieBudgetTdeeLabel;
+
+  /// No description provided for @calorieBudgetDeficitSliderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Intensidad del déficit'**
+  String get calorieBudgetDeficitSliderTitle;
+
+  /// No description provided for @calorieBudgetSurplusSliderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Intensidad del superávit'**
+  String get calorieBudgetSurplusSliderTitle;
+
+  /// No description provided for @calorieBudgetMaintenanceSliderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajuste fino'**
+  String get calorieBudgetMaintenanceSliderTitle;
+
+  /// No description provided for @calorieBudgetSliderLessCalories.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos kcal'**
+  String get calorieBudgetSliderLessCalories;
+
+  /// No description provided for @calorieBudgetSliderMoreCalories.
+  ///
+  /// In es, this message translates to:
+  /// **'Más kcal'**
+  String get calorieBudgetSliderMoreCalories;
+
+  /// No description provided for @calorieBudgetSliderLessDeficit.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos déficit'**
+  String get calorieBudgetSliderLessDeficit;
+
+  /// No description provided for @calorieBudgetSliderMoreDeficit.
+  ///
+  /// In es, this message translates to:
+  /// **'Más déficit'**
+  String get calorieBudgetSliderMoreDeficit;
+
+  /// No description provided for @calorieBudgetSliderLessSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos superávit'**
+  String get calorieBudgetSliderLessSurplus;
+
+  /// No description provided for @calorieBudgetSliderMoreSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'Más superávit'**
+  String get calorieBudgetSliderMoreSurplus;
+
+  /// No description provided for @calorieBudgetDeficitIntensity.
+  ///
+  /// In es, this message translates to:
+  /// **'{percent}% déficit'**
+  String calorieBudgetDeficitIntensity(int percent);
+
+  /// No description provided for @calorieBudgetSurplusIntensity.
+  ///
+  /// In es, this message translates to:
+  /// **'{percent}% superávit'**
+  String calorieBudgetSurplusIntensity(int percent);
+
+  /// No description provided for @calorieBudgetCaloriesRemoved.
+  ///
+  /// In es, this message translates to:
+  /// **'−{kcal} kcal bajo tu TDEE'**
+  String calorieBudgetCaloriesRemoved(int kcal);
+
+  /// No description provided for @calorieBudgetCaloriesAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'+{kcal} kcal sobre tu TDEE'**
+  String calorieBudgetCaloriesAdded(int kcal);
+
+  /// No description provided for @calorieBudgetMaintenanceDelta.
+  ///
+  /// In es, this message translates to:
+  /// **'{signed} kcal vs mantenimiento'**
+  String calorieBudgetMaintenanceDelta(String signed);
+
+  /// No description provided for @calorieBudgetAdjustmentLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajuste'**
+  String get calorieBudgetAdjustmentLabel;
+
+  /// No description provided for @calorieBudgetResultLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu presupuesto base'**
+  String get calorieBudgetResultLabel;
+
+  /// No description provided for @calorieBudgetDeficitMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Déficit calórico'**
+  String get calorieBudgetDeficitMode;
+
+  /// No description provided for @calorieBudgetSurplusMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Superávit calórico'**
+  String get calorieBudgetSurplusMode;
+
+  /// No description provided for @calorieBudgetMaintenanceMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantenimiento'**
+  String get calorieBudgetMaintenanceMode;
+
+  /// No description provided for @calorieBudgetKcalDelta.
+  ///
+  /// In es, this message translates to:
+  /// **'{kcal} kcal'**
+  String calorieBudgetKcalDelta(int kcal);
+
+  /// No description provided for @calorieBudgetPercentLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'{percent}%'**
+  String calorieBudgetPercentLabel(int percent);
+
+  /// No description provided for @calorieBudgetResetRecommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar recomendado ({label})'**
+  String calorieBudgetResetRecommended(String label);
+
+  /// No description provided for @calorieBudgetSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar presupuesto'**
+  String get calorieBudgetSave;
+
+  /// No description provided for @calorieBudgetBmrRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa peso, altura, edad y género en tu perfil para calcular tu presupuesto.'**
+  String get calorieBudgetBmrRequired;
+
+  /// No description provided for @calorieBudgetWarnWrongDirectionDeficit.
+  ///
+  /// In es, this message translates to:
+  /// **'Para pérdida de grasa necesitas un déficit (porcentaje negativo).'**
+  String get calorieBudgetWarnWrongDirectionDeficit;
+
+  /// No description provided for @calorieBudgetWarnDeficitTooSmall.
+  ///
+  /// In es, this message translates to:
+  /// **'El déficit es muy pequeño ({kcal} kcal). Se recomienda al menos 100 kcal/día para ver progreso.'**
+  String calorieBudgetWarnDeficitTooSmall(int kcal);
+
+  /// No description provided for @calorieBudgetWarnDeficitTooAggressive.
+  ///
+  /// In es, this message translates to:
+  /// **'Déficit muy agresivo. Puede afectar energía y recuperación.'**
+  String get calorieBudgetWarnDeficitTooAggressive;
+
+  /// No description provided for @calorieBudgetWarnWrongDirectionSurplus.
+  ///
+  /// In es, this message translates to:
+  /// **'Para hipertrofia o fuerza necesitas un superávit (porcentaje positivo).'**
+  String get calorieBudgetWarnWrongDirectionSurplus;
+
+  /// No description provided for @calorieBudgetWarnSurplusTooSmall.
+  ///
+  /// In es, this message translates to:
+  /// **'El superávit es muy pequeño ({kcal} kcal). Se recomienda al menos 100 kcal/día.'**
+  String calorieBudgetWarnSurplusTooSmall(int kcal);
+
+  /// No description provided for @calorieBudgetWarnSurplusTooHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Superávit elevado. Un exceso grande puede aumentar grasa corporal.'**
+  String get calorieBudgetWarnSurplusTooHigh;
+
+  /// No description provided for @calorieBudgetWarnMaintenanceDrift.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás lejos del mantenimiento. Considera alinear con tu objetivo actual.'**
+  String get calorieBudgetWarnMaintenanceDrift;
+
   /// No description provided for @foodMealsTitle.
   ///
   /// In es, this message translates to:
@@ -7311,10 +7539,22 @@ abstract class AppLocalizations {
   /// **'Peso, medidas e integraciones de salud'**
   String get profileHubBodySubtitle;
 
+  /// No description provided for @profileHubGoalsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Objetivos'**
+  String get profileHubGoalsTitle;
+
+  /// No description provided for @profileHubGoalsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta fitness, experiencia y actividad diaria'**
+  String get profileHubGoalsSubtitle;
+
   /// No description provided for @profileHubTrainingSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Objetivos, modos Hyrox/Runner y descanso'**
+  /// **'Modos Hyrox/Runner, entrenador y descanso'**
   String get profileHubTrainingSubtitle;
 
   /// No description provided for @profileHubPreferencesSubtitle.

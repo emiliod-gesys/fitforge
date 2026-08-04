@@ -118,6 +118,8 @@ class UserProfile {
   final String? fitnessGoal;
   final String? experienceLevel;
   final DailyActivityLevel activityLevel;
+  /// Porcentaje firmado sobre TDEE (-15 = 15% déficit, +8 = superávit). Null = default del objetivo.
+  final int? calorieAdjustmentPct;
   final AiProvider aiProvider;
   final bool hasAiKey;
   final UserType userType;
@@ -154,6 +156,7 @@ class UserProfile {
     this.fitnessGoal,
     this.experienceLevel,
     this.activityLevel = DailyActivityLevel.moderate,
+    this.calorieAdjustmentPct,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.userType = UserType.athlete,
@@ -183,6 +186,7 @@ class UserProfile {
       fitnessGoal: json['fitness_goal'] as String?,
       experienceLevel: json['experience_level'] as String?,
       activityLevel: DailyActivityLevel.fromCode(json['activity_level'] as String?),
+      calorieAdjustmentPct: (json['calorie_adjustment_pct'] as num?)?.toInt(),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
@@ -224,6 +228,7 @@ class UserProfile {
         'fitness_goal': fitnessGoal,
         'experience_level': experienceLevel,
         'activity_level': activityLevel.code,
+        'calorie_adjustment_pct': calorieAdjustmentPct,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
         'user_type': userType.code,
         'accent_color': accentColor.name,

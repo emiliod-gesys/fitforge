@@ -1383,10 +1383,10 @@ class _ModeTabs extends StatelessWidget {
     final l10n = context.l10n;
     final items = [
       (FoodAddMode.search, Icons.search, l10n.foodModeSearch, false),
-      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode, false),
       (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick, false),
-      (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual, false),
       (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto, photoLocked),
+      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode, false),
+      (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual, false),
     ];
 
     return SingleChildScrollView(

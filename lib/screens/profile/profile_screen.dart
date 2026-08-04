@@ -34,6 +34,7 @@ import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
 import '../../widgets/ff/ff_hub_tile.dart';
+import '../../widgets/ff/ff_selectable_tile.dart';
 import '../../widgets/ff/ff_list_row.dart';
 import '../../widgets/ff/ff_section_header.dart';
 import '../../widgets/ff/ff_surface.dart';
@@ -42,6 +43,7 @@ enum _ProfileSection {
   hub,
   personal,
   body,
+  goals,
   training,
   appearance,
   offline,
@@ -133,6 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.hub => const SizedBox.shrink(),
                 _ProfileSection.personal => _personalSection(profile, unitSystem),
                 _ProfileSection.body => _bodySection(profile, unitSystem, metricsAsync),
+                _ProfileSection.goals => _goalsSection(profile),
                 _ProfileSection.training => _trainingSection(profile),
                 _ProfileSection.appearance => _preferencesSection(profile),
                 _ProfileSection.offline => _offlineSection(context),
@@ -168,6 +171,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     title: l10n.bodyMetrics,
                     subtitle: l10n.profileHubBodySubtitle,
                     onTap: () => _openSection(_ProfileSection.body, l10n.bodyMetrics),
+                  ),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.track_changes_outlined,
+                    title: l10n.profileHubGoalsTitle,
+                    subtitle: l10n.profileHubGoalsSubtitle,
+                    onTap: () => _openSection(_ProfileSection.goals, l10n.profileHubGoalsTitle),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
@@ -255,10 +265,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildHero(UserProfile? profile) {
     final l10n = context.l10n;
-    final meta = [
+    final metaParts = [
       if (profile?.fitnessGoal != null) l10n.goalLabel(profile?.fitnessGoal),
       if (profile?.experienceLevel != null) l10n.experienceLabel(profile?.experienceLevel),
-    ].join(' · ');
+      if (profile != null) l10n.activityLevelLabel(profile.activityLevel),
+    ];
+    final meta = metaParts.join(' · ');
     return FfSurface(
       elevated: true,
       gradient: LinearGradient(
@@ -310,7 +322,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (profile != null) SubscriptionTierLabel(tier: profile.subscriptionTier),
           if (meta.isNotEmpty) ...[
             const SizedBox(height: AppTokens.space4),
-            Text(meta, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _openSection(_ProfileSection.goals, l10n.profileHubGoalsTitle),
+                borderRadius: BorderRadius.circular(AppTokens.radiusSm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTokens.space8,
+                    vertical: AppTokens.space4,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          meta,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(width: AppTokens.space4),
+                      Icon(Icons.edit_outlined, size: 14, color: context.accentColor.withValues(alpha: 0.85)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -415,7 +453,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ]);
   }
 
-  Widget _trainingSection(UserProfile? profile) {
+  Widget _goalsSection(UserProfile? profile) {
     final l10n = context.l10n;
     return _sectionList([
       FfListRow(
@@ -425,17 +463,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         onTap: () => _editGoal(profile),
       ),
       FfListRow(
-        icon: Icons.directions_walk_outlined,
-        title: l10n.activityLevel,
-        subtitle: l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate),
-        onTap: () => _editActivityLevel(profile),
-      ),
-      FfListRow(
         icon: Icons.trending_up,
         title: l10n.experienceLevel,
         subtitle: l10n.experienceLabel(profile?.experienceLevel),
         onTap: () => _editExperience(profile),
       ),
+      FfListRow(
+        icon: Icons.directions_walk_outlined,
+        title: l10n.activityLevel,
+        subtitle: l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate),
+        onTap: () => _editActivityLevel(profile),
+      ),
+    ]);
+  }
+
+  Widget _trainingSection(UserProfile? profile) {
+    final l10n = context.l10n;
+    return _sectionList([
       SwitchListTile(
         secondary: Icon(Icons.school_outlined, color: context.accentColor),
         title: Text(l10n.personalTrainerMode),
@@ -729,9 +773,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _editGoal(UserProfile? profile) async {
     final l10n = context.l10n;
+    final accent = context.accentColor;
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => Dialog(
+        backgroundColor: AppColors.cardElevated,
+        shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
           child: Column(
@@ -754,41 +801,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    ...l10n.fitnessGoals.map(
-                      (goal) => SimpleDialogOption(
-                        onPressed: () => Navigator.pop(ctx, goal),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              goal,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${l10n.fitnessGoalTrainingLabel}: ${l10n.fitnessGoalTrainingDescription(goal)}',
-                              style: const TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 12,
-                                height: 1.35,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${l10n.fitnessGoalDietLabel}: ${l10n.fitnessGoalDietDescription(goal)}',
-                              style: const TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 12,
-                                height: 1.35,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    ...l10n.fitnessGoals.map((goal) {
+                      final canonical = l10n.canonicalGoal(goal);
+                      return FfSelectableTile(
+                        title: goal,
+                        badge: l10n.fitnessGoalCalorieModeLabel(goal),
+                        subtitle:
+                            '${l10n.fitnessGoalTrainingLabel}: ${l10n.fitnessGoalTrainingDescription(goal)}\n'
+                            '${l10n.fitnessGoalDietLabel}: ${l10n.fitnessGoalDietDescription(goal)}',
+                        selected: profile?.fitnessGoal == canonical,
+                        accent: accent,
+                        onTap: () => Navigator.pop(ctx, goal),
+                      );
+                    }),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
                       child: Text(
                         l10n.fitnessGoalFootnote,
                         style: const TextStyle(
@@ -817,13 +846,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _editExperience(UserProfile? profile) async {
     final l10n = context.l10n;
+    final accent = context.accentColor;
     final selected = await showDialog<String>(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.experienceTitle),
-        children: l10n.experienceLevels
-            .map((l) => SimpleDialogOption(onPressed: () => Navigator.pop(ctx, l), child: Text(l)))
-            .toList(),
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.cardElevated,
+        shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  l10n.experienceTitle,
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
+              ),
+              const SizedBox(height: AppTokens.space12),
+              ...l10n.experienceLevels.map((level) {
+                final canonical = l10n.canonicalExperience(level);
+                return FfSelectableTile(
+                  title: level,
+                  selected: profile?.experienceLevel == canonical,
+                  accent: accent,
+                  onTap: () => Navigator.pop(ctx, level),
+                );
+              }),
+            ],
+          ),
+        ),
       ),
     );
     if (selected != null) {
@@ -836,46 +890,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _editActivityLevel(UserProfile? profile) async {
     final l10n = context.l10n;
+    final accent = context.accentColor;
     final current = profile?.activityLevel ?? DailyActivityLevel.moderate;
     final selected = await showDialog<DailyActivityLevel>(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.activityLevelTitle),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(
-              l10n.activityLevelHint,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ),
-          ...l10n.activityLevels.map(
-            (level) => SimpleDialogOption(
-              onPressed: () => Navigator.pop(ctx, level),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.activityLevelLabel(level),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.activityLevelDescription(level),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                  ),
-                ],
+      builder: (ctx) => Dialog(
+        backgroundColor: AppColors.cardElevated,
+        shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  l10n.activityLevelTitle,
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
+                child: Text(
+                  l10n.activityLevelHint,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                ),
+              ),
+              ...l10n.activityLevels.map(
+                (level) => FfSelectableTile(
+                  title: l10n.activityLevelLabel(level),
+                  subtitle: l10n.activityLevelDescription(level),
+                  selected: current == level,
+                  accent: accent,
+                  onTap: () => Navigator.pop(ctx, level),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                child: Text(
+                  l10n.activityLevelFootnote,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.35),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-            child: Text(
-              l10n.activityLevelFootnote,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.35),
-            ),
-          ),
-        ],
+        ),
       ),
     );
     if (selected != null && selected != current) {

@@ -3210,6 +3210,149 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get foodEditCalorieBudget => 'Editar presupuesto calórico';
+
+  @override
+  String get calorieBudgetEditorTitle => 'Presupuesto calórico';
+
+  @override
+  String get calorieBudgetCurrentGoal => 'Tu objetivo actual';
+
+  @override
+  String get calorieBudgetEditorSubtitleDeficit =>
+      'Sube el déficit para bajar calorías; bájalo para comer un poco más manteniendo la pérdida de grasa.';
+
+  @override
+  String get calorieBudgetEditorSubtitleSurplus =>
+      'Sube el superávit para aumentar calorías y favorecer ganancia muscular.';
+
+  @override
+  String get calorieBudgetEditorSubtitleMaintenance =>
+      'Ajusta ligeramente arriba o abajo del mantenimiento según cómo te sientas.';
+
+  @override
+  String get calorieBudgetTdeeLabel => 'Gasto diario estimado (TDEE)';
+
+  @override
+  String get calorieBudgetDeficitSliderTitle => 'Intensidad del déficit';
+
+  @override
+  String get calorieBudgetSurplusSliderTitle => 'Intensidad del superávit';
+
+  @override
+  String get calorieBudgetMaintenanceSliderTitle => 'Ajuste fino';
+
+  @override
+  String get calorieBudgetSliderLessCalories => 'Menos kcal';
+
+  @override
+  String get calorieBudgetSliderMoreCalories => 'Más kcal';
+
+  @override
+  String get calorieBudgetSliderLessDeficit => 'Menos déficit';
+
+  @override
+  String get calorieBudgetSliderMoreDeficit => 'Más déficit';
+
+  @override
+  String get calorieBudgetSliderLessSurplus => 'Menos superávit';
+
+  @override
+  String get calorieBudgetSliderMoreSurplus => 'Más superávit';
+
+  @override
+  String calorieBudgetDeficitIntensity(int percent) {
+    return '$percent% déficit';
+  }
+
+  @override
+  String calorieBudgetSurplusIntensity(int percent) {
+    return '$percent% superávit';
+  }
+
+  @override
+  String calorieBudgetCaloriesRemoved(int kcal) {
+    return '−$kcal kcal bajo tu TDEE';
+  }
+
+  @override
+  String calorieBudgetCaloriesAdded(int kcal) {
+    return '+$kcal kcal sobre tu TDEE';
+  }
+
+  @override
+  String calorieBudgetMaintenanceDelta(String signed) {
+    return '$signed kcal vs mantenimiento';
+  }
+
+  @override
+  String get calorieBudgetAdjustmentLabel => 'Ajuste';
+
+  @override
+  String get calorieBudgetResultLabel => 'Tu presupuesto base';
+
+  @override
+  String get calorieBudgetDeficitMode => 'Déficit calórico';
+
+  @override
+  String get calorieBudgetSurplusMode => 'Superávit calórico';
+
+  @override
+  String get calorieBudgetMaintenanceMode => 'Mantenimiento';
+
+  @override
+  String calorieBudgetKcalDelta(int kcal) {
+    return '$kcal kcal';
+  }
+
+  @override
+  String calorieBudgetPercentLabel(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String calorieBudgetResetRecommended(String label) {
+    return 'Restaurar recomendado ($label)';
+  }
+
+  @override
+  String get calorieBudgetSave => 'Guardar presupuesto';
+
+  @override
+  String get calorieBudgetBmrRequired =>
+      'Completa peso, altura, edad y género en tu perfil para calcular tu presupuesto.';
+
+  @override
+  String get calorieBudgetWarnWrongDirectionDeficit =>
+      'Para pérdida de grasa necesitas un déficit (porcentaje negativo).';
+
+  @override
+  String calorieBudgetWarnDeficitTooSmall(int kcal) {
+    return 'El déficit es muy pequeño ($kcal kcal). Se recomienda al menos 100 kcal/día para ver progreso.';
+  }
+
+  @override
+  String get calorieBudgetWarnDeficitTooAggressive =>
+      'Déficit muy agresivo. Puede afectar energía y recuperación.';
+
+  @override
+  String get calorieBudgetWarnWrongDirectionSurplus =>
+      'Para hipertrofia o fuerza necesitas un superávit (porcentaje positivo).';
+
+  @override
+  String calorieBudgetWarnSurplusTooSmall(int kcal) {
+    return 'El superávit es muy pequeño ($kcal kcal). Se recomienda al menos 100 kcal/día.';
+  }
+
+  @override
+  String get calorieBudgetWarnSurplusTooHigh =>
+      'Superávit elevado. Un exceso grande puede aumentar grasa corporal.';
+
+  @override
+  String get calorieBudgetWarnMaintenanceDrift =>
+      'Estás lejos del mantenimiento. Considera alinear con tu objetivo actual.';
+
+  @override
   String get foodMealsTitle => 'Comidas del día';
 
   @override
@@ -4291,8 +4434,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileHubBodySubtitle => 'Peso, medidas e integraciones de salud';
 
   @override
+  String get profileHubGoalsTitle => 'Objetivos';
+
+  @override
+  String get profileHubGoalsSubtitle =>
+      'Meta fitness, experiencia y actividad diaria';
+
+  @override
   String get profileHubTrainingSubtitle =>
-      'Objetivos, modos Hyrox/Runner y descanso';
+      'Modos Hyrox/Runner, entrenador y descanso';
 
   @override
   String get profileHubPreferencesSubtitle =>

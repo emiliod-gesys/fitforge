@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/utils/calorie_budget_adjustment.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/connection_error.dart';
 import '../core/utils/catalog_muscle_labels.dart';
@@ -503,4 +504,67 @@ extension ProfileL10n on AppLocalizations {
     'maintenance_health': (l10n) => l10n.dailyTip_maintenance_health,
     'maintenance_enjoy': (l10n) => l10n.dailyTip_maintenance_enjoy,
   };
+
+  String calorieBudgetModeLabel(CalorieGoalMode mode) => switch (mode) {
+        CalorieGoalMode.deficit => calorieBudgetDeficitMode,
+        CalorieGoalMode.surplus => calorieBudgetSurplusMode,
+        CalorieGoalMode.maintenance => calorieBudgetMaintenanceMode,
+      };
+
+  String calorieBudgetEditorSubtitle(CalorieGoalMode mode) => switch (mode) {
+        CalorieGoalMode.deficit => calorieBudgetEditorSubtitleDeficit,
+        CalorieGoalMode.surplus => calorieBudgetEditorSubtitleSurplus,
+        CalorieGoalMode.maintenance => calorieBudgetEditorSubtitleMaintenance,
+      };
+
+  String calorieBudgetSliderTitle(CalorieGoalMode mode) => switch (mode) {
+        CalorieGoalMode.deficit => calorieBudgetDeficitSliderTitle,
+        CalorieGoalMode.surplus => calorieBudgetSurplusSliderTitle,
+        CalorieGoalMode.maintenance => calorieBudgetMaintenanceSliderTitle,
+      };
+
+  String calorieBudgetIntensityLabel(CalorieGoalMode mode, int display) => switch (mode) {
+        CalorieGoalMode.deficit => calorieBudgetDeficitIntensity(display),
+        CalorieGoalMode.surplus => calorieBudgetSurplusIntensity(display),
+        CalorieGoalMode.maintenance => display == 0
+            ? calorieBudgetMaintenanceMode
+            : calorieBudgetMaintenanceDelta(
+                display > 0 ? '+$display%' : '$display%',
+              ),
+      };
+
+  String calorieBudgetKcalDeltaLabel(CalorieGoalMode mode, int kcal) => switch (mode) {
+        CalorieGoalMode.deficit => calorieBudgetCaloriesRemoved(kcal),
+        CalorieGoalMode.surplus => calorieBudgetCaloriesAdded(kcal),
+        CalorieGoalMode.maintenance => calorieBudgetMaintenanceDelta(
+            kcal == 0 ? '0' : (kcal > 0 ? '+$kcal' : '$kcal'),
+          ),
+      };
+
+  (String left, String right) calorieBudgetSliderEndpoints(CalorieGoalMode mode) =>
+      switch (mode) {
+        CalorieGoalMode.deficit => (
+            calorieBudgetSliderLessDeficit,
+            calorieBudgetSliderMoreDeficit,
+          ),
+        CalorieGoalMode.surplus => (
+            calorieBudgetSliderLessSurplus,
+            calorieBudgetSliderMoreSurplus,
+          ),
+        CalorieGoalMode.maintenance => (
+            calorieBudgetSliderLessCalories,
+            calorieBudgetSliderMoreCalories,
+          ),
+      };
+
+  String? calorieBudgetWarningMessage(CalorieBudgetWarning warning, {required int kcal}) =>
+      switch (warning) {
+        CalorieBudgetWarning.wrongDirectionDeficit => calorieBudgetWarnWrongDirectionDeficit,
+        CalorieBudgetWarning.deficitTooSmall => calorieBudgetWarnDeficitTooSmall(kcal),
+        CalorieBudgetWarning.deficitTooAggressive => calorieBudgetWarnDeficitTooAggressive,
+        CalorieBudgetWarning.wrongDirectionSurplus => calorieBudgetWarnWrongDirectionSurplus,
+        CalorieBudgetWarning.surplusTooSmall => calorieBudgetWarnSurplusTooSmall(kcal),
+        CalorieBudgetWarning.surplusTooHigh => calorieBudgetWarnSurplusTooHigh,
+        CalorieBudgetWarning.maintenanceDrift => calorieBudgetWarnMaintenanceDrift,
+      };
 }

@@ -3183,6 +3183,149 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get foodEditCalorieBudget => 'Edit calorie budget';
+
+  @override
+  String get calorieBudgetEditorTitle => 'Calorie budget';
+
+  @override
+  String get calorieBudgetCurrentGoal => 'Your current goal';
+
+  @override
+  String get calorieBudgetEditorSubtitleDeficit =>
+      'Increase deficit to eat fewer calories; decrease it to allow a bit more while still losing fat.';
+
+  @override
+  String get calorieBudgetEditorSubtitleSurplus =>
+      'Increase surplus to raise calories and support muscle gain.';
+
+  @override
+  String get calorieBudgetEditorSubtitleMaintenance =>
+      'Fine-tune slightly above or below maintenance based on how you feel.';
+
+  @override
+  String get calorieBudgetTdeeLabel => 'Estimated daily burn (TDEE)';
+
+  @override
+  String get calorieBudgetDeficitSliderTitle => 'Deficit intensity';
+
+  @override
+  String get calorieBudgetSurplusSliderTitle => 'Surplus intensity';
+
+  @override
+  String get calorieBudgetMaintenanceSliderTitle => 'Fine adjustment';
+
+  @override
+  String get calorieBudgetSliderLessCalories => 'Fewer kcal';
+
+  @override
+  String get calorieBudgetSliderMoreCalories => 'More kcal';
+
+  @override
+  String get calorieBudgetSliderLessDeficit => 'Less deficit';
+
+  @override
+  String get calorieBudgetSliderMoreDeficit => 'More deficit';
+
+  @override
+  String get calorieBudgetSliderLessSurplus => 'Less surplus';
+
+  @override
+  String get calorieBudgetSliderMoreSurplus => 'More surplus';
+
+  @override
+  String calorieBudgetDeficitIntensity(int percent) {
+    return '$percent% deficit';
+  }
+
+  @override
+  String calorieBudgetSurplusIntensity(int percent) {
+    return '$percent% surplus';
+  }
+
+  @override
+  String calorieBudgetCaloriesRemoved(int kcal) {
+    return '−$kcal kcal below your TDEE';
+  }
+
+  @override
+  String calorieBudgetCaloriesAdded(int kcal) {
+    return '+$kcal kcal above your TDEE';
+  }
+
+  @override
+  String calorieBudgetMaintenanceDelta(String signed) {
+    return '$signed kcal vs maintenance';
+  }
+
+  @override
+  String get calorieBudgetAdjustmentLabel => 'Adjustment';
+
+  @override
+  String get calorieBudgetResultLabel => 'Your base budget';
+
+  @override
+  String get calorieBudgetDeficitMode => 'Caloric deficit';
+
+  @override
+  String get calorieBudgetSurplusMode => 'Caloric surplus';
+
+  @override
+  String get calorieBudgetMaintenanceMode => 'Maintenance';
+
+  @override
+  String calorieBudgetKcalDelta(int kcal) {
+    return '$kcal kcal';
+  }
+
+  @override
+  String calorieBudgetPercentLabel(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String calorieBudgetResetRecommended(String label) {
+    return 'Reset to recommended ($label)';
+  }
+
+  @override
+  String get calorieBudgetSave => 'Save budget';
+
+  @override
+  String get calorieBudgetBmrRequired =>
+      'Add weight, height, age, and gender in your profile to calculate your budget.';
+
+  @override
+  String get calorieBudgetWarnWrongDirectionDeficit =>
+      'Fat loss requires a deficit (negative percentage).';
+
+  @override
+  String calorieBudgetWarnDeficitTooSmall(int kcal) {
+    return 'Deficit is too small ($kcal kcal). At least 100 kcal/day is recommended for progress.';
+  }
+
+  @override
+  String get calorieBudgetWarnDeficitTooAggressive =>
+      'Very aggressive deficit. It may hurt energy and recovery.';
+
+  @override
+  String get calorieBudgetWarnWrongDirectionSurplus =>
+      'Hypertrophy or strength requires a surplus (positive percentage).';
+
+  @override
+  String calorieBudgetWarnSurplusTooSmall(int kcal) {
+    return 'Surplus is too small ($kcal kcal). At least 100 kcal/day is recommended.';
+  }
+
+  @override
+  String get calorieBudgetWarnSurplusTooHigh =>
+      'High surplus. Excess calories may increase body fat.';
+
+  @override
+  String get calorieBudgetWarnMaintenanceDrift =>
+      'You\'re far from maintenance. Consider aligning with your current goal.';
+
+  @override
   String get foodMealsTitle => 'Today\'s meals';
 
   @override
@@ -4257,8 +4400,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Weight, measurements, and health integrations';
 
   @override
+  String get profileHubGoalsTitle => 'Goals';
+
+  @override
+  String get profileHubGoalsSubtitle =>
+      'Fitness goal, experience, and daily activity';
+
+  @override
   String get profileHubTrainingSubtitle =>
-      'Goals, Hyrox/Runner modes, and rest timer';
+      'Hyrox/Runner modes, trainer mode, and rest timer';
 
   @override
   String get profileHubPreferencesSubtitle =>

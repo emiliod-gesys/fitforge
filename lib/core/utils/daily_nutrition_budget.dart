@@ -4,6 +4,7 @@ import '../../models/manual_activity_entry.dart';
 import '../../models/profile.dart';
 import '../../models/workout.dart';
 import 'bmr_calculator.dart';
+import 'calorie_budget_adjustment.dart';
 import 'workout_calorie_estimator.dart';
 
 /// Calcula objetivo calórico diario, macros y balance con entrenos del día.
@@ -37,6 +38,7 @@ abstract final class DailyNutritionBudget {
             goal: profile?.fitnessGoal,
             weightKg: weightKg,
             activityLevel: profile?.activityLevel ?? DailyActivityLevel.moderate,
+            adjustmentPct: profile?.calorieAdjustmentPct,
           )
         : _defaultCalorieGoal;
 
@@ -98,28 +100,29 @@ abstract final class DailyNutritionBudget {
     );
   }
 
+  static int computeTdee({
+    required double bmr,
+    required DailyActivityLevel activityLevel,
+  }) =>
+      (bmr * activityLevel.tdeeFactor).round();
+
   static int _baseCalorieGoal({
     required double bmr,
     required String? goal,
     required double weightKg,
     required DailyActivityLevel activityLevel,
+    int? adjustmentPct,
   }) {
-    var tdee = (bmr * activityLevel.tdeeFactor).round();
-    final g = (goal ?? '').toLowerCase();
+    final tdee = computeTdee(bmr: bmr, activityLevel: activityLevel);
 
-    if (g.contains('pérdida') ||
-        g.contains('perdida') ||
-        g.contains('fat') ||
-        g.contains('grasa')) {
-      tdee = (tdee * 0.85).round();
-    } else if (g.contains('hipertrofia') ||
-        g.contains('hypertrophy') ||
-        g.contains('fuerza') ||
-        g.contains('strength')) {
-      tdee = (tdee * 1.08).round();
+    if (adjustmentPct != null) {
+      return CalorieBudgetAdjustment.goalFromTdee(tdee, adjustmentPct);
     }
 
-    return tdee.clamp(1200, 6000);
+    return CalorieBudgetAdjustment.goalFromTdee(
+      tdee,
+      CalorieBudgetAdjustment.defaultPercent(goal),
+    );
   }
 
   static MacroTargets _macroTargets({
