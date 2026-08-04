@@ -3435,6 +3435,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodNoRecent => 'Aún no has registrado alimentos.';
 
   @override
+  String get foodCatalogSection => 'Catálogo FitForge';
+
+  @override
+  String get foodCatalogNoResults =>
+      'Sin resultados. Prueba con otro nombre o usa Rápido con IA.';
+
+  @override
+  String get foodPackagedSection => 'Productos empacados';
+
+  @override
   String get foodAiFailed =>
       'No se pudo estimar el alimento. Revisa tu API key o intenta de nuevo.';
 

@@ -13,6 +13,7 @@ import '../../core/utils/speech_locale_utils.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/catalog_food.dart';
 import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
 import '../../models/profile.dart';
@@ -49,6 +50,12 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   bool _loading = false;
   List<FoodEntry> _recent = const [];
   List<ManualFoodTemplate> _manualSaved = const [];
+  List<CatalogFood> _catalogResults = const [];
+  bool _catalogSearching = false;
+  Timer? _catalogDebounce;
+  List<FoodNutritionEstimate> _offResults = const [];
+  bool _offSearching = false;
+  Timer? _offDebounce;
 
   @override
   void initState() {
@@ -58,7 +65,50 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     }
     _loadRecent();
     _loadManualSaved();
-    _filterController.addListener(_loadRecent);
+    _filterController.addListener(_onFilterChanged);
+  }
+
+  void _onFilterChanged() {
+    _loadRecent();
+    _catalogDebounce?.cancel();
+    _offDebounce?.cancel();
+    final query = _filterController.text.trim();
+    if (query.length < 2) {
+      if (_catalogResults.isNotEmpty || _catalogSearching || _offResults.isNotEmpty || _offSearching) {
+        setState(() {
+          _catalogResults = const [];
+          _catalogSearching = false;
+          _offResults = const [];
+          _offSearching = false;
+        });
+      }
+      return;
+    }
+    final searchPackaged = query.length >= 3;
+    setState(() {
+      _catalogSearching = true;
+      _offSearching = searchPackaged;
+      if (!searchPackaged) _offResults = const [];
+    });
+    _catalogDebounce = Timer(const Duration(milliseconds: 300), () async {
+      final results = await ref.read(catalogFoodServiceProvider).search(query);
+      if (!mounted || _filterController.text.trim() != query) return;
+      setState(() {
+        _catalogResults = results;
+        _catalogSearching = false;
+      });
+    });
+    // Open Food Facts: debounce más largo (servicio externo con rate limit).
+    if (searchPackaged) {
+      _offDebounce = Timer(const Duration(milliseconds: 800), () async {
+        final results = await ref.read(openFoodFactsServiceProvider).searchByText(query);
+        if (!mounted || _filterController.text.trim() != query) return;
+        setState(() {
+          _offResults = results;
+          _offSearching = false;
+        });
+      });
+    }
   }
 
   Future<void> _loadManualSaved() async {
@@ -87,6 +137,8 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
   @override
   void dispose() {
+    _catalogDebounce?.cancel();
+    _offDebounce?.cancel();
     _filterController.dispose();
     _quickController.dispose();
     super.dispose();
@@ -120,6 +172,11 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
   void _openFromManualTemplate(ManualFoodTemplate template) {
     _openDetail(template.toEstimate(), FoodEntrySource.manual);
+  }
+
+  void _openFromCatalog(CatalogFood food) {
+    final languageCode = ref.read(preferredLanguageProvider);
+    _openDetail(food.toEstimate(languageCode), FoodEntrySource.search);
   }
 
   Future<void> _lookupBarcode(String code) async {
@@ -346,7 +403,15 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                     FoodAddMode.search => _SearchPane(
                         filterController: _filterController,
                         recent: _recent,
+                        catalogResults: _catalogResults,
+                        catalogSearching: _catalogSearching,
+                        offResults: _offResults,
+                        offSearching: _offSearching,
+                        languageCode: ref.watch(preferredLanguageProvider),
                         onSelect: _openFromEntry,
+                        onSelectCatalog: _openFromCatalog,
+                        onSelectPackaged: (estimate) =>
+                            _openDetail(estimate, FoodEntrySource.search),
                       ),
                     FoodAddMode.barcode => FoodBarcodeScannerView(
                         onDetected: _lookupBarcode,
@@ -396,17 +461,39 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 class _SearchPane extends StatelessWidget {
   final TextEditingController filterController;
   final List<FoodEntry> recent;
+  final List<CatalogFood> catalogResults;
+  final bool catalogSearching;
+  final List<FoodNutritionEstimate> offResults;
+  final bool offSearching;
+  final String languageCode;
   final ValueChanged<FoodEntry> onSelect;
+  final ValueChanged<CatalogFood> onSelectCatalog;
+  final ValueChanged<FoodNutritionEstimate> onSelectPackaged;
 
   const _SearchPane({
     required this.filterController,
     required this.recent,
+    required this.catalogResults,
+    required this.catalogSearching,
+    required this.offResults,
+    required this.offSearching,
+    required this.languageCode,
     required this.onSelect,
+    required this.onSelectCatalog,
+    required this.onSelectPackaged,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final searching = filterController.text.trim().length >= 2;
+    final showCatalogSection = searching && (catalogResults.isNotEmpty || catalogSearching);
+    final showPackagedSection = searching && (offResults.isNotEmpty || offSearching);
+    final showEmptyState = !catalogSearching &&
+        !offSearching &&
+        catalogResults.isEmpty &&
+        offResults.isEmpty &&
+        recent.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,26 +506,152 @@ class _SearchPane extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          l10n.foodRecentSearches,
-          style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textMuted),
-        ),
-        const SizedBox(height: 8),
         Expanded(
-          child: recent.isEmpty
+          child: showEmptyState
               ? Align(
                   alignment: Alignment.topLeft,
-                  child: Text(l10n.foodNoRecent, style: const TextStyle(color: AppColors.textMuted)),
+                  child: Text(
+                    searching ? l10n.foodCatalogNoResults : l10n.foodNoRecent,
+                    style: const TextStyle(color: AppColors.textMuted),
+                  ),
                 )
               : ListView(
-                  children: recent
-                      .map(
+                  children: [
+                    if (showCatalogSection) ...[
+                      Text(
+                        l10n.foodCatalogSection,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                      ),
+                      const SizedBox(height: 8),
+                      if (catalogSearching && catalogResults.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                          ),
+                        )
+                      else
+                        ...catalogResults.map(
+                          (food) => _CatalogFoodTile(
+                            food: food,
+                            languageCode: languageCode,
+                            onTap: () => onSelectCatalog(food),
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (recent.isNotEmpty) ...[
+                      Text(
+                        l10n.foodRecentSearches,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                      ),
+                      const SizedBox(height: 8),
+                      ...recent.map(
                         (entry) => _RecentFoodTile(entry: entry, onTap: () => onSelect(entry)),
-                      )
-                      .toList(),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (showPackagedSection) ...[
+                      Text(
+                        l10n.foodPackagedSection,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                      ),
+                      const SizedBox(height: 8),
+                      if (offSearching && offResults.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                          ),
+                        )
+                      else
+                        ...offResults.map(
+                          (estimate) => _PackagedFoodTile(
+                            estimate: estimate,
+                            onTap: () => onSelectPackaged(estimate),
+                          ),
+                        ),
+                    ],
+                  ],
                 ),
         ),
       ],
+    );
+  }
+}
+
+class _PackagedFoodTile extends StatelessWidget {
+  final FoodNutritionEstimate estimate;
+  final VoidCallback onTap;
+
+  const _PackagedFoodTile({required this.estimate, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = estimate.brand;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        onTap: onTap,
+        title: Text(
+          brand != null && brand.isNotEmpty ? '${estimate.name} · $brand' : estimate.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          '${estimate.caloriesKcal} kcal, 100 ${estimate.amountUnit}',
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.add_circle, color: context.accentColor),
+          onPressed: onTap,
+        ),
+      ),
+    );
+  }
+}
+
+class _CatalogFoodTile extends StatelessWidget {
+  final CatalogFood food;
+  final String languageCode;
+  final VoidCallback onTap;
+
+  const _CatalogFoodTile({
+    required this.food,
+    required this.languageCode,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final serving = food.localizedServingLabel(languageCode);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        onTap: onTap,
+        title: Text(
+          food.localizedName(languageCode),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          '${food.servingCalories} kcal${serving.isNotEmpty ? ', $serving' : ''}',
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.add_circle, color: context.accentColor),
+          onPressed: onTap,
+        ),
+      ),
     );
   }
 }

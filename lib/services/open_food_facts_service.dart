@@ -4,17 +4,16 @@ import 'package:http/http.dart' as http;
 
 import '../models/food_entry.dart';
 
-/// Consulta productos por código de barras (Open Food Facts).
+/// Consulta productos por código de barras y texto (Open Food Facts).
 class OpenFoodFactsService {
+  static const _headers = {'User-Agent': 'FitForge/1.0 (nutrition tracking)'};
+
   Future<FoodNutritionEstimate?> lookupBarcode(String barcode) async {
     final code = barcode.trim();
     if (code.isEmpty) return null;
 
     final uri = Uri.parse('https://world.openfoodfacts.org/api/v2/product/$code.json');
-    final response = await http.get(
-      uri,
-      headers: const {'User-Agent': 'FitForge/1.0 (nutrition tracking)'},
-    );
+    final response = await http.get(uri, headers: _headers);
     if (response.statusCode != 200) return null;
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -23,8 +22,53 @@ class OpenFoodFactsService {
     final product = body['product'] as Map<String, dynamic>?;
     if (product == null) return null;
 
+    return _estimateFromProduct(product);
+  }
+
+  /// Búsqueda de productos empacados por texto, ordenada por popularidad
+  /// (los productos más escaneados en la región aparecen primero).
+  Future<List<FoodNutritionEstimate>> searchByText(String query, {int limit = 12}) async {
+    final q = query.trim();
+    if (q.length < 3) return const [];
+
+    final uri = Uri.https('world.openfoodfacts.org', '/cgi/search.pl', {
+      'search_terms': q,
+      'search_simple': '1',
+      'action': 'process',
+      'json': '1',
+      'page_size': '$limit',
+      'sort_by': 'unique_scans_n',
+      'lc': 'es',
+      'fields':
+          'product_name,product_name_es,brands,nutriments,product_quantity_unit,ingredients_text',
+    });
+
+    try {
+      final response = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return const [];
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final products = body['products'] as List? ?? const [];
+      return products
+          .whereType<Map>()
+          .map((p) => _estimateFromProduct(Map<String, dynamic>.from(p)))
+          .whereType<FoodNutritionEstimate>()
+          .where((e) => e.caloriesKcal > 0)
+          .toList();
+    } catch (_) {
+      // Sin conexión o servicio caído: la búsqueda degrada sin romperse.
+      return const [];
+    }
+  }
+
+  FoodNutritionEstimate? _estimateFromProduct(Map<String, dynamic> product) {
     final nutriments = product['nutriments'] as Map<String, dynamic>? ?? {};
-    final name = (product['product_name'] as String?)?.trim();
+    final name = ((product['product_name_es'] as String?)?.trim().isNotEmpty == true
+            ? product['product_name_es'] as String
+            : product['product_name'] as String?)
+        ?.trim();
     if (name == null || name.isEmpty) return null;
 
     final brand = (product['brands'] as String?)?.trim();

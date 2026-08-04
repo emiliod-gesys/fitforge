@@ -5942,6 +5942,24 @@ abstract class AppLocalizations {
   /// **'Aún no has registrado alimentos.'**
   String get foodNoRecent;
 
+  /// No description provided for @foodCatalogSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Catálogo FitForge'**
+  String get foodCatalogSection;
+
+  /// No description provided for @foodCatalogNoResults.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin resultados. Prueba con otro nombre o usa Rápido con IA.'**
+  String get foodCatalogNoResults;
+
+  /// No description provided for @foodPackagedSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Productos empacados'**
+  String get foodPackagedSection;
+
   /// No description provided for @foodAiFailed.
   ///
   /// In es, this message translates to:

@@ -27,6 +27,7 @@ import '../services/custom_exercise_repository.dart';
 import '../data/cloud_exercise_catalog.dart';
 import '../services/exercise_service.dart';
 import '../services/activity_log_service.dart';
+import '../services/catalog_food_service.dart';
 import '../services/food_service.dart';
 import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
@@ -494,6 +495,7 @@ final activityLogServiceProvider = Provider((ref) => ActivityLogService());
 final localManualFoodStoreProvider = Provider((ref) => LocalManualFoodStore());
 
 final openFoodFactsServiceProvider = Provider((ref) => OpenFoodFactsService());
+final catalogFoodServiceProvider = Provider((ref) => CatalogFoodService());
 
 final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
   final now = DateTime.now();
