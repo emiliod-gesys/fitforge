@@ -29,6 +29,7 @@ enum _OnboardingStepKind {
   aboutYou,
   body,
   goals,
+  activityLevel,
   modes,
   offlineCatalog,
   plan,
@@ -53,7 +54,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String _unitSystem = 'kg';
   String? _fitnessGoal;
   String? _experienceLevel;
-  DailyActivityLevel _activityLevel = DailyActivityLevel.moderate;
+  DailyActivityLevel? _activityLevel;
   bool _hyroxMode = false;
   bool _runnerMode = false;
   bool _busy = false;
@@ -73,6 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _OnboardingStepKind.aboutYou,
       _OnboardingStepKind.body,
       _OnboardingStepKind.goals,
+      _OnboardingStepKind.activityLevel,
       if (!isTrainer) _OnboardingStepKind.modes,
       _OnboardingStepKind.offlineCatalog,
       _OnboardingStepKind.plan,
@@ -116,7 +118,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     if (profile.fitnessGoal != null) _fitnessGoal = profile.fitnessGoal;
     if (profile.experienceLevel != null) _experienceLevel = profile.experienceLevel;
-    _activityLevel = profile.activityLevel;
     _preferredLanguage = profile.preferredLanguage;
     _hyroxMode = profile.hyroxMode;
     _runnerMode = profile.runnerMode;
@@ -224,6 +225,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             .showSnackBar(SnackBar(content: Text(l10n.onboardingSelectExperience)));
         return;
       }
+      await _goNextPage();
+      return;
+    }
+
+    if (step == _OnboardingStepKind.activityLevel) {
+      if (_activityLevel == null) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.onboardingSelectActivity)));
+        return;
+      }
       try {
         await _saveProfileDraft();
       } catch (_) {
@@ -257,6 +268,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _saveProfileDraft() async {
     if (_busy) return;
+    if (_activityLevel == null) return;
     setState(() => _busy = true);
     try {
       final name = _nameController.text.trim();
@@ -275,7 +287,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         'unit_system': _unitSystem,
         'fitness_goal': _fitnessGoal,
         'experience_level': _experienceLevel,
-        'activity_level': _activityLevel.code,
+        'activity_level': _activityLevel!.code,
         'preferred_language': _preferredLanguage,
         'avatar_url': _selectedAvatarId,
       });
@@ -349,8 +361,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _busy = true);
     final l10n = context.l10n;
     try {
-      // Re-save in case the user edited fields after the goals step.
-      if (_dateOfBirth != null && _gender != null && _fitnessGoal != null) {
+      // Re-save in case the user edited fields after the activity step.
+      if (_dateOfBirth != null &&
+          _gender != null &&
+          _fitnessGoal != null &&
+          _activityLevel != null) {
         await _saveProfileDraftQuiet();
       }
 
@@ -398,7 +413,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _saveProfileDraftQuiet() async {
     final name = _nameController.text.trim();
-    if (name.isEmpty || _dateOfBirth == null || _gender == null) return;
+    if (name.isEmpty ||
+        _dateOfBirth == null ||
+        _gender == null ||
+        _activityLevel == null) {
+      return;
+    }
     final heightCm = double.tryParse(_heightController.text.replaceAll(',', '.'));
     final weightKg = _parseWeightKg();
     if (heightCm == null || weightKg == null) return;
@@ -414,7 +434,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       'unit_system': _unitSystem,
       'fitness_goal': _fitnessGoal,
       'experience_level': _experienceLevel,
-      'activity_level': _activityLevel.code,
+      'activity_level': _activityLevel!.code,
       'preferred_language': _preferredLanguage,
       'avatar_url': _selectedAvatarId,
     });
@@ -546,10 +566,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             accent: accent,
                             fitnessGoal: _fitnessGoal,
                             experienceLevel: _experienceLevel,
-                            activityLevel: _activityLevel,
                             onGoalChanged: (g) => setState(() => _fitnessGoal = l10n.canonicalGoal(g)),
                             onExperienceChanged: (e) =>
                                 setState(() => _experienceLevel = l10n.canonicalExperience(e)),
+                          ),
+                        _OnboardingStepKind.activityLevel => _ActivityLevelStep(
+                            l10n: l10n,
+                            accent: accent,
+                            activityLevel: _activityLevel,
                             onActivityChanged: (a) => setState(() => _activityLevel = a),
                           ),
                         _OnboardingStepKind.modes => _ModesStep(
@@ -948,20 +972,16 @@ class _GoalsStep extends StatelessWidget {
   final Color accent;
   final String? fitnessGoal;
   final String? experienceLevel;
-  final DailyActivityLevel activityLevel;
   final ValueChanged<String> onGoalChanged;
   final ValueChanged<String> onExperienceChanged;
-  final ValueChanged<DailyActivityLevel> onActivityChanged;
 
   const _GoalsStep({
     required this.l10n,
     required this.accent,
     required this.fitnessGoal,
     required this.experienceLevel,
-    required this.activityLevel,
     required this.onGoalChanged,
     required this.onExperienceChanged,
-    required this.onActivityChanged,
   });
 
   @override
@@ -1001,9 +1021,38 @@ class _GoalsStep extends StatelessWidget {
               );
             }).toList(),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityLevelStep extends StatelessWidget {
+  final AppLocalizations l10n;
+  final Color accent;
+  final DailyActivityLevel? activityLevel;
+  final ValueChanged<DailyActivityLevel> onActivityChanged;
+
+  const _ActivityLevelStep({
+    required this.l10n,
+    required this.accent,
+    required this.activityLevel,
+    required this.onActivityChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepScaffold(
+      title: l10n.onboardingActivityTitle,
+      subtitle: l10n.onboardingActivitySubtitle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.activityLevelHint,
+            style: const TextStyle(color: AppColors.textMuted, height: 1.4),
+          ),
           const SizedBox(height: 16),
-          Text(l10n.activityLevel, style: const TextStyle(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
           ...l10n.activityLevels.map((level) {
             return _SelectableTile(
               title: l10n.activityLevelLabel(level),
@@ -1013,6 +1062,11 @@ class _GoalsStep extends StatelessWidget {
               onTap: () => onActivityChanged(level),
             );
           }),
+          const SizedBox(height: 12),
+          Text(
+            l10n.activityLevelFootnote,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35),
+          ),
         ],
       ),
     );

@@ -300,6 +300,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingSelectExperience => 'Selecciona tu nivel';
 
   @override
+  String get onboardingSelectActivity =>
+      'Selecciona tu nivel de actividad diaria';
+
+  @override
+  String get onboardingActivityTitle => 'Actividad diaria';
+
+  @override
+  String get onboardingActivitySubtitle =>
+      '¿Qué tan activo eres fuera del gym? Nos ayuda a estimar calorías y metas de nutrición.';
+
+  @override
   String get weightUpdateTitle => 'Actualiza tu peso';
 
   @override
@@ -2731,6 +2742,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loadingHistory => 'Cargando historial…';
+
+  @override
+  String lastSessionChip(String detail) {
+    return 'Última: $detail';
+  }
 
   @override
   String setLine(int n, String detail) {

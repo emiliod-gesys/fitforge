@@ -620,6 +620,24 @@ abstract class AppLocalizations {
   /// **'Selecciona tu nivel'**
   String get onboardingSelectExperience;
 
+  /// No description provided for @onboardingSelectActivity.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona tu nivel de actividad diaria'**
+  String get onboardingSelectActivity;
+
+  /// No description provided for @onboardingActivityTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad diaria'**
+  String get onboardingActivityTitle;
+
+  /// No description provided for @onboardingActivitySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué tan activo eres fuera del gym? Nos ayuda a estimar calorías y metas de nutrición.'**
+  String get onboardingActivitySubtitle;
+
   /// No description provided for @weightUpdateTitle.
   ///
   /// In es, this message translates to:
@@ -4819,6 +4837,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cargando historial…'**
   String get loadingHistory;
+
+  /// No description provided for @lastSessionChip.
+  ///
+  /// In es, this message translates to:
+  /// **'Última: {detail}'**
+  String lastSessionChip(String detail);
 
   /// No description provided for @setLine.
   ///

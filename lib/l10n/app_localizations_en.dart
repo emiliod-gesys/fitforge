@@ -298,6 +298,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingSelectExperience => 'Select your level';
 
   @override
+  String get onboardingSelectActivity => 'Select your daily activity level';
+
+  @override
+  String get onboardingActivityTitle => 'Daily activity';
+
+  @override
+  String get onboardingActivitySubtitle =>
+      'How active are you outside the gym? This helps us estimate calories and nutrition targets.';
+
+  @override
   String get weightUpdateTitle => 'Update your weight';
 
   @override
@@ -2708,6 +2718,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingHistory => 'Loading history…';
+
+  @override
+  String lastSessionChip(String detail) {
+    return 'Last: $detail';
+  }
 
   @override
   String setLine(int n, String detail) {

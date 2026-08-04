@@ -21,8 +21,10 @@ class SetLogTile extends StatefulWidget {
   final double? bodyWeightKg;
   final bool isLast;
   final bool isSaving;
+  final bool requestFocus;
   final void Function(WorkoutSet set) onChanged;
   final VoidCallback? onDelete;
+  final VoidCallback? onFocusHandled;
   final void Function(String message)? onValidationError;
 
   const SetLogTile({
@@ -37,8 +39,10 @@ class SetLogTile extends StatefulWidget {
     this.bodyWeightKg,
     this.isLast = true,
     this.isSaving = false,
+    this.requestFocus = false,
     required this.onChanged,
     this.onDelete,
+    this.onFocusHandled,
     this.onValidationError,
   });
 
@@ -50,6 +54,7 @@ class _SetLogTileState extends State<SetLogTile> {
   late TextEditingController _weightController;
   late TextEditingController _repsController;
   late TextEditingController _distanceController;
+  late FocusNode _weightFocusNode;
   late String _lastUnitSystem;
   bool _editing = false;
 
@@ -61,6 +66,7 @@ class _SetLogTileState extends State<SetLogTile> {
   void initState() {
     super.initState();
     _lastUnitSystem = widget.unitSystem;
+    _weightFocusNode = FocusNode();
     _repsController = TextEditingController(text: widget.set.reps.toString());
     _distanceController = TextEditingController(
       text: widget.set.distanceMeters != null && widget.set.distanceMeters! > 0
@@ -69,6 +75,16 @@ class _SetLogTileState extends State<SetLogTile> {
     );
     _weightController = TextEditingController();
     _syncWeightField();
+    _maybeRequestFocus();
+  }
+
+  void _maybeRequestFocus() {
+    if (!widget.requestFocus || widget.set.completed) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || widget.set.completed) return;
+      _weightFocusNode.requestFocus();
+      widget.onFocusHandled?.call();
+    });
   }
 
   void _syncWeightField() {
@@ -109,10 +125,14 @@ class _SetLogTileState extends State<SetLogTile> {
           ? widget.set.distanceMeters!.round().toString()
           : '';
     }
+    if (widget.requestFocus && !oldWidget.requestFocus) {
+      _maybeRequestFocus();
+    }
   }
 
   @override
   void dispose() {
+    _weightFocusNode.dispose();
     _weightController.dispose();
     _repsController.dispose();
     _distanceController.dispose();
@@ -312,6 +332,7 @@ class _SetLogTileState extends State<SetLogTile> {
                         children: [
                           TextField(
                             controller: _weightController,
+                            focusNode: _weightFocusNode,
                             enabled: _fieldsEnabled,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [

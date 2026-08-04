@@ -15,9 +15,13 @@ import '../../core/utils/workout_exercise_navigation.dart';
 import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/workout_xp_utils.dart';
+import '../../core/utils/exercise_history_utils.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
+import '../../core/utils/gym_weight.dart';
+import '../../core/utils/previous_set_utils.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../models/exercise_history.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/milestones.dart';
 import '../../core/utils/player_level.dart';
@@ -83,6 +87,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, List<WorkoutSet>> _insertedSets = {};
   final Set<String> _savingSetIds = {};
   final Map<String, bool> _perArmOverrides = {};
+  String? _focusSetId;
   bool _perArmSeeded = false;
   /// Unidad por ejercicio en la sesión (`kg`/`lb`); no persiste ni cambia el perfil.
   final Map<String, String> _unitOverrides = {};
@@ -1386,6 +1391,25 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             catalog: exerciseCatalog,
           );
 
+          final exerciseUnit = _unitOverrides[exercise.exerciseId] ?? unitSystem;
+          final lastSessionLabel = !isCardio && !_isHyroxWorkout
+              ? ref.watch(
+                  exerciseHistoryProvider(
+                    ExerciseHistoryQuery(
+                      exerciseId: exercise.exerciseId,
+                      excludeWorkoutId: displayWorkout.id,
+                    ),
+                  ),
+                ).maybeWhen(
+                  data: (history) => _lastSessionChipLabel(
+                    history,
+                    exerciseUnit,
+                    l10n,
+                  ),
+                  orElse: () => null,
+                )
+              : null;
+
           return Column(
             children: [
               if (!_isHyroxWorkout || _hyroxRaceStarted)
@@ -1410,6 +1434,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   }(),
                 ),
               if (_showRestTimer) _buildActiveRestTimer(),
+              _PinnedExerciseHeader(
+                exerciseId: exercise.exerciseId,
+                exerciseName: exercise.exerciseName,
+                restSelector: !isCardio && !_isHyroxWorkout
+                    ? RestTimeSelector(
+                        selectedSeconds: _restSeconds,
+                        onChanged: _onRestSecondsChanged,
+                      )
+                    : null,
+              ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -1426,22 +1460,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                         exerciseName: exercise.exerciseName,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    LocalizedExerciseName(
-                      exercise.exerciseName,
-                      exerciseId: exercise.exerciseId,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1.15,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (!isCardio && !_isHyroxWorkout) ...[
-                      RestTimeSelector(
-                        selectedSeconds: _restSeconds,
-                        onChanged: _onRestSecondsChanged,
-                      ),
-                    ],
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
@@ -1488,10 +1506,29 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           setState(() => _perArmOverrides[exercise.exerciseId] = value);
                         },
                         bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
-                        unitSystem: _unitOverrides[exercise.exerciseId] ?? unitSystem,
+                        unitSystem: exerciseUnit,
                         onUnitSystemChanged: (value) {
                           setState(() => _unitOverrides[exercise.exerciseId] = value);
                         },
+                      ),
+                    ],
+                    if (lastSessionLabel != null) ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Chip(
+                          visualDensity: VisualDensity.compact,
+                          avatar: Icon(
+                            Icons.history,
+                            size: 16,
+                            color: context.accentColor,
+                          ),
+                          label: Text(lastSessionLabel),
+                          side: BorderSide(
+                            color: context.accentColor.withValues(alpha: 0.35),
+                          ),
+                          backgroundColor: context.accentColor.withValues(alpha: 0.1),
+                        ),
                       ),
                     ],
                     const SizedBox(height: 12),
@@ -1501,15 +1538,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                         exercise: exercise,
                         sets: sortedSets,
                         visibleExercises: visibleExercises,
-                        unitSystem: _unitOverrides[exercise.exerciseId] ?? unitSystem,
+                        unitSystem: exerciseUnit,
                         isCardio: isCardio,
                         cardioConfig: cardioConfig,
                       )
                     else ...[
                     ...sortedSets.asMap().entries.map(
                       (entry) {
-                        final exerciseUnit =
-                            _unitOverrides[exercise.exerciseId] ?? unitSystem;
                         if (isCardio) {
                           return CardioSetLogTile(
                             key: ValueKey(entry.value.id),
@@ -1571,6 +1606,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
                           isLast: entry.key == sortedSets.length - 1,
                           isSaving: _savingSetIds.contains(entry.value.id),
+                          requestFocus: _focusSetId == entry.value.id,
+                          onFocusHandled: () {
+                            if (_focusSetId == entry.value.id) {
+                              setState(() => _focusSetId = null);
+                            }
+                          },
                           onValidationError: (message) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(message)),
@@ -1916,9 +1957,25 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       durationSeconds: stationSeconds ?? set.durationSeconds,
     );
 
+    String? nextFocusId;
+    if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
+      final sorted = _sortedSets(exercise);
+      for (final candidate in sorted) {
+        if (candidate.setNumber <= set.setNumber) continue;
+        final effective = candidate.id == set.id
+            ? completedSet
+            : (_setOverrides[candidate.id] ?? candidate);
+        if (!effective.completed) {
+          nextFocusId = candidate.id;
+          break;
+        }
+      }
+    }
+
     setState(() {
       _setOverrides[set.id] = completedSet;
       _savingSetIds.add(set.id);
+      if (nextFocusId != null) _focusSetId = nextFocusId;
     });
 
     if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
@@ -2008,6 +2065,89 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         exercise,
         newSet,
         setId: newSet.id,
+      ),
+    );
+  }
+
+  String? _lastSessionChipLabel(
+    List<ExerciseSessionHistory> history,
+    String unitSystem,
+    AppLocalizations l10n,
+  ) {
+    if (history.isEmpty) return null;
+    final sets = history.first.sets;
+    final working = ExerciseHistoryUtils.workingSets(sets);
+    final source = working.isNotEmpty
+        ? working
+        : PreviousSetUtils.sortedMeaningfulSets(sets);
+    if (source.isEmpty) return null;
+    final set = source.last;
+    final weight = set.weight;
+    if (weight != null && weight > 0) {
+      final display = GymWeight.formatDisplay(weight, unitSystem);
+      if (set.reps > 0) {
+        return l10n.lastSessionChip('$display×${set.reps}');
+      }
+      if ((set.distanceMeters ?? 0) > 0) {
+        return l10n.lastSessionChip('$display×${set.distanceMeters!.round()}m');
+      }
+      return l10n.lastSessionChip(display);
+    }
+    if (set.reps > 0) return l10n.lastSessionChip(l10n.repsOnly(set.reps));
+    return null;
+  }
+}
+
+class _PinnedExerciseHeader extends StatelessWidget {
+  final String exerciseId;
+  final String exerciseName;
+  final Widget? restSelector;
+
+  const _PinnedExerciseHeader({
+    required this.exerciseId,
+    required this.exerciseName,
+    this.restSelector,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        child: Row(
+          children: [
+            ExerciseThumbnail(
+              exerciseId: exerciseId,
+              exerciseName: exerciseName,
+              width: 44,
+              height: 44,
+              borderRadius: BorderRadius.circular(10),
+              onTap: () => ExerciseImageViewer.open(
+                context,
+                exerciseId: exerciseId,
+                exerciseName: exerciseName,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: LocalizedExerciseName(
+                exerciseName,
+                exerciseId: exerciseId,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (restSelector != null) ...[
+              const SizedBox(width: 8),
+              restSelector!,
+            ],
+          ],
+        ),
       ),
     );
   }

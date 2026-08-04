@@ -217,11 +217,14 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     final isLast = index == exercises.length - 1;
+                    final done = exercise.sets.where((s) => s.completed).length;
                     return _ExerciseListRow(
                       key: ValueKey(exercise.id),
                       listIndex: index,
                       exercise: exercise,
                       subtitle: _subtitle(exercise, l10n),
+                      doneSets: done,
+                      totalSets: exercise.sets.length,
                       isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: true,
@@ -240,11 +243,14 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     final isLast = index == exercises.length - 1;
+                    final done = exercise.sets.where((s) => s.completed).length;
                     return _ExerciseListRow(
                       key: ValueKey(exercise.id),
                       listIndex: index,
                       exercise: exercise,
                       subtitle: _subtitle(exercise, l10n),
+                      doneSets: done,
+                      totalSets: exercise.sets.length,
                       isCompleted: _isExerciseCompleted(exercise),
                       showConnector: !isLast,
                       showDragHandle: false,
@@ -276,6 +282,8 @@ class _ExerciseListRow extends ConsumerWidget {
   final int listIndex;
   final WorkoutExercise exercise;
   final String subtitle;
+  final int doneSets;
+  final int totalSets;
   final bool isCompleted;
   final bool showConnector;
   final bool showDragHandle;
@@ -288,6 +296,8 @@ class _ExerciseListRow extends ConsumerWidget {
     required this.listIndex,
     required this.exercise,
     required this.subtitle,
+    required this.doneSets,
+    required this.totalSets,
     required this.isCompleted,
     required this.showConnector,
     required this.showDragHandle,
@@ -299,116 +309,202 @@ class _ExerciseListRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final progress = totalSets <= 0 ? 0.0 : (doneSets / totalSets).clamp(0.0, 1.0);
+    final ringColor = isCompleted ? _completedGreen : context.accentColor;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (showDragHandle)
-                ReorderableDragStartListener(
-                  index: listIndex,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16, right: 4),
-                    child: Icon(
-                      Icons.drag_handle,
-                      color: AppColors.textMuted.withValues(alpha: 0.8),
-                    ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      splashColor: context.accentColor.withValues(alpha: 0.08),
+      highlightColor: context.accentColor.withValues(alpha: 0.04),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (showDragHandle)
+              ReorderableDragStartListener(
+                index: listIndex,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: AppColors.textMuted.withValues(alpha: 0.8),
                   ),
                 ),
-              SizedBox(
-                width: 64,
-                child: Column(
-                  children: [
-                    ExerciseThumbnail(
-                      exerciseId: exercise.exerciseId,
-                      exerciseName: exercise.exerciseName,
-                      width: 56,
-                      height: 56,
-                    ),
-                    if (showConnector)
-                      Container(
-                        width: 2,
-                        height: 28,
-                        margin: const EdgeInsets.only(top: 4),
-                        color: AppColors.border,
-                      ),
-                  ],
-                ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LocalizedExerciseName(
-                        exercise.exerciseName,
-                        exerciseId: exercise.exerciseId,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              subtitle,
-                              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+            SizedBox(
+              width: 58,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 58,
+                    height: 58,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      fit: StackFit.expand,
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(11),
+                            border: Border.all(
+                              color: AppColors.textMuted.withValues(alpha: 0.45),
+                              width: 3,
                             ),
                           ),
-                          if (isCompleted) ...[
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.check_circle,
-                              size: 16,
-                              color: _completedGreen,
+                        ),
+                        CustomPaint(
+                          painter: _RoundedRectProgressPainter(
+                            progress: totalSets == 0 ? 0 : progress,
+                            strokeWidth: 3,
+                            borderRadius: 11,
+                            color: ringColor,
+                          ),
+                        ),
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: ExerciseThumbnail(
+                              exerciseId: exercise.exerciseId,
+                              exerciseName: exercise.exerciseName,
+                              width: 50,
+                              height: 50,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ],
-                        ],
-                      ),
-                    ],
+                          ),
+                        ),
+                        if (isCompleted)
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: _completedGreen,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
+                  if (showConnector)
+                    Container(
+                      width: 2,
+                      height: 14,
+                      margin: const EdgeInsets.only(top: 4),
+                      color: AppColors.border.withValues(alpha: 0.5),
+                    ),
+                ],
               ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
-                onSelected: (value) {
-                  switch (value) {
-                    case 'swap':
-                      onSwap();
-                    case 'remove':
-                      onRemove();
-                  }
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: 'swap',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.swap_horiz, color: context.accentColor),
-                      title: Text(l10n.swapSimilar),
-                    ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LocalizedExerciseName(
+                    exercise.exerciseName,
+                    exerciseId: exercise.exerciseId,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
-                  PopupMenuItem(
-                    value: 'remove',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                      title: Text(l10n.remove),
-                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
+              onSelected: (value) {
+                switch (value) {
+                  case 'swap':
+                    onSwap();
+                  case 'remove':
+                    onRemove();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'swap',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.swap_horiz, color: context.accentColor),
+                    title: Text(l10n.swapSimilar),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'remove',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                    title: Text(l10n.remove),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
+  }
+}
+
+/// Progreso como trazo alrededor de un rectángulo redondeado (misma forma que la miniatura).
+class _RoundedRectProgressPainter extends CustomPainter {
+  final double progress;
+  final double strokeWidth;
+  final double borderRadius;
+  final Color color;
+
+  const _RoundedRectProgressPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.borderRadius,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty || progress <= 0) return;
+
+    final inset = strokeWidth / 2;
+    final rect = Rect.fromLTWH(inset, inset, size.width - strokeWidth, size.height - strokeWidth);
+    final radius = borderRadius.clamp(0.0, rect.shortestSide / 2);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+
+    final fgPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
+
+    if (progress >= 1) {
+      canvas.drawRRect(rrect, fgPaint);
+      return;
+    }
+
+    final path = Path()..addRRect(rrect);
+    // PathMetrics es de un solo uso: materializar antes de leer.
+    final metrics = path.computeMetrics().toList(growable: false);
+    if (metrics.isEmpty) return;
+
+    final end = metrics.first.length * progress.clamp(0.0, 1.0);
+    if (end <= 0) return;
+
+    canvas.drawPath(metrics.first.extractPath(0, end), fgPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RoundedRectProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
 
