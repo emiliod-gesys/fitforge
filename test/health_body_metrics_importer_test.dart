@@ -62,6 +62,7 @@ void main() {
           fitForgeCurrentValue: 70,
           ledger: null,
           fitForgeManualEditAt: now.subtract(const Duration(hours: 2)),
+          now: now,
         ),
         isFalse,
       );

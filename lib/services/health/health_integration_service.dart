@@ -73,18 +73,23 @@ class HealthIntegrationService {
     return _health.requestAuthorization(types, permissions: permissions);
   }
 
-  Future<bool> hasReadPermissions() async {
-    await configure();
-    final permissions = readTypes.map((_) => HealthDataAccess.READ).toList();
-    final granted = await _health.hasPermissions(readTypes, permissions: permissions);
-    return granted ?? false;
-  }
+  Future<bool> hasReadPermissions() =>
+      _hasPermissions(readTypes, HealthDataAccess.READ);
 
-  Future<bool> hasWritePermissions() async {
+  Future<bool> hasWritePermissions() =>
+      _hasPermissions(writeTypes, HealthDataAccess.WRITE);
+
+  /// HealthKit nunca revela el estado de LECTURA por privacidad, así que en iOS
+  /// `hasPermissions` devuelve `null` incluso con el permiso concedido. Tratar ese
+  /// `null` como denegado bloquearía la sincronización para siempre; en su lugar
+  /// dejamos pasar y que la propia lectura devuelva vacío si no hay acceso.
+  Future<bool> _hasPermissions(
+    List<HealthDataType> types,
+    HealthDataAccess access,
+  ) async {
     await configure();
-    final permissions = writeTypes.map((_) => HealthDataAccess.WRITE).toList();
-    final granted = await _health.hasPermissions(writeTypes, permissions: permissions);
-    // En iOS hasPermissions a menudo devuelve null; no bloquear la escritura.
+    final permissions = types.map((_) => access).toList();
+    final granted = await _health.hasPermissions(types, permissions: permissions);
     if (granted == null && Platform.isIOS) return true;
     return granted ?? false;
   }

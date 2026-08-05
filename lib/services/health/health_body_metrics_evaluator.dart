@@ -30,9 +30,11 @@ abstract final class HealthBodyMetricsEvaluator {
     required double? fitForgeCurrentValue,
     required HealthImportLedgerEntry? ledger,
     required DateTime? fitForgeManualEditAt,
+    DateTime? now,
   }) {
+    final evaluatedAt = now ?? DateTime.now();
     if (fitForgeManualEditAt != null &&
-        DateTime.now().difference(fitForgeManualEditAt) < manualEditGracePeriod) {
+        evaluatedAt.difference(fitForgeManualEditAt) < manualEditGracePeriod) {
       return false;
     }
 
@@ -81,6 +83,7 @@ abstract final class HealthBodyMetricsEvaluator {
     required HealthImportLedgerEntry? weightLedger,
     required HealthImportLedgerEntry? bodyFatLedger,
     required DateTime? fitForgeManualWeightEditAt,
+    DateTime? now,
   }) {
     final proposals = <HealthImportProposal>[];
 
@@ -93,6 +96,7 @@ abstract final class HealthBodyMetricsEvaluator {
             fitForgeCurrentValue: weightCurrentKg,
             ledger: weightLedger,
             fitForgeManualEditAt: fitForgeManualWeightEditAt,
+            now: now,
           )) {
         proposals.add(
           HealthImportProposal(
@@ -113,6 +117,7 @@ abstract final class HealthBodyMetricsEvaluator {
             fitForgeCurrentValue: bodyFatCurrentPct,
             ledger: bodyFatLedger,
             fitForgeManualEditAt: null,
+            now: now,
           )) {
         proposals.add(
           HealthImportProposal(
