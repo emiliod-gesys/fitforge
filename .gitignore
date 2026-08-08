@@ -7,7 +7,22 @@
 .packages
 build/
 *.iml
+
+# APKs / builds locales (no subir artefactos de release)
+*.apk
 FitForge.apk
+fitforge*.apk
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Android / Kotlin (logs locales del compilador)
+android/.kotlin/
+
+# Logs de scripts de tooling
+tools/*.log
+tool/*.log
 
 # Secrets
 dart_defines.json
