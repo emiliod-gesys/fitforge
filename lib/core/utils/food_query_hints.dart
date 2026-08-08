@@ -218,10 +218,7 @@ abstract final class FoodQueryHints {
   static String _primaryQueryText(String query) {
     final totalPlate = parseTotalPlateGrams(query);
     if (totalPlate != null) {
-      return totalPlate.name
-          .split(RegExp(r'\s+con\s+', caseSensitive: false))
-          .first
-          .trim();
+      return totalPlate.name.split(RegExp(r'\s+con\s+', caseSensitive: false)).first.trim();
     }
     final conMatch = RegExp(r'\s+con\s+', caseSensitive: false).firstMatch(query);
     if (conMatch != null) return query.substring(0, conMatch.start);
@@ -308,8 +305,7 @@ abstract final class FoodQueryHints {
       'taco': 80.0,
       'tacos': 160.0,
     };
-    final sortedKeys = portionDefaults.keys.toList()
-      ..sort((a, b) => b.length.compareTo(a.length));
+    final sortedKeys = portionDefaults.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
     for (final token in sortedKeys) {
       if (primary.contains(_normalizeName(token))) return portionDefaults[token]!;
     }
@@ -394,9 +390,7 @@ abstract final class FoodQueryHints {
 
     final explicitGrams = parseGrams(query);
     if (userPortions.isNotEmpty && explicitGrams != null && _isSingleItemQuery(query)) {
-      portions = userPortions
-          .map((p) => FoodIngredientPortion(name: p.name, gramsG: p.gramsG))
-          .toList();
+      portions = userPortions.map((p) => FoodIngredientPortion(name: p.name, gramsG: p.gramsG)).toList();
     }
 
     final eggs = eggCount(query);
@@ -461,10 +455,7 @@ abstract final class FoodQueryHints {
       sumGrams = portions.fold<double>(0, (sum, p) => sum + p.gramsG);
     }
 
-    if ((sumGrams - targetTotal).abs() > 1 &&
-        sumGrams > 0 &&
-        userPortions.isEmpty &&
-        volumePortions.isEmpty) {
+    if ((sumGrams - targetTotal).abs() > 1 && sumGrams > 0 && userPortions.isEmpty && volumePortions.isEmpty) {
       final factor = targetTotal / sumGrams;
       for (var i = 0; i < portions.length; i++) {
         portions[i] = portions[i].scaledBy(factor);
@@ -482,10 +473,7 @@ abstract final class FoodQueryHints {
       servingDescription: FoodServingParser.formatAmount(referenceAmount, 'g'),
     );
 
-    if (userPortions.isNotEmpty &&
-        ai.referenceAmount > 0 &&
-        referenceAmount > 0 &&
-        (referenceAmount - ai.referenceAmount).abs() > 0.5) {
+    if (userPortions.isNotEmpty && ai.referenceAmount > 0 && referenceAmount > 0 && (referenceAmount - ai.referenceAmount).abs() > 0.5) {
       result = result.scaledTo(referenceAmount);
     }
 
@@ -503,10 +491,7 @@ abstract final class FoodQueryHints {
         merged.add(portion);
         continue;
       }
-      final userGrams = userPortions
-          .where((u) => _namesOverlap(u.name, portion.name))
-          .map((u) => u.gramsG)
-          .firstOrNull;
+      final userGrams = userPortions.where((u) => _namesOverlap(u.name, portion.name)).map((u) => u.gramsG).firstOrNull;
       merged[index] = FoodIngredientPortion(
         name: merged[index].name,
         gramsG: userGrams ?? merged[index].gramsG,
@@ -526,6 +511,22 @@ abstract final class FoodQueryHints {
   }
 
   static const _anchorPer100g = {
+    // Claras sin yema (~USDA egg white, cruda/cocida sin grasa añadida).
+    'claras de huevo': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'clara de huevo': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'claras cocidas': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'clara cocida': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'claras': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'clara': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'egg whites': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    'egg white': (kcal: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0.0),
+    // Fruta fresca, sin azúcar añadida.
+    'fresas frescas': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
+    'fresa fresca': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
+    'fresas': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
+    'fresa': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
+    'strawberries': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
+    'strawberry': (kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, fiber: 2.0),
     'manzana verde': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
     'manzana': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
     'apple': (kcal: 52, protein: 0.3, carbs: 14.0, fat: 0.2, fiber: 2.4),
@@ -630,16 +631,36 @@ abstract final class FoodQueryHints {
     'crema de cacahuate': (kcal: 588, protein: 25.0, carbs: 20.0, fat: 50.0, fiber: 6.0),
   };
 
-  static ({int kcal, double protein, double carbs, double fat, double fiber})?
-      _lookupAnchor(String ingredientName) {
-    final lower = ingredientName.toLowerCase().trim();
-    if (lower.isEmpty) return null;
-    final sortedKeys = _anchorPer100g.keys.toList()
-      ..sort((a, b) => b.length.compareTo(a.length));
+  static ({int kcal, double protein, double carbs, double fat, double fiber})? _lookupAnchor(String ingredientName) {
+    final normalized = _normalizeFoodText(ingredientName);
+    if (normalized.isEmpty) return null;
+    final sortedKeys = _anchorPer100g.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
     for (final token in sortedKeys) {
-      if (lower.contains(token)) return _anchorPer100g[token];
+      if (_containsFoodPhrase(normalized, token)) return _anchorPer100g[token];
     }
     return null;
+  }
+
+  static String _normalizeFoodText(String value) {
+    return value
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('ñ', 'n')
+        .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
+        .trim();
+  }
+
+  static bool _containsFoodPhrase(String normalizedText, String phrase) {
+    final normalizedPhrase = _normalizeFoodText(phrase);
+    if (normalizedPhrase.isEmpty) return false;
+    return RegExp(
+      '(^| )${RegExp.escape(normalizedPhrase)}( |\$)',
+    ).hasMatch(normalizedText);
   }
 
   /// Estima macros sumando densidades conocidas de `ingredient_portions`.
@@ -674,16 +695,13 @@ abstract final class FoodQueryHints {
 
     if (totalKcal <= 0) return null;
     // No devolver suma parcial si queda peso significativo sin ancla (ej. avena olvidada).
-    final substantialPortions =
-        ai.ingredientPortions.where((p) => p.gramsG >= 15).length;
+    final substantialPortions = ai.ingredientPortions.where((p) => p.gramsG >= 15).length;
     if (substantialPortions >= 2 && unmatchedGrams >= 25) return null;
     if (totalGrams > 0 && unmatchedGrams / totalGrams > 0.12) return null;
     // Exigir cobertura razonable para no inventar el plato entero con 1 ancla.
     if (matchedGrams < 40 && matchedGrams < totalGrams * 0.35) return null;
 
-    final referenceAmount = totalGrams > 0
-        ? totalGrams
-        : (ai.referenceAmount > 0 ? ai.referenceAmount : matchedGrams);
+    final referenceAmount = totalGrams > 0 ? totalGrams : (ai.referenceAmount > 0 ? ai.referenceAmount : matchedGrams);
 
     return ai.copyWith(
       caloriesKcal: totalKcal.round().clamp(0, 9999),
@@ -702,15 +720,12 @@ abstract final class FoodQueryHints {
   static FoodNutritionEstimate reconcilePhotoEstimate(FoodNutritionEstimate ai) {
     var result = ai;
     if (ai.ingredientPortions.isNotEmpty) {
-      final sumGrams =
-          ai.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG);
+      final sumGrams = ai.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG);
       if (sumGrams > 0) {
         result = ai.copyWith(
           referenceAmount: sumGrams,
           amountUnit: 'g',
-          servingDescription: ai.servingDescription?.trim().isNotEmpty == true
-              ? ai.servingDescription
-              : FoodServingParser.formatAmount(sumGrams, 'g'),
+          servingDescription: ai.servingDescription?.trim().isNotEmpty == true ? ai.servingDescription : FoodServingParser.formatAmount(sumGrams, 'g'),
           ingredients: ai.ingredientPortions.map((p) => p.name).toList(),
         );
       }
@@ -719,9 +734,7 @@ abstract final class FoodQueryHints {
     final fromPortions = estimateFromIngredientPortions(result);
     if (fromPortions != null) {
       if (result.caloriesKcal <= 0) return fromPortions;
-      final dens = result.referenceAmount > 0
-          ? result.caloriesKcal / result.referenceAmount
-          : 0.0;
+      final dens = result.referenceAmount > 0 ? result.caloriesKcal / result.referenceAmount : 0.0;
       // Densidad absurda (<0.3 kcal/g ≈ <30 kcal/100g) en plato mixto → reemplazar.
       if (dens < 0.3 && fromPortions.caloriesKcal > result.caloriesKcal) {
         return fromPortions;
@@ -733,12 +746,8 @@ abstract final class FoodQueryHints {
       final anchored = anchoredEstimateForQuery(query, result);
       if (anchored != null) {
         return anchored.copyWith(
-          ingredientPortions: result.ingredientPortions.isNotEmpty
-              ? result.ingredientPortions
-              : anchored.ingredientPortions,
-          ingredients: result.ingredients.isNotEmpty
-              ? result.ingredients
-              : anchored.ingredients,
+          ingredientPortions: result.ingredientPortions.isNotEmpty ? result.ingredientPortions : anchored.ingredientPortions,
+          ingredients: result.ingredients.isNotEmpty ? result.ingredients : anchored.ingredients,
         );
       }
     }
@@ -773,9 +782,7 @@ abstract final class FoodQueryHints {
       fiberG: double.parse((ai.fiberG * factor).toStringAsFixed(1)),
       servingDescription: FoodServingParser.formatAmount(targetGrams, ai.amountUnit),
       ingredients: ai.ingredients,
-      ingredientPortions: ai.ingredientPortions
-          .map((portion) => portion.scaledBy(targetGrams / (ai.referenceAmount > 0 ? ai.referenceAmount : 100)))
-          .toList(),
+      ingredientPortions: ai.ingredientPortions.map((portion) => portion.scaledBy(targetGrams / (ai.referenceAmount > 0 ? ai.referenceAmount : 100))).toList(),
       referenceAmount: targetGrams,
       amountUnit: ai.amountUnit,
     );
@@ -792,9 +799,7 @@ abstract final class FoodQueryHints {
 
     if ((ai.referenceAmount - userGrams).abs() <= userGrams * 0.1) {
       final kcalPerG = ai.caloriesKcal / ai.referenceAmount;
-      if (kcalPerG < 0.9 &&
-          ai.caloriesKcal <= 400 &&
-          !_isLowCalorieProduce(query)) {
+      if (kcalPerG < 0.9 && ai.caloriesKcal <= 400 && !_isLowCalorieProduce(query)) {
         return _scaleFromPer100g(ai, userGrams);
       }
     }
@@ -842,11 +847,10 @@ abstract final class FoodQueryHints {
     final grams = parseGrams(query);
     if (grams == null || grams <= 0) return null;
 
-    final primaryText = _primaryQueryText(query).toLowerCase();
-    final sortedKeys = _anchorPer100g.keys.toList()
-      ..sort((a, b) => b.length.compareTo(a.length));
+    final primaryText = _normalizeFoodText(_primaryQueryText(query));
+    final sortedKeys = _anchorPer100g.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
     for (final token in sortedKeys) {
-      if (!primaryText.contains(token)) continue;
+      if (!_containsFoodPhrase(primaryText, token)) continue;
       final anchor = _anchorPer100g[token]!;
       final factor = grams / 100;
       return FoodNutritionEstimate(
@@ -873,9 +877,7 @@ abstract final class FoodQueryHints {
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
 
-    final sizeAdjusted = parseGrams(query) == null && parseIngredientGramsFromQuery(query).isEmpty
-        ? applyPortionSizeModifier(query, gramCorrected)
-        : gramCorrected;
+    final sizeAdjusted = parseGrams(query) == null && parseIngredientGramsFromQuery(query).isEmpty ? applyPortionSizeModifier(query, gramCorrected) : gramCorrected;
 
     if (labeledKcal == 0 && eggs == 0) {
       return _finalizePortionEstimate(query, ensureIngredientPortions(query, sizeAdjusted));
@@ -962,9 +964,7 @@ abstract final class FoodQueryHints {
     }
 
     if (parseTotalPlateGrams(query) != null) {
-      final solo = estimate.ingredientPortions.length == 1
-          ? estimate.ingredientPortions.first.name.toLowerCase()
-          : '';
+      final solo = estimate.ingredientPortions.length == 1 ? estimate.ingredientPortions.first.name.toLowerCase() : '';
       if (solo.contains('queso') && !solo.contains('taco')) {
         return fromPortions;
       }
@@ -973,9 +973,7 @@ abstract final class FoodQueryHints {
 
     if (estimate.caloriesKcal <= 0) return fromPortions;
 
-    final kcalPerG = estimate.referenceAmount > 0
-        ? estimate.caloriesKcal / estimate.referenceAmount
-        : 0.0;
+    final kcalPerG = estimate.referenceAmount > 0 ? estimate.caloriesKcal / estimate.referenceAmount : 0.0;
     if (kcalPerG > 3.2 && fromPortions.caloriesKcal < estimate.caloriesKcal) {
       return fromPortions;
     }

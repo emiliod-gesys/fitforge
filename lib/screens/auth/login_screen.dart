@@ -43,11 +43,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _captchaKey.currentState?.reset();
   }
 
+  bool get _captchaReady =>
+      !TurnstileConfig.isEnabled ||
+      (_captchaToken != null && _captchaToken!.isNotEmpty);
+
+  void _onCaptchaTokenChanged(String? token) {
+    setState(() {
+      _captchaToken = token;
+      if (token != null && token.isNotEmpty) {
+        final msg = _error;
+        if (msg == context.l10n.completeSecurityVerification ||
+            (msg != null && msg.toLowerCase().contains('captcha'))) {
+          _error = null;
+        }
+      }
+    });
+  }
+
   bool _validateCaptcha() {
-    if (!TurnstileConfig.isEnabled) return true;
-    if (_captchaToken != null && _captchaToken!.isNotEmpty) return true;
+    if (_captchaReady) return true;
     setState(() => _error = context.l10n.completeSecurityVerification);
     return false;
+  }
+
+  /// Solo recrea el WebView cuando el token ya no sirve; evita bucles al fallar
+  /// credenciales con un captcha aún válido.
+  bool _shouldResetCaptchaAfterError(Object error) {
+    if (!TurnstileConfig.isEnabled) return false;
+    if (error is AuthException) {
+      final message = error.message.toLowerCase();
+      if (message.contains('captcha') ||
+          message.contains('invalid-input') ||
+          message.contains('timeout-or-duplicate')) {
+        return true;
+      }
+    }
+    return _captchaToken != null;
   }
 
   String _authErrorMessage(Object error) {
@@ -58,6 +89,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         return 'Email o contraseña incorrectos.';
       }
       if (message.contains('captcha')) {
+        if (!TurnstileConfig.isEnabled) {
+          return 'El servidor aún exige verificación CAPTCHA. '
+              'En Supabase desactiva Auth → Protection → Enable CAPTCHA protection.';
+        }
+        if (message.contains('invalid-input') || message.contains('timeout-or-duplicate')) {
+          return 'El servidor rechazó la verificación. En Supabase → Auth → Protection '
+              'usa el Secret key de prueba 1x0000000000000000000000000000000AA '
+              'o desactiva CAPTCHA.';
+        }
         return l10n.completeSecurityVerification;
       }
       if (message.contains('email not confirmed')) {
@@ -99,7 +139,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
       _resetCaptcha();
     } catch (e) {
-      _resetCaptcha();
+      if (_shouldResetCaptchaAfterError(e)) {
+        _resetCaptcha();
+      }
       if (mounted) setState(() => _error = _authErrorMessage(e));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -130,8 +172,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SnackBar(content: Text(l10n.passwordResetSent)),
         );
       }
-    } catch (_) {
-      _resetCaptcha();
+    } catch (e) {
+      if (_shouldResetCaptchaAfterError(e)) {
+        _resetCaptcha();
+      }
       if (mounted) setState(() => _error = l10n.passwordResetFailed);
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -223,7 +267,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 16),
                     TurnstileCaptcha(
                       key: _captchaKey,
-                      onTokenChanged: (token) => setState(() => _captchaToken = token),
+                      onTokenChanged: _onCaptchaTokenChanged,
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 12),
@@ -231,7 +275,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _loading ? null : _submitEmail,
+                      onPressed: (_loading || !_captchaReady) ? null : _submitEmail,
                       child: _loading
                           ? const SizedBox(
                               height: 20,

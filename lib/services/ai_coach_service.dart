@@ -163,11 +163,7 @@ class AiCoachService {
   }
 
   static bool _mentionsRoutineOrPlan(String m) {
-    return RegExp(r'rutin\w*').hasMatch(m) ||
-        m.contains('entrenamiento') ||
-        m.contains('workout') ||
-        m.contains('plan de') ||
-        m.contains('programa de');
+    return RegExp(r'rutin\w*').hasMatch(m) || m.contains('entrenamiento') || m.contains('workout') || m.contains('plan de') || m.contains('programa de');
   }
 
   static bool _mentionsBodyRegionOrSplit(String m) {
@@ -190,16 +186,11 @@ class AiCoachService {
 
   static bool userSpecifiedDuration(String message) {
     final m = message.toLowerCase();
-    return RegExp(r'(\d+)\s*(min|minutos|mins?)\b').hasMatch(m) ||
-        RegExp(r'\b1\s*h(ora|oras)?\b').hasMatch(m) ||
-        RegExp(r'\b90\b').hasMatch(m);
+    return RegExp(r'(\d+)\s*(min|minutos|mins?)\b').hasMatch(m) || RegExp(r'\b1\s*h(ora|oras)?\b').hasMatch(m) || RegExp(r'\b90\b').hasMatch(m);
   }
 
   static String _normalizeRoutineTypos(String message) {
-    return message
-        .toLowerCase()
-        .replaceAll(RegExp(r'\bretina\b'), 'rutina')
-        .replaceAll(RegExp(r'\brutna\b'), 'rutina');
+    return message.toLowerCase().replaceAll(RegExp(r'\bretina\b'), 'rutina').replaceAll(RegExp(r'\brutna\b'), 'rutina');
   }
 
   static bool isRoutineCreationRequest(String message) {
@@ -241,8 +232,7 @@ class AiCoachService {
 
     if (RegExp(r'entrenamiento\s+(de|para)\b').hasMatch(m)) return true;
 
-    if ((m.contains('editable') || m.contains('editar') || m.contains('revisar')) &&
-        (m.contains('rutin') || m.contains('plan') || m.contains('entrenamiento'))) {
+    if ((m.contains('editable') || m.contains('editar') || m.contains('revisar')) && (m.contains('rutin') || m.contains('plan') || m.contains('entrenamiento'))) {
       return true;
     }
 
@@ -255,18 +245,13 @@ class AiCoachService {
 
     if (_hasRoutineCreateVerb(m) &&
         (m.contains('enfocad') || m.contains('orientad')) &&
-        (m.contains('fuerza') ||
-            m.contains('hipertrof') ||
-            m.contains('resistencia') ||
-            muscles.isNotEmpty ||
-            _mentionsBodyRegionOrSplit(m))) {
+        (m.contains('fuerza') || m.contains('hipertrof') || m.contains('resistencia') || muscles.isNotEmpty || _mentionsBodyRegionOrSplit(m))) {
       return true;
     }
 
     if (isMultiRoutineProgramRequest(message) && _hasRoutineCreateVerb(m)) return true;
 
-    if (isMultiRoutineProgramRequest(message) &&
-        RegExp(r'\b(create|make|build|design|give me|crea|haz|genera|dame)\b').hasMatch(m)) {
+    if (isMultiRoutineProgramRequest(message) && RegExp(r'\b(create|make|build|design|give me|crea|haz|genera|dame)\b').hasMatch(m)) {
       return true;
     }
 
@@ -276,13 +261,7 @@ class AiCoachService {
   }
 
   static bool _hasTrainingPlanIntent(String m) {
-    return _hasRoutineCreateVerb(m) ||
-        m.contains('entren') ||
-        m.contains('ejercicios para') ||
-        m.contains('qué hago') ||
-        m.contains('que hago') ||
-        m.contains('rutina') ||
-        m.contains('plan');
+    return _hasRoutineCreateVerb(m) || m.contains('entren') || m.contains('ejercicios para') || m.contains('qué hago') || m.contains('que hago') || m.contains('rutina') || m.contains('plan');
   }
 
   /// Petición de rutina que debe resolverse con JSON estructurado (preview guardable).
@@ -293,9 +272,7 @@ class AiCoachService {
     final m = _normalizeRoutineTypos(message);
     if (!_hasTrainingPlanIntent(m)) return false;
 
-    return _mentionsRoutineOrPlan(m) ||
-        isMultiRoutineProgramRequest(message) ||
-        parseTargetMuscles(message).isNotEmpty;
+    return _mentionsRoutineOrPlan(m) || isMultiRoutineProgramRequest(message) || parseTargetMuscles(message).isNotEmpty;
   }
 
   static const _routineRules = '''
@@ -341,17 +318,10 @@ REGLAS OBLIGATORIAS:
     final m = _normalizeRoutineTypos(message);
     final found = <String>{};
 
-    if (m.contains('tren superior') ||
-        m.contains('parte superior') ||
-        m.contains('upper body')) {
+    if (m.contains('tren superior') || m.contains('parte superior') || m.contains('upper body')) {
       found.addAll(['Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps']);
     }
-    if (m.contains('tren inferior') ||
-        m.contains('parte inferior') ||
-        m.contains('lower body') ||
-        m.contains('leg day') ||
-        m.contains('día de piernas') ||
-        m.contains('dia de piernas')) {
+    if (m.contains('tren inferior') || m.contains('parte inferior') || m.contains('lower body') || m.contains('leg day') || m.contains('día de piernas') || m.contains('dia de piernas')) {
       found.addAll(['Piernas', 'Glúteos']);
     }
     if (m.contains('push day') || (m.contains('push') && !m.contains('pull'))) {
@@ -567,13 +537,9 @@ $context
     );
     final priorAdvice = priorCoachAdvice(history);
     final duration = parseDurationMinutes(userMessage);
-    final durationLine = userSpecifiedDuration(userMessage)
-        ? 'Duración solicitada: $duration minutos.'
-        : 'El usuario no indicó duración; diseña una rutina de aproximadamente $duration minutos.';
+    final durationLine = userSpecifiedDuration(userMessage) ? 'Duración solicitada: $duration minutos.' : 'El usuario no indicó duración; diseña una rutina de aproximadamente $duration minutos.';
     final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
-    final routineLanguageHint = lang == 'en'
-        ? 'Write the routine name and description in English.'
-        : 'Escribe el nombre y la descripción de la rutina en español.';
+    final routineLanguageHint = lang == 'en' ? 'Write the routine name and description in English.' : 'Escribe el nombre y la descripción de la rutina en español.';
     final preparedCatalog = _prepareRoutineCatalog(
       catalog: catalog,
       userMessage: userMessage,
@@ -595,9 +561,7 @@ $context
       routineLimit: routineLimit,
     );
     final muscleLine = targetMuscles.isEmpty
-        ? (priorAdvice == null
-            ? 'equilibrada según el mensaje y el perfil'
-            : 'según el consejo previo del chat (no inventes una full-body genérica si ese consejo era de un grupo concreto)')
+        ? (priorAdvice == null ? 'equilibrada según el mensaje y el perfil' : 'según el consejo previo del chat (no inventes una full-body genérica si ese consejo era de un grupo concreto)')
         : targetMuscles.join(', ');
     final priorBlock = priorAdvice == null
         ? ''
@@ -681,14 +645,10 @@ Si hay un consejo previo en el mensaje del usuario, conviértelo en la rutina JS
     );
     final priorAdvice = priorCoachAdvice(history);
     final duration = parseDurationMinutes(userMessage);
-    final durationLine = userSpecifiedDuration(userMessage)
-        ? 'Duración por sesión: $duration minutos.'
-        : 'El usuario no indicó duración; cada sesión debe durar aproximadamente $duration minutos.';
+    final durationLine = userSpecifiedDuration(userMessage) ? 'Duración por sesión: $duration minutos.' : 'El usuario no indicó duración; cada sesión debe durar aproximadamente $duration minutos.';
     final routineCount = expectedProgramRoutineCount(userMessage);
     final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
-    final routineLanguageHint = lang == 'en'
-        ? 'Write routine names and descriptions in English.'
-        : 'Escribe nombres y descripciones en español.';
+    final routineLanguageHint = lang == 'en' ? 'Write routine names and descriptions in English.' : 'Escribe nombres y descripciones en español.';
     final preparedCatalog = _prepareRoutineCatalog(
       catalog: catalog,
       userMessage: userMessage,
@@ -709,11 +669,7 @@ Si hay un consejo previo en el mensaje del usuario, conviértelo en la rutina JS
       nutrition: nutrition,
       routineLimit: routineLimit,
     );
-    final muscleLine = targetMuscles.isEmpty
-        ? (priorAdvice == null
-            ? 'según el split y el perfil'
-            : 'según el consejo previo del chat')
-        : targetMuscles.join(', ');
+    final muscleLine = targetMuscles.isEmpty ? (priorAdvice == null ? 'según el split y el perfil' : 'según el consejo previo del chat') : targetMuscles.join(', ');
     final priorBlock = priorAdvice == null
         ? ''
         : '''
@@ -778,10 +734,7 @@ Si hay un consejo previo, respétalo al diseñar el programa.
     );
     if (parsed.isEmpty) return const [];
 
-    return parsed
-        .map((routine) => ExerciseMatcher.enrich(routine, preparedCatalog))
-        .where((routine) => routine.exercises.length >= 2)
-        .toList();
+    return parsed.map((routine) => ExerciseMatcher.enrich(routine, preparedCatalog)).where((routine) => routine.exercises.length >= 2).toList();
   }
 
   Future<Routine?> generateRoutine({
@@ -799,9 +752,7 @@ Si hay un consejo previo, respétalo al diseñar el programa.
     RoutineLimitStatus? routineLimit,
   }) async {
     final promptText = userMessage ?? targetMuscles.join(', ');
-    final preparedCatalog = catalog == null
-        ? null
-        : _prepareRoutineCatalog(catalog: catalog, userMessage: promptText);
+    final preparedCatalog = catalog == null ? null : _prepareRoutineCatalog(catalog: catalog, userMessage: promptText);
     final names = preparedCatalog != null
         ? AiRoutineSanitizer.namesForMuscles(
             AiRoutineSanitizer.catalogForAi(preparedCatalog),
@@ -824,9 +775,7 @@ Si hay un consejo previo, respétalo al diseñar el programa.
       routineLimit: routineLimit,
     );
 
-    final catalogHint = names.isEmpty
-        ? ''
-        : '\nUsa SOLO nombres de esta lista:\n${names.take(80).join(', ')}';
+    final catalogHint = names.isEmpty ? '' : '\nUsa SOLO nombres de esta lista:\n${names.take(80).join(', ')}';
 
     final prompt = '''
 Genera una rutina de gimnasio de $durationMinutes minutos enfocada en: ${targetMuscles.join(', ')}.
@@ -886,6 +835,7 @@ $_routineRules
     required String systemPrompt,
     required String userPrompt,
     List<CoachChatTurn>? history,
+    double temperature = 0.7,
   }) async {
     final credentials = await _resolveCredentials(profile);
     final aiProvider = credentials.provider;
@@ -894,11 +844,29 @@ $_routineRules
 
     switch (aiProvider) {
       case AiProvider.openai:
-        return _callOpenAI(apiKey, systemPrompt, userPrompt, history: turns);
+        return _callOpenAI(
+          apiKey,
+          systemPrompt,
+          userPrompt,
+          history: turns,
+          temperature: temperature,
+        );
       case AiProvider.gemini:
-        return _callGemini(apiKey, systemPrompt, userPrompt, history: turns);
+        return _callGemini(
+          apiKey,
+          systemPrompt,
+          userPrompt,
+          history: turns,
+          temperature: temperature,
+        );
       case AiProvider.anthropic:
-        return _callAnthropic(apiKey, systemPrompt, userPrompt, history: turns);
+        return _callAnthropic(
+          apiKey,
+          systemPrompt,
+          userPrompt,
+          history: turns,
+          temperature: temperature,
+        );
       case AiProvider.none:
         throw Exception('Proveedor no configurado');
     }
@@ -942,6 +910,7 @@ $_routineRules
     String system,
     String user, {
     List<CoachChatTurn> history = const [],
+    double temperature = 0.7,
   }) async {
     final response = await http.post(
       Uri.parse('https://api.openai.com/v1/chat/completions'),
@@ -956,7 +925,7 @@ $_routineRules
           ..._providerChatMessages(history, user, assistantRole: 'assistant'),
         ],
         'max_tokens': 2000,
-        'temperature': 0.7,
+        'temperature': temperature,
       }),
     );
 
@@ -973,6 +942,7 @@ $_routineRules
     String system,
     String user, {
     List<CoachChatTurn> history = const [],
+    double temperature = 0.7,
   }) async {
     final turns = _providerChatMessages(history, user, assistantRole: 'model');
     final response = await http.post(
@@ -996,7 +966,10 @@ $_routineRules
               },
             )
             .toList(),
-        'generationConfig': {'maxOutputTokens': 2000, 'temperature': 0.7},
+        'generationConfig': {
+          'maxOutputTokens': 2000,
+          'temperature': temperature,
+        },
       }),
     );
 
@@ -1013,6 +986,7 @@ $_routineRules
     String system,
     String user, {
     List<CoachChatTurn> history = const [],
+    double temperature = 0.7,
   }) async {
     final response = await http.post(
       Uri.parse('https://api.anthropic.com/v1/messages'),
@@ -1026,7 +1000,7 @@ $_routineRules
         'max_tokens': 2000,
         'system': system,
         'messages': _providerChatMessages(history, user, assistantRole: 'assistant'),
-        'temperature': 0.7,
+        'temperature': temperature,
       }),
     );
 
@@ -1116,11 +1090,7 @@ $_routineRules
     UserProfile? profile,
   }) {
     try {
-      final parsedMuscles = (json['target_muscles'] as List?)
-              ?.map((m) => m.toString())
-              .where((m) => m.isNotEmpty)
-              .toList() ??
-          targetMuscles;
+      final parsedMuscles = (json['target_muscles'] as List?)?.map((m) => m.toString()).where((m) => m.isNotEmpty).toList() ?? targetMuscles;
 
       final exercises = (json['exercises'] as List? ?? []).asMap().entries.map((e) {
         final ex = e.value as Map<String, dynamic>;
@@ -1285,6 +1255,7 @@ Responde SOLO con este JSON (ejemplo: compuesto con aproximaciones + aislamiento
   Future<FoodNutritionEstimate?> estimateFoodFromText({
     required String query,
     UserProfile? profile,
+    String? catalogFacts,
   }) async {
     final lang = _resolveLanguageCode(profile: profile);
     final system = '''
@@ -1350,9 +1321,19 @@ TAMAÑO indicado en el texto: aplica ~${(sizeHint * 100).round()}% de la porció
 '''
         : '';
 
+    final catalogBlock = catalogFacts == null || catalogFacts.trim().isEmpty
+        ? ''
+        : '''
+
+DATOS NUTRICIONALES VERIFICADOS DEL CATÁLOGO:
+${catalogFacts.trim()}
+- Estos valores son autoritativos. No los sustituyas por estimaciones propias.
+- Suma estos componentes al total y estima únicamente los ingredientes no cubiertos.
+''';
+
     final user = '''
 Comida descrita: "$query"
-$hintsBlock$userGramsBlock$sizeBlock
+$hintsBlock$userGramsBlock$sizeBlock$catalogBlock
 JSON:
 {
   "name": "nombre específico del plato con ingredientes visibles",
@@ -1372,7 +1353,12 @@ JSON:
 }
 ''';
     try {
-      final response = await _complete(profile: profile, systemPrompt: system, userPrompt: user);
+      final response = await _complete(
+        profile: profile,
+        systemPrompt: system,
+        userPrompt: user,
+        temperature: 0,
+      );
       final parsed = _parseFoodEstimate(response);
       if (parsed == null) return null;
       return FoodQueryHints.reconcile(query, parsed);
@@ -1414,8 +1400,7 @@ JSON:
             language: lang,
           );
         case AiProvider.anthropic:
-          final openAiKey =
-              await _profileService.getApiKey(AiProvider.openai) ?? AiSecrets.openAiDefaultKey;
+          final openAiKey = await _profileService.getApiKey(AiProvider.openai) ?? AiSecrets.openAiDefaultKey;
           if (openAiKey == null || openAiKey.isEmpty) return null;
           return _callOpenAIWhisper(
             apiKey: openAiKey,
@@ -1462,9 +1447,7 @@ JSON:
     request.headers['Authorization'] = 'Bearer $apiKey';
     request.fields['model'] = 'whisper-1';
     request.fields['language'] = language == 'en' ? 'en' : 'es';
-    request.fields['prompt'] = language == 'en'
-        ? 'Food description with portions, grams, and ingredients.'
-        : 'Descripción de comida con porciones, gramos e ingredientes.';
+    request.fields['prompt'] = language == 'en' ? 'Food description with portions, grams, and ingredients.' : 'Descripción de comida con porciones, gramos e ingredientes.';
     request.files.add(
       http.MultipartFile.fromBytes(
         'file',
@@ -1636,9 +1619,7 @@ JSON:
 
     try {
       final aiProvider = _profileService.resolveAiProvider(profile);
-      final canUseVision = imageBytes != null &&
-          imageBytes.isNotEmpty &&
-          await _profileService.hasUsableAiKey(profile);
+      final canUseVision = imageBytes != null && imageBytes.isNotEmpty && await _profileService.hasUsableAiKey(profile);
 
       final String response;
       if (canUseVision) {
@@ -1771,7 +1752,9 @@ JSON:
           {
             'parts': [
               {'text': prompt},
-              {'inline_data': {'mime_type': 'image/jpeg', 'data': b64}},
+              {
+                'inline_data': {'mime_type': 'image/jpeg', 'data': b64}
+              },
             ],
           },
         ],

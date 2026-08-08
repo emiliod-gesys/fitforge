@@ -4,8 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FoodQueryHints', () {
-    const query =
-        'Dos huevos estrellados sin aceite y dos tortillas de harina de 56kcal cada una';
+    const query = 'Dos huevos estrellados sin aceite y dos tortillas de harina de 56kcal cada una';
 
     test('parses labeled kcal and egg count', () {
       expect(FoodQueryHints.labeledKcalTotal(query), 112);
@@ -84,6 +83,75 @@ void main() {
 
       expect(fixed.caloriesKcal, 52);
       expect(fixed.carbsG, closeTo(14, 0.5));
+    });
+
+    test('fresas do not match the short beef alias res', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Fresas frescas',
+        caloriesKcal: 167,
+        proteinG: 20,
+        carbsG: 0,
+        fatG: 9.2,
+        referenceAmount: 77,
+      );
+
+      final fixed = FoodQueryHints.reconcile('77g de fresas frescas', ai);
+
+      expect(fixed.caloriesKcal, 25);
+      expect(fixed.proteinG, closeTo(0.5, 0.1));
+      expect(fixed.carbsG, closeTo(5.9, 0.1));
+      expect(fixed.fatG, closeTo(0.2, 0.1));
+    });
+
+    test('egg white anchor takes precedence over whole egg', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Clara de huevo cruda',
+        caloriesKcal: 282,
+        proteinG: 23.7,
+        carbsG: 2,
+        fatG: 20,
+        referenceAmount: 182,
+      );
+
+      final fixed = FoodQueryHints.reconcile('182g de clara de huevo cruda', ai);
+
+      expect(fixed.caloriesKcal, 95);
+      expect(fixed.proteinG, closeTo(19.8, 0.1));
+      expect(fixed.fatG, closeTo(0.4, 0.1));
+    });
+
+    test('cooked egg whites receive a deterministic anchor', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Claras de huevo cocidas',
+        caloriesKcal: 34,
+        proteinG: 7,
+        carbsG: 0,
+        fatG: 0,
+        referenceAmount: 250,
+      );
+
+      final fixed = FoodQueryHints.reconcile('250g de claras cocidas', ai);
+
+      expect(fixed.caloriesKcal, 130);
+      expect(fixed.proteinG, closeTo(27.3, 0.1));
+      expect(fixed.fatG, closeTo(0.5, 0.1));
+    });
+
+    test('short anchors only match complete words', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Vegetal',
+        caloriesKcal: 40,
+        proteinG: 2,
+        carbsG: 8,
+        fatG: 0,
+        referenceAmount: 100,
+      );
+
+      final repollo = FoodQueryHints.reconcile('100g de repollo', ai);
+      final empanada = FoodQueryHints.reconcile('100g de empanada', ai);
+
+      expect(repollo.caloriesKcal, 40);
+      expect(empanada.caloriesKcal, 40);
     });
 
     test('reconcile fixes spaghetti when AI returns per-100g kcal at full weight', () {

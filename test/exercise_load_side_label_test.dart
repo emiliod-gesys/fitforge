@@ -12,7 +12,8 @@ void main() {
         isTrue,
       );
       expect(
-        ExerciseLoad.isLowerBodySideLoad(exerciseName: 'Extensión de cuádriceps'),
+        ExerciseLoad.isLowerBodySideLoad(
+            exerciseName: 'Extensión de cuádriceps'),
         isTrue,
       );
       expect(
@@ -23,7 +24,8 @@ void main() {
 
     test('does not flag arm exercises', () {
       expect(
-        ExerciseLoad.isLowerBodySideLoad(exerciseName: 'Curl de bíceps con mancuernas'),
+        ExerciseLoad.isLowerBodySideLoad(
+            exerciseName: 'Curl de bíceps con mancuernas'),
         isFalse,
       );
       expect(
@@ -75,7 +77,8 @@ void main() {
     test('leg extension machine supports combined/per-leg toggle', () async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final catalog = await BundledExerciseCatalog.load(locale: 'es');
-      final legExt = catalog.firstWhere((e) => e.catalogId == 'ff_legs_leg_extension_machine');
+      final legExt = catalog
+          .firstWhere((e) => e.catalogId == 'ff_legs_leg_extension_machine');
 
       expect(legExt.loadMode, ExerciseLoadMode.machineStack);
       expect(legExt.perArmWeight, isFalse);
@@ -109,10 +112,14 @@ void main() {
         ),
         isFalse,
       );
-      expect(ExerciseLoad.combinedModeUsesLegLabel(exerciseName: legExt.name, exercise: legExt), isTrue);
+      expect(
+          ExerciseLoad.combinedModeUsesLegLabel(
+              exerciseName: legExt.name, exercise: legExt),
+          isTrue);
     });
 
-    test('concentration curl supports per-arm toggle via dumbbell equipment', () async {
+    test('concentration curl supports per-arm toggle via dumbbell equipment',
+        () async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final catalog = await BundledExerciseCatalog.load(locale: 'en');
       final concentration = catalog.firstWhere(
@@ -123,7 +130,8 @@ void main() {
       expect(concentration.equipment, contains('Dumbbell'));
       expect(concentration.unilateral, isTrue);
       expect(
-        ExerciseLoad.supportsPerArmToggle(concentration.id, catalog, concentration.name),
+        ExerciseLoad.supportsPerArmToggle(
+            concentration.id, catalog, concentration.name),
         isTrue,
       );
       expect(
@@ -145,6 +153,65 @@ void main() {
           ),
         ),
         'kg (por brazo)',
+      );
+    });
+
+    test('unilateral cable row supports and defaults to per-arm', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final catalog = await BundledExerciseCatalog.load(locale: 'en');
+      final cableRow = catalog.firstWhere(
+        (e) => e.catalogId == 'ff_back_high_cable_row',
+      );
+
+      expect(cableRow.equipment, contains('Cable'));
+      expect(cableRow.unilateral, isTrue);
+      expect(
+        ExerciseLoad.supportsPerArmToggle(cableRow.id, catalog, cableRow.name),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: cableRow.id,
+          catalog: catalog,
+          exerciseName: cableRow.name,
+        ),
+        isTrue,
+      );
+    });
+
+    test('cloud exercises respect per-arm and unilateral metadata', () {
+      const cloudExercise = Exercise(
+        catalogId: 'ext_cable_one_arm_bent_over_row',
+        name: 'Cable One Arm Bent Over Row',
+        equipment: ['Cable'],
+        perArmWeight: true,
+        unilateral: true,
+      );
+      const catalog = [cloudExercise];
+
+      expect(
+        ExerciseLoad.perArmWeightForExerciseId(cloudExercise.id, catalog),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.unilateralForExerciseId(cloudExercise.id, catalog),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          cloudExercise.id,
+          catalog,
+          cloudExercise.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: cloudExercise.id,
+          catalog: catalog,
+          exerciseName: cloudExercise.name,
+        ),
+        isTrue,
       );
     });
   });

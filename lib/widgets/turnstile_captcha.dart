@@ -1,4 +1,5 @@
 import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../core/constants/turnstile_config.dart';
 
@@ -13,10 +14,27 @@ class TurnstileCaptcha extends StatefulWidget {
 
 class TurnstileCaptchaState extends State<TurnstileCaptcha> {
   Key _widgetKey = UniqueKey();
+  DateTime? _lastResetAt;
 
   void reset() {
+    final now = DateTime.now();
+    if (_lastResetAt != null &&
+        now.difference(_lastResetAt!) < const Duration(seconds: 3)) {
+      return;
+    }
+    _lastResetAt = now;
     widget.onTokenChanged(null);
     setState(() => _widgetKey = UniqueKey());
+  }
+
+  void _onError(TurnstileException error) {
+    if (kDebugMode) {
+      debugPrint(
+        'Turnstile ${error.code}: ${error.message} '
+        '(retryable=${error.retryable})',
+      );
+    }
+    widget.onTokenChanged(null);
   }
 
   @override
@@ -34,14 +52,15 @@ class TurnstileCaptchaState extends State<TurnstileCaptcha> {
         options: TurnstileOptions(
           size: TurnstileSize.normal,
           theme: TurnstileTheme.dark,
-          retryAutomatically: true,
+          // Evita reintentos infinitos del JS de Turnstile en errores retryables
+          // (p. ej. 110200 "Domain not allowed" en WebView Android).
+          retryAutomatically: false,
+          refreshExpired: TurnstileRefreshExpired.manual,
+          refreshTimeout: TurnstileRefreshTimeout.manual,
         ),
-        onTokenReceived: (token) => widget.onTokenChanged(token),
-        onError: (_) => widget.onTokenChanged(null),
-        onTokenExpired: () {
-          widget.onTokenChanged(null);
-          reset();
-        },
+        onTokenReceived: widget.onTokenChanged,
+        onError: _onError,
+        onTokenExpired: () => widget.onTokenChanged(null),
       ),
     );
   }

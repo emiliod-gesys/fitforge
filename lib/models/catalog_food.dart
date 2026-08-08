@@ -56,31 +56,41 @@ class CatalogFood {
     );
   }
 
-  String localizedName(String languageCode) =>
-      languageCode == 'en' && nameEn.isNotEmpty ? nameEn : nameEs;
+  String localizedName(String languageCode) => languageCode == 'en' && nameEn.isNotEmpty ? nameEn : nameEs;
 
-  String localizedServingLabel(String languageCode) =>
-      languageCode == 'en' && servingLabelEn.isNotEmpty ? servingLabelEn : servingLabelEs;
+  String localizedServingLabel(String languageCode) => languageCode == 'en' && servingLabelEn.isNotEmpty ? servingLabelEn : servingLabelEs;
 
   /// Kcal de la porción cultural (ej. "1 pupusa (120 g)").
   int get servingCalories => (caloriesKcalPer100 * servingAmount / 100).round();
 
   /// Estimación escalada a la porción cultural, lista para la pantalla de detalle.
   FoodNutritionEstimate toEstimate(String languageCode) {
-    final factor = servingAmount / 100;
+    return toEstimateForAmount(languageCode, servingAmount);
+  }
+
+  /// Estimación determinista para una cantidad concreta en g/ml.
+  FoodNutritionEstimate toEstimateForAmount(
+    String languageCode,
+    double amount,
+  ) {
+    final safeAmount = amount > 0 ? amount : servingAmount;
+    final factor = safeAmount / 100;
     final label = localizedServingLabel(languageCode);
+    final name = localizedName(languageCode);
     return FoodNutritionEstimate(
-      name: localizedName(languageCode),
+      name: name,
       brand: brand,
       caloriesKcal: (caloriesKcalPer100 * factor).round(),
       proteinG: proteinGPer100 * factor,
       carbsG: carbsGPer100 * factor,
       fatG: fatGPer100 * factor,
       fiberG: fiberGPer100 * factor,
-      servingDescription: label.isNotEmpty
-          ? label
-          : '${servingAmount.round()} $amountUnit',
-      referenceAmount: servingAmount,
+      servingDescription: (safeAmount - servingAmount).abs() < 0.01 && label.isNotEmpty ? label : '${safeAmount.round()} $amountUnit',
+      ingredients: [name],
+      ingredientPortions: [
+        FoodIngredientPortion(name: name, gramsG: safeAmount),
+      ],
+      referenceAmount: safeAmount,
       amountUnit: amountUnit,
     );
   }

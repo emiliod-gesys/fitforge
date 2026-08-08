@@ -9,7 +9,6 @@ import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/workout_streak.dart';
-import '../core/constants/cloud_exercise_catalog.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
@@ -28,6 +27,7 @@ import '../data/cloud_exercise_catalog.dart';
 import '../services/exercise_service.dart';
 import '../services/activity_log_service.dart';
 import '../services/catalog_food_service.dart';
+import '../services/food_quick_add_service.dart';
 import '../services/food_service.dart';
 import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
@@ -256,8 +256,7 @@ final exerciseMediaProvider = FutureProvider.family<ExerciseMedia, int>((ref, wg
   return ref.watch(exerciseServiceProvider).fetchExerciseMedia(wgerId);
 });
 
-final exerciseImageUrlProvider =
-    FutureProvider.family<String?, ExerciseImageLookup>((ref, lookup) async {
+final exerciseImageUrlProvider = FutureProvider.family<String?, ExerciseImageLookup>((ref, lookup) async {
   return ref.watch(exerciseServiceProvider).resolveImageUrl(lookup);
 });
 
@@ -496,6 +495,12 @@ final localManualFoodStoreProvider = Provider((ref) => LocalManualFoodStore());
 
 final openFoodFactsServiceProvider = Provider((ref) => OpenFoodFactsService());
 final catalogFoodServiceProvider = Provider((ref) => CatalogFoodService());
+final foodQuickAddServiceProvider = Provider(
+  (ref) => FoodQuickAddService(
+    catalog: ref.watch(catalogFoodServiceProvider),
+    aiEstimate: ref.watch(aiCoachServiceProvider).estimateFoodFromText,
+  ),
+);
 
 final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
   final now = DateTime.now();

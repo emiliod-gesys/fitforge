@@ -123,9 +123,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     final local = await ref.read(localManualFoodStoreProvider).search(
           query: _filterController.text,
         );
-    final localEntries = local
-        .map((template) => template.toPreviewEntry(mealType: widget.mealType))
-        .toList();
+    final localEntries = local.map((template) => template.toPreviewEntry(mealType: widget.mealType)).toList();
     final seen = <String>{};
     final merged = <FoodEntry>[];
     for (final entry in [...localEntries, ...remote]) {
@@ -227,7 +225,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     setState(() => _loading = true);
     try {
       final profile = await ref.read(profileProvider.future);
-      final estimate = await ref.read(aiCoachServiceProvider).estimateFoodFromText(
+      final estimate = await ref.read(foodQuickAddServiceProvider).estimate(
             query: description,
             profile: profile,
           );
@@ -263,15 +261,12 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
       final query = transcript?.trim();
       if (query == null || query.isEmpty) {
         final provider = profile?.aiProvider ?? AiProvider.none;
-        final unsupportedAnthropic = provider == AiProvider.anthropic &&
-            !AiSecrets.hasEmbeddedOpenAi &&
-            (await ref.read(profileServiceProvider).getUserStoredApiKey(AiProvider.openai))?.isNotEmpty != true;
+        final unsupportedAnthropic =
+            provider == AiProvider.anthropic && !AiSecrets.hasEmbeddedOpenAi && (await ref.read(profileServiceProvider).getUserStoredApiKey(AiProvider.openai))?.isNotEmpty != true;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              unsupportedAnthropic
-                  ? l10n.foodQuickAddVoiceNoteUnsupportedProvider
-                  : l10n.foodQuickAddVoiceNoteFailed,
+              unsupportedAnthropic ? l10n.foodQuickAddVoiceNoteUnsupportedProvider : l10n.foodQuickAddVoiceNoteFailed,
             ),
           ),
         );
@@ -280,10 +275,10 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
 
       _quickController.text = query;
 
-      final estimate = await ai.estimateFoodFromText(
-        query: query,
-        profile: profile,
-      );
+      final estimate = await ref.read(foodQuickAddServiceProvider).estimate(
+            query: query,
+            profile: profile,
+          );
 
       if (!mounted) return;
       if (estimate == null) {
@@ -410,8 +405,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         languageCode: ref.watch(preferredLanguageProvider),
                         onSelect: _openFromEntry,
                         onSelectCatalog: _openFromCatalog,
-                        onSelectPackaged: (estimate) =>
-                            _openDetail(estimate, FoodEntrySource.search),
+                        onSelectPackaged: (estimate) => _openDetail(estimate, FoodEntrySource.search),
                       ),
                     FoodAddMode.barcode => FoodBarcodeScannerView(
                         onDetected: _lookupBarcode,
@@ -489,11 +483,7 @@ class _SearchPane extends StatelessWidget {
     final searching = filterController.text.trim().length >= 2;
     final showCatalogSection = searching && (catalogResults.isNotEmpty || catalogSearching);
     final showPackagedSection = searching && (offResults.isNotEmpty || offSearching);
-    final showEmptyState = !catalogSearching &&
-        !offSearching &&
-        catalogResults.isEmpty &&
-        offResults.isEmpty &&
-        recent.isEmpty;
+    final showEmptyState = !catalogSearching && !offSearching && catalogResults.isEmpty && offResults.isEmpty && recent.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,8 +510,7 @@ class _SearchPane extends StatelessWidget {
                     if (showCatalogSection) ...[
                       Text(
                         l10n.foodCatalogSection,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textMuted),
                       ),
                       const SizedBox(height: 8),
                       if (catalogSearching && catalogResults.isEmpty)
@@ -548,8 +537,7 @@ class _SearchPane extends StatelessWidget {
                     if (recent.isNotEmpty) ...[
                       Text(
                         l10n.foodRecentSearches,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textMuted),
                       ),
                       const SizedBox(height: 8),
                       ...recent.map(
@@ -560,8 +548,7 @@ class _SearchPane extends StatelessWidget {
                     if (showPackagedSection) ...[
                       Text(
                         l10n.foodPackagedSection,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textMuted),
                       ),
                       const SizedBox(height: 8),
                       if (offSearching && offResults.isEmpty)
@@ -662,10 +649,7 @@ class _RecentFoodTile extends StatelessWidget {
 
   const _RecentFoodTile({required this.entry, required this.onTap});
 
-  bool get _isAi =>
-      entry.source == FoodEntrySource.aiPhoto ||
-      entry.source == FoodEntrySource.aiText ||
-      entry.source == FoodEntrySource.quick;
+  bool get _isAi => entry.source == FoodEntrySource.aiPhoto || entry.source == FoodEntrySource.aiText || entry.source == FoodEntrySource.quick;
 
   bool get _isManual => entry.source == FoodEntrySource.manual && entry.userId == 'local';
 
@@ -680,8 +664,7 @@ class _RecentFoodTile extends StatelessWidget {
           children: [
             Expanded(child: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
             if (_isAi) Icon(Icons.auto_awesome, size: 16, color: context.accentColor),
-            if (_isManual)
-              const Icon(Icons.edit_note, size: 16, color: AppColors.textMuted),
+            if (_isManual) const Icon(Icons.edit_note, size: 16, color: AppColors.textMuted),
           ],
         ),
         subtitle: Text(
@@ -761,9 +744,7 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
       final gramsText = _servingController.text.trim();
       final grams = double.tryParse(gramsText.replaceAll(',', '.'));
       final referenceGrams = grams != null && grams > 0 ? grams : 100.0;
-      final servingDescription = gramsText.isEmpty
-          ? null
-          : FoodServingParser.formatAmount(referenceGrams, 'g');
+      final servingDescription = gramsText.isEmpty ? null : FoodServingParser.formatAmount(referenceGrams, 'g');
 
       final template = ManualFoodTemplate(
         id: _editingId ?? '',
@@ -791,9 +772,7 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
     _fatController.text = template.fatG > 0 ? template.fatG.toStringAsFixed(1) : '';
     _fiberController.text = template.fiberG > 0 ? template.fiberG.toStringAsFixed(1) : '';
     final grams = FoodServingParser.amountFromDescription(template.servingDescription);
-    _servingController.text = grams != null && grams > 0
-        ? (grams == grams.roundToDouble() ? '${grams.toInt()}' : grams.toStringAsFixed(1))
-        : '';
+    _servingController.text = grams != null && grams > 0 ? (grams == grams.roundToDouble() ? '${grams.toInt()}' : grams.toStringAsFixed(1)) : '';
   }
 
   @override
@@ -1024,9 +1003,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
             _starting = false;
             _setListening(true);
           });
-        } else if (status == 'done' ||
-            status == 'notListening' ||
-            status == 'stopped') {
+        } else if (status == 'done' || status == 'notListening' || status == 'stopped') {
           setState(() {
             _starting = false;
             _setListening(false);
@@ -1238,70 +1215,70 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
         children: [
           if (_dictationActive)
             AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: _listening ? 0.16 : 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: accent.withValues(alpha: _listening ? 0.75 : 0.35),
-                width: _listening ? 1.5 : 1,
+              duration: const Duration(milliseconds: 220),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: _listening ? 0.16 : 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: accent.withValues(alpha: _listening ? 0.75 : 0.35),
+                  width: _listening ? 1.5 : 1,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                if (_starting)
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: accent),
-                  )
-                else
-                  ScaleTransition(
-                    scale: _pulseController,
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        shape: BoxShape.circle,
+              child: Row(
+                children: [
+                  if (_starting)
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5, color: accent),
+                    )
+                  else
+                    ScaleTransition(
+                      scale: _pulseController,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: accent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.mic, color: Colors.white, size: 20),
                       ),
-                      child: const Icon(Icons.mic, color: Colors.white, size: 20),
+                    ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _starting ? l10n.foodQuickAddDictatePreparing : l10n.foodQuickAddDictateListening,
+                          style: TextStyle(
+                            color: accent,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (_listening) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.foodQuickAddDictateStop,
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _starting ? l10n.foodQuickAddDictatePreparing : l10n.foodQuickAddDictateListening,
-                        style: TextStyle(
-                          color: accent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                      if (_listening) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.foodQuickAddDictateStop,
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (_dictationActive)
-                  IconButton(
-                    tooltip: l10n.foodQuickAddDictateStop,
-                    onPressed: _toggleDictation,
-                    icon: Icon(Icons.stop_circle, color: accent, size: 28),
-                  ),
-              ],
+                  if (_dictationActive)
+                    IconButton(
+                      tooltip: l10n.foodQuickAddDictateStop,
+                      onPressed: _toggleDictation,
+                      icon: Icon(Icons.stop_circle, color: accent, size: 28),
+                    ),
+                ],
+              ),
             ),
-          ),
           if (_voiceNoteActive)
             AnimatedContainer(
               duration: const Duration(milliseconds: 220),
@@ -1339,9 +1316,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _voiceNoteFinishing
-                              ? l10n.foodQuickAddVoiceNoteProcessing
-                              : l10n.foodQuickAddVoiceNoteRecording(_voiceNoteElapsed.inSeconds),
+                          _voiceNoteFinishing ? l10n.foodQuickAddVoiceNoteProcessing : l10n.foodQuickAddVoiceNoteRecording(_voiceNoteElapsed.inSeconds),
                           style: const TextStyle(
                             color: AppColors.error,
                             fontWeight: FontWeight.w700,
@@ -1367,130 +1342,126 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
                 ],
               ),
             ),
-        Text(
-          l10n.foodQuickAddHint,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          l10n.foodQuickAddSpecificityHint,
-          style: TextStyle(
-            color: accent.withValues(alpha: 0.85),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+          Text(
+            l10n.foodQuickAddHint,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: widget.controller,
-          autofocus: true,
-          enabled: !_inputLocked,
-          minLines: 3,
-          maxLines: 5,
-          decoration: InputDecoration(
-            hintText: l10n.foodQuickAddPlaceholder,
-            alignLabelWithHint: true,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: _voiceNoteRecording
-                    ? AppColors.error
-                    : _listening
-                        ? accent
-                        : AppColors.border,
-                width: (_voiceNoteRecording || _listening) ? 2 : 1,
-              ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.foodQuickAddSpecificityHint,
+            style: TextStyle(
+              color: accent.withValues(alpha: 0.85),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: _voiceNoteRecording
-                    ? AppColors.error
-                    : _listening
-                        ? accent
-                        : accent.withValues(alpha: 0.8),
-                width: (_voiceNoteRecording || _listening) ? 2 : 1.5,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: widget.controller,
+            autofocus: true,
+            enabled: !_inputLocked,
+            minLines: 3,
+            maxLines: 5,
+            decoration: InputDecoration(
+              hintText: l10n.foodQuickAddPlaceholder,
+              alignLabelWithHint: true,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: _voiceNoteRecording
+                      ? AppColors.error
+                      : _listening
+                          ? accent
+                          : AppColors.border,
+                  width: (_voiceNoteRecording || _listening) ? 2 : 1,
+                ),
               ),
-            ),
-            suffixIcon: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: IconButton(
-                tooltip: _dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate,
-                onPressed: _inputLocked ? null : _toggleDictation,
-                icon: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: _listening
-                        ? accent
-                        : _starting
-                            ? accent.withValues(alpha: 0.2)
-                            : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _dictationActive ? Icons.mic : Icons.mic_none_outlined,
-                    color: _listening ? Colors.white : accent,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: _voiceNoteRecording
+                      ? AppColors.error
+                      : _listening
+                          ? accent
+                          : accent.withValues(alpha: 0.8),
+                  width: (_voiceNoteRecording || _listening) ? 2 : 1.5,
+                ),
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  tooltip: _dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate,
+                  onPressed: _inputLocked ? null : _toggleDictation,
+                  icon: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _listening
+                          ? accent
+                          : _starting
+                              ? accent.withValues(alpha: 0.2)
+                              : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _dictationActive ? Icons.mic : Icons.mic_none_outlined,
+                      color: _listening ? Colors.white : accent,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: _inputLocked ? null : _toggleDictation,
-          icon: Icon(
-            _dictationActive ? Icons.stop_circle_outlined : Icons.mic_none_outlined,
-            color: _dictationActive ? AppColors.error : accent,
-          ),
-          label: Text(_dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: _dictationActive ? AppColors.error : accent,
-            side: BorderSide(
-              color: _dictationActive
-                  ? AppColors.error.withValues(alpha: 0.55)
-                  : accent.withValues(alpha: 0.45),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _inputLocked ? null : _toggleDictation,
+            icon: Icon(
+              _dictationActive ? Icons.stop_circle_outlined : Icons.mic_none_outlined,
+              color: _dictationActive ? AppColors.error : accent,
             ),
-            minimumSize: const Size.fromHeight(44),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          l10n.foodQuickAddVoiceNoteHint,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: (_inputLocked && !_voiceNoteRecording) ? null : _toggleVoiceNote,
-          icon: Icon(
-            _voiceNoteRecording ? Icons.stop_circle_outlined : Icons.graphic_eq_rounded,
-            color: _voiceNoteRecording ? AppColors.error : accent,
-          ),
-          label: Text(
-            _voiceNoteRecording ? l10n.foodQuickAddVoiceNoteStop : l10n.foodQuickAddVoiceNote,
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: _voiceNoteRecording ? AppColors.error : accent,
-            side: BorderSide(
-              color: _voiceNoteRecording
-                  ? AppColors.error.withValues(alpha: 0.55)
-                  : accent.withValues(alpha: 0.45),
+            label: Text(_dictationActive ? l10n.foodQuickAddDictateStop : l10n.foodQuickAddDictate),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _dictationActive ? AppColors.error : accent,
+              side: BorderSide(
+                color: _dictationActive ? AppColors.error.withValues(alpha: 0.55) : accent.withValues(alpha: 0.45),
+              ),
+              minimumSize: const Size.fromHeight(44),
             ),
-            minimumSize: const Size.fromHeight(44),
           ),
-        ),
-        const SizedBox(height: 12),
-        FilledButton.icon(
-          onPressed: _inputLocked ? null : widget.onSubmit,
-          icon: const Icon(Icons.auto_awesome),
-          label: Text(l10n.foodQuickAddAction),
-          style: FilledButton.styleFrom(
-            backgroundColor: accent,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(48),
+          const SizedBox(height: 10),
+          Text(
+            l10n.foodQuickAddVoiceNoteHint,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
-        ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: (_inputLocked && !_voiceNoteRecording) ? null : _toggleVoiceNote,
+            icon: Icon(
+              _voiceNoteRecording ? Icons.stop_circle_outlined : Icons.graphic_eq_rounded,
+              color: _voiceNoteRecording ? AppColors.error : accent,
+            ),
+            label: Text(
+              _voiceNoteRecording ? l10n.foodQuickAddVoiceNoteStop : l10n.foodQuickAddVoiceNote,
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _voiceNoteRecording ? AppColors.error : accent,
+              side: BorderSide(
+                color: _voiceNoteRecording ? AppColors.error.withValues(alpha: 0.55) : accent.withValues(alpha: 0.45),
+              ),
+              minimumSize: const Size.fromHeight(44),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _inputLocked ? null : widget.onSubmit,
+            icon: const Icon(Icons.auto_awesome),
+            label: Text(l10n.foodQuickAddAction),
+            style: FilledButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
         ],
       ),
     );
@@ -1627,9 +1598,7 @@ class _ModeTabs extends StatelessWidget {
                   width: 84,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: selected && !locked
-                        ? context.accentColor.withValues(alpha: 0.15)
-                        : AppColors.card,
+                    color: selected && !locked ? context.accentColor.withValues(alpha: 0.15) : AppColors.card,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: selected && !locked ? context.accentColor : AppColors.border,

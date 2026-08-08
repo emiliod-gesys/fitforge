@@ -4,7 +4,11 @@ class TurnstileConfig {
     defaultValue: '',
   );
 
-  /// Debe coincidir con un dominio permitido en el widget de Cloudflare Turnstile.
+  /// Origen del WebView; debe coincidir con un hostname permitido en Cloudflare.
+  ///
+  /// En APK Android real, `http://localhost/` suele provocar error 110200
+  /// ("Domain not allowed") y el widget queda reintentando. Usa un dominio
+  /// real (p. ej. `https://fitforge.app/`) y añádelo en Turnstile → Hostnames.
   static const baseUrl = String.fromEnvironment(
     'TURNSTILE_BASE_URL',
     defaultValue: 'http://localhost/',

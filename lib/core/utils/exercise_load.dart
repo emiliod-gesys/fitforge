@@ -1,31 +1,41 @@
+import '../constants/cloud_exercise_catalog.dart';
 import '../../models/exercise.dart';
 import '../../models/exercise_logging.dart';
 import '../../models/workout.dart';
 
 /// Cómo interpretar el peso registrado en una serie (total vs. por brazo).
 abstract final class ExerciseLoad {
-  static Exercise? _findInCatalog(String exerciseId, Iterable<Exercise> catalog) {
+  static Exercise? _findInCatalog(
+      String exerciseId, Iterable<Exercise> catalog) {
     for (final exercise in catalog) {
       if (exercise.id == exerciseId) return exercise;
     }
     return null;
   }
 
+  static bool _hasTrustedLoadMetadata(Exercise exercise) {
+    return exercise.isBundled ||
+        exercise.isUserCustom ||
+        CloudExerciseCatalogIds.isCloudId(exercise.id);
+  }
+
   /// Override explícito desde catálogo o ejercicio personalizado (`null` = inferir del nombre).
   static bool? perArmWeightOverride(Exercise? exercise) {
     if (exercise == null) return null;
-    if (exercise.isBundled || exercise.isUserCustom) return exercise.perArmWeight;
+    if (_hasTrustedLoadMetadata(exercise)) return exercise.perArmWeight;
     return null;
   }
 
-  static bool? perArmWeightForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+  static bool? perArmWeightForExerciseId(
+      String exerciseId, Iterable<Exercise> catalog) {
     return perArmWeightOverride(_findInCatalog(exerciseId, catalog));
   }
 
-  static bool? unilateralForExerciseId(String exerciseId, Iterable<Exercise> catalog) {
+  static bool? unilateralForExerciseId(
+      String exerciseId, Iterable<Exercise> catalog) {
     final exercise = _findInCatalog(exerciseId, catalog);
     if (exercise == null) return null;
-    if (exercise.isBundled || exercise.isUserCustom) return exercise.unilateral;
+    if (_hasTrustedLoadMetadata(exercise)) return exercise.unilateral;
     return null;
   }
 
@@ -35,7 +45,7 @@ abstract final class ExerciseLoad {
     String? exerciseName,
   }) {
     final exercise = _findInCatalog(exerciseId, catalog);
-    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
+    if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
       return exercise.weightOptional || exercise.loadMode.weightOptional;
     }
     final name = exerciseName ?? exercise?.name ?? exerciseId;
@@ -49,7 +59,7 @@ abstract final class ExerciseLoad {
     String? exerciseName,
   }) {
     final exercise = _findInCatalog(exerciseId, catalog);
-    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
+    if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
       return exercise.loadMode;
     }
     return _inferLoadModeByName(exerciseName ?? exercise?.name ?? exerciseId);
@@ -76,8 +86,16 @@ abstract final class ExerciseLoad {
       }
     }
 
-    if (exercise != null && (exercise.isBundled || exercise.isUserCustom)) {
+    if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
       if (exercise.perArmWeight) return true;
+    }
+
+    // Un movimiento unilateral con cable/polea siempre puede registrarse por
+    // el lado activo, aunque su nombre corto no incluya "single arm".
+    if (exercise != null &&
+        exercise.unilateral &&
+        exercise.equipment.any(_isCableEquipment)) {
+      return true;
     }
 
     if (exercise != null && exercise.equipment.any(_isMachineEquipment)) {
@@ -153,11 +171,14 @@ abstract final class ExerciseLoad {
     final exercise = _findInCatalog(exerciseId, catalog);
     final catalogPerArm = perArmWeightForExerciseId(exerciseId, catalog);
 
-    // Unilateral con mancuerna/kettlebell: el peso registrado es del brazo activo
-    // (p. ej. curl de concentración, cuyo nombre no incluye «dumbbell»).
+    // Unilateral con mancuerna/kettlebell o polea: el peso registrado es del
+    // lado activo, incluso si el nombre corto no dice «single arm».
     if (exercise != null &&
         exercise.unilateral &&
-        exercise.equipment.any(_isDumbbellEquipment) &&
+        exercise.equipment.any(
+          (equipment) =>
+              _isDumbbellEquipment(equipment) || _isCableEquipment(equipment),
+        ) &&
         catalogPerArm != true) {
       return true;
     }
@@ -189,7 +210,8 @@ abstract final class ExerciseLoad {
     ExerciseLoadMode? loadMode,
   }) {
     final mode = loadMode ?? _inferLoadModeByName(exerciseName);
-    if (mode == ExerciseLoadMode.loadedDistance || _inferLoadedDistanceByName(exerciseName)) {
+    if (mode == ExerciseLoadMode.loadedDistance ||
+        _inferLoadedDistanceByName(exerciseName)) {
       final meters = set.distanceMeters;
       if (meters == null || meters <= 0) return 0;
       return meters.round();
@@ -231,7 +253,8 @@ abstract final class ExerciseLoad {
     final mode = loadMode ?? _inferLoadModeByName(exerciseName);
 
     if (mode == ExerciseLoadMode.bodyweight) {
-      final base = (bodyWeightKg ?? 0) * bodyweightFractionForExercise(exerciseName);
+      final base =
+          (bodyWeightKg ?? 0) * bodyweightFractionForExercise(exerciseName);
       if (base <= 0 && additional <= 0) return null;
       return base + additional;
     }
@@ -270,7 +293,9 @@ abstract final class ExerciseLoad {
     Iterable<Exercise>? catalog,
   }) {
     final resolved = exercise ??
-        (exerciseId != null && catalog != null ? _findInCatalog(exerciseId, catalog) : null);
+        (exerciseId != null && catalog != null
+            ? _findInCatalog(exerciseId, catalog)
+            : null);
 
     if (resolved != null) {
       final cat = _normalize(resolved.category);
@@ -342,7 +367,8 @@ abstract final class ExerciseLoad {
     ]);
   }
 
-  static Exercise? exerciseFromCatalog(String exerciseId, Iterable<Exercise> catalog) {
+  static Exercise? exerciseFromCatalog(
+      String exerciseId, Iterable<Exercise> catalog) {
     return _findInCatalog(exerciseId, catalog);
   }
 
@@ -390,7 +416,8 @@ abstract final class ExerciseLoad {
       exerciseName: exerciseName,
       loadMode: loadMode,
     );
-    if (effective == null || effective <= 0 || !set.completed || units <= 0) return 0;
+    if (effective == null || effective <= 0 || !set.completed || units <= 0)
+      return 0;
 
     return effective *
         units *
@@ -480,7 +507,8 @@ abstract final class ExerciseLoad {
   }
 
   static bool _isPartialTorsoCoreExercise(String n) {
-    if (_hasAny(n, ['machine', 'maquina', 'polea', 'cable', 'barbell', 'barra'])) {
+    if (_hasAny(
+        n, ['machine', 'maquina', 'polea', 'cable', 'barbell', 'barra'])) {
       return false;
     }
     const patterns = [
@@ -502,7 +530,8 @@ abstract final class ExerciseLoad {
   }
 
   static ExerciseLoadMode? _inferLoadModeByName(String name) {
-    if (_inferLoadedDistanceByName(name)) return ExerciseLoadMode.loadedDistance;
+    if (_inferLoadedDistanceByName(name))
+      return ExerciseLoadMode.loadedDistance;
     if (_inferBodyweightByName(name)) return ExerciseLoadMode.bodyweight;
     if (isAssistedExercise(name)) return ExerciseLoadMode.assistedBodyweight;
     return null;
@@ -536,39 +565,46 @@ abstract final class ExerciseLoad {
         n.contains('pesa rusa');
   }
 
+  static bool _isCableEquipment(String equipment) {
+    final n = _normalize(equipment);
+    return n.contains('polea') || n.contains('cable') || n.contains('pulley');
+  }
+
   static bool _inferBodyweightByName(String name) {
     final n = _normalize(name);
     if (isAssistedExercise(n)) return true;
     return _hasAny(n, [
-      'pull up',
-      'pull-up',
-      'pullup',
-      'chin up',
-      'chin-up',
-      'chinup',
-      'dominada',
-      'muscle up',
-      'muscle-up',
-      'parallel bar dip',
-      'fondos en paralela',
-      'fondos en paralelas',
-      'bench dip',
-      'fondos en banco',
-      'push up',
-      'push-up',
-      'pushup',
-      'flexion',
-      'flexión',
-      'plancha',
-      'plank',
-      'l-sit',
-      'hanging leg raise',
-      'inverted row',
-      'remo invertido',
-      'australian pull',
-    ]) ||
-        (_hasWord(n, 'dip') && !_hasAny(n, ['machine', 'maquina', 'máquina', 'cable', 'polea'])) ||
-        (_hasWord(n, 'fondos') && !_hasAny(n, ['maquina', 'máquina', 'machine']));
+          'pull up',
+          'pull-up',
+          'pullup',
+          'chin up',
+          'chin-up',
+          'chinup',
+          'dominada',
+          'muscle up',
+          'muscle-up',
+          'parallel bar dip',
+          'fondos en paralela',
+          'fondos en paralelas',
+          'bench dip',
+          'fondos en banco',
+          'push up',
+          'push-up',
+          'pushup',
+          'flexion',
+          'flexión',
+          'plancha',
+          'plank',
+          'l-sit',
+          'hanging leg raise',
+          'inverted row',
+          'remo invertido',
+          'australian pull',
+        ]) ||
+        (_hasWord(n, 'dip') &&
+            !_hasAny(n, ['machine', 'maquina', 'máquina', 'cable', 'polea'])) ||
+        (_hasWord(n, 'fondos') &&
+            !_hasAny(n, ['maquina', 'máquina', 'machine']));
   }
 
   static bool _hasAny(String name, List<String> terms) {
@@ -586,7 +622,8 @@ abstract final class ExerciseLoad {
   static bool _hasWord(String name, String word) {
     final w = _normalize(word);
     if (w.isEmpty) return false;
-    return RegExp(r'(^|[^a-z])' + RegExp.escape(w) + r'([^a-z]|$)').hasMatch(name);
+    return RegExp(r'(^|[^a-z])' + RegExp.escape(w) + r'([^a-z]|$)')
+        .hasMatch(name);
   }
 
   static String _normalize(String name) {
@@ -626,7 +663,9 @@ abstract final class ExerciseLoad {
 
     if (_usesCable(n) &&
         (n.contains('triceps') || n.contains('tricep')) &&
-        (n.contains('extension') || n.contains('pushdown') || n.contains('press down'))) {
+        (n.contains('extension') ||
+            n.contains('pushdown') ||
+            n.contains('press down'))) {
       return true;
     }
 
