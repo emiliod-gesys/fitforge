@@ -118,6 +118,7 @@ class UserProfile {
   final String? fitnessGoal;
   final String? experienceLevel;
   final DailyActivityLevel activityLevel;
+
   /// Porcentaje firmado sobre TDEE (-15 = 15% déficit, +8 = superávit). Null = default del objetivo.
   final int? calorieAdjustmentPct;
   final AiProvider aiProvider;
@@ -161,7 +162,7 @@ class UserProfile {
     this.hasAiKey = false,
     this.userType = UserType.athlete,
     this.subscriptionTier = SubscriptionTier.free,
-    this.accentColor = AppAccent.gold,
+    this.accentColor = AppAccent.defaultAccent,
     this.hyroxMode = false,
     this.runnerMode = false,
     this.totalXp = 0,
@@ -169,7 +170,8 @@ class UserProfile {
     this.onboardingCompletedAt,
   });
 
-  factory UserProfile.fromJson(Map<String, dynamic> json, {bool hasAiKey = false}) {
+  factory UserProfile.fromJson(Map<String, dynamic> json,
+      {bool hasAiKey = false}) {
     final dob = AgeCalculator.tryParseDate(json['date_of_birth'] as String?);
     final storedAge = json['age'] as int?;
     return UserProfile(
@@ -185,12 +187,14 @@ class UserProfile {
       preferredLanguage: json['preferred_language'] as String? ?? 'es',
       fitnessGoal: json['fitness_goal'] as String?,
       experienceLevel: json['experience_level'] as String?,
-      activityLevel: DailyActivityLevel.fromCode(json['activity_level'] as String?),
+      activityLevel:
+          DailyActivityLevel.fromCode(json['activity_level'] as String?),
       calorieAdjustmentPct: (json['calorie_adjustment_pct'] as num?)?.toInt(),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
-      subscriptionTier: SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
+      subscriptionTier:
+          SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
       accentColor: AppAccent.fromCode(parseJsonString(json['accent_color'])),
       hyroxMode: json['hyrox_mode'] as bool? ?? false,
       runnerMode: json['runner_mode'] as bool? ?? false,
@@ -220,7 +224,9 @@ class UserProfile {
         'avatar_url': avatarUrl,
         'unit_system': unitSystem,
         'body_weight': bodyWeight,
-        'date_of_birth': dateOfBirth != null ? AgeCalculator.toDateString(dateOfBirth!) : null,
+        'date_of_birth': dateOfBirth != null
+            ? AgeCalculator.toDateString(dateOfBirth!)
+            : null,
         'age': effectiveAge,
         'gender': gender?.code,
         'height_cm': heightCm,
@@ -270,7 +276,6 @@ class BodyMeasurement {
         'measured_at': measuredAt.toIso8601String(),
       });
 }
-
 
 class PersonalRecord {
   final String id;

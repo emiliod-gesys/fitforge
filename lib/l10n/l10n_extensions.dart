@@ -14,6 +14,7 @@ import '../models/social.dart';
 import '../core/hyrox/hyrox_standards.dart';
 import '../core/runner/runner_standards.dart';
 import 'app_localizations.dart';
+
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
@@ -68,6 +69,11 @@ extension ProfileL10n on AppLocalizations {
       AppAccent.emerald => accentEmerald,
       AppAccent.rose => accentRose,
       AppAccent.crimson => accentCrimson,
+      AppAccent.cyan => accentCyan,
+      AppAccent.teal => accentTeal,
+      AppAccent.indigo => accentIndigo,
+      AppAccent.amber => accentAmber,
+      AppAccent.lime => accentLime,
     };
   }
 
@@ -187,7 +193,8 @@ extension ProfileL10n on AppLocalizations {
     return fitnessGoalCalorieSurplus;
   }
 
-  List<String> get experienceLevels => [expBeginner, expIntermediate, expAdvanced];
+  List<String> get experienceLevels =>
+      [expBeginner, expIntermediate, expAdvanced];
 
   String activityLevelLabel(DailyActivityLevel level) {
     return switch (level) {
@@ -231,7 +238,9 @@ extension ProfileL10n on AppLocalizations {
 
   String workoutDisplayName(String name) {
     if (name == 'Entrenamiento' || name == 'Workout') return defaultWorkoutName;
-    if (name == 'Entrenamiento libre' || name == 'Free workout') return freeWorkout;
+    if (name == 'Entrenamiento libre' || name == 'Free workout') {
+      return freeWorkout;
+    }
     if (_isRunnerOutdoorName(name)) return runnerStartOutdoor;
     if (_isRunnerTreadmillName(name)) return runnerStartTreadmill;
     if (_isHyroxPrepName(name)) return hyroxRoutinePrepName;
@@ -421,7 +430,8 @@ extension ProfileL10n on AppLocalizations {
     return _dailyTipLookup[tipId]?.call(this) ?? tipId;
   }
 
-  static final Map<String, String Function(AppLocalizations)> _dailyTipLookup = {
+  static final Map<String, String Function(AppLocalizations)> _dailyTipLookup =
+      {
     'general_doms': (l10n) => l10n.dailyTip_general_doms,
     'general_sweat': (l10n) => l10n.dailyTip_general_sweat,
     'general_sleep': (l10n) => l10n.dailyTip_general_sleep,
@@ -441,7 +451,8 @@ extension ProfileL10n on AppLocalizations {
     'general_fasted_cardio': (l10n) => l10n.dailyTip_general_fasted_cardio,
     'general_bcaa': (l10n) => l10n.dailyTip_general_bcaa,
     'general_creatine': (l10n) => l10n.dailyTip_general_creatine,
-    'general_pain_vs_soreness': (l10n) => l10n.dailyTip_general_pain_vs_soreness,
+    'general_pain_vs_soreness': (l10n) =>
+        l10n.dailyTip_general_pain_vs_soreness,
     'general_consistency': (l10n) => l10n.dailyTip_general_consistency,
     'general_track_progress': (l10n) => l10n.dailyTip_general_track_progress,
     'general_fiber': (l10n) => l10n.dailyTip_general_fiber,
@@ -458,7 +469,8 @@ extension ProfileL10n on AppLocalizations {
     'hypertrophy_eccentric': (l10n) => l10n.dailyTip_hypertrophy_eccentric,
     'hypertrophy_mind_muscle': (l10n) => l10n.dailyTip_hypertrophy_mind_muscle,
     'hypertrophy_deload': (l10n) => l10n.dailyTip_hypertrophy_deload,
-    'hypertrophy_sleep_growth': (l10n) => l10n.dailyTip_hypertrophy_sleep_growth,
+    'hypertrophy_sleep_growth': (l10n) =>
+        l10n.dailyTip_hypertrophy_sleep_growth,
     'strength_rest': (l10n) => l10n.dailyTip_strength_rest,
     'strength_failure': (l10n) => l10n.dailyTip_strength_failure,
     'strength_technique': (l10n) => l10n.dailyTip_strength_technique,
@@ -470,7 +482,8 @@ extension ProfileL10n on AppLocalizations {
     'strength_1rm_test': (l10n) => l10n.dailyTip_strength_1rm_test,
     'strength_grip': (l10n) => l10n.dailyTip_strength_grip,
     'strength_leg_drive': (l10n) => l10n.dailyTip_strength_leg_drive,
-    'strength_program_hopping': (l10n) => l10n.dailyTip_strength_program_hopping,
+    'strength_program_hopping': (l10n) =>
+        l10n.dailyTip_strength_program_hopping,
     'fatloss_cardio': (l10n) => l10n.dailyTip_fatloss_cardio,
     'fatloss_strength': (l10n) => l10n.dailyTip_fatloss_strength,
     'fatloss_starve': (l10n) => l10n.dailyTip_fatloss_starve,
@@ -498,7 +511,8 @@ extension ProfileL10n on AppLocalizations {
     'maintenance_variety': (l10n) => l10n.dailyTip_maintenance_variety,
     'maintenance_microcycles': (l10n) => l10n.dailyTip_maintenance_microcycles,
     'maintenance_mobility': (l10n) => l10n.dailyTip_maintenance_mobility,
-    'maintenance_perfect_week': (l10n) => l10n.dailyTip_maintenance_perfect_week,
+    'maintenance_perfect_week': (l10n) =>
+        l10n.dailyTip_maintenance_perfect_week,
     'maintenance_habits': (l10n) => l10n.dailyTip_maintenance_habits,
     'maintenance_social': (l10n) => l10n.dailyTip_maintenance_social,
     'maintenance_health': (l10n) => l10n.dailyTip_maintenance_health,
@@ -523,7 +537,8 @@ extension ProfileL10n on AppLocalizations {
         CalorieGoalMode.maintenance => calorieBudgetMaintenanceSliderTitle,
       };
 
-  String calorieBudgetIntensityLabel(CalorieGoalMode mode, int display) => switch (mode) {
+  String calorieBudgetIntensityLabel(CalorieGoalMode mode, int display) =>
+      switch (mode) {
         CalorieGoalMode.deficit => calorieBudgetDeficitIntensity(display),
         CalorieGoalMode.surplus => calorieBudgetSurplusIntensity(display),
         CalorieGoalMode.maintenance => display == 0
@@ -533,7 +548,8 @@ extension ProfileL10n on AppLocalizations {
               ),
       };
 
-  String calorieBudgetKcalDeltaLabel(CalorieGoalMode mode, int kcal) => switch (mode) {
+  String calorieBudgetKcalDeltaLabel(CalorieGoalMode mode, int kcal) =>
+      switch (mode) {
         CalorieGoalMode.deficit => calorieBudgetCaloriesRemoved(kcal),
         CalorieGoalMode.surplus => calorieBudgetCaloriesAdded(kcal),
         CalorieGoalMode.maintenance => calorieBudgetMaintenanceDelta(
@@ -541,7 +557,8 @@ extension ProfileL10n on AppLocalizations {
           ),
       };
 
-  (String left, String right) calorieBudgetSliderEndpoints(CalorieGoalMode mode) =>
+  (String left, String right) calorieBudgetSliderEndpoints(
+          CalorieGoalMode mode) =>
       switch (mode) {
         CalorieGoalMode.deficit => (
             calorieBudgetSliderLessDeficit,
@@ -557,14 +574,21 @@ extension ProfileL10n on AppLocalizations {
           ),
       };
 
-  String? calorieBudgetWarningMessage(CalorieBudgetWarning warning, {required int kcal}) =>
+  String? calorieBudgetWarningMessage(CalorieBudgetWarning warning,
+          {required int kcal}) =>
       switch (warning) {
-        CalorieBudgetWarning.wrongDirectionDeficit => calorieBudgetWarnWrongDirectionDeficit,
-        CalorieBudgetWarning.deficitTooSmall => calorieBudgetWarnDeficitTooSmall(kcal),
-        CalorieBudgetWarning.deficitTooAggressive => calorieBudgetWarnDeficitTooAggressive,
-        CalorieBudgetWarning.wrongDirectionSurplus => calorieBudgetWarnWrongDirectionSurplus,
-        CalorieBudgetWarning.surplusTooSmall => calorieBudgetWarnSurplusTooSmall(kcal),
+        CalorieBudgetWarning.wrongDirectionDeficit =>
+          calorieBudgetWarnWrongDirectionDeficit,
+        CalorieBudgetWarning.deficitTooSmall =>
+          calorieBudgetWarnDeficitTooSmall(kcal),
+        CalorieBudgetWarning.deficitTooAggressive =>
+          calorieBudgetWarnDeficitTooAggressive,
+        CalorieBudgetWarning.wrongDirectionSurplus =>
+          calorieBudgetWarnWrongDirectionSurplus,
+        CalorieBudgetWarning.surplusTooSmall =>
+          calorieBudgetWarnSurplusTooSmall(kcal),
         CalorieBudgetWarning.surplusTooHigh => calorieBudgetWarnSurplusTooHigh,
-        CalorieBudgetWarning.maintenanceDrift => calorieBudgetWarnMaintenanceDrift,
+        CalorieBudgetWarning.maintenanceDrift =>
+          calorieBudgetWarnMaintenanceDrift,
       };
 }

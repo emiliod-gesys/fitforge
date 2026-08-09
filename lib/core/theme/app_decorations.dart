@@ -25,7 +25,8 @@ abstract final class AppDecorations {
         ),
       ];
 
-  static BoxDecoration heroCard(AppAccent accent, {double radius = 20}) => BoxDecoration(
+  static BoxDecoration heroCard(AppAccent accent, {double radius = 20}) =>
+      BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         gradient: heroGradient(accent),
         boxShadow: heroGlow(accent.primary, accent.dark),
@@ -37,7 +38,7 @@ abstract final class AppDecorations {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gold.withValues(alpha: 0.1),
+            color: AppColors.cobalt.withValues(alpha: 0.1),
             blurRadius: 28,
             offset: const Offset(0, 10),
           ),

@@ -8,7 +8,7 @@ class AppTheme {
   /// @Deprecated: prefer [AppTokens.radiusMd]
   static const borderRadius = AppTokens.radiusMd;
 
-  static ThemeData dark({AppAccent accent = AppAccent.gold}) {
+  static ThemeData dark({AppAccent accent = AppAccent.defaultAccent}) {
     final palette = FitForgeAccent.fromAccent(accent);
     final primary = palette.accentColor;
     final secondary = palette.accentDark;
@@ -85,20 +85,24 @@ class AppTheme {
         backgroundColor: AppColors.cardElevated,
         shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
       ),
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.cardElevated,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppTokens.radiusXl)),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppTokens.radiusXl)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.cardElevated,
-        labelStyle: GoogleFonts.montserrat(color: AppColors.textMuted, fontSize: 14),
-        hintStyle: GoogleFonts.montserrat(color: AppColors.textMuted.withValues(alpha: 0.6)),
+        labelStyle:
+            GoogleFonts.montserrat(color: AppColors.textMuted, fontSize: 14),
+        hintStyle: GoogleFonts.montserrat(
+            color: AppColors.textMuted.withValues(alpha: 0.6)),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppTokens.borderRadiusMd,
-          borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
+          borderSide:
+              BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppTokens.borderRadiusMd,
@@ -108,7 +112,8 @@ class AppTheme {
           borderRadius: AppTokens.borderRadiusMd,
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -119,7 +124,8 @@ class AppTheme {
           elevation: 0,
           minimumSize: const Size(0, AppTokens.buttonHeight),
           shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusMd),
-          textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 15),
+          textStyle:
+              GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 15),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -128,7 +134,8 @@ class AppTheme {
           foregroundColor: Colors.black,
           minimumSize: const Size(0, AppTokens.buttonHeight),
           shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusMd),
-          textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 15),
+          textStyle:
+              GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 15),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -150,15 +157,19 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.cardElevated,
         selectedColor: primary.withValues(alpha: 0.2),
-        labelStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+        labelStyle:
+            GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
         side: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTokens.radiusSm)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTokens.radiusSm)),
       ),
       tabBarTheme: TabBarThemeData(
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
-        labelStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w800, fontSize: 14),
-        unselectedLabelStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 14),
+        labelStyle:
+            GoogleFonts.montserrat(fontWeight: FontWeight.w800, fontSize: 14),
+        unselectedLabelStyle:
+            GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 14),
         labelColor: primary,
         unselectedLabelColor: AppColors.textMuted,
         indicator: UnderlineTabIndicator(
@@ -175,7 +186,8 @@ class AppTheme {
       ),
       listTileTheme: ListTileThemeData(
         iconColor: primary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppTokens.space8),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: AppTokens.space8),
         shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusMd),
       ),
       switchTheme: SwitchThemeData(

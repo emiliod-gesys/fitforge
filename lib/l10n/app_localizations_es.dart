@@ -384,6 +384,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accentCrimson => 'Carmesí';
 
   @override
+  String get accentCyan => 'Cian';
+
+  @override
+  String get accentTeal => 'Turquesa';
+
+  @override
+  String get accentIndigo => 'Índigo';
+
+  @override
+  String get accentAmber => 'Ámbar';
+
+  @override
+  String get accentLime => 'Lima';
+
+  @override
   String get kilograms => 'Kilogramos';
 
   @override

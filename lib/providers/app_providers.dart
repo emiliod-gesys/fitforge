@@ -74,8 +74,10 @@ final localWorkoutStoreProvider = Provider((ref) => LocalWorkoutStore());
 final syncOutboxProvider = Provider((ref) => SyncOutbox());
 final routineCacheStoreProvider = Provider((ref) => RoutineCacheStore());
 final profileCacheStoreProvider = Provider((ref) => ProfileCacheStore());
-final cloudExerciseCacheStoreProvider = Provider((ref) => CloudExerciseCacheStore());
-final cloudExerciseMediaCacheProvider = Provider((ref) => CloudExerciseMediaCache());
+final cloudExerciseCacheStoreProvider =
+    Provider((ref) => CloudExerciseCacheStore());
+final cloudExerciseMediaCacheProvider =
+    Provider((ref) => CloudExerciseMediaCache());
 final previousSetsCacheProvider = Provider((ref) => PreviousSetsCache());
 
 final offlineWorkoutSupportProvider = Provider((ref) {
@@ -132,7 +134,8 @@ final cloudExerciseDownloadServiceProvider = Provider((ref) {
     mediaCache: ref.watch(cloudExerciseMediaCacheProvider),
   );
 });
-final exerciseTranslationStoreProvider = Provider((ref) => ExerciseTranslationStore());
+final exerciseTranslationStoreProvider =
+    Provider((ref) => ExerciseTranslationStore());
 final routineShareServiceProvider = Provider((ref) => RoutineShareService());
 
 final routineServiceProvider = Provider(
@@ -147,10 +150,12 @@ final hyroxServiceProvider = Provider(
 final runnerServiceProvider = Provider(
   (ref) => RunnerService(ref.watch(routineServiceProvider)),
 );
-final pendingRunnerSurfaceProvider = StateProvider<RunningSurface?>((ref) => null);
+final pendingRunnerSurfaceProvider =
+    StateProvider<RunningSurface?>((ref) => null);
 
 /// Resumen pendiente tras finalizar entreno; sobrevive a rebuilds de GoRouter sin `extra`.
-final pendingWorkoutSummaryProvider = StateProvider<WorkoutSummaryData?>((ref) => null);
+final pendingWorkoutSummaryProvider =
+    StateProvider<WorkoutSummaryData?>((ref) => null);
 
 /// Id del entreno cuyo resumen está en pantalla; estabiliza la key del host al reconstruir rutas.
 final workoutSummarySessionIdProvider = StateProvider<String?>((ref) => null);
@@ -160,13 +165,15 @@ final workoutServiceProvider = Provider(
     previousSetsCache: ref.watch(previousSetsCacheProvider),
   ),
 );
-final exerciseReportServiceProvider = Provider((ref) => ExerciseReportService());
+final exerciseReportServiceProvider =
+    Provider((ref) => ExerciseReportService());
 final profileServiceProvider = Provider(
   (ref) => ProfileService(profileCache: ref.watch(profileCacheStoreProvider)),
 );
 final socialServiceProvider = Provider((ref) => SocialService());
 final trainerServiceProvider = Provider((ref) => TrainerService());
-final pushNotificationServiceProvider = Provider((ref) => PushNotificationService());
+final pushNotificationServiceProvider =
+    Provider((ref) => PushNotificationService());
 final aiCoachServiceProvider = Provider(
   (ref) => AiCoachService(ref.watch(profileServiceProvider)),
 );
@@ -182,7 +189,9 @@ final coachNutritionServiceProvider = Provider(
 final coachUsageStatusProvider = FutureProvider<CoachUsageStatus>((ref) async {
   final profile = await ref.watch(profileProvider.future);
   final profileService = ref.watch(profileServiceProvider);
-  return ref.watch(coachUsageServiceProvider).getStatus(profile, profileService);
+  return ref
+      .watch(coachUsageServiceProvider)
+      .getStatus(profile, profileService);
 });
 
 final authStateProvider = StreamProvider((ref) {
@@ -201,7 +210,8 @@ final unitSystemProvider = Provider<String>((ref) {
 
 /// Idioma preferido del usuario (es / en).
 final preferredLanguageProvider = Provider<String>((ref) {
-  return ref.watch(profileProvider).value?.preferredLanguage ?? AppLocale.defaultCode;
+  return ref.watch(profileProvider).value?.preferredLanguage ??
+      AppLocale.defaultCode;
 });
 
 final appLocaleProvider = Provider<Locale>((ref) {
@@ -210,17 +220,20 @@ final appLocaleProvider = Provider<Locale>((ref) {
 
 /// Color de acento personalizado del usuario (solo afecta su propia vista).
 final accentProvider = Provider<AppAccent>((ref) {
-  return ref.watch(profileProvider).value?.accentColor ?? AppAccent.gold;
+  return ref.watch(profileProvider).value?.accentColor ??
+      AppAccent.defaultAccent;
 });
 
 final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
   final profile = await ref.watch(profileProvider.future);
-  final snapshots = await ref.watch(profileServiceProvider).getBodyMetricSnapshots();
+  final snapshots =
+      await ref.watch(profileServiceProvider).getBodyMetricSnapshots();
   return BodyMetricCalculator.enrich(snapshots, profile);
 });
 
-final restTimerAlertModeProvider = FutureProvider<RestTimerAlertMode>((ref) async {
+final restTimerAlertModeProvider =
+    FutureProvider<RestTimerAlertMode>((ref) async {
   return RestPreferences.getRestTimerAlertMode();
 });
 
@@ -228,7 +241,8 @@ final aiProactiveEnabledProvider = FutureProvider<bool>((ref) async {
   return AiPreferences.isProactiveAiEnabled();
 });
 
-final customExerciseRepositoryProvider = Provider((ref) => CustomExerciseRepository());
+final customExerciseRepositoryProvider =
+    Provider((ref) => CustomExerciseRepository());
 
 final exercisesProvider = FutureProvider((ref) async {
   final lang = ref.watch(preferredLanguageProvider);
@@ -245,18 +259,21 @@ final exercisesProvider = FutureProvider((ref) async {
 
 final cloudExerciseCatalogProvider = Provider((ref) => CloudExerciseCatalog());
 
-final cloudExerciseByIdProvider = FutureProvider.family<Exercise?, String>((ref, id) async {
+final cloudExerciseByIdProvider =
+    FutureProvider.family<Exercise?, String>((ref, id) async {
   if (!CloudExerciseCatalog.isCloudExerciseId(id)) return null;
   final lang = ref.watch(preferredLanguageProvider);
   ref.read(exerciseServiceProvider).configure(language: lang);
   return ref.read(exerciseServiceProvider).getCloudExerciseById(id);
 });
 
-final exerciseMediaProvider = FutureProvider.family<ExerciseMedia, int>((ref, wgerId) async {
+final exerciseMediaProvider =
+    FutureProvider.family<ExerciseMedia, int>((ref, wgerId) async {
   return ref.watch(exerciseServiceProvider).fetchExerciseMedia(wgerId);
 });
 
-final exerciseImageUrlProvider = FutureProvider.family<String?, ExerciseImageLookup>((ref, lookup) async {
+final exerciseImageUrlProvider =
+    FutureProvider.family<String?, ExerciseImageLookup>((ref, lookup) async {
   return ref.watch(exerciseServiceProvider).resolveImageUrl(lookup);
 });
 
@@ -287,9 +304,11 @@ final milestoneTotalsProvider = FutureProvider((ref) async {
   return ref.watch(workoutServiceProvider).getMilestoneTotals(profile: profile);
 });
 
-final workoutWeeklyStatsProvider = FutureProvider<WorkoutWeeklyStats>((ref) async {
+final workoutWeeklyStatsProvider =
+    FutureProvider<WorkoutWeeklyStats>((ref) async {
   ref.watch(authStateProvider);
-  final dates = await ref.watch(workoutServiceProvider).getCompletedWorkoutTimestamps();
+  final dates =
+      await ref.watch(workoutServiceProvider).getCompletedWorkoutTimestamps();
   return WorkoutStreakCalculator.fromCompletedDates(dates);
 });
 
@@ -319,7 +338,8 @@ final muscleRecoveryProvider = FutureProvider((ref) async {
   return service.calculateMuscleRecovery(workouts, catalog: catalog);
 });
 
-final exerciseHistoryProvider = FutureProvider.family<List<ExerciseSessionHistory>, ExerciseHistoryQuery>(
+final exerciseHistoryProvider =
+    FutureProvider.family<List<ExerciseSessionHistory>, ExerciseHistoryQuery>(
   (ref, query) async {
     ref.watch(authStateProvider);
     return ref.watch(workoutServiceProvider).getExerciseHistory(
@@ -335,14 +355,16 @@ final isTrainerProvider = Provider<bool>((ref) {
   return profile.isTrainer && profile.subscriptionTier.hasTrainerMode;
 });
 
-final trainerStudentsProvider = FutureProvider<List<TrainerStudent>>((ref) async {
+final trainerStudentsProvider =
+    FutureProvider<List<TrainerStudent>>((ref) async {
   ref.watch(authStateProvider);
   final profile = await ref.watch(profileProvider.future);
   if (profile?.isTrainer != true) return [];
   return ref.watch(trainerServiceProvider).getStudents();
 });
 
-final trainerAddableFriendsProvider = FutureProvider<List<FriendUser>>((ref) async {
+final trainerAddableFriendsProvider =
+    FutureProvider<List<FriendUser>>((ref) async {
   ref.watch(authStateProvider);
   final profile = await ref.watch(profileProvider.future);
   if (profile?.isTrainer != true) return [];
@@ -350,12 +372,14 @@ final trainerAddableFriendsProvider = FutureProvider<List<FriendUser>>((ref) asy
   return ref.watch(trainerServiceProvider).getAddableFriends(social);
 });
 
-final studentProfileProvider = FutureProvider.family<StudentProfileView?, String>((ref, studentId) async {
+final studentProfileProvider =
+    FutureProvider.family<StudentProfileView?, String>((ref, studentId) async {
   ref.watch(authStateProvider);
   return ref.watch(trainerServiceProvider).getStudentProfile(studentId);
 });
 
-final studentWorkoutHistoryProvider = FutureProvider.family<List<Workout>, String>((ref, studentId) async {
+final studentWorkoutHistoryProvider =
+    FutureProvider.family<List<Workout>, String>((ref, studentId) async {
   ref.watch(authStateProvider);
   return ref.watch(workoutServiceProvider).getWorkoutSummariesForUser(
         studentId,
@@ -364,17 +388,21 @@ final studentWorkoutHistoryProvider = FutureProvider.family<List<Workout>, Strin
       );
 });
 
-final studentRoutinesProvider = FutureProvider.family<List<Routine>, String>((ref, studentId) async {
+final studentRoutinesProvider =
+    FutureProvider.family<List<Routine>, String>((ref, studentId) async {
   ref.watch(authStateProvider);
   return ref.watch(routineServiceProvider).getRoutinesForUser(studentId);
 });
 
-final studentNutritionDayProvider = StateProvider.family<DateTime, String>((ref, studentId) {
+final studentNutritionDayProvider =
+    StateProvider.family<DateTime, String>((ref, studentId) {
   final now = DateTime.now();
   return DateTime(now.year, now.month, now.day);
 });
 
-final studentDailyNutritionProvider = FutureProvider.family<DailyNutritionSummary, String>((ref, studentId) async {
+final studentDailyNutritionProvider =
+    FutureProvider.family<DailyNutritionSummary, String>(
+        (ref, studentId) async {
   ref.watch(authStateProvider);
   final selected = ref.watch(studentNutritionDayProvider(studentId));
   final day = DateTime(selected.year, selected.month, selected.day);
@@ -384,10 +412,18 @@ final studentDailyNutritionProvider = FutureProvider.family<DailyNutritionSummar
     throw StateError('Student not found');
   }
 
-  final entries = await ref.watch(foodServiceProvider).getEntriesForDay(day, userId: studentId);
-  final workouts = await ref.watch(workoutServiceProvider).getCompletedWorkoutsOnDay(day, userId: studentId);
-  final activities = await ref.watch(activityLogServiceProvider).getEntriesForDay(day, userId: studentId);
-  final bodyMetrics = await ref.watch(profileServiceProvider).getBodyMetricSnapshotsForUser(studentId);
+  final entries = await ref
+      .watch(foodServiceProvider)
+      .getEntriesForDay(day, userId: studentId);
+  final workouts = await ref
+      .watch(workoutServiceProvider)
+      .getCompletedWorkoutsOnDay(day, userId: studentId);
+  final activities = await ref
+      .watch(activityLogServiceProvider)
+      .getEntriesForDay(day, userId: studentId);
+  final bodyMetrics = await ref
+      .watch(profileServiceProvider)
+      .getBodyMetricSnapshotsForUser(studentId);
 
   return DailyNutritionBudget.build(
     day: day,
@@ -399,7 +435,8 @@ final studentDailyNutritionProvider = FutureProvider.family<DailyNutritionSummar
   );
 });
 
-final studentRecoveryProvider = FutureProvider.family<Map<String, double>, String>((ref, studentId) async {
+final studentRecoveryProvider =
+    FutureProvider.family<Map<String, double>, String>((ref, studentId) async {
   ref.keepAlive();
   ref.watch(authStateProvider);
   final service = ref.watch(workoutServiceProvider);
@@ -423,7 +460,8 @@ final mutedFriendsProvider = FutureProvider<Set<String>>((ref) async {
   return ref.watch(socialServiceProvider).getMutedFriendIds();
 });
 
-final leaderboardProvider = FutureProvider.family<LeaderboardResult, LeaderboardKey>((ref, key) async {
+final leaderboardProvider =
+    FutureProvider.family<LeaderboardResult, LeaderboardKey>((ref, key) async {
   ref.watch(authStateProvider);
   ref.watch(profileProvider);
   return ref.watch(socialServiceProvider).getLeaderboard(
@@ -434,22 +472,26 @@ final leaderboardProvider = FutureProvider.family<LeaderboardResult, Leaderboard
       );
 });
 
-final userSearchProvider = FutureProvider.family<List<FriendUser>, String>((ref, query) async {
+final userSearchProvider =
+    FutureProvider.family<List<FriendUser>, String>((ref, query) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).searchUsers(query);
 });
 
-final friendFavoriteRoutinesProvider = FutureProvider.family<List<Routine>, String>((ref, userId) async {
+final friendFavoriteRoutinesProvider =
+    FutureProvider.family<List<Routine>, String>((ref, userId) async {
   ref.watch(authStateProvider);
   return ref.watch(routineServiceProvider).getFavoriteRoutinesForUser(userId);
 });
 
-final friendProfileProvider = FutureProvider.family<FriendProfileView?, String>((ref, friendId) async {
+final friendProfileProvider =
+    FutureProvider.family<FriendProfileView?, String>((ref, friendId) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getFriendProfile(friendId);
 });
 
-final socialNotificationsProvider = FutureProvider<List<SocialNotification>>((ref) async {
+final socialNotificationsProvider =
+    FutureProvider<List<SocialNotification>>((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getNotifications();
 });
@@ -459,7 +501,8 @@ final socialFeedProvider = FutureProvider<List<FeedPost>>((ref) async {
   return ref.watch(socialServiceProvider).getFeedWithReactions();
 });
 
-final feedPostDetailProvider = FutureProvider.family<FeedPostDetailData?, String>((ref, postId) async {
+final feedPostDetailProvider =
+    FutureProvider.family<FeedPostDetailData?, String>((ref, postId) async {
   ref.watch(authStateProvider);
   return ref.watch(socialServiceProvider).getFeedPostDetail(postId);
 });
@@ -514,20 +557,25 @@ final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
   return ref.watch(foodServiceProvider).getEntriesForDay(day);
 });
 
-final manualActivitiesProvider = FutureProvider<List<ManualActivityEntry>>((ref) async {
+final manualActivitiesProvider =
+    FutureProvider<List<ManualActivityEntry>>((ref) async {
   ref.keepAlive();
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
   return ref.watch(activityLogServiceProvider).getEntriesForDay(day);
 });
 
-final foodDayWorkoutsProvider = FutureProvider.family<List<Workout>, DateTime>((ref, day) async {
+final foodDayWorkoutsProvider =
+    FutureProvider.family<List<Workout>, DateTime>((ref, day) async {
   ref.watch(authStateProvider);
   final normalized = DateTime(day.year, day.month, day.day);
-  return ref.watch(workoutServiceProvider).getCompletedWorkoutsOnDay(normalized);
+  return ref
+      .watch(workoutServiceProvider)
+      .getCompletedWorkoutsOnDay(normalized);
 });
 
-final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async {
+final dailyNutritionProvider =
+    FutureProvider<DailyNutritionSummary>((ref) async {
   ref.keepAlive();
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
@@ -536,7 +584,8 @@ final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async
   final profileFuture = ref.watch(profileProvider.future);
   final metricsFuture = ref.watch(bodyMetricSnapshotsProvider.future);
   final entriesFuture = ref.watch(foodEntriesProvider.future);
-  final workoutsFuture = ref.watch(foodDayWorkoutsProvider(normalizedDay).future);
+  final workoutsFuture =
+      ref.watch(foodDayWorkoutsProvider(normalizedDay).future);
   final activitiesFuture = ref.watch(manualActivitiesProvider.future);
 
   final results = await Future.wait([
@@ -560,7 +609,8 @@ final dailyNutritionProvider = FutureProvider<DailyNutritionSummary>((ref) async
 final watchSessionBridgeProvider = Provider((ref) => WatchSessionBridge());
 
 final watchWorkoutCoordinatorProvider = Provider((ref) {
-  final coordinator = WatchWorkoutCoordinator(ref.watch(watchSessionBridgeProvider));
+  final coordinator =
+      WatchWorkoutCoordinator(ref.watch(watchSessionBridgeProvider));
   ref.onDispose(coordinator.detach);
   return coordinator;
 });

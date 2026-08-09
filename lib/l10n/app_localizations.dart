@@ -782,6 +782,36 @@ abstract class AppLocalizations {
   /// **'Carmesí'**
   String get accentCrimson;
 
+  /// No description provided for @accentCyan.
+  ///
+  /// In es, this message translates to:
+  /// **'Cian'**
+  String get accentCyan;
+
+  /// No description provided for @accentTeal.
+  ///
+  /// In es, this message translates to:
+  /// **'Turquesa'**
+  String get accentTeal;
+
+  /// No description provided for @accentIndigo.
+  ///
+  /// In es, this message translates to:
+  /// **'Índigo'**
+  String get accentIndigo;
+
+  /// No description provided for @accentAmber.
+  ///
+  /// In es, this message translates to:
+  /// **'Ámbar'**
+  String get accentAmber;
+
+  /// No description provided for @accentLime.
+  ///
+  /// In es, this message translates to:
+  /// **'Lima'**
+  String get accentLime;
+
   /// No description provided for @kilograms.
   ///
   /// In es, this message translates to:

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Paletas de acento personalizables (dorado = default de marca).
+/// Paletas de acento personalizables (cobalto = default de marca).
 enum AppAccent {
   gold,
   orange,
@@ -8,9 +8,14 @@ enum AppAccent {
   violet,
   emerald,
   rose,
-  crimson;
+  crimson,
+  cyan,
+  teal,
+  indigo,
+  amber,
+  lime;
 
-  static const defaultAccent = AppAccent.gold;
+  static const defaultAccent = AppAccent.cobalt;
 
   static AppAccent fromCode(String? code) {
     if (code == null) return defaultAccent;
@@ -28,6 +33,11 @@ enum AppAccent {
         AppAccent.emerald => const Color(0xFF3DD68C),
         AppAccent.rose => const Color(0xFFFF6B9D),
         AppAccent.crimson => const Color(0xFFE82E45),
+        AppAccent.cyan => const Color(0xFF22D3EE),
+        AppAccent.teal => const Color(0xFF14B8A6),
+        AppAccent.indigo => const Color(0xFF6366F1),
+        AppAccent.amber => const Color(0xFFF59E0B),
+        AppAccent.lime => const Color(0xFF84CC16),
       };
 
   Color get dark => switch (this) {
@@ -38,6 +48,11 @@ enum AppAccent {
         AppAccent.emerald => const Color(0xFF24965F),
         AppAccent.rose => const Color(0xFFC44575),
         AppAccent.crimson => const Color(0xFFA81E30),
+        AppAccent.cyan => const Color(0xFF0E7490),
+        AppAccent.teal => const Color(0xFF0F766E),
+        AppAccent.indigo => const Color(0xFF4338CA),
+        AppAccent.amber => const Color(0xFFB45309),
+        AppAccent.lime => const Color(0xFF4D7C0F),
       };
 
   Color get subtitleOnHero => switch (this) {
@@ -48,6 +63,11 @@ enum AppAccent {
         AppAccent.emerald => const Color(0xFFD4F8E8),
         AppAccent.rose => const Color(0xFFFFE0EC),
         AppAccent.crimson => const Color(0xFFFFD6DC),
+        AppAccent.cyan => const Color(0xFFCFFAFE),
+        AppAccent.teal => const Color(0xFFCCFBF1),
+        AppAccent.indigo => const Color(0xFFE0E7FF),
+        AppAccent.amber => const Color(0xFFFEF3C7),
+        AppAccent.lime => const Color(0xFFECFCCB),
       };
 
   List<Color> get heroGradientColors => switch (this) {
@@ -93,6 +113,36 @@ enum AppAccent {
             Color(0xFFA81E30),
             Color(0xFF6B121E),
           ],
+        AppAccent.cyan => const [
+            Color(0xFF67E8F9),
+            Color(0xFF22D3EE),
+            Color(0xFF0E7490),
+            Color(0xFF164E63),
+          ],
+        AppAccent.teal => const [
+            Color(0xFF5EEAD4),
+            Color(0xFF14B8A6),
+            Color(0xFF0F766E),
+            Color(0xFF134E4A),
+          ],
+        AppAccent.indigo => const [
+            Color(0xFFA5B4FC),
+            Color(0xFF6366F1),
+            Color(0xFF4338CA),
+            Color(0xFF312E81),
+          ],
+        AppAccent.amber => const [
+            Color(0xFFFCD34D),
+            Color(0xFFF59E0B),
+            Color(0xFFB45309),
+            Color(0xFF78350F),
+          ],
+        AppAccent.lime => const [
+            Color(0xFFBEF264),
+            Color(0xFF84CC16),
+            Color(0xFF4D7C0F),
+            Color(0xFF365314),
+          ],
       };
 }
 
@@ -127,6 +177,13 @@ class FitForgeAccent extends ThemeExtension<FitForgeAccent> {
     subtitleOnHero: Color(0xFFF0E6D2),
   );
 
+  static const cobalt = FitForgeAccent(
+    accent: AppAccent.cobalt,
+    accentColor: Color(0xFF4A9EFF),
+    accentDark: Color(0xFF2B6DB8),
+    subtitleOnHero: Color(0xFFD6EBFF),
+  );
+
   @override
   FitForgeAccent copyWith({
     AppAccent? accent,
@@ -156,7 +213,7 @@ class FitForgeAccent extends ThemeExtension<FitForgeAccent> {
 
 extension FitForgeAccentContext on BuildContext {
   FitForgeAccent get fitForgeAccent =>
-      Theme.of(this).extension<FitForgeAccent>() ?? FitForgeAccent.gold;
+      Theme.of(this).extension<FitForgeAccent>() ?? FitForgeAccent.cobalt;
 
   Color get accentColor => fitForgeAccent.accentColor;
 

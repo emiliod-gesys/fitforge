@@ -75,7 +75,10 @@ class FitForgeLoadingIndicator extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             message!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: AppColors.textMuted),
             textAlign: TextAlign.center,
           ),
         ],

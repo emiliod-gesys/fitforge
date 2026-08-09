@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Paleta premium FitForge — negro carbón + oro champán.
+/// Paleta premium FitForge — negro carbón + azul cobalto.
 abstract final class AppColors {
   static const black = Color(0xFF000000);
   static const slate = Color(0xFF2C2D31);
   static const slateLight = Color(0xFF3A3B40);
   static const gold = Color(0xFFC6A46B);
   static const goldDark = Color(0xFF8A6A3D);
+  static const cobalt = Color(0xFF4A9EFF);
+  static const cobaltDark = Color(0xFF2B6DB8);
   static const surface = Color(0xFF000000);
   static const card = Color(0xFF1A1B1E);
   static const cardElevated = Color(0xFF242528);
@@ -16,10 +18,10 @@ abstract final class AppColors {
   static const error = Color(0xFFE85D5D);
 
   /// Acento principal de la UI (alias histórico `orange`).
-  static const orange = gold;
-  static const orangeDark = goldDark;
+  static const orange = cobalt;
+  static const orangeDark = cobaltDark;
 
-  static const logoFit = gold;
+  static const logoFit = cobalt;
   static const logoForge = textPrimary;
 
   /// Fondo claro para ilustraciones wger (siluetas negras sobre PNG transparente).
