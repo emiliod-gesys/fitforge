@@ -26,6 +26,8 @@ import '../../widgets/food/food_week_strip.dart';
 import '../../widgets/food/macro_chip_grid.dart';
 import '../../widgets/food/manual_activity_sheet.dart';
 import '../../widgets/food/meal_timeline.dart';
+import '../../widgets/food/water_intake_section.dart';
+import '../../core/utils/water_goal_calculator.dart';
 
 
 
@@ -56,6 +58,8 @@ class FoodScreen extends ConsumerWidget {
       ref.invalidate(foodDayWorkoutsProvider);
 
       ref.invalidate(manualActivitiesProvider);
+
+      ref.invalidate(waterEntriesProvider);
 
     }
 
@@ -376,6 +380,29 @@ class _FoodBody extends ConsumerWidget {
                 ),
 
               ],
+
+              const SizedBox(height: 20),
+
+              Builder(
+                builder: (context) {
+                  final waterAsync = ref.watch(waterEntriesProvider);
+                  final entries = waterAsync.valueOrNull ?? const [];
+                  final goal = WaterGoalCalculator.goalMl(
+                    profile: profile,
+                    bodyMetrics: bodyMetrics,
+                  );
+                  final hasWeight = (bodyMetrics?['weight']?.valueKg ?? profile?.bodyWeight) != null &&
+                      ((bodyMetrics?['weight']?.valueKg ?? profile?.bodyWeight)! > 20);
+
+                  return WaterIntakeSection(
+                    day: normalizedDay,
+                    entries: entries,
+                    goalMl: goal,
+                    goalFromMetrics: hasWeight,
+                    onChanged: () => ref.invalidate(waterEntriesProvider),
+                  );
+                },
+              ),
 
               const SizedBox(height: 28),
 

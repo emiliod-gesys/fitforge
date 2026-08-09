@@ -5,7 +5,7 @@ import '../models/routine.dart';
 import 'routine_service.dart';
 import 'supabase_service.dart';
 
-/// Activa/desactiva modo Runner y sincroniza las 2 rutinas sistema.
+/// Activa/desactiva modo Runner y sincroniza las rutinas sistema.
 class RunnerService {
   RunnerService(this._routines);
 
@@ -26,6 +26,24 @@ class RunnerService {
       await syncRunnerRoutines(profile);
     } else {
       await _deleteRunnerRoutines(userId);
+    }
+  }
+
+  /// Crea tipos runner faltantes (p. ej. caminata para quien ya tenía el modo on).
+  Future<void> ensureRunnerRoutines(UserProfile profile) async {
+    if (!profile.runnerMode) return;
+    final userId = profile.id;
+    final existing = await _routines.getRunnerSystemRoutines(userId);
+    final byType = <RunnerType, Routine>{
+      for (final r in existing)
+        if (r.runnerType != null) r.runnerType!: r,
+    };
+
+    for (final type in RunnerType.values) {
+      if (byType.containsKey(type)) continue;
+      await _routines.createRunnerSystemRoutine(
+        RunnerRoutineBuilder.build(userId: userId, type: type),
+      );
     }
   }
 

@@ -1307,13 +1307,13 @@ abstract class AppLocalizations {
   /// No description provided for @runnerModeSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Añade Salir a correr (GPS) y Correr en cinta. No cuentan en tu límite de rutinas.'**
+  /// **'Añade Salir a correr (GPS), Salir a caminar (GPS) y Correr en cinta. No cuentan en tu límite de rutinas.'**
   String get runnerModeSubtitle;
 
   /// No description provided for @runnerModeEnabled.
   ///
   /// In es, this message translates to:
-  /// **'Modo runner activado · 2 rutinas listas en Rutinas'**
+  /// **'Modo runner activado · 3 rutinas listas en Rutinas'**
   String get runnerModeEnabled;
 
   /// No description provided for @runnerModeDisabled.
@@ -1346,6 +1346,12 @@ abstract class AppLocalizations {
   /// **'Salir a correr'**
   String get runnerStartOutdoor;
 
+  /// No description provided for @runnerStartOutdoorWalk.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir a caminar'**
+  String get runnerStartOutdoorWalk;
+
   /// No description provided for @runnerStartTreadmill.
   ///
   /// In es, this message translates to:
@@ -1357,6 +1363,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Carrera outdoor con GPS, ritmo, splits y desnivel.'**
   String get runnerRoutineOutdoorSubtitle;
+
+  /// No description provided for @runnerRoutineOutdoorWalkSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Caminata outdoor con GPS, ritmo, splits y desnivel.'**
+  String get runnerRoutineOutdoorWalkSubtitle;
 
   /// No description provided for @runnerRoutineTreadmillSubtitle.
   ///
@@ -1375,6 +1387,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Esto ayuda a contextualizar tu sesión en el historial.'**
   String get runnerSurfaceHint;
+
+  /// No description provided for @runnerWalkSurfaceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dónde vas a caminar?'**
+  String get runnerWalkSurfaceTitle;
+
+  /// No description provided for @runnerWalkSurfaceHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto ayuda a contextualizar tu sesión en el historial.'**
+  String get runnerWalkSurfaceHint;
 
   /// No description provided for @runnerSurfaceAsphalt.
   ///
@@ -1508,6 +1532,12 @@ abstract class AppLocalizations {
   /// **'Resumen de carrera'**
   String get runnerSummaryTitle;
 
+  /// No description provided for @runnerWalkSummaryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen de caminata'**
+  String get runnerWalkSummaryTitle;
+
   /// No description provided for @runnerRouteTitle.
   ///
   /// In es, this message translates to:
@@ -1549,6 +1579,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¡A correr! El cronómetro y las métricas iniciarán solas al detectar movimiento.'**
   String get runnerAutoStartHint;
+
+  /// No description provided for @runnerWalkAutoStartHint.
+  ///
+  /// In es, this message translates to:
+  /// **'¡A caminar! El cronómetro y las métricas iniciarán solas al detectar movimiento.'**
+  String get runnerWalkAutoStartHint;
 
   /// No description provided for @hyroxSystemBadge.
   ///
@@ -5822,6 +5858,102 @@ abstract class AppLocalizations {
   /// **'Comidas del día'**
   String get foodMealsTitle;
 
+  /// No description provided for @foodWaterTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Agua'**
+  String get foodWaterTitle;
+
+  /// No description provided for @foodWaterAddGlass.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar vaso ({amount})'**
+  String foodWaterAddGlass(String amount);
+
+  /// No description provided for @foodWaterAddCustom.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar cantidad personalizada'**
+  String get foodWaterAddCustom;
+
+  /// No description provided for @foodWaterCustomTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad de agua'**
+  String get foodWaterCustomTitle;
+
+  /// No description provided for @foodWaterCustomHint.
+  ///
+  /// In es, this message translates to:
+  /// **'ml'**
+  String get foodWaterCustomHint;
+
+  /// No description provided for @foodWaterCustomHintOz.
+  ///
+  /// In es, this message translates to:
+  /// **'oz'**
+  String get foodWaterCustomHintOz;
+
+  /// No description provided for @foodWaterCustomInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresa entre 1 y 5000 ml.'**
+  String get foodWaterCustomInvalid;
+
+  /// No description provided for @foodWaterCustomInvalidOz.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresa entre 0.1 y 169 oz.'**
+  String get foodWaterCustomInvalidOz;
+
+  /// No description provided for @foodWaterCustomConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar'**
+  String get foodWaterCustomConfirm;
+
+  /// No description provided for @foodWaterUnitLiters.
+  ///
+  /// In es, this message translates to:
+  /// **'L'**
+  String get foodWaterUnitLiters;
+
+  /// No description provided for @foodWaterUnitOz.
+  ///
+  /// In es, this message translates to:
+  /// **'oz'**
+  String get foodWaterUnitOz;
+
+  /// No description provided for @foodWaterUndo.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer último vaso'**
+  String get foodWaterUndo;
+
+  /// No description provided for @foodWaterOfGoal.
+  ///
+  /// In es, this message translates to:
+  /// **'de {goal}'**
+  String foodWaterOfGoal(String goal);
+
+  /// No description provided for @foodWaterGlassesLogged.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} vasos'**
+  String foodWaterGlassesLogged(int count);
+
+  /// No description provided for @foodWaterGoalHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta según tu peso y perfil.'**
+  String get foodWaterGoalHint;
+
+  /// No description provided for @foodWaterGoalFallbackHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade tu peso en Perfil para una meta personalizada.'**
+  String get foodWaterGoalFallbackHint;
+
   /// No description provided for @foodActivitiesTitle.
   ///
   /// In es, this message translates to:
@@ -7598,6 +7730,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Meta fitness, experiencia y actividad diaria'**
   String get profileHubGoalsSubtitle;
+
+  /// No description provided for @profileHubNutritionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nutrición'**
+  String get profileHubNutritionTitle;
+
+  /// No description provided for @profileHubNutritionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto calórico y de agua diarios'**
+  String get profileHubNutritionSubtitle;
+
+  /// No description provided for @profileNutritionCaloriesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto calórico'**
+  String get profileNutritionCaloriesTitle;
+
+  /// No description provided for @profileNutritionCaloriesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta tu meta diaria de calorías'**
+  String get profileNutritionCaloriesSubtitle;
+
+  /// No description provided for @profileNutritionWaterTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto de agua'**
+  String get profileNutritionWaterTitle;
+
+  /// No description provided for @profileNutritionWaterSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta tu meta diaria de agua'**
+  String get profileNutritionWaterSubtitle;
+
+  /// No description provided for @profileNutritionWaterCurrent.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta actual: {amount}'**
+  String profileNutritionWaterCurrent(String amount);
+
+  /// No description provided for @profileNutritionWaterSuggested.
+  ///
+  /// In es, this message translates to:
+  /// **'Sugerida: {amount}'**
+  String profileNutritionWaterSuggested(String amount);
+
+  /// No description provided for @waterBudgetEditorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta diaria de agua'**
+  String get waterBudgetEditorTitle;
+
+  /// No description provided for @waterBudgetEditorSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'El valor predeterminado es la sugerencia de FitForge según tus métricas. Puedes cambiarla cuando quieras.'**
+  String get waterBudgetEditorSubtitle;
+
+  /// No description provided for @waterBudgetSuggestedLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Sugerencia de la app'**
+  String get waterBudgetSuggestedLabel;
+
+  /// No description provided for @waterBudgetYourGoalLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu meta'**
+  String get waterBudgetYourGoalLabel;
+
+  /// No description provided for @waterBudgetSliderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustar meta'**
+  String get waterBudgetSliderTitle;
+
+  /// No description provided for @waterBudgetResetRecommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar meta recomendada'**
+  String get waterBudgetResetRecommended;
+
+  /// No description provided for @waterBudgetSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar meta de agua'**
+  String get waterBudgetSave;
+
+  /// No description provided for @waterGoalWarnTooLow.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cantidad parece baja para tus métricas. Una hidratación insuficiente puede afectar energía y recuperación.'**
+  String get waterGoalWarnTooLow;
+
+  /// No description provided for @waterGoalWarnTooHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cantidad parece alta para tus métricas. Beber mucho más de lo necesario no suele aportar beneficios.'**
+  String get waterGoalWarnTooHigh;
 
   /// No description provided for @profileHubTrainingSubtitle.
   ///

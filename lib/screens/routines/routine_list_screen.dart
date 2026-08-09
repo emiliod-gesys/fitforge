@@ -422,9 +422,7 @@ class _RoutineCard extends ConsumerWidget {
                   icon: const Icon(Icons.play_arrow, size: 26),
                   label: Text(
                     isRunner
-                        ? (routine.runnerType == RunnerType.outdoor
-                            ? l10n.runnerStartOutdoor
-                            : l10n.runnerStartTreadmill)
+                        ? l10n.routineDisplayName(routine)
                         : l10n.hyroxStartRace,
                   ),
                   style: FilledButton.styleFrom(

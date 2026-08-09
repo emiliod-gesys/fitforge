@@ -24,7 +24,7 @@ void main() {
       );
     });
 
-    test('maps runner outdoor and treadmill', () {
+    test('maps runner outdoor, walk, and treadmill', () {
       expect(
         HealthWorkoutActivityMapper.resolve(
           isRunner: true,
@@ -33,6 +33,15 @@ void main() {
           isIOS: true,
         ),
         HealthWorkoutActivityType.RUNNING,
+      );
+      expect(
+        HealthWorkoutActivityMapper.resolve(
+          isRunner: true,
+          isHyrox: false,
+          runnerType: RunnerType.outdoorWalk,
+          isIOS: true,
+        ),
+        HealthWorkoutActivityType.WALKING,
       );
       expect(
         HealthWorkoutActivityMapper.resolve(

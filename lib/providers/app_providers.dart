@@ -15,6 +15,7 @@ import '../models/exercise_history.dart';
 import '../models/body_metric.dart';
 import '../models/food_entry.dart';
 import '../models/manual_activity_entry.dart';
+import '../models/water_entry.dart';
 import '../models/leaderboard.dart';
 import '../models/profile.dart';
 import '../models/routine.dart';
@@ -26,6 +27,7 @@ import '../services/custom_exercise_repository.dart';
 import '../data/cloud_exercise_catalog.dart';
 import '../services/exercise_service.dart';
 import '../services/activity_log_service.dart';
+import '../services/water_log_service.dart';
 import '../services/catalog_food_service.dart';
 import '../services/food_quick_add_service.dart';
 import '../services/food_service.dart';
@@ -279,6 +281,10 @@ final exerciseImageUrlProvider =
 
 final routinesProvider = FutureProvider((ref) async {
   ref.watch(authStateProvider);
+  final profile = await ref.watch(profileProvider.future);
+  if (profile != null && profile.runnerMode) {
+    await ref.read(runnerServiceProvider).ensureRunnerRoutines(profile);
+  }
   return ref.watch(routineServiceProvider).getRoutines();
 });
 
@@ -534,6 +540,7 @@ final socialRealtimeProvider = StreamProvider<SocialRealtimeEvent>((ref) {
 
 final foodServiceProvider = Provider((ref) => FoodService());
 final activityLogServiceProvider = Provider((ref) => ActivityLogService());
+final waterLogServiceProvider = Provider((ref) => WaterLogService());
 final localManualFoodStoreProvider = Provider((ref) => LocalManualFoodStore());
 
 final openFoodFactsServiceProvider = Provider((ref) => OpenFoodFactsService());
@@ -563,6 +570,13 @@ final manualActivitiesProvider =
   ref.watch(authStateProvider);
   final day = ref.watch(foodSelectedDayProvider);
   return ref.watch(activityLogServiceProvider).getEntriesForDay(day);
+});
+
+final waterEntriesProvider = FutureProvider<List<WaterEntry>>((ref) async {
+  ref.keepAlive();
+  ref.watch(authStateProvider);
+  final day = ref.watch(foodSelectedDayProvider);
+  return ref.watch(waterLogServiceProvider).getEntriesForDay(day);
 });
 
 final foodDayWorkoutsProvider =

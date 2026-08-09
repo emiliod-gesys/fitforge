@@ -568,7 +568,9 @@ class _RunnerSummarySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.runnerSummaryTitle,
+            l10n.isRunnerWalkSessionName(workout.name)
+                ? l10n.runnerWalkSummaryTitle
+                : l10n.runnerSummaryTitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           if (workout.runnerSurface != null) ...[

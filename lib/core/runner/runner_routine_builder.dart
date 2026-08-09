@@ -10,8 +10,7 @@ abstract final class RunnerRoutineBuilder {
 
   static List<Routine> buildAll({required String userId}) {
     return [
-      build(userId: userId, type: RunnerType.outdoor),
-      build(userId: userId, type: RunnerType.treadmill),
+      for (final type in RunnerType.values) build(userId: userId, type: type),
     ];
   }
 
@@ -19,25 +18,43 @@ abstract final class RunnerRoutineBuilder {
     required String userId,
     required RunnerType type,
   }) {
-    final isOutdoor = type == RunnerType.outdoor;
+    final (name, description, exerciseId, exerciseName) = switch (type) {
+      RunnerType.outdoor => (
+          'Salir a correr',
+          'Carrera outdoor con GPS, ritmo y splits automáticos.',
+          RunnerExerciseIds.outdoorRunning,
+          'Carrera outdoor',
+        ),
+      RunnerType.outdoorWalk => (
+          'Salir a caminar',
+          'Caminata outdoor con GPS, ritmo y splits automáticos.',
+          RunnerExerciseIds.outdoorWalking,
+          'Caminata outdoor',
+        ),
+      RunnerType.treadmill => (
+          'Correr en cinta',
+          'Carrera en cinta con inclinación, distancia y ritmo.',
+          RunnerExerciseIds.treadmill,
+          'Cinta de correr',
+        ),
+    };
+
     return Routine(
       id: '',
       userId: userId,
-      name: isOutdoor ? 'Salir a correr' : 'Correr en cinta',
-      description: isOutdoor
-          ? 'Carrera outdoor con GPS, ritmo y splits automáticos.'
-          : 'Carrera en cinta con inclinación, distancia y ritmo.',
+      name: name,
+      description: description,
       targetMuscles: const ['Cardio'],
       exercises: [
         RoutineExercise(
           id: _uuid.v4(),
-          exerciseId: isOutdoor ? RunnerExerciseIds.outdoorRunning : RunnerExerciseIds.treadmill,
-          exerciseName: isOutdoor ? 'Carrera outdoor' : 'Cinta de correr',
+          exerciseId: exerciseId,
+          exerciseName: exerciseName,
           orderIndex: 0,
           targetSets: 1,
           targetReps: 0,
           loggingType: ExerciseLoggingType.cardio,
-          targetInclinePercent: isOutdoor ? null : 0,
+          targetInclinePercent: type == RunnerType.treadmill ? 0 : null,
         ),
       ],
       createdAt: DateTime.now(),

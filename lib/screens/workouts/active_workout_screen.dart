@@ -1305,11 +1305,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             return _buildHyroxStartGate(displayWorkout, l10n);
           }
 
-          if (_isRunnerWorkout && _runnerType == RunnerType.outdoor) {
+          if (_isRunnerWorkout && (_runnerType?.usesOutdoorGps ?? false)) {
             return RunnerOutdoorSession(
               workoutId: displayWorkout.id,
               unitSystem: unitSystem,
               surface: _runnerSurface,
+              isWalk: _runnerType?.isWalk ?? false,
               onCancel: () => _cancelWorkout(displayWorkout),
               onFinish: (snap) async {
                 if (!await _confirmEndTraining() || !mounted) return;

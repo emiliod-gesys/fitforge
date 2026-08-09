@@ -121,6 +121,9 @@ class UserProfile {
 
   /// Porcentaje firmado sobre TDEE (-15 = 15% déficit, +8 = superávit). Null = default del objetivo.
   final int? calorieAdjustmentPct;
+
+  /// Meta diaria de agua en ml. Null = sugerencia automática según métricas.
+  final int? waterGoalMl;
   final AiProvider aiProvider;
   final bool hasAiKey;
   final UserType userType;
@@ -158,6 +161,7 @@ class UserProfile {
     this.experienceLevel,
     this.activityLevel = DailyActivityLevel.moderate,
     this.calorieAdjustmentPct,
+    this.waterGoalMl,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.userType = UserType.athlete,
@@ -190,6 +194,7 @@ class UserProfile {
       activityLevel:
           DailyActivityLevel.fromCode(json['activity_level'] as String?),
       calorieAdjustmentPct: (json['calorie_adjustment_pct'] as num?)?.toInt(),
+      waterGoalMl: (json['water_goal_ml'] as num?)?.toInt(),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
@@ -235,6 +240,7 @@ class UserProfile {
         'experience_level': experienceLevel,
         'activity_level': activityLevel.code,
         'calorie_adjustment_pct': calorieAdjustmentPct,
+        'water_goal_ml': waterGoalMl,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
         'user_type': userType.code,
         'accent_color': accentColor.name,

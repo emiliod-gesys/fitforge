@@ -1,0 +1,62 @@
+import 'package:uuid/uuid.dart';
+
+import '../core/utils/supabase_datetime.dart';
+import '../models/water_entry.dart';
+import 'supabase_service.dart';
+
+class WaterLogService {
+  final _client = SupabaseService.client;
+  final _uuid = const Uuid();
+
+  Future<List<WaterEntry>> getEntriesForDay(DateTime day, {String? userId}) async {
+    final uid = userId ?? SupabaseService.currentUser?.id;
+    if (uid == null) return [];
+
+    final start = DateTime(day.year, day.month, day.day);
+    final end = start.add(const Duration(days: 1));
+
+    final data = await _client
+        .from('water_entries')
+        .select()
+        .eq('user_id', uid)
+        .gte('logged_at', start.toUtc().toIso8601String())
+        .lt('logged_at', end.toUtc().toIso8601String())
+        .order('logged_at', ascending: true);
+
+    return (data as List)
+        .map((row) => WaterEntry.fromJson(Map<String, dynamic>.from(row as Map)))
+        .toList();
+  }
+
+  Future<WaterEntry> addGlass({
+    DateTime? loggedAt,
+    int amountMl = 250,
+  }) async {
+    final userId = SupabaseService.currentUser!.id;
+    final id = _uuid.v4();
+    final at = loggedAt ?? SupabaseDateTime.nowUtc;
+    final ml = amountMl.clamp(1, 5000);
+
+    final entry = WaterEntry(
+      id: id,
+      userId: userId,
+      loggedAt: at,
+      amountMl: ml,
+    );
+
+    await _client.from('water_entries').insert({
+      'id': id,
+      'user_id': userId,
+      ...entry.toInsertJson(),
+    });
+
+    return entry;
+  }
+
+  Future<void> deleteEntry(String id) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return;
+
+    await _client.from('water_entries').delete().eq('id', id).eq('user_id', userId);
+  }
+}

@@ -16,6 +16,7 @@ class RunnerOutdoorSession extends StatefulWidget {
   final String workoutId;
   final String unitSystem;
   final RunningSurface? surface;
+  final bool isWalk;
   final VoidCallback onCancel;
   final Future<void> Function(RunnerTrackingSnapshot snapshot) onFinish;
 
@@ -24,6 +25,7 @@ class RunnerOutdoorSession extends StatefulWidget {
     required this.workoutId,
     required this.unitSystem,
     this.surface,
+    this.isWalk = false,
     required this.onCancel,
     required this.onFinish,
   });
@@ -268,10 +270,16 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.directions_run, size: 40, color: accent.withValues(alpha: 0.85)),
+                      Icon(
+                        widget.isWalk ? Icons.directions_walk : Icons.directions_run,
+                        size: 40,
+                        color: accent.withValues(alpha: 0.85),
+                      ),
                       const SizedBox(height: 16),
                       Text(
-                        l10n.runnerAutoStartHint,
+                        widget.isWalk
+                            ? l10n.runnerWalkAutoStartHint
+                            : l10n.runnerAutoStartHint,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: accent.withValues(alpha: 0.95),

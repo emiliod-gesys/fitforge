@@ -673,11 +673,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runnerModeSubtitle =>
-      'Adds Go for a run (GPS) and Treadmill run. They don\'t count toward your routine limit.';
+      'Adds Go for a run (GPS), Go for a walk (GPS), and Treadmill run. They don\'t count toward your routine limit.';
 
   @override
   String get runnerModeEnabled =>
-      'Runner mode on · 2 routines ready in Routines';
+      'Runner mode on · 3 routines ready in Routines';
 
   @override
   String get runnerModeDisabled => 'Runner mode off · runner routines removed';
@@ -696,11 +696,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runnerStartOutdoor => 'Go for a run';
 
   @override
+  String get runnerStartOutdoorWalk => 'Go for a walk';
+
+  @override
   String get runnerStartTreadmill => 'Treadmill run';
 
   @override
   String get runnerRoutineOutdoorSubtitle =>
       'Outdoor run with GPS, pace, splits, and elevation.';
+
+  @override
+  String get runnerRoutineOutdoorWalkSubtitle =>
+      'Outdoor walk with GPS, pace, splits, and elevation.';
 
   @override
   String get runnerRoutineTreadmillSubtitle =>
@@ -711,6 +718,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runnerSurfaceHint =>
+      'This helps contextualize your session in history.';
+
+  @override
+  String get runnerWalkSurfaceTitle => 'Where will you walk?';
+
+  @override
+  String get runnerWalkSurfaceHint =>
       'This helps contextualize your session in history.';
 
   @override
@@ -786,6 +800,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runnerSummaryTitle => 'Run summary';
 
   @override
+  String get runnerWalkSummaryTitle => 'Walk summary';
+
+  @override
   String get runnerRouteTitle => 'Route';
 
   @override
@@ -806,6 +823,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get runnerAutoStartHint =>
       'Let\'s run! The stopwatch and metrics will start automatically when movement is detected.';
+
+  @override
+  String get runnerWalkAutoStartHint =>
+      'Let\'s walk! The stopwatch and metrics will start automatically when movement is detected.';
 
   @override
   String get hyroxSystemBadge => 'Hyrox';
@@ -3344,6 +3365,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodMealsTitle => 'Today\'s meals';
 
   @override
+  String get foodWaterTitle => 'Water';
+
+  @override
+  String foodWaterAddGlass(String amount) {
+    return 'Add glass ($amount)';
+  }
+
+  @override
+  String get foodWaterAddCustom => 'Add custom amount';
+
+  @override
+  String get foodWaterCustomTitle => 'Water amount';
+
+  @override
+  String get foodWaterCustomHint => 'ml';
+
+  @override
+  String get foodWaterCustomHintOz => 'oz';
+
+  @override
+  String get foodWaterCustomInvalid => 'Enter between 1 and 5000 ml.';
+
+  @override
+  String get foodWaterCustomInvalidOz => 'Enter between 0.1 and 169 oz.';
+
+  @override
+  String get foodWaterCustomConfirm => 'Add';
+
+  @override
+  String get foodWaterUnitLiters => 'L';
+
+  @override
+  String get foodWaterUnitOz => 'oz';
+
+  @override
+  String get foodWaterUndo => 'Undo last glass';
+
+  @override
+  String foodWaterOfGoal(String goal) {
+    return 'of $goal';
+  }
+
+  @override
+  String foodWaterGlassesLogged(int count) {
+    return '$count glasses';
+  }
+
+  @override
+  String get foodWaterGoalHint => 'Goal based on your body weight and profile.';
+
+  @override
+  String get foodWaterGoalFallbackHint =>
+      'Add your weight in Profile for a personalized goal.';
+
+  @override
   String get foodActivitiesTitle => 'Today\'s activities';
 
   @override
@@ -4430,6 +4506,65 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileHubGoalsSubtitle =>
       'Fitness goal, experience, and daily activity';
+
+  @override
+  String get profileHubNutritionTitle => 'Nutrition';
+
+  @override
+  String get profileHubNutritionSubtitle => 'Calorie and water daily budgets';
+
+  @override
+  String get profileNutritionCaloriesTitle => 'Calorie budget';
+
+  @override
+  String get profileNutritionCaloriesSubtitle =>
+      'Adjust your daily calorie target';
+
+  @override
+  String get profileNutritionWaterTitle => 'Water budget';
+
+  @override
+  String get profileNutritionWaterSubtitle => 'Adjust your daily water goal';
+
+  @override
+  String profileNutritionWaterCurrent(String amount) {
+    return 'Current goal: $amount';
+  }
+
+  @override
+  String profileNutritionWaterSuggested(String amount) {
+    return 'Suggested: $amount';
+  }
+
+  @override
+  String get waterBudgetEditorTitle => 'Daily water goal';
+
+  @override
+  String get waterBudgetEditorSubtitle =>
+      'The default is FitForge\'s suggestion from your body metrics. You can change it anytime.';
+
+  @override
+  String get waterBudgetSuggestedLabel => 'App suggestion';
+
+  @override
+  String get waterBudgetYourGoalLabel => 'Your goal';
+
+  @override
+  String get waterBudgetSliderTitle => 'Adjust goal';
+
+  @override
+  String get waterBudgetResetRecommended => 'Use recommended goal';
+
+  @override
+  String get waterBudgetSave => 'Save water goal';
+
+  @override
+  String get waterGoalWarnTooLow =>
+      'This amount looks low for your metrics. Staying under-hydrated can hurt energy and recovery.';
+
+  @override
+  String get waterGoalWarnTooHigh =>
+      'This amount looks high for your metrics. Drinking far more than needed usually isn\'t necessary.';
 
   @override
   String get profileHubTrainingSubtitle =>

@@ -11,6 +11,9 @@ abstract final class HealthWorkoutActivityMapper {
     required bool isIOS,
   }) {
     if (isRunner) {
+      if (runnerType == RunnerType.outdoorWalk) {
+        return HealthWorkoutActivityType.WALKING;
+      }
       if (runnerType == RunnerType.treadmill) {
         // RUNNING_TREADMILL solo existe en Android; en iOS es RUNNING.
         return isIOS

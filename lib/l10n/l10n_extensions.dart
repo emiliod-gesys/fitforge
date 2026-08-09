@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/utils/calorie_budget_adjustment.dart';
+import '../core/utils/water_goal_calculator.dart';
 import '../core/theme/app_accent.dart';
 import '../core/utils/connection_error.dart';
 import '../core/utils/catalog_muscle_labels.dart';
@@ -242,6 +243,7 @@ extension ProfileL10n on AppLocalizations {
       return freeWorkout;
     }
     if (_isRunnerOutdoorName(name)) return runnerStartOutdoor;
+    if (_isRunnerOutdoorWalkName(name)) return runnerStartOutdoorWalk;
     if (_isRunnerTreadmillName(name)) return runnerStartTreadmill;
     if (_isHyroxPrepName(name)) return hyroxRoutinePrepName;
     if (_isHyroxBuildName(name)) return hyroxRoutineBuildName;
@@ -253,6 +255,7 @@ extension ProfileL10n on AppLocalizations {
     if (routine.isRunnerSystem && routine.runnerType != null) {
       return switch (routine.runnerType!) {
         RunnerType.outdoor => runnerStartOutdoor,
+        RunnerType.outdoorWalk => runnerStartOutdoorWalk,
         RunnerType.treadmill => runnerStartTreadmill,
       };
     }
@@ -270,6 +273,7 @@ extension ProfileL10n on AppLocalizations {
     if (routine.isRunnerSystem && routine.runnerType != null) {
       return switch (routine.runnerType!) {
         RunnerType.outdoor => runnerRoutineOutdoorSubtitle,
+        RunnerType.outdoorWalk => runnerRoutineOutdoorWalkSubtitle,
         RunnerType.treadmill => runnerRoutineTreadmillSubtitle,
       };
     }
@@ -286,8 +290,13 @@ extension ProfileL10n on AppLocalizations {
   bool _isRunnerOutdoorName(String name) =>
       name == 'Salir a correr' || name == 'Go for a run';
 
+  bool _isRunnerOutdoorWalkName(String name) =>
+      name == 'Salir a caminar' || name == 'Go for a walk';
+
   bool _isRunnerTreadmillName(String name) =>
       name == 'Correr en cinta' || name == 'Treadmill run';
+
+  bool isRunnerWalkSessionName(String name) => _isRunnerOutdoorWalkName(name);
 
   bool _isHyroxPrepName(String name) =>
       name == 'Hyrox 1 · Prep' || name == 'Hyrox 1 · Preparación';
@@ -590,5 +599,10 @@ extension ProfileL10n on AppLocalizations {
         CalorieBudgetWarning.surplusTooHigh => calorieBudgetWarnSurplusTooHigh,
         CalorieBudgetWarning.maintenanceDrift =>
           calorieBudgetWarnMaintenanceDrift,
+      };
+
+  String waterGoalWarningMessage(WaterGoalWarning warning) => switch (warning) {
+        WaterGoalWarning.tooLow => waterGoalWarnTooLow,
+        WaterGoalWarning.tooHigh => waterGoalWarnTooHigh,
       };
 }

@@ -33,6 +33,12 @@ import '../../widgets/profile/accent_color_selector.dart';
 import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
+import '../../widgets/food/calorie_budget_editor_sheet.dart';
+import '../../widgets/food/water_budget_editor_sheet.dart';
+import '../../core/utils/water_goal_calculator.dart';
+import '../../core/utils/bmr_calculator.dart';
+import '../../core/utils/calorie_budget_adjustment.dart';
+import '../../core/utils/daily_nutrition_budget.dart';
 import '../../widgets/ff/ff_hub_tile.dart';
 import '../../widgets/ff/ff_selectable_tile.dart';
 import '../../widgets/ff/ff_list_row.dart';
@@ -44,6 +50,7 @@ enum _ProfileSection {
   personal,
   body,
   goals,
+  nutrition,
   training,
   appearance,
   offline,
@@ -136,6 +143,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.personal => _personalSection(profile, unitSystem),
                 _ProfileSection.body => _bodySection(profile, unitSystem, metricsAsync),
                 _ProfileSection.goals => _goalsSection(profile),
+                _ProfileSection.nutrition => _nutritionSection(profile, metricsAsync),
                 _ProfileSection.training => _trainingSection(profile),
                 _ProfileSection.appearance => _preferencesSection(profile),
                 _ProfileSection.offline => _offlineSection(context),
@@ -178,6 +186,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     title: l10n.profileHubGoalsTitle,
                     subtitle: l10n.profileHubGoalsSubtitle,
                     onTap: () => _openSection(_ProfileSection.goals, l10n.profileHubGoalsTitle),
+                  ),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.restaurant_outlined,
+                    title: l10n.profileHubNutritionTitle,
+                    subtitle: l10n.profileHubNutritionSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.nutrition,
+                      l10n.profileHubNutritionTitle,
+                    ),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
@@ -473,6 +491,76 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: l10n.activityLevel,
         subtitle: l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate),
         onTap: () => _editActivityLevel(profile),
+      ),
+    ]);
+  }
+
+  Widget _nutritionSection(
+    UserProfile? profile,
+    AsyncValue<Map<String, BodyMetricSnapshot>> metricsAsync,
+  ) {
+    final l10n = context.l10n;
+    final bodyMetrics = metricsAsync.valueOrNull;
+    final useFlOz = UnitConverter.isLb(profile?.unitSystem ?? 'kg');
+    final suggested = WaterGoalCalculator.suggestedGoalMl(
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+    );
+    final waterGoal = WaterGoalCalculator.goalMl(
+      profile: profile,
+      bodyMetrics: bodyMetrics,
+    );
+    final waterSubtitle = profile?.waterGoalMl == null
+        ? l10n.profileNutritionWaterSuggested(
+            WaterGoalCalculator.formatVolume(suggested, useFlOz: useFlOz),
+          )
+        : l10n.profileNutritionWaterCurrent(
+            WaterGoalCalculator.formatVolume(waterGoal, useFlOz: useFlOz),
+          );
+
+    final bmr = BmrCalculator.calculate(profile: profile, snapshots: bodyMetrics);
+    String calorieSubtitle = l10n.profileNutritionCaloriesSubtitle;
+    if (bmr != null) {
+      final tdee = DailyNutritionBudget.computeTdee(
+        bmr: bmr,
+        activityLevel: profile?.activityLevel ?? DailyActivityLevel.moderate,
+      );
+      final pct = CalorieBudgetAdjustment.resolvedPercent(
+        profile?.fitnessGoal,
+        profile?.calorieAdjustmentPct,
+      );
+      final goalKcal = CalorieBudgetAdjustment.goalFromTdee(tdee, pct);
+      calorieSubtitle = '$goalKcal kcal · ${l10n.profileNutritionCaloriesSubtitle}';
+    }
+
+    return _sectionList([
+      FfListRow(
+        icon: Icons.local_fire_department_outlined,
+        title: l10n.profileNutritionCaloriesTitle,
+        subtitle: calorieSubtitle,
+        onTap: () => CalorieBudgetEditorSheet.show(
+          context,
+          profile: profile,
+          bodyMetrics: bodyMetrics,
+          onSaved: () {
+            ref.invalidate(profileProvider);
+            ref.invalidate(dailyNutritionProvider);
+          },
+        ),
+      ),
+      FfListRow(
+        icon: Icons.water_drop_outlined,
+        title: l10n.profileNutritionWaterTitle,
+        subtitle: waterSubtitle,
+        onTap: () => WaterBudgetEditorSheet.show(
+          context,
+          profile: profile,
+          bodyMetrics: bodyMetrics,
+          onSaved: () {
+            ref.invalidate(profileProvider);
+            ref.invalidate(waterEntriesProvider);
+          },
+        ),
       ),
     ]);
   }

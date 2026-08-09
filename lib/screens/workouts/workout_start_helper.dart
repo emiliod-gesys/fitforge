@@ -6,7 +6,6 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../models/workout.dart';
-import '../../core/runner/runner_standards.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/runner_surface_picker.dart';
 import '../../services/ai_preferences.dart';
@@ -175,8 +174,11 @@ Future<void> startRunnerWorkoutFromRoutine(
   WidgetRef ref,
   Routine routine,
 ) async {
-  if (routine.runnerType == RunnerType.outdoor) {
-    final surface = await showRunnerSurfacePicker(context);
+  if (routine.runnerType?.usesOutdoorGps ?? false) {
+    final surface = await showRunnerSurfacePicker(
+      context,
+      isWalk: routine.runnerType?.isWalk ?? false,
+    );
     if (surface == null || !context.mounted) return;
     ref.read(pendingRunnerSurfaceProvider.notifier).state = surface;
   }
