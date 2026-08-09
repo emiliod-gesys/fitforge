@@ -22,41 +22,55 @@ class MacroChipGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.55,
+    // Evita GridView+shrinkWrap dentro de ListView (puede dejar hueco vertical).
+    return Column(
       children: [
-        _MacroChip(
-          label: proteinLabel,
-          current: eaten.proteinG,
-          target: targets.proteinG,
-          color: const Color(0xFFE85D75),
-          unit: 'g',
+        Row(
+          children: [
+            Expanded(
+              child: _MacroChip(
+                label: proteinLabel,
+                current: eaten.proteinG,
+                target: targets.proteinG,
+                color: const Color(0xFFE85D75),
+                unit: 'g',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _MacroChip(
+                label: carbsLabel,
+                current: eaten.carbsG,
+                target: targets.carbsG,
+                color: const Color(0xFF5BB8F0),
+                unit: 'g',
+              ),
+            ),
+          ],
         ),
-        _MacroChip(
-          label: carbsLabel,
-          current: eaten.carbsG,
-          target: targets.carbsG,
-          color: const Color(0xFF5BB8F0),
-          unit: 'g',
-        ),
-        _MacroChip(
-          label: fatLabel,
-          current: eaten.fatG,
-          target: targets.fatG,
-          color: const Color(0xFFF5B942),
-          unit: 'g',
-        ),
-        _MacroChip(
-          label: fiberLabel,
-          current: eaten.fiberG,
-          target: targets.fiberG,
-          color: const Color(0xFF7BC67E),
-          unit: 'g',
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _MacroChip(
+                label: fatLabel,
+                current: eaten.fatG,
+                target: targets.fatG,
+                color: const Color(0xFFF5B942),
+                unit: 'g',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _MacroChip(
+                label: fiberLabel,
+                current: eaten.fiberG,
+                target: targets.fiberG,
+                color: const Color(0xFF7BC67E),
+                unit: 'g',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -91,6 +105,7 @@ class _MacroChip extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -114,7 +129,7 @@ class _MacroChip extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 12),
           Text(
             '${current.round()}',
             style: const TextStyle(

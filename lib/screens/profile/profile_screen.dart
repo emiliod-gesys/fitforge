@@ -159,7 +159,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: ListView(
                 key: const PageStorageKey<String>('profile_scroll'),
                 controller: _scrollController,
-                padding: AppTokens.pagePadding,
+                padding: AppTokens.pagePaddingWithBottomInset(context),
                 children: [
                   _buildHero(profile),
                   const SizedBox(height: AppTokens.space28),
@@ -375,7 +375,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _sectionList(List<Widget> children) {
     return ListView(
-      padding: AppTokens.pagePadding,
+      padding: AppTokens.pagePaddingWithBottomInset(context),
       children: [
         FfSurface(child: Column(children: children)),
         const SizedBox(height: AppTokens.space24),
@@ -628,7 +628,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final accent = ref.watch(accentProvider);
     final proactiveEnabled = ref.watch(aiProactiveEnabledProvider).valueOrNull ?? false;
     return ListView(
-      padding: AppTokens.pagePadding,
+      padding: AppTokens.pagePaddingWithBottomInset(context),
       children: [
         FfSurface(
           child: Column(

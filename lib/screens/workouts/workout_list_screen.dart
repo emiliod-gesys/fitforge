@@ -45,10 +45,12 @@ class WorkoutTodayTab extends ConsumerWidget {
       ref.invalidate(routinesProvider);
     }
 
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad),
         children: [
           activeAsync.when(
             data: (active) {

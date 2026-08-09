@@ -36,6 +36,16 @@ abstract final class AppTokens {
   static const EdgeInsets pagePadding = EdgeInsets.fromLTRB(20, 16, 20, 24);
   static const EdgeInsets pagePaddingCompact = EdgeInsets.fromLTRB(16, 12, 16, 20);
 
+  /// Page padding plus [MediaQuery] bottom inset (nav glass / safe area).
+  static EdgeInsets pagePaddingWithBottomInset(
+    BuildContext context, {
+    EdgeInsets base = pagePadding,
+  }) {
+    return base.copyWith(
+      bottom: base.bottom + MediaQuery.paddingOf(context).bottom,
+    );
+  }
+
   static BorderRadius get borderRadiusSm => BorderRadius.circular(radiusSm);
   static BorderRadius get borderRadiusMd => BorderRadius.circular(radiusMd);
   static BorderRadius get borderRadiusLg => BorderRadius.circular(radiusLg);

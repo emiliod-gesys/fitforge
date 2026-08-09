@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/utils/online_only_routes.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
@@ -150,7 +151,15 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.black,
-      body: child,
+      extendBody: true,
+      body: MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          padding: MediaQuery.paddingOf(context).copyWith(
+            bottom: MediaQuery.paddingOf(context).bottom + AppTokens.navBarHeight,
+          ),
+        ),
+        child: child,
+      ),
       bottomNavigationBar: FfNavSpinner(
         items: items,
         selectedIndex: selected,

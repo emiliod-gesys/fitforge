@@ -98,7 +98,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       body: RefreshIndicator(
         onRefresh: onRefresh,
         child: ListView(
-          padding: AppTokens.pagePadding,
+          padding: AppTokens.pagePaddingWithBottomInset(context),
           children: [
             FfSectionHeader(title: l10n.progressOverviewSection),
             profileAsync.when(

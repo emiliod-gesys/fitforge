@@ -87,7 +87,10 @@ class SocialFeedTab extends ConsumerWidget {
               onRefresh: onRefresh,
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+                padding: AppTokens.pagePaddingWithBottomInset(
+                  context,
+                  base: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                ),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final post = items[index];

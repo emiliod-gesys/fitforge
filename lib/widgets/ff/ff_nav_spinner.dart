@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_glass.dart';
 import '../../core/theme/app_tokens.dart';
+import 'ff_glass.dart';
 
 class FfNavSpinnerItem {
   final IconData icon;
@@ -92,84 +94,91 @@ class _FfNavSpinnerState extends State<FfNavSpinner> {
     final accent = context.accentColor;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        border: Border(
-          top: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+    return FfGlass.bar(
+      blur: true,
+      blurSigma: AppGlass.blurSigma,
+      fillOpacity: 0.72,
+      showBorder: false,
+      showShadow: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: AppGlass.border(0.16)),
           ),
-        ],
-      ),
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: SizedBox(
-        height: AppTokens.navBarHeight,
-        child: Stack(
-          children: [
-            ListView.separated(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTokens.space20,
-                vertical: AppTokens.space12,
-              ),
-              itemCount: widget.items.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppTokens.space8),
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                final selected = index == widget.selectedIndex;
-                return KeyedSubtree(
-                  key: _keys[index],
-                  child: _NavChip(
-                    item: item,
-                    selected: selected,
-                    accent: accent,
-                    onTap: () {
-                      if (index == widget.selectedIndex) return;
-                      HapticFeedback.selectionClick();
-                      widget.onSelected(index);
-                    },
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: SizedBox(
+            height: AppTokens.navBarHeight,
+            child: Stack(
+              children: [
+                ListView.separated(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTokens.space20,
+                    vertical: AppTokens.space12,
                   ),
-                );
-              },
-            ),
-            const Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: 28,
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.card, Color(0x001A1B1E)],
+                  itemCount: widget.items.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: AppTokens.space8),
+                  itemBuilder: (context, index) {
+                    final item = widget.items[index];
+                    final selected = index == widget.selectedIndex;
+                    return KeyedSubtree(
+                      key: _keys[index],
+                      child: _NavChip(
+                        item: item,
+                        selected: selected,
+                        accent: accent,
+                        onTap: () {
+                          if (index == widget.selectedIndex) return;
+                          HapticFeedback.selectionClick();
+                          widget.onSelected(index);
+                        },
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 28,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.card.withValues(alpha: 0.85),
+                            AppColors.card.withValues(alpha: 0),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            const Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: 28,
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0x001A1B1E), AppColors.card],
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 28,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.card.withValues(alpha: 0),
+                            AppColors.card.withValues(alpha: 0.85),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -208,20 +217,20 @@ class _NavChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: selected
-                ? accent.withValues(alpha: 0.18)
-                : AppColors.cardElevated.withValues(alpha: 0.55),
+                ? accent.withValues(alpha: 0.20)
+                : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(AppTokens.radiusFull),
             border: Border.all(
               color: selected
-                  ? accent.withValues(alpha: 0.55)
-                  : AppColors.border.withValues(alpha: 0.55),
+                  ? accent.withValues(alpha: 0.50)
+                  : AppGlass.border(0.12),
             ),
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: accent.withValues(alpha: 0.16),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: accent.withValues(alpha: 0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,

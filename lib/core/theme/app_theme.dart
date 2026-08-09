@@ -82,12 +82,12 @@ class AppTheme {
         margin: EdgeInsets.zero,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.cardElevated,
+        backgroundColor: AppColors.cardElevated.withValues(alpha: 0.94),
         shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.cardElevated,
-        shape: RoundedRectangleBorder(
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.cardElevated.withValues(alpha: 0.94),
+        shape: const RoundedRectangleBorder(
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(AppTokens.radiusXl)),
         ),

@@ -72,7 +72,7 @@ class FoodBudgetHeader extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
@@ -98,7 +98,7 @@ class FoodBudgetHeader extends StatelessWidget {
                   accent: AppColors.eaten,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: _BudgetStatTile(
                   icon: Icons.local_fire_department_outlined,

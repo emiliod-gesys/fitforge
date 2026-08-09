@@ -29,6 +29,9 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
   LeaderboardMetric _metric = LeaderboardMetric.level;
   LeaderboardPeriod _period = LeaderboardPeriod.all;
   int _limit = LeaderboardPagination.pageSize;
+  /// Último resultado visible; evita saltar al tope al paginar (nuevo key = loading).
+  LeaderboardResult? _stableResult;
+  LeaderboardKey? _stableFilters;
 
   LeaderboardKey get _key => (
         scope: _scope,
@@ -37,10 +40,27 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
         limit: _limit,
       );
 
+  LeaderboardKey get _filterKey => (
+        scope: _scope,
+        metric: _metric,
+        period: _period,
+        limit: 0,
+      );
+
   void _updateFilters(void Function() update) {
     setState(() {
       update();
       _limit = LeaderboardPagination.pageSize;
+      _stableResult = null;
+      _stableFilters = null;
+    });
+  }
+
+  void _loadMore() {
+    if (_limit >= LeaderboardPagination.maxLimit) return;
+    setState(() {
+      _limit = (_limit + LeaderboardPagination.pageSize)
+          .clamp(LeaderboardPagination.pageSize, LeaderboardPagination.maxLimit);
     });
   }
 
@@ -57,16 +77,40 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
     ref.invalidate(leaderboardProvider(_key));
   }
 
+  void _rememberResult(LeaderboardResult data) {
+    final filters = _filterKey;
+    if (_stableFilters != filters) {
+      _stableFilters = filters;
+      _stableResult = data;
+      return;
+    }
+    if (_stableResult == null ||
+        data.entries.length >= _stableResult!.entries.length) {
+      _stableResult = data;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final unitSystem = ref.watch(unitSystemProvider);
     final leaderboardAsync = ref.watch(leaderboardProvider(_key));
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
+    final isPaging = _limit > LeaderboardPagination.pageSize;
+
+    final data = leaderboardAsync.asData?.value;
+    if (data != null) {
+      _rememberResult(data);
+    }
+
+    final displayResult = data ?? (isPaging ? _stableResult : null);
+    final isLoadingMore =
+        isPaging && (data == null || leaderboardAsync.isLoading);
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad),
         children: [
           _FilterGroup(
             label: l10n.leaderboardFilterScope,
@@ -125,23 +169,27 @@ class _LeaderboardsSectionState extends ConsumerState<LeaderboardsSection> {
             ),
           ),
           const SizedBox(height: 16),
-          leaderboardAsync.when(
-            skipLoadingOnReload: true,
-            loading: () => const _LeaderboardSkeleton(),
-            error: (e, _) => Text(l10n.errorGeneric('$e')),
-            data: (result) => _LeaderboardList(
-              result: result,
+          if (displayResult == null && leaderboardAsync.isLoading)
+            const _LeaderboardSkeleton()
+          else if (leaderboardAsync.hasError && displayResult == null)
+            Text(l10n.errorGeneric('${leaderboardAsync.error}'))
+          else if (displayResult != null)
+            _LeaderboardList(
+              result: displayResult,
               metric: _metric,
               period: _period,
               l10n: l10n,
               unitSystem: unitSystem,
               rankColorFor: _rankColor,
-              isLoadingMore: leaderboardAsync.isLoading && _limit > LeaderboardPagination.pageSize,
-              onLoadMore: result.hasMore
-                  ? () => setState(() => _limit += LeaderboardPagination.pageSize)
+              isLoadingMore: isLoadingMore ||
+                  (leaderboardAsync.isLoading && isPaging),
+              onLoadMore: displayResult.hasMore &&
+                      _limit < LeaderboardPagination.maxLimit
+                  ? _loadMore
                   : null,
-            ),
-          ),
+            )
+          else
+            Text(l10n.leaderboardEmpty),
         ],
       ),
     );

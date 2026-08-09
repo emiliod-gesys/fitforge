@@ -14,6 +14,7 @@ class ManualActivitySheet {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: AppColors.card,
       shape: const RoundedRectangleBorder(
@@ -107,9 +108,10 @@ class _ManualActivitySheetBodyState extends State<_ManualActivitySheetBody> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottomInset),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + safeBottom + bottomInset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

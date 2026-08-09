@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/utils/player_level.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/social.dart';
@@ -80,7 +81,10 @@ class SocialFriendsTab extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppTokens.pagePaddingWithBottomInset(
+          context,
+          base: const EdgeInsets.all(16),
+        ),
         children: [
           profileAsync.when(
             data: (profile) {

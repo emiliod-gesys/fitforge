@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/runner/runner_standards.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
@@ -256,7 +257,10 @@ class RoutinesTab extends ConsumerWidget {
           });
         final favoriteCount = sorted.where((r) => r.isFavorite).length;
         return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+          padding: AppTokens.pagePaddingWithBottomInset(
+            context,
+            base: const EdgeInsets.all(16),
+          ),
           children: [
             if (limitStatus != null)
               Padding(

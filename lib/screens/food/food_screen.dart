@@ -245,7 +245,7 @@ class _FoodBody extends ConsumerWidget {
 
           child: ListView(
 
-            padding: AppTokens.pagePadding,
+            padding: AppTokens.pagePaddingWithBottomInset(context),
 
             children: [
 

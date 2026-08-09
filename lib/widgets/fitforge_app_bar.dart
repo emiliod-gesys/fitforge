@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_glass.dart';
 import 'fitforge_logo.dart';
 
 class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -74,6 +77,25 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: titleWidget,
       actions: actions,
       bottom: bottom,
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withValues(alpha: 0.07),
+              AppColors.surface.withValues(alpha: 0.82),
+            ],
+          ),
+          border: Border(
+            bottom: BorderSide(color: AppGlass.border(0.10)),
+          ),
+        ),
+      ),
     );
   }
 }

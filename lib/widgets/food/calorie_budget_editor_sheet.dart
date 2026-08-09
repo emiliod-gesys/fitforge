@@ -23,6 +23,7 @@ class CalorieBudgetEditorSheet {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: AppColors.cardElevated,
       shape: const RoundedRectangleBorder(

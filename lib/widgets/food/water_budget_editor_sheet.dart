@@ -11,6 +11,7 @@ import '../../models/body_metric.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../ff/ff_button.dart';
+import '../ff/ff_glass.dart';
 
 class WaterBudgetEditorSheet {
   static Future<void> show(
@@ -21,15 +22,18 @@ class WaterBudgetEditorSheet {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardElevated,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => _WaterBudgetEditorBody(
-        profile: profile,
-        bodyMetrics: bodyMetrics,
-        onSaved: onSaved,
+      builder: (ctx) => FfGlassSheetScaffold(
+        child: _WaterBudgetEditorBody(
+          profile: profile,
+          bodyMetrics: bodyMetrics,
+          onSaved: onSaved,
+        ),
       ),
     );
   }
