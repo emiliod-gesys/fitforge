@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'FitForge';
+  String get appTitle => 'FORGEN';
 
   @override
   String get save => 'Guardar';
@@ -129,7 +129,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileOnboardingContinue => 'Continuar';
 
   @override
-  String get onboardingWelcomeTitle => 'Bienvenido a FitForge';
+  String get onboardingWelcomeTitle => 'Bienvenido a FORGEN';
 
   @override
   String get onboardingWelcomeSubtitle =>
@@ -152,7 +152,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingLanguageSubtitle =>
-      'Verás FitForge en este idioma. Puedes cambiarlo después en Perfil.';
+      'Verás FORGEN en este idioma. Puedes cambiarlo después en Perfil.';
 
   @override
   String get fitnessGoalCalorieSurplus => 'Requiere superávit calórico';
@@ -282,7 +282,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tu perfil está configurado. Empieza tu primer entrenamiento cuando quieras.';
 
   @override
-  String get onboardingDoneAction => 'Entrar a FitForge';
+  String get onboardingDoneAction => 'Entrar a FORGEN';
 
   @override
   String get onboardingNext => 'Siguiente';
@@ -916,7 +916,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get proactiveAiEnableMessage =>
-      'FitForge podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.';
+      'FORGEN podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.';
 
   @override
   String get proactiveAiEnableConfirm => 'Activar';
@@ -1285,7 +1285,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get watchDemoVideo => 'Ver video demostrativo';
 
   @override
-  String get fitforgeCatalog => 'Ejercicio del catálogo FitForge';
+  String get fitforgeCatalog => 'Ejercicio del catálogo FORGEN';
 
   @override
   String get customExerciseTag => 'Personalizado';
@@ -1789,7 +1789,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resetPasswordSubtitle =>
-      'Elige una contraseña segura para tu cuenta de FitForge.';
+      'Elige una contraseña segura para tu cuenta de FORGEN.';
 
   @override
   String get newPassword => 'Nueva contraseña';
@@ -2870,7 +2870,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get openAiGuideStep4 =>
-      'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FitForge».';
+      'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FORGEN».';
 
   @override
   String get openAiGuideStep5 =>
@@ -2882,7 +2882,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get openAiGuideStep7 =>
-      'Vuelve a FitForge, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».';
+      'Vuelve a FORGEN, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».';
 
   @override
   String get geminiGuideTitle => 'Cómo obtener tu API Key de Gemini (Google)';
@@ -2916,7 +2916,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get geminiGuideStep7 =>
-      'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».';
+      'Vuelve a FORGEN, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».';
 
   @override
   String get claudeGuideTitle =>
@@ -2935,7 +2935,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get claudeGuideStep3 =>
-      'Pulsa «Create Key», ponle un nombre (ej. FitForge) y confirma.';
+      'Pulsa «Create Key», ponle un nombre (ej. FORGEN) y confirma.';
 
   @override
   String get claudeGuideStep4 =>
@@ -2947,7 +2947,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get claudeGuideStep6 =>
-      'Vuelve a FitForge, pega la clave, elige Claude y pulsa «Guardar API Key».';
+      'Vuelve a FORGEN, pega la clave, elige Claude y pulsa «Guardar API Key».';
 
   @override
   String setsRepsBest(int sets, int reps, String weight) {
@@ -3008,7 +3008,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String shareWorkoutTitle(String name) {
-    return '$name — FitForge';
+    return '$name — FORGEN';
   }
 
   @override
@@ -3095,11 +3095,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get shareHashtags => '#FitForge #Entrenamiento';
+  String get shareHashtags => '#FORGEN #Entrenamiento';
 
   @override
   String shareHyroxTitle(String name) {
-    return 'HYROX · $name — FitForge';
+    return 'HYROX · $name — FORGEN';
   }
 
   @override
@@ -3114,7 +3114,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String shareRunnerTitle(String name) {
-    return 'RUN · $name — FitForge';
+    return 'RUN · $name — FORGEN';
   }
 
   @override
@@ -3175,7 +3175,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chooseAvatar => 'Elige tu avatar';
 
   @override
-  String get chooseAvatarHint => 'Selecciona un avatar del catálogo FitForge';
+  String get chooseAvatarHint => 'Selecciona un avatar del catálogo FORGEN';
 
   @override
   String get changeAvatar => 'Cambiar avatar';
@@ -3229,13 +3229,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get foodEnergyOutputEmpty =>
-      'Sin actividad registrada hoy. Añade entrenos en FitForge o actividades manuales.';
+      'Sin actividad registrada hoy. Añade entrenos en FORGEN o actividades manuales.';
 
   @override
   String get foodAddActivity => 'Registrar actividad';
 
   @override
-  String get foodFromFitForgeWorkout => 'Entrenamiento FitForge';
+  String get foodFromFitForgeWorkout => 'Entrenamiento FORGEN';
 
   @override
   String get foodManualActivityLabel => 'Actividad manual';
@@ -3457,7 +3457,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get foodActivityAddHint =>
-      'Registra entrenos u otras actividades que no hayas documentado en FitForge.';
+      'Registra entrenos u otras actividades que no hayas documentado en FORGEN.';
 
   @override
   String get foodActivityName => 'Nombre de la actividad';
@@ -3526,7 +3526,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodNoRecent => 'Aún no has registrado alimentos.';
 
   @override
-  String get foodCatalogSection => 'Catálogo FitForge';
+  String get foodCatalogSection => 'Catálogo FORGEN';
 
   @override
   String get foodCatalogNoResults =>
@@ -4265,7 +4265,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get healthIntegrationDisclaimer =>
-      'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FitForge.';
+      'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FORGEN.';
 
   @override
   String get healthIntegrationConnect => 'Conectar';
@@ -4348,7 +4348,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountSectionSubtitle =>
-      'Elimina permanentemente tu cuenta de FitForge y todos los datos asociados.';
+      'Elimina permanentemente tu cuenta de FORGEN y todos los datos asociados.';
 
   @override
   String get deleteAccountTitle => '¿Borrar tu cuenta?';
@@ -4365,7 +4365,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmMessage =>
-      'Tus datos se eliminarán de los servidores de FitForge y no se podrán recuperar.';
+      'Tus datos se eliminarán de los servidores de FORGEN y no se podrán recuperar.';
 
   @override
   String get deleteAccountUnderstand =>
@@ -4576,7 +4576,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get waterBudgetEditorSubtitle =>
-      'El valor predeterminado es la sugerencia de FitForge según tus métricas. Puedes cambiarla cuando quieras.';
+      'El valor predeterminado es la sugerencia de FORGEN según tus métricas. Puedes cambiarla cuando quieras.';
 
   @override
   String get waterBudgetSuggestedLabel => 'Sugerencia de la app';

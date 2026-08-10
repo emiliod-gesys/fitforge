@@ -9,27 +9,27 @@ Future<void> main() async {
 
   await _writePdf(
     path: '${outDir.path}/openai_api_key_guide.pdf',
-    title: 'FitForge — Obtener API Key de OpenAI',
+    title: 'FORGEN — Obtener API Key de OpenAI',
     portal: 'https://platform.openai.com/api-keys',
     steps: const [
       'Abre platform.openai.com en tu navegador y crea una cuenta o inicia sesión.',
       'Verifica tu correo si es la primera vez. OpenAI puede pedir un número de teléfono.',
       'Entra a API keys: platform.openai.com/api-keys (menú lateral → API keys).',
-      'Pulsa «Create new secret key» y ponle un nombre, por ejemplo «FitForge».',
+      'Pulsa «Create new secret key» y ponle un nombre, por ejemplo «FORGEN».',
       'Copia la clave en cuanto aparezca. Solo se muestra una vez.',
       'OpenAI puede pedir agregar un método de pago en Billing (pago por uso).',
-      'Vuelve a FitForge, pega la clave, elige OpenAI y pulsa «Guardar API Key».',
+      'Vuelve a FORGEN, pega la clave, elige OpenAI y pulsa «Guardar API Key».',
     ],
     notes: const [
       'La clave se guarda solo en tu dispositivo (almacenamiento seguro).',
-      'FitForge no almacena tu API key en servidores propios.',
+      'FORGEN no almacena tu API key en servidores propios.',
       'Las llamadas a la IA van directamente a OpenAI.',
     ],
   );
 
   await _writePdf(
     path: '${outDir.path}/gemini_api_key_guide.pdf',
-    title: 'FitForge — Obtener API Key de Gemini (Google)',
+    title: 'FORGEN — Obtener API Key de Gemini (Google)',
     portal: 'https://aistudio.google.com/apikey',
     steps: const [
       'Abre aistudio.google.com e inicia sesión con tu cuenta de Google.',
@@ -38,11 +38,11 @@ Future<void> main() async {
       'Pulsa «Create API key». Crea un proyecto nuevo o usa uno existente.',
       'Copia la API key generada y guárdala en un lugar seguro.',
       'Google ofrece un nivel gratuito con límites de uso.',
-      'Vuelve a FitForge, pega la clave, elige Gemini y pulsa «Guardar API Key».',
+      'Vuelve a FORGEN, pega la clave, elige Gemini y pulsa «Guardar API Key».',
     ],
     notes: const [
       'La clave se guarda solo en tu dispositivo (almacenamiento seguro).',
-      'FitForge no almacena tu API key en servidores propios.',
+      'FORGEN no almacena tu API key en servidores propios.',
       'Las llamadas a la IA van directamente a Google.',
     ],
   );
@@ -116,7 +116,7 @@ Future<void> _writePdf({
         ...notes.map((n) => pw.Bullet(text: n, style: const pw.TextStyle(fontSize: 10))),
         pw.SizedBox(height: 24),
         pw.Text(
-          'FitForge — Guía generada para usuarios',
+          'FORGEN — Guía generada para usuarios',
           style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
         ),
       ],

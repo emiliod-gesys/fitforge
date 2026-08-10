@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In es, this message translates to:
-  /// **'FitForge'**
+  /// **'FORGEN'**
   String get appTitle;
 
   /// No description provided for @save.
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeTitle.
   ///
   /// In es, this message translates to:
-  /// **'Bienvenido a FitForge'**
+  /// **'Bienvenido a FORGEN'**
   String get onboardingWelcomeTitle;
 
   /// No description provided for @onboardingWelcomeSubtitle.
@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingLanguageSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Verás FitForge en este idioma. Puedes cambiarlo después en Perfil.'**
+  /// **'Verás FORGEN en este idioma. Puedes cambiarlo después en Perfil.'**
   String get onboardingLanguageSubtitle;
 
   /// No description provided for @fitnessGoalCalorieSurplus.
@@ -587,7 +587,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingDoneAction.
   ///
   /// In es, this message translates to:
-  /// **'Entrar a FitForge'**
+  /// **'Entrar a FORGEN'**
   String get onboardingDoneAction;
 
   /// No description provided for @onboardingNext.
@@ -1721,7 +1721,7 @@ abstract class AppLocalizations {
   /// No description provided for @proactiveAiEnableMessage.
   ///
   /// In es, this message translates to:
-  /// **'FitForge podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.'**
+  /// **'FORGEN podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.'**
   String get proactiveAiEnableMessage;
 
   /// No description provided for @proactiveAiEnableConfirm.
@@ -2369,7 +2369,7 @@ abstract class AppLocalizations {
   /// No description provided for @fitforgeCatalog.
   ///
   /// In es, this message translates to:
-  /// **'Ejercicio del catálogo FitForge'**
+  /// **'Ejercicio del catálogo FORGEN'**
   String get fitforgeCatalog;
 
   /// No description provided for @customExerciseTag.
@@ -3233,7 +3233,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetPasswordSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Elige una contraseña segura para tu cuenta de FitForge.'**
+  /// **'Elige una contraseña segura para tu cuenta de FORGEN.'**
   String get resetPasswordSubtitle;
 
   /// No description provided for @newPassword.
@@ -5057,7 +5057,7 @@ abstract class AppLocalizations {
   /// No description provided for @openAiGuideStep4.
   ///
   /// In es, this message translates to:
-  /// **'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FitForge».'**
+  /// **'Pulsa «Create new secret key». Ponle un nombre que reconozcas, por ejemplo «FORGEN».'**
   String get openAiGuideStep4;
 
   /// No description provided for @openAiGuideStep5.
@@ -5075,7 +5075,7 @@ abstract class AppLocalizations {
   /// No description provided for @openAiGuideStep7.
   ///
   /// In es, this message translates to:
-  /// **'Vuelve a FitForge, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».'**
+  /// **'Vuelve a FORGEN, pega la clave en el campo de arriba, elige OpenAI y pulsa «Guardar API Key».'**
   String get openAiGuideStep7;
 
   /// No description provided for @geminiGuideTitle.
@@ -5129,7 +5129,7 @@ abstract class AppLocalizations {
   /// No description provided for @geminiGuideStep7.
   ///
   /// In es, this message translates to:
-  /// **'Vuelve a FitForge, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».'**
+  /// **'Vuelve a FORGEN, pega la clave en el campo de arriba, elige Gemini y pulsa «Guardar API Key».'**
   String get geminiGuideStep7;
 
   /// No description provided for @claudeGuideTitle.
@@ -5159,7 +5159,7 @@ abstract class AppLocalizations {
   /// No description provided for @claudeGuideStep3.
   ///
   /// In es, this message translates to:
-  /// **'Pulsa «Create Key», ponle un nombre (ej. FitForge) y confirma.'**
+  /// **'Pulsa «Create Key», ponle un nombre (ej. FORGEN) y confirma.'**
   String get claudeGuideStep3;
 
   /// No description provided for @claudeGuideStep4.
@@ -5177,7 +5177,7 @@ abstract class AppLocalizations {
   /// No description provided for @claudeGuideStep6.
   ///
   /// In es, this message translates to:
-  /// **'Vuelve a FitForge, pega la clave, elige Claude y pulsa «Guardar API Key».'**
+  /// **'Vuelve a FORGEN, pega la clave, elige Claude y pulsa «Guardar API Key».'**
   String get claudeGuideStep6;
 
   /// No description provided for @setsRepsBest.
@@ -5261,7 +5261,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareWorkoutTitle.
   ///
   /// In es, this message translates to:
-  /// **'{name} — FitForge'**
+  /// **'{name} — FORGEN'**
   String shareWorkoutTitle(String name);
 
   /// No description provided for @shareDuration.
@@ -5381,13 +5381,13 @@ abstract class AppLocalizations {
   /// No description provided for @shareHashtags.
   ///
   /// In es, this message translates to:
-  /// **'#FitForge #Entrenamiento'**
+  /// **'#FORGEN #Entrenamiento'**
   String get shareHashtags;
 
   /// No description provided for @shareHyroxTitle.
   ///
   /// In es, this message translates to:
-  /// **'HYROX · {name} — FitForge'**
+  /// **'HYROX · {name} — FORGEN'**
   String shareHyroxTitle(String name);
 
   /// No description provided for @shareHyroxTotalTime.
@@ -5405,7 +5405,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareRunnerTitle.
   ///
   /// In es, this message translates to:
-  /// **'RUN · {name} — FitForge'**
+  /// **'RUN · {name} — FORGEN'**
   String shareRunnerTitle(String name);
 
   /// No description provided for @shareRunnerStats.
@@ -5507,7 +5507,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseAvatarHint.
   ///
   /// In es, this message translates to:
-  /// **'Selecciona un avatar del catálogo FitForge'**
+  /// **'Selecciona un avatar del catálogo FORGEN'**
   String get chooseAvatarHint;
 
   /// No description provided for @changeAvatar.
@@ -5597,7 +5597,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodEnergyOutputEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Sin actividad registrada hoy. Añade entrenos en FitForge o actividades manuales.'**
+  /// **'Sin actividad registrada hoy. Añade entrenos en FORGEN o actividades manuales.'**
   String get foodEnergyOutputEmpty;
 
   /// No description provided for @foodAddActivity.
@@ -5609,7 +5609,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodFromFitForgeWorkout.
   ///
   /// In es, this message translates to:
-  /// **'Entrenamiento FitForge'**
+  /// **'Entrenamiento FORGEN'**
   String get foodFromFitForgeWorkout;
 
   /// No description provided for @foodManualActivityLabel.
@@ -5975,7 +5975,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodActivityAddHint.
   ///
   /// In es, this message translates to:
-  /// **'Registra entrenos u otras actividades que no hayas documentado en FitForge.'**
+  /// **'Registra entrenos u otras actividades que no hayas documentado en FORGEN.'**
   String get foodActivityAddHint;
 
   /// No description provided for @foodActivityName.
@@ -6107,7 +6107,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodCatalogSection.
   ///
   /// In es, this message translates to:
-  /// **'Catálogo FitForge'**
+  /// **'Catálogo FORGEN'**
   String get foodCatalogSection;
 
   /// No description provided for @foodCatalogNoResults.
@@ -7242,7 +7242,7 @@ abstract class AppLocalizations {
   /// No description provided for @healthIntegrationDisclaimer.
   ///
   /// In es, this message translates to:
-  /// **'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FitForge.'**
+  /// **'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FORGEN.'**
   String get healthIntegrationDisclaimer;
 
   /// No description provided for @healthIntegrationConnect.
@@ -7386,7 +7386,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountSectionSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Elimina permanentemente tu cuenta de FitForge y todos los datos asociados.'**
+  /// **'Elimina permanentemente tu cuenta de FORGEN y todos los datos asociados.'**
   String get deleteAccountSectionSubtitle;
 
   /// No description provided for @deleteAccountTitle.
@@ -7416,7 +7416,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountConfirmMessage.
   ///
   /// In es, this message translates to:
-  /// **'Tus datos se eliminarán de los servidores de FitForge y no se podrán recuperar.'**
+  /// **'Tus datos se eliminarán de los servidores de FORGEN y no se podrán recuperar.'**
   String get deleteAccountConfirmMessage;
 
   /// No description provided for @deleteAccountUnderstand.
@@ -7788,7 +7788,7 @@ abstract class AppLocalizations {
   /// No description provided for @waterBudgetEditorSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'El valor predeterminado es la sugerencia de FitForge según tus métricas. Puedes cambiarla cuando quieras.'**
+  /// **'El valor predeterminado es la sugerencia de FORGEN según tus métricas. Puedes cambiarla cuando quieras.'**
   String get waterBudgetEditorSubtitle;
 
   /// No description provided for @waterBudgetSuggestedLabel.

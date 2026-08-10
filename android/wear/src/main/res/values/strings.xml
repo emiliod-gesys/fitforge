@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FitForge</string>
+    <string name="app_name">FORGEN</string>
     <string name="waiting_for_phone">Inicia un entreno en el teléfono</string>
     <string name="complete_set">Completar set</string>
     <string name="skip_rest">Saltar descanso</string>

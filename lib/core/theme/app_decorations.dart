@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_accent.dart';
 import 'app_colors.dart';
 
-/// Decoraciones reutilizables de la línea gráfica premium FitForge.
+/// Decoraciones reutilizables de la línea gráfica premium FORGEN.
 abstract final class AppDecorations {
   static LinearGradient heroGradient(AppAccent accent) => LinearGradient(
         begin: Alignment.topLeft,

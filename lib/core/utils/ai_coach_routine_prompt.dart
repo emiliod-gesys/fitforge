@@ -153,11 +153,11 @@ No sugieras ejercicios que requieran otro equipamiento.''';
   static String routineGenerationInstruction(String languageCode) {
     if (languageCode == 'en') {
       return '''
-When the user asks for a workout routine or training plan to save in FitForge, you MUST respond with valid routine JSON only (no markdown prose as the main answer) so the app can add it to their library.
+When the user asks for a workout routine or training plan to save in FORGEN, you MUST respond with valid routine JSON only (no markdown prose as the main answer) so the app can add it to their library.
 Do not reply with a generic tip list when they asked for a routine; produce the structured routine.''';
     }
     return '''
-Cuando el usuario pida una rutina o plan de entrenamiento para guardar en FitForge, DEBES responder SOLO con JSON válido de rutina (sin markdown como respuesta principal) para que la app pueda agregarla.
+Cuando el usuario pida una rutina o plan de entrenamiento para guardar en FORGEN, DEBES responder SOLO con JSON válido de rutina (sin markdown como respuesta principal) para que la app pueda agregarla.
 No respondas con una lista genérica de consejos si pidió una rutina; genera la rutina estructurada.''';
   }
 

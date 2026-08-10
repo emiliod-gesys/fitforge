@@ -158,6 +158,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
     return Scaffold(
       appBar: FitForgeAppBar(
         title: l10n.socialTitle,
+        showBrandMark: true,
         automaticallyImplyLeading: false,
         actions: [
           SocialNotificationsBellButton(),

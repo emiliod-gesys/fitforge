@@ -73,6 +73,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
       appBar: FitForgeAppBar(
         title: l10n.navTrain,
         showBrandMark: true,
+        automaticallyImplyLeading: false,
         actions: [
           if (_tabController.index == 0)
             IconButton(
@@ -98,11 +99,11 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
           ],
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
+          preferredSize: const Size.fromHeight(56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppTokens.space16,
-              0,
+              AppTokens.space8,
               AppTokens.space16,
               AppTokens.space8,
             ),

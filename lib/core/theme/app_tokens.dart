@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Escala de diseño FitForge — usar en lugar de números mágicos.
+/// Escala de diseño FORGEN — usar en lugar de números mágicos.
 abstract final class AppTokens {
   // Spacing
   static const double space2 = 2;

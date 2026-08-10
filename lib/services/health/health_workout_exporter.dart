@@ -73,7 +73,7 @@ class HealthWorkoutExporter {
         end: end,
         totalEnergyBurnedKcal: energy,
         totalDistanceMeters: distance,
-        title: title.trim().isEmpty ? 'FitForge' : title.trim(),
+        title: title.trim().isEmpty ? 'FORGEN' : title.trim(),
       );
 
       if (ok) {

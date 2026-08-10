@@ -6,7 +6,7 @@ import '../models/food_entry.dart';
 
 /// Consulta productos por código de barras y texto (Open Food Facts).
 class OpenFoodFactsService {
-  static const _headers = {'User-Agent': 'FitForge/1.0 (nutrition tracking)'};
+  static const _headers = {'User-Agent': 'FORGEN/1.0 (nutrition tracking)'};
 
   Future<FoodNutritionEstimate?> lookupBarcode(String barcode) async {
     final code = barcode.trim();

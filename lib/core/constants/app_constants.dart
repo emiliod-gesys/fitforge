@@ -1,7 +1,7 @@
 import 'exercise_catalog_source.dart';
 
 class AppConstants {
-  static const appName = 'FitForge';
+  static const appName = 'FORGEN';
   static const wgerApiBase = 'https://wger.de/api/v2';
 
   static const exerciseCatalogSource = ExerciseCatalogSource.bundled;

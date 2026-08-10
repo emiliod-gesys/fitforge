@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Fitforge</string>
+	<string>FORGEN</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>fitforge</string>
+	<string>FORGEN</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -67,21 +67,21 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>FitForge usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
+	<string>FORGEN usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>FitForge usa el micrófono para dictar descripciones de comida en el registro rápido.</string>
+	<string>FORGEN usa el micrófono para dictar descripciones de comida en el registro rápido.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>FitForge convierte tu voz en texto para describir lo que comiste.</string>
+	<string>FORGEN convierte tu voz en texto para describir lo que comiste.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FitForge accede a tu galería para elegir fotos de ejercicios personalizados.</string>
+	<string>FORGEN accede a tu galería para elegir fotos de ejercicios personalizados.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FitForge usa tu ubicación para registrar la ruta y distancia de tus carreras.</string>
+	<string>FORGEN usa tu ubicación para registrar la ruta y distancia de tus carreras.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>FitForge sigue registrando tu carrera cuando la app está en segundo plano.</string>
+	<string>FORGEN sigue registrando tu carrera cuando la app está en segundo plano.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>FitForge puede importar tu peso y grasa corporal desde Apple Salud para mantener tu perfil al día.</string>
+	<string>FORGEN puede importar tu peso y grasa corporal desde Apple Salud para mantener tu perfil al día.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>FitForge puede guardar tus entrenamientos en Apple Salud para compartirlos con otras apps.</string>
+	<string>FORGEN puede guardar tus entrenamientos en Apple Salud para compartirlos con otras apps.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

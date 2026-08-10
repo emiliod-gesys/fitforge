@@ -86,7 +86,7 @@ class _ShareCardShell extends StatelessWidget {
             children: [
               const FitForgeLogo.icon(height: 28),
               const SizedBox(width: 8),
-              const Text('FitForge', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('FORGEN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -478,7 +478,7 @@ class _GymShareCard extends StatelessWidget {
             children: [
               const FitForgeLogo.icon(height: 28),
               const SizedBox(width: 8),
-              const Text('FitForge', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('FORGEN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           const SizedBox(height: 16),

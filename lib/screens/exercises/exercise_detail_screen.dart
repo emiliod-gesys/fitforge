@@ -160,7 +160,7 @@ class _ExerciseBody extends StatelessWidget {
                         avatar: const Icon(Icons.person, size: 16),
                       )
                     else if (exercise.isCustom)
-                      const Chip(label: Text('FitForge'), avatar: Icon(Icons.star, size: 16)),
+                      const Chip(label: Text('FORGEN'), avatar: Icon(Icons.star, size: 16)),
                     if (exercise.isUserCustom && exercise.perArmWeight)
                       Chip(
                         label: Text(l10n.customExercisePerArmWeight),

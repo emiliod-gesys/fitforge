@@ -94,7 +94,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     }
 
     return Scaffold(
-      appBar: FitForgeAppBar(title: l10n.progressTitle),
+      appBar: FitForgeAppBar(title: l10n.progressTitle, showBrandMark: true),
       body: RefreshIndicator(
         onRefresh: onRefresh,
         child: ListView(

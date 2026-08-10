@@ -50,7 +50,7 @@ class RunnerTrackingService {
         accuracy: LocationAccuracy.best,
         distanceFilter: 5,
         foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationTitle: 'FitForge',
+          notificationTitle: 'FORGEN',
           notificationText: 'Registrando tu carrera…',
           enableWakeLock: true,
         ),

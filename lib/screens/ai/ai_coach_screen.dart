@@ -441,7 +441,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     final inputBlocked = usage != null && !usage.canSend;
 
     return Scaffold(
-      appBar: FitForgeAppBar(title: l10n.coachTitle),
+      appBar: FitForgeAppBar(title: l10n.coachTitle, showBrandMark: true),
       body: Column(
         children: [
           usageAsync.when(

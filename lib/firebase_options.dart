@@ -17,7 +17,7 @@ abstract final class DefaultFirebaseOptions {
 
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError('FitForge push no está configurado para web.');
+      throw UnsupportedError('FORGEN push no está configurado para web.');
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

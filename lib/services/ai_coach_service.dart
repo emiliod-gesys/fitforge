@@ -277,7 +277,7 @@ class AiCoachService {
 
   static const _routineRules = '''
 REGLAS OBLIGATORIAS:
-- Cuando el usuario pida una rutina o plan de entrenamiento para FitForge, responde SOLO con JSON válido de rutina(s). La app lo convierte en rutina editable para guardar; no des solo consejos en prosa.
+- Cuando el usuario pida una rutina o plan de entrenamiento para FORGEN, responde SOLO con JSON válido de rutina(s). La app lo convierte en rutina editable para guardar; no des solo consejos en prosa.
 - Entre 4 y 8 ejercicios DIFERENTES por rutina; nunca repitas el mismo ejercicio.
 - Usa SOLO nombres EXACTOS copiados de la lista proporcionada (todos tienen imagen ilustrativa).
 - No uses nombres genéricos de músculo (ej. "bíceps", "tríceps", "pecho") ni inventados.
@@ -435,12 +435,12 @@ REGLAS OBLIGATORIAS:
     if (normalized == 'en') {
       return 'ONLY answer questions related to fitness: training, exercise technique, '
           'workout programming, sports nutrition, recovery, physical health tied to exercise, '
-          'and using FitForge. Politely decline off-topic requests (general knowledge, coding, '
+          'and using FORGEN. Politely decline off-topic requests (general knowledge, coding, '
           'politics, homework, etc.) and offer to help with fitness instead.';
     }
     return 'Responde ÚNICAMENTE preguntas relacionadas con fitness: entrenamiento, técnica de '
         'ejercicios, programación de rutinas, nutrición deportiva, recuperación, salud física '
-        'vinculada al ejercicio y uso de FitForge. Rechaza amablemente temas ajenos (cultura '
+        'vinculada al ejercicio y uso de FORGEN. Rechaza amablemente temas ajenos (cultura '
         'general, programación, política, deberes, etc.) y ofrece ayuda con fitness.';
   }
 
@@ -487,7 +487,7 @@ REGLAS OBLIGATORIAS:
     final lang = _resolveLanguageCode(languageCode: languageCode, profile: profile);
     final history = trimChatHistory(conversationHistory ?? const []);
     final systemPrompt = '''
-Eres FitForge Coach, un entrenador personal experto en fuerza e hipertrofia.
+Eres FORGEN Coach, un entrenador personal experto en fuerza e hipertrofia.
 ${languageInstruction(lang)} Sé conciso pero útil.
 ${fitnessScopeInstruction(lang)}
 Tienes acceso al perfil completo del usuario: datos personales, objetivo, métricas corporales, nivel, racha, records, historial de entrenos y nutrición.
@@ -576,7 +576,7 @@ $priorAdvice
 El usuario pidió lo siguiente:
 "$userMessage"
 $priorBlock
-Genera una rutina de gimnasio lista para guardar en FitForge (JSON obligatorio).
+Genera una rutina de gimnasio lista para guardar en FORGEN (JSON obligatorio).
 $durationLine
 Músculos objetivo: $muscleLine.
 
@@ -605,7 +605,7 @@ Responde SOLO con JSON válido (sin markdown ni texto extra):
     final response = await _complete(
       profile: profile,
       systemPrompt: '''
-Eres un generador de rutinas de gimnasio para FitForge.
+Eres un generador de rutinas de gimnasio para FORGEN.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 ${fitnessScopeInstruction(lang)}
 $_routineRules
@@ -683,7 +683,7 @@ $priorAdvice
 El usuario pidió lo siguiente:
 "$userMessage"
 $priorBlock
-Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento), listas para guardar en FitForge.
+Genera un programa con EXACTAMENTE $routineCount rutinas distintas (una por día de entrenamiento), listas para guardar en FORGEN.
 $durationLine
 Músculos objetivo globales: $muscleLine.
 
@@ -718,7 +718,7 @@ Responde SOLO con JSON válido (sin markdown ni texto extra):
     final response = await _complete(
       profile: profile,
       systemPrompt: '''
-Eres un generador de programas de entrenamiento para FitForge.
+Eres un generador de programas de entrenamiento para FORGEN.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 ${fitnessScopeInstruction(lang)}
 $_routineRules
@@ -779,7 +779,7 @@ Si hay un consejo previo, respétalo al diseñar el programa.
 
     final prompt = '''
 Genera una rutina de gimnasio de $durationMinutes minutos enfocada en: ${targetMuscles.join(', ')}.
-La rutina debe estar en JSON listo para guardar en FitForge.
+La rutina debe estar en JSON listo para guardar en FORGEN.
 
 Perfil y contexto del usuario (úsalo para adaptar ejercicios, volumen y dificultad):
 $userContext
@@ -803,7 +803,7 @@ Responde SOLO con JSON válido (sin markdown):
     final response = await _complete(
       profile: profile,
       systemPrompt: '''
-Eres un generador de rutinas de gimnasio para FitForge.
+Eres un generador de rutinas de gimnasio para FORGEN.
 Responde ÚNICAMENTE con JSON válido. Sin markdown, sin texto adicional.
 ${fitnessScopeInstruction(lang)}
 $_routineRules
@@ -1182,7 +1182,7 @@ $_routineRules
     final goalBlock = ProactiveWorkoutAiRules.goalProgrammingBlock(profile);
 
     final systemPrompt = '''
-Eres un programador de entrenamiento de FitForge.
+Eres un programador de entrenamiento de FORGEN.
 ${languageInstruction(lang)}
 Responde ÚNICAMENTE con JSON válido. Sin markdown ni texto extra.
 $weightNote
@@ -1259,7 +1259,7 @@ Responde SOLO con este JSON (ejemplo: compuesto con aproximaciones + aislamiento
   }) async {
     final lang = _resolveLanguageCode(profile: profile);
     final system = '''
-Eres un nutricionista de FitForge. ${languageInstruction(lang)}
+Eres un nutricionista de FORGEN. ${languageInstruction(lang)}
 Responde SOLO JSON válido sin markdown.
 
 Reglas:
@@ -1655,7 +1655,7 @@ JSON:
 
   String _foodRevisionSystemPrompt(String lang) {
     return '''
-Eres un nutricionista de FitForge. ${languageInstruction(lang)}
+Eres un nutricionista de FORGEN. ${languageInstruction(lang)}
 El usuario ya tiene una estimación y pide un AJUSTE puntual, no un plato nuevo.
 Responde SOLO JSON válido sin markdown.
 

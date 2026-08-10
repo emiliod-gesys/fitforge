@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_tokens.dart';
 
-/// Tokens para el look “liquid glass” sutil de FitForge.
+/// Tokens para el look “liquid glass” sutil de FORGEN.
 ///
 /// Diseñado para gama baja: blur bajo y relleno translúcido
 /// que ya se siente premium sin saturar BackdropFilter.

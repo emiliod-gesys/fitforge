@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Paleta premium FitForge — negro carbón + azul cobalto.
+/// Paleta premium FORGEN — negro carbón + azul cobalto.
 abstract final class AppColors {
   static const black = Color(0xFF000000);
   static const slate = Color(0xFF2C2D31);
@@ -21,8 +21,10 @@ abstract final class AppColors {
   static const orange = cobalt;
   static const orangeDark = cobaltDark;
 
-  static const logoFit = cobalt;
-  static const logoForge = textPrimary;
+  /// Azul de marca del lockup FORGEN (logo).
+  static const forgenBlue = Color(0xFF305890);
+  static const logoFit = forgenBlue;
+  static const logoForge = forgenBlue;
 
   /// Fondo claro para ilustraciones wger (siluetas negras sobre PNG transparente).
   static const exerciseIllustrationBackground = Color(0xFFFFFFFF);

@@ -159,7 +159,7 @@ class LocalNotificationService {
     required String body,
   }) async {
     if (!_initialized) return;
-    if (body.isEmpty && title == 'FitForge') return;
+    if (body.isEmpty && title == 'FORGEN') return;
 
     await _plugin.show(
       id,
@@ -249,7 +249,7 @@ class LocalNotificationService {
     final notification = message.notification;
     final data = message.data;
     return (
-      title: notification?.title ?? data['title'] as String? ?? 'FitForge',
+      title: notification?.title ?? data['title'] as String? ?? 'FORGEN',
       body: notification?.body ??
           data['message'] as String? ??
           data['body'] as String? ??

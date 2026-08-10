@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/utils/workout_muscle_groups.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -66,7 +67,10 @@ class _StudentDetailScreenState extends ConsumerState<StudentDetailScreen> {
               ref.invalidate(studentDailyNutritionProvider(widget.studentId));
             },
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: AppTokens.pagePaddingWithBottomInset(
+                context,
+                base: const EdgeInsets.all(16),
+              ),
               children: [
                 Center(
                   child: Column(

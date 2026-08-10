@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/social.dart';
 import '../../providers/app_providers.dart';
@@ -11,7 +13,6 @@ import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/social/friend_tile.dart';
 import '../../widgets/social/pending_request_tile.dart';
 import '../../widgets/social/social_section_header.dart';
-import '../../core/theme/app_accent.dart';
 
 class StudentsScreen extends ConsumerWidget {
   const StudentsScreen({super.key});
@@ -23,7 +24,7 @@ class StudentsScreen extends ConsumerWidget {
 
     if (!isTrainer) {
       return Scaffold(
-        appBar: FitForgeAppBar(title: l10n.navStudents),
+        appBar: FitForgeAppBar(title: l10n.navStudents, showBrandMark: true),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -41,14 +42,17 @@ class StudentsScreen extends ConsumerWidget {
     final addableAsync = ref.watch(trainerAddableFriendsProvider);
 
     return Scaffold(
-      appBar: FitForgeAppBar(title: l10n.navStudents),
+      appBar: FitForgeAppBar(title: l10n.navStudents, showBrandMark: true),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(trainerStudentsProvider);
           ref.invalidate(trainerAddableFriendsProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppTokens.pagePaddingWithBottomInset(
+            context,
+            base: const EdgeInsets.all(16),
+          ),
           children: [
             Text(
               l10n.studentsScreenHint,

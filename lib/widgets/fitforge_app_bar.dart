@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_glass.dart';
 import 'fitforge_logo.dart';
 
 class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const double _logoHeight = 36;
+  /// Lockup FORGEN en la esquina izquierda.
+  static const double _logoHeight = 40;
+  static const double _brandLeadingWidth = 56;
   static const double _toolbarHeight = kToolbarHeight;
 
   final String? title;
   final List<Widget>? actions;
   final bool showWordmark;
-  /// Marca/isotipo a la izquierda. En pantallas de tarea conviene `false`.
+  /// Muestra el lockup de marca a la izquierda (pestañas principales).
   final bool showBrandMark;
   final Widget? leading;
   final bool automaticallyImplyLeading;
@@ -35,32 +36,21 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget titleWidget;
-    if (showBrandMark || showWordmark) {
-      titleWidget = Row(
-        children: [
-          if (showBrandMark)
-            SizedBox(
-              height: _toolbarHeight,
-              child: const Center(
-                child: FitForgeLogo.icon(height: _logoHeight),
-              ),
-            ),
-          if (showWordmark || title != null) ...[
-            if (showBrandMark) const SizedBox(width: 10),
-            if (title != null)
-              Flexible(
-                child: Text(
-                  title!,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              )
-            else if (showWordmark)
-              const FitForgeLogo.wordmark(height: 22),
-          ],
-        ],
+    final Widget? leadingWidget;
+    if (showBrandMark) {
+      leadingWidget = const Padding(
+        padding: EdgeInsets.only(left: 8),
+        child: Center(
+          child: FitForgeLogo.full(height: _logoHeight),
+        ),
       );
+    } else {
+      leadingWidget = leading;
+    }
+
+    final Widget titleWidget;
+    if (showWordmark && title == null) {
+      titleWidget = const FitForgeLogo.wordmark(height: 22);
     } else {
       titleWidget = Text(
         title ?? '',
@@ -71,31 +61,19 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       toolbarHeight: _toolbarHeight,
-      titleSpacing: leading == null && automaticallyImplyLeading ? 16 : 0,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      leading: leading,
-      title: titleWidget,
-      actions: actions,
-      bottom: bottom,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      flexibleSpace: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withValues(alpha: 0.07),
-              AppColors.surface.withValues(alpha: 0.82),
-            ],
-          ),
-          border: Border(
-            bottom: BorderSide(color: AppGlass.border(0.10)),
-          ),
-        ),
-      ),
+      centerTitle: true,
+      titleSpacing: 0,
+      automaticallyImplyLeading: !showBrandMark && automaticallyImplyLeading,
+      leading: leadingWidget,
+      leadingWidth: showBrandMark ? _brandLeadingWidth : null,
+      title: titleWidget,
+      actions: actions,
+      bottom: bottom,
     );
   }
 }

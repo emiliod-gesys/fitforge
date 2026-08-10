@@ -30,7 +30,7 @@ class FitForgeApp extends ConsumerWidget {
         router: router,
         child: MaterialApp.router(
           scaffoldMessengerKey: rootScaffoldMessengerKey,
-          title: 'FitForge',
+          title: 'FORGEN',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.dark(accent: accent),
           locale: locale,

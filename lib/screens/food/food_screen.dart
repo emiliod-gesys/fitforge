@@ -67,7 +67,7 @@ class FoodScreen extends ConsumerWidget {
 
     return Scaffold(
 
-      appBar: FitForgeAppBar(title: l10n.foodTitle),
+      appBar: FitForgeAppBar(title: l10n.foodTitle, showBrandMark: true),
 
       body: _FoodBody(
 

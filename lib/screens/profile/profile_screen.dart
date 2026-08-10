@@ -116,6 +116,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Scaffold(
         appBar: FitForgeAppBar(
           title: inSection ? (_sectionTitle ?? l10n.profileTitle) : l10n.profileTitle,
+          showBrandMark: !inSection,
           leading: inSection
               ? IconButton(
                   icon: const Icon(Icons.arrow_back),
