@@ -143,6 +143,7 @@ Future<void> showLogPastStartSheet(
                   title: Text(l10n.logPastFreeWorkout),
                   onTap: () async {
                     Navigator.pop(ctx);
+                    if (!context.mounted) return;
                     await openLogPastWorkout(
                       context,
                       ref,
@@ -168,7 +169,7 @@ Future<void> showLogPastStartSheet(
                       return ListView.builder(
                         shrinkWrap: true,
                         itemCount: gymRoutines.length,
-                        itemBuilder: (context, index) {
+                        itemBuilder: (_, index) {
                           final routine = gymRoutines[index];
                           return ListTile(
                             leading: const Icon(Icons.list_alt),
@@ -176,6 +177,7 @@ Future<void> showLogPastStartSheet(
                             subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
                             onTap: () async {
                               Navigator.pop(ctx);
+                              if (!context.mounted) return;
                               await openLogPastWorkout(
                                 context,
                                 ref,
