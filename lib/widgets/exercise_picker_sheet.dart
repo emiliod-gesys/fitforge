@@ -110,6 +110,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
               TextField(
                 controller: _searchController,
                 autofocus: true,
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.searchExercises,
                   prefixIcon: const Icon(Icons.search),

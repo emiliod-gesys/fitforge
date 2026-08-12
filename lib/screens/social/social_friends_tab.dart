@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/utils/player_level.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/social.dart';
 import '../../providers/app_providers.dart';
@@ -20,6 +21,7 @@ class SocialFriendsTab extends ConsumerWidget {
   final TextEditingController searchController;
   final FocusNode? searchFocusNode;
   final String query;
+  final bool isSearching;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onSearchClear;
   final int? friendsRank;
@@ -37,6 +39,7 @@ class SocialFriendsTab extends ConsumerWidget {
     required this.searchController,
     this.searchFocusNode,
     required this.query,
+    this.isSearching = false,
     required this.onSearchChanged,
     required this.onSearchClear,
     required this.friendsRank,
@@ -78,9 +81,52 @@ class SocialFriendsTab extends ConsumerWidget {
         ? 0
         : pending.where((f) => f.isIncoming(uid)).length;
 
+    final searchBar = SocialSearchBar(
+      hintText: l10n.searchFriendsHint,
+      controller: searchController,
+      focusNode: searchFocusNode,
+      showClear: searchController.text.isNotEmpty,
+      onChanged: onSearchChanged,
+      onClear: onSearchClear,
+    );
+    final searchResults = _buildSearchResults(
+      context: context,
+      l10n: l10n,
+      searchAsync: searchAsync,
+      uid: uid,
+      friendships: friendships,
+    );
+
+    if (isSearching) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: searchBar,
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: onRefresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: AppTokens.pagePaddingWithBottomInset(
+                  context,
+                  base: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                ),
+                children: [searchResults],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: AppTokens.pagePaddingWithBottomInset(
           context,
           base: const EdgeInsets.all(16),
@@ -137,65 +183,7 @@ class SocialFriendsTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          SocialSearchBar(
-            hintText: l10n.searchFriendsHint,
-            controller: searchController,
-            focusNode: searchFocusNode,
-            showClear: searchController.text.isNotEmpty,
-            onChanged: onSearchChanged,
-            onClear: onSearchClear,
-          ),
-          if (searchAsync != null) ...[
-            const SizedBox(height: 12),
-            searchAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: FitForgeLoadingIndicator(size: 32)),
-              ),
-              error: (e, _) => Text(
-                l10n.searchFailed('$e'),
-                style: const TextStyle(color: AppColors.error),
-              ),
-              data: (users) {
-                if (users.isEmpty) {
-                  return Text(
-                    l10n.noResults,
-                    style: const TextStyle(color: AppColors.textMuted),
-                  );
-                }
-                return Column(
-                  children: users.map((user) {
-                    final relation = _relationFor(user.id, uid, friendships);
-                    return FriendTile(
-                      friend: user,
-                      trailing: switch (relation) {
-                        _FriendRelation.friends => Text(
-                            l10n.friendStatusFriends,
-                            style: TextStyle(
-                              color: context.accentColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          ),
-                        _FriendRelation.pending => Text(
-                            l10n.friendStatusPending,
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        _FriendRelation.none => TextButton(
-                            onPressed: () => onSendRequest(user.id),
-                            child: Text(l10n.friendStatusAdd),
-                          ),
-                      },
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-          ],
+          searchBar,
           if (pending.isNotEmpty) ...[
             const SizedBox(height: 20),
             KeyedSubtree(
@@ -291,6 +279,73 @@ class SocialFriendsTab extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchResults({
+    required BuildContext context,
+    required AppLocalizations l10n,
+    required AsyncValue<List<FriendUser>>? searchAsync,
+    required String? uid,
+    required List<Friendship> friendships,
+  }) {
+    if (searchAsync == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          l10n.searchFriendsEmpty,
+          style: const TextStyle(color: AppColors.textMuted),
+        ),
+      );
+    }
+
+    return searchAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: FitForgeLoadingIndicator(size: 32)),
+      ),
+      error: (e, _) => Text(
+        l10n.searchFailed('$e'),
+        style: const TextStyle(color: AppColors.error),
+      ),
+      data: (users) {
+        if (users.isEmpty) {
+          return Text(
+            l10n.noResults,
+            style: const TextStyle(color: AppColors.textMuted),
+          );
+        }
+        return Column(
+          children: users.map((user) {
+            final relation = _relationFor(user.id, uid, friendships);
+            return FriendTile(
+              friend: user,
+              trailing: switch (relation) {
+                _FriendRelation.friends => Text(
+                    l10n.friendStatusFriends,
+                    style: TextStyle(
+                      color: context.accentColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                _FriendRelation.pending => Text(
+                    l10n.friendStatusPending,
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                _FriendRelation.none => TextButton(
+                    onPressed: () => onSendRequest(user.id),
+                    child: Text(l10n.friendStatusAdd),
+                  ),
+              },
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

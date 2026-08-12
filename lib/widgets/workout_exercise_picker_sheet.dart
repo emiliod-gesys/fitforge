@@ -103,6 +103,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
               ),
               const SizedBox(height: 8),
               TextField(
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.searchExercises,
                   prefixIcon: const Icon(Icons.search),

@@ -48,15 +48,21 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _searchFocusNode.addListener(_onSearchFocusChanged);
   }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
     _searchController.dispose();
     _searchFocusNode.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onSearchFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onSearchChanged(String value) {
@@ -70,6 +76,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
   void _onSearchClear() {
     _searchDebounce?.cancel();
     _searchController.clear();
+    _searchFocusNode.unfocus();
     setState(() => _query = '');
   }
 
@@ -186,6 +193,8 @@ class _SocialScreenState extends ConsumerState<SocialScreen> with SingleTickerPr
             searchController: _searchController,
             searchFocusNode: _searchFocusNode,
             query: _query,
+            isSearching: _searchFocusNode.hasFocus ||
+                _searchController.text.isNotEmpty,
             onSearchChanged: _onSearchChanged,
             onSearchClear: _onSearchClear,
             friendsRank: _userRank(rankAsync.valueOrNull),

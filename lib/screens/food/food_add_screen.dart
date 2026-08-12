@@ -342,6 +342,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     final l10n = context.l10n;
     final profile = ref.watch(profileProvider).value;
     final photoAllowed = profile?.canUseFoodPhotoAi ?? false;
+    final barcodeAllowed = profile?.canUseFoodBarcode ?? false;
     final summaryAsync = ref.watch(dailyNutritionProvider);
     final mealEaten = summaryAsync.valueOrNull?.eatenForMeal(widget.mealType).caloriesKcal ?? 0;
     final mealGoal = summaryAsync.valueOrNull?.mealCalorieGoal(widget.mealType) ?? 0;
@@ -373,15 +374,27 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                 child: _ModeTabs(
                   mode: _mode,
                   photoLocked: !photoAllowed,
+                  barcodeLocked: !barcodeAllowed,
                   onPhotoLockedTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
+                    );
+                  },
+                  onBarcodeLockedTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.featureGymratPlansOnly)),
                     );
                   },
                   onChanged: (m) {
                     if (m == FoodAddMode.photo && !photoAllowed) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
+                      );
+                      return;
+                    }
+                    if (m == FoodAddMode.barcode && !barcodeAllowed) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.featureGymratPlansOnly)),
                       );
                       return;
                     }
@@ -407,9 +420,15 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         onSelectCatalog: _openFromCatalog,
                         onSelectPackaged: (estimate) => _openDetail(estimate, FoodEntrySource.search),
                       ),
-                    FoodAddMode.barcode => FoodBarcodeScannerView(
-                        onDetected: _lookupBarcode,
-                      ),
+                    FoodAddMode.barcode => barcodeAllowed
+                        ? FoodBarcodeScannerView(
+                            onDetected: _lookupBarcode,
+                          )
+                        : _PhotoPane(
+                            locked: true,
+                            lockedMessage: l10n.featureGymratPlansOnly,
+                            onPickImage: (_) async {},
+                          ),
                     FoodAddMode.quick => _QuickAddPane(
                         controller: _quickController,
                         onSubmit: _quickAddWithAi,
@@ -490,6 +509,7 @@ class _SearchPane extends StatelessWidget {
       children: [
         TextField(
           controller: filterController,
+          textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: l10n.foodSearchHint,
             prefixIcon: const Icon(Icons.search),
@@ -506,6 +526,8 @@ class _SearchPane extends StatelessWidget {
                   ),
                 )
               : ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   children: [
                     if (showCatalogSection) ...[
                       Text(
@@ -1552,13 +1574,17 @@ class _PhotoPane extends StatelessWidget {
 class _ModeTabs extends StatelessWidget {
   final FoodAddMode mode;
   final bool photoLocked;
+  final bool barcodeLocked;
   final VoidCallback onPhotoLockedTap;
+  final VoidCallback onBarcodeLockedTap;
   final ValueChanged<FoodAddMode> onChanged;
 
   const _ModeTabs({
     required this.mode,
     required this.photoLocked,
+    required this.barcodeLocked,
     required this.onPhotoLockedTap,
+    required this.onBarcodeLockedTap,
     required this.onChanged,
   });
 
@@ -1569,7 +1595,7 @@ class _ModeTabs extends StatelessWidget {
       (FoodAddMode.search, Icons.search, l10n.foodModeSearch, false),
       (FoodAddMode.quick, Icons.bolt, l10n.foodModeQuick, false),
       (FoodAddMode.photo, Icons.photo_camera_outlined, l10n.foodModePhoto, photoLocked),
-      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode, false),
+      (FoodAddMode.barcode, Icons.qr_code_scanner, l10n.foodModeBarcode, barcodeLocked),
       (FoodAddMode.manual, Icons.edit_note, l10n.foodModeManual, false),
     ];
 
@@ -1586,7 +1612,11 @@ class _ModeTabs extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 if (locked) {
-                  onPhotoLockedTap();
+                  if (foodMode == FoodAddMode.photo) {
+                    onPhotoLockedTap();
+                  } else if (foodMode == FoodAddMode.barcode) {
+                    onBarcodeLockedTap();
+                  }
                   return;
                 }
                 onChanged(foodMode);

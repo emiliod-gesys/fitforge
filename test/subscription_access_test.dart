@@ -45,6 +45,12 @@ void main() {
 
       expect(profile.canUseProactiveAi, isTrue);
       expect(profile.canUseFoodPhotoAi, isFalse);
+      expect(profile.canUseFoodBarcode, isTrue);
+    });
+
+    test('free locks barcode scan', () {
+      final profile = _profile();
+      expect(profile.canUseFoodBarcode, isFalse);
     });
 
     test('gymrat pro includes all AI features', () {
@@ -52,6 +58,7 @@ void main() {
 
       expect(profile.canUseProactiveAi, isTrue);
       expect(profile.canUseFoodPhotoAi, isTrue);
+      expect(profile.canUseFoodBarcode, isTrue);
     });
   });
 }

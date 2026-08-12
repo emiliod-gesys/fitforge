@@ -7746,7 +7746,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPlanBenefitGymrat4.
   ///
   /// In es, this message translates to:
-  /// **'Color de acento personalizable'**
+  /// **'Código de barras + color de acento'**
   String get onboardingPlanBenefitGymrat4;
 
   /// No description provided for @onboardingPlanBenefitPro1.
@@ -7764,7 +7764,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPlanBenefitPro3.
   ///
   /// In es, this message translates to:
-  /// **'Foto de comida con IA'**
+  /// **'Foto de comida con IA + código de barras'**
   String get onboardingPlanBenefitPro3;
 
   /// No description provided for @onboardingPlanBenefitPro4.

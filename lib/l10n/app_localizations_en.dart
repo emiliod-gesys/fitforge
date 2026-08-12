@@ -4516,7 +4516,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPlanBenefitGymrat3 => 'Proactive AI during workouts';
 
   @override
-  String get onboardingPlanBenefitGymrat4 => 'Custom accent color';
+  String get onboardingPlanBenefitGymrat4 =>
+      'Barcode food scan + custom accent';
 
   @override
   String get onboardingPlanBenefitPro1 => '50 saved routines';
@@ -4525,7 +4526,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPlanBenefitPro2 => 'Unlimited Coach AI';
 
   @override
-  String get onboardingPlanBenefitPro3 => 'Food photo AI';
+  String get onboardingPlanBenefitPro3 => 'Food photo AI + barcode';
 
   @override
   String get onboardingPlanBenefitPro4 => 'Trainer mode (students)';

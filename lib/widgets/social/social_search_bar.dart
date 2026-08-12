@@ -31,6 +31,8 @@ class SocialSearchBar extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         onChanged: onChanged,
+        textInputAction: TextInputAction.search,
+        scrollPadding: const EdgeInsets.only(bottom: 160),
         style: const TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,

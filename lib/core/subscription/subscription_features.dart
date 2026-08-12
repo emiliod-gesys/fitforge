@@ -8,6 +8,9 @@ extension SubscriptionFeatures on SubscriptionTier {
   /// Foto de comida con IA (visión).
   bool get hasFoodPhotoAi => this == SubscriptionTier.gymratPro;
 
+  /// Registro de comida por código de barras.
+  bool get hasFoodBarcode => !isFree;
+
   /// Color de acento personalizable.
   bool get hasCustomAccent => !isFree;
 
@@ -44,4 +47,7 @@ extension ProfileSubscriptionAccess on UserProfile {
   bool get canUseFoodPhotoAi =>
       subscriptionTier.hasFoodPhotoAi ||
       (subscriptionTier.isFree && hasUserOwnedApiKey);
+
+  /// Código de barras (Gymrat / Gymrat Pro).
+  bool get canUseFoodBarcode => subscriptionTier.hasFoodBarcode;
 }

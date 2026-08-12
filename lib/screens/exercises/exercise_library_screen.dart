@@ -53,6 +53,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextField(
+                  textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     hintText: l10n.searchExercises,
                     prefixIcon: const Icon(Icons.search),
@@ -127,6 +128,8 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                     ),
                     Expanded(
                       child: ListView.builder(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.all(16),
                         itemCount: filtered.length,
                         itemBuilder: (_, i) => ExerciseCard(
