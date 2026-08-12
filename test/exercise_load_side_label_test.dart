@@ -214,5 +214,52 @@ void main() {
         isTrue,
       );
     });
+
+    test('band reverse fly defaults to per-arm even if catalog flag is false',
+        () {
+      const bandFly = Exercise(
+        catalogId: 'ext_0993',
+        name: 'band reverse fly',
+        equipment: ['Banda'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.singleLoad,
+      );
+      const catalog = [bandFly];
+
+      expect(
+        ExerciseLoad.supportsPerArmToggle(bandFly.id, catalog, bandFly.name),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: bandFly.id,
+          catalog: catalog,
+          exerciseName: bandFly.name,
+        ),
+        isTrue,
+      );
+    });
+
+    test('dual_load cloud exercises default to per-arm', () {
+      const dbFly = Exercise(
+        catalogId: 'ext_0383',
+        name: 'dumbbell reverse fly',
+        equipment: ['Mancuernas'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.dualLoad,
+      );
+      const catalog = [dbFly];
+
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: dbFly.id,
+          catalog: catalog,
+          exerciseName: dbFly.name,
+        ),
+        isTrue,
+      );
+    });
   });
 }

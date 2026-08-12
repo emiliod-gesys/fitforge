@@ -129,9 +129,16 @@ abstract final class ExerciseLoad {
       if (!_singleDumbbellBothHands(n)) return true;
     }
 
+    if (exercise != null &&
+        exercise.equipment.any(_isBandEquipment) &&
+        (_isPerArmBand(_normalize(exerciseName)) || exercise.unilateral)) {
+      return true;
+    }
+
     final n = _normalize(exerciseName);
     if (_usesDumbbell(n) && !_singleDumbbellBothHands(n)) return true;
     if (_isPerArmCable(n)) return true;
+    if (_isPerArmBand(n)) return true;
     return false;
   }
 
@@ -180,15 +187,32 @@ abstract final class ExerciseLoad {
     final exercise = _findInCatalog(exerciseId, catalog);
     final catalogPerArm = perArmWeightForExerciseId(exerciseId, catalog);
 
-    // Unilateral con mancuerna/kettlebell o polea: el peso registrado es del
-    // lado activo, incluso si el nombre corto no dice «single arm».
+    // dual_load = dos implementos (p. ej. mancuernas): el peso es por lado.
+    if (exercise != null &&
+        exercise.loadMode == ExerciseLoadMode.dualLoad &&
+        catalogPerArm != true) {
+      return true;
+    }
+
+    // Unilateral con mancuerna/kettlebell, polea o banda: el peso registrado es
+    // del lado activo, incluso si el nombre corto no dice «single arm».
     if (exercise != null &&
         exercise.unilateral &&
         exercise.equipment.any(
           (equipment) =>
-              _isDumbbellEquipment(equipment) || _isCableEquipment(equipment),
+              _isDumbbellEquipment(equipment) ||
+              _isCableEquipment(equipment) ||
+              _isBandEquipment(equipment),
         ) &&
         catalogPerArm != true) {
+      return true;
+    }
+
+    // Bandas de aislamiento bilateral (p. ej. reverse fly): carga por lado.
+    if (exercise != null &&
+        catalogPerArm != true &&
+        exercise.equipment.any(_isBandEquipment) &&
+        _isPerArmBand(_normalize(exerciseName))) {
       return true;
     }
 
@@ -577,6 +601,59 @@ abstract final class ExerciseLoad {
   static bool _isCableEquipment(String equipment) {
     final n = _normalize(equipment);
     return n.contains('polea') || n.contains('cable') || n.contains('pulley');
+  }
+
+  static bool _isBandEquipment(String equipment) {
+    final n = _normalize(equipment);
+    return n.contains('banda') ||
+        n.contains('band') ||
+        n.contains('resistance band');
+  }
+
+  /// Bandas bilaterales de aislamiento (aperturas, elevaciones, etc.): carga por lado.
+  static bool _isPerArmBand(String n) {
+    if (!_usesBand(n) && !n.contains('banda')) return false;
+    if (_hasAny(n, [
+      'pulldown',
+      'pull-up',
+      'pull up',
+      'pull through',
+      'pallof',
+      'assisted',
+      'deadlift',
+      'squat',
+      'crunch',
+      'hip thrust',
+      'v-up',
+      'sit-up',
+      'sit up',
+    ])) {
+      return false;
+    }
+    return _hasAny(n, [
+      'fly',
+      'apertura',
+      'raise',
+      'elevacion',
+      'shrug',
+      'encogimiento',
+      'press',
+      'curl',
+      'kickback',
+      'patada',
+      'row',
+      'remo',
+      'y-raise',
+      'wrist',
+      'extension',
+      'lateral',
+      'reverse fly',
+      'rear delt',
+    ]);
+  }
+
+  static bool _usesBand(String n) {
+    return n.contains('band') || n.contains('banda');
   }
 
   static bool _inferBodyweightByName(String name) {
