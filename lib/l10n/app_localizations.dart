@@ -3512,6 +3512,90 @@ abstract class AppLocalizations {
   /// **'Iniciando entrenamiento…'**
   String get startingWorkout;
 
+  /// No description provided for @logPastWorkout.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar después'**
+  String get logPastWorkout;
+
+  /// No description provided for @logPastWorkoutSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Series y duración de un entreno ya hecho'**
+  String get logPastWorkoutSubtitle;
+
+  /// No description provided for @logPastWorkoutTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar entreno'**
+  String get logPastWorkoutTitle;
+
+  /// No description provided for @logPastFreeWorkout.
+  ///
+  /// In es, this message translates to:
+  /// **'Entreno libre (pasado)'**
+  String get logPastFreeWorkout;
+
+  /// No description provided for @logPastDurationLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Duración (min)'**
+  String get logPastDurationLabel;
+
+  /// No description provided for @logPastDateLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get logPastDateLabel;
+
+  /// No description provided for @logPastSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar entreno'**
+  String get logPastSave;
+
+  /// No description provided for @logPastNeedCompletedSets.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca al menos una serie como completada'**
+  String get logPastNeedCompletedSets;
+
+  /// No description provided for @logPastDurationInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'La duración debe estar entre {min} y {max} min'**
+  String logPastDurationInvalid(int min, int max);
+
+  /// No description provided for @logPastActiveWorkoutExists.
+  ///
+  /// In es, this message translates to:
+  /// **'Finaliza el entreno en curso antes de registrar uno pasado'**
+  String get logPastActiveWorkoutExists;
+
+  /// No description provided for @logPastSaveFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar: {message}'**
+  String logPastSaveFailed(String message);
+
+  /// No description provided for @logPastSaving.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardando entreno…'**
+  String get logPastSaving;
+
+  /// No description provided for @logPastAddSet.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir serie'**
+  String get logPastAddSet;
+
+  /// No description provided for @logPastNoGymRoutines.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay rutinas de gym para registrar'**
+  String get logPastNoGymRoutines;
+
   /// No description provided for @startWorkoutError.
   ///
   /// In es, this message translates to:

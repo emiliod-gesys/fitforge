@@ -1957,6 +1957,55 @@ class AppLocalizationsEs extends AppLocalizations {
   String get startingWorkout => 'Iniciando entrenamiento…';
 
   @override
+  String get logPastWorkout => 'Registrar después';
+
+  @override
+  String get logPastWorkoutSubtitle =>
+      'Series y duración de un entreno ya hecho';
+
+  @override
+  String get logPastWorkoutTitle => 'Registrar entreno';
+
+  @override
+  String get logPastFreeWorkout => 'Entreno libre (pasado)';
+
+  @override
+  String get logPastDurationLabel => 'Duración (min)';
+
+  @override
+  String get logPastDateLabel => 'Fecha';
+
+  @override
+  String get logPastSave => 'Guardar entreno';
+
+  @override
+  String get logPastNeedCompletedSets =>
+      'Marca al menos una serie como completada';
+
+  @override
+  String logPastDurationInvalid(int min, int max) {
+    return 'La duración debe estar entre $min y $max min';
+  }
+
+  @override
+  String get logPastActiveWorkoutExists =>
+      'Finaliza el entreno en curso antes de registrar uno pasado';
+
+  @override
+  String logPastSaveFailed(String message) {
+    return 'No se pudo guardar: $message';
+  }
+
+  @override
+  String get logPastSaving => 'Guardando entreno…';
+
+  @override
+  String get logPastAddSet => 'Añadir serie';
+
+  @override
+  String get logPastNoGymRoutines => 'No hay rutinas de gym para registrar';
+
+  @override
   String startWorkoutError(String message) {
     return 'Error al iniciar entrenamiento: $message';
   }

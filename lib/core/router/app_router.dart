@@ -28,6 +28,7 @@ import '../../screens/training/training_hub_screen.dart';
 import '../../screens/trainer/students_screen.dart';
 import '../../screens/trainer/student_detail_screen.dart';
 import '../../screens/workouts/active_workout_screen.dart';
+import '../../screens/workouts/log_past_workout_screen.dart';
 import '../../screens/workouts/workout_summary_screen.dart';
 import '../../screens/workouts/workout_history_screen.dart';
 import '../../widgets/profile_gate_listener.dart';
@@ -172,6 +173,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/workout/active',
         builder: (_, __) => const ActiveWorkoutScreen(),
+      ),
+      GoRoute(
+        path: '/workout/log-past',
+        builder: (_, state) {
+          final extra = state.extra;
+          if (extra is! LogPastWorkoutArgs) {
+            return const SizedBox.shrink();
+          }
+          return LogPastWorkoutScreen(args: extra);
+        },
       ),
       GoRoute(
         path: '/workout/summary',

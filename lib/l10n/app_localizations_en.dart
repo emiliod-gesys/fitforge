@@ -1937,6 +1937,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startingWorkout => 'Starting workout…';
 
   @override
+  String get logPastWorkout => 'Log past workout';
+
+  @override
+  String get logPastWorkoutSubtitle =>
+      'Sets and duration for a workout you already did';
+
+  @override
+  String get logPastWorkoutTitle => 'Log workout';
+
+  @override
+  String get logPastFreeWorkout => 'Free workout (past)';
+
+  @override
+  String get logPastDurationLabel => 'Duration (min)';
+
+  @override
+  String get logPastDateLabel => 'Date';
+
+  @override
+  String get logPastSave => 'Save workout';
+
+  @override
+  String get logPastNeedCompletedSets => 'Mark at least one set as completed';
+
+  @override
+  String logPastDurationInvalid(int min, int max) {
+    return 'Duration must be between $min and $max min';
+  }
+
+  @override
+  String get logPastActiveWorkoutExists =>
+      'Finish your active workout before logging a past one';
+
+  @override
+  String logPastSaveFailed(String message) {
+    return 'Could not save: $message';
+  }
+
+  @override
+  String get logPastSaving => 'Saving workout…';
+
+  @override
+  String get logPastAddSet => 'Add set';
+
+  @override
+  String get logPastNoGymRoutines => 'No gym routines to log';
+
+  @override
   String startWorkoutError(String message) {
     return 'Could not start workout: $message';
   }

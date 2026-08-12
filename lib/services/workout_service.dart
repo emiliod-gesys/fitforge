@@ -585,6 +585,204 @@ class WorkoutService {
     return workout;
   }
 
+  /// Registers a workout already done (sets + duration), without a live session.
+  ///
+  /// Refuses if there is an active workout. Inserts exercises/sets then completes
+  /// with backdated [startedAt]/[completedAt] so validation triggers run.
+  Future<Workout> logPastWorkout({
+    required String name,
+    String? routineId,
+    required DateTime completedAt,
+    required int durationMinutes,
+    required List<WorkoutExercise> exercises,
+    required double totalVolume,
+    int? activeCaloriesKcal,
+  }) async {
+    if (durationMinutes < WorkoutValidator.minDurationMinutesReject ||
+        durationMinutes > WorkoutValidator.maxDurationMinutesReject) {
+      throw ArgumentError.value(
+        durationMinutes,
+        'durationMinutes',
+        'must be between ${WorkoutValidator.minDurationMinutesReject} and ${WorkoutValidator.maxDurationMinutesReject}',
+      );
+    }
+
+    final completedSets = exercises.expand((e) => e.sets).where((s) => s.completed);
+    if (completedSets.isEmpty) {
+      throw StateError('no_completed_sets');
+    }
+
+    final active = await getActiveWorkout();
+    if (active != null) {
+      throw StateError('active_workout_exists');
+    }
+
+    final userId = SupabaseService.currentUser!.id;
+    final workoutId = _uuid.v4();
+    final completedAtUtc = completedAt.toUtc();
+    final startedAt = completedAtUtc.subtract(Duration(minutes: durationMinutes));
+    final prepared = _withClientIds(exercises);
+
+    final offline = _offline;
+    if (offline != null) {
+      final withIds = offline.assignClientIds(
+        Workout(
+          id: workoutId,
+          userId: userId,
+          routineId: routineId,
+          name: name,
+          startedAt: startedAt,
+          exercises: prepared,
+        ),
+      );
+      await offline.persistActiveWorkout(withIds, pendingSync: true);
+      await offline.runRemoteOrQueue(
+        () async {
+          await _insertPastWorkoutRemote(
+            workoutId: withIds.id,
+            userId: userId,
+            routineId: routineId,
+            name: name,
+            startedAt: startedAt,
+            exercises: withIds.exercises,
+          );
+        },
+        fallbackType: SyncOperationType.startWorkout,
+        workoutId: withIds.id,
+        payload: {
+          'workout': WorkoutLocalSerializer.toJson(withIds, pendingSync: true),
+        },
+        occurredAt: startedAt,
+      );
+
+      try {
+        final validation = await completeWorkout(
+          withIds.id,
+          durationMinutes: durationMinutes,
+          totalVolume: totalVolume,
+          activeCaloriesKcal: activeCaloriesKcal,
+          completedAt: completedAtUtc,
+          startedAt: startedAt,
+        );
+        return Workout(
+          id: withIds.id,
+          userId: userId,
+          routineId: routineId,
+          name: name,
+          startedAt: startedAt,
+          completedAt: completedAtUtc,
+          durationMinutes: durationMinutes,
+          totalVolume: totalVolume,
+          activeCaloriesKcal: activeCaloriesKcal,
+          exercises: withIds.exercises,
+          validationStatus: validation?.validation.status,
+          validationReasons: validation?.validation.reasons ?? const [],
+        );
+      } catch (e) {
+        await cancelWorkout(withIds.id);
+        rethrow;
+      }
+    }
+
+    try {
+      await _insertPastWorkoutRemote(
+        workoutId: workoutId,
+        userId: userId,
+        routineId: routineId,
+        name: name,
+        startedAt: startedAt,
+        exercises: prepared,
+      );
+      final validation = await _remoteCompleteWorkout(
+        workoutId,
+        completedAt: completedAtUtc,
+        durationMinutes: durationMinutes,
+        totalVolume: totalVolume,
+        activeCaloriesKcal: activeCaloriesKcal,
+        startedAt: startedAt,
+      );
+      return Workout(
+        id: workoutId,
+        userId: userId,
+        routineId: routineId,
+        name: name,
+        startedAt: startedAt,
+        completedAt: completedAtUtc,
+        durationMinutes: durationMinutes,
+        totalVolume: totalVolume,
+        activeCaloriesKcal: activeCaloriesKcal,
+        exercises: prepared,
+        validationStatus: validation?.validation.status,
+        validationReasons: validation?.validation.reasons ?? const [],
+      );
+    } catch (e) {
+      try {
+        await _client.from('workouts').delete().eq('id', workoutId);
+      } catch (_) {}
+      rethrow;
+    }
+  }
+
+  Future<void> _insertPastWorkoutRemote({
+    required String workoutId,
+    required String userId,
+    String? routineId,
+    required String name,
+    required DateTime startedAt,
+    required List<WorkoutExercise> exercises,
+  }) async {
+    await _client.from('workouts').insert({
+      'id': workoutId,
+      'user_id': userId,
+      'routine_id': routineId,
+      'name': name,
+      'started_at': startedAt.toIso8601String(),
+    });
+    for (final ex in exercises) {
+      await _addExerciseToWorkout(workoutId, ex);
+    }
+  }
+
+  List<WorkoutExercise> _withClientIds(List<WorkoutExercise> exercises) {
+    return exercises
+        .map(
+          (ex) => WorkoutExercise(
+            id: ex.id.isEmpty ? _uuid.v4() : ex.id,
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            imageUrl: ex.imageUrl,
+            orderIndex: ex.orderIndex,
+            notes: ex.notes,
+            sets: ex.sets
+                .map(
+                  (s) => WorkoutSet(
+                    id: s.id.isEmpty ? _uuid.v4() : s.id,
+                    setNumber: s.setNumber,
+                    weight: s.weight,
+                    reps: s.reps,
+                    rir: s.rir,
+                    completed: s.completed,
+                    restTaken: s.restTaken,
+                    durationSeconds: s.durationSeconds,
+                    distanceMeters: s.distanceMeters,
+                    inclinePercent: s.inclinePercent,
+                    steps: s.steps,
+                    loggingType: s.loggingType,
+                  ),
+                )
+                .toList(),
+          ),
+        )
+        .toList();
+  }
+
+  /// Seeds client IDs and previous-set suggestions for the past-log UI.
+  Future<List<WorkoutExercise>> preparePastLogExercises(
+    List<WorkoutExercise> exercises,
+  ) {
+    return _applyPreviousSetSuggestions(_withClientIds(exercises));
+  }
+
   Future<List<WorkoutExercise>> _applyPreviousSetSuggestions(
     List<WorkoutExercise> exercises, {
     String? excludeWorkoutId,
@@ -1036,16 +1234,40 @@ class WorkoutService {
     int durationMinutes = 0,
     double totalVolume = 0,
     int? activeCaloriesKcal,
+    DateTime? completedAt,
+    DateTime? startedAt,
   }) async {
-    final completedAt = SupabaseDateTime.nowUtc;
+    final resolvedCompletedAt = (completedAt ?? SupabaseDateTime.nowUtc).toUtc();
     final offline = _offline;
 
     if (offline != null) {
       final local = await offline.localWorkout(workoutId);
       if (local != null) {
+        final withStart = startedAt == null
+            ? local
+            : Workout(
+                id: local.id,
+                userId: local.userId,
+                routineId: local.routineId,
+                routineName: local.routineName,
+                name: local.name,
+                startedAt: startedAt.toUtc(),
+                completedAt: local.completedAt,
+                durationMinutes: local.durationMinutes,
+                activeCaloriesKcal: local.activeCaloriesKcal,
+                exercises: local.exercises,
+                notes: local.notes,
+                totalVolume: local.totalVolume,
+                runnerSurface: local.runnerSurface,
+                runnerRoute: local.runnerRoute,
+                runnerSplits: local.runnerSplits,
+                runnerAvgPaceSecPerKm: local.runnerAvgPaceSecPerKm,
+                runnerElevationGainMeters: local.runnerElevationGainMeters,
+                runnerElevationLossMeters: local.runnerElevationLossMeters,
+              );
         await offline.completeLocal(
-          workout: local,
-          completedAt: completedAt,
+          workout: withStart,
+          completedAt: resolvedCompletedAt,
           durationMinutes: durationMinutes,
           totalVolume: totalVolume,
           activeCaloriesKcal: activeCaloriesKcal,
@@ -1056,10 +1278,11 @@ class WorkoutService {
     try {
       final result = await _remoteCompleteWorkout(
         workoutId,
-        completedAt: completedAt,
+        completedAt: resolvedCompletedAt,
         durationMinutes: durationMinutes,
         totalVolume: totalVolume,
         activeCaloriesKcal: activeCaloriesKcal,
+        startedAt: startedAt?.toUtc(),
       );
       if (offline != null) {
         await offline.markWorkoutSynced(workoutId);
@@ -1070,7 +1293,7 @@ class WorkoutService {
       if (offline != null && isConnectionError(e)) {
         await offline.enqueueComplete(
           workoutId: workoutId,
-          completedAt: completedAt,
+          completedAt: resolvedCompletedAt,
           durationMinutes: durationMinutes,
           totalVolume: totalVolume,
           activeCaloriesKcal: activeCaloriesKcal,
@@ -1088,10 +1311,12 @@ class WorkoutService {
     int durationMinutes = 0,
     double totalVolume = 0,
     int? activeCaloriesKcal,
+    DateTime? startedAt,
   }) async {
     final row = await _client
         .from('workouts')
         .update({
+          if (startedAt != null) 'started_at': startedAt.toIso8601String(),
           'completed_at': completedAt.toIso8601String(),
           'duration_minutes': durationMinutes,
           'total_volume': totalVolume,
