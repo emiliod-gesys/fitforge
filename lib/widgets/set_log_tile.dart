@@ -60,6 +60,15 @@ class _SetLogTileState extends State<SetLogTile> {
 
   bool get _fieldsEnabled => !widget.set.completed || _editing;
 
+  bool get _weightIsOptional =>
+      widget.weightOptional == true ||
+      widget.loadMode == ExerciseLoadMode.bodyweight ||
+      widget.loadMode == ExerciseLoadMode.assistedBodyweight ||
+      ExerciseLoad.isAssistedExercise(
+        widget.exerciseName,
+        loadMode: widget.loadMode,
+      );
+
   bool get _isLoadedDistance => widget.loadMode == ExerciseLoadMode.loadedDistance;
 
   @override
@@ -142,7 +151,7 @@ class _SetLogTileState extends State<SetLogTile> {
   double? _parsedWeightKg() {
     final parsed = double.tryParse(_weightController.text.replaceAll(',', '.'));
     if (parsed == null) return null;
-    if (widget.weightOptional == true) {
+    if (_weightIsOptional) {
       if (parsed < 0) return null;
       if (parsed == 0) return 0;
     } else if (parsed <= 0) {
@@ -160,14 +169,14 @@ class _SetLogTileState extends State<SetLogTile> {
   WorkoutSet _buildSet({bool? completed}) {
     if (_isLoadedDistance) {
       return widget.set.copyWith(
-        weight: _parsedWeightKg() ?? (widget.weightOptional == true ? 0.0 : null),
+        weight: _parsedWeightKg() ?? (_weightIsOptional ? 0.0 : null),
         distanceMeters: _parsedDistanceMeters(),
         reps: 0,
         completed: completed ?? widget.set.completed,
       );
     }
     return widget.set.copyWith(
-      weight: _parsedWeightKg() ?? (widget.weightOptional == true ? 0.0 : null),
+      weight: _parsedWeightKg() ?? (_weightIsOptional ? 0.0 : null),
       reps: int.tryParse(_repsController.text) ?? widget.set.reps,
       completed: completed ?? widget.set.completed,
     );
@@ -175,7 +184,7 @@ class _SetLogTileState extends State<SetLogTile> {
 
   bool _validateForComplete() {
     final l10n = context.l10n;
-    if (widget.weightOptional != true && _parsedWeightKg() == null) {
+    if (!_weightIsOptional && _parsedWeightKg() == null) {
       widget.onValidationError?.call(l10n.weightRequired);
       return false;
     }
@@ -244,7 +253,7 @@ class _SetLogTileState extends State<SetLogTile> {
       unitLabel,
       widget.exerciseName,
       perArmWeight: widget.perArmWeight,
-      weightOptional: widget.weightOptional,
+      weightOptional: _weightIsOptional,
       loadMode: widget.loadMode,
       additionalSuffix: l10n.weightAdditionalSuffix,
       perArmSuffix: l10n.weightPerArmSuffix,
@@ -267,7 +276,7 @@ class _SetLogTileState extends State<SetLogTile> {
           )
         : null;
     final reserveEffectiveSlot = widget.loadMode == ExerciseLoadMode.bodyweight ||
-        widget.weightOptional == true;
+        _weightIsOptional;
     final isDone = widget.set.completed && !_editing;
     final isActive = _fieldsEnabled && !isDone;
 

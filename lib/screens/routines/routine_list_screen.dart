@@ -16,6 +16,7 @@ import '../../widgets/ff/ff_empty_state.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
+import '../../widgets/train/train_start_sheet.dart';
 import '../../core/theme/app_accent.dart';
 
 abstract final class RoutineListActions {
@@ -512,7 +513,7 @@ class _RoutineCard extends ConsumerWidget {
                   Tooltip(
                     message: l10n.startWorkout,
                     child: FilledButton(
-                      onPressed: () => startWorkoutFromRoutine(context, ref, routine),
+                      onPressed: () => showRoutineStartChoices(context, ref, routine),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(44, 40),
                         padding: const EdgeInsets.symmetric(horizontal: 12),

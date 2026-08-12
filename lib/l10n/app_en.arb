@@ -728,6 +728,7 @@
   "@logPastSaveFailed": { "placeholders": { "message": {"type": "String"} } },
   "logPastSaving": "Saving workout…",
   "logPastAddSet": "Add set",
+  "logPastMarkAllDone": "Mark entire routine as done",
   "logPastNoGymRoutines": "No gym routines to log",
   "startWorkoutError": "Could not start workout: {message}",
   "freeWorkout": "Free workout",

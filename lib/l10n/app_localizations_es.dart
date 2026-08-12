@@ -2003,6 +2003,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get logPastAddSet => 'Añadir serie';
 
   @override
+  String get logPastMarkAllDone => 'Marcar toda la rutina como hecha';
+
+  @override
   String get logPastNoGymRoutines => 'No hay rutinas de gym para registrar';
 
   @override

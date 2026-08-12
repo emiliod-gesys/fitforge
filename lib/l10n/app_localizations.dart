@@ -3590,6 +3590,12 @@ abstract class AppLocalizations {
   /// **'Añadir serie'**
   String get logPastAddSet;
 
+  /// No description provided for @logPastMarkAllDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar toda la rutina como hecha'**
+  String get logPastMarkAllDone;
+
   /// No description provided for @logPastNoGymRoutines.
   ///
   /// In es, this message translates to:

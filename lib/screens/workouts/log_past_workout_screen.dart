@@ -10,6 +10,7 @@ import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/workout/workout_validation.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
+import '../../models/exercise.dart';
 import '../../models/exercise_logging.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
@@ -159,6 +160,81 @@ class _LogPastWorkoutScreenState extends ConsumerState<LogPastWorkoutScreen> {
         notes: exercise.notes,
         sets: sets,
       ),
+    );
+  }
+
+  void _markAllCompleted() {
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+    setState(() {
+      _exercises = [
+        for (final exercise in _exercises)
+          WorkoutExercise(
+            id: exercise.id,
+            exerciseId: exercise.exerciseId,
+            exerciseName: exercise.exerciseName,
+            imageUrl: exercise.imageUrl,
+            orderIndex: exercise.orderIndex,
+            notes: exercise.notes,
+            sets: [
+              for (final set in exercise.sets)
+                _completedSetPreservingValues(set, exercise, catalog),
+            ],
+          ),
+      ];
+    });
+  }
+
+  WorkoutSet _completedSetPreservingValues(
+    WorkoutSet set,
+    WorkoutExercise exercise,
+    List<Exercise> catalog,
+  ) {
+    if (set.completed) return set;
+
+    final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
+          exercise.exerciseId,
+          catalog,
+          exerciseName: exercise.exerciseName,
+        ) ??
+        false;
+    final isCardio = set.isCardio ||
+        ExerciseLoggingResolver.isCardioExercise(
+          exerciseId: exercise.exerciseId,
+          exerciseName: exercise.exerciseName,
+          sets: exercise.sets,
+          catalog: catalog,
+        );
+
+    if (isCardio) {
+      return WorkoutSet(
+        id: set.id,
+        setNumber: set.setNumber,
+        weight: set.weight,
+        reps: set.reps,
+        rir: set.rir,
+        completed: true,
+        restTaken: set.restTaken,
+        durationSeconds: set.durationSeconds,
+        distanceMeters: set.distanceMeters,
+        inclinePercent: set.inclinePercent,
+        steps: set.steps,
+        loggingType: set.loggingType,
+      );
+    }
+
+    return WorkoutSet(
+      id: set.id,
+      setNumber: set.setNumber,
+      weight: set.weight ?? (weightOptional ? 0.0 : set.weight),
+      reps: set.reps,
+      rir: set.rir,
+      completed: true,
+      restTaken: set.restTaken,
+      durationSeconds: set.durationSeconds,
+      distanceMeters: set.distanceMeters,
+      inclinePercent: set.inclinePercent,
+      steps: set.steps,
+      loggingType: set.loggingType,
     );
   }
 
@@ -402,6 +478,17 @@ class _LogPastWorkoutScreenState extends ConsumerState<LogPastWorkoutScreen> {
               ),
             ),
           ),
+          if (_exercises.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _saving ||
+                      _exercises.every((e) => e.sets.every((s) => s.completed))
+                  ? null
+                  : _markAllCompleted,
+              icon: const Icon(Icons.done_all),
+              label: Text(l10n.logPastMarkAllDone),
+            ),
+          ],
           const SizedBox(height: 12),
           ...List.generate(_exercises.length, (index) {
             final exercise = _exercises[index];
@@ -458,6 +545,12 @@ class _LogPastWorkoutScreenState extends ConsumerState<LogPastWorkoutScreen> {
                               unitSystem: unitSystem,
                               exerciseName: exercise.exerciseName,
                               loadMode: loadMode,
+                              weightOptional: ExerciseLoad.weightOptionalForExerciseId(
+                                    exercise.exerciseId,
+                                    catalog,
+                                    exerciseName: exercise.exerciseName,
+                                  ) ??
+                                  false,
                               bodyWeightKg: profile?.bodyWeight,
                               onChanged: (updated) => _updateSet(index, updated),
                               onDelete: () => _deleteSet(index, set.id),

@@ -15,6 +15,87 @@ import '../../widgets/fitforge_loading_indicator.dart';
 bool _isGymRoutine(Routine routine) =>
     !routine.isHyroxSystem && !routine.isRunnerSystem;
 
+Future<void> showRoutineStartChoices(
+  BuildContext context,
+  WidgetRef ref,
+  Routine routine,
+) async {
+  if (routine.isRunnerSystem) {
+    await startRunnerWorkoutFromRoutine(context, ref, routine);
+    return;
+  }
+  if (routine.isHyroxSystem) {
+    await startWorkoutFromRoutine(context, ref, routine);
+    return;
+  }
+
+  final l10n = context.l10n;
+  final parentContext = context;
+
+  await showModalBottomSheet<void>(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  routine.name,
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.play_arrow_rounded, color: context.accentColor),
+              title: Text(l10n.startWorkout),
+              onTap: () async {
+                Navigator.pop(ctx);
+                if (!parentContext.mounted) return;
+                await startWorkoutFromRoutine(parentContext, ref, routine);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history, color: context.accentColor),
+              title: Text(l10n.logPastWorkout),
+              subtitle: Text(l10n.logPastWorkoutSubtitle),
+              onTap: () async {
+                Navigator.pop(ctx);
+                if (!parentContext.mounted) return;
+                await openLogPastWorkout(
+                  parentContext,
+                  ref,
+                  name: routine.name,
+                  routineId: routine.id,
+                  exercises: workoutExercisesFromRoutine(routine),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Future<void> showTrainStartSheet(
   BuildContext context,
   WidgetRef ref, {

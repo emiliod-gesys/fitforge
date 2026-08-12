@@ -45,11 +45,20 @@ abstract final class ExerciseLoad {
     String? exerciseName,
   }) {
     final exercise = _findInCatalog(exerciseId, catalog);
-    if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
-      return exercise.weightOptional || exercise.loadMode.weightOptional;
-    }
     final name = exerciseName ?? exercise?.name ?? exerciseId;
-    if (_inferBodyweightByName(name)) return true;
+
+    // Nombre / asistido tienen prioridad: el catálogo a veces marca bodyweight como single_load.
+    if (_inferBodyweightByName(name) || isAssistedExercise(name)) return true;
+
+    if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
+      if (exercise.weightOptional || exercise.loadMode.weightOptional) return true;
+      if (_isBodyweightEquipmentOnly(exercise.equipment)) return true;
+      return false;
+    }
+
+    if (exercise != null && _isBodyweightEquipmentOnly(exercise.equipment)) {
+      return true;
+    }
     return null;
   }
 
@@ -573,6 +582,15 @@ abstract final class ExerciseLoad {
   static bool _inferBodyweightByName(String name) {
     final n = _normalize(name);
     if (isAssistedExercise(n)) return true;
+    if (_hasAny(n, [
+      'peso corporal',
+      'bodyweight',
+      'body weight',
+      'sin peso',
+      'sin carga',
+    ])) {
+      return true;
+    }
     return _hasAny(n, [
           'pull up',
           'pull-up',
@@ -597,14 +615,107 @@ abstract final class ExerciseLoad {
           'plank',
           'l-sit',
           'hanging leg raise',
+          'hanging knee',
+          'elevacion de rodillas',
           'inverted row',
           'remo invertido',
           'australian pull',
+          'burpee',
+          'burpees',
+          'mountain climber',
+          'mountain climbers',
+          'escalador',
+          'escaladores',
+          'jumping jack',
+          'jumping jacks',
+          'saltos de tijera',
+          'hollow',
+          'bird dog',
+          'superman',
+          'wall sit',
+          'sentadilla en pared',
+          'air squat',
+          'air squats',
+          'sentadilla libre',
+          'sentadilla sin peso',
+          'glute bridge',
+          'glute bridges',
+          'puente de gluteos',
+          'puente de glúteos',
+          'hip thrust sin',
+          'pike push',
+          'handstand',
+          'pistol squat',
+          'nordic',
+          'sit-up',
+          'sit up',
+          'situp',
+          'situps',
+          'crunch',
+          'crunches',
+          'abdominal',
+          'dead bug',
+          'v-up',
+          'jackknife',
+          'russian twist',
+          'toe touch',
+          'leg raise',
+          'elevacion de piernas',
+          'dominadas',
+          'flexiones',
+          'planks',
+          'planchas',
         ]) ||
         (_hasWord(n, 'dip') &&
             !_hasAny(n, ['machine', 'maquina', 'máquina', 'cable', 'polea'])) ||
         (_hasWord(n, 'fondos') &&
             !_hasAny(n, ['maquina', 'máquina', 'machine']));
+  }
+
+  /// Equipo solo corporal / ninguno (sin barra, mancuernas, máquina, etc.).
+  static bool _isBodyweightEquipmentOnly(List<String> equipment) {
+    if (equipment.isEmpty) return false;
+    const weightedHints = [
+      'barbell',
+      'barra',
+      'dumbbell',
+      'mancuerna',
+      'kettlebell',
+      'pesa rusa',
+      'machine',
+      'maquina',
+      'cable',
+      'polea',
+      'pulley',
+      'smith',
+      'band',
+      'banda',
+      'ez',
+      'trap',
+      'medicine',
+      'balon',
+      'landmine',
+      'sled',
+      'trineo',
+    ];
+    for (final item in equipment) {
+      final n = _normalize(item);
+      if (weightedHints.any(n.contains)) return false;
+    }
+    return equipment.every((item) {
+      final n = _normalize(item);
+      return n.isEmpty ||
+          n.contains('body') ||
+          n.contains('peso corporal') ||
+          n.contains('bodyweight') ||
+          n.contains('ninguno') ||
+          n.contains('none') ||
+          n.contains('sin equipo') ||
+          n.contains('mat') ||
+          n.contains('colchoneta') ||
+          n.contains('floor') ||
+          n.contains('suelo');
+    });
   }
 
   static bool _hasAny(String name, List<String> terms) {

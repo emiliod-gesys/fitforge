@@ -1982,6 +1982,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logPastAddSet => 'Add set';
 
   @override
+  String get logPastMarkAllDone => 'Mark entire routine as done';
+
+  @override
   String get logPastNoGymRoutines => 'No gym routines to log';
 
   @override

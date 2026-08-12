@@ -731,6 +731,7 @@
   "@logPastSaveFailed": { "placeholders": { "message": {"type": "String"} } },
   "logPastSaving": "Guardando entreno…",
   "logPastAddSet": "Añadir serie",
+  "logPastMarkAllDone": "Marcar toda la rutina como hecha",
   "logPastNoGymRoutines": "No hay rutinas de gym para registrar",
   "startWorkoutError": "Error al iniciar entrenamiento: {message}",
   "@startWorkoutError": { "placeholders": { "message": {"type": "String"} } },
