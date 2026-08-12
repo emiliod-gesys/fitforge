@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/utils/quantity_format.dart';
 import '../l10n/app_localizations.dart';
 import '../models/workout_summary.dart';
 
@@ -21,7 +22,7 @@ class WorkoutCalorieEstimateDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!summary.hasCalorieEstimate) return const SizedBox.shrink();
 
-    final kcal = l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!);
+    final kcal = QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!);
     final note = summary.calorieEstimate.usedDefaultWeight
         ? l10n.caloriesEstimateDefaultWeight
         : l10n.caloriesEstimateNote;

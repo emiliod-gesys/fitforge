@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/quantity_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
 import '../../core/theme/app_accent.dart';
@@ -49,7 +50,7 @@ class FoodBudgetHeader extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                _formatNumber(displayKcal),
+                QuantityFormat.integer(displayKcal),
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w800,
@@ -142,17 +143,6 @@ class FoodBudgetHeader extends StatelessWidget {
       ),
     );
   }
-
-  static String _formatNumber(int value) {
-    final s = value.toString();
-    if (s.length <= 3) return s;
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(' ');
-      buf.write(s[i]);
-    }
-    return buf.toString();
-  }
 }
 
 class _BudgetStatTile extends StatelessWidget {
@@ -183,7 +173,7 @@ class _BudgetStatTile extends StatelessWidget {
           Icon(icon, size: 16, color: accent),
           const SizedBox(height: 8),
           Text(
-            FoodBudgetHeader._formatNumber(value),
+            QuantityFormat.integer(value),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,

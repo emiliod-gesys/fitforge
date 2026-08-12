@@ -9,6 +9,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/config/ai_secrets.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
+import '../../core/utils/quantity_format.dart';
 import '../../core/utils/speech_locale_utils.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
@@ -619,7 +620,7 @@ class _PackagedFoodTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${estimate.caloriesKcal} kcal, 100 ${estimate.amountUnit}',
+          '${QuantityFormat.kcal(estimate.caloriesKcal)}, 100 ${estimate.amountUnit}',
         ),
         trailing: IconButton(
           icon: Icon(Icons.add_circle, color: context.accentColor),
@@ -654,7 +655,7 @@ class _CatalogFoodTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${food.servingCalories} kcal${serving.isNotEmpty ? ', $serving' : ''}',
+          '${QuantityFormat.kcal(food.servingCalories)}${serving.isNotEmpty ? ', $serving' : ''}',
         ),
         trailing: IconButton(
           icon: Icon(Icons.add_circle, color: context.accentColor),
@@ -690,7 +691,7 @@ class _RecentFoodTile extends StatelessWidget {
           ],
         ),
         subtitle: Text(
-          '${entry.caloriesKcal} kcal${serving != null ? ', $serving' : ''}',
+          '${QuantityFormat.kcal(entry.caloriesKcal)}${serving != null ? ', $serving' : ''}',
         ),
         trailing: IconButton(
           icon: Icon(Icons.add_circle, color: context.accentColor),
@@ -904,7 +905,7 @@ class _ManualAddPaneState extends State<_ManualAddPane> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       title: Text(template.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      subtitle: Text('${template.caloriesKcal} kcal'),
+                      subtitle: Text(QuantityFormat.kcal(template.caloriesKcal)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

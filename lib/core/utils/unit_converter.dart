@@ -1,4 +1,5 @@
 import 'gym_weight.dart';
+import 'quantity_format.dart';
 
 abstract final class UnitConverter {
   static const lbPerKg = 2.2046226218;
@@ -16,30 +17,40 @@ abstract final class UnitConverter {
   static String formatMass(double? kg, String unitSystem, {int decimals = 1}) {
     if (kg == null) return '—';
     final display = kgToDisplay(kg, unitSystem);
-    return '${display.toStringAsFixed(decimals)} ${massLabel(unitSystem)}';
+    return '${QuantityFormat.decimal(display, decimals: decimals)} ${massLabel(unitSystem)}';
   }
 
   /// Peso de entrenamiento: lb enteras; kg solo .0 o .5.
   static String formatGymMass(double? kg, String unitSystem) {
     if (kg == null) return '—';
-    return '${GymWeight.formatDisplay(kg, unitSystem)} ${massLabel(unitSystem)}';
+    return '${_groupedGymDisplay(kg, unitSystem)} ${massLabel(unitSystem)}';
   }
 
   static String formatDelta(double? delta, String unitSystem, {int decimals = 1}) {
     if (delta == null) return '';
     final display = isLb(unitSystem) ? delta * lbPerKg : delta;
     final sign = display > 0 ? '+' : '';
-    return '$sign${display.toStringAsFixed(decimals)}';
+    return '$sign${QuantityFormat.decimal(display, decimals: decimals)}';
   }
 
   static String formatVolume(double kg, String unitSystem, {int decimals = 0}) {
     final display = kgToDisplay(kg, unitSystem);
-    return '${display.toStringAsFixed(decimals)} ${massLabel(unitSystem)}';
+    return '${QuantityFormat.decimal(display, decimals: decimals)} ${massLabel(unitSystem)}';
   }
 
   static String formatSetLine(double weightKg, int reps, String unitSystem) {
-    final w = GymWeight.formatDisplay(weightKg, unitSystem);
+    final w = _groupedGymDisplay(weightKg, unitSystem);
     return '$w ${massLabel(unitSystem)} × $reps';
+  }
+
+  static String _groupedGymDisplay(double kg, String unitSystem) {
+    final raw = GymWeight.formatDisplay(kg, unitSystem);
+    final parsed = double.tryParse(raw);
+    if (parsed == null) return raw;
+    if (raw.contains('.')) {
+      return QuantityFormat.decimal(parsed, decimals: 1);
+    }
+    return QuantityFormat.integer(parsed);
   }
 
   static String heightLabel(String unitSystem) => isLb(unitSystem) ? 'ft/in' : 'cm';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/quantity_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/manual_activity_entry.dart';
 import '../../core/theme/app_accent.dart';
@@ -159,7 +160,7 @@ class _EnergyRow extends StatelessWidget {
             ),
           ),
           Text(
-            '$kcal kcal',
+            QuantityFormat.kcal(kcal),
             style: TextStyle(
               color: context.accentColor,
               fontWeight: FontWeight.w700,

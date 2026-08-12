@@ -4,6 +4,7 @@ import '../../models/leaderboard.dart';
 import 'cardio_format.dart';
 import 'milestones.dart';
 import 'player_level.dart';
+import 'quantity_format.dart';
 import 'unit_converter.dart';
 
 abstract final class LeaderboardFormat {
@@ -43,7 +44,7 @@ abstract final class LeaderboardFormat {
       LeaderboardMetric.volume => UnitConverter.formatVolume(entry.totalVolume, unitSystem),
       LeaderboardMetric.workouts => _formatCount(entry.totalWorkouts.toDouble()),
       LeaderboardMetric.distance => CardioFormat.distance(entry.totalDistance, unitSystem),
-      LeaderboardMetric.calories => l10n.caloriesKcal(entry.totalCalories),
+      LeaderboardMetric.calories => QuantityFormat.kcal(entry.totalCalories),
       LeaderboardMetric.reps => _formatCount(entry.totalReps.toDouble()),
       LeaderboardMetric.hyrox => CardioFormat.duration(entry.metricValue.round()),
     };

@@ -10,6 +10,7 @@ import '../core/utils/cardio_format.dart';
 import '../core/utils/milestone_badge.dart';
 import '../core/utils/player_level.dart';
 import '../core/utils/player_level_badge.dart';
+import '../core/utils/quantity_format.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
@@ -161,7 +162,7 @@ class _HyroxShareCard extends StatelessWidget {
                 Expanded(
                   child: _ShareStatTile(
                     label: l10n.caloriesBurned,
-                    value: l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!),
+                    value: QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!),
                     accent: _hyroxAccent,
                   ),
                 ),
@@ -311,7 +312,7 @@ class _RunnerShareCard extends StatelessWidget {
                 Expanded(
                   child: _ShareStatTile(
                     label: l10n.caloriesBurned,
-                    value: l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!),
+                    value: QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!),
                     accent: _runnerAccent,
                   ),
                 ),
@@ -528,7 +529,7 @@ class _GymShareCard extends StatelessWidget {
                 child: _ShareStatTile(
                   label: l10n.caloriesBurned,
                   value: summary.hasCalorieEstimate
-                      ? l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)
+                      ? QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!)
                       : '—',
                 ),
               ),

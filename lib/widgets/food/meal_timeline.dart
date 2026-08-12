@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/quantity_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
 import '../../core/theme/app_accent.dart';
@@ -133,7 +134,7 @@ class _MealTimelineNode extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '$eatenKcal kcal',
+                              QuantityFormat.kcal(eatenKcal),
                               style: TextStyle(
                                 color: eatenKcal > 0 ? context.accentColor : AppColors.textMuted,
                                 fontSize: 13,
@@ -206,7 +207,7 @@ class _FoodEntryRow extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 Text(
-                  '${entry.caloriesKcal} kcal · P ${entry.proteinG.round()}g',
+                  '${QuantityFormat.kcal(entry.caloriesKcal)} · P ${entry.proteinG.round()}g',
                   style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                 ),
               ],

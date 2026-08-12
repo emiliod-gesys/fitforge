@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/food_serving_parser.dart';
+import '../../core/utils/quantity_format.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
@@ -314,7 +315,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
               const SizedBox(height: 20),
               _NutrientCard(
                 label: l10n.foodCaloriesLabel,
-                value: '${scaled.caloriesKcal} kcal',
+                value: QuantityFormat.kcal(scaled.caloriesKcal),
                 prominent: true,
               ),
               const SizedBox(height: 12),

@@ -1,4 +1,5 @@
 import '../../models/exercise_logging.dart';
+import 'quantity_format.dart';
 
 abstract final class CardioFormat {
   static String duration(int? seconds) {
@@ -142,7 +143,7 @@ abstract final class CardioFormat {
 
   static String steps(int? count) {
     if (count == null || count <= 0) return '—';
-    return count.toString();
+    return QuantityFormat.integer(count);
   }
 
   static String setSummary({

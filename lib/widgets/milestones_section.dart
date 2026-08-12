@@ -3,6 +3,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/cardio_format.dart';
 import '../core/utils/milestone_badge.dart';
 import '../core/utils/milestones.dart';
+import '../core/utils/quantity_format.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
@@ -40,7 +41,7 @@ class MilestonesSection extends StatelessWidget {
       MilestoneCategory.reps => _formatCountStatic(value),
       MilestoneCategory.volume => UnitConverter.formatVolume(value, unitSystem),
       MilestoneCategory.distance => CardioFormat.distance(value, unitSystem),
-      MilestoneCategory.calories => l10n.caloriesKcal(value.round()),
+      MilestoneCategory.calories => QuantityFormat.kcal(value.round()),
       MilestoneCategory.workouts => _formatCountStatic(value),
     };
   }

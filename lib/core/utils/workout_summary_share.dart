@@ -5,6 +5,7 @@ import '../../models/workout_summary.dart';
 import '../../widgets/milestones_section.dart';
 import '../../widgets/runner_surface_picker.dart';
 import 'cardio_format.dart';
+import 'quantity_format.dart';
 import 'unit_converter.dart';
 
 abstract final class WorkoutSummaryShare {
@@ -44,7 +45,7 @@ abstract final class WorkoutSummaryShare {
 
     if (summary.hasCalorieEstimate) {
       buffer.writeln(
-        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+        l10n.shareCalories(QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!)),
       );
     }
 
@@ -121,7 +122,7 @@ abstract final class WorkoutSummaryShare {
 
     if (summary.hasCalorieEstimate) {
       buffer.writeln(
-        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+        l10n.shareCalories(QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!)),
       );
     }
 
@@ -159,7 +160,7 @@ abstract final class WorkoutSummaryShare {
     );
     if (summary.hasCalorieEstimate) {
       buffer.writeln(
-        l10n.shareCalories(l10n.caloriesKcal(summary.calorieEstimate.caloriesKcal!)),
+        l10n.shareCalories(QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!)),
       );
     }
 
