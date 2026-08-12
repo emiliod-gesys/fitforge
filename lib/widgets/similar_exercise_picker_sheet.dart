@@ -275,6 +275,7 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
         ),
         Expanded(
           child: ListView.builder(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: similar.length + (showLoadMore ? 1 : 0),
             itemBuilder: (_, i) {

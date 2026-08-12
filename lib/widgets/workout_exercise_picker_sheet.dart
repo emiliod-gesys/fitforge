@@ -206,6 +206,8 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                             child: Text(l10n.noResults, style: const TextStyle(color: AppColors.textMuted)),
                           )
                         : ListView.builder(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: filtered.length + (showCloudLoadMore ? 1 : 0),
                             itemBuilder: (_, i) {

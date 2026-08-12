@@ -213,6 +213,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                   ),
                 )
               : ListView.builder(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                   itemCount: filtered.length + (showCloudLoadMore ? 1 : 0),
                   itemBuilder: (_, i) {
                     if (showCloudLoadMore && i == filtered.length) {
