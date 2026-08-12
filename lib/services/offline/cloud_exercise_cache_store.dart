@@ -1,3 +1,4 @@
+import '../../core/utils/exercise_text_search.dart';
 import '../../models/exercise.dart';
 import '../../models/exercise_logging.dart';
 import 'offline_json_file.dart';
@@ -63,15 +64,16 @@ class CloudExerciseCacheStore {
     final trimmed = query.trim();
     if (trimmed.length < 2) return const [];
 
-    final q = trimmed.toLowerCase();
+    final q = ExerciseTextSearch.normalize(trimmed);
     final filtered = _exercises.where((exercise) {
-      if (exercise.name.toLowerCase().contains(q)) return true;
-      for (final muscle in exercise.muscles) {
-        if (muscle.toLowerCase().contains(q)) return true;
-      }
-      return false;
+      return ExerciseTextSearch.matchesExercise(exercise, q);
     }).toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      ..sort((a, b) {
+        final byScore = ExerciseTextSearch.score(b, q)
+            .compareTo(ExerciseTextSearch.score(a, q));
+        if (byScore != 0) return byScore;
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
 
     if (offset >= filtered.length) return const [];
     final end = (offset + limit).clamp(0, filtered.length);

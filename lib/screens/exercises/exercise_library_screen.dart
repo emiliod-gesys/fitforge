@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/exercise_text_search.dart';
 import '../../core/utils/muscle_inference.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
@@ -25,9 +26,10 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   bool _customOnly = false;
 
   List<Exercise> _filterExercises(List<Exercise> exercises) {
-    return exercises.where((e) {
+    final filtered = exercises.where((e) {
       if (_customOnly && !e.isUserCustom) return false;
-      if (_search.isNotEmpty && !e.name.toLowerCase().contains(_search.toLowerCase())) {
+      if (_search.isNotEmpty &&
+          !ExerciseTextSearch.matchesExercise(e, _search)) {
         return false;
       }
       if (_muscleFilter != null &&
@@ -36,6 +38,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
       }
       return true;
     }).toList();
+    return ExerciseTextSearch.rank(filtered, _search);
   }
 
   @override

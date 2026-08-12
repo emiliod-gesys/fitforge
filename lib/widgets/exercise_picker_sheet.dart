@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_picker_merge.dart';
+import '../core/utils/exercise_text_search.dart';
 import '../core/utils/muscle_inference.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -53,12 +54,16 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
     );
     final filteredCloud = filterCloudPickerExercises(
       exercises: cloud,
+      search: _search,
       muscleFilter: _muscleFilter,
       customOnly: _filter == ExercisePickerFilter.custom,
       inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
       selectedExerciseIds: widget.selectedExerciseIds,
     );
-    return mergeBundledAndCloudExercises(bundled: filteredBundled, cloud: filteredCloud);
+    return ExerciseTextSearch.rank(
+      mergeBundledAndCloudExercises(bundled: filteredBundled, cloud: filteredCloud),
+      _search,
+    );
   }
 
   @override

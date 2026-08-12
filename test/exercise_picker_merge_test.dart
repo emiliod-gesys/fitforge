@@ -39,6 +39,13 @@ void main() {
       ),
       isEmpty,
     );
+    expect(
+      filterBundledPickerExercises(
+        exercises: [cloud],
+        search: 'cable fly',
+      ),
+      hasLength(1),
+    );
   });
 
   test('cloudExerciseCatalogNotifierKey uses browse when no search or muscle', () {

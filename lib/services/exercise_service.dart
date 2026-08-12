@@ -4,6 +4,7 @@ import '../core/constants/app_constants.dart';
 import '../core/constants/exercise_catalog_source.dart';
 import '../core/utils/exercise_catalog_visibility.dart';
 import '../core/utils/exercise_matcher.dart';
+import '../core/utils/exercise_text_search.dart';
 import '../core/utils/ai_coach_catalog.dart';
 import '../core/utils/exercise_picker_merge.dart';
 import '../core/utils/muscle_inference.dart';
@@ -211,7 +212,8 @@ class ExerciseService {
     String? category,
   }) {
     return full.where((exercise) {
-      if (search != null && !exercise.name.toLowerCase().contains(search.toLowerCase())) {
+      if (search != null &&
+          !ExerciseTextSearch.matchesExercise(exercise, search)) {
         return false;
       }
       if (category != null && exercise.category != category) return false;

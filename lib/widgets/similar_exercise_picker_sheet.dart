@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/cloud_exercise_catalog.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_picker_merge.dart';
+import '../core/utils/exercise_text_search.dart';
 import '../core/utils/similar_exercises.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -207,11 +208,13 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
         excludeIds: widget.excludeExerciseIds,
         sourceCategory: sourceCategory,
       ).where((e) => exerciseMatchesTextFilter(e, _search)).toList();
-      similar = mergeBundledAndCloudExercises(
-        bundled: bundledMatches,
-        cloud: cloudMatches,
+      similar = ExerciseTextSearch.rank(
+        mergeBundledAndCloudExercises(
+          bundled: bundledMatches,
+          cloud: cloudMatches,
+        ),
+        _search,
       );
-      similar.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     } else {
       final bundledSimilar = SimilarExercises.find(
         exerciseName: widget.current.exerciseName,

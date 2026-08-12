@@ -1,4 +1,5 @@
 import '../../models/exercise.dart';
+import '../utils/exercise_text_search.dart';
 import '../utils/muscle_inference.dart';
 
 /// Combina catálogo embebido con resultados cloud (sin duplicar IDs).
@@ -54,11 +55,7 @@ String? cloudExerciseCatalogNotifierKey({
 bool cloudExerciseCatalogIsBrowseMode(String key) => key == '__browse__';
 
 bool exerciseMatchesTextFilter(Exercise exercise, String search) {
-  if (search.trim().isEmpty) return true;
-  final q = search.toLowerCase();
-  return exercise.name.toLowerCase().contains(q) ||
-      exercise.category.toLowerCase().contains(q) ||
-      exercise.muscles.any((m) => m.toLowerCase().contains(q));
+  return ExerciseTextSearch.matchesExercise(exercise, search);
 }
 
 bool exerciseMatchesMuscleFilter(Exercise exercise, String? muscleFilter) {
@@ -86,9 +83,10 @@ List<Exercise> filterBundledPickerExercises({
   }).toList();
 }
 
-/// Filtra resultados cloud ya resueltos por Supabase (no repetir búsqueda de texto).
+/// Filtra resultados cloud (músculo / chips) y revalida el texto con tokens ES/EN.
 List<Exercise> filterCloudPickerExercises({
   required List<Exercise> exercises,
+  String search = '',
   String? muscleFilter,
   bool customOnly = false,
   bool inRoutineOnly = false,
@@ -100,6 +98,7 @@ List<Exercise> filterCloudPickerExercises({
     if (inRoutineOnly && !selectedExerciseIds.contains(exercise.id)) return false;
     if (customOnly && !exercise.isUserCustom) return false;
     if (!exerciseMatchesMuscleFilter(exercise, muscleFilter)) return false;
+    if (!exerciseMatchesTextFilter(exercise, search)) return false;
     return true;
   }).toList();
 }
