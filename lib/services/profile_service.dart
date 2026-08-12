@@ -72,7 +72,16 @@ class ProfileService {
     if (data.containsKey('display_name') && data['display_name'] != null) {
       payload['search_name'] = (data['display_name'] as String).toLowerCase();
     }
-    await _client.from('profiles').update(payload).eq('id', user.id);
+    final row = await _client
+        .from('profiles')
+        .update(payload)
+        .eq('id', user.id)
+        .select()
+        .maybeSingle();
+    if (row != null) {
+      final hasKey = await _hasKeyForProvider(row['ai_provider'] as String?);
+      await _profileCache?.save(user.id, row, hasAiKey: hasKey);
+    }
   }
 
   Future<void> saveApiKey(AiProvider provider, String apiKey) async {

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../core/utils/unit_converter.dart';
 import '../../core/utils/water_goal_calculator.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/water_entry.dart';
@@ -33,11 +32,27 @@ class _WaterIntakeSectionState extends ConsumerState<WaterIntakeSection> {
   static const _waterBlue = Color(0xFF5BB8F0);
 
   bool _busy = false;
-  bool? _useFlOzOverride;
+  bool? _pendingFlOz;
 
-  bool get _useFlOz {
-    if (_useFlOzOverride != null) return _useFlOzOverride!;
-    return UnitConverter.isLb(ref.watch(unitSystemProvider));
+  bool get _useFlOz =>
+      _pendingFlOz ??
+      (ref.watch(profileProvider).valueOrNull?.waterUseFlOz ?? false);
+
+  Future<void> _setUseFlOz(bool value) async {
+    if (_useFlOz == value) return;
+    setState(() => _pendingFlOz = value);
+    try {
+      await ref.read(profileServiceProvider).updateProfile({
+        'water_use_fl_oz': value,
+      });
+      ref.invalidate(profileProvider);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _pendingFlOz = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+      );
+    }
   }
 
   int get _intakeMl =>
@@ -141,7 +156,7 @@ class _WaterIntakeSectionState extends ConsumerState<WaterIntakeSection> {
                 accent: accent,
                 litersLabel: l10n.foodWaterUnitLiters,
                 ozLabel: l10n.foodWaterUnitOz,
-                onChanged: (value) => setState(() => _useFlOzOverride = value),
+                onChanged: _setUseFlOz,
               ),
               if (widget.entries.isNotEmpty)
                 IconButton(

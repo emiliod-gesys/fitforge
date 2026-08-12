@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
-import '../../core/utils/unit_converter.dart';
 import '../../core/utils/water_goal_calculator.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
@@ -70,7 +69,7 @@ class _WaterBudgetEditorBodyState extends ConsumerState<_WaterBudgetEditorBody> 
   @override
   void initState() {
     super.initState();
-    _useFlOz = UnitConverter.isLb(widget.profile?.unitSystem ?? 'kg');
+    _useFlOz = widget.profile?.waterUseFlOz ?? false;
     final suggested = WaterGoalCalculator.suggestedGoalMl(
       profile: widget.profile,
       bodyMetrics: widget.bodyMetrics,
@@ -82,6 +81,23 @@ class _WaterBudgetEditorBodyState extends ConsumerState<_WaterBudgetEditorBody> 
     );
   }
 
+  Future<void> _setUseFlOz(bool value) async {
+    if (_useFlOz == value) return;
+    setState(() => _useFlOz = value);
+    try {
+      await ref.read(profileServiceProvider).updateProfile({
+        'water_use_fl_oz': value,
+      });
+      ref.invalidate(profileProvider);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _useFlOz = !value);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+      );
+    }
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     setState(() => _saving = true);
@@ -89,6 +105,7 @@ class _WaterBudgetEditorBodyState extends ConsumerState<_WaterBudgetEditorBody> 
       final value = _selectedMl == _suggestedMl ? null : _selectedMl;
       await ref.read(profileServiceProvider).updateProfile({
         'water_goal_ml': value,
+        'water_use_fl_oz': _useFlOz,
       });
       ref.invalidate(profileProvider);
       ref.invalidate(waterEntriesProvider);
@@ -96,6 +113,11 @@ class _WaterBudgetEditorBodyState extends ConsumerState<_WaterBudgetEditorBody> 
         widget.onSaved();
         Navigator.pop(context);
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -149,7 +171,7 @@ class _WaterBudgetEditorBodyState extends ConsumerState<_WaterBudgetEditorBody> 
                   accent: _waterBlue,
                   litersLabel: l10n.foodWaterUnitLiters,
                   ozLabel: l10n.foodWaterUnitOz,
-                  onChanged: (value) => setState(() => _useFlOz = value),
+                  onChanged: _setUseFlOz,
                 ),
               ],
             ),

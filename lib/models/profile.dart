@@ -124,6 +124,9 @@ class UserProfile {
 
   /// Meta diaria de agua en ml. Null = sugerencia automática según métricas.
   final int? waterGoalMl;
+
+  /// Unidad de visualización de agua. false = litros (default), true = oz.
+  final bool waterUseFlOz;
   final AiProvider aiProvider;
   final bool hasAiKey;
   final UserType userType;
@@ -162,6 +165,7 @@ class UserProfile {
     this.activityLevel = DailyActivityLevel.moderate,
     this.calorieAdjustmentPct,
     this.waterGoalMl,
+    this.waterUseFlOz = false,
     this.aiProvider = AiProvider.none,
     this.hasAiKey = false,
     this.userType = UserType.athlete,
@@ -195,6 +199,7 @@ class UserProfile {
           DailyActivityLevel.fromCode(json['activity_level'] as String?),
       calorieAdjustmentPct: (json['calorie_adjustment_pct'] as num?)?.toInt(),
       waterGoalMl: (json['water_goal_ml'] as num?)?.toInt(),
+      waterUseFlOz: parseJsonBool(json['water_use_fl_oz']),
       aiProvider: _parseProvider(json['ai_provider'] as String?),
       hasAiKey: hasAiKey,
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
@@ -241,6 +246,7 @@ class UserProfile {
         'activity_level': activityLevel.code,
         'calorie_adjustment_pct': calorieAdjustmentPct,
         'water_goal_ml': waterGoalMl,
+        'water_use_fl_oz': waterUseFlOz,
         'ai_provider': aiProvider.name == 'none' ? null : aiProvider.name,
         'user_type': userType.code,
         'accent_color': accentColor.name,

@@ -502,7 +502,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   ) {
     final l10n = context.l10n;
     final bodyMetrics = metricsAsync.valueOrNull;
-    final useFlOz = UnitConverter.isLb(profile?.unitSystem ?? 'kg');
+    final useFlOz = profile?.waterUseFlOz ?? false;
     final suggested = WaterGoalCalculator.suggestedGoalMl(
       profile: profile,
       bodyMetrics: bodyMetrics,
