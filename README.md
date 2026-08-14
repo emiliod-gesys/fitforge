@@ -110,7 +110,7 @@ Sin las variables `FIREBASE_*` la app funciona igual; solo se desactivan los pus
    - **APIs & Services → Credentials → Create credentials → OAuth client ID**
    - Crea un cliente **Web** → copia el Client ID → `GOOGLE_WEB_CLIENT_ID` en `dart_defines.json`
    - Crea un cliente **Android** (`io.fitforge.fitforge`) con el SHA-1 de debug/release
-   - Crea un cliente **iOS** (`io.fitforge.fitforge`) → `GOOGLE_IOS_CLIENT_ID` en `dart_defines.json`
+   - Crea un cliente **iOS** (`io.fitforge.app`) → `GOOGLE_IOS_CLIENT_ID` en `dart_defines.json`
 2. **Supabase → Authentication → Providers → Google**: activa y pega el **Web Client ID** y **Client Secret**
 3. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**:
    `io.fitforge.fitforge://login-callback`

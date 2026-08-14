@@ -82,6 +82,8 @@
 	<string>FORGEN puede importar tu peso y grasa corporal desde Apple Salud para mantener tu perfil al día.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>FORGEN puede guardar tus entrenamientos en Apple Salud para compartirlos con otras apps.</string>
+	<key>GIDClientID</key>
+	<string>461988971555-9dahln63k9on692nlt55nhq1uecoli8d.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -92,6 +94,16 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>io.fitforge.app</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google-sign-in</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.461988971555-9dahln63k9on692nlt55nhq1uecoli8d</string>
 			</array>
 		</dict>
 	</array>
