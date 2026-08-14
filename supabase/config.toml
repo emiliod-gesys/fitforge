@@ -16,8 +16,25 @@ major_version = 15
 
 [auth]
 enabled = true
-site_url = "io.fitforge.app://login-callback"
-additional_redirect_urls = ["io.fitforge.app://login-callback"]
+site_url = "io.fitforge.fitforge://login-callback"
+additional_redirect_urls = [
+  "io.fitforge.fitforge://login-callback",
+  "io.fitforge.fitforge://reset-password",
+  "io.fitforge.app://login-callback",
+  "io.fitforge.app://reset-password",
+]
 
+# Credenciales: variables de entorno locales (nunca en git).
+# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET = OAuth Web client de Google Cloud.
+# APPLE_CLIENT_ID = Services ID; APPLE_SECRET = JWT generado con la clave .p8.
 [auth.external.google]
-enabled = false
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = true
+
+[auth.external.apple]
+enabled = true
+client_id = "env(APPLE_CLIENT_ID)"
+secret = "env(APPLE_SECRET)"
+skip_nonce_check = true

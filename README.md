@@ -4,7 +4,7 @@ App móvil de entrenamiento tipo **Fitbod** para Android e iOS, construida con *
 
 ## Características
 
-- **Autenticación** con email/contraseña y verificación **Cloudflare Turnstile** (sin confirmación por email)
+- **Autenticación** con email/contraseña, **Google** y **Apple**, y verificación **Cloudflare Turnstile**
 - **Rutinas personalizadas** — crear, editar y ejecutar rutinas
 - **Registro de entrenamientos** — series, reps, peso, RIR, temporizador de descanso
 - **Biblioteca de ejercicios** — +200 ejercicios con imágenes y videos desde [wger.de](https://wger.de) (API pública, CC-BY-SA)
@@ -37,7 +37,7 @@ flutter pub get
 2. En **SQL Editor**, ejecuta el contenido de `supabase/migrations/001_initial_schema.sql`
 3. **Authentication → Providers → Email** → desactiva **Confirm email**
 4. **Authentication → Bot and Abuse Protection** → activa CAPTCHA con **Cloudflare Turnstile** y pega la **Secret key**
-5. (Opcional) Configurar **Google OAuth** — ver sección [Google Sign-In](#google-sign-in) más abajo
+5. Configurar **Google** y **Apple** — ver [Google Sign-In](#google-sign-in) y [Apple Sign-In](#apple-sign-in)
 6. **Recuperación de contraseña (móvil)** — ver [Reset password](#reset-password) más abajo
 
 ### 2b. Configurar Cloudflare Turnstile
@@ -120,6 +120,22 @@ Sin las variables `FIREBASE_*` la app funciona igual; solo se desactivan los pus
 
 Sin `GOOGLE_WEB_CLIENT_ID` el botón usa OAuth en navegador (deep link). Con el Web Client ID usa el selector nativo de Google (recomendado).
 
+El SHA-1 de debug actual (para el cliente Android en Google Cloud) es:
+`2A:29:7E:E5:4D:9C:0E:28:11:1A:59:E6:CF:9A:CD:14:48:3D:9B:C7`
+
+### Apple Sign-In
+
+1. **Apple Developer** → Identifiers → tu App ID (`io.fitforge.app`) → activa **Sign In with Apple**.
+2. **Supabase → Authentication → Providers → Apple**:
+   - Activa el proveedor.
+   - iOS nativo: usa el **Services ID** / Bundle ID y la clave (`.p8`) de Sign in with Apple. Guía: [Auth Apple](https://supabase.com/docs/guides/auth/social-login/auth-apple).
+3. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**:
+   - `io.fitforge.fitforge://login-callback`
+   - `io.fitforge.app://login-callback`
+4. En Xcode → Runner → Signing & Capabilities confirma **Sign In with Apple** (el repo ya incluye el entitlement).
+
+En iOS el botón abre el sheet nativo de Apple. En Android abre OAuth en el navegador (hace falta el proveedor Apple activo en Supabase).
+
 ### Reset password
 
 Para que el enlace del email abra la app y permita elegir contraseña nueva:
@@ -172,7 +188,6 @@ flutter build ios --dart-define-from-file=dart_defines.json
 ## Próximos pasos sugeridos
 
 - Modo offline con caché local (Hive/Isar)
-- Apple Sign-In
 - Integración con wearables
 - Planes de nutrición
 

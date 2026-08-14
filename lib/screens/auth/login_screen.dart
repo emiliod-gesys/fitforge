@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/constants/apple_auth_config.dart';
 import '../../core/constants/google_auth_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
@@ -201,6 +202,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authServiceProvider).signInWithApple();
+    } catch (e) {
+      if (!mounted) return;
+      if (e is AuthException && e.message.toLowerCase().contains('cancel')) {
+        setState(() => _error = context.l10n.appleSignInCancelled);
+      } else {
+        setState(() => _error = context.l10n.appleSignInFailed);
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -297,7 +317,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ),
-              if (GoogleAuthConfig.enabled) ...[
+              if (GoogleAuthConfig.enabled || AppleAuthConfig.enabled) ...[
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -312,21 +332,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const Expanded(child: Divider(color: AppColors.border)),
                   ],
                 ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: _loading ? null : _signInWithGoogle,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
-                    side: const BorderSide(color: AppColors.border),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                if (GoogleAuthConfig.enabled) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: _loading ? null : _signInWithGoogle,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.white),
+                    label: Text(
+                      l10n.continueWithGoogle,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
-                  icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.white),
-                  label: Text(
-                    l10n.continueWithGoogle,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                ],
+                if (AppleAuthConfig.enabled) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _loading ? null : _signInWithApple,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.apple, size: 22, color: Colors.white),
+                    label: Text(
+                      l10n.continueWithApple,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
-                ),
+                ],
               ],
               const SizedBox(height: 20),
               TextButton(

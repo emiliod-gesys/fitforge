@@ -3296,6 +3296,24 @@ abstract class AppLocalizations {
   /// **'No se pudo iniciar sesión con Google. Inténtalo de nuevo.'**
   String get googleSignInFailed;
 
+  /// No description provided for @continueWithApple.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar con Apple'**
+  String get continueWithApple;
+
+  /// No description provided for @appleSignInCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio de sesión con Apple cancelado'**
+  String get appleSignInCancelled;
+
+  /// No description provided for @appleSignInFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo iniciar sesión con Apple. Inténtalo de nuevo.'**
+  String get appleSignInFailed;
+
   /// No description provided for @forgotPassword.
   ///
   /// In es, this message translates to:

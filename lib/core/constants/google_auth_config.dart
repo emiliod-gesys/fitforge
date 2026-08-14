@@ -11,8 +11,8 @@ abstract final class GoogleAuthConfig {
   /// Deep link de retorno para `signInWithOAuth` (fallback).
   static String get redirectUrl => AuthRedirectConfig.loginCallback;
 
-  /// Desactivar temporalmente el botón de Google en login.
-  static const enabled = false;
+  /// Login con Google (nativo si hay Web Client ID; si no, OAuth en navegador).
+  static const enabled = true;
 
   static bool get isNativeConfigured => enabled && webClientId.isNotEmpty;
 }

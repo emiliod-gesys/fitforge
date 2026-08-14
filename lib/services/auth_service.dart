@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/constants/apple_auth_config.dart';
 import '../core/constants/auth_redirect_config.dart';
 import '../core/constants/google_auth_config.dart';
 import 'supabase_service.dart';
@@ -79,6 +85,74 @@ class AuthService {
       redirectTo: AuthRedirectConfig.loginCallback,
       authScreenLaunchMode: LaunchMode.externalApplication,
     );
+  }
+
+  /// Login con Apple: nativo en iOS/macOS; OAuth en Android/web.
+  Future<void> signInWithApple() async {
+    if (!AppleAuthConfig.enabled) {
+      throw const AuthException('Apple sign-in is disabled');
+    }
+
+    final useNative = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS);
+    if (!useNative) {
+      await _client.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: AuthRedirectConfig.loginCallback,
+        authScreenLaunchMode: LaunchMode.externalApplication,
+      );
+      return;
+    }
+
+    final rawNonce = _generateNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+      final idToken = credential.identityToken;
+      if (idToken == null || idToken.isEmpty) {
+        throw const AuthException('Missing Apple ID token');
+      }
+
+      await _client.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+
+      final fullName = [
+        credential.givenName,
+        credential.familyName,
+      ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' ');
+      if (fullName.isNotEmpty) {
+        await _client.auth.updateUser(
+          UserAttributes(data: {
+            'display_name': fullName,
+            'full_name': fullName,
+          }),
+        );
+      }
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw const AuthException('Apple sign-in cancelled');
+      }
+      throw AuthException(e.message);
+    }
+  }
+
+  static String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
   }
 
   Future<void> signOut() async {

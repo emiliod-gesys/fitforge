@@ -1807,6 +1807,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get googleSignInFailed => 'Could not sign in with Google. Try again.';
 
   @override
+  String get continueWithApple => 'Continue with Apple';
+
+  @override
+  String get appleSignInCancelled => 'Apple sign-in was cancelled';
+
+  @override
+  String get appleSignInFailed => 'Could not sign in with Apple. Try again.';
+
+  @override
   String get forgotPassword => 'Forgot your password?';
 
   @override
