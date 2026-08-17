@@ -67,6 +67,10 @@ class ProactiveWorkoutEnricher {
       exercises: exercises,
       suggestions: suggestions,
       unitSystem: profile.unitSystem,
+      minWorkingWeightKg: WorkoutSuggestionContextBuilder.minWorkingWeightKg(
+        exercises: exercises,
+        context: context,
+      ),
     );
 
     final changed = _hasChanges(exercises, merged);

@@ -19,6 +19,12 @@ abstract final class ExerciseHistoryUtils {
         .fold<double>(0, (best, s) => s.weight! > best ? s.weight! : best);
   }
 
+  /// Peso de trabajo de una sesión (máximo de series ≥85%, o el máximo si no hay).
+  static double workingWeightKg(List<WorkoutSet> sets) {
+    final work = workingSets(sets);
+    return sessionHeaviestWeightKg(work.isNotEmpty ? work : sets);
+  }
+
   static double sessionQualityScore(List<WorkoutSet> sets) {
     final meaningful = PreviousSetUtils.sortedMeaningfulSets(sets);
     var score = 0.0;

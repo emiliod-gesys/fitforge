@@ -82,6 +82,8 @@ void main() {
       expect(context.recentTopSet!['weight_kg'], 32.5);
       expect(context.recentTopSet!['reps'], 8);
       expect(context.recentTopSet!['rir'], 1);
+      expect(context.currentWorkingWeightKg, 30);
+      expect(context.currentSetWeightsKg, [30]);
     });
 
     test('enables warmup sets for compound lifts with history and recovery', () {
@@ -139,6 +141,45 @@ void main() {
 
       expect(context[0].warmupSetsAllowed, isTrue);
       expect(context[1].warmupSetsAllowed, isFalse);
+    });
+
+    test('uses local and history working weight as floor when recovered', () {
+      final exercises = [
+        const WorkoutExercise(
+          id: 'we-1',
+          exerciseId: 'bench',
+          exerciseName: 'Barbell Bench Press',
+          orderIndex: 0,
+          sets: [
+            WorkoutSet(id: 's1', setNumber: 1, weight: 80, reps: 8),
+            WorkoutSet(id: 's2', setNumber: 2, weight: 80, reps: 8),
+          ],
+        ),
+      ];
+      final context = WorkoutSuggestionContextBuilder.build(
+        exercises: exercises,
+        profile: UserProfile(id: 'u1', createdAt: DateTime(2026, 1, 1)),
+        muscleRecovery: const {'chest': 100},
+        catalog: const <Exercise>[],
+        historyByExerciseId: {
+          'bench': [
+            ExerciseSessionHistory(
+              workoutId: 'w1',
+              workoutName: 'Push',
+              date: DateTime(2026, 6, 28),
+              sets: const [
+                WorkoutSet(id: 'a', setNumber: 1, weight: 80, reps: 8),
+              ],
+            ),
+          ],
+        },
+      );
+
+      final floors = WorkoutSuggestionContextBuilder.minWorkingWeightKg(
+        exercises: exercises,
+        context: context,
+      );
+      expect(floors['bench'], 80);
     });
   });
 
@@ -307,6 +348,67 @@ void main() {
       expect(merged.first.sets[0].weight, 50);
       expect(merged.first.sets[2].weight, 95);
       expect(merged.first.sets.last.weight, 100);
+    });
+
+    test('does not let AI drop working weight below history when recovered', () {
+      const exercises = [
+        WorkoutExercise(
+          id: 'we1',
+          exerciseId: 'bench',
+          exerciseName: 'Bench Press',
+          orderIndex: 0,
+          sets: [
+            WorkoutSet(id: 's1', setNumber: 1, weight: 80, reps: 8),
+            WorkoutSet(id: 's2', setNumber: 2, weight: 80, reps: 8),
+            WorkoutSet(id: 's3', setNumber: 3, weight: 80, reps: 8),
+          ],
+        ),
+      ];
+
+      const suggestions = AiWorkoutSuggestions(byExerciseId: {
+        'bench': [
+          AiExerciseSetSuggestion(setNumber: 1, weightKg: 20, reps: 10),
+          AiExerciseSetSuggestion(setNumber: 2, weightKg: 30, reps: 8),
+          AiExerciseSetSuggestion(setNumber: 3, weightKg: 40, reps: 8),
+        ],
+      });
+
+      final merged = AiWorkoutSuggestionsMerger.apply(
+        exercises: exercises,
+        suggestions: suggestions,
+        minWorkingWeightKg: const {'bench': 80},
+      );
+
+      expect(merged.first.sets.last.weight, 80);
+      expect(merged.first.sets.first.weight, 40);
+    });
+
+    test('keeps AI increases above the historical floor', () {
+      const exercises = [
+        WorkoutExercise(
+          id: 'we1',
+          exerciseId: 'bench',
+          exerciseName: 'Bench Press',
+          orderIndex: 0,
+          sets: [
+            WorkoutSet(id: 's1', setNumber: 1, weight: 80, reps: 8),
+          ],
+        ),
+      ];
+
+      const suggestions = AiWorkoutSuggestions(byExerciseId: {
+        'bench': [
+          AiExerciseSetSuggestion(setNumber: 1, weightKg: 82.5, reps: 8),
+        ],
+      });
+
+      final merged = AiWorkoutSuggestionsMerger.apply(
+        exercises: exercises,
+        suggestions: suggestions,
+        minWorkingWeightKg: const {'bench': 80},
+      );
+
+      expect(merged.first.sets.first.weight, 82.5);
     });
   });
 

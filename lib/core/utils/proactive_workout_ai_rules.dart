@@ -31,6 +31,7 @@ Pesos variados en la misma sesión o entre sesiones del mismo día:
 - set_weights_kg en latest_session_summary muestra TODAS las series en orden (aproximación + trabajo).
 - weight_pattern: warmup_then_work = series ligeras al inicio + trabajo pesado; pyramid/varied = cargas mixtas.
 - Ancla el peso de TRABAJO en working_weight_kg (≥85% del máximo de la sesión), NO en el primer set ni en series ligeras.
+- current_working_weight_kg es el peso ya prellenado. Con recovery_pct ≥ 60 NO bajes las series de trabajo por debajo de ese valor.
 - Si la sesión cronológica más reciente tiene peso mucho menor que recent_top_set o working_weight_kg de otra sesión reciente, ignora la sesión ligera (suele ser entreno abandonado) y usa la sesión con mayor carga.
 - En aislamiento sin aproximaciones (weight_pattern constant), working_weight_kg ≈ heaviest_weight_kg.
 

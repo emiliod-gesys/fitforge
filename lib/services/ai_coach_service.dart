@@ -1196,6 +1196,10 @@ Reglas generales:
 - latest_session_summary resume la sesión de referencia (no siempre la más reciente si hay una sesión ligera fantasma); incluye working_weight_kg, weight_pattern y set_weights_kg en orden.
 - recent_top_set resume la mejor serie reciente.
 - Si existe latest_session_summary o recent_top_set, ancla el peso de TRABAJO en working_weight_kg o recent_top_set, no en series de aproximación ni en sesiones con peso claramente inferior al historial reciente.
+- current_working_weight_kg / current_set_weights_kg son los pesos YA prellenados del último entreno. Trátalos como el mínimo de las series de TRABAJO.
+- Si recovery_pct ≥ 60: el peso de TRABAJO debe ser ≥ current_working_weight_kg y ≥ working_weight_kg. Micro-progresión opcional. PROHIBIDO bajar el peso de trabajo.
+- Si recovery_pct < 60: puedes reducir como máximo ~10% el peso de trabajo. Nunca vuelvas a pesos de principiante.
+- Las series de aproximación SÍ pueden ser más ligeras. Las de trabajo NO.
 - Si weight_pattern es warmup_then_work, pyramid o varied: las series ligeras del inicio NO definen el peso de trabajo; usa working_weight_kg y las reps de las series al ≥85% del máximo.
 - Si el usuario ya hizo por ejemplo 30 kg x 10 recientemente con buena recuperación, no sugieras 20 kg x 10 por defecto. Mantén o micro-progresa.
 - set_count es la plantilla de la rutina; history_avg_set_count es el promedio histórico. NO estás obligado a mantener set_count: ajusta series según objetivo (incluidas aproximaciones).

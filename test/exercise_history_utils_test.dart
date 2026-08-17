@@ -93,6 +93,16 @@ void main() {
       expect(anchor?.workoutId, 'real');
     });
 
+    test('workingWeightKg ignores obvious warmups', () {
+      final sets = [
+        _set(1, 40, 10),
+        _set(2, 60, 5),
+        _set(3, 80, 5),
+        _set(4, 80, 5),
+      ];
+      expect(ExerciseHistoryUtils.workingWeightKg(sets), 80);
+    });
+
     test('setsForNextWorkoutSuggestion skips obvious warmups', () {
       final sets = [
         _set(1, 40, 10),

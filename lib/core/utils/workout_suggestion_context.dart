@@ -25,6 +25,8 @@ class WorkoutSuggestionExerciseContext {
   final int? daysSinceLastSession;
   final bool isCompound;
   final bool warmupSetsAllowed;
+  final double? currentWorkingWeightKg;
+  final List<double> currentSetWeightsKg;
   final List<WorkoutSuggestionHistorySession> history;
 
   const WorkoutSuggestionExerciseContext({
@@ -40,6 +42,8 @@ class WorkoutSuggestionExerciseContext {
     this.daysSinceLastSession,
     this.isCompound = false,
     this.warmupSetsAllowed = false,
+    this.currentWorkingWeightKg,
+    this.currentSetWeightsKg = const [],
     this.history = const [],
   });
 
@@ -56,6 +60,9 @@ class WorkoutSuggestionExerciseContext {
         'recovery_pct': recoveryPercent.round(),
         if (daysSinceLastSession != null) 'days_since_last': daysSinceLastSession,
         'warmup_sets_allowed': warmupSetsAllowed,
+        if (currentWorkingWeightKg != null && currentWorkingWeightKg! > 0)
+          'current_working_weight_kg': currentWorkingWeightKg,
+        if (currentSetWeightsKg.isNotEmpty) 'current_set_weights_kg': currentSetWeightsKg,
         'history': history.map((h) => h.toJson()).toList(),
       };
 }
@@ -114,6 +121,14 @@ abstract final class WorkoutSuggestionContextBuilder {
                   history.any((session) =>
                       session.sets.any((set) => (set.weight ?? 0) > 0)));
 
+      final currentSetWeights = isCardio
+          ? const <double>[]
+          : ex.sets
+              .map((set) => set.weight ?? 0)
+              .where((weight) => weight > 0)
+              .toList();
+      final currentWorking = isCardio ? 0.0 : ExerciseHistoryUtils.workingWeightKg(ex.sets);
+
       return WorkoutSuggestionExerciseContext(
         exerciseId: ex.exerciseId,
         exerciseName: ex.exerciseName,
@@ -133,6 +148,8 @@ abstract final class WorkoutSuggestionContextBuilder {
           hasWorkingHistory: hasWorkingHistory,
           fitnessGoal: profile.fitnessGoal,
         ),
+        currentWorkingWeightKg: currentWorking > 0 ? currentWorking : null,
+        currentSetWeightsKg: currentSetWeights,
         history: history
             .take(historyLimit)
             .map((session) => _historySession(session, isCardio))
@@ -158,6 +175,30 @@ abstract final class WorkoutSuggestionContextBuilder {
       },
       'exercises': exercises.map((e) => e.toJson()).toList(),
     });
+  }
+
+  /// Peso mínimo de trabajo por ejercicio. Con buena recuperación no baja del historial.
+  static Map<String, double> minWorkingWeightKg({
+    required List<WorkoutExercise> exercises,
+    required List<WorkoutSuggestionExerciseContext> context,
+  }) {
+    final byId = {for (final item in context) item.exerciseId: item};
+    final floors = <String, double>{};
+    for (final ex in exercises) {
+      if (ex.sets.any((set) => set.isCardio)) continue;
+      final ctx = byId[ex.exerciseId];
+      final local = ExerciseHistoryUtils.workingWeightKg(ex.sets);
+      final hist = (ctx?.latestSessionSummary?['working_weight_kg'] as num?)?.toDouble() ??
+          (ctx?.recentTopSet?['weight_kg'] as num?)?.toDouble() ??
+          0;
+      var floor = local > hist ? local : hist;
+      if (floor <= 0) continue;
+      if ((ctx?.recoveryPercent ?? 100) < 60) {
+        floor *= 0.9;
+      }
+      floors[ex.exerciseId] = floor;
+    }
+    return floors;
   }
 
   static double _recoveryForMuscles(
@@ -416,14 +457,22 @@ abstract final class AiWorkoutSuggestionsMerger {
     required List<WorkoutExercise> exercises,
     required AiWorkoutSuggestions suggestions,
     String unitSystem = 'kg',
+    Map<String, double> minWorkingWeightKg = const {},
   }) {
     return exercises.map((ex) {
       final suggested = suggestions.forExercise(ex.exerciseId);
       if (suggested == null || suggested.isEmpty) return ex;
 
       final isCardio = ex.sets.any((s) => s.isCardio);
-      final clamped = _clampSetCount(suggested, isCardio: isCardio);
+      var clamped = _clampSetCount(suggested, isCardio: isCardio);
       if (clamped.isEmpty) return ex;
+      if (!isCardio) {
+        clamped = enforceWorkingWeightFloor(
+          clamped,
+          floorKg: minWorkingWeightKg[ex.exerciseId] ?? 0,
+          unitSystem: unitSystem,
+        );
+      }
 
       final templateSet = ex.sets.isNotEmpty ? ex.sets.first : null;
       final loggingType = isCardio
@@ -484,6 +533,50 @@ abstract final class AiWorkoutSuggestionsMerger {
     if (sets.length > max) return sets.take(max).toList();
     if (sets.length < minSets) return const [];
     return sets;
+  }
+
+  /// Si la IA propone un techo más bajo que el historial, escala todo para no recortar el trabajo.
+  static List<AiExerciseSetSuggestion> enforceWorkingWeightFloor(
+    List<AiExerciseSetSuggestion> sets, {
+    required double floorKg,
+    required String unitSystem,
+  }) {
+    if (floorKg <= 0 || sets.isEmpty) return sets;
+
+    final weights = sets.map((set) => set.weightKg ?? 0).where((weight) => weight > 0).toList();
+    if (weights.isEmpty) {
+      return sets
+          .map(
+            (set) => AiExerciseSetSuggestion(
+              setNumber: set.setNumber,
+              weightKg: GymWeight.snapKg(floorKg, unitSystem),
+              reps: set.reps,
+              durationSeconds: set.durationSeconds,
+              distanceMeters: set.distanceMeters,
+              inclinePercent: set.inclinePercent,
+              steps: set.steps,
+            ),
+          )
+          .toList();
+    }
+
+    final maxW = weights.reduce((a, b) => a > b ? a : b);
+    if (maxW >= floorKg) return sets;
+
+    final scale = floorKg / maxW;
+    return sets
+        .map(
+          (set) => AiExerciseSetSuggestion(
+            setNumber: set.setNumber,
+            weightKg: GymWeight.snapKg((set.weightKg ?? maxW) * scale, unitSystem),
+            reps: set.reps,
+            durationSeconds: set.durationSeconds,
+            distanceMeters: set.distanceMeters,
+            inclinePercent: set.inclinePercent,
+            steps: set.steps,
+          ),
+        )
+        .toList();
   }
 
   static WorkoutSet? _existingSet(List<WorkoutSet> sets, int setNumber) {
