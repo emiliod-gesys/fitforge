@@ -307,7 +307,8 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                 decoration: InputDecoration(
                   labelText: l10n.foodQuantityLabel(unit),
                   suffixText: unit,
-                  helperText: widget.source == FoodEntrySource.barcode
+                  helperText: widget.source == FoodEntrySource.barcode &&
+                          _baseEstimate.referenceAmount == 100
                       ? l10n.foodPer100gNote
                       : l10n.foodMacrosAutoHint,
                 ),

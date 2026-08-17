@@ -634,7 +634,7 @@ class _PackagedFoodTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${QuantityFormat.kcal(estimate.caloriesKcal)}, 100 ${estimate.amountUnit}',
+          '${QuantityFormat.kcal(estimate.caloriesKcal)}, ${estimate.servingDescription ?? FoodServingParser.formatAmount(estimate.referenceAmount, estimate.amountUnit)}',
         ),
         trailing: IconButton(
           icon: Icon(Icons.add_circle, color: context.accentColor),
