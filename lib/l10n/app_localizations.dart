@@ -6512,6 +6512,30 @@ abstract class AppLocalizations {
   /// **'Toca para ampliar'**
   String get foodPhotoTapToExpand;
 
+  /// No description provided for @foodPhotoContextTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quieres añadir contexto?'**
+  String get foodPhotoContextTitle;
+
+  /// No description provided for @foodPhotoContextHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Opcional. Por ejemplo: aceite, salsa, el peso exacto o un ingrediente que no se ve bien.'**
+  String get foodPhotoContextHint;
+
+  /// No description provided for @foodPhotoContextPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: lleva 1 cucharada de aceite y el pollo era a la plancha'**
+  String get foodPhotoContextPlaceholder;
+
+  /// No description provided for @foodPhotoContextAnalyze.
+  ///
+  /// In es, this message translates to:
+  /// **'Analizar'**
+  String get foodPhotoContextAnalyze;
+
   /// No description provided for @foodQuantityLabel.
   ///
   /// In es, this message translates to:

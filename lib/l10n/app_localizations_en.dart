@@ -3734,6 +3734,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodPhotoTapToExpand => 'Tap to enlarge';
 
   @override
+  String get foodPhotoContextTitle => 'Want to add context?';
+
+  @override
+  String get foodPhotoContextHint =>
+      'Optional. For example: oil, sauce, the exact weight, or an ingredient that isn’t clearly visible.';
+
+  @override
+  String get foodPhotoContextPlaceholder =>
+      'E.g. it has 1 tbsp of oil and the chicken was grilled';
+
+  @override
+  String get foodPhotoContextAnalyze => 'Analyze';
+
+  @override
   String foodQuantityLabel(String unit) {
     return 'Amount ($unit)';
   }

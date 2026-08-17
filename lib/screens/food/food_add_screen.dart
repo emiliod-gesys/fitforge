@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -305,12 +306,18 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
       return;
     }
 
+    final bytes = await image.readAsBytes();
+    if (!mounted) return;
+
+    final extraContext = await _askPhotoContext(bytes);
+    if (extraContext == null || !mounted) return;
+
     setState(() => _loading = true);
     try {
-      final bytes = await image.readAsBytes();
       final estimate = await ref.read(aiCoachServiceProvider).estimateFoodFromImage(
             imageBytes: bytes,
             profile: profile,
+            userContext: extraContext,
           );
       if (!mounted) return;
       if (estimate == null) {
@@ -323,6 +330,13 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<String?> _askPhotoContext(List<int> imageBytes) {
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => _FoodPhotoContextDialog(imageBytes: imageBytes),
+    );
   }
 
   Future<void> _pickFoodImage(ImageSource source) async {
@@ -1668,6 +1682,100 @@ class _ModeTabs extends StatelessWidget {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _FoodPhotoContextDialog extends StatefulWidget {
+  final List<int> imageBytes;
+
+  const _FoodPhotoContextDialog({required this.imageBytes});
+
+  @override
+  State<_FoodPhotoContextDialog> createState() => _FoodPhotoContextDialogState();
+}
+
+class _FoodPhotoContextDialogState extends State<_FoodPhotoContextDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.foodPhotoContextTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  height: 160,
+                  width: double.infinity,
+                  child: Image.memory(
+                    Uint8List.fromList(widget.imageBytes),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.foodPhotoContextHint,
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _controller,
+                maxLines: 3,
+                minLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: l10n.foodPhotoContextPlaceholder,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, _controller.text.trim()),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: context.accentColor,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(l10n.foodPhotoContextAnalyze),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

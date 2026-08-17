@@ -1533,6 +1533,7 @@ JSON:
   Future<FoodNutritionEstimate?> estimateFoodFromImage({
     required List<int> imageBytes,
     UserProfile? profile,
+    String? userContext,
   }) async {
     if (!await _profileService.hasUsableAiKey(profile)) return null;
 
@@ -1541,8 +1542,16 @@ JSON:
     if (apiKey == null || apiKey.isEmpty) return null;
 
     final lang = _resolveLanguageCode(profile: profile);
+    final extra = userContext?.trim() ?? '';
+    final contextBlock = extra.isEmpty
+        ? ''
+        : '''
+
+Contexto adicional del usuario (prioriza esto si contradice o aclara la foto; no ignores ingredientes, cantidades, aceite, salsas o método de cocción que mencione):
+"$extra"
+''';
     final prompt = '''
-Identifica la comida en la imagen y estima nutrición de la porción visible en el plato.
+Identifica la comida en la imagen y estima nutrición de la porción visible en el plato.$contextBlock
 ${languageInstruction(lang)}
 Responde SOLO JSON válido sin markdown.
 
