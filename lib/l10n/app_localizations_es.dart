@@ -909,14 +909,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proactiveAiSubtitleOff => 'La IA solo responde cuando le escribes';
 
   @override
-  String get proactiveAiSubtitleOn => 'Activada · puede consumir más tokens';
+  String get proactiveAiSubtitleOn => 'Activada';
 
   @override
   String get proactiveAiEnableTitle => '¿Activar IA proactiva?';
 
   @override
   String get proactiveAiEnableMessage =>
-      'FORGEN podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.';
+      'FORGEN podrá enviarte sugerencias al iniciar el entreno sin que las pidas.';
 
   @override
   String get proactiveAiEnableConfirm => 'Activar';

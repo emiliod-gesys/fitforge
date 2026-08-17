@@ -1709,7 +1709,7 @@ abstract class AppLocalizations {
   /// No description provided for @proactiveAiSubtitleOn.
   ///
   /// In es, this message translates to:
-  /// **'Activada · puede consumir más tokens'**
+  /// **'Activada'**
   String get proactiveAiSubtitleOn;
 
   /// No description provided for @proactiveAiEnableTitle.
@@ -1721,7 +1721,7 @@ abstract class AppLocalizations {
   /// No description provided for @proactiveAiEnableMessage.
   ///
   /// In es, this message translates to:
-  /// **'FORGEN podrá enviarte sugerencias durante el entreno sin que las pidas. Esto puede aumentar el uso de IA.'**
+  /// **'FORGEN podrá enviarte sugerencias al iniciar el entreno sin que las pidas.'**
   String get proactiveAiEnableMessage;
 
   /// No description provided for @proactiveAiEnableConfirm.

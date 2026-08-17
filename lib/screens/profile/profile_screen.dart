@@ -1042,32 +1042,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) async {
     if (enabled == currentlyEnabled) return;
 
-    if (enabled) {
-      final l10n = context.l10n;
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.proactiveAiEnableTitle),
-          content: Text(l10n.proactiveAiEnableMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(
-                backgroundColor: context.accentColor,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(l10n.proactiveAiEnableConfirm),
-            ),
-          ],
-        ),
-      );
-      if (confirm != true || !mounted) return;
-    }
-
     await AiPreferences.setProactiveAiEnabled(enabled);
     ref.invalidate(aiProactiveEnabledProvider);
   }

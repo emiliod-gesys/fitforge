@@ -901,14 +901,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proactiveAiSubtitleOff => 'AI only responds when you message it';
 
   @override
-  String get proactiveAiSubtitleOn => 'Enabled · may use more tokens';
+  String get proactiveAiSubtitleOn => 'Enabled';
 
   @override
   String get proactiveAiEnableTitle => 'Enable proactive AI?';
 
   @override
   String get proactiveAiEnableMessage =>
-      'FORGEN may send workout suggestions without you asking. This can increase AI usage.';
+      'FORGEN may send workout suggestions when you start a session without you asking.';
 
   @override
   String get proactiveAiEnableConfirm => 'Enable';
