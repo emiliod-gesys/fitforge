@@ -7,5 +7,8 @@
     <string name="plus_15">+15s</string>
     <string name="rest_label">Descanso</string>
     <string name="set_label">Set %1$d</string>
+    <string name="set_progress">Set %1$d/%2$d</string>
+    <string name="rir_prompt">RIR</string>
+    <string name="rir_skip">Omitir</string>
     <string name="cardio_unsupported">Cardio solo en el teléfono</string>
 </resources>

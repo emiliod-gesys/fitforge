@@ -17,6 +17,7 @@ import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/cloud_exercise_download_provider.dart';
 import '../../providers/onboarding_progress_provider.dart';
+import '../../services/billing_service.dart';
 import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
@@ -372,9 +373,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
       await ref.read(profileServiceProvider).updateProfile({
         'onboarding_completed_at': DateTime.now().toUtc().toIso8601String(),
-        // Paid tiers require IAP — keep free until billing ships.
         'subscription_tier': SubscriptionTier.free.code,
       });
+
+      if (!_selectedPlan.isFree) {
+        final billing = ref.read(billingServiceProvider);
+        billing.ensureListening();
+        final result = await billing.purchase(_selectedPlan);
+        if (!mounted) return;
+        if (result.outcome == BillingOutcome.cancelled) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.onboardingPlanPurchaseCancelled)),
+          );
+        } else if (result.outcome == BillingOutcome.unavailable ||
+            result.outcome == BillingOutcome.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.subscriptionPurchaseFailed)),
+          );
+        }
+      }
 
       ref.invalidate(profileProvider);
       final profile = await ref.read(profileProvider.future);
@@ -395,11 +412,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ref.read(onboardingProgressProvider.notifier).reset();
 
       if (!mounted) return;
-      if (!_selectedPlan.isFree) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.onboardingPlanPaidSoon)),
-        );
-      }
       context.go('/');
     } catch (e) {
       if (mounted) {

@@ -20,6 +20,7 @@ import '../../core/utils/exercise_load.dart';
 import '../../core/utils/exercise_logging_resolver.dart';
 import '../../core/utils/gym_weight.dart';
 import '../../core/utils/previous_set_utils.dart';
+import '../../core/utils/rir_weight_adjustment.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../models/exercise_history.dart';
 import '../../core/utils/cardio_format.dart';
@@ -91,6 +92,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   bool _perArmSeeded = false;
   /// Unidad por ejercicio en la sesión (`kg`/`lb`); no persiste ni cambia el perfil.
   final Map<String, String> _unitOverrides = {};
+  /// Peso planeado de cada serie antes de un ajuste por RIR de la anterior.
+  final Map<String, double> _rirWeightBaselines = {};
   bool _isHyroxWorkout = false;
   HyroxLevel? _hyroxLevel;
   List<RoutineExercise> _hyroxRoutineExercises = const [];
@@ -341,13 +344,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           await _publishWatchSession(workout);
         }
       case WatchActionType.completeSet:
-        await _completeSetFromWatch(workout);
+        await _completeSetFromWatch(workout, action);
       case WatchActionType.updateSet:
         break;
     }
   }
 
-  Future<void> _completeSetFromWatch(Workout workout) async {
+  Future<void> _completeSetFromWatch(
+    Workout workout,
+    WatchWorkoutAction action,
+  ) async {
     final setId = ref.read(watchWorkoutCoordinatorProvider).lastSnapshot?.setId;
     if (setId == null) return;
 
@@ -374,6 +380,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           wasAlreadyCompleted: false,
           isCardio: false,
           isLastSet: isLastSet,
+          fromWatch: true,
+          watchRir: action.skipRir ? null : action.rir,
         );
         return;
       }
@@ -1876,6 +1884,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     required bool isCardio,
     required bool isLastSet,
     CardioLoggingConfig? cardioConfig,
+    bool fromWatch = false,
+    int? watchRir,
   }) async {
     if (!wasAlreadyCompleted && !_isHyroxWorkout) {
       if (isCardio) {
@@ -1939,9 +1949,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
     }
 
-    int? rir;
-    if (!wasAlreadyCompleted && !isCardio && isLastSet && mounted && !_isHyroxWorkout) {
-      rir = await RirPickerSheet.show(context);
+    int? rir = set.rir;
+    if (!wasAlreadyCompleted && !isCardio && mounted && !_isHyroxWorkout) {
+      if (fromWatch) {
+        rir = watchRir;
+      } else {
+        rir = await RirPickerSheet.show(context);
+      }
     }
 
     final stationSeconds = (_isHyroxWorkout && _stationStartedAt != null && !wasAlreadyCompleted)
@@ -1959,22 +1973,44 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     );
 
     String? nextFocusId;
+    WorkoutSet? adjustedNextSet;
     if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
+      final String resolvedUnit =
+          _unitOverrides[exercise.exerciseId] ?? ref.read(unitSystemProvider);
       final sorted = _sortedSets(exercise);
       for (final candidate in sorted) {
         if (candidate.setNumber <= set.setNumber) continue;
         final effective = candidate.id == set.id
             ? completedSet
             : (_setOverrides[candidate.id] ?? candidate);
-        if (!effective.completed) {
-          nextFocusId = candidate.id;
-          break;
+        if (effective.completed) continue;
+        nextFocusId = candidate.id;
+        final selectedRir = rir;
+        if (selectedRir != null) {
+          final baseline = _rirWeightBaselines[effective.id] ?? effective.weight;
+          if (baseline != null && baseline > 0) {
+            _rirWeightBaselines[effective.id] = baseline;
+            final nextKg = RirWeightAdjustment.apply(
+              baselineKg: baseline,
+              rir: selectedRir,
+              unitSystem: resolvedUnit,
+            );
+            if (nextKg != null &&
+                (effective.weight == null ||
+                    (effective.weight! - nextKg).abs() > 0.01)) {
+              adjustedNextSet = effective.copyWith(weight: nextKg);
+            }
+          }
         }
+        break;
       }
     }
 
     setState(() {
       _setOverrides[set.id] = completedSet;
+      if (adjustedNextSet != null) {
+        _setOverrides[adjustedNextSet.id] = adjustedNextSet;
+      }
       _savingSetIds.add(set.id);
       if (nextFocusId != null) _focusSetId = nextFocusId;
     });
@@ -1988,6 +2024,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       completedSet,
       setId: set.id,
     );
+    if (adjustedNextSet != null) {
+      unawaited(
+        _persistSet(
+          exercise,
+          adjustedNextSet,
+          setId: adjustedNextSet.id,
+        ),
+      );
+    }
     if (_isHyroxWorkout) {
       await persist;
     } else {

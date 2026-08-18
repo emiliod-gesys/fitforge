@@ -16,8 +16,10 @@ major_version = 15
 
 [auth]
 enabled = true
-site_url = "io.fitforge.fitforge://login-callback"
+site_url = "forgen.app://login-callback"
 additional_redirect_urls = [
+  "forgen.app://login-callback",
+  "forgen.app://reset-password",
   "io.fitforge.fitforge://login-callback",
   "io.fitforge.fitforge://reset-password",
   "io.fitforge.app://login-callback",

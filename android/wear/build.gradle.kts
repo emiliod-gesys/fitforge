@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "io.fitforge.fitforge"
+        applicationId = "forgen.app"
         minSdk = 30
         targetSdk = 35
         versionCode = 1

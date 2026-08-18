@@ -12,6 +12,7 @@ import 'providers/app_providers.dart';
 import 'services/local_notification_service.dart';
 import 'services/rest_sound_service.dart';
 import 'services/supabase_service.dart';
+import 'widgets/billing_bootstrap.dart';
 import 'widgets/push_notification_bootstrap.dart';
 import 'widgets/offline_sync_bootstrap.dart';
 import 'widgets/offline_status_banner.dart';
@@ -26,7 +27,8 @@ class FitForgeApp extends ConsumerWidget {
     final accent = ref.watch(accentProvider);
 
     return OfflineSyncBootstrap(
-      child: PushNotificationBootstrap(
+      child: BillingBootstrap(
+        child: PushNotificationBootstrap(
         router: router,
         child: MaterialApp.router(
           scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -50,6 +52,7 @@ class FitForgeApp extends ConsumerWidget {
               ],
             );
           },
+        ),
         ),
       ),
     );

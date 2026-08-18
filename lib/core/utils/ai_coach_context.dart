@@ -9,6 +9,7 @@ import '../../services/routine_limit_service.dart';
 import 'ai_coach_routine_prompt.dart';
 import 'cardio_format.dart';
 import 'player_level.dart';
+import 'rir_weight_adjustment.dart';
 import 'unit_converter.dart';
 import 'workout_streak.dart';
 
@@ -25,6 +26,7 @@ abstract final class AiCoachContextBuilder {
     RoutineLimitStatus? routineLimit,
   }) {
     final buffer = StringBuffer();
+    _appendAnchor(buffer, recentWorkouts, nutrition, profile?.unitSystem ?? 'kg');
 
     if (profile != null) {
       buffer.writeln('=== PERFIL PERSONAL ===');
@@ -76,6 +78,124 @@ abstract final class AiCoachContextBuilder {
 
     final text = buffer.toString().trim();
     return text.isEmpty ? 'Sin datos de perfil registrados aún.' : text;
+  }
+
+  static void _appendAnchor(
+    StringBuffer buffer,
+    List<Workout>? workouts,
+    CoachNutritionSnapshot? nutrition,
+    String unitSystem,
+  ) {
+    buffer.writeln('=== ANCLAJE OBLIGATORIO (datos reales; no inventes) ===');
+    _appendLastWorkoutDetail(buffer, workouts, unitSystem);
+    _appendTodayNutritionAnchor(buffer, nutrition);
+  }
+
+  static Workout? _latestCompletedWorkout(List<Workout>? workouts) {
+    if (workouts == null || workouts.isEmpty) return null;
+    final completed = workouts.where((w) => w.completedAt != null).toList()
+      ..sort((a, b) => (b.completedAt ?? b.startedAt).compareTo(a.completedAt ?? a.startedAt));
+    if (completed.isNotEmpty) return completed.first;
+    final sorted = [...workouts]
+      ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    return sorted.first;
+  }
+
+  static void _appendLastWorkoutDetail(
+    StringBuffer buffer,
+    List<Workout>? workouts,
+    String unitSystem,
+  ) {
+    buffer.writeln('\n=== ÚLTIMO ENTRENO ===');
+    final workout = _latestCompletedWorkout(workouts);
+    if (workout == null) {
+      buffer.writeln('Sin entrenos registrados todavía.');
+      return;
+    }
+
+    final when = workout.completedAt ?? workout.startedAt;
+    final local = when.toLocal();
+    final date =
+        '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year}';
+    buffer.writeln(
+      '${workout.name} — $date, ${workout.durationMinutes} min, '
+      'volumen ${UnitConverter.formatVolume(workout.totalVolume, unitSystem)}',
+    );
+    if (workout.exercises.isEmpty) {
+      buffer.writeln('Sin ejercicios en este entreno.');
+      return;
+    }
+    for (final ex in workout.exercises) {
+      final sets = [...ex.sets]..sort((a, b) => a.setNumber.compareTo(b.setNumber));
+      if (sets.isEmpty) {
+        buffer.writeln('- ${ex.exerciseName}: sin series');
+        continue;
+      }
+      final lines = sets.map((s) => _setLine(s, unitSystem)).join('; ');
+      buffer.writeln('- ${ex.exerciseName}: $lines');
+    }
+  }
+
+  static String _setLine(WorkoutSet set, String unitSystem) {
+    final done = set.completed ? '' : ' (incompleta)';
+    final rir = set.rir != null ? ' RIR ${RirWeightAdjustment.formatLabel(set.rir!)}' : '';
+    if (set.isCardio) {
+      return 's${set.setNumber}$done$rir';
+    }
+    if (set.weight == null) {
+      return 's${set.setNumber}: ${set.reps} reps$rir$done';
+    }
+    return 's${set.setNumber}: ${UnitConverter.formatSetLine(set.weight!, set.reps, unitSystem)}$rir$done';
+  }
+
+  static void _appendTodayNutritionAnchor(
+    StringBuffer buffer,
+    CoachNutritionSnapshot? nutrition,
+  ) {
+    buffer.writeln('\n=== NUTRICIÓN DE HOY ===');
+    if (nutrition == null) {
+      buffer.writeln('Sin datos de nutrición cargados.');
+      return;
+    }
+    final today = nutrition.today;
+    if (today.caloriesEaten == 0 &&
+        today.entriesByMeal.values.every((e) => e.isEmpty)) {
+      buffer.writeln('Sin comidas registradas hoy.');
+      if (today.bmrAvailable) {
+        buffer.writeln(
+          'Meta del día: ${today.calorieBudget} kcal | '
+          'P ${today.targets.proteinG.toStringAsFixed(0)}g.',
+        );
+      }
+      return;
+    }
+    buffer.writeln(
+      'Kcal ${today.caloriesEaten}/${today.calorieBudget} '
+      '(${today.isCaloricSurplus ? 'superávit ${today.caloriesSurplus}' : 'restante ${today.caloriesRemaining}'}). '
+      'Proteína ${today.eaten.proteinG.toStringAsFixed(0)}/${today.targets.proteinG.toStringAsFixed(0)}g.',
+    );
+    final last = _lastMealToday(today);
+    if (last != null) {
+      final t = last.loggedAt.toLocal();
+      final time =
+          '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+      buffer.writeln(
+        'Última comida ($time): ${last.name} — ${last.caloriesKcal} kcal '
+        '(P ${last.proteinG.toStringAsFixed(0)}g).',
+      );
+    }
+  }
+
+  static FoodEntry? _lastMealToday(DailyNutritionSummary today) {
+    FoodEntry? last;
+    for (final entries in today.entriesByMeal.values) {
+      for (final entry in entries) {
+        if (last == null || entry.loggedAt.isAfter(last.loggedAt)) {
+          last = entry;
+        }
+      }
+    }
+    return last;
   }
 
   static void _appendBodyMetrics(
@@ -175,10 +295,10 @@ abstract final class AiCoachContextBuilder {
       buffer.writeln(
         '- ${w.name} (${w.durationMinutes} min, volumen: ${UnitConverter.formatVolume(w.totalVolume, unitSystem)})',
       );
-      for (final ex in w.exercises.take(4)) {
+      for (final ex in w.exercises) {
         final sets = ex.sets
-            .where((s) => s.completed && s.weight != null)
-            .map((s) => UnitConverter.formatSetLine(s.weight!, s.reps, unitSystem))
+            .where((s) => s.completed)
+            .map((s) => _setLine(s, unitSystem))
             .join(', ');
         if (sets.isNotEmpty) {
           buffer.writeln('  ${ex.exerciseName}: $sets');

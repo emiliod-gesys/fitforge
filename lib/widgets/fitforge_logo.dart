@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
+import '../core/theme/app_accent.dart';
 
 enum FitForgeLogoVariant { full, icon, wordmark }
 
 /// Brand assets.
 ///
 /// - [full] / brand lockup: isotipo + wordmark FORGEN (AppBar / login).
-/// - [icon]: isotipo solo — se actualizará cuando llegue el nuevo archivo.
+/// - [icon]: isotipo solo.
 abstract final class ForgenBrandAssets {
   static const brandLockup = 'assets/images/logo_brand.png';
   static const icon = 'assets/images/logo_icon.png';
@@ -36,30 +36,46 @@ class FitForgeLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.accentColor;
     return switch (variant) {
-      FitForgeLogoVariant.full => Image.asset(
-          ForgenBrandAssets.brandLockup,
-          height: height ?? 140,
-          width: width,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
+      FitForgeLogoVariant.full => _tinted(
+          accent,
+          Image.asset(
+            ForgenBrandAssets.brandLockup,
+            height: height ?? 140,
+            width: width,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          ),
         ),
-      FitForgeLogoVariant.icon => Image.asset(
-          ForgenBrandAssets.icon,
-          height: height ?? 64,
-          width: width ?? height ?? 64,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
+      FitForgeLogoVariant.icon => _tinted(
+          accent,
+          Image.asset(
+            ForgenBrandAssets.icon,
+            height: height ?? 64,
+            width: width ?? height ?? 64,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+          ),
         ),
-      FitForgeLogoVariant.wordmark => _Wordmark(height: height ?? 32),
+      FitForgeLogoVariant.wordmark => _Wordmark(height: height ?? 32, color: accent),
     };
+  }
+
+  static Widget _tinted(Color color, Widget child) {
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      child: child,
+    );
   }
 }
 
 class _Wordmark extends StatelessWidget {
   final double height;
+  final Color color;
 
-  const _Wordmark({required this.height});
+  const _Wordmark({required this.height, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +87,7 @@ class _Wordmark extends StatelessWidget {
         fontWeight: FontWeight.w700,
         letterSpacing: 1.4,
         fontFamily: 'Montserrat',
-        color: AppColors.logoForge,
+        color: color,
       ),
     );
   }

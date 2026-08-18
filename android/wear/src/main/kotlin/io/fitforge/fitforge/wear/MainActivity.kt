@@ -8,14 +8,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -24,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -47,8 +53,13 @@ private fun WorkoutCompanionScreen() {
     var restRemaining by remember(session.restEndsAtEpochMs) {
         mutableIntStateOf(session.restRemainingSeconds ?: 0)
     }
+    var awaitingRir by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(session.setNumber, session.exerciseName, session.restActive) {
+        if (session.restActive) awaitingRir = false
+    }
 
     LaunchedEffect(session.restEndsAtEpochMs) {
         var vibrated = false
@@ -99,14 +110,18 @@ private fun WorkoutCompanionScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(session.exerciseName, textAlign = TextAlign.Center)
-        Text(stringResource(R.string.set_label, session.setNumber))
+        Text(session.exerciseName, textAlign = TextAlign.Center, fontSize = 14.sp)
+        Text(
+            stringResource(R.string.set_progress, session.setNumber, session.totalSets),
+            fontSize = 13.sp,
+        )
         val unit = if (session.unitSystem == "lb") "lb" else "kg"
-        Text("${session.weight ?: "-"} $unit × ${session.reps} reps")
+        val weightText = session.weightLabel ?: session.weight?.toString() ?: "-"
+        Text("$weightText $unit × ${session.reps}")
 
         if (session.restActive) {
             Text("${stringResource(R.string.rest_label)} ${restRemaining}s")
@@ -118,32 +133,96 @@ private fun WorkoutCompanionScreen() {
             ) {
                 Text(stringResource(R.string.skip_rest))
             }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    scope.launch { WatchActionSender.send(context, "adjust_rest", -15) }
-                },
-            ) {
-                Text(stringResource(R.string.minus_15))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        scope.launch { WatchActionSender.send(context, "adjust_rest", -15) }
+                    },
+                ) {
+                    Text(stringResource(R.string.minus_15))
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        scope.launch { WatchActionSender.send(context, "adjust_rest", 15) }
+                    },
+                ) {
+                    Text(stringResource(R.string.plus_15))
+                }
+            }
+        } else if (awaitingRir) {
+            Text(stringResource(R.string.rir_prompt), fontSize = 13.sp)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                RirButton(
+                    modifier = Modifier.weight(1f),
+                    label = "0",
+                    onClick = {
+                        awaitingRir = false
+                        scope.launch { WatchActionSender.send(context, "complete_set", rir = 0) }
+                    },
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                RirButton(
+                    modifier = Modifier.weight(1f),
+                    label = "1",
+                    onClick = {
+                        awaitingRir = false
+                        scope.launch { WatchActionSender.send(context, "complete_set", rir = 1) }
+                    },
+                )
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                RirButton(
+                    modifier = Modifier.weight(1f),
+                    label = "2",
+                    onClick = {
+                        awaitingRir = false
+                        scope.launch { WatchActionSender.send(context, "complete_set", rir = 2) }
+                    },
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                RirButton(
+                    modifier = Modifier.weight(1f),
+                    label = "+3",
+                    onClick = {
+                        awaitingRir = false
+                        scope.launch { WatchActionSender.send(context, "complete_set", rir = 3) }
+                    },
+                )
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    scope.launch { WatchActionSender.send(context, "adjust_rest", 15) }
+                    awaitingRir = false
+                    scope.launch { WatchActionSender.send(context, "complete_set", skipRir = true) }
                 },
             ) {
-                Text(stringResource(R.string.plus_15))
+                Text(stringResource(R.string.rir_skip))
             }
         } else {
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    scope.launch { WatchActionSender.send(context, "complete_set") }
-                },
+                onClick = { awaitingRir = true },
             ) {
                 Text(stringResource(R.string.complete_set))
             }
         }
+    }
+}
+
+@Composable
+private fun RirButton(
+    modifier: Modifier,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Button(
+        modifier = modifier.height(40.dp),
+        onClick = onClick,
+    ) {
+        Text(label)
     }
 }
 

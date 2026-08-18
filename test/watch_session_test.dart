@@ -32,11 +32,21 @@ void main() {
   });
 
   group('WatchWorkoutAction', () {
-    test('decodes complete_set action', () {
+    test('decodes complete_set with rir', () {
       final action = WatchWorkoutAction.decode(
-        jsonEncode({'type': 'complete_set'}),
+        jsonEncode({'type': 'complete_set', 'rir': 2}),
       );
       expect(action?.type, WatchActionType.completeSet);
+      expect(action?.rir, 2);
+      expect(action?.skipRir, isFalse);
+    });
+
+    test('decodes complete_set skip rir', () {
+      final action = WatchWorkoutAction.decode(
+        jsonEncode({'type': 'complete_set', 'skipRir': true}),
+      );
+      expect(action?.skipRir, isTrue);
+      expect(action?.rir, isNull);
     });
 
     test('decodes adjust_rest action', () {

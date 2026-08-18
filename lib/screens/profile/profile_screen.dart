@@ -32,6 +32,7 @@ import '../../widgets/profile_avatar.dart';
 import '../../widgets/profile/accent_color_selector.dart';
 import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
+import '../../widgets/profile/subscription_plan_section.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
 import '../../widgets/food/calorie_budget_editor_sheet.dart';
 import '../../widgets/food/water_budget_editor_sheet.dart';
@@ -55,6 +56,7 @@ enum _ProfileSection {
   appearance,
   offline,
   account,
+  plan,
 }
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -149,6 +151,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.appearance => _preferencesSection(profile),
                 _ProfileSection.offline => _offlineSection(context),
                 _ProfileSection.account => _accountSection(),
+                _ProfileSection.plan => SubscriptionPlanSection(profile: profile),
               };
             }
 
@@ -234,6 +237,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () => context.go('/students'),
                     ),
                   ],
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.workspace_premium_outlined,
+                    title: l10n.profileHubPlanTitle,
+                    subtitle: l10n.profileHubPlanSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.plan,
+                      l10n.profileHubPlanTitle,
+                    ),
+                  ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
                     icon: Icons.manage_accounts_outlined,

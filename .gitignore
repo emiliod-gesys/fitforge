@@ -28,6 +28,9 @@ tool/*.log
 dart_defines.json
 .env
 *.keystore
+*.jks
+android/key.properties
+android/play-verification/
 
 # IDE
 .idea/

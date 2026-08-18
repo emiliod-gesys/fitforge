@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/utils/gym_weight.dart';
 import '../models/watch_session.dart';
 import '../models/workout.dart';
 import 'watch_session_bridge.dart';
@@ -58,6 +59,11 @@ class WatchWorkoutCoordinator {
       orElse: () => visibleSets.last,
     );
 
+    final remainingSets = visibleSets.where((s) => !s.completed).length;
+    final weightLabel = currentSet.weight == null
+        ? null
+        : GymWeight.formatDisplay(currentSet.weight!, unitSystem);
+
     final snapshot = WatchWorkoutSnapshot(
       workoutId: workout.id,
       exerciseId: exercise.id,
@@ -68,6 +74,9 @@ class WatchWorkoutCoordinator {
       reps: currentSet.reps,
       unitSystem: unitSystem,
       isCardio: currentSet.isCardio,
+      weightLabel: weightLabel,
+      totalSets: visibleSets.length,
+      remainingSets: remainingSets,
       restEndsAtEpochMs: restEndsAt?.millisecondsSinceEpoch,
       restTotalSeconds: restTotalSeconds,
       updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,

@@ -12,6 +12,9 @@ class WatchWorkoutSnapshot {
     required this.reps,
     required this.unitSystem,
     required this.isCardio,
+    this.weightLabel,
+    this.totalSets = 1,
+    this.remainingSets = 1,
     this.restEndsAtEpochMs,
     this.restTotalSeconds,
     required this.updatedAtEpochMs,
@@ -26,6 +29,9 @@ class WatchWorkoutSnapshot {
   final int reps;
   final String unitSystem;
   final bool isCardio;
+  final String? weightLabel;
+  final int totalSets;
+  final int remainingSets;
   final int? restEndsAtEpochMs;
   final int? restTotalSeconds;
   final int updatedAtEpochMs;
@@ -44,6 +50,9 @@ class WatchWorkoutSnapshot {
         'reps': reps,
         'unitSystem': unitSystem,
         'isCardio': isCardio,
+        if (weightLabel != null) 'weightLabel': weightLabel,
+        'totalSets': totalSets,
+        'remainingSets': remainingSets,
         'restEndsAtEpochMs': restEndsAtEpochMs,
         'restTotalSeconds': restTotalSeconds,
         'updatedAtEpochMs': updatedAtEpochMs,
@@ -60,6 +69,9 @@ class WatchWorkoutSnapshot {
       reps: json['reps'] as int? ?? 0,
       unitSystem: json['unitSystem'] as String? ?? 'kg',
       isCardio: json['isCardio'] as bool? ?? false,
+      weightLabel: json['weightLabel'] as String?,
+      totalSets: json['totalSets'] as int? ?? 1,
+      remainingSets: json['remainingSets'] as int? ?? 1,
       restEndsAtEpochMs: json['restEndsAtEpochMs'] as int?,
       restTotalSeconds: json['restTotalSeconds'] as int?,
       updatedAtEpochMs: json['updatedAtEpochMs'] as int? ??
@@ -92,12 +104,16 @@ class WatchWorkoutAction {
     this.deltaSeconds,
     this.weight,
     this.reps,
+    this.rir,
+    this.skipRir = false,
   });
 
   final WatchActionType type;
   final int? deltaSeconds;
   final double? weight;
   final int? reps;
+  final int? rir;
+  final bool skipRir;
 
   Map<String, dynamic> toJson() {
     return {
@@ -110,6 +126,8 @@ class WatchWorkoutAction {
       if (deltaSeconds != null) 'deltaSeconds': deltaSeconds,
       if (weight != null) 'weight': weight,
       if (reps != null) 'reps': reps,
+      if (rir != null) 'rir': rir,
+      if (skipRir) 'skipRir': true,
     };
   }
 
@@ -127,6 +145,8 @@ class WatchWorkoutAction {
       deltaSeconds: json['deltaSeconds'] as int?,
       weight: (json['weight'] as num?)?.toDouble(),
       reps: json['reps'] as int?,
+      rir: json['rir'] as int?,
+      skipRir: json['skipRir'] as bool? ?? false,
     );
   }
 

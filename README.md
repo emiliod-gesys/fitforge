@@ -109,11 +109,11 @@ Sin las variables `FIREBASE_*` la app funciona igual; solo se desactivan los pus
 1. **Google Cloud Console** (mismo proyecto que Firebase `fitforge-76fa2`):
    - **APIs & Services → Credentials → Create credentials → OAuth client ID**
    - Crea un cliente **Web** → copia el Client ID → `GOOGLE_WEB_CLIENT_ID` en `dart_defines.json`
-   - Crea un cliente **Android** (`io.fitforge.fitforge`) con el SHA-1 de debug/release
+   - Crea un cliente **Android** (`forgen.app`) con el SHA-1 de debug/release
    - Crea un cliente **iOS** (`io.fitforge.app`) → `GOOGLE_IOS_CLIENT_ID` en `dart_defines.json`
 2. **Supabase → Authentication → Providers → Google**: activa y pega el **Web Client ID** y **Client Secret**
 3. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**:
-   `io.fitforge.fitforge://login-callback`
+   `forgen.app://login-callback`
 4. **iOS** (`ios/Runner/Info.plist`): añade también el URL scheme invertido de Google:
    `com.googleusercontent.apps.TU_CLIENT_ID_SIN_SUFFIX` (ver consola de Google)
 5. Ejecuta `supabase/migrations/016_oauth_profile_metadata.sql` si aún no está aplicada
@@ -130,7 +130,7 @@ El SHA-1 de debug actual (para el cliente Android en Google Cloud) es:
    - Activa el proveedor.
    - iOS nativo: usa el **Services ID** / Bundle ID y la clave (`.p8`) de Sign in with Apple. Guía: [Auth Apple](https://supabase.com/docs/guides/auth/social-login/auth-apple).
 3. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**:
-   - `io.fitforge.fitforge://login-callback`
+   - `forgen.app://login-callback`
    - `io.fitforge.app://login-callback`
 4. En Xcode → Runner → Signing & Capabilities confirma **Sign In with Apple** (el repo ya incluye el entitlement).
 
@@ -141,8 +141,8 @@ En iOS el botón abre el sheet nativo de Apple. En Android abre OAuth en el nave
 Para que el enlace del email abra la app y permita elegir contraseña nueva:
 
 1. **Supabase → Authentication → URL Configuration → Additional Redirect URLs**, añade:
-   - `io.fitforge.fitforge://login-callback`
-   - `io.fitforge.fitforge://reset-password`
+   - `forgen.app://login-callback`
+   - `forgen.app://reset-password`
 2. (Opcional) **Authentication → Email Templates → Reset password**: personaliza asunto y cuerpo HTML. El enlace debe seguir usando `{{ .ConfirmationURL }}` (Supabase lo reemplaza automáticamente).
 3. En el móvil, al pulsar el enlace del correo se abre FitForge en la pantalla **Nueva contraseña**.
 

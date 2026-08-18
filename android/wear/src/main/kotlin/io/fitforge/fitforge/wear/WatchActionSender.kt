@@ -1,7 +1,6 @@
 package io.fitforge.fitforge.wear
 
 import android.content.Context
-import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
@@ -9,10 +8,18 @@ import org.json.JSONObject
 object WatchActionSender {
     private const val PATH_ACTION = "/fitforge/workout_action"
 
-    suspend fun send(context: Context, type: String, deltaSeconds: Int? = null) {
+    suspend fun send(
+        context: Context,
+        type: String,
+        deltaSeconds: Int? = null,
+        rir: Int? = null,
+        skipRir: Boolean = false,
+    ) {
         val payload = JSONObject().apply {
             put("type", type)
             if (deltaSeconds != null) put("deltaSeconds", deltaSeconds)
+            if (rir != null) put("rir", rir)
+            if (skipRir) put("skipRir", true)
         }.toString()
 
         val nodeClient = Wearable.getNodeClient(context)

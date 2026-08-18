@@ -65,6 +65,26 @@ enum SubscriptionTier {
   bool get isFree => this == SubscriptionTier.free;
 }
 
+enum SubscriptionSource {
+  none,
+  iap,
+  courtesy;
+
+  static SubscriptionSource fromCode(String? value) {
+    return switch (value) {
+      'iap' => SubscriptionSource.iap,
+      'courtesy' => SubscriptionSource.courtesy,
+      _ => SubscriptionSource.none,
+    };
+  }
+
+  String? get code => switch (this) {
+        SubscriptionSource.none => null,
+        SubscriptionSource.iap => 'iap',
+        SubscriptionSource.courtesy => 'courtesy',
+      };
+}
+
 enum UserType {
   athlete,
   trainer;
@@ -131,6 +151,9 @@ class UserProfile {
   final bool hasAiKey;
   final UserType userType;
   final SubscriptionTier subscriptionTier;
+  final SubscriptionSource subscriptionSource;
+  final String? subscriptionProductId;
+  final DateTime? subscriptionExpiresAt;
   final AppAccent accentColor;
   final bool hyroxMode;
   final bool runnerMode;
@@ -140,6 +163,8 @@ class UserProfile {
 
   bool get isTrainer => userType == UserType.trainer;
   bool get hasCompletedOnboarding => onboardingCompletedAt != null;
+  bool get isCourtesySubscription =>
+      subscriptionSource == SubscriptionSource.courtesy;
 
   /// Edad efectiva: prioriza fecha de nacimiento.
   int? get effectiveAge {
@@ -170,6 +195,9 @@ class UserProfile {
     this.hasAiKey = false,
     this.userType = UserType.athlete,
     this.subscriptionTier = SubscriptionTier.free,
+    this.subscriptionSource = SubscriptionSource.none,
+    this.subscriptionProductId,
+    this.subscriptionExpiresAt,
     this.accentColor = AppAccent.defaultAccent,
     this.hyroxMode = false,
     this.runnerMode = false,
@@ -205,6 +233,12 @@ class UserProfile {
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
       subscriptionTier:
           SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
+      subscriptionSource:
+          SubscriptionSource.fromCode(parseJsonString(json['subscription_source'])),
+      subscriptionProductId: parseJsonString(json['subscription_product_id']),
+      subscriptionExpiresAt: json['subscription_expires_at'] != null
+          ? DateTime.tryParse(json['subscription_expires_at'] as String)
+          : null,
       accentColor: AppAccent.fromCode(parseJsonString(json['accent_color'])),
       hyroxMode: json['hyrox_mode'] as bool? ?? false,
       runnerMode: json['runner_mode'] as bool? ?? false,

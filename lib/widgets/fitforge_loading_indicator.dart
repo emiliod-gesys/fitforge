@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import '../core/theme/app_accent.dart';
 import '../core/theme/app_colors.dart';
+import 'fitforge_logo.dart';
 
-/// Indicador de carga con animación Lottie (fondo transparente).
+/// Indicador de carga: anillos del acento + isotipo.
 class FitForgeLoadingIndicator extends StatelessWidget {
   /// Escala del anillo respecto al [size] base (anillos más grandes).
   static const spinnerScale = 1.65;
@@ -35,39 +37,12 @@ class FitForgeLoadingIndicator extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Lottie.asset(
-                'assets/animations/loading_spinner.json',
-                width: spinnerSize,
-                height: spinnerSize,
-                fit: BoxFit.contain,
-                repeat: true,
-                frameRate: FrameRate.max,
-                delegates: LottieDelegates(
-                  values: [
-                    ValueDelegate.color(
-                      const ['Outer Ring', 'Group 1', 'Stroke 1'],
-                      value: accent.accentColor,
-                    ),
-                    ValueDelegate.color(
-                      const ['Inner Ring', 'Group 1', 'Stroke 1'],
-                      value: accent.accentDark,
-                    ),
-                  ],
-                ),
-                errorBuilder: (_, __, ___) => SizedBox(
-                  width: spinnerSize,
-                  height: spinnerSize,
-                  child: CircularProgressIndicator(color: accent.accentColor),
-                ),
+              _AccentRings(
+                size: spinnerSize,
+                color: accent.accentColor,
+                darkColor: accent.accentDark,
               ),
-              Image.asset(
-                'assets/images/logo_icon.png',
-                width: logoSize,
-                height: logoSize,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-                gaplessPlayback: true,
-              ),
+              FitForgeLogo.icon(height: logoSize),
             ],
           ),
         ),
@@ -84,6 +59,110 @@ class FitForgeLoadingIndicator extends StatelessWidget {
         ],
       ],
     );
+  }
+}
+
+class _AccentRings extends StatefulWidget {
+  final double size;
+  final Color color;
+  final Color darkColor;
+
+  const _AccentRings({
+    required this.size,
+    required this.color,
+    required this.darkColor,
+  });
+
+  @override
+  State<_AccentRings> createState() => _AccentRingsState();
+}
+
+class _AccentRingsState extends State<_AccentRings> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return CustomPaint(
+          size: Size.square(widget.size),
+          painter: _AccentRingsPainter(
+            turn: _controller.value,
+            color: widget.color,
+            darkColor: widget.darkColor,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AccentRingsPainter extends CustomPainter {
+  final double turn;
+  final Color color;
+  final Color darkColor;
+
+  const _AccentRingsPainter({
+    required this.turn,
+    required this.color,
+    required this.darkColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.shortestSide * (14 / 200);
+    final center = size.center(Offset.zero);
+    final outerRadius = size.shortestSide * (70 / 200) - stroke / 2;
+    final innerRadius = size.shortestSide * (45 / 200) - stroke / 2;
+
+    final outerPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+    final innerPaint = Paint()
+      ..color = darkColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: outerRadius),
+      turn * math.pi * 2 - math.pi / 2,
+      0.65 * math.pi * 2,
+      false,
+      outerPaint,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: innerRadius),
+      -turn * math.pi * 2 - math.pi / 2,
+      0.55 * math.pi * 2,
+      false,
+      innerPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _AccentRingsPainter oldDelegate) {
+    return oldDelegate.turn != turn ||
+        oldDelegate.color != color ||
+        oldDelegate.darkColor != darkColor;
   }
 }
 

@@ -2371,13 +2371,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rirPickerSubtitle =>
-      'Reps en reserva (RIR) del último set. La IA usará esto para ajustar tu próximo entreno.';
+      'Según lo que elijas, subimos o bajamos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).';
 
   @override
   String get rirPickerRepsLeft => 'reps más';
 
   @override
   String get rirPickerSkip => 'Omitir';
+
+  @override
+  String setRirCaption(String value) {
+    return 'RIR $value';
+  }
 
   @override
   String get newRoutine => 'Nueva rutina';
@@ -2575,11 +2580,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay ninguna rutina pendiente por guardar. Primero pídeme que cree una.';
 
   @override
-  String get coachSuggestion1 => 'Crea una rutina de piernas de 45 minutos';
+  String get coachSuggestion1 => '¿Cómo me fue en el último entreno?';
 
   @override
-  String get coachSuggestion2 =>
-      '¿Qué ejercicios me recomiendas para pecho hoy?';
+  String get coachSuggestion2 => '¿Cómo voy de proteína hoy?';
 
   @override
   String get coachSuggestion3 =>
@@ -4595,6 +4599,54 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingPlanPaidSoon =>
       'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.';
+
+  @override
+  String get onboardingPlanPurchaseCancelled =>
+      'Sigues en el plan gratuito. Puedes suscribirte cuando quieras en Perfil.';
+
+  @override
+  String get profileHubPlanTitle => 'Plan';
+
+  @override
+  String get profileHubPlanSubtitle =>
+      'Suscripción, mejoras y restaurar compras';
+
+  @override
+  String get subscriptionCurrentPlan => 'Plan actual';
+
+  @override
+  String get subscriptionCourtesy => 'Cortesía';
+
+  @override
+  String get subscriptionRestore => 'Restaurar compras';
+
+  @override
+  String get subscriptionRestoreSuccess => 'Compras restauradas';
+
+  @override
+  String get subscriptionRestoreNone =>
+      'No hay compras para restaurar en esta cuenta';
+
+  @override
+  String get subscriptionPurchaseFailed =>
+      'No se pudo completar la compra. Inténtalo de nuevo.';
+
+  @override
+  String get subscriptionPurchaseSuccess => 'Plan actualizado';
+
+  @override
+  String get subscriptionNotAvailable =>
+      'Las compras in-app no están disponibles en este dispositivo';
+
+  @override
+  String get subscriptionUpgradeGymrat => 'Pasar a Gymrat';
+
+  @override
+  String get subscriptionUpgradePro => 'Pasar a Gymrat Pro';
+
+  @override
+  String get subscriptionManageHint =>
+      'La suscripción se gestiona en Google Play o App Store. Restaurar recupera un plan ya pagado en este usuario.';
 
   @override
   String get profileHubTitle => 'Tu espacio';

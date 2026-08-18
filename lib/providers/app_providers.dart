@@ -23,6 +23,7 @@ import '../models/workout.dart';
 import '../models/workout_summary.dart';
 import '../services/ai_coach_service.dart';
 import '../services/auth_service.dart';
+import '../services/billing_service.dart';
 import '../services/custom_exercise_repository.dart';
 import '../data/cloud_exercise_catalog.dart';
 import '../services/exercise_service.dart';
@@ -172,6 +173,11 @@ final exerciseReportServiceProvider =
 final profileServiceProvider = Provider(
   (ref) => ProfileService(profileCache: ref.watch(profileCacheStoreProvider)),
 );
+final billingServiceProvider = Provider((ref) {
+  final service = BillingService(ref.watch(profileServiceProvider));
+  ref.onDispose(service.dispose);
+  return service;
+});
 final socialServiceProvider = Provider((ref) => SocialService());
 final trainerServiceProvider = Provider((ref) => TrainerService());
 final pushNotificationServiceProvider =

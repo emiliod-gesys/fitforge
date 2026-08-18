@@ -4211,7 +4211,7 @@ abstract class AppLocalizations {
   /// No description provided for @rirPickerSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Reps en reserva (RIR) del último set. La IA usará esto para ajustar tu próximo entreno.'**
+  /// **'Según lo que elijas, subimos o bajamos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).'**
   String get rirPickerSubtitle;
 
   /// No description provided for @rirPickerRepsLeft.
@@ -4225,6 +4225,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Omitir'**
   String get rirPickerSkip;
+
+  /// No description provided for @setRirCaption.
+  ///
+  /// In es, this message translates to:
+  /// **'RIR {value}'**
+  String setRirCaption(String value);
 
   /// No description provided for @newRoutine.
   ///
@@ -4547,13 +4553,13 @@ abstract class AppLocalizations {
   /// No description provided for @coachSuggestion1.
   ///
   /// In es, this message translates to:
-  /// **'Crea una rutina de piernas de 45 minutos'**
+  /// **'¿Cómo me fue en el último entreno?'**
   String get coachSuggestion1;
 
   /// No description provided for @coachSuggestion2.
   ///
   /// In es, this message translates to:
-  /// **'¿Qué ejercicios me recomiendas para pecho hoy?'**
+  /// **'¿Cómo voy de proteína hoy?'**
   String get coachSuggestion2;
 
   /// No description provided for @coachSuggestion3.
@@ -7820,6 +7826,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El pago in-app llega pronto. Por ahora entras en el plan gratuito; tu elección queda guardada.'**
   String get onboardingPlanPaidSoon;
+
+  /// No description provided for @onboardingPlanPurchaseCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Sigues en el plan gratuito. Puedes suscribirte cuando quieras en Perfil.'**
+  String get onboardingPlanPurchaseCancelled;
+
+  /// No description provided for @profileHubPlanTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan'**
+  String get profileHubPlanTitle;
+
+  /// No description provided for @profileHubPlanSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Suscripción, mejoras y restaurar compras'**
+  String get profileHubPlanSubtitle;
+
+  /// No description provided for @subscriptionCurrentPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actual'**
+  String get subscriptionCurrentPlan;
+
+  /// No description provided for @subscriptionCourtesy.
+  ///
+  /// In es, this message translates to:
+  /// **'Cortesía'**
+  String get subscriptionCourtesy;
+
+  /// No description provided for @subscriptionRestore.
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar compras'**
+  String get subscriptionRestore;
+
+  /// No description provided for @subscriptionRestoreSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Compras restauradas'**
+  String get subscriptionRestoreSuccess;
+
+  /// No description provided for @subscriptionRestoreNone.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay compras para restaurar en esta cuenta'**
+  String get subscriptionRestoreNone;
+
+  /// No description provided for @subscriptionPurchaseFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo completar la compra. Inténtalo de nuevo.'**
+  String get subscriptionPurchaseFailed;
+
+  /// No description provided for @subscriptionPurchaseSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actualizado'**
+  String get subscriptionPurchaseSuccess;
+
+  /// No description provided for @subscriptionNotAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Las compras in-app no están disponibles en este dispositivo'**
+  String get subscriptionNotAvailable;
+
+  /// No description provided for @subscriptionUpgradeGymrat.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasar a Gymrat'**
+  String get subscriptionUpgradeGymrat;
+
+  /// No description provided for @subscriptionUpgradePro.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasar a Gymrat Pro'**
+  String get subscriptionUpgradePro;
+
+  /// No description provided for @subscriptionManageHint.
+  ///
+  /// In es, this message translates to:
+  /// **'La suscripción se gestiona en Google Play o App Store. Restaurar recupera un plan ya pagado en este usuario.'**
+  String get subscriptionManageHint;
 
   /// No description provided for @profileHubTitle.
   ///

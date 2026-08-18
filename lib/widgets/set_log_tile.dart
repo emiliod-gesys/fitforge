@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_load.dart';
 import '../core/utils/gym_weight.dart';
 import '../core/utils/gym_weight_input_formatter.dart';
+import '../core/utils/rir_weight_adjustment.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise_logging.dart';
@@ -272,13 +272,16 @@ class _SetLogTileState extends State<SetLogTile> {
         (parsedKg == null || (effectiveKg - parsedKg).abs() > 0.01);
     final effectiveLabel = showEffectiveLabel
         ? l10n.effectiveWeightLabel(
-            UnitConverter.formatGymMass(effectiveKg!, widget.unitSystem),
+            UnitConverter.formatGymMass(effectiveKg, widget.unitSystem),
           )
         : null;
     final reserveEffectiveSlot = widget.loadMode == ExerciseLoadMode.bodyweight ||
         _weightIsOptional;
     final isDone = widget.set.completed && !_editing;
     final isActive = _fieldsEnabled && !isDone;
+    final rirLabel = widget.set.completed && widget.set.rir != null
+        ? l10n.setRirCaption(RirWeightAdjustment.formatLabel(widget.set.rir!))
+        : null;
 
     return Opacity(
       opacity: isDone ? 0.72 : 1,
@@ -321,7 +324,7 @@ class _SetLogTileState extends State<SetLogTile> {
                   if (!widget.isLast)
                     Container(
                       width: 2,
-                      height: 56,
+                      height: rirLabel != null ? 72 : 56,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       color: AppColors.border,
                     ),
@@ -332,9 +335,12 @@ class _SetLogTileState extends State<SetLogTile> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -435,6 +441,21 @@ class _SetLogTileState extends State<SetLogTile> {
                                   : Text(l10n.done),
                             ),
                     ),
+                  ],
+                    ),
+                    if (rirLabel != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 2),
+                        child: Text(
+                          rirLabel,
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
