@@ -152,6 +152,7 @@ class Workout {
   final String name;
   final DateTime startedAt;
   final DateTime? completedAt;
+  final DateTime? lastActivityAt;
   final int durationMinutes;
   final int? activeCaloriesKcal;
   final List<WorkoutExercise> exercises;
@@ -176,6 +177,7 @@ class Workout {
     required this.name,
     required this.startedAt,
     this.completedAt,
+    this.lastActivityAt,
     this.durationMinutes = 0,
     this.activeCaloriesKcal,
     this.exercises = const [],
@@ -205,6 +207,9 @@ class Workout {
       startedAt: SupabaseDateTime.parse(json['started_at'] as String),
       completedAt: json['completed_at'] != null
           ? SupabaseDateTime.parse(json['completed_at'] as String)
+          : null,
+      lastActivityAt: json['last_activity_at'] != null
+          ? SupabaseDateTime.parse(json['last_activity_at'] as String)
           : null,
       durationMinutes: json['duration_minutes'] as int? ?? 0,
       activeCaloriesKcal: json['active_calories_kcal'] as int?,
@@ -242,6 +247,8 @@ class Workout {
         'name': name,
         'started_at': startedAt.toIso8601String(),
         'completed_at': completedAt?.toIso8601String(),
+        if (lastActivityAt != null)
+          'last_activity_at': lastActivityAt!.toIso8601String(),
         'duration_minutes': durationMinutes,
         if (activeCaloriesKcal != null) 'active_calories_kcal': activeCaloriesKcal,
         'notes': notes,

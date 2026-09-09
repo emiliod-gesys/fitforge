@@ -208,6 +208,7 @@ class OfflineWorkoutSupport {
       name: workout.name,
       startedAt: workout.startedAt,
       completedAt: completedAt,
+      lastActivityAt: workout.lastActivityAt,
       durationMinutes: durationMinutes,
       activeCaloriesKcal: activeCaloriesKcal,
       exercises: workout.exercises,

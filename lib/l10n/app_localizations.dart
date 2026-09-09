@@ -4016,6 +4016,24 @@ abstract class AppLocalizations {
   /// **'No se pudo finalizar: {message}'**
   String finishFailed(String message);
 
+  /// No description provided for @workoutIdlePaused.
+  ///
+  /// In es, this message translates to:
+  /// **'Cronómetro en pausa: hace rato que no marcas series.'**
+  String get workoutIdlePaused;
+
+  /// No description provided for @workoutIdleResume.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguir'**
+  String get workoutIdleResume;
+
+  /// No description provided for @workoutDurationTrimmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustamos el tiempo a {minutes} min porque el cronómetro siguió en marcha sin series.'**
+  String workoutDurationTrimmed(int minutes);
+
   /// No description provided for @weightRequired.
   ///
   /// In es, this message translates to:

@@ -2265,6 +2265,18 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get workoutIdlePaused =>
+      'Cronómetro en pausa: hace rato que no marcas series.';
+
+  @override
+  String get workoutIdleResume => 'Seguir';
+
+  @override
+  String workoutDurationTrimmed(int minutes) {
+    return 'Ajustamos el tiempo a $minutes min porque el cronómetro siguió en marcha sin series.';
+  }
+
+  @override
   String get weightRequired =>
       'Indica el peso antes de marcar la serie como hecha';
 

@@ -13,6 +13,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_exercise_navigation.dart';
 import '../../core/utils/workout_calorie_estimator.dart';
+import '../../core/utils/workout_duration_guard.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../core/utils/workout_xp_utils.dart';
 import '../../core/utils/exercise_history_utils.dart';
@@ -101,6 +102,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   DateTime? _hyroxGlobalStartedAt;
   DateTime? _stationStartedAt;
   DateTime? _workoutStoppedAt;
+  DateTime? _lastActivityAt;
+  DateTime? _idlePausedAt;
+  Duration _idleSkipped = Duration.zero;
+  Timer? _idleCheckTimer;
+  bool _activitySeeded = false;
   final Map<String, double> _hyroxTargetMetersByExerciseId = {};
   bool _isRunnerWorkout = false;
   RunnerType? _runnerType;
@@ -160,6 +166,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       name: workout.name,
       startedAt: workout.startedAt,
       completedAt: workout.completedAt,
+      lastActivityAt: workout.lastActivityAt,
       durationMinutes: workout.durationMinutes,
       activeCaloriesKcal: workout.activeCaloriesKcal,
       exercises: [
@@ -223,6 +230,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       name: workout.name,
       startedAt: workout.startedAt,
       completedAt: workout.completedAt,
+      lastActivityAt: workout.lastActivityAt,
       durationMinutes: workout.durationMinutes,
       activeCaloriesKcal: workout.activeCaloriesKcal,
       exercises: exercises,
@@ -492,6 +500,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     RestPreferences.getDefaultRestSeconds().then((seconds) {
       if (mounted) setState(() => _restSeconds = seconds);
     });
+    _idleCheckTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _checkIdlePause();
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(pendingRunnerSurfaceProvider.notifier).state = null;
@@ -502,6 +513,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   @override
   void dispose() {
+    _idleCheckTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     ref.read(watchWorkoutCoordinatorProvider).detach();
     super.dispose();
@@ -511,6 +523,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _reconcileRestTimerOnResume();
+      _checkIdlePause();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _checkIdlePause();
     }
   }
 
@@ -704,14 +720,24 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
 
       final startAt = _workoutTimerStart(effectiveWorkout);
-      final endAt = _workoutTimerStop()?.toUtc() ?? SupabaseDateTime.nowUtc;
-      var duration = endAt.difference(startAt.toUtc()).inMinutes;
+      final wallEndAt = _workoutTimerStop()?.toUtc() ?? SupabaseDateTime.nowUtc;
+      var duration = wallEndAt.difference(startAt.toUtc()).inMinutes;
+      duration -= _idleSkipped.inMinutes;
+      if (duration < 0) duration = 0;
       if (_isRunnerWorkout) {
         duration = WorkoutCalorieEstimator.resolveDurationMinutes(
           workout: effectiveWorkout,
           wallClockMinutes: duration,
         );
       }
+      final durationResolution = WorkoutDurationGuard.resolve(
+        wallClockMinutes: duration,
+        startedAt: startAt,
+        lastActivityAt: _lastActivityAt ?? effectiveWorkout.lastActivityAt,
+        skipIdleTrim: _skipIdleGuard,
+      );
+      duration = durationResolution.minutes;
+      final endAt = startAt.toUtc().add(Duration(minutes: duration));
       final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
       final profile = ref.read(profileProvider).valueOrNull;
       final bodyWeightKg = profile?.bodyWeight;
@@ -770,6 +796,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             durationMinutes: duration,
             totalVolume: volume,
             activeCaloriesKcal: calorieEstimate.caloriesKcal,
+            startedAt: startAt,
+            completedAt: endAt,
           );
 
       // Export a Apple Health / Health Connect (no bloquea el flujo si falla).
@@ -891,6 +919,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       );
 
       if (!mounted) return;
+      if (durationResolution.trimmed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.workoutDurationTrimmed(duration)),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
       ref.read(pendingWorkoutSummaryProvider.notifier).state = summary;
       ref.read(workoutSummarySessionIdProvider.notifier).state = summary.workout.id;
       context.pushReplacement('/workout/summary', extra: summary);
@@ -1100,14 +1136,89 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   DateTime _workoutTimerStart(Workout workout) =>
       _hyroxGlobalStartedAt ?? workout.startedAt;
 
-  DateTime? _workoutTimerStop() => _workoutStoppedAt;
+  DateTime? _workoutTimerStop() => _workoutStoppedAt ?? _idlePausedAt;
+
+  DateTime _elapsedTimerStart(Workout workout) =>
+      _workoutTimerStart(workout).add(_idleSkipped);
+
+  void _seedActivityIfNeeded(Workout workout) {
+    if (_activitySeeded) return;
+    _activitySeeded = true;
+    _lastActivityAt = workout.lastActivityAt ?? workout.startedAt;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkIdlePause();
+    });
+  }
+
+  void _markWorkoutActivity() {
+    final now = DateTime.now();
+    setState(() {
+      _lastActivityAt = now;
+      if (_idlePausedAt != null) {
+        _idleSkipped += now.difference(_idlePausedAt!);
+        _idlePausedAt = null;
+      }
+    });
+  }
+
+  bool get _skipIdleGuard => _isRunnerWorkout || _isHyroxWorkout;
+
+  void _checkIdlePause() {
+    if (!mounted || _skipIdleGuard || _completing) return;
+    if (_workoutStoppedAt != null || _idlePausedAt != null) return;
+    final last = _lastActivityAt;
+    if (last == null) return;
+    if (!WorkoutDurationGuard.shouldPauseForIdle(
+      lastActivityAt: last,
+      now: DateTime.now(),
+      restTimerActive: _showRestTimer,
+    )) {
+      return;
+    }
+    setState(() => _idlePausedAt = DateTime.now());
+  }
+
+  void _resumeIdlePause() {
+    final pausedAt = _idlePausedAt;
+    if (pausedAt == null) return;
+    setState(() {
+      _idleSkipped += DateTime.now().difference(pausedAt);
+      _idlePausedAt = null;
+      _lastActivityAt = DateTime.now();
+    });
+  }
 
   void _freezeWorkoutTimers() {
     if (_workoutStoppedAt != null) return;
     setState(() {
-      _workoutStoppedAt = DateTime.now();
+      _workoutStoppedAt = _idlePausedAt ?? DateTime.now();
       _showRestTimer = false;
     });
+  }
+
+  Widget _buildIdlePauseBanner(AppLocalizations l10n) {
+    return Material(
+      color: AppColors.cardElevated,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 8, 8),
+        child: Row(
+          children: [
+            const Icon(Icons.pause_circle_outline, color: AppColors.warning, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l10n.workoutIdlePaused,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+              ),
+            ),
+            TextButton(
+              onPressed: _resumeIdlePause,
+              child: Text(l10n.workoutIdleResume),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _startHyroxRace(Workout workout) async {
@@ -1308,6 +1419,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           }
 
           final displayWorkout = _mergedWorkout(workout);
+          _seedActivityIfNeeded(displayWorkout);
 
           if (_isHyroxWorkout && !_hyroxRaceStarted) {
             return _buildHyroxStartGate(displayWorkout, l10n);
@@ -1347,9 +1459,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               children: [
                 if (!_isHyroxWorkout || _hyroxRaceStarted)
                   WorkoutElapsedTimer(
-                    startedAt: _workoutTimerStart(displayWorkout),
+                    startedAt: _elapsedTimerStart(displayWorkout),
                     stoppedAt: _workoutTimerStop(),
                   ),
+                if (_idlePausedAt != null && !_skipIdleGuard)
+                  _buildIdlePauseBanner(l10n),
                 if (_showRestTimer) _buildActiveRestTimer(),
                 Expanded(
                   child: ActiveWorkoutExerciseList(
@@ -1423,9 +1537,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             children: [
               if (!_isHyroxWorkout || _hyroxRaceStarted)
                 WorkoutElapsedTimer(
-                  startedAt: _workoutTimerStart(displayWorkout),
+                  startedAt: _elapsedTimerStart(displayWorkout),
                   stoppedAt: _workoutTimerStop(),
                 ),
+              if (_idlePausedAt != null && !_skipIdleGuard)
+                _buildIdlePauseBanner(l10n),
               if (_isHyroxWorkout && _hyroxRaceStarted && _stationStartedAt != null)
                 HyroxPhaseTimer(
                   phaseIndex: exerciseIndex,
@@ -2004,6 +2120,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         }
         break;
       }
+    }
+
+    if (!wasAlreadyCompleted) {
+      _markWorkoutActivity();
     }
 
     setState(() {

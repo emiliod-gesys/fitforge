@@ -529,6 +529,7 @@ class WorkoutService {
         'routine_id': routineId,
         'name': name,
         'started_at': startedAt.toIso8601String(),
+        'last_activity_at': startedAt.toIso8601String(),
       });
       if (workoutExercises != null) {
         for (final ex in workoutExercises) {
@@ -541,6 +542,7 @@ class WorkoutService {
         routineId: routineId,
         name: name,
         startedAt: startedAt,
+        lastActivityAt: startedAt,
         exercises: workoutExercises ?? [],
       );
     }
@@ -552,6 +554,7 @@ class WorkoutService {
         routineId: routineId,
         name: name,
         startedAt: startedAt,
+        lastActivityAt: startedAt,
         exercises: workoutExercises ?? [],
       ),
     );
@@ -566,6 +569,7 @@ class WorkoutService {
           'routine_id': routineId,
           'name': name,
           'started_at': startedAt.toIso8601String(),
+          'last_activity_at': startedAt.toIso8601String(),
         });
         for (final ex in workout.exercises) {
           await _addExerciseToWorkout(workout.id, ex);
@@ -1201,8 +1205,10 @@ class WorkoutService {
   }
 
   Future<void> beginWorkoutTimer(String workoutId) async {
+    final now = SupabaseDateTime.nowUtc.toIso8601String();
     await _client.from('workouts').update({
-      'started_at': SupabaseDateTime.nowUtc.toIso8601String(),
+      'started_at': now,
+      'last_activity_at': now,
     }).eq('id', workoutId);
   }
 
@@ -1253,6 +1259,7 @@ class WorkoutService {
                 name: local.name,
                 startedAt: startedAt.toUtc(),
                 completedAt: local.completedAt,
+                lastActivityAt: local.lastActivityAt,
                 durationMinutes: local.durationMinutes,
                 activeCaloriesKcal: local.activeCaloriesKcal,
                 exercises: local.exercises,
@@ -1671,6 +1678,9 @@ class WorkoutService {
           },
         },
       );
+      if (resolvedSet.completed) {
+        await _touchLastActivity(workoutId);
+      }
       return;
     }
 
@@ -1679,6 +1689,18 @@ class WorkoutService {
       'workout_exercise_id': workoutExerciseId,
       ...resolvedSet.toJson(),
     });
+    if (resolvedSet.completed && workoutId != null) {
+      await _touchLastActivity(workoutId);
+    }
+  }
+
+  Future<void> _touchLastActivity(String workoutId) async {
+    final ts = SupabaseDateTime.nowUtc.toIso8601String();
+    try {
+      await _client.from('workouts').update({
+        'last_activity_at': ts,
+      }).eq('id', workoutId);
+    } catch (_) {}
   }
 
   Future<void> deleteSet(
@@ -1728,6 +1750,7 @@ class WorkoutService {
             name: local.name,
             startedAt: local.startedAt,
             completedAt: local.completedAt,
+            lastActivityAt: local.lastActivityAt,
             durationMinutes: local.durationMinutes,
             activeCaloriesKcal: local.activeCaloriesKcal,
             exercises: exercises,

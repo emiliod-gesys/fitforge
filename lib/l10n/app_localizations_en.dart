@@ -2243,6 +2243,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get workoutIdlePaused => 'Timer paused: no sets logged for a while.';
+
+  @override
+  String get workoutIdleResume => 'Resume';
+
+  @override
+  String workoutDurationTrimmed(int minutes) {
+    return 'We set the session to $minutes min because the timer kept running with no sets.';
+  }
+
+  @override
   String get weightRequired => 'Enter weight before marking the set as done';
 
   @override
