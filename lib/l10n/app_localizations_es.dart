@@ -2383,7 +2383,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rirPickerSubtitle =>
-      'Según lo que elijas, subimos o bajamos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).';
+      'Si marcas +3, subimos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).';
 
   @override
   String get rirPickerRepsLeft => 'reps más';

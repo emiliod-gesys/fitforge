@@ -860,7 +860,7 @@
   "reps": "Reps",
   "done": "Hecho",
   "rirPickerTitle": "¿Cuántas repeticiones más pudiste haber hecho?",
-  "rirPickerSubtitle": "Según lo que elijas, subimos o bajamos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).",
+  "rirPickerSubtitle": "Si marcas +3, subimos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).",
   "rirPickerRepsLeft": "reps más",
   "rirPickerSkip": "Omitir",
   "setRirCaption": "RIR {value}",

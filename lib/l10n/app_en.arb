@@ -848,7 +848,7 @@
   "reps": "Reps",
   "done": "Done",
   "rirPickerTitle": "How many more reps could you have done?",
-  "rirPickerSubtitle": "Your pick raises or lowers the next set by one gym step (5 lb or 2.5 kg).",
+  "rirPickerSubtitle": "If you pick +3, we raise the next set by one gym step (5 lb or 2.5 kg).",
   "rirPickerRepsLeft": "reps left",
   "rirPickerSkip": "Skip",
   "setRirCaption": "RIR {value}",

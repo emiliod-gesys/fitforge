@@ -21,7 +21,8 @@ class MilestonesSection extends StatelessWidget {
     required this.unitSystem,
   });
 
-  static String categoryLabel(AppLocalizations l10n, MilestoneCategory category) {
+  static String categoryLabel(
+      AppLocalizations l10n, MilestoneCategory category) {
     return switch (category) {
       MilestoneCategory.reps => l10n.milestoneCategoryReps,
       MilestoneCategory.volume => l10n.milestoneCategoryVolume,
@@ -84,79 +85,90 @@ class MilestonesSection extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.card,
+      isScrollControlled: true,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _MilestoneBadgeImage(
-                assetPath: MilestoneBadge.assetPathForTier(displayTier),
-                unlocked: MilestonesCalculator.hasUnlockedTier(category, totals),
-                size: 72,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                tierName,
-                style: TextStyle(
-                  color: context.accentColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.milestoneTotal(formatValue(category, current, l10n, unitSystem)),
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-              ),
-              if (next != null && remaining != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  l10n.milestoneNextTarget(formatValue(category, next.threshold, l10n, unitSystem)),
-                  style: const TextStyle(fontSize: 15),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l10n.milestoneDetailRemaining(
-                    formatValue(category, remaining, l10n, unitSystem),
-                    formatValue(category, next.threshold, l10n, unitSystem),
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+                const SizedBox(height: 20),
+                _MilestoneBadgeImage(
+                  assetPath: MilestoneBadge.assetPathForTier(displayTier),
+                  unlocked:
+                      MilestonesCalculator.hasUnlockedTier(category, totals),
+                  size: 72,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  tierName,
                   style: TextStyle(
                     color: context.accentColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ] else ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
-                  l10n.milestoneAllUnlocked,
-                  style: TextStyle(
-                    color: context.accentColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
+                  label,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.milestoneTotal(
+                      formatValue(category, current, l10n, unitSystem)),
+                  style:
+                      const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                ),
+                if (next != null && remaining != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.milestoneNextTarget(formatValue(
+                        category, next.threshold, l10n, unitSystem)),
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.milestoneDetailRemaining(
+                      formatValue(category, remaining, l10n, unitSystem),
+                      formatValue(category, next.threshold, l10n, unitSystem),
+                    ),
+                    style: TextStyle(
+                      color: context.accentColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.milestoneAllUnlocked,
+                    style: TextStyle(
+                      color: context.accentColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
@@ -168,20 +180,24 @@ class MilestonesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.milestonesTitle, style: Theme.of(context).textTheme.titleLarge),
+        Text(l10n.milestonesTitle,
+            style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
         Row(
           children: MilestoneCategory.values.map((category) {
             final tier = MilestonesCalculator.displayTier(category, totals);
-            final unlocked = MilestonesCalculator.hasUnlockedTier(category, totals);
-            final currentLabel = _formatValue(category, totals.valueFor(category));
+            final unlocked =
+                MilestonesCalculator.hasUnlockedTier(category, totals);
+            final currentLabel =
+                _formatValue(category, totals.valueFor(category));
 
             return Expanded(
               child: InkWell(
                 onTap: () => _showDetail(context, category),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
                   child: Column(
                     children: [
                       SizedBox(
@@ -195,7 +211,8 @@ class MilestonesSection extends StatelessWidget {
                               unlocked: unlocked,
                             ),
                             if (!unlocked)
-                              const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 18),
+                              const Icon(Icons.lock_outline,
+                                  color: AppColors.textMuted, size: 18),
                           ],
                         ),
                       ),
@@ -205,7 +222,8 @@ class MilestonesSection extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -213,7 +231,8 @@ class MilestonesSection extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                        style: const TextStyle(
+                            fontSize: 10, color: AppColors.textMuted),
                       ),
                     ],
                   ),
@@ -246,7 +265,9 @@ class _MilestoneBadgeImage extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
-      opacity: unlocked ? AlwaysStoppedAnimation(1) : const AlwaysStoppedAnimation(0.35),
+      opacity: unlocked
+          ? AlwaysStoppedAnimation(1)
+          : const AlwaysStoppedAnimation(0.35),
       errorBuilder: (_, __, ___) => Icon(
         unlocked ? Icons.emoji_events : Icons.lock_outline,
         color: unlocked ? context.accentColor : AppColors.textMuted,

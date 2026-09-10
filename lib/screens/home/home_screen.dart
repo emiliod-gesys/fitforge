@@ -149,27 +149,33 @@ class HomeScreen extends ConsumerWidget {
       isTrainer: isTrainer,
     ).clamp(0, items.length - 1);
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
       backgroundColor: AppColors.black,
-      extendBody: true,
+      extendBody: !keyboardOpen,
+      resizeToAvoidBottomInset: true,
       body: MediaQuery(
         data: MediaQuery.of(context).copyWith(
           padding: MediaQuery.paddingOf(context).copyWith(
-            bottom: MediaQuery.paddingOf(context).bottom + AppTokens.navBarHeight,
+            bottom: MediaQuery.paddingOf(context).bottom +
+                (keyboardOpen ? 0 : AppTokens.navBarHeight),
           ),
         ),
         child: child,
       ),
-      bottomNavigationBar: FfNavSpinner(
-        items: items,
-        selectedIndex: selected,
-        onSelected: (index) => _onDestinationSelected(
-          context,
-          index,
-          isOnline: isOnline,
-          isTrainer: isTrainer,
-        ),
-      ),
+      bottomNavigationBar: keyboardOpen
+          ? null
+          : FfNavSpinner(
+              items: items,
+              selectedIndex: selected,
+              onSelected: (index) => _onDestinationSelected(
+                context,
+                index,
+                isOnline: isOnline,
+                isTrainer: isTrainer,
+              ),
+            ),
     );
   }
 }

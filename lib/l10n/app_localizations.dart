@@ -4229,7 +4229,7 @@ abstract class AppLocalizations {
   /// No description provided for @rirPickerSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Según lo que elijas, subimos o bajamos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).'**
+  /// **'Si marcas +3, subimos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).'**
   String get rirPickerSubtitle;
 
   /// No description provided for @rirPickerRepsLeft.

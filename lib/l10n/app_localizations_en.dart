@@ -2359,7 +2359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rirPickerSubtitle =>
-      'Your pick raises or lowers the next set by one gym step (5 lb or 2.5 kg).';
+      'If you pick +3, we raise the next set by one gym step (5 lb or 2.5 kg).';
 
   @override
   String get rirPickerRepsLeft => 'reps left';

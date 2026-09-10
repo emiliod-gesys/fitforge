@@ -30,7 +30,8 @@ class SocialFriendsTab extends ConsumerWidget {
   final Future<void> Function(String userId) onSendRequest;
   final Future<void> Function(Friendship friendship) onAccept;
   final Future<void> Function(Friendship friendship) onRemove;
-  final void Function(BuildContext context, String name, VoidCallback onConfirm) onConfirmRemove;
+  final void Function(BuildContext context, String name, VoidCallback onConfirm)
+      onConfirmRemove;
   final VoidCallback? onOpenLeaderboards;
   final GlobalKey? pendingSectionKey;
 
@@ -53,7 +54,8 @@ class SocialFriendsTab extends ConsumerWidget {
     this.pendingSectionKey,
   });
 
-  _FriendRelation _relationFor(String userId, String? uid, List<Friendship> friendships) {
+  _FriendRelation _relationFor(
+      String userId, String? uid, List<Friendship> friendships) {
     if (uid == null) return _FriendRelation.none;
     for (final f in friendships) {
       final other = f.friendFor(uid);
@@ -70,16 +72,19 @@ class SocialFriendsTab extends ConsumerWidget {
     final friendshipsAsync = ref.watch(friendshipsProvider);
     final mutedAsync = ref.watch(mutedFriendsProvider);
     final profileAsync = ref.watch(profileProvider);
-    final searchAsync = query.length >= 2 ? ref.watch(userSearchProvider(query)) : null;
+    final searchAsync =
+        query.length >= 2 ? ref.watch(userSearchProvider(query)) : null;
     final uid = ref.watch(authStateProvider).valueOrNull?.session?.user.id;
 
     final friendships = friendshipsAsync.valueOrNull ?? [];
     final mutedIds = mutedAsync.valueOrNull ?? const <String>{};
-    final pending = friendships.where((f) => f.status == FriendshipStatus.pending).toList();
-    final friends = friendships.where((f) => f.status == FriendshipStatus.accepted).toList();
-    final incomingPending = uid == null
-        ? 0
-        : pending.where((f) => f.isIncoming(uid)).length;
+    final pending =
+        friendships.where((f) => f.status == FriendshipStatus.pending).toList();
+    final friends = friendships
+        .where((f) => f.status == FriendshipStatus.accepted)
+        .toList();
+    final incomingPending =
+        uid == null ? 0 : pending.where((f) => f.isIncoming(uid)).length;
 
     final searchBar = SocialSearchBar(
       hintText: l10n.searchFriendsHint,
@@ -97,188 +102,208 @@ class SocialFriendsTab extends ConsumerWidget {
       friendships: friendships,
     );
 
-    if (isSearching) {
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: searchBar,
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: onRefresh,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: AppTokens.pagePaddingWithBottomInset(
-                  context,
-                  base: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                ),
-                children: [searchResults],
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: AppTokens.pagePaddingWithBottomInset(
-          context,
-          base: const EdgeInsets.all(16),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: searchBar,
         ),
-        children: [
-          profileAsync.when(
-            data: (profile) {
-              final progress = profile == null
-                  ? null
-                  : PlayerLevelCalculator.fromTotalXp(profile.totalXp);
-              return SocialHeroCard(
-                progress: progress,
-                friendsCount: friends.length,
-                pendingCount: incomingPending,
-                friendsRank: friendsRank,
-                globalRank: globalRank,
-                isLoading: friendshipsAsync.isLoading,
-                l10n: l10n,
-                onPendingTap: incomingPending > 0
-                    ? () {
-                        final ctx = pendingSectionKey?.currentContext;
-                        if (ctx != null) {
-                          Scrollable.ensureVisible(
-                            ctx,
-                            duration: const Duration(milliseconds: 280),
-                            curve: Curves.easeOutCubic,
-                          );
-                        }
-                      }
-                    : null,
-                onRankTap: onOpenLeaderboards,
-                onInviteTap: () => searchFocusNode?.requestFocus(),
-              );
-            },
-            loading: () => SocialHeroCard(
-              progress: null,
-              friendsCount: 0,
-              pendingCount: 0,
-              friendsRank: null,
-              globalRank: null,
-              isLoading: true,
-              l10n: l10n,
-            ),
-            error: (_, __) => SocialHeroCard(
-              progress: null,
-              friendsCount: friends.length,
-              pendingCount: incomingPending,
-              friendsRank: friendsRank,
-              globalRank: globalRank,
-              isLoading: false,
-              l10n: l10n,
-              onRankTap: onOpenLeaderboards,
-              onInviteTap: () => searchFocusNode?.requestFocus(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          searchBar,
-          if (pending.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            KeyedSubtree(
-              key: pendingSectionKey,
-              child: SocialSectionHeader(title: l10n.pendingRequests),
-            ),
-            ...pending.map((f) {
-              final friend = uid != null ? f.friendFor(uid) : FriendUser(id: f.addresseeId);
-              final incoming = uid != null && f.isIncoming(uid);
-              return PendingRequestTile(
-                friend: friend,
-                subtitle: incoming ? l10n.wantsToBeFriend : l10n.requestSentLabel,
-                incoming: incoming,
-                onAccept: incoming ? () => onAccept(f) : null,
-                onDecline: () => onRemove(f),
-              );
-            }),
-          ],
-          const SizedBox(height: 20),
-          SocialSectionHeader(title: l10n.friendsCount(friends.length)),
-          friendshipsAsync.when(
-            loading: () => const _FriendsSkeleton(),
-            error: (e, _) => Text(l10n.errorGeneric('$e')),
-            data: (_) {
-              if (friends.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    l10n.searchFriendsEmpty,
-                    style: const TextStyle(color: AppColors.textMuted),
-                  ),
-                );
-              }
-              return Column(
-                children: friends.map((f) {
-                  final friend = uid != null ? f.friendFor(uid) : FriendUser(id: f.requesterId);
-                  final isMuted = mutedIds.contains(friend.id);
-                  return FriendTile(
-                    friend: friend,
-                    isMuted: isMuted,
-                    onTap: () => context.push('/social/friend/${friend.id}'),
-                    onLongPress: () => onConfirmRemove(
+        Expanded(
+          child: isSearching
+              ? RefreshIndicator(
+                  onRefresh: onRefresh,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppTokens.pagePaddingWithBottomInset(
                       context,
-                      friend.label,
-                      () => onRemove(f),
+                      base: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     ),
-                    trailing: PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
-                      onSelected: (value) async {
-                        if (value == 'remove') {
-                          onConfirmRemove(
-                            context,
-                            friend.label,
-                            () => onRemove(f),
+                    children: [searchResults],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: onRefresh,
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppTokens.pagePaddingWithBottomInset(
+                      context,
+                      base: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    ),
+                    children: [
+                      profileAsync.when(
+                        data: (profile) {
+                          final progress = profile == null
+                              ? null
+                              : PlayerLevelCalculator.fromTotalXp(
+                                  profile.totalXp);
+                          return SocialHeroCard(
+                            progress: progress,
+                            friendsCount: friends.length,
+                            pendingCount: incomingPending,
+                            friendsRank: friendsRank,
+                            globalRank: globalRank,
+                            isLoading: friendshipsAsync.isLoading,
+                            l10n: l10n,
+                            onPendingTap: incomingPending > 0
+                                ? () {
+                                    final ctx =
+                                        pendingSectionKey?.currentContext;
+                                    if (ctx != null) {
+                                      Scrollable.ensureVisible(
+                                        ctx,
+                                        duration:
+                                            const Duration(milliseconds: 280),
+                                        curve: Curves.easeOutCubic,
+                                      );
+                                    }
+                                  }
+                                : null,
+                            onRankTap: onOpenLeaderboards,
+                            onInviteTap: () => searchFocusNode?.requestFocus(),
                           );
-                        } else if (value == 'mute' || value == 'unmute') {
-                          await ref.read(socialServiceProvider).setFriendMuted(
-                                friend.id,
-                                value == 'mute',
-                              );
-                          ref.invalidate(mutedFriendsProvider);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  value == 'mute'
-                                      ? l10n.friendMuted(friend.label)
-                                      : l10n.friendUnmuted(friend.label),
-                                ),
+                        },
+                        loading: () => SocialHeroCard(
+                          progress: null,
+                          friendsCount: 0,
+                          pendingCount: 0,
+                          friendsRank: null,
+                          globalRank: null,
+                          isLoading: true,
+                          l10n: l10n,
+                        ),
+                        error: (_, __) => SocialHeroCard(
+                          progress: null,
+                          friendsCount: friends.length,
+                          pendingCount: incomingPending,
+                          friendsRank: friendsRank,
+                          globalRank: globalRank,
+                          isLoading: false,
+                          l10n: l10n,
+                          onRankTap: onOpenLeaderboards,
+                          onInviteTap: () => searchFocusNode?.requestFocus(),
+                        ),
+                      ),
+                      if (pending.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        KeyedSubtree(
+                          key: pendingSectionKey,
+                          child:
+                              SocialSectionHeader(title: l10n.pendingRequests),
+                        ),
+                        ...pending.map((f) {
+                          final friend = uid != null
+                              ? f.friendFor(uid)
+                              : FriendUser(id: f.addresseeId);
+                          final incoming = uid != null && f.isIncoming(uid);
+                          return PendingRequestTile(
+                            friend: friend,
+                            subtitle: incoming
+                                ? l10n.wantsToBeFriend
+                                : l10n.requestSentLabel,
+                            incoming: incoming,
+                            onAccept: incoming ? () => onAccept(f) : null,
+                            onDecline: () => onRemove(f),
+                          );
+                        }),
+                      ],
+                      const SizedBox(height: 20),
+                      SocialSectionHeader(
+                          title: l10n.friendsCount(friends.length)),
+                      friendshipsAsync.when(
+                        loading: () => const _FriendsSkeleton(),
+                        error: (e, _) => Text(l10n.errorGeneric('$e')),
+                        data: (_) {
+                          if (friends.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                l10n.searchFriendsEmpty,
+                                style:
+                                    const TextStyle(color: AppColors.textMuted),
                               ),
                             );
                           }
-                        }
-                      },
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: isMuted ? 'unmute' : 'mute',
-                          child: Text(isMuted ? l10n.unmuteFriend : l10n.muteFriend),
-                        ),
-                        PopupMenuItem(
-                          value: 'remove',
-                          child: Text(
-                            l10n.removeFriendTitle,
-                            style: const TextStyle(color: AppColors.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-        ],
-      ),
+                          return Column(
+                            children: friends.map((f) {
+                              final friend = uid != null
+                                  ? f.friendFor(uid)
+                                  : FriendUser(id: f.requesterId);
+                              final isMuted = mutedIds.contains(friend.id);
+                              return FriendTile(
+                                friend: friend,
+                                isMuted: isMuted,
+                                onTap: () =>
+                                    context.push('/social/friend/${friend.id}'),
+                                onLongPress: () => onConfirmRemove(
+                                  context,
+                                  friend.label,
+                                  () => onRemove(f),
+                                ),
+                                trailing: PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert,
+                                      color: AppColors.textMuted),
+                                  onSelected: (value) async {
+                                    if (value == 'remove') {
+                                      onConfirmRemove(
+                                        context,
+                                        friend.label,
+                                        () => onRemove(f),
+                                      );
+                                    } else if (value == 'mute' ||
+                                        value == 'unmute') {
+                                      await ref
+                                          .read(socialServiceProvider)
+                                          .setFriendMuted(
+                                            friend.id,
+                                            value == 'mute',
+                                          );
+                                      ref.invalidate(mutedFriendsProvider);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              value == 'mute'
+                                                  ? l10n
+                                                      .friendMuted(friend.label)
+                                                  : l10n.friendUnmuted(
+                                                      friend.label),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  itemBuilder: (_) => [
+                                    PopupMenuItem(
+                                      value: isMuted ? 'unmute' : 'mute',
+                                      child: Text(isMuted
+                                          ? l10n.unmuteFriend
+                                          : l10n.muteFriend),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'remove',
+                                      child: Text(
+                                        l10n.removeFriendTitle,
+                                        style: const TextStyle(
+                                            color: AppColors.error),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
     );
   }
 

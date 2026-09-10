@@ -32,14 +32,18 @@ class SocialSearchBar extends StatelessWidget {
         focusNode: focusNode,
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
-        scrollPadding: const EdgeInsets.only(bottom: 160),
+        scrollPadding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom + 80,
+        ),
         style: const TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: AppColors.textMuted),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textMuted, size: 22),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+          prefixIcon:
+              const Icon(Icons.search, color: AppColors.textMuted, size: 22),
           suffixIcon: showClear
               ? IconButton(
                   icon: const Icon(Icons.close, size: 20),
