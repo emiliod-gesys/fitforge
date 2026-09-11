@@ -1037,6 +1037,19 @@
   "@restSeconds": { "placeholders": { "seconds": {"type": "int"} } },
   "addExercise": "Añadir ejercicio",
   "reorderExercise": "Arrastrar para reordenar",
+  "superset": "Superserie",
+  "supersetRound": "Ronda {current} de {total}",
+  "@supersetRound": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "joinSuperset": "Unir con el de abajo",
+  "leaveSuperset": "Quitar de la superserie",
+  "supersetRounds": "Rondas",
+  "supersetRoundsCount": "{count} rondas",
+  "@supersetRoundsCount": { "placeholders": { "count": {"type": "int"} } },
   "searchByMuscle": "Buscar por nombre, músculo o categoría…",
   "searchExercise": "Buscar ejercicio…",
   "inRoutine": "En rutina ({count})",

@@ -69,6 +69,8 @@ class OfflineWorkoutSupport {
         orderIndex: ex.orderIndex,
         sets: sets,
         notes: ex.notes,
+        supersetGroupId: ex.supersetGroupId,
+        supersetSlot: ex.supersetSlot,
       );
     }).toList();
 

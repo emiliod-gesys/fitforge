@@ -121,6 +121,8 @@ class WorkoutSyncService {
       'image_url': exercise.imageUrl,
       'order_index': exercise.orderIndex,
       'notes': exercise.notes,
+      'superset_group_id': exercise.supersetGroupId,
+      'superset_slot': exercise.supersetSlot,
     });
 
     if (exercise.sets.isEmpty) return;

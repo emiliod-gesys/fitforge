@@ -28,6 +28,27 @@ void main() {
       expect(decoded.setNumber, 2);
       expect(decoded.weight, 80);
       expect(decoded.restTotalSeconds, 90);
+      expect(decoded.supersetSlot, isNull);
+    });
+
+    test('includes superset slot when present', () {
+      const snapshot = WatchWorkoutSnapshot(
+        workoutId: 'w1',
+        exerciseId: 'e1',
+        exerciseName: 'A Press',
+        setId: 's1',
+        setNumber: 2,
+        weight: 80,
+        reps: 8,
+        unitSystem: 'kg',
+        isCardio: false,
+        supersetSlot: 1,
+        updatedAtEpochMs: 1699999000000,
+      );
+
+      final decoded = WatchWorkoutSnapshot.decode(snapshot.encode());
+      expect(decoded!.supersetSlot, 1);
+      expect(decoded.exerciseName, 'A Press');
     });
   });
 

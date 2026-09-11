@@ -17,6 +17,7 @@ class WatchWorkoutSnapshot {
     this.remainingSets = 1,
     this.restEndsAtEpochMs,
     this.restTotalSeconds,
+    this.supersetSlot,
     required this.updatedAtEpochMs,
   });
 
@@ -34,6 +35,7 @@ class WatchWorkoutSnapshot {
   final int remainingSets;
   final int? restEndsAtEpochMs;
   final int? restTotalSeconds;
+  final int? supersetSlot;
   final int updatedAtEpochMs;
 
   bool get restActive =>
@@ -55,6 +57,7 @@ class WatchWorkoutSnapshot {
         'remainingSets': remainingSets,
         'restEndsAtEpochMs': restEndsAtEpochMs,
         'restTotalSeconds': restTotalSeconds,
+        if (supersetSlot != null) 'supersetSlot': supersetSlot,
         'updatedAtEpochMs': updatedAtEpochMs,
       };
 
@@ -74,6 +77,7 @@ class WatchWorkoutSnapshot {
       remainingSets: json['remainingSets'] as int? ?? 1,
       restEndsAtEpochMs: json['restEndsAtEpochMs'] as int?,
       restTotalSeconds: json['restTotalSeconds'] as int?,
+      supersetSlot: json['supersetSlot'] as int?,
       updatedAtEpochMs: json['updatedAtEpochMs'] as int? ??
           DateTime.now().millisecondsSinceEpoch,
     );

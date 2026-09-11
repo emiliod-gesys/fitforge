@@ -63,10 +63,13 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
   @override
   void didUpdateWidget(covariant RoutineExerciseTargetFields oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.exercise.id != widget.exercise.id) {
+    final oldDetails = oldWidget.exercise.resolvedSetDetails;
+    final newDetails = widget.exercise.resolvedSetDetails;
+    if (oldWidget.exercise.id != widget.exercise.id ||
+        oldDetails.length != newDetails.length) {
       _disposeRows();
       _perArmWeight = widget.exercise.perArmWeight;
-      _initRows(widget.exercise.resolvedSetDetails);
+      _initRows(newDetails);
     }
   }
 
@@ -142,6 +145,8 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
       targetSteps: current.targetSteps,
       perArmWeight: _perArmWeight,
       targetSetDetails: details,
+      supersetGroupId: current.supersetGroupId,
+      supersetSlot: current.supersetSlot,
     );
 
     if (current.perArmWeight == _perArmWeight &&

@@ -53,6 +53,8 @@ class RoutineExercise {
   final int? targetSteps;
   final bool? perArmWeight;
   final List<RoutineSetTarget> targetSetDetails;
+  final String? supersetGroupId;
+  final int? supersetSlot;
 
   const RoutineExercise({
     required this.id,
@@ -71,6 +73,8 @@ class RoutineExercise {
     this.targetSteps,
     this.perArmWeight,
     this.targetSetDetails = const [],
+    this.supersetGroupId,
+    this.supersetSlot,
   });
 
   bool get isCardio => loggingType == ExerciseLoggingType.cardio;
@@ -103,6 +107,8 @@ class RoutineExercise {
       targetSteps: targetSteps,
       perArmWeight: perArmWeight,
       targetSetDetails: details,
+      supersetGroupId: supersetGroupId,
+      supersetSlot: supersetSlot,
     );
   }
 
@@ -132,6 +138,8 @@ class RoutineExercise {
       targetSteps: json['target_steps'] as int?,
       perArmWeight: json['per_arm_weight'] as bool?,
       targetSetDetails: details,
+      supersetGroupId: json['superset_group_id'] as String?,
+      supersetSlot: (json['superset_slot'] as num?)?.toInt(),
     );
   }
 
@@ -153,6 +161,8 @@ class RoutineExercise {
         if (perArmWeight != null) 'per_arm_weight': perArmWeight,
         if (targetSetDetails.isNotEmpty)
           'target_set_details': targetSetDetails.map((s) => s.toJson()).toList(),
+        if (supersetGroupId != null) 'superset_group_id': supersetGroupId,
+        if (supersetSlot != null) 'superset_slot': supersetSlot,
       };
 
   RoutineExercise copyWith({
@@ -171,6 +181,9 @@ class RoutineExercise {
     int? targetSteps,
     bool? perArmWeight,
     List<RoutineSetTarget>? targetSetDetails,
+    String? supersetGroupId,
+    int? supersetSlot,
+    bool clearSuperset = false,
   }) {
     return RoutineExercise(
       id: id,
@@ -189,6 +202,8 @@ class RoutineExercise {
       targetSteps: targetSteps ?? this.targetSteps,
       perArmWeight: perArmWeight ?? this.perArmWeight,
       targetSetDetails: targetSetDetails ?? this.targetSetDetails,
+      supersetGroupId: clearSuperset ? null : (supersetGroupId ?? this.supersetGroupId),
+      supersetSlot: clearSuperset ? null : (supersetSlot ?? this.supersetSlot),
     );
   }
 }
@@ -317,6 +332,8 @@ class Routine {
               targetSteps: e.targetSteps,
               perArmWeight: e.perArmWeight,
               targetSetDetails: e.targetSetDetails,
+              supersetGroupId: e.supersetGroupId,
+              supersetSlot: e.supersetSlot,
             ),
           )
           .toList(),

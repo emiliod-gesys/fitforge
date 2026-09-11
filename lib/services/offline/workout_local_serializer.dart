@@ -41,6 +41,8 @@ abstract final class WorkoutLocalSerializer {
       'image_url': exercise.imageUrl,
       'order_index': exercise.orderIndex,
       'notes': exercise.notes,
+      'superset_group_id': exercise.supersetGroupId,
+      'superset_slot': exercise.supersetSlot,
       'workout_sets': exercise.sets.map((set) {
         return {
           'id': set.id,

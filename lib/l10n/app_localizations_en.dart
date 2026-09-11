@@ -2780,6 +2780,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reorderExercise => 'Drag to reorder';
 
   @override
+  String get superset => 'Superset';
+
+  @override
+  String supersetRound(int current, int total) {
+    return 'Round $current of $total';
+  }
+
+  @override
+  String get joinSuperset => 'Join with next';
+
+  @override
+  String get leaveSuperset => 'Remove from superset';
+
+  @override
+  String get supersetRounds => 'Rounds';
+
+  @override
+  String supersetRoundsCount(int count) {
+    return '$count rounds';
+  }
+
+  @override
   String get searchByMuscle => 'Search by name, muscle or category…';
 
   @override

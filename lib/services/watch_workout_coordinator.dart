@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../core/utils/gym_weight.dart';
+import '../core/utils/superset_groups.dart';
 import '../models/watch_session.dart';
 import '../models/workout.dart';
 import 'watch_session_bridge.dart';
@@ -67,7 +68,7 @@ class WatchWorkoutCoordinator {
     final snapshot = WatchWorkoutSnapshot(
       workoutId: workout.id,
       exerciseId: exercise.id,
-      exerciseName: exercise.exerciseName,
+      exerciseName: SupersetGroups.watchExerciseName(exercise),
       setId: currentSet.id,
       setNumber: currentSet.setNumber,
       weight: currentSet.weight,
@@ -79,6 +80,7 @@ class WatchWorkoutCoordinator {
       remainingSets: remainingSets,
       restEndsAtEpochMs: restEndsAt?.millisecondsSinceEpoch,
       restTotalSeconds: restTotalSeconds,
+      supersetSlot: exercise.supersetSlot,
       updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,
     );
 

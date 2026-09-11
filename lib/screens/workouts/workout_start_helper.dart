@@ -131,6 +131,8 @@ List<WorkoutExercise> workoutExercisesFromRoutine(Routine routine) {
           exerciseName: e.exerciseName,
           imageUrl: e.imageUrl,
           orderIndex: e.orderIndex,
+          supersetGroupId: e.supersetGroupId,
+          supersetSlot: e.supersetSlot,
           sets: e.resolvedSetDetails
               .asMap()
               .entries

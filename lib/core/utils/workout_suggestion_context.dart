@@ -513,15 +513,7 @@ abstract final class AiWorkoutSuggestionsMerger {
         );
       }).toList();
 
-      return WorkoutExercise(
-        id: ex.id,
-        exerciseId: ex.exerciseId,
-        exerciseName: ex.exerciseName,
-        imageUrl: ex.imageUrl,
-        orderIndex: ex.orderIndex,
-        sets: mergedSets,
-        notes: ex.notes,
-      );
+      return ex.copyWith(sets: mergedSets);
     }).toList();
   }
 

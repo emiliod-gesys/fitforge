@@ -106,6 +106,8 @@ class WorkoutExercise {
   final int orderIndex;
   final List<WorkoutSet> sets;
   final String? notes;
+  final String? supersetGroupId;
+  final int? supersetSlot;
 
   const WorkoutExercise({
     required this.id,
@@ -115,6 +117,8 @@ class WorkoutExercise {
     required this.orderIndex,
     this.sets = const [],
     this.notes,
+    this.supersetGroupId,
+    this.supersetSlot,
   });
 
   factory WorkoutExercise.fromJson(Map<String, dynamic> json, {List<WorkoutSet>? sets}) {
@@ -126,6 +130,33 @@ class WorkoutExercise {
       orderIndex: json['order_index'] as int? ?? 0,
       sets: sets ?? [],
       notes: json['notes'] as String?,
+      supersetGroupId: json['superset_group_id'] as String?,
+      supersetSlot: (json['superset_slot'] as num?)?.toInt(),
+    );
+  }
+
+  WorkoutExercise copyWith({
+    String? id,
+    String? exerciseId,
+    String? exerciseName,
+    String? imageUrl,
+    int? orderIndex,
+    List<WorkoutSet>? sets,
+    String? notes,
+    String? supersetGroupId,
+    int? supersetSlot,
+    bool clearSuperset = false,
+  }) {
+    return WorkoutExercise(
+      id: id ?? this.id,
+      exerciseId: exerciseId ?? this.exerciseId,
+      exerciseName: exerciseName ?? this.exerciseName,
+      imageUrl: imageUrl ?? this.imageUrl,
+      orderIndex: orderIndex ?? this.orderIndex,
+      sets: sets ?? this.sets,
+      notes: notes ?? this.notes,
+      supersetGroupId: clearSuperset ? null : (supersetGroupId ?? this.supersetGroupId),
+      supersetSlot: clearSuperset ? null : (supersetSlot ?? this.supersetSlot),
     );
   }
 

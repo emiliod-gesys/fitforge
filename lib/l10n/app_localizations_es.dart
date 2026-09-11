@@ -2807,6 +2807,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reorderExercise => 'Arrastrar para reordenar';
 
   @override
+  String get superset => 'Superserie';
+
+  @override
+  String supersetRound(int current, int total) {
+    return 'Ronda $current de $total';
+  }
+
+  @override
+  String get joinSuperset => 'Unir con el de abajo';
+
+  @override
+  String get leaveSuperset => 'Quitar de la superserie';
+
+  @override
+  String get supersetRounds => 'Rondas';
+
+  @override
+  String supersetRoundsCount(int count) {
+    return '$count rondas';
+  }
+
+  @override
   String get searchByMuscle => 'Buscar por nombre, músculo o categoría…';
 
   @override

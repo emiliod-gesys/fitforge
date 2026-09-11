@@ -12,6 +12,7 @@ import '../../core/runner/runner_standards.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/supabase_datetime.dart';
 import '../../core/utils/workout_exercise_navigation.dart';
+import '../../core/utils/superset_groups.dart';
 import '../../core/utils/workout_calorie_estimator.dart';
 import '../../core/utils/workout_duration_guard.dart';
 import '../../core/utils/workout_streak.dart';
@@ -23,6 +24,7 @@ import '../../core/utils/gym_weight.dart';
 import '../../core/utils/previous_set_utils.dart';
 import '../../core/utils/rir_weight_adjustment.dart';
 import '../../core/utils/unit_converter.dart';
+import '../../models/exercise.dart';
 import '../../models/exercise_history.dart';
 import '../../core/utils/cardio_format.dart';
 import '../../core/utils/milestones.dart';
@@ -56,6 +58,7 @@ import '../../widgets/set_log_tile.dart';
 import '../../widgets/workout_exercise_picker_sheet.dart';
 import '../../widgets/workout_elapsed_timer.dart';
 import '../../widgets/active_workout_exercise_list.dart';
+import '../../widgets/superset_rounds_sheet.dart';
 import '../../widgets/runner_outdoor_session.dart';
 import '../../widgets/runner_treadmill_session.dart';
 import '../../widgets/hyrox_phase_timer.dart';
@@ -170,15 +173,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       durationMinutes: workout.durationMinutes,
       activeCaloriesKcal: workout.activeCaloriesKcal,
       exercises: [
-        WorkoutExercise(
-          id: exercise.id,
-          exerciseId: exercise.exerciseId,
-          exerciseName: exercise.exerciseName,
-          imageUrl: exercise.imageUrl,
-          orderIndex: exercise.orderIndex,
-          sets: [set],
-          notes: exercise.notes,
-        ),
+        exercise.copyWith(sets: [set]),
       ],
       notes: workout.notes,
       totalVolume: workout.totalVolume,
@@ -211,15 +206,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         }
         sets.sort((a, b) => a.setNumber.compareTo(b.setNumber));
       }
-      return WorkoutExercise(
-        id: exercise.id,
-        exerciseId: exercise.exerciseId,
-        exerciseName: exercise.exerciseName,
-        imageUrl: exercise.imageUrl,
-        orderIndex: exercise.orderIndex,
-        sets: sets,
-        notes: exercise.notes,
-      );
+      return exercise.copyWith(sets: sets);
     }).toList();
 
     return Workout(
@@ -1338,6 +1325,137 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
+  bool _isWorkoutExerciseCardio(WorkoutExercise exercise) {
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+    return ExerciseLoggingResolver.isCardioExercise(
+      exerciseId: exercise.exerciseId,
+      exerciseName: exercise.exerciseName,
+      catalog: catalog,
+      sets: exercise.sets,
+    );
+  }
+
+  List<WorkoutExercise> _assignMissingSetIds(List<WorkoutExercise> exercises) {
+    return [
+      for (final ex in exercises)
+        ex.copyWith(
+          sets: [
+            for (final set in ex.sets)
+              if (set.id.isEmpty)
+                WorkoutSet(
+                  id: const Uuid().v4(),
+                  setNumber: set.setNumber,
+                  weight: set.weight,
+                  reps: set.reps,
+                  rir: set.rir,
+                  completed: set.completed,
+                  restTaken: set.restTaken,
+                  durationSeconds: set.durationSeconds,
+                  distanceMeters: set.distanceMeters,
+                  inclinePercent: set.inclinePercent,
+                  steps: set.steps,
+                  loggingType: set.loggingType,
+                )
+              else
+                set,
+          ],
+        ),
+    ];
+  }
+
+  Future<void> _applyWorkoutLayout(
+    Workout workout,
+    List<WorkoutExercise> nextExercises,
+  ) async {
+    final assigned = _assignMissingSetIds(nextExercises);
+    final previousById = {for (final ex in workout.exercises) ex.id: ex};
+    final service = ref.read(workoutServiceProvider);
+
+    try {
+      await service.updateExerciseGrouping(
+        workoutId: workout.id,
+        exercises: assigned,
+      );
+      for (final ex in assigned) {
+        final previous = previousById[ex.id];
+        final previousIds = {
+          for (final set in previous?.sets ?? const <WorkoutSet>[]) set.id,
+        };
+        for (final set in ex.sets) {
+          if (!previousIds.contains(set.id)) {
+            await service.logSet(ex.id, set, workoutId: workout.id);
+          }
+        }
+        if (previous != null) {
+          final nextIds = {for (final set in ex.sets) set.id};
+          for (final set in previous.sets) {
+            if (set.id.isNotEmpty && !nextIds.contains(set.id)) {
+              await service.deleteSet(ex.id, set.id, workoutId: workout.id);
+            }
+          }
+        }
+      }
+      await _syncActiveWorkout();
+    } catch (e) {
+      await _syncActiveWorkout();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
+      }
+    }
+  }
+
+  Future<void> _joinSuperset(
+    Workout workout,
+    int blockIndex,
+    List<WorkoutExercise> ordered,
+  ) async {
+    final updated = SupersetGroups.joinWorkoutBlockWithNext(
+      ordered,
+      blockIndex,
+      newGroupId: const Uuid().v4(),
+      isCardio: _isWorkoutExerciseCardio,
+    );
+    await _applyWorkoutLayout(workout, updated);
+  }
+
+  Future<void> _leaveSuperset(Workout workout, WorkoutExercise exercise) async {
+    final visible = workout.exercises
+        .where((e) => !_removedExerciseIds.contains(e.id))
+        .toList();
+    final updated = SupersetGroups.leaveWorkoutSuperset(visible, exercise.id);
+    await _applyWorkoutLayout(workout, updated);
+  }
+
+  Future<void> _setSupersetRounds(
+    Workout workout,
+    List<WorkoutExercise> members,
+    int rounds,
+  ) async {
+    final groupId = members.first.supersetGroupId;
+    if (groupId == null) return;
+    final updated = SupersetGroups.setGroupRoundCount(
+      workout.exercises,
+      groupId,
+      rounds,
+    );
+    await _applyWorkoutLayout(workout, updated);
+  }
+
+  Future<void> _pickSupersetRounds(
+    Workout workout,
+    List<WorkoutExercise> members,
+  ) async {
+    final selected = await SupersetRoundsSheet.show(
+      context,
+      selected: SupersetGroups.roundCount(members),
+      min: SupersetGroups.minAllowedRounds(members),
+    );
+    if (selected == null || !mounted) return;
+    await _setSupersetRounds(workout, members, selected);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -1479,6 +1597,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     onSwapExercise: (exercise) => _swapExercise(displayWorkout, exercise),
                     onReorderExercises: (orderedIds) =>
                         _reorderExercises(displayWorkout, orderedIds),
+                    isCardioExercise: (exercise) => ExerciseLoggingResolver.isCardioExercise(
+                      exerciseId: exercise.exerciseId,
+                      exerciseName: exercise.exerciseName,
+                      catalog: exerciseCatalog,
+                      sets: exercise.sets,
+                    ),
+                    onJoinSuperset: (_isHyroxWorkout || _isRunnerWorkout)
+                        ? null
+                        : (blockIndex, ordered) =>
+                            _joinSuperset(displayWorkout, blockIndex, ordered),
+                    onLeaveSuperset: (_isHyroxWorkout || _isRunnerWorkout)
+                        ? null
+                        : (exercise) => _leaveSuperset(displayWorkout, exercise),
                   ),
                 ),
               ],
@@ -1498,6 +1629,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               if (mounted) setState(() => _showExerciseList = true);
             });
             return const FitForgeLoadingScreen();
+          }
+          final supersetMembers = SupersetGroups.membersOf(
+            visibleExercises,
+            exercise.supersetGroupId,
+          );
+          if (supersetMembers.length >= 2 && !_isHyroxWorkout) {
+            return _buildSupersetLogger(
+              displayWorkout: displayWorkout,
+              members: supersetMembers,
+              visibleExercises: visibleExercises,
+              unitSystem: unitSystem,
+              exerciseCatalog: exerciseCatalog,
+              l10n: l10n,
+            );
           }
           final sortedSets = _sortedSets(exercise)
               .where((s) => !_removedSetIds.contains(s.id))
@@ -1774,12 +1919,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               ),
               _ExerciseNavigator(
                 l10n: l10n,
-                currentIndex: WorkoutExerciseNavigation.visibleIndex(visibleExercises, exercise.id)
-                    .clamp(0, visibleExercises.length - 1),
-                total: visibleExercises.length,
+                currentIndex: SupersetGroups.blockIndexOf(visibleExercises, exercise.id),
+                total: SupersetGroups.workoutBlocks(visibleExercises).length,
                 completing: _completing,
                 onPrevious: () {
-                  final previousIndex = WorkoutExerciseNavigation.resolvePreviousWorkoutIndex(
+                  final previousIndex = SupersetGroups.resolvePreviousBlockWorkoutIndex(
                     workoutExercises: displayWorkout.exercises,
                     visibleExercises: visibleExercises,
                     currentExerciseId: exercise.id,
@@ -1789,7 +1933,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   }
                 },
                 onNext: () {
-                  final nextIndex = WorkoutExerciseNavigation.resolveNextWorkoutIndex(
+                  final nextIndex = SupersetGroups.resolveNextBlockWorkoutIndex(
                     workoutExercises: displayWorkout.exercises,
                     visibleExercises: visibleExercises,
                     currentExerciseId: exercise.id,
@@ -1799,8 +1943,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   }
                 },
                 onEndTraining: () => _requestCompleteWorkout(displayWorkout),
-                hasPrevious: WorkoutExerciseNavigation.hasPrevious(visibleExercises, exercise.id),
-                hasNext: WorkoutExerciseNavigation.hasNext(visibleExercises, exercise.id),
+                hasPrevious: SupersetGroups.hasPreviousBlock(visibleExercises, exercise.id),
+                hasNext: SupersetGroups.hasNextBlock(visibleExercises, exercise.id),
               ),
             ],
           );
@@ -1809,6 +1953,338 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
       ),
     ),
+    );
+  }
+
+  Widget _buildSupersetLogger({
+    required Workout displayWorkout,
+    required List<WorkoutExercise> members,
+    required List<WorkoutExercise> visibleExercises,
+    required String unitSystem,
+    required List<Exercise> exerciseCatalog,
+    required AppLocalizations l10n,
+  }) {
+    final round = SupersetGroups.currentRound(members);
+    final totalRounds = SupersetGroups.roundCount(members);
+    final currentExercise = displayWorkout.exercises[
+        _currentExerciseIndex.clamp(0, displayWorkout.exercises.length - 1)];
+    final bodyWeightKg = ref.watch(profileProvider).valueOrNull?.bodyWeight;
+
+    return Column(
+      children: [
+        WorkoutElapsedTimer(
+          startedAt: _elapsedTimerStart(displayWorkout),
+          stoppedAt: _workoutTimerStop(),
+        ),
+        if (_idlePausedAt != null && !_skipIdleGuard) _buildIdlePauseBanner(l10n),
+        if (_showRestTimer) _buildActiveRestTimer(),
+        Material(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Chip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(l10n.superset),
+                      side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
+                      backgroundColor: context.accentColor.withValues(alpha: 0.1),
+                    ),
+                    const Spacer(),
+                    RestTimeSelector(
+                      selectedSeconds: _restSeconds,
+                      onChanged: _onRestSecondsChanged,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        totalRounds == 0
+                            ? l10n.noSets
+                            : l10n.supersetRound(round, totalRounds),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ActionChip(
+                      avatar: Icon(
+                        Icons.repeat,
+                        size: 16,
+                        color: context.accentColor,
+                      ),
+                      label: Text(l10n.supersetRoundsCount(totalRounds)),
+                      onPressed: totalRounds == 0
+                          ? null
+                          : () => _pickSupersetRounds(displayWorkout, members),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              if (round > 1) ...[
+                for (var past = 1; past < round; past++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '${l10n.supersetRound(past, totalRounds)} · ${_supersetRoundSummary(members, past, unitSystem)}',
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    ),
+                  ),
+                const SizedBox(height: 4),
+              ],
+              for (var i = 0; i < members.length; i++) ...[
+                if (i > 0) const SizedBox(height: 12),
+                _buildSupersetMemberSection(
+                  displayWorkout: displayWorkout,
+                  member: members[i],
+                  round: round,
+                  isActive: members[i].id == currentExercise.id,
+                  unitSystem: unitSystem,
+                  exerciseCatalog: exerciseCatalog,
+                  bodyWeightKg: bodyWeightKg,
+                  l10n: l10n,
+                ),
+              ],
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => _addSetToSuperset(displayWorkout, members),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addSet),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  side: BorderSide(color: context.accentColor),
+                  foregroundColor: context.accentColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _ExerciseNavigator(
+          l10n: l10n,
+          currentIndex: SupersetGroups.blockIndexOf(visibleExercises, currentExercise.id),
+          total: SupersetGroups.workoutBlocks(visibleExercises).length,
+          completing: _completing,
+          onPrevious: () {
+            final previousIndex = SupersetGroups.resolvePreviousBlockWorkoutIndex(
+              workoutExercises: displayWorkout.exercises,
+              visibleExercises: visibleExercises,
+              currentExerciseId: currentExercise.id,
+            );
+            if (previousIndex != null) {
+              setState(() => _currentExerciseIndex = previousIndex);
+            }
+          },
+          onNext: () {
+            final nextIndex = SupersetGroups.resolveNextBlockWorkoutIndex(
+              workoutExercises: displayWorkout.exercises,
+              visibleExercises: visibleExercises,
+              currentExerciseId: currentExercise.id,
+            );
+            if (nextIndex != null) {
+              setState(() => _currentExerciseIndex = nextIndex);
+            }
+          },
+          onEndTraining: () => _requestCompleteWorkout(displayWorkout),
+          hasPrevious: SupersetGroups.hasPreviousBlock(visibleExercises, currentExercise.id),
+          hasNext: SupersetGroups.hasNextBlock(visibleExercises, currentExercise.id),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSupersetMemberSection({
+    required Workout displayWorkout,
+    required WorkoutExercise member,
+    required int round,
+    required bool isActive,
+    required String unitSystem,
+    required List<Exercise> exerciseCatalog,
+    required double? bodyWeightKg,
+    required AppLocalizations l10n,
+  }) {
+    final set = SupersetGroups.setForRound(member, round);
+    final letter = SupersetGroups.slotLetter(member.supersetSlot ?? 1);
+    final exerciseUnit = _unitOverrides[member.exerciseId] ?? unitSystem;
+    final loadMode = ExerciseLoad.loadModeForExerciseId(
+      member.exerciseId,
+      exerciseCatalog,
+      exerciseName: member.exerciseName,
+    );
+    final perArm = ExerciseLoad.resolvePerArmWeight(
+      exerciseId: member.exerciseId,
+      catalog: exerciseCatalog,
+      exerciseName: member.exerciseName,
+      sessionOverride: _perArmOverrides[member.exerciseId],
+    );
+    final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
+          member.exerciseId,
+          exerciseCatalog,
+          exerciseName: member.exerciseName,
+        ) ??
+        false;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive
+              ? context.accentColor.withValues(alpha: 0.7)
+              : AppColors.border.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: context.accentColor.withValues(alpha: 0.18),
+                  child: Text(
+                    letter,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: context.accentColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ExerciseThumbnail(
+                  exerciseId: member.exerciseId,
+                  exerciseName: member.exerciseName,
+                  width: 40,
+                  height: 40,
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => ExerciseImageViewer.open(
+                    context,
+                    exerciseId: member.exerciseId,
+                    exerciseName: member.exerciseName,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LocalizedExerciseName(
+                    member.exerciseName,
+                    exerciseId: member.exerciseId,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.exerciseHistory,
+                  onPressed: () => ExerciseHistorySheet.show(
+                    context,
+                    exerciseId: member.exerciseId,
+                    exerciseName: member.exerciseName,
+                    excludeWorkoutId: displayWorkout.id,
+                  ),
+                  icon: const Icon(Icons.history, size: 20),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ExerciseLoadControls(
+              exerciseId: member.exerciseId,
+              exerciseName: member.exerciseName,
+              catalog: exerciseCatalog,
+              perArmEnabled: perArm,
+              onPerArmChanged: (value) {
+                setState(() => _perArmOverrides[member.exerciseId] = value);
+              },
+              bodyWeightKg: bodyWeightKg,
+              unitSystem: exerciseUnit,
+              onUnitSystemChanged: (value) {
+                setState(() => _unitOverrides[member.exerciseId] = value);
+              },
+            ),
+            if (set != null)
+              SetLogTile(
+                key: ValueKey(set.id),
+                set: set,
+                unitSystem: exerciseUnit,
+                exerciseName: member.exerciseName,
+                perArmWeight: perArm,
+                weightOptional: weightOptional,
+                loadMode: loadMode,
+                useLegLabel: ExerciseLoad.isLowerBodySideLoad(
+                  exerciseName: member.exerciseName,
+                  exerciseId: member.exerciseId,
+                  catalog: exerciseCatalog,
+                ),
+                bodyWeightKg: bodyWeightKg,
+                isLast: true,
+                isSaving: _savingSetIds.contains(set.id),
+                requestFocus: _focusSetId == set.id,
+                onFocusHandled: () {
+                  if (_focusSetId == set.id) {
+                    setState(() => _focusSetId = null);
+                  }
+                },
+                onValidationError: (message) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(message)),
+                  );
+                },
+                onChanged: (updated) => _logSet(
+                  displayWorkout,
+                  member,
+                  updated,
+                  wasAlreadyCompleted: set.completed,
+                  isCardio: false,
+                  isLastSet: true,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _supersetRoundSummary(
+    List<WorkoutExercise> members,
+    int round,
+    String unitSystem,
+  ) {
+    final parts = <String>[];
+    for (final member in members) {
+      final set = SupersetGroups.setForRound(member, round);
+      if (set == null) continue;
+      final letter = SupersetGroups.slotLetter(member.supersetSlot ?? 1);
+      final weight = set.weight == null
+          ? ''
+          : '×${GymWeight.formatDisplay(set.weight!, unitSystem)}';
+      parts.add('$letter ${set.reps}$weight');
+    }
+    return parts.join(' · ');
+  }
+
+  Future<void> _addSetToSuperset(
+    Workout workout,
+    List<WorkoutExercise> members,
+  ) async {
+    if (SupersetGroups.roundCount(members) >= SupersetGroups.maxRounds) return;
+    await _setSupersetRounds(
+      workout,
+      members,
+      SupersetGroups.roundCount(members) + 1,
     );
   }
 
@@ -2090,6 +2566,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
     String? nextFocusId;
     WorkoutSet? adjustedNextSet;
+    int? nextExerciseIndex;
+    var startRest = false;
     if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
       final String resolvedUnit =
           _unitOverrides[exercise.exerciseId] ?? ref.read(unitSystemProvider);
@@ -2120,6 +2598,49 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         }
         break;
       }
+
+      final groupMembers = SupersetGroups.membersOf(
+        workout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).toList(),
+        exercise.supersetGroupId,
+      );
+      if (groupMembers.length >= 2) {
+        final patchedGroup = groupMembers.map((m) {
+          final sets = m.sets
+              .map((s) {
+                if (s.id == completedSet.id) return completedSet;
+                if (adjustedNextSet != null && s.id == adjustedNextSet.id) {
+                  return adjustedNextSet;
+                }
+                return _setOverrides[s.id] ?? s;
+              })
+              .where((s) => !_removedSetIds.contains(s.id))
+              .toList();
+          return m.copyWith(sets: sets);
+        }).toList();
+
+        nextFocusId = null;
+        final nextInRound = SupersetGroups.nextMemberInRound(
+          patchedGroup,
+          exercise.id,
+          completedSet.setNumber,
+        );
+        if (nextInRound != null) {
+          final index = workout.exercises.indexWhere((e) => e.id == nextInRound.id);
+          if (index >= 0) nextExerciseIndex = index;
+          nextFocusId = SupersetGroups.setForRound(nextInRound, completedSet.setNumber)?.id;
+        } else {
+          final nextMember = SupersetGroups.activeMember(patchedGroup) ?? patchedGroup.first;
+          final index = workout.exercises.indexWhere((e) => e.id == nextMember.id);
+          if (index >= 0) nextExerciseIndex = index;
+          nextFocusId = SupersetGroups.setForRound(
+            nextMember,
+            completedSet.setNumber + 1,
+          )?.id;
+        }
+        startRest = SupersetGroups.isRoundComplete(patchedGroup, completedSet.setNumber);
+      } else {
+        startRest = true;
+      }
     }
 
     if (!wasAlreadyCompleted) {
@@ -2133,11 +2654,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
       _savingSetIds.add(set.id);
       if (nextFocusId != null) _focusSetId = nextFocusId;
+      if (nextExerciseIndex != null) _currentExerciseIndex = nextExerciseIndex;
     });
 
-    if (!wasAlreadyCompleted && !isCardio && !_isHyroxWorkout) {
+    if (startRest) {
       _startRestTimer();
     }
+    unawaited(_publishWatchSession(workout));
 
     final persist = _persistSet(
       exercise,

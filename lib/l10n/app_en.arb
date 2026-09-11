@@ -1013,6 +1013,19 @@
   "restSeconds": "{seconds}s",
   "addExercise": "Add exercise",
   "reorderExercise": "Drag to reorder",
+  "superset": "Superset",
+  "supersetRound": "Round {current} of {total}",
+  "@supersetRound": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "joinSuperset": "Join with next",
+  "leaveSuperset": "Remove from superset",
+  "supersetRounds": "Rounds",
+  "supersetRoundsCount": "{count} rounds",
+  "@supersetRoundsCount": { "placeholders": { "count": {"type": "int"} } },
   "searchByMuscle": "Search by name, muscle or category…",
   "searchExercise": "Search exercise…",
   "inRoutine": "In routine ({count})",

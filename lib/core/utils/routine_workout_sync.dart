@@ -44,6 +44,8 @@ abstract final class RoutineWorkoutSync {
               (_) => const RoutineSetTarget(reps: 0),
             ),
             restSeconds: AppConstants.defaultRestSeconds,
+            supersetGroupId: ex.supersetGroupId,
+            supersetSlot: ex.supersetSlot,
           ).withSyncedLegacyFields(),
         );
         continue;
@@ -74,6 +76,8 @@ abstract final class RoutineWorkoutSync {
           targetSetDetails: setDetails,
           targetDistanceMeters: lastSet.distanceMeters,
           restSeconds: AppConstants.defaultRestSeconds,
+          supersetGroupId: ex.supersetGroupId,
+          supersetSlot: ex.supersetSlot,
         ).withSyncedLegacyFields(),
       );
     }

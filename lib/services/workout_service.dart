@@ -11,6 +11,7 @@ import '../core/runner/runner_standards.dart';
 import '../core/runner/runner_tracking.dart';
 import '../core/utils/exercise_history_utils.dart';
 import '../core/utils/previous_set_utils.dart';
+import '../core/utils/superset_groups.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
 import '../models/exercise_logging.dart';
@@ -518,7 +519,7 @@ class WorkoutService {
           // Mantiene sugerencias locales si la IA falla o no hay red.
         }
       }
-      workoutExercises = enriched;
+      workoutExercises = SupersetGroups.alignWorkoutGroupSetCounts(enriched);
     }
 
     if (offline == null) {
@@ -750,13 +751,8 @@ class WorkoutService {
   List<WorkoutExercise> _withClientIds(List<WorkoutExercise> exercises) {
     return exercises
         .map(
-          (ex) => WorkoutExercise(
+          (ex) => ex.copyWith(
             id: ex.id.isEmpty ? _uuid.v4() : ex.id,
-            exerciseId: ex.exerciseId,
-            exerciseName: ex.exerciseName,
-            imageUrl: ex.imageUrl,
-            orderIndex: ex.orderIndex,
-            notes: ex.notes,
             sets: ex.sets
                 .map(
                   (s) => WorkoutSet(
@@ -849,15 +845,7 @@ class WorkoutService {
         );
       });
 
-      result.add(WorkoutExercise(
-        id: ex.id,
-        exerciseId: ex.exerciseId,
-        exerciseName: ex.exerciseName,
-        imageUrl: ex.imageUrl,
-        orderIndex: ex.orderIndex,
-        sets: sets,
-        notes: ex.notes,
-      ));
+      result.add(ex.copyWith(sets: sets));
     }
     return result;
   }
@@ -1138,6 +1126,72 @@ class WorkoutService {
     }
   }
 
+  Future<void> updateExerciseGrouping({
+    required String workoutId,
+    required List<WorkoutExercise> exercises,
+  }) async {
+    final byId = {for (final ex in exercises) ex.id: ex};
+    final offline = _offline;
+    if (offline != null) {
+      final local = await offline.localWorkout(workoutId);
+      if (local != null) {
+        final merged = [
+          for (final ex in local.exercises)
+            if (byId[ex.id] case final next?)
+              ex.copyWith(
+                orderIndex: next.orderIndex,
+                sets: next.sets,
+                supersetGroupId: next.supersetGroupId,
+                supersetSlot: next.supersetSlot,
+                clearSuperset: next.supersetGroupId == null,
+              )
+            else
+              ex,
+        ]..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+        await offline.persistActiveWorkout(
+          Workout(
+            id: local.id,
+            userId: local.userId,
+            routineId: local.routineId,
+            routineName: local.routineName,
+            name: local.name,
+            startedAt: local.startedAt,
+            completedAt: local.completedAt,
+            lastActivityAt: local.lastActivityAt,
+            durationMinutes: local.durationMinutes,
+            activeCaloriesKcal: local.activeCaloriesKcal,
+            exercises: merged,
+            notes: local.notes,
+            totalVolume: local.totalVolume,
+            runnerSurface: local.runnerSurface,
+            runnerRoute: local.runnerRoute,
+            runnerSplits: local.runnerSplits,
+            runnerAvgPaceSecPerKm: local.runnerAvgPaceSecPerKm,
+            runnerElevationGainMeters: local.runnerElevationGainMeters,
+            runnerElevationLossMeters: local.runnerElevationLossMeters,
+            hyroxValidationStatus: local.hyroxValidationStatus,
+            hyroxValidationReasons: local.hyroxValidationReasons,
+            validationStatus: local.validationStatus,
+            validationReasons: local.validationReasons,
+          ),
+        );
+      }
+    }
+
+    try {
+      await Future.wait([
+        for (final ex in exercises)
+          _client.from('workout_exercises').update({
+            'order_index': ex.orderIndex,
+            'superset_group_id': ex.supersetGroupId,
+            'superset_slot': ex.supersetSlot,
+          }).eq('id', ex.id).eq('workout_id', workoutId),
+      ]);
+    } catch (e) {
+      if (offline == null || !isConnectionError(e)) rethrow;
+    }
+  }
+
   Future<void> reorderWorkoutExercises(
     String workoutId,
     List<String> orderedExerciseIds,
@@ -1188,6 +1242,8 @@ class WorkoutService {
       'image_url': exercise.imageUrl,
       'order_index': exercise.orderIndex,
       'notes': exercise.notes,
+      'superset_group_id': exercise.supersetGroupId,
+      'superset_slot': exercise.supersetSlot,
     });
 
     if (exercise.sets.isNotEmpty) {
@@ -1731,15 +1787,7 @@ class WorkoutService {
               loggingType: sets[i].loggingType,
             );
           }
-          return WorkoutExercise(
-            id: ex.id,
-            exerciseId: ex.exerciseId,
-            exerciseName: ex.exerciseName,
-            imageUrl: ex.imageUrl,
-            orderIndex: ex.orderIndex,
-            sets: sets,
-            notes: ex.notes,
-          );
+          return ex.copyWith(sets: sets);
         }).toList();
         await offline.persistActiveWorkout(
           Workout(

@@ -4946,6 +4946,42 @@ abstract class AppLocalizations {
   /// **'Arrastrar para reordenar'**
   String get reorderExercise;
 
+  /// No description provided for @superset.
+  ///
+  /// In es, this message translates to:
+  /// **'Superserie'**
+  String get superset;
+
+  /// No description provided for @supersetRound.
+  ///
+  /// In es, this message translates to:
+  /// **'Ronda {current} de {total}'**
+  String supersetRound(int current, int total);
+
+  /// No description provided for @joinSuperset.
+  ///
+  /// In es, this message translates to:
+  /// **'Unir con el de abajo'**
+  String get joinSuperset;
+
+  /// No description provided for @leaveSuperset.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar de la superserie'**
+  String get leaveSuperset;
+
+  /// No description provided for @supersetRounds.
+  ///
+  /// In es, this message translates to:
+  /// **'Rondas'**
+  String get supersetRounds;
+
+  /// No description provided for @supersetRoundsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} rondas'**
+  String supersetRoundsCount(int count);
+
   /// No description provided for @searchByMuscle.
   ///
   /// In es, this message translates to:

@@ -183,15 +183,7 @@ class LocalWorkoutStore {
         sets.add(set);
         sets.sort((a, b) => a.setNumber.compareTo(b.setNumber));
       }
-      return WorkoutExercise(
-        id: ex.id,
-        exerciseId: ex.exerciseId,
-        exerciseName: ex.exerciseName,
-        imageUrl: ex.imageUrl,
-        orderIndex: ex.orderIndex,
-        sets: sets,
-        notes: ex.notes,
-      );
+      return ex.copyWith(sets: sets);
     }).toList();
 
     await saveWorkout(

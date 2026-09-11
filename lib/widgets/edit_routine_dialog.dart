@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/routine.dart';
-import '../providers/app_providers.dart';
-import 'localized_exercise_name.dart';
 import 'localized_exercise_name.dart';
 
 class EditRoutineDialog extends ConsumerStatefulWidget {
@@ -56,19 +54,7 @@ class _EditRoutineDialogState extends ConsumerState<EditRoutineDialog> {
         exercises: _exercises
             .asMap()
             .entries
-            .map(
-              (e) => RoutineExercise(
-                id: e.value.id,
-                exerciseId: e.value.exerciseId,
-                exerciseName: e.value.exerciseName,
-                orderIndex: e.key,
-                targetSets: e.value.targetSets,
-                targetReps: e.value.targetReps,
-                targetWeight: e.value.targetWeight,
-                restSeconds: e.value.restSeconds,
-                imageUrl: e.value.imageUrl,
-              ),
-            )
+            .map((e) => e.value.copyWith(orderIndex: e.key))
             .toList(),
         createdAt: widget.routine.createdAt,
         updatedAt: widget.routine.updatedAt,

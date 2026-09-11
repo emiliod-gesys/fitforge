@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/muscle_inference.dart';
 import '../core/utils/gym_weight.dart';
+import '../core/utils/superset_groups.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
@@ -20,6 +21,9 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
   final void Function(WorkoutExercise exercise) onRemoveExercise;
   final void Function(WorkoutExercise exercise) onSwapExercise;
   final void Function(List<String> orderedExerciseIds)? onReorderExercises;
+  final bool Function(WorkoutExercise exercise)? isCardioExercise;
+  final void Function(int blockIndex, List<WorkoutExercise> orderedExercises)? onJoinSuperset;
+  final void Function(WorkoutExercise exercise)? onLeaveSuperset;
 
   const ActiveWorkoutExerciseList({
     super.key,
@@ -31,6 +35,9 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
     required this.onRemoveExercise,
     required this.onSwapExercise,
     this.onReorderExercises,
+    this.isCardioExercise,
+    this.onJoinSuperset,
+    this.onLeaveSuperset,
   });
 
   @override
@@ -116,10 +123,14 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
   void _handleReorder(int oldIndex, int newIndex) {
     if (oldIndex == newIndex) return;
 
-    // onReorderItem (Flutter 3.41+) already adjusts newIndex after removal.
+    final blocks = SupersetGroups.workoutBlocks(_orderedExercises);
+    if (oldIndex < 0 || oldIndex >= blocks.length) return;
+    if (newIndex < 0 || newIndex >= blocks.length) return;
+
     setState(() {
-      final moved = _orderedExercises.removeAt(oldIndex);
-      _orderedExercises.insert(newIndex, moved);
+      final moved = blocks.removeAt(oldIndex);
+      blocks.insert(newIndex, moved);
+      _orderedExercises = [for (final block in blocks) ...block];
       _pendingOrderIds = _orderedExercises.map((e) => e.id).toList();
     });
 
@@ -156,6 +167,7 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercises = _orderedExercises;
+    final blocks = SupersetGroups.workoutBlocks(exercises);
     final muscleCount = exercises
         .expand((e) => MuscleInference.resolve(
               exerciseName: e.exerciseName,
@@ -163,7 +175,7 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
             ))
         .toSet()
         .length;
-    final canReorder = widget.onReorderExercises != null && exercises.length > 1;
+    final canReorder = widget.onReorderExercises != null && blocks.length > 1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,56 +224,28 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
                       child: child,
                     );
                   },
-                  itemCount: exercises.length,
+                  itemCount: blocks.length,
                   onReorderItem: _handleReorder,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    final isLast = index == exercises.length - 1;
-                    final done = exercise.sets.where((s) => s.completed).length;
-                    return _ExerciseListRow(
-                      key: ValueKey(exercise.id),
-                      listIndex: index,
-                      exercise: exercise,
-                      subtitle: _subtitle(exercise, l10n),
-                      doneSets: done,
-                      totalSets: exercise.sets.length,
-                      isCompleted: _isExerciseCompleted(exercise),
-                      showConnector: !isLast,
-                      showDragHandle: true,
-                      onTap: () {
-                        final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
-                        if (index >= 0) widget.onOpenExercise(index);
-                      },
-                      onSwap: () => widget.onSwapExercise(exercise),
-                      onRemove: () => widget.onRemoveExercise(exercise),
-                    );
-                  },
+                  itemBuilder: (context, index) => _buildBlockRow(
+                    context,
+                    l10n: l10n,
+                    block: blocks[index],
+                    listIndex: index,
+                    isLast: index == blocks.length - 1,
+                    showDragHandle: true,
+                  ),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    final isLast = index == exercises.length - 1;
-                    final done = exercise.sets.where((s) => s.completed).length;
-                    return _ExerciseListRow(
-                      key: ValueKey(exercise.id),
-                      listIndex: index,
-                      exercise: exercise,
-                      subtitle: _subtitle(exercise, l10n),
-                      doneSets: done,
-                      totalSets: exercise.sets.length,
-                      isCompleted: _isExerciseCompleted(exercise),
-                      showConnector: !isLast,
-                      showDragHandle: false,
-                      onTap: () {
-                        final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
-                        if (index >= 0) widget.onOpenExercise(index);
-                      },
-                      onSwap: () => widget.onSwapExercise(exercise),
-                      onRemove: () => widget.onRemoveExercise(exercise),
-                    );
-                  },
+                  itemCount: blocks.length,
+                  itemBuilder: (context, index) => _buildBlockRow(
+                    context,
+                    l10n: l10n,
+                    block: blocks[index],
+                    listIndex: index,
+                    isLast: index == blocks.length - 1,
+                    showDragHandle: false,
+                  ),
                 ),
         ),
         SafeArea(
@@ -272,6 +256,61 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBlockRow(
+    BuildContext context, {
+    required AppLocalizations l10n,
+    required List<WorkoutExercise> block,
+    required int listIndex,
+    required bool isLast,
+    required bool showDragHandle,
+  }) {
+    final canJoin = widget.onJoinSuperset != null &&
+        SupersetGroups.canJoinWorkoutBlockWithNext(
+          _orderedExercises,
+          listIndex,
+          isCardio: widget.isCardioExercise,
+        );
+
+    if (block.length < 2) {
+      final exercise = block.first;
+      final done = exercise.sets.where((s) => s.completed).length;
+      return _ExerciseListRow(
+        key: ValueKey(exercise.id),
+        listIndex: listIndex,
+        exercise: exercise,
+        subtitle: _subtitle(exercise, l10n),
+        doneSets: done,
+        totalSets: exercise.sets.length,
+        isCompleted: _isExerciseCompleted(exercise),
+        showConnector: !isLast,
+        showDragHandle: showDragHandle,
+        onTap: () {
+          final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
+          if (index >= 0) widget.onOpenExercise(index);
+        },
+        onSwap: () => widget.onSwapExercise(exercise),
+        onRemove: () => widget.onRemoveExercise(exercise),
+        onJoin: canJoin ? () => widget.onJoinSuperset!(listIndex, _orderedExercises) : null,
+      );
+    }
+
+    return _SupersetListRow(
+      key: ValueKey(block.first.supersetGroupId ?? block.first.id),
+      listIndex: listIndex,
+      members: block,
+      showConnector: !isLast,
+      showDragHandle: showDragHandle,
+      onTap: () {
+        final active = SupersetGroups.activeMember(block) ?? block.first;
+        final index = widget.workout.exercises.indexWhere((e) => e.id == active.id);
+        if (index >= 0) widget.onOpenExercise(index);
+      },
+      onRemoveMember: widget.onRemoveExercise,
+      onJoin: canJoin ? () => widget.onJoinSuperset!(listIndex, _orderedExercises) : null,
+      onLeaveMember: widget.onLeaveSuperset,
     );
   }
 }
@@ -290,6 +329,7 @@ class _ExerciseListRow extends ConsumerWidget {
   final VoidCallback onTap;
   final VoidCallback onSwap;
   final VoidCallback onRemove;
+  final VoidCallback? onJoin;
 
   const _ExerciseListRow({
     super.key,
@@ -304,6 +344,7 @@ class _ExerciseListRow extends ConsumerWidget {
     required this.onTap,
     required this.onSwap,
     required this.onRemove,
+    this.onJoin,
   });
 
   @override
@@ -417,6 +458,18 @@ class _ExerciseListRow extends ConsumerWidget {
                     subtitle,
                     style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
+                  if (onJoin != null)
+                    TextButton.icon(
+                      onPressed: onJoin,
+                      icon: const Icon(Icons.link, size: 16),
+                      label: Text(l10n.joinSuperset),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -424,6 +477,8 @@ class _ExerciseListRow extends ConsumerWidget {
               icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
               onSelected: (value) {
                 switch (value) {
+                  case 'join':
+                    onJoin?.call();
                   case 'swap':
                     onSwap();
                   case 'remove':
@@ -431,6 +486,15 @@ class _ExerciseListRow extends ConsumerWidget {
                 }
               },
               itemBuilder: (_) => [
+                if (onJoin != null)
+                  PopupMenuItem(
+                    value: 'join',
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.link, color: context.accentColor),
+                      title: Text(l10n.joinSuperset),
+                    ),
+                  ),
                 PopupMenuItem(
                   value: 'swap',
                   child: ListTile(
@@ -505,6 +569,258 @@ class _RoundedRectProgressPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RoundedRectProgressPainter oldDelegate) {
     return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
+
+class _SupersetListRow extends ConsumerWidget {
+  static const _completedGreen = Color(0xFF22C55E);
+
+  final int listIndex;
+  final List<WorkoutExercise> members;
+  final bool showConnector;
+  final bool showDragHandle;
+  final VoidCallback onTap;
+  final void Function(WorkoutExercise exercise) onRemoveMember;
+  final VoidCallback? onJoin;
+  final void Function(WorkoutExercise exercise)? onLeaveMember;
+
+  const _SupersetListRow({
+    super.key,
+    required this.listIndex,
+    required this.members,
+    required this.showConnector,
+    required this.showDragHandle,
+    required this.onTap,
+    required this.onRemoveMember,
+    this.onJoin,
+    this.onLeaveMember,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final totalRounds = SupersetGroups.roundCount(members);
+    final doneRounds = SupersetGroups.completedRounds(members);
+    final progress = totalRounds <= 0 ? 0.0 : (doneRounds / totalRounds).clamp(0.0, 1.0);
+    final isCompleted = totalRounds > 0 && doneRounds == totalRounds;
+    final ringColor = isCompleted ? _completedGreen : context.accentColor;
+    final names = members.map((m) => m.exerciseName).join(' · ');
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      splashColor: context.accentColor.withValues(alpha: 0.08),
+      highlightColor: context.accentColor.withValues(alpha: 0.04),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (showDragHandle)
+              ReorderableDragStartListener(
+                index: listIndex,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: AppColors.textMuted.withValues(alpha: 0.8),
+                  ),
+                ),
+              ),
+            SizedBox(
+              width: 58,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 58,
+                    height: 58,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      fit: StackFit.expand,
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(11),
+                            border: Border.all(
+                              color: AppColors.textMuted.withValues(alpha: 0.45),
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                        CustomPaint(
+                          painter: _RoundedRectProgressPainter(
+                            progress: totalRounds == 0 ? 0 : progress,
+                            strokeWidth: 3,
+                            borderRadius: 11,
+                            color: ringColor,
+                          ),
+                        ),
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var i = 0; i < members.length; i++)
+                                Padding(
+                                  padding: EdgeInsets.only(left: i == 0 ? 0 : 2),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        SupersetGroups.slotLetter(members[i].supersetSlot ?? (i + 1)),
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w800,
+                                          color: context.accentColor,
+                                        ),
+                                      ),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: ExerciseThumbnail(
+                                          exerciseId: members[i].exerciseId,
+                                          exerciseName: members[i].exerciseName,
+                                          width: 16,
+                                          height: 16,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (isCompleted)
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: _completedGreen,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (showConnector)
+                    Container(
+                      width: 2,
+                      height: 14,
+                      margin: const EdgeInsets.only(top: 4),
+                      color: AppColors.border.withValues(alpha: 0.5),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.superset,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    names,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    totalRounds == 0
+                        ? l10n.noSets
+                        : l10n.supersetRound(
+                            SupersetGroups.currentRound(members),
+                            totalRounds,
+                          ),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                  if (onJoin != null)
+                    TextButton.icon(
+                      onPressed: onJoin,
+                      icon: const Icon(Icons.link, size: 16),
+                      label: Text(l10n.joinSuperset),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
+              onSelected: (value) {
+                if (value == 'join') {
+                  onJoin?.call();
+                  return;
+                }
+                if (value.startsWith('leave:')) {
+                  final id = value.substring(6);
+                  for (final member in members) {
+                    if (member.id == id) {
+                      onLeaveMember?.call(member);
+                      break;
+                    }
+                  }
+                  return;
+                }
+                if (value.startsWith('remove:')) {
+                  final id = value.substring(7);
+                  for (final member in members) {
+                    if (member.id == id) {
+                      onRemoveMember(member);
+                      break;
+                    }
+                  }
+                }
+              },
+              itemBuilder: (_) => [
+                if (onJoin != null)
+                  PopupMenuItem(
+                    value: 'join',
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.link, color: context.accentColor),
+                      title: Text(l10n.joinSuperset),
+                    ),
+                  ),
+                if (onLeaveMember != null)
+                  for (final member in members)
+                    PopupMenuItem(
+                      value: 'leave:${member.id}',
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.link_off),
+                        title: Text('${l10n.leaveSuperset}: ${member.exerciseName}'),
+                      ),
+                    ),
+                for (final member in members)
+                  PopupMenuItem(
+                    value: 'remove:${member.id}',
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                      title: Text('${l10n.remove} ${member.exerciseName}'),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

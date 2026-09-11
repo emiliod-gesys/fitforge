@@ -6,6 +6,8 @@ import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/exercise_load.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_accent.dart';
+import '../../core/utils/superset_groups.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -19,6 +21,8 @@ import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/localized_exercise_name.dart';
 import '../../widgets/routine_exercise_target_fields.dart';
+import '../../widgets/rest_time_selector.dart';
+import '../../widgets/superset_rounds_sheet.dart';
 
 class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
@@ -199,43 +203,342 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   }
 
   void _normalizeOrderIndices() {
-    for (var i = 0; i < _exercises.length; i++) {
-      if (_exercises[i].orderIndex != i) {
-        _exercises[i] = _exercises[i].copyWith(orderIndex: i);
-      }
-    }
+    final updated = SupersetGroups.reindexRoutine(_exercises);
+    _exercises
+      ..clear()
+      ..addAll(updated);
   }
 
-  void _reorderExercises(int oldIndex, int newIndex) {
+  void _reorderBlocks(int oldIndex, int newIndex) {
     if (oldIndex == newIndex) return;
     setState(() {
-      final item = _exercises.removeAt(oldIndex);
-      _exercises.insert(newIndex, item);
-      _normalizeOrderIndices();
+      final updated = SupersetGroups.reorderRoutineBlocks(_exercises, oldIndex, newIndex);
+      _exercises
+        ..clear()
+        ..addAll(updated);
     });
   }
 
-  void _removeExercise(int index) {
+  void _removeExercise(String exerciseId) {
     setState(() {
-      _exercises.removeAt(index);
+      _exercises.removeWhere((e) => e.id == exerciseId);
       _normalizeOrderIndices();
     });
   }
 
-  void _updateExercise(int index, RoutineExercise updated) {
+  void _updateExercise(String exerciseId, RoutineExercise updated) {
+    final index = _exercises.indexWhere((e) => e.id == exerciseId);
+    if (index < 0) return;
     setState(() => _exercises[index] = updated);
   }
 
-  Widget _buildExerciseCard({
-    required int index,
-    required RoutineExercise ex,
+  void _joinBlock(int blockIndex) {
+    setState(() {
+      final updated = SupersetGroups.joinRoutineBlockWithNext(
+        _exercises,
+        blockIndex,
+        newGroupId: const Uuid().v4(),
+      );
+      _exercises
+        ..clear()
+        ..addAll(updated);
+    });
+  }
+
+  void _leaveSuperset(String exerciseId) {
+    setState(() {
+      final updated = SupersetGroups.leaveRoutineSuperset(_exercises, exerciseId);
+      _exercises
+        ..clear()
+        ..addAll(updated);
+    });
+  }
+
+  void _setGroupRounds(String groupId, int rounds) {
+    setState(() {
+      final updated = SupersetGroups.setRoutineGroupRoundCount(
+        _exercises,
+        groupId,
+        rounds,
+      );
+      _exercises
+        ..clear()
+        ..addAll(updated);
+    });
+  }
+
+  Future<void> _pickGroupRounds(String groupId, int selected) async {
+    final rounds = await SupersetRoundsSheet.show(
+      context,
+      selected: selected,
+    );
+    if (rounds == null || !mounted) return;
+    _setGroupRounds(groupId, rounds);
+  }
+
+  void _moveSlot(String groupId, int oldSlotIndex, int newSlotIndex) {
+    setState(() {
+      final updated = SupersetGroups.reorderRoutineSlots(
+        _exercises,
+        groupId,
+        oldSlotIndex,
+        newSlotIndex,
+      );
+      _exercises
+        ..clear()
+        ..addAll(updated);
+    });
+  }
+
+  Widget _buildBlock({
+    required int blockIndex,
+    required List<RoutineExercise> block,
     required String unitSystem,
     required Iterable<Exercise> catalog,
     required AppLocalizations l10n,
     required bool showDragHandle,
   }) {
+    if (block.length < 2) {
+      return _buildExerciseCard(
+        key: ValueKey(block.first.id),
+        dragIndex: blockIndex,
+        ex: block.first,
+        unitSystem: unitSystem,
+        catalog: catalog,
+        l10n: l10n,
+        showDragHandle: showDragHandle,
+        canJoin: SupersetGroups.canJoinRoutineBlockWithNext(_exercises, blockIndex),
+        onJoin: () => _joinBlock(blockIndex),
+      );
+    }
+    return _buildSupersetBlock(
+      blockIndex: blockIndex,
+      block: block,
+      unitSystem: unitSystem,
+      catalog: catalog,
+      l10n: l10n,
+      showDragHandle: showDragHandle,
+    );
+  }
+
+  Widget _buildSupersetBlock({
+    required int blockIndex,
+    required List<RoutineExercise> block,
+    required String unitSystem,
+    required Iterable<Exercise> catalog,
+    required AppLocalizations l10n,
+    required bool showDragHandle,
+  }) {
+    final gid = block.first.supersetGroupId ?? block.first.id;
+    final canJoin = SupersetGroups.canJoinRoutineBlockWithNext(_exercises, blockIndex);
+    final rounds = block.first.resolvedSetDetails.length;
     return Card(
-      key: ValueKey(ex.id),
+      key: ValueKey('superset-$gid'),
+      margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.accentColor.withValues(alpha: 0.55)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 4, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (showDragHandle)
+                  ReorderableDragStartListener(
+                    index: blockIndex,
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(Icons.drag_handle, color: AppColors.textMuted),
+                    ),
+                  ),
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(l10n.superset),
+                  side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
+                  backgroundColor: context.accentColor.withValues(alpha: 0.12),
+                ),
+                const Spacer(),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 8, 0),
+              child: Row(
+                children: [
+                  ActionChip(
+                    avatar: Icon(
+                      Icons.repeat,
+                      size: 16,
+                      color: context.accentColor,
+                    ),
+                    label: Text(l10n.supersetRoundsCount(rounds <= 0 ? 1 : rounds)),
+                    onPressed: () => _pickGroupRounds(gid, rounds <= 0 ? 3 : rounds),
+                  ),
+                  const Spacer(),
+                  RestTimeSelector(
+                    selectedSeconds: block.first.restSeconds,
+                    onChanged: (seconds) {
+                      setState(() {
+                        final updated = SupersetGroups.setRoutineGroupRestSeconds(
+                          _exercises,
+                          gid,
+                          seconds,
+                        );
+                        _exercises
+                          ..clear()
+                          ..addAll(updated);
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            for (var i = 0; i < block.length; i++) ...[
+              if (i > 0) const Divider(height: 16),
+              _buildGroupedMember(
+                ex: block[i],
+                slotIndex: i,
+                memberCount: block.length,
+                groupId: gid,
+                unitSystem: unitSystem,
+                catalog: catalog,
+                l10n: l10n,
+              ),
+            ],
+            if (canJoin)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _joinBlock(blockIndex),
+                  icon: const Icon(Icons.link, size: 18),
+                  label: Text(l10n.joinSuperset),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupedMember({
+    required RoutineExercise ex,
+    required int slotIndex,
+    required int memberCount,
+    required String groupId,
+    required String unitSystem,
+    required Iterable<Exercise> catalog,
+    required AppLocalizations l10n,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: context.accentColor.withValues(alpha: 0.18),
+                child: Text(
+                  SupersetGroups.slotLetter(slotIndex + 1),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ExerciseThumbnail(
+                exerciseId: ex.exerciseId,
+                exerciseName: ex.exerciseName,
+                width: 44,
+                height: 44,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: LocalizedExerciseName(
+                    ex.exerciseName,
+                    exerciseId: ex.exerciseId,
+                  ),
+                ),
+              ),
+              if (slotIndex > 0)
+                IconButton(
+                  tooltip: l10n.previous,
+                  icon: const Icon(Icons.keyboard_arrow_up),
+                  onPressed: () => _moveSlot(groupId, slotIndex, slotIndex - 1),
+                ),
+              if (slotIndex < memberCount - 1)
+                IconButton(
+                  tooltip: l10n.next,
+                  icon: const Icon(Icons.keyboard_arrow_down),
+                  onPressed: () => _moveSlot(groupId, slotIndex, slotIndex + 1),
+                ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'leave':
+                      _leaveSuperset(ex.id);
+                    case 'delete':
+                      _removeExercise(ex.id);
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'leave',
+                    child: Text(l10n.leaveSuperset),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(l10n.remove),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (ex.isCardio) ...[
+            const SizedBox(height: 4),
+            Text(
+              _exerciseSubtitle(ex, unitSystem, l10n),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMuted,
+                  ),
+            ),
+          ] else ...[
+            const SizedBox(height: 8),
+            RoutineExerciseTargetFields(
+              key: ValueKey('${ex.id}-${ex.resolvedSetDetails.length}'),
+              exercise: ex,
+              unitSystem: unitSystem,
+              catalog: catalog,
+              onChanged: (updated) => _updateExercise(ex.id, updated),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExerciseCard({
+    Key? key,
+    required int dragIndex,
+    required RoutineExercise ex,
+    required String unitSystem,
+    required Iterable<Exercise> catalog,
+    required AppLocalizations l10n,
+    required bool showDragHandle,
+    required bool canJoin,
+    required VoidCallback onJoin,
+  }) {
+    return Card(
+      key: key,
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 4, 12),
@@ -247,7 +550,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
               children: [
                 if (showDragHandle)
                   ReorderableDragStartListener(
-                    index: index,
+                    index: dragIndex,
                     child: const Padding(
                       padding: EdgeInsets.only(right: 4, top: 12),
                       child: Icon(Icons.drag_handle, color: AppColors.textMuted),
@@ -272,7 +575,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _removeExercise(index),
+                  onPressed: () => _removeExercise(ex.id),
                 ),
               ],
             ),
@@ -293,9 +596,18 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                 exercise: ex,
                 unitSystem: unitSystem,
                 catalog: catalog,
-                onChanged: (updated) => _updateExercise(index, updated),
+                onChanged: (updated) => _updateExercise(ex.id, updated),
               ),
             ],
+            if (canJoin)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: onJoin,
+                  icon: const Icon(Icons.link, size: 18),
+                  label: Text(l10n.joinSuperset),
+                ),
+              ),
           ],
         ),
       ),
@@ -317,7 +629,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     } else {
       unitSystem = ref.watch(unitSystemProvider);
     }
-    final canReorder = _exercises.length > 1;
+    final blocks = SupersetGroups.routineBlocks(_exercises);
+    final canReorder = blocks.length > 1;
     final catalog = ref.watch(exercisesProvider).valueOrNull ?? const <Exercise>[];
 
     return Scaffold(
@@ -399,11 +712,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverReorderableList(
-                itemCount: _exercises.length,
-                onReorderItem: _reorderExercises,
-                itemBuilder: (context, index) => _buildExerciseCard(
-                  index: index,
-                  ex: _exercises[index],
+                itemCount: blocks.length,
+                onReorderItem: _reorderBlocks,
+                itemBuilder: (context, index) => _buildBlock(
+                  blockIndex: index,
+                  block: blocks[index],
                   unitSystem: unitSystem,
                   catalog: catalog,
                   l10n: l10n,
@@ -416,15 +729,15 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildExerciseCard(
-                    index: index,
-                    ex: _exercises[index],
+                  (context, index) => _buildBlock(
+                    blockIndex: index,
+                    block: blocks[index],
                     unitSystem: unitSystem,
                     catalog: catalog,
                     l10n: l10n,
                     showDragHandle: false,
                   ),
-                  childCount: _exercises.length,
+                  childCount: blocks.length,
                 ),
               ),
             ),

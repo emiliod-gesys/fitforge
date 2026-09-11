@@ -153,6 +153,8 @@ abstract final class AiRoutineSanitizer {
           targetDistanceMeters: re.targetDistanceMeters ?? (isCardio ? 3000 : null),
           targetInclinePercent: re.targetInclinePercent,
           targetSteps: re.targetSteps,
+          supersetGroupId: re.supersetGroupId,
+          supersetSlot: re.supersetSlot,
         ),
       );
     }
