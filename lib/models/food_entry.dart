@@ -1,4 +1,6 @@
 import '../core/utils/food_serving_parser.dart';
+import '../core/utils/json_parsing.dart';
+import '../core/utils/supabase_datetime.dart';
 import 'manual_activity_entry.dart';
 
 enum MealType {
@@ -86,11 +88,11 @@ class FoodEntry {
     return FoodEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      loggedAt: DateTime.parse(json['logged_at'] as String),
+      loggedAt: SupabaseDateTime.parse(json['logged_at'] as String),
       mealType: MealType.fromJson(json['meal_type'] as String?),
       name: json['name'] as String? ?? '',
       brand: json['brand'] as String?,
-      caloriesKcal: json['calories_kcal'] as int? ?? 0,
+      caloriesKcal: parseJsonInt(json['calories_kcal']),
       proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0,
       carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0,
       fatG: (json['fat_g'] as num?)?.toDouble() ?? 0,

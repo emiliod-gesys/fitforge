@@ -206,6 +206,14 @@ final authStateProvider = StreamProvider((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
+/// Stable user id so token refresh does not refetch food as an empty list.
+final authUserIdProvider = Provider<String?>((ref) {
+  final fromStream = ref.watch(
+    authStateProvider.select((async) => async.valueOrNull?.session?.user.id),
+  );
+  return fromStream ?? ref.watch(authServiceProvider).currentUser?.id;
+});
+
 final profileProvider = FutureProvider<UserProfile?>((ref) async {
   ref.watch(authStateProvider);
   return ref.watch(profileServiceProvider).getProfile();
@@ -565,39 +573,43 @@ final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
 
 final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
   ref.keepAlive();
-  ref.watch(authStateProvider);
+  final userId = ref.watch(authUserIdProvider);
+  if (userId == null) return const [];
   final day = ref.watch(foodSelectedDayProvider);
-  return ref.watch(foodServiceProvider).getEntriesForDay(day);
+  return ref.watch(foodServiceProvider).getEntriesForDay(day, userId: userId);
 });
 
 final manualActivitiesProvider =
     FutureProvider<List<ManualActivityEntry>>((ref) async {
   ref.keepAlive();
-  ref.watch(authStateProvider);
+  final userId = ref.watch(authUserIdProvider);
+  if (userId == null) return const [];
   final day = ref.watch(foodSelectedDayProvider);
-  return ref.watch(activityLogServiceProvider).getEntriesForDay(day);
+  return ref.watch(activityLogServiceProvider).getEntriesForDay(day, userId: userId);
 });
 
 final waterEntriesProvider = FutureProvider<List<WaterEntry>>((ref) async {
   ref.keepAlive();
-  ref.watch(authStateProvider);
+  final userId = ref.watch(authUserIdProvider);
+  if (userId == null) return const [];
   final day = ref.watch(foodSelectedDayProvider);
-  return ref.watch(waterLogServiceProvider).getEntriesForDay(day);
+  return ref.watch(waterLogServiceProvider).getEntriesForDay(day, userId: userId);
 });
 
 final foodDayWorkoutsProvider =
     FutureProvider.family<List<Workout>, DateTime>((ref, day) async {
-  ref.watch(authStateProvider);
+  final userId = ref.watch(authUserIdProvider);
+  if (userId == null) return const [];
   final normalized = DateTime(day.year, day.month, day.day);
   return ref
       .watch(workoutServiceProvider)
-      .getCompletedWorkoutsOnDay(normalized);
+      .getCompletedWorkoutsOnDay(normalized, userId: userId);
 });
 
 final dailyNutritionProvider =
     FutureProvider<DailyNutritionSummary>((ref) async {
   ref.keepAlive();
-  ref.watch(authStateProvider);
+  ref.watch(authUserIdProvider);
   final day = ref.watch(foodSelectedDayProvider);
   final normalizedDay = DateTime(day.year, day.month, day.day);
 

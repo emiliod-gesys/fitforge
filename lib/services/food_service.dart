@@ -8,6 +8,19 @@ class FoodService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
 
+  List<FoodEntry> _entriesFromRows(dynamic data) {
+    return (data as List)
+        .map((row) {
+          try {
+            return FoodEntry.fromJson(Map<String, dynamic>.from(row as Map));
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<FoodEntry>()
+        .toList();
+  }
+
   Future<List<FoodEntry>> getEntriesForDay(DateTime day, {String? userId}) async {
     final uid = userId ?? SupabaseService.currentUser?.id;
     if (uid == null) return [];
@@ -23,9 +36,7 @@ class FoodService {
         .lt('logged_at', end.toUtc().toIso8601String())
         .order('logged_at', ascending: true);
 
-    return (data as List)
-        .map((row) => FoodEntry.fromJson(Map<String, dynamic>.from(row as Map)))
-        .toList();
+    return _entriesFromRows(data);
   }
 
   Future<List<FoodEntry>> getEntriesSince(DateTime startInclusive, {String? userId}) async {
@@ -39,9 +50,7 @@ class FoodService {
         .gte('logged_at', startInclusive.toUtc().toIso8601String())
         .order('logged_at', ascending: true);
 
-    return (data as List)
-        .map((row) => FoodEntry.fromJson(Map<String, dynamic>.from(row as Map)))
-        .toList();
+    return _entriesFromRows(data);
   }
 
   Future<List<FoodEntry>> getRecentEntries({int limit = 20}) async {
@@ -55,9 +64,7 @@ class FoodService {
         .order('logged_at', ascending: false)
         .limit(limit);
 
-    return (data as List)
-        .map((row) => FoodEntry.fromJson(Map<String, dynamic>.from(row as Map)))
-        .toList();
+    return _entriesFromRows(data);
   }
 
   /// Alimentos únicos registrados antes (para pestaña Search).

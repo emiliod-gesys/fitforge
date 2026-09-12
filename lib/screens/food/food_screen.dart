@@ -28,6 +28,7 @@ import '../../widgets/food/manual_activity_sheet.dart';
 import '../../widgets/food/meal_timeline.dart';
 import '../../widgets/food/water_intake_section.dart';
 import '../../core/utils/water_goal_calculator.dart';
+import 'food_add_screen.dart';
 
 
 
@@ -97,7 +98,13 @@ class FoodScreen extends ConsumerWidget {
 
         },
 
-        onAdd: (meal, selectedDay) => context.push('/food/add', extra: {'meal': meal, 'day': selectedDay}),
+        onAdd: (meal, selectedDay) {
+          ref.read(foodAddRouteArgsProvider.notifier).state = FoodAddRouteArgs(
+            mealType: meal,
+            day: selectedDay,
+          );
+          context.push('/food/add', extra: {'meal': meal, 'day': selectedDay});
+        },
 
         onAddActivity: (selectedDay) => ManualActivitySheet.show(
 

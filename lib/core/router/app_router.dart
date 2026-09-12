@@ -19,6 +19,7 @@ import '../../screens/routines/routine_editor_screen.dart';
 import '../../screens/social/friend_profile_screen.dart';
 import '../../screens/social/feed_post_detail_screen.dart';
 import '../../screens/social/social_screen.dart';
+import '../../core/router/food_route_extra.dart';
 import '../../screens/food/food_screen.dart';
 import '../../screens/food/food_add_screen.dart';
 import '../../screens/food/food_detail_screen.dart';
@@ -235,27 +236,43 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/food/add',
         builder: (_, state) {
-          final extra = state.extra! as Map<String, dynamic>;
+          final extra = foodRouteExtraMap(state.extra);
+          final stored = ref.read(foodAddRouteArgsProvider);
+          final meal = extra?['meal'] as MealType? ?? stored?.mealType;
+          final day = extra?['day'] as DateTime? ?? stored?.day;
+          if (meal == null || day == null) {
+            return const FoodRouteFallbackScreen();
+          }
           return FoodAddScreen(
-            mealType: extra['meal'] as MealType,
-            day: extra['day'] as DateTime,
-            onboardingMode: extra['onboarding'] as bool? ?? false,
-            initialMode: extra['initialMode'] as FoodAddMode?,
+            mealType: meal,
+            day: day,
+            onboardingMode: extra?['onboarding'] as bool? ?? stored?.onboardingMode ?? false,
+            initialMode: extra?['initialMode'] as FoodAddMode? ?? stored?.initialMode,
           );
         },
       ),
       GoRoute(
         path: '/food/detail',
         builder: (_, state) {
-          final extra = state.extra! as Map<String, dynamic>;
+          final extra = foodRouteExtraMap(state.extra);
+          final stored = ref.read(foodDetailRouteArgsProvider);
+          final estimate =
+              extra?['estimate'] as FoodNutritionEstimate? ?? stored?.estimate;
+          final meal = extra?['meal'] as MealType? ?? stored?.mealType;
+          final day = extra?['day'] as DateTime? ?? stored?.day;
+          if (estimate == null || meal == null || day == null) {
+            return const FoodRouteFallbackScreen();
+          }
           return FoodDetailScreen(
-            estimate: extra['estimate'] as FoodNutritionEstimate,
-            mealType: extra['meal'] as MealType,
-            day: extra['day'] as DateTime,
-            source: extra['source'] as FoodEntrySource? ?? FoodEntrySource.manual,
-            originalQuery: extra['originalQuery'] as String?,
-            imageBytes: extra['imageBytes'] as List<int>?,
-            onboardingMode: extra['onboarding'] as bool? ?? false,
+            estimate: estimate,
+            mealType: meal,
+            day: day,
+            source: extra?['source'] as FoodEntrySource? ??
+                stored?.source ??
+                FoodEntrySource.manual,
+            originalQuery: extra?['originalQuery'] as String? ?? stored?.originalQuery,
+            imageBytes: extra?['imageBytes'] as List<int>? ?? stored?.imageBytes,
+            onboardingMode: extra?['onboarding'] as bool? ?? stored?.onboardingMode ?? false,
           );
         },
       ),

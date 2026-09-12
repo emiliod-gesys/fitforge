@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/food_logged_at.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/quantity_format.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -12,6 +13,28 @@ import '../../providers/app_providers.dart';
 import '../../providers/onboarding_progress_provider.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../core/theme/app_accent.dart';
+
+class FoodDetailRouteArgs {
+  final FoodNutritionEstimate estimate;
+  final MealType mealType;
+  final DateTime day;
+  final FoodEntrySource source;
+  final String? originalQuery;
+  final List<int>? imageBytes;
+  final bool onboardingMode;
+
+  const FoodDetailRouteArgs({
+    required this.estimate,
+    required this.mealType,
+    required this.day,
+    required this.source,
+    this.originalQuery,
+    this.imageBytes,
+    this.onboardingMode = false,
+  });
+}
+
+final foodDetailRouteArgsProvider = StateProvider<FoodDetailRouteArgs?>((ref) => null);
 
 class FoodDetailScreen extends ConsumerStatefulWidget {
   final FoodNutritionEstimate estimate;
@@ -179,7 +202,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
             fiberG: scaled.fiberG,
             servingDescription: serving,
             source: widget.source,
-            loggedAt: widget.day,
+            loggedAt: FoodLoggedAt.forSelectedDay(widget.day),
           );
       ref.invalidate(dailyNutritionProvider);
       ref.invalidate(foodEntriesProvider);
@@ -190,6 +213,11 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
         return;
       }
       context.go('/food');
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.errorGeneric('$error'))),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

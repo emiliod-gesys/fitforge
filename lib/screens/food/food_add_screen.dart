@@ -24,8 +24,25 @@ import '../../services/food_voice_note_recorder.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/food/barcode_scanner_view.dart';
 import '../../core/theme/app_accent.dart';
+import 'food_detail_screen.dart';
 
 enum FoodAddMode { search, barcode, photo, quick, manual }
+
+class FoodAddRouteArgs {
+  final MealType mealType;
+  final DateTime day;
+  final bool onboardingMode;
+  final FoodAddMode? initialMode;
+
+  const FoodAddRouteArgs({
+    required this.mealType,
+    required this.day,
+    this.onboardingMode = false,
+    this.initialMode,
+  });
+}
+
+final foodAddRouteArgsProvider = StateProvider<FoodAddRouteArgs?>((ref) => null);
 
 class FoodAddScreen extends ConsumerStatefulWidget {
   final MealType mealType;
@@ -152,6 +169,16 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     String? originalQuery,
     List<int>? imageBytes,
   }) {
+    final args = FoodDetailRouteArgs(
+      estimate: estimate,
+      mealType: widget.mealType,
+      day: widget.day,
+      source: source,
+      originalQuery: originalQuery,
+      imageBytes: imageBytes,
+      onboardingMode: widget.onboardingMode,
+    );
+    ref.read(foodDetailRouteArgsProvider.notifier).state = args;
     return context.push<void>(
       '/food/detail',
       extra: {

@@ -1,3 +1,6 @@
+import '../core/utils/json_parsing.dart';
+import '../core/utils/supabase_datetime.dart';
+
 class WaterEntry {
   final String id;
   final String userId;
@@ -15,8 +18,8 @@ class WaterEntry {
     return WaterEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      loggedAt: DateTime.parse(json['logged_at'] as String),
-      amountMl: json['amount_ml'] as int? ?? 0,
+      loggedAt: SupabaseDateTime.parse(json['logged_at'] as String),
+      amountMl: parseJsonInt(json['amount_ml']),
     );
   }
 
