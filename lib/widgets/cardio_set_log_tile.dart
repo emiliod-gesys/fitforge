@@ -158,6 +158,8 @@ class _CardioSetLogTileState extends State<CardioSetLogTile> {
       keyboardType: decimal
           ? const TextInputType.numberWithOptions(decimal: true)
           : keyboardType,
+      textInputAction: TextInputAction.done,
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       decoration: _fieldDecoration(label),
       onSubmitted: (_) => _submit(),
     );
@@ -389,7 +391,9 @@ class _DurationInputRow extends StatelessWidget {
             controller: minutesController,
             enabled: enabled,
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
             textAlign: TextAlign.center,
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             decoration: decorationBuilder(minutesLabel),
             onSubmitted: (_) => onSubmitted(),
           ),
@@ -411,7 +415,9 @@ class _DurationInputRow extends StatelessWidget {
             controller: secondsController,
             enabled: enabled,
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
             textAlign: TextAlign.center,
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             decoration: decorationBuilder(secondsLabel),
             onSubmitted: (_) => onSubmitted(),
           ),

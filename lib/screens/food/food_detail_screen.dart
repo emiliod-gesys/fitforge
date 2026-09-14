@@ -258,6 +258,12 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
                           Image.memory(
                             Uint8List.fromList(widget.imageBytes!),
                             fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const ColoredBox(
+                              color: Colors.black,
+                              child: Center(
+                                child: Icon(Icons.broken_image_outlined, color: Colors.white54),
+                              ),
+                            ),
                           ),
                           Positioned(
                             left: 0,

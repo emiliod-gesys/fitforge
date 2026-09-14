@@ -350,6 +350,10 @@ class _SetLogTileState extends State<SetLogTile> {
                             focusNode: _weightFocusNode,
                             enabled: _fieldsEnabled,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            textInputAction: TextInputAction.done,
+                            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                            onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                            scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 160),
                             inputFormatters: [
                               GymWeightInputFormatter(unitSystem: widget.unitSystem),
                             ],
@@ -388,6 +392,10 @@ class _SetLogTileState extends State<SetLogTile> {
                               enabled: _fieldsEnabled,
                               keyboardType:
                                   const TextInputType.numberWithOptions(decimal: true),
+                              textInputAction: TextInputAction.done,
+                              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                              onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                              scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 160),
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -400,6 +408,10 @@ class _SetLogTileState extends State<SetLogTile> {
                               controller: _repsController,
                               enabled: _fieldsEnabled,
                               keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                              onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                              scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 160),
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),

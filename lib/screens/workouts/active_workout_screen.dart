@@ -962,6 +962,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   void _dismissRestTimer(int sessionId) {
     if (sessionId != _restTimerKey) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _showRestTimer = false;
       _restEndsAt = null;
@@ -1478,6 +1479,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         await _leaveActiveWorkoutToMenu();
       },
       child: Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: activeAsync.whenOrNull(
         data: (workout) {
           if (workout == null) return null;
@@ -1503,6 +1505,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     onPressed: _completing ? null : _leaveActiveWorkoutToMenu,
                   ),
             actions: [
+              if (MediaQuery.viewInsetsOf(context).bottom > 80)
+                IconButton(
+                  tooltip: l10n.done,
+                  onPressed: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  icon: const Icon(Icons.keyboard_hide_outlined),
+                ),
               TextButton(
                 onPressed: _completing ? null : () => _cancelWorkout(displayWorkout),
                 child: Text(
@@ -1717,6 +1725,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                   children: [
                     ExerciseThumbnail(
                       exerciseId: exercise.exerciseId,
@@ -1917,6 +1926,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   ],
                 ),
               ),
+              if (MediaQuery.viewInsetsOf(context).bottom <= 80)
               _ExerciseNavigator(
                 l10n: l10n,
                 currentIndex: SupersetGroups.blockIndexOf(visibleExercises, exercise.id),
@@ -2036,6 +2046,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               if (round > 1) ...[
                 for (var past = 1; past < round; past++)
@@ -2075,6 +2086,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             ],
           ),
         ),
+        if (MediaQuery.viewInsetsOf(context).bottom <= 80)
         _ExerciseNavigator(
           l10n: l10n,
           currentIndex: SupersetGroups.blockIndexOf(visibleExercises, currentExercise.id),
@@ -2564,7 +2576,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       durationSeconds: stationSeconds ?? set.durationSeconds,
     );
 
-    String? nextFocusId;
     WorkoutSet? adjustedNextSet;
     int? nextExerciseIndex;
     var startRest = false;
@@ -2578,7 +2589,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             ? completedSet
             : (_setOverrides[candidate.id] ?? candidate);
         if (effective.completed) continue;
-        nextFocusId = candidate.id;
         final selectedRir = rir;
         if (selectedRir != null) {
           final baseline = _rirWeightBaselines[effective.id] ?? effective.weight;
@@ -2618,7 +2628,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           return m.copyWith(sets: sets);
         }).toList();
 
-        nextFocusId = null;
         final nextInRound = SupersetGroups.nextMemberInRound(
           patchedGroup,
           exercise.id,
@@ -2627,15 +2636,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         if (nextInRound != null) {
           final index = workout.exercises.indexWhere((e) => e.id == nextInRound.id);
           if (index >= 0) nextExerciseIndex = index;
-          nextFocusId = SupersetGroups.setForRound(nextInRound, completedSet.setNumber)?.id;
         } else {
           final nextMember = SupersetGroups.activeMember(patchedGroup) ?? patchedGroup.first;
           final index = workout.exercises.indexWhere((e) => e.id == nextMember.id);
           if (index >= 0) nextExerciseIndex = index;
-          nextFocusId = SupersetGroups.setForRound(
-            nextMember,
-            completedSet.setNumber + 1,
-          )?.id;
         }
         startRest = SupersetGroups.isRoundComplete(patchedGroup, completedSet.setNumber);
       } else {
@@ -2653,13 +2657,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         _setOverrides[adjustedNextSet.id] = adjustedNextSet;
       }
       _savingSetIds.add(set.id);
-      if (nextFocusId != null) _focusSetId = nextFocusId;
       if (nextExerciseIndex != null) _currentExerciseIndex = nextExerciseIndex;
     });
 
     if (startRest) {
       _startRestTimer();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) FocusManager.instance.primaryFocus?.unfocus();
+    });
     unawaited(_publishWatchSession(workout));
 
     final persist = _persistSet(
