@@ -20,6 +20,15 @@ extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
 
+extension GroupedSetL10n on AppLocalizations {
+  /// 2 ejercicios = superserie; 3 o más = circuito.
+  String groupedSetKind(int memberCount) =>
+      memberCount >= 3 ? circuit : superset;
+
+  String leaveGroupedSet(int memberCount) =>
+      memberCount >= 3 ? leaveCircuit : leaveSuperset;
+}
+
 extension ProfileL10n on AppLocalizations {
   String genderLabel(Gender? gender) {
     return switch (gender) {

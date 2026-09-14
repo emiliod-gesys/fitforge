@@ -5,6 +5,7 @@ import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../routines/routine_list_screen.dart';
@@ -83,6 +84,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
             )
           else ...[
             IconButton(
+              key: TutorialTargets.routineCreateKey,
               icon: const Icon(Icons.add_rounded),
               tooltip: l10n.newRoutine,
               onPressed: () async {
@@ -92,6 +94,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
               },
             ),
             IconButton(
+              key: TutorialTargets.routineAiKey,
               icon: const Icon(Icons.auto_awesome_rounded),
               tooltip: l10n.generateWithAi,
               onPressed: () => RoutineListActions.showAiGenerator(context, ref),
@@ -125,7 +128,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
                 unselectedLabelColor: AppColors.textMuted,
                 tabs: [
                   Tab(text: l10n.trainTabToday),
-                  Tab(text: l10n.trainTabRoutines),
+                  Tab(key: TutorialTargets.trainRoutinesTabKey, text: l10n.trainTabRoutines),
                 ],
               ),
             ),

@@ -74,12 +74,42 @@ void main() {
     );
   });
 
-  test('mergeBundledAndCloudExercises deduplicates by id', () {
-    final bundled = [_ex('ff_1', 'Bench Press')];
-    final cloud = [_ex('ext_1', 'Incline Fly'), _ex('ff_1', 'Bench Press duplicate')];
+  test('mergeRecentExerciseIds keeps local picks first then dated usages', () {
+    final merged = mergeRecentExerciseIds(
+      localPicks: ['local_a', 'local_b'],
+      usages: [
+        ExerciseUsage(exerciseId: 'old', usedAt: DateTime(2026, 1, 1)),
+        ExerciseUsage(exerciseId: 'fresh', usedAt: DateTime(2026, 3, 1)),
+        ExerciseUsage(exerciseId: 'local_a', usedAt: DateTime(2026, 4, 1)),
+      ],
+    );
 
-    final merged = mergeBundledAndCloudExercises(bundled: bundled, cloud: cloud);
+    expect(merged, ['local_a', 'local_b', 'fresh', 'old']);
+  });
 
-    expect(merged.map((e) => e.id), ['ff_1', 'ext_1']);
+  test('sortPickerExercises puts recents first within the filtered list', () {
+    final bench = _ex('bench', 'Bench press');
+    final fly = _ex('fly', 'Cable fly');
+    final dip = _ex('dip', 'Dip');
+
+    final sorted = sortPickerExercises(
+      exercises: [bench, fly, dip],
+      recentIds: ['dip', 'bench'],
+    );
+
+    expect(sorted.map((e) => e.id), ['dip', 'bench', 'fly']);
+  });
+
+  test('sortPickerExercises keeps search relevance ahead of recency', () {
+    final bench = _ex('bench', 'Bench press');
+    final fly = _ex('fly', 'Cable fly');
+
+    final sorted = sortPickerExercises(
+      exercises: [bench, fly],
+      recentIds: ['fly'],
+      search: 'bench',
+    );
+
+    expect(sorted.first.id, 'bench');
   });
 }

@@ -99,13 +99,9 @@ abstract final class ExerciseLoad {
       if (exercise.perArmWeight) return true;
     }
 
-    // Un movimiento unilateral con cable/polea siempre puede registrarse por
-    // el lado activo, aunque su nombre corto no incluya "single arm".
-    if (exercise != null &&
-        exercise.unilateral &&
-        exercise.equipment.any(_isCableEquipment)) {
-      return true;
-    }
+    // Polea, cable, banda o elástica: se puede hacer a un brazo aunque el
+    // nombre del catálogo sea la variante a dos manos.
+    if (_isCableOrBandExercise(exercise, exerciseName)) return true;
 
     if (exercise != null && exercise.equipment.any(_isMachineEquipment)) {
       return true;
@@ -129,16 +125,8 @@ abstract final class ExerciseLoad {
       if (!_singleDumbbellBothHands(n)) return true;
     }
 
-    if (exercise != null &&
-        exercise.equipment.any(_isBandEquipment) &&
-        (_isPerArmBand(_normalize(exerciseName)) || exercise.unilateral)) {
-      return true;
-    }
-
     final n = _normalize(exerciseName);
     if (_usesDumbbell(n) && !_singleDumbbellBothHands(n)) return true;
-    if (_isPerArmCable(n)) return true;
-    if (_isPerArmBand(n)) return true;
     return false;
   }
 
@@ -186,6 +174,10 @@ abstract final class ExerciseLoad {
 
     final exercise = _findInCatalog(exerciseId, catalog);
     final catalogPerArm = perArmWeightForExerciseId(exerciseId, catalog);
+    final n = _normalize(exerciseName);
+
+    // El nombre ya es a un brazo: el flag del catálogo cloud a veces viene en false.
+    if (_isUnilateral(n: n)) return true;
 
     // dual_load = dos implementos (p. ej. mancuernas): el peso es por lado.
     if (exercise != null &&
@@ -607,7 +599,19 @@ abstract final class ExerciseLoad {
     final n = _normalize(equipment);
     return n.contains('banda') ||
         n.contains('band') ||
+        n.contains('elastica') ||
+        n.contains('elastic') ||
         n.contains('resistance band');
+  }
+
+  /// Cable, polea, banda o elástica: se pueden registrar a un brazo.
+  static bool _isCableOrBandExercise(Exercise? exercise, String exerciseName) {
+    final n = _normalize(exerciseName);
+    if (_usesCable(n) || _usesBand(n)) return true;
+    if (exercise == null) return false;
+    return exercise.equipment.any(
+      (equipment) => _isCableEquipment(equipment) || _isBandEquipment(equipment),
+    );
   }
 
   /// Bandas bilaterales de aislamiento (aperturas, elevaciones, etc.): carga por lado.
@@ -653,7 +657,10 @@ abstract final class ExerciseLoad {
   }
 
   static bool _usesBand(String n) {
-    return n.contains('band') || n.contains('banda');
+    return n.contains('banda') ||
+        n.contains('band') ||
+        n.contains('elastica') ||
+        n.contains('elastic');
   }
 
   static bool _inferBodyweightByName(String name) {
@@ -841,6 +848,7 @@ abstract final class ExerciseLoad {
 
   static bool _isPerArmCable(String n) {
     if (!_usesCable(n)) return false;
+    if (_isUnilateral(n: n)) return true;
     if (_cableUsesTotalWeight(n)) return false;
     return _cableArmIsolation(n);
   }
@@ -948,9 +956,14 @@ abstract final class ExerciseLoad {
     const patterns = [
       'unilateral',
       'un brazo',
+      'un solo brazo',
       'one arm',
+      'one-arm',
       'single arm',
       'single-arm',
+      'a una mano',
+      'una mano',
+      'single handle',
       'concentrado',
       'concentration',
       'martillo altern',

@@ -13,6 +13,7 @@ import '../../models/exercise.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../widgets/ff/ff_section_header.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/progress/personal_record_card.dart';
@@ -107,7 +108,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 final progress = PlayerLevelCalculator.fromTotalXp(profile.totalXp);
                 return Column(
                   children: [
-                    ProgressHeroCard(progress: progress, l10n: l10n),
+                    ProgressHeroCard(
+                      key: TutorialTargets.progressHeroKey,
+                      progress: progress,
+                      l10n: l10n,
+                    ),
                     const SizedBox(height: 16),
                   ],
                 );
@@ -133,6 +138,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 final workouts = workoutsAsync.valueOrNull ?? const [];
                 final prs = prsAsync.valueOrNull ?? const [];
                 return ProgressStatsGrid(
+                  key: TutorialTargets.progressStatsKey,
                   l10n: l10n,
                   unitSystem: unitSystem,
                   monthlyWorkouts: ProgressStatsCalculator.workoutsThisMonth(workouts),

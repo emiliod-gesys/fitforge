@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../core/utils/online_only_routes.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../providers/app_providers.dart';
@@ -79,6 +80,7 @@ class HomeScreen extends ConsumerWidget {
       icon: Icons.fitness_center_outlined,
       selectedIcon: Icons.fitness_center,
       label: l10n.navTrain,
+      tutorialKey: TutorialTargets.navTrainKey,
     );
     final profile = FfNavSpinnerItem(
       icon: Icons.person_outline,
@@ -101,11 +103,13 @@ class HomeScreen extends ConsumerWidget {
         icon: Icons.restaurant_outlined,
         selectedIcon: Icons.restaurant,
         label: l10n.navFood,
+        tutorialKey: TutorialTargets.navFoodKey,
       ),
       FfNavSpinnerItem(
         icon: Icons.show_chart_outlined,
         selectedIcon: Icons.show_chart,
         label: l10n.navProgress,
+        tutorialKey: TutorialTargets.navProgressKey,
       ),
       FfNavSpinnerItem(
         icon: Icons.people_outline,
@@ -154,7 +158,9 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.black,
       extendBody: !keyboardOpen,
-      resizeToAvoidBottomInset: true,
+      // Leaf tabs already wrap content in their own Scaffold. Resizing here
+      // would apply the keyboard inset twice and leave a black gap above it.
+      resizeToAvoidBottomInset: false,
       body: MediaQuery(
         data: MediaQuery.of(context).copyWith(
           padding: MediaQuery.paddingOf(context).copyWith(

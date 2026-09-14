@@ -724,7 +724,7 @@ class _SupersetListRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.superset,
+                    l10n.groupedSetKind(members.length),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                   const SizedBox(height: 2),
@@ -803,7 +803,7 @@ class _SupersetListRow extends ConsumerWidget {
                       child: ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.link_off),
-                        title: Text('${l10n.leaveSuperset}: ${member.exerciseName}'),
+                        title: Text('${l10n.leaveGroupedSet(members.length)}: ${member.exerciseName}'),
                       ),
                     ),
                 for (final member in members)

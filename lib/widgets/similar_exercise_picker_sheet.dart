@@ -10,6 +10,7 @@ import '../models/exercise.dart';
 import '../models/workout.dart';
 import '../providers/app_providers.dart';
 import '../providers/cloud_exercise_search_notifier.dart';
+import '../providers/recent_exercise_ids_provider.dart';
 import 'cloud_exercise_load_more_footer.dart';
 import 'exercise_card.dart';
 import 'fitforge_loading_indicator.dart';
@@ -192,7 +193,7 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
 
     final cloudState = ref.watch(cloudExerciseSearchNotifierProvider(cloudKey));
 
-    final List<Exercise> similar;
+    List<Exercise> similar;
     if (hasSearch) {
       final bundledMatches = SimilarExercises.searchInPrimaryGroup(
         catalog: widget.catalog,
@@ -237,6 +238,12 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
       );
       SimilarExercises.sortByRelevance(similar, sourceCategory: sourceCategory);
     }
+
+    similar = sortPickerExercises(
+      exercises: similar,
+      recentIds: ref.watch(recentExerciseIdsProvider),
+      search: _search,
+    );
 
     if (similar.isEmpty && !cloudState.isLoading) {
       return Column(
@@ -293,7 +300,10 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
               final exercise = similar[i];
               return ExerciseCard(
                 exercise: exercise,
-                onTap: () => Navigator.pop(context, exercise),
+                onTap: () {
+                  ref.read(recentPickerExerciseIdsProvider.notifier).record(exercise.id);
+                  Navigator.pop(context, exercise);
+                },
               );
             },
           ),

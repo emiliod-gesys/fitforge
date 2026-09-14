@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -88,15 +89,18 @@ class TrainHeroCard extends StatelessWidget {
             const SizedBox(height: 18),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: onStartWorkout,
-                icon: Icon(Icons.play_arrow_rounded),
-                label: Text(l10n.startWorkout),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: context.accentDark,
-                  minimumSize: const Size.fromHeight(50),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              child: KeyedSubtree(
+                key: TutorialTargets.trainStartKey,
+                child: FilledButton.icon(
+                  onPressed: onStartWorkout,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: Text(l10n.startWorkout),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: context.accentDark,
+                    minimumSize: const Size.fromHeight(50),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                  ),
                 ),
               ),
             ),

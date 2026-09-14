@@ -38,8 +38,33 @@ class OfflineWorkoutSupport {
 
   Future<int> pendingSyncCount() async {
     final local = await _localStore.pendingSyncCount();
-    final outbox = await _outbox.pendingWorkoutCount();
+    final activeId = await _localStore.activeWorkoutId();
+    final outbox = await _outbox.pendingWorkoutCount(excludeWorkoutId: activeId);
     return local > outbox ? local : outbox;
+  }
+
+  /// Deja de intentar subir entrenos atascados y oculta el aviso.
+  Future<void> discardPendingUploads() async {
+    final activeId = await _localStore.activeWorkoutId();
+    final pending = await _localStore.pendingCompletedWorkouts();
+    for (final workout in pending) {
+      await _outbox.clearWorkout(workout.id);
+      await _localStore.markSynced(workout.id);
+    }
+
+    final ops = await _outbox.loadAll();
+    final leftoverIds = ops
+        .where((o) => o.type != SyncOperationType.cancelWorkout)
+        .map((o) => o.workoutId)
+        .where((id) => id != activeId)
+        .toSet();
+    for (final workoutId in leftoverIds) {
+      await _outbox.clearWorkout(workoutId);
+      final local = await _localStore.getWorkout(workoutId);
+      if (local != null && local.completedAt != null) {
+        await _localStore.markSynced(workoutId);
+      }
+    }
   }
 
   Workout assignClientIds(Workout workout) {
@@ -252,4 +277,6 @@ class OfflineWorkoutSupport {
     await _localStore.setActiveWorkoutId(userId, null);
     await _outbox.clearWorkout(workoutId);
   }
+
+  Future<void> clearQueuedOps(String workoutId) => _outbox.clearWorkout(workoutId);
 }

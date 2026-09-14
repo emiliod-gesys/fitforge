@@ -1349,6 +1349,7 @@ class WorkoutService {
       );
       if (offline != null) {
         await offline.markWorkoutSynced(workoutId);
+        await offline.clearQueuedOps(workoutId);
         unawaited(offline.triggerSync());
       }
       return result;

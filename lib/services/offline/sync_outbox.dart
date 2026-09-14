@@ -130,10 +130,18 @@ class SyncOutbox {
   Future<int> pendingCount() async => (await loadAll()).length;
 
   /// Entrenamientos distintos con subida pendiente (excluye cancelaciones).
-  Future<int> pendingWorkoutCount() async {
+  Future<int> pendingWorkoutCount({String? excludeWorkoutId}) async {
     final ops = await loadAll();
+    return distinctPendingWorkoutCount(ops, excludeWorkoutId: excludeWorkoutId);
+  }
+
+  static int distinctPendingWorkoutCount(
+    Iterable<SyncOperation> ops, {
+    String? excludeWorkoutId,
+  }) {
     return ops
         .where((o) => o.type != SyncOperationType.cancelWorkout)
+        .where((o) => excludeWorkoutId == null || o.workoutId != excludeWorkoutId)
         .map((o) => o.workoutId)
         .toSet()
         .length;

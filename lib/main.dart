@@ -16,6 +16,7 @@ import 'widgets/billing_bootstrap.dart';
 import 'widgets/push_notification_bootstrap.dart';
 import 'widgets/offline_sync_bootstrap.dart';
 import 'widgets/offline_status_banner.dart';
+import 'widgets/tutorial_spotlight_overlay.dart';
 
 class FitForgeApp extends ConsumerWidget {
   const FitForgeApp({super.key});
@@ -45,10 +46,16 @@ class FitForgeApp extends ConsumerWidget {
           ],
           routerConfig: router,
           builder: (context, child) {
-            return Column(
+            return Stack(
+              fit: StackFit.expand,
               children: [
-                const OfflineStatusBanner(),
-                Expanded(child: child ?? const SizedBox.shrink()),
+                Column(
+                  children: [
+                    const OfflineStatusBanner(),
+                    Expanded(child: child ?? const SizedBox.shrink()),
+                  ],
+                ),
+                const TutorialSpotlightOverlay(),
               ],
             );
           },

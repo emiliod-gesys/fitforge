@@ -15,6 +15,9 @@ import '../../models/exercise.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/onboarding_progress_provider.dart';
+import '../../providers/tutorial_controller.dart';
+import '../../core/tutorials/tutorial_catalog.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../widgets/exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/exercise_thumbnail.dart';
@@ -49,12 +52,19 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   final List<String> _targetMuscles = [];
   bool _loading = true;
   bool _saving = false;
+  bool _seededTutorialExercises = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.routineId != null) _loadRoutine();
-    else _loading = false;
+    if (widget.routineId != null) {
+      _loadRoutine();
+    } else {
+      _loading = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _seedTutorialExercisesIfNeeded();
+      });
+    }
   }
 
   Future<void> _loadRoutine() async {
@@ -136,6 +146,82 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  void _seedTutorialExercisesIfNeeded() {
+    if (!mounted || _seededTutorialExercises || widget.routineId != null) return;
+    if (_exercises.isNotEmpty) return;
+    final tutorial = ref.read(tutorialControllerProvider);
+    if (tutorial.activeTourId != TutorialCatalog.supersets) return;
+
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? const <Exercise>[];
+    final picks = catalog.where((exercise) => !exercise.isCardio).take(2).toList();
+    setState(() {
+      _seededTutorialExercises = true;
+      if (picks.length >= 2) {
+        _exercises.add(_tutorialDemoExercise(picks[0], 0, catalog));
+        _exercises.add(_tutorialDemoExercise(picks[1], 1, catalog));
+      } else {
+        _exercises.add(_tutorialFallbackExercise('tutorial-demo-a', 'Bench press', 0));
+        _exercises.add(_tutorialFallbackExercise('tutorial-demo-b', 'Barbell row', 1));
+      }
+      _normalizeOrderIndices();
+    });
+  }
+
+  RoutineExercise _tutorialDemoExercise(
+    Exercise exercise,
+    int orderIndex,
+    Iterable<Exercise> catalog,
+  ) {
+    final defaultSets = List.generate(
+      AppConstants.defaultSets,
+      (_) => const RoutineSetTarget(reps: AppConstants.defaultReps),
+    );
+    return RoutineExercise(
+      id: const Uuid().v4(),
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      orderIndex: orderIndex,
+      imageUrl: exercise.isUserCustom ? null : exercise.imageUrl,
+      loggingType: exercise.loggingType,
+      targetSets: defaultSets.length,
+      targetReps: AppConstants.defaultReps,
+      targetSetDetails: defaultSets,
+      perArmWeight: ExerciseLoad.resolvePerArmWeight(
+        exerciseId: exercise.id,
+        catalog: catalog,
+        exerciseName: exercise.name,
+      ),
+    );
+  }
+
+  RoutineExercise _tutorialFallbackExercise(
+    String exerciseId,
+    String name,
+    int orderIndex,
+  ) {
+    final defaultSets = List.generate(
+      AppConstants.defaultSets,
+      (_) => const RoutineSetTarget(reps: AppConstants.defaultReps),
+    );
+    return RoutineExercise(
+      id: exerciseId,
+      exerciseId: exerciseId,
+      exerciseName: name,
+      orderIndex: orderIndex,
+      targetSets: defaultSets.length,
+      targetReps: AppConstants.defaultReps,
+      targetSetDetails: defaultSets,
+    );
+  }
+
+  void _ensureTutorialSupersetJoined() {
+    if (_exercises.length < 2) return;
+    final blocks = SupersetGroups.routineBlocks(_exercises);
+    if (blocks.isEmpty || blocks.first.length >= 2) return;
+    if (!SupersetGroups.canJoinRoutineBlockWithNext(_exercises, 0)) return;
+    _joinBlock(0);
   }
 
   Future<void> _addExercise() async {
@@ -301,6 +387,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     if (block.length < 2) {
       return _buildExerciseCard(
         key: ValueKey(block.first.id),
+        joinTutorialKey:
+            blockIndex == 0 ? TutorialTargets.routineJoinKey : null,
         dragIndex: blockIndex,
         ex: block.first,
         unitSystem: unitSystem,
@@ -355,8 +443,9 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                     ),
                   ),
                 Chip(
+                  key: TutorialTargets.routineSupersetKindKey,
                   visualDensity: VisualDensity.compact,
-                  label: Text(l10n.superset),
+                  label: Text(l10n.groupedSetKind(block.length)),
                   side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
                   backgroundColor: context.accentColor.withValues(alpha: 0.12),
                 ),
@@ -368,6 +457,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
               child: Row(
                 children: [
                   ActionChip(
+                    key: TutorialTargets.routineSupersetRoundsKey,
                     avatar: Icon(
                       Icons.repeat,
                       size: 16,
@@ -493,7 +583,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                 itemBuilder: (_) => [
                   PopupMenuItem(
                     value: 'leave',
-                    child: Text(l10n.leaveSuperset),
+                    child: Text(l10n.leaveGroupedSet(memberCount)),
                   ),
                   PopupMenuItem(
                     value: 'delete',
@@ -528,6 +618,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
   Widget _buildExerciseCard({
     Key? key,
+    Key? joinTutorialKey,
     required int dragIndex,
     required RoutineExercise ex,
     required String unitSystem,
@@ -603,6 +694,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
+                  key: joinTutorialKey,
                   onPressed: onJoin,
                   icon: const Icon(Icons.link, size: 18),
                   label: Text(l10n.joinSuperset),
@@ -617,6 +709,15 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
+    ref.listen(tutorialControllerProvider, (prev, next) {
+      if (next.activeTourId != TutorialCatalog.supersets) return;
+      final id = next.activeStep?.targetId;
+      if (id == TutorialTargets.routineSupersetKind ||
+          id == TutorialTargets.routineSupersetRounds) {
+        _ensureTutorialSupersetJoined();
+      }
+    });
 
     if (_loading) {
       return Scaffold(body: FitForgeLoadingScreen());
@@ -640,6 +741,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
             : (widget.routineId != null ? l10n.edit : l10n.newRoutine),
         actions: [
           TextButton(
+            key: TutorialTargets.routineSaveKey,
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
@@ -654,6 +756,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 TextField(
+                  key: TutorialTargets.routineNameKey,
                   controller: _nameController,
                   decoration: InputDecoration(labelText: l10n.routineName),
                 ),
@@ -689,6 +792,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                   children: [
                     Text(l10n.exercisesSection(_exercises.length), style: Theme.of(context).textTheme.titleMedium),
                     TextButton.icon(
+                      key: TutorialTargets.routineAddExerciseKey,
                       onPressed: _addExercise,
                       icon: const Icon(Icons.add),
                       label: Text(l10n.add),

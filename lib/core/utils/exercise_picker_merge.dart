@@ -2,6 +2,13 @@ import '../../models/exercise.dart';
 import '../utils/exercise_text_search.dart';
 import '../utils/muscle_inference.dart';
 
+class ExerciseUsage {
+  final String exerciseId;
+  final DateTime usedAt;
+
+  const ExerciseUsage({required this.exerciseId, required this.usedAt});
+}
+
 /// Combina catálogo embebido con resultados cloud (sin duplicar IDs).
 List<Exercise> mergeBundledAndCloudExercises({
   required List<Exercise> bundled,
@@ -101,4 +108,56 @@ List<Exercise> filterCloudPickerExercises({
     if (!exerciseMatchesTextFilter(exercise, search)) return false;
     return true;
   }).toList();
+}
+
+/// IDs más recientes primero: picks del selector, luego usos por fecha.
+List<String> mergeRecentExerciseIds({
+  List<String> localPicks = const [],
+  List<ExerciseUsage> usages = const [],
+}) {
+  final seen = <String>{};
+  final out = <String>[];
+
+  void add(String id) {
+    if (id.isEmpty) return;
+    if (seen.add(id)) out.add(id);
+  }
+
+  for (final id in localPicks) {
+    add(id);
+  }
+
+  final dated = [...usages]..sort((a, b) => b.usedAt.compareTo(a.usedAt));
+  for (final usage in dated) {
+    add(usage.exerciseId);
+  }
+  return out;
+}
+
+/// Recientes arriba; si hay búsqueda, manda la relevancia y la recencia desempata.
+List<Exercise> sortPickerExercises({
+  required List<Exercise> exercises,
+  required List<String> recentIds,
+  String search = '',
+}) {
+  if (exercises.length < 2) return exercises;
+
+  final rank = <String, int>{};
+  for (var i = 0; i < recentIds.length; i++) {
+    rank[recentIds[i]] = recentIds.length - i;
+  }
+
+  final ranked = List<Exercise>.from(exercises);
+  final hasSearch = search.trim().isNotEmpty;
+  ranked.sort((a, b) {
+    if (hasSearch) {
+      final byScore =
+          ExerciseTextSearch.score(b, search).compareTo(ExerciseTextSearch.score(a, search));
+      if (byScore != 0) return byScore;
+    }
+    final recency = (rank[b.id] ?? 0).compareTo(rank[a.id] ?? 0);
+    if (recency != 0) return recency;
+    return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  });
+  return ranked;
 }

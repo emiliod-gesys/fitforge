@@ -8,6 +8,8 @@ import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/tutorials/tutorial_catalog.dart';
+import '../../core/tutorials/tutorial_navigation.dart';
 import '../../core/utils/age_calculator.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
@@ -18,6 +20,7 @@ import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/cloud_exercise_download_provider.dart';
 import '../../providers/health_integration_provider.dart';
+import '../../providers/tutorial_controller.dart';
 import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../data/avatar_catalog.dart';
 import '../../services/supabase_service.dart';
@@ -54,6 +57,7 @@ enum _ProfileSection {
   nutrition,
   training,
   appearance,
+  tutorials,
   offline,
   account,
   plan,
@@ -149,6 +153,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.nutrition => _nutritionSection(profile, metricsAsync),
                 _ProfileSection.training => _trainingSection(profile),
                 _ProfileSection.appearance => _preferencesSection(profile),
+                _ProfileSection.tutorials => _tutorialsSection(),
                 _ProfileSection.offline => _offlineSection(context),
                 _ProfileSection.account => _accountSection(),
                 _ProfileSection.plan => SubscriptionPlanSection(profile: profile),
@@ -216,6 +221,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onTap: () => _openSection(
                       _ProfileSection.appearance,
                       l10n.profileHubAppearanceTitle,
+                    ),
+                  ),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.school_outlined,
+                    title: l10n.tutorialsTitle,
+                    subtitle: l10n.tutorialsHubSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.tutorials,
+                      l10n.tutorialsTitle,
                     ),
                   ),
                   const SizedBox(height: AppTokens.space12),
@@ -700,6 +715,57 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       onChanged: canProactive
           ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled)
           : null,
+    );
+  }
+
+  Widget _tutorialsSection() {
+    final l10n = context.l10n;
+    return _sectionList([
+      FfSectionHeader(
+        title: l10n.tutorialsTitle,
+        subtitle: l10n.tutorialsSubtitle,
+      ),
+      for (final tour in TutorialCatalog.basics) _tutorialRow(tour),
+      FfSectionHeader(
+        title: l10n.tutorialsAdvancedTitle,
+        subtitle: l10n.tutorialsAdvancedSubtitle,
+        padding: const EdgeInsets.only(
+          top: AppTokens.space20,
+          bottom: AppTokens.space12,
+        ),
+      ),
+      for (final tour in TutorialCatalog.advancedTours) _tutorialRow(tour),
+    ]);
+  }
+
+  Widget _tutorialRow(TutorialTour tour) {
+    final l10n = context.l10n;
+    final tutorial = ref.watch(tutorialControllerProvider);
+    final done = tutorial.isCompleted(tour.id);
+    return FfListRow(
+      icon: tour.icon,
+      title: tour.title(l10n),
+      subtitle: tour.subtitle(l10n),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (done)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Icon(Icons.check_circle, color: context.accentColor, size: 20),
+            ),
+          Text(
+            done ? l10n.tutorialReplay : l10n.tutorialStart,
+            style: TextStyle(
+              color: context.accentColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+      showChevron: false,
+      onTap: () => TutorialNavigation.start(ref, tour),
     );
   }
 

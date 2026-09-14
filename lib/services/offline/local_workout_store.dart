@@ -151,18 +151,24 @@ class LocalWorkoutStore {
     return list;
   }
 
-  Future<int> pendingSyncCount() async {
+  Future<String?> activeWorkoutId() async {
+    final state = await _readState();
+    return state['active_workout_id'] as String?;
+  }
+
+  Future<List<Workout>> pendingCompletedWorkouts() async {
     final state = await _readState();
     final workouts = state['workouts'] as Map? ?? {};
-    var count = 0;
-    for (final raw in workouts.values) {
-      if (raw is! Map) continue;
-      if (raw['pending_sync'] as bool? ?? false) {
-        final completedAt = raw['completed_at'];
-        if (completedAt != null) count++;
-      }
-    }
-    return count;
+    return workouts.values
+        .whereType<Map>()
+        .where((raw) =>
+            (raw['pending_sync'] as bool? ?? false) && raw['completed_at'] != null)
+        .map((raw) => WorkoutLocalSerializer.fromJson(Map<String, dynamic>.from(raw)))
+        .toList();
+  }
+
+  Future<int> pendingSyncCount() async {
+    return (await pendingCompletedWorkouts()).length;
   }
 
   Future<void> upsertSet({

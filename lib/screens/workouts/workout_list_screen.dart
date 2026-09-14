@@ -19,6 +19,7 @@ import '../../widgets/workout_tile.dart';
 import 'workout_start_helper.dart';
 import 'workout_summary_helper.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 
 class WorkoutTodayTab extends ConsumerWidget {
   const WorkoutTodayTab({super.key});
@@ -55,7 +56,10 @@ class WorkoutTodayTab extends ConsumerWidget {
           activeAsync.when(
             data: (active) {
               if (active != null) {
-                return _ActiveWorkoutBanner(workout: active);
+                return _ActiveWorkoutBanner(
+                  key: TutorialTargets.trainStartKey,
+                  workout: active,
+                );
               }
               return TrainHeroCard(
                 stats: statsAsync.valueOrNull,
@@ -208,7 +212,7 @@ class WorkoutTodayTab extends ConsumerWidget {
 class _ActiveWorkoutBanner extends StatelessWidget {
   final Workout workout;
 
-  _ActiveWorkoutBanner({required this.workout});
+  const _ActiveWorkoutBanner({super.key, required this.workout});
 
   @override
   Widget build(BuildContext context) {

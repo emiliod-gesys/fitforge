@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_picker_merge.dart';
-import '../core/utils/exercise_text_search.dart';
 import '../core/utils/muscle_inference.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
 import '../providers/cloud_exercise_search_notifier.dart';
+import '../providers/recent_exercise_ids_provider.dart';
 import 'cloud_exercise_load_more_footer.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_thumbnail.dart';
@@ -43,7 +43,11 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
     super.dispose();
   }
 
-  List<Exercise> _filteredFrom(List<Exercise> bundled, List<Exercise> cloud) {
+  List<Exercise> _filteredFrom(
+    List<Exercise> bundled,
+    List<Exercise> cloud,
+    List<String> recentIds,
+  ) {
     final filteredBundled = filterBundledPickerExercises(
       exercises: bundled,
       search: _search,
@@ -60,9 +64,13 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
       inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
       selectedExerciseIds: widget.selectedExerciseIds,
     );
-    return ExerciseTextSearch.rank(
-      mergeBundledAndCloudExercises(bundled: filteredBundled, cloud: filteredCloud),
-      _search,
+    return sortPickerExercises(
+      exercises: mergeBundledAndCloudExercises(
+        bundled: filteredBundled,
+        cloud: filteredCloud,
+      ),
+      recentIds: recentIds,
+      search: _search,
     );
   }
 
@@ -70,6 +78,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
+    final recentIds = ref.watch(recentExerciseIdsProvider);
     final cloudDisabled = _filter == ExercisePickerFilter.custom ||
         _filter == ExercisePickerFilter.inRoutine;
     final cloudKey = cloudExerciseCatalogNotifierKey(
@@ -80,7 +89,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
     final cloudState = cloudKey != null
         ? ref.watch(cloudExerciseSearchNotifierProvider(cloudKey))
         : const CloudExerciseSearchState();
-    final filtered = _filteredFrom(exercises, cloudState.exercises);
+    final filtered = _filteredFrom(exercises, cloudState.exercises, recentIds);
     final showCloudLoadMore =
         cloudKey != null && cloudState.hasMore && !cloudDisabled;
     final inRoutineCount = widget.selectedExerciseIds.length;
@@ -284,7 +293,12 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                       trailing: inRoutine
                           ? Icon(Icons.check_circle, color: context.accentColor)
                           : const Icon(Icons.add_circle_outline),
-                      onTap: () => Navigator.pop(context, ex),
+                      onTap: () {
+                        ref
+                            .read(recentPickerExerciseIdsProvider.notifier)
+                            .record(ex.id);
+                        Navigator.pop(context, ex);
+                      },
                     );
                   },
                 ),

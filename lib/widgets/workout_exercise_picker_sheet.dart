@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/exercise_picker_merge.dart';
-import '../core/utils/exercise_text_search.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
 import '../providers/app_providers.dart';
 import '../providers/cloud_exercise_search_notifier.dart';
+import '../providers/recent_exercise_ids_provider.dart';
 import 'cloud_exercise_load_more_footer.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_card.dart';
-import 'localized_exercise_name.dart';
 import 'fitforge_loading_indicator.dart';
 
 class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
@@ -144,12 +143,13 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
               customOnly: _customOnly,
               excludeExerciseIds: widget.excludeExerciseIds,
             );
-            final filtered = ExerciseTextSearch.rank(
-              mergeBundledAndCloudExercises(
+            final filtered = sortPickerExercises(
+              exercises: mergeBundledAndCloudExercises(
                 bundled: filteredBundled,
                 cloud: filteredCloud,
               ),
-              _search,
+              recentIds: ref.watch(recentExerciseIdsProvider),
+              search: _search,
             );
 
             return Expanded(
@@ -230,7 +230,12 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                               final exercise = filtered[i];
                               return ExerciseCard(
                                 exercise: exercise,
-                                onTap: () => Navigator.pop(context, exercise),
+                                onTap: () {
+                                  ref
+                                      .read(recentPickerExerciseIdsProvider.notifier)
+                                      .record(exercise.id);
+                                  Navigator.pop(context, exercise);
+                                },
                               );
                             },
                           ),

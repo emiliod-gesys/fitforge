@@ -17,6 +17,7 @@ import '../../providers/onboarding_progress_provider.dart';
 
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/food/calorie_budget_editor_sheet.dart';
@@ -304,11 +305,19 @@ class _FoodBody extends ConsumerWidget {
 
               ],
 
-              FoodWeekStrip(selectedDay: normalizedDay, onChanged: onDayChanged),
+              FoodWeekStrip(
+                key: TutorialTargets.foodWeekKey,
+                selectedDay: normalizedDay,
+                onChanged: onDayChanged,
+              ),
 
               const SizedBox(height: 20),
 
-              FoodBudgetHeader(summary: summary, l10n: l10n),
+              FoodBudgetHeader(
+                key: TutorialTargets.foodBudgetKey,
+                summary: summary,
+                l10n: l10n,
+              ),
 
               const SizedBox(height: 16),
 
@@ -333,6 +342,7 @@ class _FoodBody extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
+                  key: TutorialTargets.foodBudgetEditKey,
                   onPressed: () => CalorieBudgetEditorSheet.show(
                     context,
                     profile: profile,

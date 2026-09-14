@@ -12,12 +12,14 @@ class FfNavSpinnerItem {
   final IconData selectedIcon;
   final String label;
   final int badgeCount;
+  final GlobalKey? tutorialKey;
 
   const FfNavSpinnerItem({
     required this.icon,
     required this.selectedIcon,
     required this.label,
     this.badgeCount = 0,
+    this.tutorialKey,
   });
 }
 
@@ -126,7 +128,7 @@ class _FfNavSpinnerState extends State<FfNavSpinner> {
                     final item = widget.items[index];
                     final selected = index == widget.selectedIndex;
                     return KeyedSubtree(
-                      key: _keys[index],
+                      key: item.tutorialKey ?? _keys[index],
                       child: _NavChip(
                         item: item,
                         selected: selected,

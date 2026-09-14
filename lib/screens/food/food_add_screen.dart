@@ -13,6 +13,7 @@ import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/quantity_format.dart';
 import '../../core/utils/speech_locale_utils.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/catalog_food.dart';
@@ -414,6 +415,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: _ModeTabs(
+                  key: TutorialTargets.foodAddModesKey,
                   mode: _mode,
                   photoLocked: !photoAllowed,
                   barcodeLocked: !barcodeAllowed,
@@ -550,6 +552,7 @@ class _SearchPane extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
+          key: TutorialTargets.foodAddSearchKey,
           controller: filterController,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
@@ -1622,6 +1625,7 @@ class _ModeTabs extends StatelessWidget {
   final ValueChanged<FoodAddMode> onChanged;
 
   const _ModeTabs({
+    super.key,
     required this.mode,
     required this.photoLocked,
     required this.barcodeLocked,

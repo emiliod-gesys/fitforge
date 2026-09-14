@@ -1999,7 +1999,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   children: [
                     Chip(
                       visualDensity: VisualDensity.compact,
-                      label: Text(l10n.superset),
+                      label: Text(l10n.groupedSetKind(members.length)),
                       side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
                       backgroundColor: context.accentColor.withValues(alpha: 0.1),
                     ),

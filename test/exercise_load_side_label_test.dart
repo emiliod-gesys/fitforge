@@ -215,6 +215,100 @@ void main() {
       );
     });
 
+    test('cable/band names get the one-arm toggle even without catalog flags',
+        () {
+      const oneArmRow = Exercise(
+        catalogId: 'ext_cable_one_arm_bent_over_row',
+        name: 'cable one arm bent over row',
+        equipment: ['Cable'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.singleLoad,
+      );
+      const seatedRow = Exercise(
+        catalogId: 'ext_seated_cable_row',
+        name: 'Seated cable row',
+        equipment: ['Cable'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.singleLoad,
+      );
+      const bandPullThrough = Exercise(
+        catalogId: 'ext_band_pull_through',
+        name: 'band pull through',
+        equipment: ['Band'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.singleLoad,
+      );
+      const catalog = [oneArmRow, seatedRow, bandPullThrough];
+
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          oneArmRow.id,
+          catalog,
+          oneArmRow.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: oneArmRow.id,
+          catalog: catalog,
+          exerciseName: oneArmRow.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          '',
+          const [],
+          'cable one arm bent over row',
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          seatedRow.id,
+          catalog,
+          seatedRow.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: seatedRow.id,
+          catalog: catalog,
+          exerciseName: seatedRow.name,
+        ),
+        isFalse,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          bandPullThrough.id,
+          catalog,
+          bandPullThrough.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          'x',
+          const [],
+          'Remo en polea baja',
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.supportsPerArmToggle(
+          'x',
+          const [],
+          'Curl con banda elástica',
+        ),
+        isTrue,
+      );
+    });
+
     test('band reverse fly defaults to per-arm even if catalog flag is false',
         () {
       const bandFly = Exercise(

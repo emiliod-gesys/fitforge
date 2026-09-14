@@ -2810,6 +2810,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get superset => 'Superserie';
 
   @override
+  String get circuit => 'Circuito';
+
+  @override
   String supersetRound(int current, int total) {
     return 'Ronda $current de $total';
   }
@@ -2819,6 +2822,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leaveSuperset => 'Quitar de la superserie';
+
+  @override
+  String get leaveCircuit => 'Quitar del circuito';
 
   @override
   String get supersetRounds => 'Rondas';
@@ -4267,6 +4273,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get offlineSyncNow => 'Subir ahora';
 
   @override
+  String get offlineDismissPending => 'Cancelar';
+
+  @override
+  String get offlineDismissPendingTitle => '¿Descartar la subida pendiente?';
+
+  @override
+  String get offlineDismissPendingBody =>
+      'El aviso desaparecerá y no se volverá a intentar subir. El entrenamiento se queda en este dispositivo si ya estaba guardado.';
+
+  @override
+  String get offlineSyncFailed =>
+      'No se pudo subir el entrenamiento. Prueba de nuevo o cancela el aviso.';
+
+  @override
+  String get offlineSyncNeedSignIn =>
+      'Inicia sesión para subir el entrenamiento.';
+
+  @override
   String get offlinePrepareTitle => 'Preparar modo offline';
 
   @override
@@ -4779,6 +4803,251 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get profileHubAppearanceSubtitle =>
       'IA proactiva y color de acento de la app';
+
+  @override
+  String get tutorialsTitle => 'Tutoriales';
+
+  @override
+  String get tutorialsSubtitle => 'Aprende a usar FORGEN paso a paso';
+
+  @override
+  String get tutorialsHubSubtitle =>
+      'Tours básicos y avanzados de Entrenar, Comida y Progreso';
+
+  @override
+  String get tutorialStart => 'Empezar';
+
+  @override
+  String get tutorialReplay => 'Repetir';
+
+  @override
+  String get tutorialFinish => 'Listo';
+
+  @override
+  String get tutorialDone => 'Hecho';
+
+  @override
+  String get tutorialTrainTitle => 'Entrenar';
+
+  @override
+  String get tutorialTrainSubtitle =>
+      'Empieza una sesión y encuentra tus rutinas';
+
+  @override
+  String get tutorialTrainNavTitle => 'Aquí se entrena';
+
+  @override
+  String get tutorialTrainNavBody =>
+      'La pestaña Entrenar es el punto de partida de cada sesión.';
+
+  @override
+  String get tutorialTrainStartTitle => 'Empieza el entreno';
+
+  @override
+  String get tutorialTrainStartBody =>
+      'Pulsa aquí para elegir una rutina o continuar una sesión en curso.';
+
+  @override
+  String get tutorialTrainRoutinesTitle => 'Tus rutinas';
+
+  @override
+  String get tutorialTrainRoutinesBody =>
+      'En Rutinas creas, editas y unes ejercicios en superseries o circuitos.';
+
+  @override
+  String get tutorialFoodTitle => 'Comida';
+
+  @override
+  String get tutorialFoodSubtitle =>
+      'Presupuesto del día y cómo registrar comidas';
+
+  @override
+  String get tutorialFoodNavTitle => 'Tu diario';
+
+  @override
+  String get tutorialFoodNavBody =>
+      'En Comida ves calorías, macros y el registro del día.';
+
+  @override
+  String get tutorialFoodBudgetTitle => 'Presupuesto diario';
+
+  @override
+  String get tutorialFoodBudgetBody =>
+      'Este número es lo que te queda (o el excedente) según tu meta.';
+
+  @override
+  String get tutorialFoodAddTitle => 'Añade una comida';
+
+  @override
+  String get tutorialFoodAddBody =>
+      'El + de cada comida abre búsqueda, foto, código de barras o Quick add.';
+
+  @override
+  String get tutorialProgressTitle => 'Progreso';
+
+  @override
+  String get tutorialProgressSubtitle =>
+      'XP, racha y récords de tu entrenamiento';
+
+  @override
+  String get tutorialProgressNavTitle => 'Tu evolución';
+
+  @override
+  String get tutorialProgressNavBody =>
+      'Progreso resume el trabajo de las últimas semanas.';
+
+  @override
+  String get tutorialProgressHeroTitle => 'Nivel y XP';
+
+  @override
+  String get tutorialProgressHeroBody =>
+      'Cada entreno suma XP. El distintivo cambia al subir de nivel.';
+
+  @override
+  String get tutorialProgressStatsTitle => 'Números del mes';
+
+  @override
+  String get tutorialProgressStatsBody =>
+      'Entrenamientos, volumen y récords del mes, más tu racha semanal.';
+
+  @override
+  String get tutorialsAdvancedTitle => 'Avanzado';
+
+  @override
+  String get tutorialsAdvancedSubtitle =>
+      'Rutinas, superseries y cómo registrar o ajustar comidas';
+
+  @override
+  String get tutorialRoutinesTitle => 'Crear una rutina';
+
+  @override
+  String get tutorialRoutinesSubtitle =>
+      'Nómbrala, añade ejercicios y guárdala';
+
+  @override
+  String get tutorialRoutinesTabTitle => 'Tu biblioteca de rutinas';
+
+  @override
+  String get tutorialRoutinesTabBody =>
+      'Aquí viven las rutinas. Ábrela para editarla o crea una nueva.';
+
+  @override
+  String get tutorialRoutinesCreateTitle => 'Nueva rutina';
+
+  @override
+  String get tutorialRoutinesCreateBody =>
+      'El + abre el editor en blanco para armar la sesión tú.';
+
+  @override
+  String get tutorialRoutinesAiTitle => 'Generar con Coach';
+
+  @override
+  String get tutorialRoutinesAiBody =>
+      'Si no quieres partir de cero, la IA propone una rutina según músculos y duración.';
+
+  @override
+  String get tutorialRoutinesNameTitle => 'Ponle un nombre';
+
+  @override
+  String get tutorialRoutinesNameBody =>
+      'Un nombre claro (Push A, Piernas, Hyrox…) ayuda a elegirla el día del entreno.';
+
+  @override
+  String get tutorialRoutinesAddTitle => 'Añade ejercicios';
+
+  @override
+  String get tutorialRoutinesAddBody =>
+      'Busca en el catálogo. En cada uno defines series, reps y descanso.';
+
+  @override
+  String get tutorialRoutinesSaveTitle => 'Guarda la rutina';
+
+  @override
+  String get tutorialRoutinesSaveBody =>
+      'Cuando esté lista, pulsa Guardar. Luego aparece en esta pestaña para lanzar el entreno.';
+
+  @override
+  String get tutorialSupersetTitle => 'Superseries y circuitos';
+
+  @override
+  String get tutorialSupersetSubtitle => 'Une ejercicios y define las rondas';
+
+  @override
+  String get tutorialSupersetTabTitle => 'Dentro de una rutina';
+
+  @override
+  String get tutorialSupersetTabBody =>
+      'Las superseries se arman en el editor de la rutina, no durante el entreno.';
+
+  @override
+  String get tutorialSupersetCreateTitle => 'Abre el editor';
+
+  @override
+  String get tutorialSupersetCreateBody =>
+      'Crea o edita una rutina. Ahora verás cómo agrupar ejercicios.';
+
+  @override
+  String get tutorialSupersetJoinTitle => 'Une con el de abajo';
+
+  @override
+  String get tutorialSupersetJoinBody =>
+      'Eso agrupa dos ejercicios en una superserie: se hacen seguidos y el descanso va al terminar el par.';
+
+  @override
+  String get tutorialSupersetKindTitle => 'Superserie o circuito';
+
+  @override
+  String get tutorialSupersetKindBody =>
+      'Dos ejercicios son superserie. Si unes un tercero, se convierte en circuito.';
+
+  @override
+  String get tutorialSupersetRoundsTitle => 'Rondas del grupo';
+
+  @override
+  String get tutorialSupersetRoundsBody =>
+      'Las rondas son las vueltas al grupo. El descanso va al terminar cada ronda, no entre ejercicios.';
+
+  @override
+  String get tutorialFoodLogTitle => 'Registrar y editar comidas';
+
+  @override
+  String get tutorialFoodLogSubtitle =>
+      'Cambia el día, edita el presupuesto y ajusta un alimento antes de guardar';
+
+  @override
+  String get tutorialFoodLogWeekTitle => 'Cambia de día';
+
+  @override
+  String get tutorialFoodLogWeekBody =>
+      'La tira de la semana abre otro día del diario. No puedes adelantar al futuro.';
+
+  @override
+  String get tutorialFoodLogBudgetTitle => 'Editar la meta';
+
+  @override
+  String get tutorialFoodLogBudgetBody =>
+      'Aquí cambias el presupuesto calórico del día y cómo se reparte entre comidas.';
+
+  @override
+  String get tutorialFoodLogAddTitle => 'Añadir a una comida';
+
+  @override
+  String get tutorialFoodLogAddBody =>
+      'El + de desayuno, comida, cena o snack abre el registro de ese bloque.';
+
+  @override
+  String get tutorialFoodLogSearchTitle => 'Busca el alimento';
+
+  @override
+  String get tutorialFoodLogSearchBody =>
+      'Escribe el nombre. Al elegirlo, la siguiente pantalla deja cambiar gramos, nombre y macros antes de guardar.';
+
+  @override
+  String get tutorialFoodLogModesTitle => 'Otras formas de registrar';
+
+  @override
+  String get tutorialFoodLogModesBody =>
+      'Rápido describe el plato con IA. Foto y código de barras están en planes de pago. Manual es por macros.';
 
   @override
   String get profileHubOfflineSubtitle => 'Catálogo de ejercicios sin conexión';

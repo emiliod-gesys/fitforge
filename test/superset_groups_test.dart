@@ -83,7 +83,7 @@ void main() {
       expect(joined[1].resolvedSetDetails, hasLength(3));
     });
 
-    test('refuses joining cardio or a fourth member', () {
+    test('refuses joining cardio but allows a fourth member as a circuit', () {
       expect(
         SupersetGroups.canJoinRoutineBlockWithNext(
           [_re(id: 'a', order: 0), _re(id: 'run', order: 1, cardio: true)],
@@ -97,7 +97,9 @@ void main() {
         _re(id: 'c', order: 2, groupId: 'g', slot: 3),
         _re(id: 'd', order: 3),
       ];
-      expect(SupersetGroups.canJoinRoutineBlockWithNext(trio, 0), isFalse);
+      expect(SupersetGroups.canJoinRoutineBlockWithNext(trio, 0), isTrue);
+      expect(SupersetGroups.isCircuit(2), isFalse);
+      expect(SupersetGroups.isCircuit(3), isTrue);
     });
 
     test('appends a singleton as slot C', () {
@@ -113,6 +115,24 @@ void main() {
       );
       expect(joined.map((e) => e.supersetSlot), [1, 2, 3]);
       expect(joined.every((e) => e.supersetGroupId == 'g'), isTrue);
+      expect(SupersetGroups.slotLetter(4), 'D');
+    });
+
+    test('joins a fourth member into a circuit', () {
+      final exercises = [
+        _re(id: 'a', order: 0, groupId: 'g', slot: 1),
+        _re(id: 'b', order: 1, groupId: 'g', slot: 2),
+        _re(id: 'c', order: 2, groupId: 'g', slot: 3),
+        _re(id: 'd', order: 3),
+      ];
+      final joined = SupersetGroups.joinRoutineBlockWithNext(
+        exercises,
+        0,
+        newGroupId: 'unused',
+      );
+      expect(joined.map((e) => e.supersetSlot), [1, 2, 3, 4]);
+      expect(joined.take(4).every((e) => e.supersetGroupId == 'g'), isTrue);
+      expect(SupersetGroups.isCircuit(joined.where((e) => e.supersetGroupId == 'g').length), isTrue);
     });
 
     test('leaving the middle member keeps the rest consecutive', () {

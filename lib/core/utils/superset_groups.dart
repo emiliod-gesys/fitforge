@@ -1,18 +1,19 @@
 import '../../models/routine.dart';
 import '../../models/workout.dart';
 
-/// Bloques de superserie (2–3 ejercicios consecutivos con el mismo `superset_group_id`).
+/// Bloques de superserie (2) o circuito (3+), con el mismo `superset_group_id`.
 abstract final class SupersetGroups {
-  static const maxMembers = 3;
+  static const maxMembers = 12;
+  static const circuitMinMembers = 3;
   static const minRounds = 1;
   static const maxRounds = 8;
 
+  static bool isCircuit(int memberCount) => memberCount >= circuitMinMembers;
+
   static String slotLetter(int slot) {
-    return switch (slot) {
-      1 => 'A',
-      2 => 'B',
-      _ => 'C',
-    };
+    if (slot < 1) return 'A';
+    if (slot <= 26) return String.fromCharCode(64 + slot);
+    return '$slot';
   }
 
   static String watchExerciseName(WorkoutExercise exercise) {

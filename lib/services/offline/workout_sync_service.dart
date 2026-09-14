@@ -23,38 +23,85 @@ class WorkoutSyncService {
         _connectivity = connectivity,
         _client = client ?? SupabaseService.client;
 
+  static const _operationTimeout = Duration(seconds: 25);
+
   final SyncOutbox _outbox;
   final LocalWorkoutStore _localStore;
   final ConnectivityService _connectivity;
   final SupabaseClient _client;
   final _uuid = const Uuid();
 
-  bool _syncing = false;
+  Future<int>? _inFlight;
 
   Future<int> syncPending({int maxOperations = 50}) async {
-    if (_syncing) return 0;
     if (!_connectivity.isOnline) return 0;
     if (SupabaseService.currentUser == null) return 0;
+    return _inFlight ??= _syncPendingBody(maxOperations).whenComplete(() {
+      _inFlight = null;
+    });
+  }
 
-    _syncing = true;
+  Future<int> _syncPendingBody(int maxOperations) async {
     var synced = 0;
     try {
       final ops = await _outbox.loadAll();
+      final finishedWorkouts = <String>{};
       for (final op in ops.take(maxOperations)) {
         if (!_connectivity.isOnline) break;
+        if (finishedWorkouts.contains(op.workoutId) &&
+            op.type != SyncOperationType.cancelWorkout) {
+          continue;
+        }
         try {
-          await _process(op);
+          await _process(op).timeout(_operationTimeout);
           await _outbox.remove(op.id);
+          if (op.type == SyncOperationType.completeWorkout) {
+            await _outbox.clearWorkout(op.workoutId);
+            finishedWorkouts.add(op.workoutId);
+          }
           synced++;
         } catch (e) {
           await _outbox.markFailed(op, e);
           continue;
         }
       }
-    } finally {
-      _syncing = false;
+      synced += await _syncOrphanedCompleted();
+    } catch (_) {
+      // El aviso y el siguiente intento cubren el fallo.
     }
     return synced;
+  }
+
+  /// Completados locales con `pending_sync` y sin ops útiles en la cola.
+  Future<int> _syncOrphanedCompleted() async {
+    if (!_connectivity.isOnline || SupabaseService.currentUser == null) return 0;
+    final pending = await _localStore.pendingCompletedWorkouts();
+    if (pending.isEmpty) return 0;
+
+    var synced = 0;
+    for (final workout in pending) {
+      try {
+        await _upsertCompletedWorkout(workout).timeout(_operationTimeout);
+        await _outbox.clearWorkout(workout.id);
+        await _localStore.markSynced(workout.id);
+        synced++;
+      } catch (_) {
+        continue;
+      }
+    }
+    return synced;
+  }
+
+  Future<void> _upsertCompletedWorkout(Workout workout) async {
+    await _insertWorkout(workout);
+    await _client.from('workouts').update({
+      if (workout.completedAt != null)
+        'completed_at': workout.completedAt!.toUtc().toIso8601String(),
+      'duration_minutes': workout.durationMinutes,
+      'total_volume': workout.totalVolume,
+      if (workout.activeCaloriesKcal != null)
+        'active_calories_kcal': workout.activeCaloriesKcal,
+    }).eq('id', workout.id);
   }
 
   Future<void> _process(SyncOperation op) async {

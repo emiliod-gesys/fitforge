@@ -4952,6 +4952,12 @@ abstract class AppLocalizations {
   /// **'Superserie'**
   String get superset;
 
+  /// No description provided for @circuit.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito'**
+  String get circuit;
+
   /// No description provided for @supersetRound.
   ///
   /// In es, this message translates to:
@@ -4969,6 +4975,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Quitar de la superserie'**
   String get leaveSuperset;
+
+  /// No description provided for @leaveCircuit.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar del circuito'**
+  String get leaveCircuit;
 
   /// No description provided for @supersetRounds.
   ///
@@ -7280,6 +7292,36 @@ abstract class AppLocalizations {
   /// **'Subir ahora'**
   String get offlineSyncNow;
 
+  /// No description provided for @offlineDismissPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get offlineDismissPending;
+
+  /// No description provided for @offlineDismissPendingTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar la subida pendiente?'**
+  String get offlineDismissPendingTitle;
+
+  /// No description provided for @offlineDismissPendingBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El aviso desaparecerá y no se volverá a intentar subir. El entrenamiento se queda en este dispositivo si ya estaba guardado.'**
+  String get offlineDismissPendingBody;
+
+  /// No description provided for @offlineSyncFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo subir el entrenamiento. Prueba de nuevo o cancela el aviso.'**
+  String get offlineSyncFailed;
+
+  /// No description provided for @offlineSyncNeedSignIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para subir el entrenamiento.'**
+  String get offlineSyncNeedSignIn;
+
   /// No description provided for @offlinePrepareTitle.
   ///
   /// In es, this message translates to:
@@ -8132,6 +8174,432 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'IA proactiva y color de acento de la app'**
   String get profileHubAppearanceSubtitle;
+
+  /// No description provided for @tutorialsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tutoriales'**
+  String get tutorialsTitle;
+
+  /// No description provided for @tutorialsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprende a usar FORGEN paso a paso'**
+  String get tutorialsSubtitle;
+
+  /// No description provided for @tutorialsHubSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tours básicos y avanzados de Entrenar, Comida y Progreso'**
+  String get tutorialsHubSubtitle;
+
+  /// No description provided for @tutorialStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar'**
+  String get tutorialStart;
+
+  /// No description provided for @tutorialReplay.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetir'**
+  String get tutorialReplay;
+
+  /// No description provided for @tutorialFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo'**
+  String get tutorialFinish;
+
+  /// No description provided for @tutorialDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Hecho'**
+  String get tutorialDone;
+
+  /// No description provided for @tutorialTrainTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenar'**
+  String get tutorialTrainTitle;
+
+  /// No description provided for @tutorialTrainSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza una sesión y encuentra tus rutinas'**
+  String get tutorialTrainSubtitle;
+
+  /// No description provided for @tutorialTrainNavTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí se entrena'**
+  String get tutorialTrainNavTitle;
+
+  /// No description provided for @tutorialTrainNavBody.
+  ///
+  /// In es, this message translates to:
+  /// **'La pestaña Entrenar es el punto de partida de cada sesión.'**
+  String get tutorialTrainNavBody;
+
+  /// No description provided for @tutorialTrainStartTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza el entreno'**
+  String get tutorialTrainStartTitle;
+
+  /// No description provided for @tutorialTrainStartBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa aquí para elegir una rutina o continuar una sesión en curso.'**
+  String get tutorialTrainStartBody;
+
+  /// No description provided for @tutorialTrainRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus rutinas'**
+  String get tutorialTrainRoutinesTitle;
+
+  /// No description provided for @tutorialTrainRoutinesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'En Rutinas creas, editas y unes ejercicios en superseries o circuitos.'**
+  String get tutorialTrainRoutinesBody;
+
+  /// No description provided for @tutorialFoodTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida'**
+  String get tutorialFoodTitle;
+
+  /// No description provided for @tutorialFoodSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto del día y cómo registrar comidas'**
+  String get tutorialFoodSubtitle;
+
+  /// No description provided for @tutorialFoodNavTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu diario'**
+  String get tutorialFoodNavTitle;
+
+  /// No description provided for @tutorialFoodNavBody.
+  ///
+  /// In es, this message translates to:
+  /// **'En Comida ves calorías, macros y el registro del día.'**
+  String get tutorialFoodNavBody;
+
+  /// No description provided for @tutorialFoodBudgetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Presupuesto diario'**
+  String get tutorialFoodBudgetTitle;
+
+  /// No description provided for @tutorialFoodBudgetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Este número es lo que te queda (o el excedente) según tu meta.'**
+  String get tutorialFoodBudgetBody;
+
+  /// No description provided for @tutorialFoodAddTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade una comida'**
+  String get tutorialFoodAddTitle;
+
+  /// No description provided for @tutorialFoodAddBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El + de cada comida abre búsqueda, foto, código de barras o Quick add.'**
+  String get tutorialFoodAddBody;
+
+  /// No description provided for @tutorialProgressTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Progreso'**
+  String get tutorialProgressTitle;
+
+  /// No description provided for @tutorialProgressSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'XP, racha y récords de tu entrenamiento'**
+  String get tutorialProgressSubtitle;
+
+  /// No description provided for @tutorialProgressNavTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu evolución'**
+  String get tutorialProgressNavTitle;
+
+  /// No description provided for @tutorialProgressNavBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Progreso resume el trabajo de las últimas semanas.'**
+  String get tutorialProgressNavBody;
+
+  /// No description provided for @tutorialProgressHeroTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel y XP'**
+  String get tutorialProgressHeroTitle;
+
+  /// No description provided for @tutorialProgressHeroBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada entreno suma XP. El distintivo cambia al subir de nivel.'**
+  String get tutorialProgressHeroBody;
+
+  /// No description provided for @tutorialProgressStatsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Números del mes'**
+  String get tutorialProgressStatsTitle;
+
+  /// No description provided for @tutorialProgressStatsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenamientos, volumen y récords del mes, más tu racha semanal.'**
+  String get tutorialProgressStatsBody;
+
+  /// No description provided for @tutorialsAdvancedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avanzado'**
+  String get tutorialsAdvancedTitle;
+
+  /// No description provided for @tutorialsAdvancedSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas, superseries y cómo registrar o ajustar comidas'**
+  String get tutorialsAdvancedSubtitle;
+
+  /// No description provided for @tutorialRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear una rutina'**
+  String get tutorialRoutinesTitle;
+
+  /// No description provided for @tutorialRoutinesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nómbrala, añade ejercicios y guárdala'**
+  String get tutorialRoutinesSubtitle;
+
+  /// No description provided for @tutorialRoutinesTabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu biblioteca de rutinas'**
+  String get tutorialRoutinesTabTitle;
+
+  /// No description provided for @tutorialRoutinesTabBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí viven las rutinas. Ábrela para editarla o crea una nueva.'**
+  String get tutorialRoutinesTabBody;
+
+  /// No description provided for @tutorialRoutinesCreateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva rutina'**
+  String get tutorialRoutinesCreateTitle;
+
+  /// No description provided for @tutorialRoutinesCreateBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El + abre el editor en blanco para armar la sesión tú.'**
+  String get tutorialRoutinesCreateBody;
+
+  /// No description provided for @tutorialRoutinesAiTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar con Coach'**
+  String get tutorialRoutinesAiTitle;
+
+  /// No description provided for @tutorialRoutinesAiBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Si no quieres partir de cero, la IA propone una rutina según músculos y duración.'**
+  String get tutorialRoutinesAiBody;
+
+  /// No description provided for @tutorialRoutinesNameTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ponle un nombre'**
+  String get tutorialRoutinesNameTitle;
+
+  /// No description provided for @tutorialRoutinesNameBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Un nombre claro (Push A, Piernas, Hyrox…) ayuda a elegirla el día del entreno.'**
+  String get tutorialRoutinesNameBody;
+
+  /// No description provided for @tutorialRoutinesAddTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade ejercicios'**
+  String get tutorialRoutinesAddTitle;
+
+  /// No description provided for @tutorialRoutinesAddBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca en el catálogo. En cada uno defines series, reps y descanso.'**
+  String get tutorialRoutinesAddBody;
+
+  /// No description provided for @tutorialRoutinesSaveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda la rutina'**
+  String get tutorialRoutinesSaveTitle;
+
+  /// No description provided for @tutorialRoutinesSaveBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando esté lista, pulsa Guardar. Luego aparece en esta pestaña para lanzar el entreno.'**
+  String get tutorialRoutinesSaveBody;
+
+  /// No description provided for @tutorialSupersetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Superseries y circuitos'**
+  String get tutorialSupersetTitle;
+
+  /// No description provided for @tutorialSupersetSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Une ejercicios y define las rondas'**
+  String get tutorialSupersetSubtitle;
+
+  /// No description provided for @tutorialSupersetTabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Dentro de una rutina'**
+  String get tutorialSupersetTabTitle;
+
+  /// No description provided for @tutorialSupersetTabBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Las superseries se arman en el editor de la rutina, no durante el entreno.'**
+  String get tutorialSupersetTabBody;
+
+  /// No description provided for @tutorialSupersetCreateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre el editor'**
+  String get tutorialSupersetCreateTitle;
+
+  /// No description provided for @tutorialSupersetCreateBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea o edita una rutina. Ahora verás cómo agrupar ejercicios.'**
+  String get tutorialSupersetCreateBody;
+
+  /// No description provided for @tutorialSupersetJoinTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Une con el de abajo'**
+  String get tutorialSupersetJoinTitle;
+
+  /// No description provided for @tutorialSupersetJoinBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Eso agrupa dos ejercicios en una superserie: se hacen seguidos y el descanso va al terminar el par.'**
+  String get tutorialSupersetJoinBody;
+
+  /// No description provided for @tutorialSupersetKindTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Superserie o circuito'**
+  String get tutorialSupersetKindTitle;
+
+  /// No description provided for @tutorialSupersetKindBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Dos ejercicios son superserie. Si unes un tercero, se convierte en circuito.'**
+  String get tutorialSupersetKindBody;
+
+  /// No description provided for @tutorialSupersetRoundsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rondas del grupo'**
+  String get tutorialSupersetRoundsTitle;
+
+  /// No description provided for @tutorialSupersetRoundsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Las rondas son las vueltas al grupo. El descanso va al terminar cada ronda, no entre ejercicios.'**
+  String get tutorialSupersetRoundsBody;
+
+  /// No description provided for @tutorialFoodLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar y editar comidas'**
+  String get tutorialFoodLogTitle;
+
+  /// No description provided for @tutorialFoodLogSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambia el día, edita el presupuesto y ajusta un alimento antes de guardar'**
+  String get tutorialFoodLogSubtitle;
+
+  /// No description provided for @tutorialFoodLogWeekTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambia de día'**
+  String get tutorialFoodLogWeekTitle;
+
+  /// No description provided for @tutorialFoodLogWeekBody.
+  ///
+  /// In es, this message translates to:
+  /// **'La tira de la semana abre otro día del diario. No puedes adelantar al futuro.'**
+  String get tutorialFoodLogWeekBody;
+
+  /// No description provided for @tutorialFoodLogBudgetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar la meta'**
+  String get tutorialFoodLogBudgetTitle;
+
+  /// No description provided for @tutorialFoodLogBudgetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí cambias el presupuesto calórico del día y cómo se reparte entre comidas.'**
+  String get tutorialFoodLogBudgetBody;
+
+  /// No description provided for @tutorialFoodLogAddTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a una comida'**
+  String get tutorialFoodLogAddTitle;
+
+  /// No description provided for @tutorialFoodLogAddBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El + de desayuno, comida, cena o snack abre el registro de ese bloque.'**
+  String get tutorialFoodLogAddBody;
+
+  /// No description provided for @tutorialFoodLogSearchTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca el alimento'**
+  String get tutorialFoodLogSearchTitle;
+
+  /// No description provided for @tutorialFoodLogSearchBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre. Al elegirlo, la siguiente pantalla deja cambiar gramos, nombre y macros antes de guardar.'**
+  String get tutorialFoodLogSearchBody;
+
+  /// No description provided for @tutorialFoodLogModesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Otras formas de registrar'**
+  String get tutorialFoodLogModesTitle;
+
+  /// No description provided for @tutorialFoodLogModesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Rápido describe el plato con IA. Foto y código de barras están en planes de pago. Manual es por macros.'**
+  String get tutorialFoodLogModesBody;
 
   /// No description provided for @profileHubOfflineSubtitle.
   ///

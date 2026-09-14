@@ -4,6 +4,7 @@ import '../../core/utils/quantity_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/food_entry.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 
 class MealTimeline extends StatelessWidget {
   final DailyNutritionSummary summary;
@@ -145,8 +146,11 @@ class _MealTimelineNode extends StatelessWidget {
                         ),
                       ),
                       IconButton(
+                        key: mealType == MealType.breakfast
+                            ? TutorialTargets.foodAddMealKey
+                            : null,
                         onPressed: onAdd,
-                        icon: Icon(Icons.add_circle_outline),
+                        icon: const Icon(Icons.add_circle_outline),
                         color: context.accentColor,
                         tooltip: title,
                       ),
