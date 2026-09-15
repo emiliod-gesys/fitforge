@@ -18,6 +18,7 @@ import '../models/manual_activity_entry.dart';
 import '../models/water_entry.dart';
 import '../models/leaderboard.dart';
 import '../models/profile.dart';
+import '../models/referral.dart';
 import '../models/routine.dart';
 import '../models/workout.dart';
 import '../models/workout_summary.dart';
@@ -35,6 +36,7 @@ import '../services/food_service.dart';
 import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
 import '../services/profile_service.dart';
+import '../services/referral_service.dart';
 import '../services/routine_service.dart';
 import '../services/hyrox_service.dart';
 import '../services/runner_service.dart';
@@ -177,6 +179,12 @@ final billingServiceProvider = Provider((ref) {
   final service = BillingService(ref.watch(profileServiceProvider));
   ref.onDispose(service.dispose);
   return service;
+});
+final referralServiceProvider = Provider((ref) => ReferralService());
+final myReferralsProvider = FutureProvider<List<ReferralEntry>>((ref) async {
+  final uid = ref.watch(authUserIdProvider);
+  if (uid == null) return const [];
+  return ref.watch(referralServiceProvider).listMine();
 });
 final socialServiceProvider = Provider((ref) => SocialService());
 final trainerServiceProvider = Provider((ref) => TrainerService());
@@ -585,7 +593,9 @@ final manualActivitiesProvider =
   final userId = ref.watch(authUserIdProvider);
   if (userId == null) return const [];
   final day = ref.watch(foodSelectedDayProvider);
-  return ref.watch(activityLogServiceProvider).getEntriesForDay(day, userId: userId);
+  return ref
+      .watch(activityLogServiceProvider)
+      .getEntriesForDay(day, userId: userId);
 });
 
 final waterEntriesProvider = FutureProvider<List<WaterEntry>>((ref) async {
@@ -593,7 +603,9 @@ final waterEntriesProvider = FutureProvider<List<WaterEntry>>((ref) async {
   final userId = ref.watch(authUserIdProvider);
   if (userId == null) return const [];
   final day = ref.watch(foodSelectedDayProvider);
-  return ref.watch(waterLogServiceProvider).getEntriesForDay(day, userId: userId);
+  return ref
+      .watch(waterLogServiceProvider)
+      .getEntriesForDay(day, userId: userId);
 });
 
 final foodDayWorkoutsProvider =

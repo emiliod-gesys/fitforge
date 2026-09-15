@@ -8912,6 +8912,132 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Récord'**
   String get feedComposePr;
+
+  /// No description provided for @profileHubReferralsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Referidos'**
+  String get profileHubReferralsTitle;
+
+  /// No description provided for @profileHubReferralsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu código, amigos invitados y planes gratis'**
+  String get profileHubReferralsSubtitle;
+
+  /// No description provided for @referralYourCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu código'**
+  String get referralYourCode;
+
+  /// No description provided for @referralCodeCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Código copiado'**
+  String get referralCodeCopied;
+
+  /// No description provided for @referralProgressTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Referidos activos'**
+  String get referralProgressTitle;
+
+  /// No description provided for @referralProgressSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{active} de {needed} activos · Gymrat a los 3, Pro a los 5'**
+  String referralProgressSubtitle(int active, int needed);
+
+  /// No description provided for @referralConditionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Condiciones'**
+  String get referralConditionsTitle;
+
+  /// No description provided for @referralConditionsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Un referido cuenta como activo durante su primera semana en la app. A partir de la segunda, necesita al menos 2 entrenos completados en la semana anterior (lunes a domingo). Con 3 referidos activos tienes Gymrat gratis; con 5, Gymrat Pro. Si bajas de esos números, el plan de referidos se ajusta o se pierde. Una compra en la tienda no se toca.'**
+  String get referralConditionsBody;
+
+  /// No description provided for @referralListTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus referidos'**
+  String get referralListTitle;
+
+  /// No description provided for @referralListEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has invitado a nadie. Comparte tu código.'**
+  String get referralListEmpty;
+
+  /// No description provided for @referralStatusActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo'**
+  String get referralStatusActive;
+
+  /// No description provided for @referralStatusInactive.
+  ///
+  /// In es, this message translates to:
+  /// **'Inactivo'**
+  String get referralStatusInactive;
+
+  /// No description provided for @subscriptionReferral.
+  ///
+  /// In es, this message translates to:
+  /// **'Referidos'**
+  String get subscriptionReferral;
+
+  /// No description provided for @onboardingReferralTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Te refirió un amigo?'**
+  String get onboardingReferralTitle;
+
+  /// No description provided for @onboardingReferralSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Si tienes su código, escríbelo aquí. Es opcional y no se mostrará en tu perfil.'**
+  String get onboardingReferralSubtitle;
+
+  /// No description provided for @onboardingReferralHint.
+  ///
+  /// In es, this message translates to:
+  /// **'482KMT'**
+  String get onboardingReferralHint;
+
+  /// No description provided for @onboardingReferralSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar sin código'**
+  String get onboardingReferralSkip;
+
+  /// No description provided for @onboardingReferralInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese código no tiene el formato correcto.'**
+  String get onboardingReferralInvalid;
+
+  /// No description provided for @onboardingReferralNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos ese código.'**
+  String get onboardingReferralNotFound;
+
+  /// No description provided for @onboardingReferralSelf.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes usar tu propio código.'**
+  String get onboardingReferralSelf;
+
+  /// No description provided for @onboardingReferralFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar el código. Inténtalo de nuevo.'**
+  String get onboardingReferralFailed;
 }
 
 class _AppLocalizationsDelegate

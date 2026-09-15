@@ -14,6 +14,7 @@ import '../../data/avatar_catalog.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
+import '../../models/referral.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/cloud_exercise_download_provider.dart';
 import '../../providers/onboarding_progress_provider.dart';
@@ -29,6 +30,7 @@ import 'onboarding_plan_step.dart';
 enum _OnboardingStepKind {
   language,
   aboutYou,
+  referral,
   body,
   goals,
   activityLevel,
@@ -48,6 +50,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
   late final TextEditingController _nameController;
+  late final TextEditingController _referralController;
 
   late int _pageIndex;
   late final PageController _pageController;
@@ -74,6 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return [
       _OnboardingStepKind.language,
       _OnboardingStepKind.aboutYou,
+      _OnboardingStepKind.referral,
       _OnboardingStepKind.body,
       _OnboardingStepKind.goals,
       _OnboardingStepKind.activityLevel,
@@ -96,8 +100,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       });
     }
     _pageController = PageController(initialPage: _pageIndex);
-    _selectedAvatarId = AvatarCatalog.toStorageId(AvatarCatalog.defaultOption().id);
+    _selectedAvatarId =
+        AvatarCatalog.toStorageId(AvatarCatalog.defaultOption().id);
     _nameController = TextEditingController();
+    _referralController = TextEditingController();
     _heightController = TextEditingController();
     _weightController = TextEditingController();
   }
@@ -109,17 +115,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _seededFromProfile = true;
     _nameController.text = profile.displayName ?? '';
     _dateOfBirth = profile.dateOfBirth ??
-        (profile.age != null ? AgeCalculator.estimateDateOfBirthFromAge(profile.age!) : null);
+        (profile.age != null
+            ? AgeCalculator.estimateDateOfBirthFromAge(profile.age!)
+            : null);
     _heightController.text =
         profile.heightCm != null ? profile.heightCm!.toStringAsFixed(0) : '';
     _unitSystem = profile.unitSystem;
     _gender = profile.gender;
     if (profile.bodyWeight != null) {
       _weightController.text =
-          UnitConverter.kgToDisplay(profile.bodyWeight!, _unitSystem).toStringAsFixed(1);
+          UnitConverter.kgToDisplay(profile.bodyWeight!, _unitSystem)
+              .toStringAsFixed(1);
     }
     if (profile.fitnessGoal != null) _fitnessGoal = profile.fitnessGoal;
-    if (profile.experienceLevel != null) _experienceLevel = profile.experienceLevel;
+    if (profile.experienceLevel != null)
+      _experienceLevel = profile.experienceLevel;
     _preferredLanguage = profile.preferredLanguage;
     _hyroxMode = profile.hyroxMode;
     _runnerMode = profile.runnerMode;
@@ -147,7 +157,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await ref.read(profileServiceProvider).updateProfile({'preferred_language': code});
+      await ref
+          .read(profileServiceProvider)
+          .updateProfile({'preferred_language': code});
       ref.read(exerciseServiceProvider).configure(language: code);
       ref.invalidate(profileProvider);
       ref.invalidate(exercisesProvider);
@@ -166,6 +178,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void dispose() {
     _pageController.dispose();
     _nameController.dispose();
+    _referralController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     super.dispose();
@@ -175,12 +188,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentKg = _parseWeightKg();
     setState(() => _unitSystem = unit);
     if (currentKg != null) {
-      _weightController.text = UnitConverter.kgToDisplay(currentKg, unit).toStringAsFixed(1);
+      _weightController.text =
+          UnitConverter.kgToDisplay(currentKg, unit).toStringAsFixed(1);
     }
   }
 
   double? _parseWeightKg() {
-    final display = double.tryParse(_weightController.text.replaceAll(',', '.'));
+    final display =
+        double.tryParse(_weightController.text.replaceAll(',', '.'));
     if (display == null) return null;
     return UnitConverter.displayToKg(display, _unitSystem);
   }
@@ -199,15 +214,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     if (step == _OnboardingStepKind.aboutYou) {
       if (_gender == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.genderRequired)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.genderRequired)));
         return;
       }
-      if (_dateOfBirth == null || !AgeCalculator.isValidDateOfBirth(_dateOfBirth!)) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.dateOfBirthInvalid)));
+      if (_dateOfBirth == null ||
+          !AgeCalculator.isValidDateOfBirth(_dateOfBirth!)) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.dateOfBirthInvalid)));
         return;
       }
       if (!_formKeyBasics.currentState!.validate()) return;
       await _goNextPage();
+      return;
+    }
+
+    if (step == _OnboardingStepKind.referral) {
+      await _submitReferralAndContinue();
       return;
     }
 
@@ -219,12 +242,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     if (step == _OnboardingStepKind.goals) {
       if (_fitnessGoal == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.onboardingSelectGoal)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.onboardingSelectGoal)));
         return;
       }
       if (_experienceLevel == null) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.onboardingSelectExperience)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.onboardingSelectExperience)));
         return;
       }
       await _goNextPage();
@@ -233,8 +257,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     if (step == _OnboardingStepKind.activityLevel) {
       if (_activityLevel == null) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.onboardingSelectActivity)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.onboardingSelectActivity)));
         return;
       }
       try {
@@ -260,6 +284,39 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await _goNextPage();
   }
 
+  Future<void> _skipReferral() async {
+    _referralController.clear();
+    await _goNextPage();
+  }
+
+  Future<void> _submitReferralAndContinue() async {
+    final l10n = context.l10n;
+    final raw = _referralController.text.trim();
+    if (raw.isEmpty) {
+      await _goNextPage();
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final outcome = await ref.read(referralServiceProvider).applyCode(raw);
+      if (!mounted) return;
+      if (!outcome.succeeded) {
+        final message = switch (outcome.result) {
+          ApplyReferralResult.invalid => l10n.onboardingReferralInvalid,
+          ApplyReferralResult.notFound => l10n.onboardingReferralNotFound,
+          ApplyReferralResult.self => l10n.onboardingReferralSelf,
+          _ => l10n.onboardingReferralFailed,
+        };
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+        return;
+      }
+      await _goNextPage();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   void _back() {
     if (_pageIndex == 0) return;
     _pageController.previousPage(
@@ -275,7 +332,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     try {
       final name = _nameController.text.trim();
       final dob = _dateOfBirth!;
-      final heightCm = double.parse(_heightController.text.replaceAll(',', '.'));
+      final heightCm =
+          double.parse(_heightController.text.replaceAll(',', '.'));
       final weightKg = _parseWeightKg()!;
 
       final profileService = ref.read(profileServiceProvider);
@@ -319,7 +377,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final online = ref.read(isOnlineProvider).valueOrNull ?? true;
     if (!online) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric(l10n.onboardingOfflineSkip))));
+      messenger.showSnackBar(SnackBar(
+          content: Text(l10n.errorGeneric(l10n.onboardingOfflineSkip))));
       return;
     }
 
@@ -341,7 +400,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             await notifier.download();
           } catch (e) {
             messenger.showSnackBar(
-              SnackBar(content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
+              SnackBar(
+                  content: Text(l10n.offlineDownloadExercisesFailed('$e'))),
             );
           }
         }());
@@ -397,10 +457,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final profile = await ref.read(profileProvider.future);
       if (profile != null) {
         if (_hyroxMode && !profile.hyroxMode) {
-          await ref.read(hyroxServiceProvider).setHyroxMode(enabled: true, profile: profile);
+          await ref
+              .read(hyroxServiceProvider)
+              .setHyroxMode(enabled: true, profile: profile);
         }
         if (_runnerMode && !profile.runnerMode) {
-          await ref.read(runnerServiceProvider).setRunnerMode(enabled: true, profile: profile);
+          await ref
+              .read(runnerServiceProvider)
+              .setRunnerMode(enabled: true, profile: profile);
         }
       }
 
@@ -432,7 +496,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _activityLevel == null) {
       return;
     }
-    final heightCm = double.tryParse(_heightController.text.replaceAll(',', '.'));
+    final heightCm =
+        double.tryParse(_heightController.text.replaceAll(',', '.'));
     final weightKg = _parseWeightKg();
     if (heightCm == null || weightKg == null) return;
 
@@ -478,6 +543,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     final isPlan = _currentStep == _OnboardingStepKind.plan;
     final isOffline = _currentStep == _OnboardingStepKind.offlineCatalog;
+    final isReferral = _currentStep == _OnboardingStepKind.referral;
     final showBack = _pageIndex > 0;
     final download = ref.watch(cloudExerciseDownloadProvider);
 
@@ -506,11 +572,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       const FitForgeLogo(height: 28),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: AppColors.cardElevated,
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
+                          border: Border.all(
+                              color: AppColors.border.withValues(alpha: 0.7)),
                         ),
                         child: Text(
                           l10n.onboardingStepOf(_pageIndex + 1, steps.length),
@@ -544,7 +612,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     itemCount: steps.length,
                     onPageChanged: (index) {
                       setState(() => _pageIndex = index);
-                      ref.read(onboardingProgressProvider.notifier).setStepIndex(index);
+                      ref
+                          .read(onboardingProgressProvider.notifier)
+                          .setStepIndex(index);
                     },
                     itemBuilder: (context, index) {
                       return switch (steps[index]) {
@@ -563,8 +633,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             gender: _gender,
                             selectedAvatarId: _selectedAvatarId,
                             onGenderChanged: (g) => setState(() => _gender = g),
-                            onDateOfBirthChanged: (d) => setState(() => _dateOfBirth = d),
+                            onDateOfBirthChanged: (d) =>
+                                setState(() => _dateOfBirth = d),
                             onPickAvatar: _pickAvatar,
+                          ),
+                        _OnboardingStepKind.referral => _ReferralStep(
+                            l10n: l10n,
+                            accent: accent,
+                            controller: _referralController,
                           ),
                         _OnboardingStepKind.body => _BodyStep(
                             l10n: l10n,
@@ -579,25 +655,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             accent: accent,
                             fitnessGoal: _fitnessGoal,
                             experienceLevel: _experienceLevel,
-                            onGoalChanged: (g) => setState(() => _fitnessGoal = l10n.canonicalGoal(g)),
-                            onExperienceChanged: (e) =>
-                                setState(() => _experienceLevel = l10n.canonicalExperience(e)),
+                            onGoalChanged: (g) => setState(
+                                () => _fitnessGoal = l10n.canonicalGoal(g)),
+                            onExperienceChanged: (e) => setState(() =>
+                                _experienceLevel = l10n.canonicalExperience(e)),
                           ),
                         _OnboardingStepKind.activityLevel => _ActivityLevelStep(
                             l10n: l10n,
                             accent: accent,
                             activityLevel: _activityLevel,
-                            onActivityChanged: (a) => setState(() => _activityLevel = a),
+                            onActivityChanged: (a) =>
+                                setState(() => _activityLevel = a),
                           ),
                         _OnboardingStepKind.modes => _ModesStep(
                             l10n: l10n,
                             accent: accent,
                             hyroxMode: _hyroxMode,
                             runnerMode: _runnerMode,
-                            onHyroxChanged: (v) => setState(() => _hyroxMode = v),
-                            onRunnerChanged: (v) => setState(() => _runnerMode = v),
+                            onHyroxChanged: (v) =>
+                                setState(() => _hyroxMode = v),
+                            onRunnerChanged: (v) =>
+                                setState(() => _runnerMode = v),
                           ),
-                        _OnboardingStepKind.offlineCatalog => _OfflineCatalogStep(
+                        _OnboardingStepKind.offlineCatalog =>
+                          _OfflineCatalogStep(
                             l10n: l10n,
                             accent: accent,
                             download: download,
@@ -613,7 +694,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             l10n: l10n,
                             accent: accent,
                             selected: _selectedPlan,
-                            onSelected: (tier) => setState(() => _selectedPlan = tier),
+                            onSelected: (tier) =>
+                                setState(() => _selectedPlan = tier),
                           ),
                       };
                     },
@@ -628,7 +710,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       if (_currentStep == _OnboardingStepKind.modes)
                         TextButton(
                           onPressed: _busy ? null : _next,
-                          child: Text(l10n.onboardingSkipModes, textAlign: TextAlign.center),
+                          child: Text(l10n.onboardingSkipModes,
+                              textAlign: TextAlign.center),
+                        ),
+                      if (isReferral)
+                        TextButton(
+                          onPressed: _busy ? null : _skipReferral,
+                          child: Text(l10n.onboardingReferralSkip,
+                              textAlign: TextAlign.center),
                         ),
                       if (!isOffline)
                         Row(
@@ -651,7 +740,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: _busy && isPlan
+                              child: _busy && (isPlan || isReferral)
                                   ? const SizedBox(
                                       width: 22,
                                       height: 22,
@@ -661,8 +750,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                       ),
                                     )
                                   : Text(
-                                      isPlan ? _planCtaLabel(l10n) : l10n.onboardingNext,
-                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                      isPlan
+                                          ? _planCtaLabel(l10n)
+                                          : l10n.onboardingNext,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w700),
                                     ),
                             ),
                           ],
@@ -680,7 +772,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               onPressed: _busy
                                   ? null
                                   : () async {
-                                      setState(() => _offlineDecisionMade = true);
+                                      setState(
+                                          () => _offlineDecisionMade = true);
                                       await _goNextPage();
                                     },
                               child: Text(l10n.onboardingOfflineSkip),
@@ -723,7 +816,8 @@ class _StepScaffold extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 8),
-        Text(subtitle, style: const TextStyle(color: AppColors.textMuted, height: 1.45)),
+        Text(subtitle,
+            style: const TextStyle(color: AppColors.textMuted, height: 1.45)),
         const SizedBox(height: 24),
         child,
       ],
@@ -804,9 +898,12 @@ class _AboutYouStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final age = dateOfBirth != null ? AgeCalculator.yearsFromDateOfBirth(dateOfBirth!) : null;
+    final age = dateOfBirth != null
+        ? AgeCalculator.yearsFromDateOfBirth(dateOfBirth!)
+        : null;
     final dateLabel = dateOfBirth != null
-        ? DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(dateOfBirth!)
+        ? DateFormat.yMMMMd(Localizations.localeOf(context).toString())
+            .format(dateOfBirth!)
         : l10n.dateOfBirthHint;
 
     return _StepScaffold(
@@ -847,19 +944,23 @@ class _AboutYouStep extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: accent,
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.surface, width: 2),
+                              border: Border.all(
+                                  color: AppColors.surface, width: 2),
                             ),
-                            child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                            child: const Icon(Icons.edit,
+                                size: 16, color: Colors.white),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
-                  TextButton(onPressed: onPickAvatar, child: Text(l10n.chooseAvatar)),
+                  TextButton(
+                      onPressed: onPickAvatar, child: Text(l10n.chooseAvatar)),
                   Text(
                     l10n.chooseAvatarHint,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -869,8 +970,11 @@ class _AboutYouStep extends StatelessWidget {
             TextFormField(
               controller: nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: l10n.profileOnboardingNickname),
-              validator: (v) => v == null || v.trim().isEmpty ? l10n.displayNameRequired : null,
+              decoration:
+                  InputDecoration(labelText: l10n.profileOnboardingNickname),
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? l10n.displayNameRequired
+                  : null,
             ),
             const SizedBox(height: 12),
             InkWell(
@@ -883,7 +987,8 @@ class _AboutYouStep extends StatelessWidget {
                 ),
                 child: Text(
                   dateLabel,
-                  style: TextStyle(color: dateOfBirth != null ? null : AppColors.textMuted),
+                  style: TextStyle(
+                      color: dateOfBirth != null ? null : AppColors.textMuted),
                 ),
               ),
             ),
@@ -891,11 +996,13 @@ class _AboutYouStep extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.dateOfBirthAgePreview(age),
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                style:
+                    const TextStyle(color: AppColors.textMuted, fontSize: 13),
               ),
             ],
             const SizedBox(height: 16),
-            Text(l10n.genderTitle, style: Theme.of(context).textTheme.labelLarge),
+            Text(l10n.genderTitle,
+                style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -910,6 +1017,42 @@ class _AboutYouStep extends StatelessWidget {
               }).toList(),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReferralStep extends StatelessWidget {
+  final AppLocalizations l10n;
+  final Color accent;
+  final TextEditingController controller;
+
+  const _ReferralStep({
+    required this.l10n,
+    required this.accent,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepScaffold(
+      title: l10n.onboardingReferralTitle,
+      subtitle: l10n.onboardingReferralSubtitle,
+      child: TextField(
+        controller: controller,
+        textCapitalization: TextCapitalization.characters,
+        autocorrect: false,
+        maxLength: 8,
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          letterSpacing: 3,
+          color: accent,
+          fontSize: 22,
+        ),
+        decoration: InputDecoration(
+          hintText: l10n.onboardingReferralHint,
+          counterText: '',
         ),
       ),
     );
@@ -946,7 +1089,8 @@ class _BodyStep extends StatelessWidget {
             TextFormField(
               controller: heightController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.heightTitle, suffixText: 'cm'),
+              decoration: InputDecoration(
+                  labelText: l10n.heightTitle, suffixText: 'cm'),
               validator: (v) {
                 final h = double.tryParse(v?.replaceAll(',', '.') ?? '');
                 if (h == null || h < 50 || h > 280) return l10n.heightInvalid;
@@ -954,13 +1098,15 @@ class _BodyStep extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            Text(l10n.unitSystem, style: Theme.of(context).textTheme.labelLarge),
+            Text(l10n.unitSystem,
+                style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             _UnitToggle(unitSystem: unitSystem, onChanged: onUnitChanged),
             const SizedBox(height: 12),
             TextFormField(
               controller: weightController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: l10n.metricWeight,
                 suffixText: UnitConverter.massLabel(unitSystem),
@@ -1005,7 +1151,8 @@ class _GoalsStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.fitnessGoalTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(l10n.fitnessGoalTitle,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           ...l10n.fitnessGoals.map((goal) {
             final canonical = l10n.canonicalGoal(goal);
@@ -1020,7 +1167,8 @@ class _GoalsStep extends StatelessWidget {
             );
           }),
           const SizedBox(height: 16),
-          Text(l10n.experienceLevel, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(l10n.experienceLevel,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -1078,7 +1226,8 @@ class _ActivityLevelStep extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             l10n.activityLevelFootnote,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.35),
+            style: const TextStyle(
+                color: AppColors.textMuted, fontSize: 12, height: 1.35),
           ),
         ],
       ),
@@ -1166,7 +1315,8 @@ class _ModeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: enabled ? accent.withValues(alpha: 0.08) : AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: enabled ? accent.withValues(alpha: 0.4) : AppColors.border),
+        border: Border.all(
+            color: enabled ? accent.withValues(alpha: 0.4) : AppColors.border),
       ),
       child: Row(
         children: [
@@ -1176,13 +1326,17 @@ class _ModeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(subtitle,
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 12)),
               ],
             ),
           ),
           if (onChanged != null)
-            Switch(value: enabled, onChanged: onChanged, activeThumbColor: accent)
+            Switch(
+                value: enabled, onChanged: onChanged, activeThumbColor: accent)
           else
             Icon(Icons.check_circle, color: accent, size: 22),
         ],
@@ -1213,12 +1367,15 @@ class _OfflineCatalogStep extends StatelessWidget {
   String _progressLabel() {
     if (download.phase == CloudExerciseDownloadPhase.media) {
       if (download.total != null) {
-        return l10n.offlineDownloadExercisesProgressMedia(download.downloaded, download.total!);
+        return l10n.offlineDownloadExercisesProgressMedia(
+            download.downloaded, download.total!);
       }
-      return l10n.offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
+      return l10n
+          .offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
     }
     if (download.total != null) {
-      return l10n.offlineDownloadExercisesProgress(download.downloaded, download.total!);
+      return l10n.offlineDownloadExercisesProgress(
+          download.downloaded, download.total!);
     }
     return l10n.offlineDownloadExercisesProgressUnknown(download.downloaded);
   }
@@ -1250,20 +1407,25 @@ class _OfflineCatalogStep extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.cloud_download_outlined, color: accent, size: 28),
+                    Icon(Icons.cloud_download_outlined,
+                        color: accent, size: 28),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         l10n.onboardingOfflineSize,
-                        style: const TextStyle(fontWeight: FontWeight.w700, height: 1.3),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, height: 1.3),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 14),
-                _OfflineBullet(text: l10n.onboardingOfflineBenefit1, accent: accent),
-                _OfflineBullet(text: l10n.onboardingOfflineBenefit2, accent: accent),
-                _OfflineBullet(text: l10n.onboardingOfflineBenefit3, accent: accent),
+                _OfflineBullet(
+                    text: l10n.onboardingOfflineBenefit1, accent: accent),
+                _OfflineBullet(
+                    text: l10n.onboardingOfflineBenefit2, accent: accent),
+                _OfflineBullet(
+                    text: l10n.onboardingOfflineBenefit3, accent: accent),
               ],
             ),
           ),
@@ -1282,7 +1444,9 @@ class _OfflineCatalogStep extends StatelessWidget {
               color: accent,
             ),
             const SizedBox(height: 8),
-            Text(_progressLabel(), style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            Text(_progressLabel(),
+                style:
+                    const TextStyle(color: AppColors.textMuted, fontSize: 13)),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: busy ? null : onSkip,
@@ -1290,7 +1454,8 @@ class _OfflineCatalogStep extends StatelessWidget {
                 backgroundColor: accent,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
               child: Text(l10n.onboardingOfflineContinue),
             ),
@@ -1301,7 +1466,8 @@ class _OfflineCatalogStep extends StatelessWidget {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.download_rounded),
               label: Text(l10n.onboardingOfflineDownload),
@@ -1309,7 +1475,8 @@ class _OfflineCatalogStep extends StatelessWidget {
                 backgroundColor: accent,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
             ),
             const SizedBox(height: 10),
@@ -1317,9 +1484,11 @@ class _OfflineCatalogStep extends StatelessWidget {
               onPressed: busy ? null : onSkip,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
+                side:
+                    BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
               child: Text(l10n.onboardingOfflineSkip),
             ),
@@ -1327,7 +1496,8 @@ class _OfflineCatalogStep extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 l10n.offlineDownloadExercisesSubtitleDone(download.cachedCount),
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                style:
+                    const TextStyle(color: AppColors.textMuted, fontSize: 13),
               ),
             ],
           ],
@@ -1352,7 +1522,9 @@ class _OfflineBullet extends StatelessWidget {
         children: [
           Icon(Icons.check_rounded, size: 18, color: accent),
           const SizedBox(width: 8),
-          Expanded(child: Text(text, style: const TextStyle(height: 1.35, fontSize: 13.5))),
+          Expanded(
+              child: Text(text,
+                  style: const TextStyle(height: 1.35, fontSize: 13.5))),
         ],
       ),
     );
@@ -1395,12 +1567,15 @@ class _UnitChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _UnitChip({required this.label, required this.selected, required this.onTap});
+  const _UnitChip(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? context.accentColor.withValues(alpha: 0.2) : AppColors.card,
+      color: selected
+          ? context.accentColor.withValues(alpha: 0.2)
+          : AppColors.card,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: onTap,
@@ -1410,7 +1585,9 @@ class _UnitChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: selected ? context.accentColor : AppColors.border.withValues(alpha: 0.5),
+              color: selected
+                  ? context.accentColor
+                  : AppColors.border.withValues(alpha: 0.5),
             ),
           ),
           alignment: Alignment.center,

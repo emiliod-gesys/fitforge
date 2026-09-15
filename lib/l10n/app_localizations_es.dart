@@ -5228,4 +5228,75 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get feedComposePr => 'Récord';
+
+  @override
+  String get profileHubReferralsTitle => 'Referidos';
+
+  @override
+  String get profileHubReferralsSubtitle =>
+      'Tu código, amigos invitados y planes gratis';
+
+  @override
+  String get referralYourCode => 'Tu código';
+
+  @override
+  String get referralCodeCopied => 'Código copiado';
+
+  @override
+  String get referralProgressTitle => 'Referidos activos';
+
+  @override
+  String referralProgressSubtitle(int active, int needed) {
+    return '$active de $needed activos · Gymrat a los 3, Pro a los 5';
+  }
+
+  @override
+  String get referralConditionsTitle => 'Condiciones';
+
+  @override
+  String get referralConditionsBody =>
+      'Un referido cuenta como activo durante su primera semana en la app. A partir de la segunda, necesita al menos 2 entrenos completados en la semana anterior (lunes a domingo). Con 3 referidos activos tienes Gymrat gratis; con 5, Gymrat Pro. Si bajas de esos números, el plan de referidos se ajusta o se pierde. Una compra en la tienda no se toca.';
+
+  @override
+  String get referralListTitle => 'Tus referidos';
+
+  @override
+  String get referralListEmpty =>
+      'Aún no has invitado a nadie. Comparte tu código.';
+
+  @override
+  String get referralStatusActive => 'Activo';
+
+  @override
+  String get referralStatusInactive => 'Inactivo';
+
+  @override
+  String get subscriptionReferral => 'Referidos';
+
+  @override
+  String get onboardingReferralTitle => '¿Te refirió un amigo?';
+
+  @override
+  String get onboardingReferralSubtitle =>
+      'Si tienes su código, escríbelo aquí. Es opcional y no se mostrará en tu perfil.';
+
+  @override
+  String get onboardingReferralHint => '482KMT';
+
+  @override
+  String get onboardingReferralSkip => 'Continuar sin código';
+
+  @override
+  String get onboardingReferralInvalid =>
+      'Ese código no tiene el formato correcto.';
+
+  @override
+  String get onboardingReferralNotFound => 'No encontramos ese código.';
+
+  @override
+  String get onboardingReferralSelf => 'No puedes usar tu propio código.';
+
+  @override
+  String get onboardingReferralFailed =>
+      'No se pudo guardar el código. Inténtalo de nuevo.';
 }

@@ -1858,5 +1858,32 @@
   "socialHeroInvite": "Invite friend",
   "feedComposePhoto": "Photo",
   "feedComposeCamera": "Camera",
-  "feedComposePr": "PR"
+  "feedComposePr": "PR",
+  "profileHubReferralsTitle": "Referrals",
+  "profileHubReferralsSubtitle": "Your code, invited friends, and free plans",
+  "referralYourCode": "Your code",
+  "referralCodeCopied": "Code copied",
+  "referralProgressTitle": "Active referrals",
+  "referralProgressSubtitle": "{active} of {needed} active · Gymrat at 3, Pro at 5",
+  "@referralProgressSubtitle": {
+    "placeholders": {
+      "active": { "type": "int" },
+      "needed": { "type": "int" }
+    }
+  },
+  "referralConditionsTitle": "How it works",
+  "referralConditionsBody": "A referral counts as active during their first week in the app. From the second week, they need at least 2 completed workouts in the previous week (Monday to Sunday). 3 active referrals unlock free Gymrat; 5 unlock Gymrat Pro. If you drop below those numbers, the referral plan steps down or goes away. A store purchase is never changed.",
+  "referralListTitle": "Your referrals",
+  "referralListEmpty": "You haven't invited anyone yet. Share your code.",
+  "referralStatusActive": "Active",
+  "referralStatusInactive": "Inactive",
+  "subscriptionReferral": "Referrals",
+  "onboardingReferralTitle": "Did a friend refer you?",
+  "onboardingReferralSubtitle": "If you have their code, enter it here. It's optional and won't show on your profile.",
+  "onboardingReferralHint": "482KMT",
+  "onboardingReferralSkip": "Continue without a code",
+  "onboardingReferralInvalid": "That code isn't the right format.",
+  "onboardingReferralNotFound": "We couldn't find that code.",
+  "onboardingReferralSelf": "You can't use your own code.",
+  "onboardingReferralFailed": "Couldn't save the code. Try again."
 }

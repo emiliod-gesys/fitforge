@@ -50,7 +50,8 @@ class _SubscriptionPlanSectionState
         BillingOutcome.error => l10n.subscriptionPurchaseFailed,
       };
       if (message != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -63,7 +64,12 @@ class _SubscriptionPlanSectionState
     final profile = widget.profile;
     final tier = profile?.subscriptionTier ?? SubscriptionTier.free;
     final current = l10n.subscriptionTierLabel(tier) ?? l10n.onboardingPlanFree;
-    final courtesy = profile?.isCourtesySubscription == true;
+    final locked = profile?.hidesStoreUpgrades == true;
+    final sourceLabel = profile?.isReferralSubscription == true
+        ? l10n.subscriptionReferral
+        : profile?.isCourtesySubscription == true
+            ? l10n.subscriptionCourtesy
+            : null;
 
     return ListView(
       padding: AppTokens.pagePaddingWithBottomInset(context),
@@ -76,7 +82,7 @@ class _SubscriptionPlanSectionState
         ),
         const SizedBox(height: 8),
         Text(
-          courtesy ? '$current · ${l10n.subscriptionCourtesy}' : current,
+          sourceLabel != null ? '$current · $sourceLabel' : current,
           style: TextStyle(
             color: context.accentColor,
             fontWeight: FontWeight.w700,
@@ -92,9 +98,9 @@ class _SubscriptionPlanSectionState
         FfSurface(
           child: Column(
             children: [
-              if (!courtesy &&
+              if (!locked &&
                   BillingProducts.rank(tier) <
-                  BillingProducts.rank(SubscriptionTier.gymrat))
+                      BillingProducts.rank(SubscriptionTier.gymrat))
                 FfListRow(
                   icon: Icons.workspace_premium_outlined,
                   title: l10n.subscriptionUpgradeGymrat,
@@ -107,9 +113,9 @@ class _SubscriptionPlanSectionState
                                 .purchase(SubscriptionTier.gymrat),
                           ),
                 ),
-              if (!courtesy &&
+              if (!locked &&
                   BillingProducts.rank(tier) <
-                  BillingProducts.rank(SubscriptionTier.gymratPro))
+                      BillingProducts.rank(SubscriptionTier.gymratPro))
                 FfListRow(
                   icon: Icons.star_outline,
                   title: l10n.subscriptionUpgradePro,
@@ -128,7 +134,8 @@ class _SubscriptionPlanSectionState
                 showChevron: false,
                 onTap: _busy
                     ? null
-                    : () => _run(() => ref.read(billingServiceProvider).restore()),
+                    : () =>
+                        _run(() => ref.read(billingServiceProvider).restore()),
               ),
             ],
           ),

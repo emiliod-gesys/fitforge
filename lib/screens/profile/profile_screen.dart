@@ -36,6 +36,8 @@ import '../../widgets/profile_avatar.dart';
 import '../../widgets/profile/accent_color_selector.dart';
 import '../../widgets/profile/delete_account_section.dart';
 import '../../widgets/profile/health_integration_card.dart';
+import '../../widgets/profile/referrals_section.dart';
+import '../../widgets/profile/referral_code_copy_row.dart';
 import '../../widgets/profile/subscription_plan_section.dart';
 import '../../widgets/profile/subscription_tier_label.dart';
 import '../../widgets/food/calorie_budget_editor_sheet.dart';
@@ -62,6 +64,7 @@ enum _ProfileSection {
   offline,
   account,
   plan,
+  referrals,
 }
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -205,6 +208,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.account => _accountSection(),
                 _ProfileSection.plan =>
                   SubscriptionPlanSection(profile: profile),
+                _ProfileSection.referrals => ReferralsSection(profile: profile),
               };
             }
 
@@ -304,6 +308,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () => context.go('/students'),
                     ),
                   ],
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.group_add_outlined,
+                    title: l10n.profileHubReferralsTitle,
+                    subtitle: l10n.profileHubReferralsSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.referrals,
+                      l10n.profileHubReferralsTitle,
+                    ),
+                  ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
                     icon: Icons.workspace_premium_outlined,
@@ -528,6 +542,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         subtitle: l10n.languageLabel(profile?.preferredLanguage ?? 'es'),
         onTap: () => _editLanguage(profile),
       ),
+      if ((profile?.referralCode ?? '').isNotEmpty) ...[
+        const SizedBox(height: AppTokens.space20),
+        ReferralCodeCopyRow(code: profile!.referralCode!),
+      ],
       const SizedBox(height: AppTokens.space20),
       FfSectionHeader(title: l10n.unitSystem),
       _UnitSelector(

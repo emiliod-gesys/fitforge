@@ -68,12 +68,14 @@ enum SubscriptionTier {
 enum SubscriptionSource {
   none,
   iap,
-  courtesy;
+  courtesy,
+  referral;
 
   static SubscriptionSource fromCode(String? value) {
     return switch (value) {
       'iap' => SubscriptionSource.iap,
       'courtesy' => SubscriptionSource.courtesy,
+      'referral' => SubscriptionSource.referral,
       _ => SubscriptionSource.none,
     };
   }
@@ -82,6 +84,7 @@ enum SubscriptionSource {
         SubscriptionSource.none => null,
         SubscriptionSource.iap => 'iap',
         SubscriptionSource.courtesy => 'courtesy',
+        SubscriptionSource.referral => 'referral',
       };
 }
 
@@ -160,11 +163,18 @@ class UserProfile {
   final int totalXp;
   final DateTime createdAt;
   final DateTime? onboardingCompletedAt;
+  final String? referralCode;
 
   bool get isTrainer => userType == UserType.trainer;
   bool get hasCompletedOnboarding => onboardingCompletedAt != null;
   bool get isCourtesySubscription =>
       subscriptionSource == SubscriptionSource.courtesy;
+  bool get isReferralSubscription =>
+      subscriptionSource == SubscriptionSource.referral;
+  bool get hidesStoreUpgrades =>
+      isCourtesySubscription ||
+      (isReferralSubscription &&
+          subscriptionTier == SubscriptionTier.gymratPro);
 
   /// Edad efectiva: prioriza fecha de nacimiento.
   int? get effectiveAge {
@@ -204,6 +214,7 @@ class UserProfile {
     this.totalXp = 0,
     required this.createdAt,
     this.onboardingCompletedAt,
+    this.referralCode,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json,
@@ -233,8 +244,8 @@ class UserProfile {
       userType: UserType.fromCode(parseJsonString(json['user_type'])),
       subscriptionTier:
           SubscriptionTier.fromCode(parseJsonString(json['subscription_tier'])),
-      subscriptionSource:
-          SubscriptionSource.fromCode(parseJsonString(json['subscription_source'])),
+      subscriptionSource: SubscriptionSource.fromCode(
+          parseJsonString(json['subscription_source'])),
       subscriptionProductId: parseJsonString(json['subscription_product_id']),
       subscriptionExpiresAt: json['subscription_expires_at'] != null
           ? DateTime.tryParse(json['subscription_expires_at'] as String)
@@ -247,6 +258,7 @@ class UserProfile {
       onboardingCompletedAt: json['onboarding_completed_at'] != null
           ? DateTime.parse(json['onboarding_completed_at'] as String)
           : null,
+      referralCode: parseJsonString(json['referral_code']),
     );
   }
 

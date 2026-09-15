@@ -26,8 +26,8 @@ class BillingFlowResult {
   final String? message;
 }
 
-/// Play Billing / StoreKit. Las cortesías (`subscription_source = courtesy`)
-/// no se pisan ni se bajan a free al caducar un recibo de tienda.
+/// Play Billing / StoreKit. Las cortesías (`courtesy`) no se pisan.
+/// Un Pro por referidos (`referral`) sí lo reemplaza una compra de tienda.
 class BillingService {
   BillingService(this._profileService);
 

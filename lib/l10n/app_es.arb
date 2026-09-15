@@ -1897,5 +1897,32 @@
   "socialHeroInvite": "Invitar amigo",
   "feedComposePhoto": "Foto",
   "feedComposeCamera": "Cámara",
-  "feedComposePr": "Récord"
+  "feedComposePr": "Récord",
+  "profileHubReferralsTitle": "Referidos",
+  "profileHubReferralsSubtitle": "Tu código, amigos invitados y planes gratis",
+  "referralYourCode": "Tu código",
+  "referralCodeCopied": "Código copiado",
+  "referralProgressTitle": "Referidos activos",
+  "referralProgressSubtitle": "{active} de {needed} activos · Gymrat a los 3, Pro a los 5",
+  "@referralProgressSubtitle": {
+    "placeholders": {
+      "active": { "type": "int" },
+      "needed": { "type": "int" }
+    }
+  },
+  "referralConditionsTitle": "Condiciones",
+  "referralConditionsBody": "Un referido cuenta como activo durante su primera semana en la app. A partir de la segunda, necesita al menos 2 entrenos completados en la semana anterior (lunes a domingo). Con 3 referidos activos tienes Gymrat gratis; con 5, Gymrat Pro. Si bajas de esos números, el plan de referidos se ajusta o se pierde. Una compra en la tienda no se toca.",
+  "referralListTitle": "Tus referidos",
+  "referralListEmpty": "Aún no has invitado a nadie. Comparte tu código.",
+  "referralStatusActive": "Activo",
+  "referralStatusInactive": "Inactivo",
+  "subscriptionReferral": "Referidos",
+  "onboardingReferralTitle": "¿Te refirió un amigo?",
+  "onboardingReferralSubtitle": "Si tienes su código, escríbelo aquí. Es opcional y no se mostrará en tu perfil.",
+  "onboardingReferralHint": "482KMT",
+  "onboardingReferralSkip": "Continuar sin código",
+  "onboardingReferralInvalid": "Ese código no tiene el formato correcto.",
+  "onboardingReferralNotFound": "No encontramos ese código.",
+  "onboardingReferralSelf": "No puedes usar tu propio código.",
+  "onboardingReferralFailed": "No se pudo guardar el código. Inténtalo de nuevo."
 }
