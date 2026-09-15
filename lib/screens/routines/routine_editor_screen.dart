@@ -141,7 +141,11 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showRoutineSaveErrorSnackBar(context, e);
+        showRoutineSaveErrorSnackBar(
+          context,
+          e,
+          profile: ref.read(profileProvider).valueOrNull,
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);

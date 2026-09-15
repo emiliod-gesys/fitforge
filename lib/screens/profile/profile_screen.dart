@@ -98,7 +98,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _openTutorialsFromRoute();
+    _openSectionFromRoute();
   }
 
   @override
@@ -106,23 +106,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialSection != widget.initialSection) {
       _openedFromQuery = null;
-      _openTutorialsFromRoute();
+      _openSectionFromRoute();
     }
   }
 
-  void _openTutorialsFromRoute() {
+  void _openSectionFromRoute() {
     final section = widget.initialSection ??
         GoRouterState.of(context).uri.queryParameters['section'];
-    if (section != 'tutorials') return;
-    if (_openedFromQuery == section && _section == _ProfileSection.tutorials) {
-      return;
-    }
+    if (section == null || section.isEmpty) return;
+
+    final mapped = switch (section) {
+      'tutorials' => _ProfileSection.tutorials,
+      'plan' => _ProfileSection.plan,
+      _ => null,
+    };
+    if (mapped == null) return;
+    if (_openedFromQuery == section && _section == mapped) return;
+
+    final title = switch (mapped) {
+      _ProfileSection.tutorials => context.l10n.tutorialsTitle,
+      _ProfileSection.plan => context.l10n.profileHubPlanTitle,
+      _ => context.l10n.profileTitle,
+    };
+
     _openedFromQuery = section;
-    final title = context.l10n.tutorialsTitle;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (_section != _ProfileSection.tutorials) {
-        _openSection(_ProfileSection.tutorials, title);
+      if (_section != mapped) {
+        _openSection(mapped, title);
       }
     });
   }

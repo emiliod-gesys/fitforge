@@ -8001,11 +8001,77 @@ abstract class AppLocalizations {
   /// **'Pasar a Gymrat Pro'**
   String get subscriptionUpgradePro;
 
+  /// No description provided for @subscriptionSeePlans.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver planes'**
+  String get subscriptionSeePlans;
+
+  /// No description provided for @planUpgradeCoachFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite diario de {limit} mensajes del Coach IA. Pasa a Gymrat para 30 al día, o a Gymrat Pro para ilimitados.'**
+  String planUpgradeCoachFree(int limit);
+
+  /// No description provided for @planUpgradeCoachGymrat.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite diario de {limit} mensajes. Pasa a Gymrat Pro para Coach IA ilimitado.'**
+  String planUpgradeCoachGymrat(int limit);
+
+  /// No description provided for @planUpgradeRoutinesFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite de {limit} rutinas. Pasa a Gymrat para guardar 20, o a Gymrat Pro para 50.'**
+  String planUpgradeRoutinesFree(int limit);
+
+  /// No description provided for @planUpgradeRoutinesGymrat.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite de {limit} rutinas. Pasa a Gymrat Pro para guardar hasta 50.'**
+  String planUpgradeRoutinesGymrat(int limit);
+
+  /// No description provided for @planUpgradeRoutinesMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el máximo de {limit} rutinas de tu plan.'**
+  String planUpgradeRoutinesMax(int limit);
+
   /// No description provided for @subscriptionManageHint.
   ///
   /// In es, this message translates to:
   /// **'La suscripción se gestiona en Google Play o App Store. Restaurar recupera un plan ya pagado en este usuario.'**
   String get subscriptionManageHint;
+
+  /// No description provided for @subscriptionManageHintIos.
+  ///
+  /// In es, this message translates to:
+  /// **'La suscripción se compra y gestiona en App Store. Restaurar recupera un plan ya pagado en este Apple ID.'**
+  String get subscriptionManageHintIos;
+
+  /// No description provided for @subscriptionManageHintAndroid.
+  ///
+  /// In es, this message translates to:
+  /// **'La suscripción se compra y gestiona en Google Play. Restaurar recupera un plan ya pagado en esta cuenta.'**
+  String get subscriptionManageHintAndroid;
+
+  /// No description provided for @subscriptionManageInStoreIos.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar en App Store'**
+  String get subscriptionManageInStoreIos;
+
+  /// No description provided for @subscriptionManageInStoreAndroid.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar en Google Play'**
+  String get subscriptionManageInStoreAndroid;
+
+  /// No description provided for @subscriptionManageFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir la tienda.'**
+  String get subscriptionManageFailed;
 
   /// No description provided for @profileHubTitle.
   ///

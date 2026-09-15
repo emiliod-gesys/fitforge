@@ -4703,8 +4703,53 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscriptionUpgradePro => 'Pasar a Gymrat Pro';
 
   @override
+  String get subscriptionSeePlans => 'Ver planes';
+
+  @override
+  String planUpgradeCoachFree(int limit) {
+    return 'Has alcanzado el límite diario de $limit mensajes del Coach IA. Pasa a Gymrat para 30 al día, o a Gymrat Pro para ilimitados.';
+  }
+
+  @override
+  String planUpgradeCoachGymrat(int limit) {
+    return 'Has alcanzado el límite diario de $limit mensajes. Pasa a Gymrat Pro para Coach IA ilimitado.';
+  }
+
+  @override
+  String planUpgradeRoutinesFree(int limit) {
+    return 'Has alcanzado el límite de $limit rutinas. Pasa a Gymrat para guardar 20, o a Gymrat Pro para 50.';
+  }
+
+  @override
+  String planUpgradeRoutinesGymrat(int limit) {
+    return 'Has alcanzado el límite de $limit rutinas. Pasa a Gymrat Pro para guardar hasta 50.';
+  }
+
+  @override
+  String planUpgradeRoutinesMax(int limit) {
+    return 'Has alcanzado el máximo de $limit rutinas de tu plan.';
+  }
+
+  @override
   String get subscriptionManageHint =>
       'La suscripción se gestiona en Google Play o App Store. Restaurar recupera un plan ya pagado en este usuario.';
+
+  @override
+  String get subscriptionManageHintIos =>
+      'La suscripción se compra y gestiona en App Store. Restaurar recupera un plan ya pagado en este Apple ID.';
+
+  @override
+  String get subscriptionManageHintAndroid =>
+      'La suscripción se compra y gestiona en Google Play. Restaurar recupera un plan ya pagado en esta cuenta.';
+
+  @override
+  String get subscriptionManageInStoreIos => 'Gestionar en App Store';
+
+  @override
+  String get subscriptionManageInStoreAndroid => 'Gestionar en Google Play';
+
+  @override
+  String get subscriptionManageFailed => 'No se pudo abrir la tienda.';
 
   @override
   String get profileHubTitle => 'Tu espacio';

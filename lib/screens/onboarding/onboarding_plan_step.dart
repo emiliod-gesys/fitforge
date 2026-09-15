@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/subscription/billing_products.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/profile.dart';
@@ -55,9 +56,9 @@ class OnboardingPlanStep extends StatelessWidget {
           selected: selected == SubscriptionTier.gymrat,
           onTap: () => onSelected(SubscriptionTier.gymrat),
           name: 'Gymrat',
-          price: r'$4.99',
+          price: BillingProducts.gymratMonthlyPrice,
           period: l10n.onboardingPlanPerMonth,
-          originalPrice: r'$7.99',
+          originalPrice: BillingProducts.gymratCompareAtPrice,
           badge: l10n.onboardingPlanDiscount,
           benefits: [
             l10n.onboardingPlanBenefitGymrat1,
@@ -72,9 +73,9 @@ class OnboardingPlanStep extends StatelessWidget {
           selected: selected == SubscriptionTier.gymratPro,
           onTap: () => onSelected(SubscriptionTier.gymratPro),
           name: 'Gymrat Pro',
-          price: r'$9.99',
+          price: BillingProducts.gymratProMonthlyPrice,
           period: l10n.onboardingPlanPerMonth,
-          originalPrice: r'$11.99',
+          originalPrice: BillingProducts.gymratProCompareAtPrice,
           badge: l10n.onboardingPlanRecommended,
           highlighted: true,
           benefits: [

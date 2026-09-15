@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/workout_streak.dart';
+import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/l10n_extensions.dart';
@@ -23,6 +24,7 @@ import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/ff/ff_surface.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/plan_limit_banner.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
   const AiCoachScreen({super.key});
@@ -90,10 +92,15 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       if (!canSend) {
         if (!mounted) return;
         final status = await usageService.getStatus(profile, profileService);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.coachDailyLimitReached(status.limit ?? 0)),
+        if (!mounted) return;
+        PlanUpgrade.showLimitSnackBar(
+          context,
+          message: PlanUpgrade.coachMessage(
+            l10n,
+            profile?.subscriptionTier ?? SubscriptionTier.free,
+            status.limit ?? 0,
           ),
+          canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
         );
         return;
       }
@@ -342,7 +349,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     final l10n = context.l10n;
     final base = l10n.coachRoutineReady;
     if (!status.canCreate) {
-      return '$base\n\n${l10n.routineLimitReached(status.limit)}';
+      return '$base\n\n${PlanUpgrade.routinesMessage(l10n, status.tier, status.limit)}';
     }
     if (status.remaining <= 2) {
       return '$base\n\n${l10n.routineLimitUsage(status.used, status.limit)}';
@@ -387,7 +394,11 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
       );
     } catch (e) {
       if (mounted) {
-        showRoutineSaveErrorSnackBar(context, e);
+        showRoutineSaveErrorSnackBar(
+          context,
+          e,
+          profile: ref.read(profileProvider).valueOrNull,
+        );
       }
     } finally {
       if (mounted) {
@@ -447,21 +458,22 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
           usageAsync.when(
             data: (status) {
               if (status.isUnlimited) return const SizedBox.shrink();
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                color: status.canSend
-                    ? context.accentColor.withValues(alpha: 0.12)
-                    : AppColors.error.withValues(alpha: 0.12),
-                child: Text(
-                  status.canSend
-                      ? l10n.coachDailyLimitRemaining(status.remaining, status.limit!)
-                      : l10n.coachDailyLimitReached(status.limit!),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: status.canSend ? context.accentColor : AppColors.error,
-                  ),
-                ),
+              final profile = ref.read(profileProvider).valueOrNull;
+              final atLimit = !status.canSend;
+              return PlanLimitBanner(
+                message: atLimit
+                    ? PlanUpgrade.coachMessage(
+                        l10n,
+                        profile?.subscriptionTier ?? SubscriptionTier.free,
+                        status.limit ?? 0,
+                      )
+                    : l10n.coachDailyLimitRemaining(
+                        status.remaining,
+                        status.limit!,
+                      ),
+                canUpgrade:
+                    atLimit && PlanUpgrade.canOfferStoreUpgrade(profile),
+                emphasized: atLimit,
               );
             },
             loading: () => const SizedBox.shrink(),

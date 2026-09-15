@@ -6,6 +6,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
 import '../../services/routine_limit_service.dart';
+import 'plan_upgrade.dart';
 
 final routineLimitServiceProvider = Provider((ref) => RoutineLimitService());
 
@@ -25,17 +26,37 @@ Future<bool> ensureCanCreateRoutine(BuildContext context, WidgetRef ref) async {
   final status = await ref.read(routineLimitStatusProvider.future);
   if (status.canCreate) return true;
   if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.routineLimitReached(status.limit))),
+    final profile = ref.read(profileProvider).valueOrNull;
+    PlanUpgrade.showLimitSnackBar(
+      context,
+      message: PlanUpgrade.routinesMessage(
+        context.l10n,
+        status.tier,
+        status.limit,
+      ),
+      canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
     );
   }
   return false;
 }
 
-void showRoutineSaveErrorSnackBar(BuildContext context, Object error) {
+void showRoutineSaveErrorSnackBar(
+  BuildContext context,
+  Object error, {
+  UserProfile? profile,
+}) {
   final l10n = context.l10n;
-  final message = error is RoutineLimitReachedException
-      ? l10n.routineLimitReached(error.limit)
-      : l10n.saveFailed('$error');
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  if (error is RoutineLimitReachedException) {
+    PlanUpgrade.showLimitSnackBar(
+      context,
+      message: PlanUpgrade.routinesMessage(l10n, error.tier, error.limit),
+      canUpgrade: profile != null
+          ? PlanUpgrade.canOfferStoreUpgrade(profile)
+          : PlanUpgrade.nextStoreTier(error.tier) != null,
+    );
+    return;
+  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(l10n.saveFailed('$error'))),
+  );
 }

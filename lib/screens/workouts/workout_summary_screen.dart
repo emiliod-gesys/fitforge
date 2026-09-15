@@ -250,7 +250,11 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
       await _applyRoutineActions();
     } catch (e) {
       if (mounted) {
-        showRoutineSaveErrorSnackBar(context, e);
+        showRoutineSaveErrorSnackBar(
+          context,
+          e,
+          profile: ref.read(profileProvider).valueOrNull,
+        );
       }
     }
 

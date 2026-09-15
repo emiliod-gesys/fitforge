@@ -1700,7 +1700,43 @@
   "subscriptionNotAvailable": "In-app purchases are not available on this device",
   "subscriptionUpgradeGymrat": "Upgrade to Gymrat",
   "subscriptionUpgradePro": "Upgrade to Gymrat Pro",
+  "subscriptionSeePlans": "See plans",
+  "planUpgradeCoachFree": "You've reached today's limit of {limit} AI Coach messages. Upgrade to Gymrat for 30 a day, or Gymrat Pro for unlimited.",
+  "@planUpgradeCoachFree": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "planUpgradeCoachGymrat": "You've reached today's limit of {limit} messages. Upgrade to Gymrat Pro for unlimited AI Coach.",
+  "@planUpgradeCoachGymrat": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "planUpgradeRoutinesFree": "You've reached your limit of {limit} routines. Upgrade to Gymrat for 20, or Gymrat Pro for 50.",
+  "@planUpgradeRoutinesFree": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "planUpgradeRoutinesGymrat": "You've reached your limit of {limit} routines. Upgrade to Gymrat Pro to save up to 50.",
+  "@planUpgradeRoutinesGymrat": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
+  "planUpgradeRoutinesMax": "You've reached your plan's maximum of {limit} saved routines.",
+  "@planUpgradeRoutinesMax": {
+    "placeholders": {
+      "limit": { "type": "int" }
+    }
+  },
   "subscriptionManageHint": "Subscriptions are managed in Google Play or the App Store. Restore recovers a plan already paid on this user.",
+  "subscriptionManageHintIos": "Subscriptions are purchased and managed in the App Store. Restore recovers a plan already paid on this Apple ID.",
+  "subscriptionManageHintAndroid": "Subscriptions are purchased and managed in Google Play. Restore recovers a plan already paid on this account.",
+  "subscriptionManageInStoreIos": "Manage in the App Store",
+  "subscriptionManageInStoreAndroid": "Manage in Google Play",
+  "subscriptionManageFailed": "Could not open the store.",
   "profileHubTitle": "Your space",
   "profileHubSubtitle": "Everything that shapes how you train and progress",
   "profileHubAccount": "Account",

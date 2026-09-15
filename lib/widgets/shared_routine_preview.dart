@@ -58,7 +58,11 @@ abstract final class SharedRoutinePreview {
                       } catch (e) {
                         setDialogState(() => isSaving = false);
                         if (context.mounted) {
-                          showRoutineSaveErrorSnackBar(context, e);
+                          showRoutineSaveErrorSnackBar(
+                            context,
+                            e,
+                            profile: ref.read(profileProvider).valueOrNull,
+                          );
                         }
                       }
                     },

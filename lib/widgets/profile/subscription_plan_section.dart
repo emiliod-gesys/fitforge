@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/subscription/billing_products.dart';
+import '../../core/subscription/store_subscriptions.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
@@ -58,6 +59,15 @@ class _SubscriptionPlanSectionState
     }
   }
 
+  Future<void> _openStoreSubscriptions() async {
+    final l10n = context.l10n;
+    final opened = await StoreSubscriptions.openManage();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.subscriptionManageFailed)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -91,7 +101,9 @@ class _SubscriptionPlanSectionState
         ),
         const SizedBox(height: 8),
         Text(
-          l10n.subscriptionManageHint,
+          StoreSubscriptions.isIos
+              ? l10n.subscriptionManageHintIos
+              : l10n.subscriptionManageHintAndroid,
           style: const TextStyle(color: AppColors.textMuted, height: 1.4),
         ),
         const SizedBox(height: 20),
@@ -104,7 +116,8 @@ class _SubscriptionPlanSectionState
                 FfListRow(
                   icon: Icons.workspace_premium_outlined,
                   title: l10n.subscriptionUpgradeGymrat,
-                  subtitle: '\$4.99${l10n.onboardingPlanPerMonth}',
+                  subtitle:
+                      '${BillingProducts.gymratMonthlyPrice}${l10n.onboardingPlanPerMonth}',
                   onTap: _busy
                       ? null
                       : () => _run(
@@ -119,7 +132,8 @@ class _SubscriptionPlanSectionState
                 FfListRow(
                   icon: Icons.star_outline,
                   title: l10n.subscriptionUpgradePro,
-                  subtitle: '\$9.99${l10n.onboardingPlanPerMonth}',
+                  subtitle:
+                      '${BillingProducts.gymratProMonthlyPrice}${l10n.onboardingPlanPerMonth}',
                   onTap: _busy
                       ? null
                       : () => _run(
@@ -137,6 +151,14 @@ class _SubscriptionPlanSectionState
                     : () =>
                         _run(() => ref.read(billingServiceProvider).restore()),
               ),
+              if (StoreSubscriptions.canOpenManage)
+                FfListRow(
+                  icon: Icons.storefront_outlined,
+                  title: StoreSubscriptions.isIos
+                      ? l10n.subscriptionManageInStoreIos
+                      : l10n.subscriptionManageInStoreAndroid,
+                  onTap: _busy ? null : _openStoreSubscriptions,
+                ),
             ],
           ),
         ),

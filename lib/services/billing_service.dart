@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
 import '../core/subscription/billing_products.dart';
 import '../models/profile.dart';
@@ -55,6 +56,7 @@ class BillingService {
     if (!isSupported) return;
     ensureListening();
     await _syncAndroidPurchases();
+    await _syncIosPurchases();
   }
 
   Future<BillingFlowResult> purchase(SubscriptionTier tier) async {
@@ -84,7 +86,7 @@ class BillingService {
     final completer = Completer<BillingFlowResult>();
     _pending[productId] = completer;
     final started = await InAppPurchase.instance.buyNonConsumable(
-      purchaseParam: _purchaseParam(response.productDetails.first),
+      purchaseParam: await _purchaseParam(response.productDetails.first),
     );
     if (!started) {
       _pending.remove(productId);
@@ -107,6 +109,8 @@ class BillingService {
     await InAppPurchase.instance.restorePurchases();
     if (defaultTargetPlatform == TargetPlatform.android) {
       await _syncAndroidPurchases();
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      await _syncIosPurchases(restore: false);
     }
     await Future<void>.delayed(const Duration(milliseconds: 900));
     final after = await _profileService.getProfile();
@@ -119,12 +123,19 @@ class BillingService {
     return const BillingFlowResult(BillingOutcome.none);
   }
 
-  PurchaseParam _purchaseParam(ProductDetails details) {
+  Future<PurchaseParam> _purchaseParam(ProductDetails details) async {
     if (defaultTargetPlatform == TargetPlatform.android &&
         details is GooglePlayProductDetails) {
       return GooglePlayPurchaseParam(
         productDetails: details,
         offerToken: details.offerToken,
+      );
+    }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final profile = await _profileService.getProfile();
+      return AppStorePurchaseParam(
+        productDetails: details,
+        applicationUserName: profile?.id,
       );
     }
     return PurchaseParam(productDetails: details);
@@ -138,6 +149,18 @@ class BillingService {
       final response = await addition.queryPastPurchases();
       if (response.error != null) return;
       await _onPurchases(response.pastPurchases);
+    } catch (_) {}
+  }
+
+  Future<void> _syncIosPurchases({bool restore = true}) async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      final addition = InAppPurchase.instance
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      await addition.sync();
+      if (restore) {
+        await InAppPurchase.instance.restorePurchases();
+      }
     } catch (_) {}
   }
 

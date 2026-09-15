@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/runner/runner_standards.dart';
+import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../services/routine_service.dart';
@@ -14,6 +16,7 @@ import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
 import '../../widgets/ff/ff_empty_state.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+import '../../widgets/plan_limit_banner.dart';
 import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
 import '../../widgets/train/train_start_sheet.dart';
@@ -85,11 +88,17 @@ abstract final class RoutineListActions {
                 final canSend = await usageService.canSendMessage(profile, profileService);
                 if (!canSend) {
                   if (!context.mounted) return;
-                  final status = await usageService.getStatus(profile, profileService);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.coachDailyLimitReached(status.limit ?? 0)),
+                  final status =
+                      await usageService.getStatus(profile, profileService);
+                  if (!context.mounted) return;
+                  PlanUpgrade.showLimitSnackBar(
+                    context,
+                    message: PlanUpgrade.coachMessage(
+                      l10n,
+                      profile?.subscriptionTier ?? SubscriptionTier.free,
+                      status.limit ?? 0,
                     ),
+                    canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
                   );
                   return;
                 }
@@ -186,7 +195,11 @@ abstract final class RoutineListActions {
                       } catch (e) {
                         setDialogState(() => isSaving = false);
                         if (context.mounted) {
-                          showRoutineSaveErrorSnackBar(context, e);
+                          showRoutineSaveErrorSnackBar(
+                            context,
+                            e,
+                            profile: ref.read(profileProvider).valueOrNull,
+                          );
                         }
                       }
                     },
@@ -221,17 +234,27 @@ class RoutinesTab extends ConsumerWidget {
       data: (routines) {
         final limitStatus = limitAsync.valueOrNull;
         final atLimit = limitStatus != null && !limitStatus.canCreate;
+        final profile = ref.watch(profileProvider).valueOrNull;
+        final canUpgrade = PlanUpgrade.canOfferStoreUpgrade(profile);
 
         if (routines.isEmpty) {
           return FfEmptyState(
             icon: Icons.fitness_center_rounded,
             title: l10n.emptyRoutinesTitle,
-            subtitle: limitStatus != null
-                ? '${l10n.emptyRoutinesSubtitle}\n${l10n.routineLimitUsage(limitStatus.used, limitStatus.limit)}'
-                : l10n.emptyRoutinesSubtitle,
-            actionLabel: atLimit ? null : l10n.emptyRoutinesAction,
+            subtitle: limitStatus != null && atLimit
+                ? PlanUpgrade.routinesMessage(
+                    l10n,
+                    limitStatus.tier,
+                    limitStatus.limit,
+                  )
+                : limitStatus != null
+                    ? '${l10n.emptyRoutinesSubtitle}\n${l10n.routineLimitUsage(limitStatus.used, limitStatus.limit)}'
+                    : l10n.emptyRoutinesSubtitle,
+            actionLabel: atLimit
+                ? (canUpgrade ? l10n.subscriptionSeePlans : null)
+                : l10n.emptyRoutinesAction,
             onAction: atLimit
-                ? null
+                ? (canUpgrade ? () => PlanUpgrade.openPlan(context) : null)
                 : () async {
                     if (await ensureCanCreateRoutine(context, ref)) {
                       if (context.mounted) context.push('/routines/new');
@@ -266,21 +289,45 @@ class RoutinesTab extends ConsumerWidget {
             if (limitStatus != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  l10n.routineLimitUsage(limitStatus.used, limitStatus.limit),
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                ),
+                child: atLimit
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: PlanLimitBanner(
+                          message: PlanUpgrade.routinesMessage(
+                            l10n,
+                            limitStatus.tier,
+                            limitStatus.limit,
+                          ),
+                          canUpgrade: canUpgrade,
+                          emphasized: true,
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                        ),
+                      )
+                    : Text(
+                        l10n.routineLimitUsage(
+                          limitStatus.used,
+                          limitStatus.limit,
+                        ),
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 13,
+                        ),
+                      ),
               ),
             OutlinedButton.icon(
               onPressed: atLimit
-                  ? null
+                  ? (canUpgrade ? () => PlanUpgrade.openPlan(context) : null)
                   : () async {
                       if (await ensureCanCreateRoutine(context, ref)) {
                         if (context.mounted) context.push('/routines/new');
                       }
                     },
-              icon: const Icon(Icons.add),
-              label: Text(l10n.newRoutine),
+              icon: Icon(atLimit ? Icons.workspace_premium_outlined : Icons.add),
+              label: Text(
+                atLimit && canUpgrade
+                    ? l10n.subscriptionSeePlans
+                    : l10n.newRoutine,
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: Size.fromHeight(48),
                 foregroundColor: context.accentColor,
@@ -565,7 +612,13 @@ class _RoutineCard extends ConsumerWidget {
           context.push('/routines/${created.id}/edit');
         }
       } catch (e) {
-        if (context.mounted) showRoutineSaveErrorSnackBar(context, e);
+        if (context.mounted) {
+          showRoutineSaveErrorSnackBar(
+            context,
+            e,
+            profile: ref.read(profileProvider).valueOrNull,
+          );
+        }
       }
     } else if (value == 'share') {
       await RoutineShareFriendSheet.show(context, routine);

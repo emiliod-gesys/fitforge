@@ -4663,8 +4663,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionUpgradePro => 'Upgrade to Gymrat Pro';
 
   @override
+  String get subscriptionSeePlans => 'See plans';
+
+  @override
+  String planUpgradeCoachFree(int limit) {
+    return 'You\'ve reached today\'s limit of $limit AI Coach messages. Upgrade to Gymrat for 30 a day, or Gymrat Pro for unlimited.';
+  }
+
+  @override
+  String planUpgradeCoachGymrat(int limit) {
+    return 'You\'ve reached today\'s limit of $limit messages. Upgrade to Gymrat Pro for unlimited AI Coach.';
+  }
+
+  @override
+  String planUpgradeRoutinesFree(int limit) {
+    return 'You\'ve reached your limit of $limit routines. Upgrade to Gymrat for 20, or Gymrat Pro for 50.';
+  }
+
+  @override
+  String planUpgradeRoutinesGymrat(int limit) {
+    return 'You\'ve reached your limit of $limit routines. Upgrade to Gymrat Pro to save up to 50.';
+  }
+
+  @override
+  String planUpgradeRoutinesMax(int limit) {
+    return 'You\'ve reached your plan\'s maximum of $limit saved routines.';
+  }
+
+  @override
   String get subscriptionManageHint =>
       'Subscriptions are managed in Google Play or the App Store. Restore recovers a plan already paid on this user.';
+
+  @override
+  String get subscriptionManageHintIos =>
+      'Subscriptions are purchased and managed in the App Store. Restore recovers a plan already paid on this Apple ID.';
+
+  @override
+  String get subscriptionManageHintAndroid =>
+      'Subscriptions are purchased and managed in Google Play. Restore recovers a plan already paid on this account.';
+
+  @override
+  String get subscriptionManageInStoreIos => 'Manage in the App Store';
+
+  @override
+  String get subscriptionManageInStoreAndroid => 'Manage in Google Play';
+
+  @override
+  String get subscriptionManageFailed => 'Could not open the store.';
 
   @override
   String get profileHubTitle => 'Your space';
