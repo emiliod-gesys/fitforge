@@ -4915,7 +4915,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tutorialsAdvancedSubtitle =>
-      'Rutinas, superseries y cómo registrar o ajustar comidas';
+      'Rutinas, superseries, el entreno en vivo y cómo registrar comidas';
 
   @override
   String get tutorialRoutinesTitle => 'Crear una rutina';
@@ -5048,6 +5048,94 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tutorialFoodLogModesBody =>
       'Rápido describe el plato con IA. Foto y código de barras están en planes de pago. Manual es por macros.';
+
+  @override
+  String get tutorialWorkoutSessionTitle => 'Durante el entreno';
+
+  @override
+  String get tutorialWorkoutSessionSubtitle =>
+      'Empieza desde una rutina y edita la sesión';
+
+  @override
+  String get tutorialWorkoutSessionNeedsRoutine =>
+      'Crea al menos una rutina con ejercicios antes de este tutorial';
+
+  @override
+  String get tutorialWorkoutSessionStartTitle => 'Empieza desde una rutina';
+
+  @override
+  String get tutorialWorkoutSessionStartBody =>
+      'Desde aquí eliges una rutina ya creada y lanzas el entreno. Si no hay uno en curso, abrimos una sesión de práctica y la cancelamos al terminar el tutorial.';
+
+  @override
+  String get tutorialWorkoutSessionAddTitle => 'Añade ejercicios';
+
+  @override
+  String get tutorialWorkoutSessionAddBody =>
+      'Si en el momento quieres algo que no estaba en la rutina, añádelo aquí. No cambia la rutina guardada.';
+
+  @override
+  String get tutorialWorkoutSessionSwapTitle => 'Intercambia un ejercicio';
+
+  @override
+  String get tutorialWorkoutSessionSwapBody =>
+      'El menú ⋯ permite cambiarlo por uno similar o quitarlo. Solo afecta a este entreno.';
+
+  @override
+  String get tutorialWorkoutSessionReorderTitle => 'Cambia el orden';
+
+  @override
+  String get tutorialWorkoutSessionReorderBody =>
+      'Arrastra el asa para reordenar. El orden de esta sesión no modifica la rutina.';
+
+  @override
+  String get tutorialWorkoutSessionRestTitle => 'Tiempo de descanso';
+
+  @override
+  String get tutorialWorkoutSessionRestBody =>
+      'Aquí eliges cuánto descansar entre series. El temporizador arranca al completar una serie.';
+
+  @override
+  String get tutorialWorkoutSessionAddSetTitle => 'Añade series';
+
+  @override
+  String get tutorialWorkoutSessionAddSetBody =>
+      'Si necesitas una serie extra, pulsa aquí. Las series de más solo valen para este entreno.';
+
+  @override
+  String get tutorialWorkoutSessionRemoveSetTitle => 'Quita una serie';
+
+  @override
+  String get tutorialWorkoutSessionRemoveSetBody =>
+      'Desliza la serie hacia la izquierda para eliminarla si te pasaste o no la vas a hacer.';
+
+  @override
+  String get tutorialWorkoutDemoName => 'Entreno de práctica';
+
+  @override
+  String tutorialPendingNudgeLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tutoriales pendientes',
+      one: '1 tutorial pendiente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tutorialPendingNudgeSheetTitle => 'Tutoriales pendientes';
+
+  @override
+  String get tutorialPendingNudgeSheetBody =>
+      'Puedes marcarlos todos como hechos o te recordamos este aviso mañana.';
+
+  @override
+  String get tutorialPendingNudgeMarkAll =>
+      'Marcar todos los tutoriales como terminados';
+
+  @override
+  String get tutorialPendingNudgeRemindLater => 'Recordarme más tarde';
 
   @override
   String get profileHubOfflineSubtitle => 'Catálogo de ejercicios sin conexión';

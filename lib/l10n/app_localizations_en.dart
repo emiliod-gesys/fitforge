@@ -4872,7 +4872,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialsAdvancedSubtitle =>
-      'Build routines, supersets, and log or adjust meals';
+      'Routines, supersets, the live workout, and how to log meals';
 
   @override
   String get tutorialRoutinesTitle => 'Create a routine';
@@ -5004,6 +5004,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tutorialFoodLogModesBody =>
       'Quick add describes the plate with AI. Photo and barcode are on paid plans. Manual is by macros.';
+
+  @override
+  String get tutorialWorkoutSessionTitle => 'During the workout';
+
+  @override
+  String get tutorialWorkoutSessionSubtitle =>
+      'Start from a routine and edit the session';
+
+  @override
+  String get tutorialWorkoutSessionNeedsRoutine =>
+      'Create at least one routine with exercises before this tutorial';
+
+  @override
+  String get tutorialWorkoutSessionStartTitle => 'Start from a routine';
+
+  @override
+  String get tutorialWorkoutSessionStartBody =>
+      'From here you pick a routine you already created and launch the workout. If none is in progress, we open a practice session and cancel it when the tutorial ends.';
+
+  @override
+  String get tutorialWorkoutSessionAddTitle => 'Add exercises';
+
+  @override
+  String get tutorialWorkoutSessionAddBody =>
+      'If you want something that wasn’t in the routine, add it here. It doesn’t change the saved routine.';
+
+  @override
+  String get tutorialWorkoutSessionSwapTitle => 'Swap an exercise';
+
+  @override
+  String get tutorialWorkoutSessionSwapBody =>
+      'The ⋯ menu lets you swap it for a similar one or remove it. That only affects this session.';
+
+  @override
+  String get tutorialWorkoutSessionReorderTitle => 'Change the order';
+
+  @override
+  String get tutorialWorkoutSessionReorderBody =>
+      'Drag the handle to reorder. This session’s order doesn’t change the routine.';
+
+  @override
+  String get tutorialWorkoutSessionRestTitle => 'Rest time';
+
+  @override
+  String get tutorialWorkoutSessionRestBody =>
+      'This is where you choose how long to rest between sets. The timer starts when you complete a set.';
+
+  @override
+  String get tutorialWorkoutSessionAddSetTitle => 'Add sets';
+
+  @override
+  String get tutorialWorkoutSessionAddSetBody =>
+      'Need an extra set? Tap here. Extra sets only apply to this workout.';
+
+  @override
+  String get tutorialWorkoutSessionRemoveSetTitle => 'Remove a set';
+
+  @override
+  String get tutorialWorkoutSessionRemoveSetBody =>
+      'Swipe the set to the left to delete it if you added too many or won’t do it.';
+
+  @override
+  String get tutorialWorkoutDemoName => 'Practice workout';
+
+  @override
+  String tutorialPendingNudgeLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending tutorials',
+      one: '1 pending tutorial',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tutorialPendingNudgeSheetTitle => 'Pending tutorials';
+
+  @override
+  String get tutorialPendingNudgeSheetBody =>
+      'Mark them all as done, or we’ll show this reminder again tomorrow.';
+
+  @override
+  String get tutorialPendingNudgeMarkAll => 'Mark all tutorials as completed';
+
+  @override
+  String get tutorialPendingNudgeRemindLater => 'Remind me later';
 
   @override
   String get profileHubOfflineSubtitle => 'Offline exercise catalog';

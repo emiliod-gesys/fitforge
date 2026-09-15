@@ -24,37 +24,58 @@ class ProgressStatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.55,
+    const gap = 10.0;
+    return Column(
       children: [
-        _StatTile(
-          icon: Icons.fitness_center,
-          label: l10n.progressStatsMonthlyWorkouts,
-          value: '$monthlyWorkouts',
-          accent: context.accentColor,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.fitness_center,
+                  label: l10n.progressStatsMonthlyWorkouts,
+                  value: '$monthlyWorkouts',
+                  accent: context.accentColor,
+                ),
+              ),
+              const SizedBox(width: gap),
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.trending_up,
+                  label: l10n.progressStatsMonthlyVolume,
+                  value:
+                      UnitConverter.formatVolume(monthlyVolumeKg, unitSystem),
+                  accent: const Color(0xFF5BB8F0),
+                ),
+              ),
+            ],
+          ),
         ),
-        _StatTile(
-          icon: Icons.trending_up,
-          label: l10n.progressStatsMonthlyVolume,
-          value: UnitConverter.formatVolume(monthlyVolumeKg, unitSystem),
-          accent: const Color(0xFF5BB8F0),
-        ),
-        _StatTile(
-          icon: Icons.emoji_events_outlined,
-          label: l10n.progressStatsMonthlyPrs,
-          value: '$monthlyPrCount',
-          accent: Color(0xFFFFD54F),
-        ),
-        _StatTile(
-          icon: Icons.local_fire_department,
-          label: l10n.streakLabel,
-          value: l10n.progressStreakWeeks(streakWeeks),
-          accent: context.accentDark,
+        const SizedBox(height: gap),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.emoji_events_outlined,
+                  label: l10n.progressStatsMonthlyPrs,
+                  value: '$monthlyPrCount',
+                  accent: const Color(0xFFFFD54F),
+                ),
+              ),
+              const SizedBox(width: gap),
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.local_fire_department,
+                  label: l10n.streakLabel,
+                  value: l10n.progressStreakWeeks(streakWeeks),
+                  accent: context.accentDark,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -87,7 +108,7 @@ class _StatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: accent, size: 20),
-          const Spacer(),
+          const SizedBox(height: 12),
           Text(
             value,
             maxLines: 1,

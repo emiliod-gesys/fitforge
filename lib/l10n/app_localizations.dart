@@ -8370,7 +8370,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialsAdvancedSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Rutinas, superseries y cómo registrar o ajustar comidas'**
+  /// **'Rutinas, superseries, el entreno en vivo y cómo registrar comidas'**
   String get tutorialsAdvancedSubtitle;
 
   /// No description provided for @tutorialRoutinesTitle.
@@ -8600,6 +8600,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Rápido describe el plato con IA. Foto y código de barras están en planes de pago. Manual es por macros.'**
   String get tutorialFoodLogModesBody;
+
+  /// No description provided for @tutorialWorkoutSessionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Durante el entreno'**
+  String get tutorialWorkoutSessionTitle;
+
+  /// No description provided for @tutorialWorkoutSessionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza desde una rutina y edita la sesión'**
+  String get tutorialWorkoutSessionSubtitle;
+
+  /// No description provided for @tutorialWorkoutSessionNeedsRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea al menos una rutina con ejercicios antes de este tutorial'**
+  String get tutorialWorkoutSessionNeedsRoutine;
+
+  /// No description provided for @tutorialWorkoutSessionStartTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza desde una rutina'**
+  String get tutorialWorkoutSessionStartTitle;
+
+  /// No description provided for @tutorialWorkoutSessionStartBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Desde aquí eliges una rutina ya creada y lanzas el entreno. Si no hay uno en curso, abrimos una sesión de práctica y la cancelamos al terminar el tutorial.'**
+  String get tutorialWorkoutSessionStartBody;
+
+  /// No description provided for @tutorialWorkoutSessionAddTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade ejercicios'**
+  String get tutorialWorkoutSessionAddTitle;
+
+  /// No description provided for @tutorialWorkoutSessionAddBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Si en el momento quieres algo que no estaba en la rutina, añádelo aquí. No cambia la rutina guardada.'**
+  String get tutorialWorkoutSessionAddBody;
+
+  /// No description provided for @tutorialWorkoutSessionSwapTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Intercambia un ejercicio'**
+  String get tutorialWorkoutSessionSwapTitle;
+
+  /// No description provided for @tutorialWorkoutSessionSwapBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El menú ⋯ permite cambiarlo por uno similar o quitarlo. Solo afecta a este entreno.'**
+  String get tutorialWorkoutSessionSwapBody;
+
+  /// No description provided for @tutorialWorkoutSessionReorderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambia el orden'**
+  String get tutorialWorkoutSessionReorderTitle;
+
+  /// No description provided for @tutorialWorkoutSessionReorderBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrastra el asa para reordenar. El orden de esta sesión no modifica la rutina.'**
+  String get tutorialWorkoutSessionReorderBody;
+
+  /// No description provided for @tutorialWorkoutSessionRestTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo de descanso'**
+  String get tutorialWorkoutSessionRestTitle;
+
+  /// No description provided for @tutorialWorkoutSessionRestBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí eliges cuánto descansar entre series. El temporizador arranca al completar una serie.'**
+  String get tutorialWorkoutSessionRestBody;
+
+  /// No description provided for @tutorialWorkoutSessionAddSetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade series'**
+  String get tutorialWorkoutSessionAddSetTitle;
+
+  /// No description provided for @tutorialWorkoutSessionAddSetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Si necesitas una serie extra, pulsa aquí. Las series de más solo valen para este entreno.'**
+  String get tutorialWorkoutSessionAddSetBody;
+
+  /// No description provided for @tutorialWorkoutSessionRemoveSetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Quita una serie'**
+  String get tutorialWorkoutSessionRemoveSetTitle;
+
+  /// No description provided for @tutorialWorkoutSessionRemoveSetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Desliza la serie hacia la izquierda para eliminarla si te pasaste o no la vas a hacer.'**
+  String get tutorialWorkoutSessionRemoveSetBody;
+
+  /// No description provided for @tutorialWorkoutDemoName.
+  ///
+  /// In es, this message translates to:
+  /// **'Entreno de práctica'**
+  String get tutorialWorkoutDemoName;
+
+  /// No description provided for @tutorialPendingNudgeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one{1 tutorial pendiente} other{{count} tutoriales pendientes}}'**
+  String tutorialPendingNudgeLabel(int count);
+
+  /// No description provided for @tutorialPendingNudgeSheetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tutoriales pendientes'**
+  String get tutorialPendingNudgeSheetTitle;
+
+  /// No description provided for @tutorialPendingNudgeSheetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes marcarlos todos como hechos o te recordamos este aviso mañana.'**
+  String get tutorialPendingNudgeSheetBody;
+
+  /// No description provided for @tutorialPendingNudgeMarkAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar todos los tutoriales como terminados'**
+  String get tutorialPendingNudgeMarkAll;
+
+  /// No description provided for @tutorialPendingNudgeRemindLater.
+  ///
+  /// In es, this message translates to:
+  /// **'Recordarme más tarde'**
+  String get tutorialPendingNudgeRemindLater;
 
   /// No description provided for @profileHubOfflineSubtitle.
   ///

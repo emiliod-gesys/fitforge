@@ -7,7 +7,9 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/tutorials/tutorial_targets.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../providers/tutorial_controller.dart';
 import '../../widgets/fitforge_app_bar.dart';
+import '../../widgets/tutorial_pending_nudge.dart';
 import '../routines/routine_list_screen.dart';
 import '../workouts/workout_list_screen.dart';
 
@@ -69,6 +71,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final showNudge = ref.watch(tutorialControllerProvider).showPendingNudge;
 
     return Scaffold(
       appBar: FitForgeAppBar(
@@ -102,7 +105,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
           ],
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
+          preferredSize: Size.fromHeight(showNudge ? 112 : 56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppTokens.space16,
@@ -110,27 +113,40 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
               AppTokens.space16,
               AppTokens.space8,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.cardElevated,
-                borderRadius: AppTokens.borderRadiusMd,
-                border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  color: context.accentColor.withValues(alpha: 0.18),
-                  borderRadius: AppTokens.borderRadiusSm,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.cardElevated,
+                    borderRadius: AppTokens.borderRadiusMd,
+                    border: Border.all(
+                        color: AppColors.border.withValues(alpha: 0.7)),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      color: context.accentColor.withValues(alpha: 0.18),
+                      borderRadius: AppTokens.borderRadiusSm,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelColor: context.accentColor,
+                    unselectedLabelColor: AppColors.textMuted,
+                    tabs: [
+                      Tab(text: l10n.trainTabToday),
+                      Tab(
+                        key: TutorialTargets.trainRoutinesTabKey,
+                        text: l10n.trainTabRoutines,
+                      ),
+                    ],
+                  ),
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                labelColor: context.accentColor,
-                unselectedLabelColor: AppColors.textMuted,
-                tabs: [
-                  Tab(text: l10n.trainTabToday),
-                  Tab(key: TutorialTargets.trainRoutinesTabKey, text: l10n.trainTabRoutines),
+                if (showNudge) ...[
+                  const SizedBox(height: 10),
+                  const TutorialPendingNudge(),
                 ],
-              ),
+              ],
             ),
           ),
         ),

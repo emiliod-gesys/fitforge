@@ -66,12 +66,16 @@ import '../../widgets/similar_exercise_picker_sheet.dart';
 import '../../widgets/exercise_load_controls.dart';
 import '../../widgets/exercise_report_sheet.dart';
 import '../../core/theme/app_accent.dart';
+import '../../core/tutorials/tutorial_catalog.dart';
+import '../../core/tutorials/tutorial_targets.dart';
+import '../../providers/tutorial_controller.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
 
   @override
-  ConsumerState<ActiveWorkoutScreen> createState() => _ActiveWorkoutScreenState();
+  ConsumerState<ActiveWorkoutScreen> createState() =>
+      _ActiveWorkoutScreenState();
 }
 
 class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
@@ -94,8 +98,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, bool> _perArmOverrides = {};
   String? _focusSetId;
   bool _perArmSeeded = false;
+
   /// Unidad por ejercicio en la sesión (`kg`/`lb`); no persiste ni cambia el perfil.
   final Map<String, String> _unitOverrides = {};
+
   /// Peso planeado de cada serie antes de un ajuste por RIR de la anterior.
   final Map<String, double> _rirWeightBaselines = {};
   bool _isHyroxWorkout = false;
@@ -119,14 +125,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     final routineId = workout.routineId;
     if (routineId == null) return;
 
-    final routine = await ref.read(routineServiceProvider).getRoutineById(routineId);
+    final routine =
+        await ref.read(routineServiceProvider).getRoutineById(routineId);
     if (!mounted || routine == null) return;
 
     setState(() {
       _isHyroxWorkout = routine.isHyroxSystem;
       _hyroxLevel = routine.hyroxLevel;
-      _hyroxRoutineExercises =
-          routine.isHyroxSystem ? List<RoutineExercise>.from(routine.exercises) : const [];
+      _hyroxRoutineExercises = routine.isHyroxSystem
+          ? List<RoutineExercise>.from(routine.exercises)
+          : const [];
       _isRunnerWorkout = routine.isRunnerSystem;
       _runnerType = routine.runnerType;
       _hyroxTargetMetersByExerciseId
@@ -146,7 +154,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   bool _workoutHasCompletedCardio(Workout workout) {
     return workout.exercises.any(
-      (ex) => ex.sets.any((s) => s.completed && s.isCardio && (s.durationSeconds ?? 0) >= 60),
+      (ex) => ex.sets.any(
+          (s) => s.completed && s.isCardio && (s.durationSeconds ?? 0) >= 60),
     );
   }
 
@@ -180,7 +189,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       runnerSurface: runnerSurface ?? workout.runnerSurface,
       runnerRoute: runnerRoute ?? workout.runnerRoute,
       runnerSplits: runnerSplits ?? workout.runnerSplits,
-      runnerAvgPaceSecPerKm: runnerAvgPaceSecPerKm ?? workout.runnerAvgPaceSecPerKm,
+      runnerAvgPaceSecPerKm:
+          runnerAvgPaceSecPerKm ?? workout.runnerAvgPaceSecPerKm,
       runnerElevationGainMeters:
           runnerElevationGainMeters ?? workout.runnerElevationGainMeters,
       runnerElevationLossMeters:
@@ -196,9 +206,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     if (_setOverrides.isEmpty && _insertedSets.isEmpty) return workout;
 
     final exercises = workout.exercises.map((exercise) {
-      var sets = exercise.sets
-          .map((set) => _setOverrides[set.id] ?? set)
-          .toList();
+      var sets =
+          exercise.sets.map((set) => _setOverrides[set.id] ?? set).toList();
       final pending = _insertedSets[exercise.id];
       if (pending != null) {
         for (final set in pending) {
@@ -248,7 +257,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
-  Future<void> _refreshActiveWorkoutAfterSet(String setId, {String? exerciseId}) async {
+  Future<void> _refreshActiveWorkoutAfterSet(String setId,
+      {String? exerciseId}) async {
     final generation = ++_workoutSyncGeneration;
     ref.invalidate(activeWorkoutProvider);
     try {
@@ -334,7 +344,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         if (_showRestTimer && delta != null) {
           _restTimerController.adjust(delta);
           setState(() {
-            _restEndsAt = (_restEndsAt ?? DateTime.now()).add(Duration(seconds: delta));
+            _restEndsAt =
+                (_restEndsAt ?? DateTime.now()).add(Duration(seconds: delta));
           });
           await _publishWatchSession(workout);
         }
@@ -396,8 +407,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   void _pruneRemovedIds(Workout? workout) {
     if (workout == null) return;
     final exerciseIds = workout.exercises.map((e) => e.id).toSet();
-    final setIds = workout.exercises.expand((e) => e.sets).map((s) => s.id).toSet();
-    final staleExercises = _removedExerciseIds.any((id) => !exerciseIds.contains(id));
+    final setIds =
+        workout.exercises.expand((e) => e.sets).map((s) => s.id).toSet();
+    final staleExercises =
+        _removedExerciseIds.any((id) => !exerciseIds.contains(id));
     final staleSets = _removedSetIds.any((id) => !setIds.contains(id));
     if (!staleExercises && !staleSets) return;
 
@@ -526,7 +539,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   }
 
   List<WorkoutSet> _sortedSets(WorkoutExercise exercise) {
-    return [...exercise.sets]..sort((a, b) => a.setNumber.compareTo(b.setNumber));
+    return [...exercise.sets]
+      ..sort((a, b) => a.setNumber.compareTo(b.setNumber));
   }
 
   void _clampExerciseIndex(int total) {
@@ -610,7 +624,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         durationSeconds: elapsed,
         distanceMeters: snapshot.distanceMeters,
       );
-      await ref.read(workoutServiceProvider).logSet(exercise.id, set, workoutId: workout.id);
+      await ref
+          .read(workoutServiceProvider)
+          .logSet(exercise.id, set, workoutId: workout.id);
 
       await ref.read(workoutServiceProvider).saveRunnerSession(
             workoutId: workout.id,
@@ -664,7 +680,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         distanceMeters: result.distanceMeters,
         inclinePercent: result.inclinePercent,
       );
-      await ref.read(workoutServiceProvider).logSet(exercise.id, set, workoutId: workout.id);
+      await ref
+          .read(workoutServiceProvider)
+          .logSet(exercise.id, set, workoutId: workout.id);
 
       await ref.read(workoutServiceProvider).saveRunnerSession(
             workoutId: workout.id,
@@ -690,7 +708,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
-  Future<void> _completeWorkout(Workout workout, {bool skipCompletingFlag = false}) async {
+  Future<void> _completeWorkout(Workout workout,
+      {bool skipCompletingFlag = false}) async {
     if (_completing && !skipCompletingFlag) return;
     if (!skipCompletingFlag) {
       _freezeWorkoutTimers();
@@ -744,7 +763,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       List<DateTime> completedDates = [];
       if (isOnline) {
         try {
-          completedDates = await ref.read(workoutServiceProvider).getCompletedWorkoutTimestamps();
+          completedDates = await ref
+              .read(workoutServiceProvider)
+              .getCompletedWorkoutTimestamps();
         } catch (_) {}
       }
       final streakWeeks = WorkoutStreakCalculator.weeklyStreak([
@@ -774,18 +795,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               .getMilestoneTotals(profile: profile);
         } catch (_) {}
         try {
-          personalRecordsBefore = await ref.read(personalRecordsProvider.future);
+          personalRecordsBefore =
+              await ref.read(personalRecordsProvider.future);
         } catch (_) {}
       }
 
-      final completionValidation = await ref.read(workoutServiceProvider).completeWorkout(
-            effectiveWorkout.id,
-            durationMinutes: duration,
-            totalVolume: volume,
-            activeCaloriesKcal: calorieEstimate.caloriesKcal,
-            startedAt: startAt,
-            completedAt: endAt,
-          );
+      final completionValidation =
+          await ref.read(workoutServiceProvider).completeWorkout(
+                effectiveWorkout.id,
+                durationMinutes: duration,
+                totalVolume: volume,
+                activeCaloriesKcal: calorieEstimate.caloriesKcal,
+                startedAt: startAt,
+                completedAt: endAt,
+              );
 
       // Export a Apple Health / Health Connect (no bloquea el flujo si falla).
       unawaited(
@@ -825,7 +848,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
             }).length,
           );
 
-      HyroxValidationResult? hyroxValidation = completionValidation?.hyroxValidation;
+      HyroxValidationResult? hyroxValidation =
+          completionValidation?.hyroxValidation;
       if (hyroxValidation == null && _isHyroxWorkout && _hyroxLevel != null) {
         hyroxValidation = HyroxValidator.validate(
           workout: effectiveWorkout,
@@ -833,7 +857,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           gender: profile?.gender,
           startedAt: startAt,
           completedAt: endAt,
-          expectations: HyroxValidator.expectationsFromRoutineExercises(_hyroxRoutineExercises),
+          expectations: HyroxValidator.expectationsFromRoutineExercises(
+              _hyroxRoutineExercises),
         );
       }
 
@@ -847,7 +872,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                 workoutId: effectiveWorkout.id,
                 totalVolumeKg: volume,
                 streakWeeks: streakWeeks,
-                runDistanceMeters: WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
+                runDistanceMeters:
+                    WorkoutXpUtils.completedRunDistanceMeters(effectiveWorkout),
                 isRunnerRoutine: _isRunnerWorkout,
               );
         } catch (_) {}
@@ -876,10 +902,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       Workout? previous;
       if (isOnline) {
         try {
-          previous = await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
-                routineId: effectiveWorkout.routineId,
-                excludeWorkoutId: effectiveWorkout.id,
-              );
+          previous =
+              await ref.read(workoutServiceProvider).getPreviousRoutineWorkout(
+                    routineId: effectiveWorkout.routineId,
+                    excludeWorkoutId: effectiveWorkout.id,
+                  );
         } catch (_) {}
       }
       final newPersonalRecords = SessionPersonalRecords.detect(
@@ -915,7 +942,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         );
       }
       ref.read(pendingWorkoutSummaryProvider.notifier).state = summary;
-      ref.read(workoutSummarySessionIdProvider.notifier).state = summary.workout.id;
+      ref.read(workoutSummarySessionIdProvider.notifier).state =
+          summary.workout.id;
       context.pushReplacement('/workout/summary', extra: summary);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _invalidateWorkoutProviders();
@@ -1059,7 +1087,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   Future<void> _removeExercise(WorkoutExercise exercise) async {
     try {
-      await ref.read(workoutServiceProvider).removeExerciseFromWorkout(exercise.id);
+      await ref
+          .read(workoutServiceProvider)
+          .removeExerciseFromWorkout(exercise.id);
       await _syncActiveWorkout();
       if (mounted) {
         setState(() {
@@ -1149,7 +1179,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     });
   }
 
-  bool get _skipIdleGuard => _isRunnerWorkout || _isHyroxWorkout;
+  bool get _skipIdleGuard =>
+      _isRunnerWorkout ||
+      _isHyroxWorkout ||
+      ref.read(tutorialControllerProvider).activeTourId ==
+          TutorialCatalog.workoutSession;
 
   void _checkIdlePause() {
     if (!mounted || _skipIdleGuard || _completing) return;
@@ -1191,12 +1225,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         padding: const EdgeInsets.fromLTRB(16, 4, 8, 8),
         child: Row(
           children: [
-            const Icon(Icons.pause_circle_outline, color: AppColors.warning, size: 22),
+            const Icon(Icons.pause_circle_outline,
+                color: AppColors.warning, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 l10n.workoutIdlePaused,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                style:
+                    const TextStyle(color: AppColors.textPrimary, fontSize: 13),
               ),
             ),
             TextButton(
@@ -1215,7 +1251,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         .toList();
     if (visible.isEmpty) return;
 
-    final firstIndex = workout.exercises.indexWhere((e) => e.id == visible.first.id);
+    final firstIndex =
+        workout.exercises.indexWhere((e) => e.id == visible.first.id);
     final now = DateTime.now();
 
     setState(() {
@@ -1242,8 +1279,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   Widget _buildHyroxStartGate(Workout workout, AppLocalizations l10n) {
     final accent = context.accentColor;
-    final visibleCount =
-        workout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).length;
+    final visibleCount = workout.exercises
+        .where((e) => !_removedExerciseIds.contains(e.id))
+        .length;
 
     return Center(
       child: Padding(
@@ -1307,7 +1345,74 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     unawaited(_publishWatchSession());
   }
 
-  Future<void> _reorderExercises(Workout workout, List<String> orderedExerciseIds) async {
+  static const _tutorialExerciseDetailTargets = {
+    TutorialTargets.workoutRest,
+    TutorialTargets.workoutAddSet,
+    TutorialTargets.workoutRemoveSet,
+  };
+
+  void _scheduleTutorialWorkoutView(Workout? workout) {
+    if (workout == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncTutorialWorkoutView(workout);
+    });
+  }
+
+  void _syncTutorialWorkoutView(Workout workout) {
+    final tutorial = ref.read(tutorialControllerProvider);
+    if (tutorial.activeTourId != TutorialCatalog.workoutSession) return;
+    final id = tutorial.activeStep?.targetId;
+    if (id == null) return;
+
+    final wantDetail = _tutorialExerciseDetailTargets.contains(id);
+    if (wantDetail) {
+      final index = _tutorialExerciseIndex(workout);
+      if (_showExerciseList || _currentExerciseIndex != index) {
+        setState(() {
+          _showExerciseList = false;
+          _currentExerciseIndex = index;
+        });
+      }
+      return;
+    }
+
+    if (!_showExerciseList) {
+      setState(() => _showExerciseList = true);
+    }
+  }
+
+  int _tutorialExerciseIndex(Workout workout) {
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
+    final visible = workout.exercises
+        .where((exercise) => !_removedExerciseIds.contains(exercise.id))
+        .toList();
+    for (final exercise in visible) {
+      final cardio = ExerciseLoggingResolver.isCardioExercise(
+        exerciseId: exercise.exerciseId,
+        exerciseName: exercise.exerciseName,
+        catalog: catalog,
+        sets: exercise.sets,
+      );
+      if (!cardio) {
+        final index = workout.exercises.indexWhere((e) => e.id == exercise.id);
+        if (index >= 0) return index;
+      }
+    }
+    if (visible.isEmpty) return 0;
+    final index = workout.exercises.indexWhere((e) => e.id == visible.first.id);
+    return index >= 0 ? index : 0;
+  }
+
+  Widget _anchorRemoveSet({required bool highlight, required Widget child}) {
+    if (!highlight) return child;
+    return KeyedSubtree(
+      key: TutorialTargets.workoutRemoveSetKey,
+      child: child,
+    );
+  }
+
+  Future<void> _reorderExercises(
+      Workout workout, List<String> orderedExerciseIds) async {
     if (orderedExerciseIds.isEmpty) return;
 
     try {
@@ -1459,13 +1564,23 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(tutorialControllerProvider, (prev, next) {
+      if (next.activeTourId != TutorialCatalog.workoutSession) return;
+      _scheduleTutorialWorkoutView(ref.read(activeWorkoutProvider).valueOrNull);
+    });
+    ref.listen(activeWorkoutProvider, (prev, next) {
+      _scheduleTutorialWorkoutView(next.valueOrNull);
+    });
+
     final l10n = context.l10n;
     final activeAsync = ref.watch(activeWorkoutProvider);
     final unitSystem = ref.watch(unitSystemProvider);
     final exerciseCatalog = ref.watch(exercisesProvider).valueOrNull ?? [];
 
     final workoutForSeed = activeAsync.valueOrNull;
-    if (workoutForSeed != null && !_perArmSeeded && workoutForSeed.routineId != null) {
+    if (workoutForSeed != null &&
+        !_perArmSeeded &&
+        workoutForSeed.routineId != null) {
       _perArmSeeded = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_seedPerArmFromRoutine(workoutForSeed));
@@ -1479,108 +1594,232 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         await _leaveActiveWorkoutToMenu();
       },
       child: Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: activeAsync.whenOrNull(
-        data: (workout) {
-          if (workout == null) return null;
-          final displayWorkout = _mergedWorkout(workout);
-          final visibleCount =
-              displayWorkout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).length;
-          final inExerciseView = !_showExerciseList && visibleCount > 0;
+        resizeToAvoidBottomInset: true,
+        appBar: activeAsync.whenOrNull(
+              data: (workout) {
+                if (workout == null) return null;
+                final displayWorkout = _mergedWorkout(workout);
+                final visibleCount = displayWorkout.exercises
+                    .where((e) => !_removedExerciseIds.contains(e.id))
+                    .length;
+                final inExerciseView = !_showExerciseList && visibleCount > 0;
 
-          return FitForgeAppBar(
-            title: l10n.training,
-            showBrandMark: false,
-            showWordmark: false,
-            automaticallyImplyLeading: false,
-            leading: inExerciseView
-                ? IconButton(
-                    icon: const Icon(Icons.list),
-                    tooltip: l10n.viewList,
-                    onPressed: () => setState(() => _showExerciseList = true),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.menu),
-                    tooltip: l10n.backToMenu,
-                    onPressed: _completing ? null : _leaveActiveWorkoutToMenu,
-                  ),
-            actions: [
-              if (MediaQuery.viewInsetsOf(context).bottom > 80)
-                IconButton(
-                  tooltip: l10n.done,
-                  onPressed: () => FocusManager.instance.primaryFocus?.unfocus(),
-                  icon: const Icon(Icons.keyboard_hide_outlined),
-                ),
-              TextButton(
-                onPressed: _completing ? null : () => _cancelWorkout(displayWorkout),
-                child: Text(
-                  l10n.cancelWorkout,
-                  style: const TextStyle(color: AppColors.textMuted),
-                ),
-              ),
-              if ((!_isHyroxWorkout || _hyroxRaceStarted) && !_isRunnerWorkout)
-                TextButton(
-                  onPressed: _completing ? null : () => _requestCompleteWorkout(displayWorkout),
-                  child: _completing
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                return FitForgeAppBar(
+                  title: l10n.training,
+                  showBrandMark: false,
+                  showWordmark: false,
+                  automaticallyImplyLeading: false,
+                  leading: inExerciseView
+                      ? IconButton(
+                          icon: const Icon(Icons.list),
+                          tooltip: l10n.viewList,
+                          onPressed: () =>
+                              setState(() => _showExerciseList = true),
                         )
-                      : Text(l10n.finish),
-                ),
-            ],
-          );
-        },
-      ) ?? FitForgeAppBar(title: l10n.training, automaticallyImplyLeading: false),
-      body: activeAsync.when(
-        skipLoadingOnReload: true,
-        skipLoadingOnRefresh: true,
-        data: (workout) {
-          if (workout == null) {
-            if (activeAsync.isLoading || activeAsync.isRefreshing) {
+                      : IconButton(
+                          icon: const Icon(Icons.menu),
+                          tooltip: l10n.backToMenu,
+                          onPressed:
+                              _completing ? null : _leaveActiveWorkoutToMenu,
+                        ),
+                  actions: [
+                    if (MediaQuery.viewInsetsOf(context).bottom > 80)
+                      IconButton(
+                        tooltip: l10n.done,
+                        onPressed: () =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        icon: const Icon(Icons.keyboard_hide_outlined),
+                      ),
+                    TextButton(
+                      onPressed: _completing
+                          ? null
+                          : () => _cancelWorkout(displayWorkout),
+                      child: Text(
+                        l10n.cancelWorkout,
+                        style: const TextStyle(color: AppColors.textMuted),
+                      ),
+                    ),
+                    if ((!_isHyroxWorkout || _hyroxRaceStarted) &&
+                        !_isRunnerWorkout)
+                      TextButton(
+                        onPressed: _completing
+                            ? null
+                            : () => _requestCompleteWorkout(displayWorkout),
+                        child: _completing
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(l10n.finish),
+                      ),
+                  ],
+                );
+              },
+            ) ??
+            FitForgeAppBar(
+                title: l10n.training, automaticallyImplyLeading: false),
+        body: activeAsync.when(
+          skipLoadingOnReload: true,
+          skipLoadingOnRefresh: true,
+          data: (workout) {
+            if (workout == null) {
+              if (activeAsync.isLoading || activeAsync.isRefreshing) {
+                return const FitForgeLoadingScreen();
+              }
+              return Center(child: Text(l10n.noActiveWorkout));
+            }
+
+            final displayWorkout = _mergedWorkout(workout);
+            _seedActivityIfNeeded(displayWorkout);
+
+            if (_isHyroxWorkout && !_hyroxRaceStarted) {
+              return _buildHyroxStartGate(displayWorkout, l10n);
+            }
+
+            if (_isRunnerWorkout && (_runnerType?.usesOutdoorGps ?? false)) {
+              return RunnerOutdoorSession(
+                workoutId: displayWorkout.id,
+                unitSystem: unitSystem,
+                surface: _runnerSurface,
+                isWalk: _runnerType?.isWalk ?? false,
+                onCancel: () => _cancelWorkout(displayWorkout),
+                onFinish: (snap) async {
+                  if (!await _confirmEndTraining() || !mounted) return;
+                  await _completeRunnerOutdoor(displayWorkout, snap);
+                },
+              );
+            }
+
+            if (_isRunnerWorkout && _runnerType == RunnerType.treadmill) {
+              return RunnerTreadmillSession(
+                unitSystem: unitSystem,
+                onCancel: () => _cancelWorkout(displayWorkout),
+                onFinish: (result) async {
+                  if (!await _confirmEndTraining() || !mounted) return;
+                  await _completeRunnerTreadmill(displayWorkout, result);
+                },
+              );
+            }
+
+            final visibleExercises = displayWorkout.exercises
+                .where((e) => !_removedExerciseIds.contains(e.id))
+                .toList();
+
+            if (_showExerciseList || visibleExercises.isEmpty) {
+              return Column(
+                children: [
+                  if (!_isHyroxWorkout || _hyroxRaceStarted)
+                    WorkoutElapsedTimer(
+                      startedAt: _elapsedTimerStart(displayWorkout),
+                      stoppedAt: _workoutTimerStop(),
+                    ),
+                  if (_idlePausedAt != null && !_skipIdleGuard)
+                    _buildIdlePauseBanner(l10n),
+                  if (_showRestTimer) _buildActiveRestTimer(),
+                  Expanded(
+                    child: ActiveWorkoutExerciseList(
+                      workout: displayWorkout,
+                      removedExerciseIds: _removedExerciseIds,
+                      unitSystem: unitSystem,
+                      onOpenExercise: _openExercise,
+                      onAddExercise: () => _pickAndAddExercise(displayWorkout),
+                      onRemoveExercise: (exercise) {
+                        setState(() => _removedExerciseIds.add(exercise.id));
+                        unawaited(_removeExercise(exercise));
+                      },
+                      onSwapExercise: (exercise) =>
+                          _swapExercise(displayWorkout, exercise),
+                      onReorderExercises: (orderedIds) =>
+                          _reorderExercises(displayWorkout, orderedIds),
+                      isCardioExercise: (exercise) =>
+                          ExerciseLoggingResolver.isCardioExercise(
+                        exerciseId: exercise.exerciseId,
+                        exerciseName: exercise.exerciseName,
+                        catalog: exerciseCatalog,
+                        sets: exercise.sets,
+                      ),
+                      onJoinSuperset: (_isHyroxWorkout || _isRunnerWorkout)
+                          ? null
+                          : (blockIndex, ordered) => _joinSuperset(
+                              displayWorkout, blockIndex, ordered),
+                      onLeaveSuperset: (_isHyroxWorkout || _isRunnerWorkout)
+                          ? null
+                          : (exercise) =>
+                              _leaveSuperset(displayWorkout, exercise),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            final exerciseIndex = _currentExerciseIndex.clamp(
+                0, displayWorkout.exercises.length - 1);
+            if (exerciseIndex != _currentExerciseIndex) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted)
+                  setState(() => _currentExerciseIndex = exerciseIndex);
+              });
+            }
+            final exercise = displayWorkout.exercises[exerciseIndex];
+            if (_removedExerciseIds.contains(exercise.id)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) setState(() => _showExerciseList = true);
+              });
               return const FitForgeLoadingScreen();
             }
-            return Center(child: Text(l10n.noActiveWorkout));
-          }
-
-          final displayWorkout = _mergedWorkout(workout);
-          _seedActivityIfNeeded(displayWorkout);
-
-          if (_isHyroxWorkout && !_hyroxRaceStarted) {
-            return _buildHyroxStartGate(displayWorkout, l10n);
-          }
-
-          if (_isRunnerWorkout && (_runnerType?.usesOutdoorGps ?? false)) {
-            return RunnerOutdoorSession(
-              workoutId: displayWorkout.id,
-              unitSystem: unitSystem,
-              surface: _runnerSurface,
-              isWalk: _runnerType?.isWalk ?? false,
-              onCancel: () => _cancelWorkout(displayWorkout),
-              onFinish: (snap) async {
-                if (!await _confirmEndTraining() || !mounted) return;
-                await _completeRunnerOutdoor(displayWorkout, snap);
-              },
+            final supersetMembers = SupersetGroups.membersOf(
+              visibleExercises,
+              exercise.supersetGroupId,
             );
-          }
-
-          if (_isRunnerWorkout && _runnerType == RunnerType.treadmill) {
-            return RunnerTreadmillSession(
-              unitSystem: unitSystem,
-              onCancel: () => _cancelWorkout(displayWorkout),
-              onFinish: (result) async {
-                if (!await _confirmEndTraining() || !mounted) return;
-                await _completeRunnerTreadmill(displayWorkout, result);
-              },
+            if (supersetMembers.length >= 2 && !_isHyroxWorkout) {
+              return _buildSupersetLogger(
+                displayWorkout: displayWorkout,
+                members: supersetMembers,
+                visibleExercises: visibleExercises,
+                unitSystem: unitSystem,
+                exerciseCatalog: exerciseCatalog,
+                l10n: l10n,
+              );
+            }
+            final sortedSets = _sortedSets(exercise)
+                .where((s) => !_removedSetIds.contains(s.id))
+                .toList();
+            final isCardio = ExerciseLoggingResolver.isCardioExercise(
+              exerciseId: exercise.exerciseId,
+              exerciseName: exercise.exerciseName,
+              catalog: exerciseCatalog,
+              sets: sortedSets,
             );
-          }
+            final cardioConfig = ExerciseLoggingResolver.cardioConfigFor(
+              exerciseId: exercise.exerciseId,
+              exerciseName: exercise.exerciseName,
+              catalog: exerciseCatalog,
+            );
 
-          final visibleExercises = displayWorkout.exercises
-              .where((e) => !_removedExerciseIds.contains(e.id))
-              .toList();
+            final exerciseUnit =
+                _unitOverrides[exercise.exerciseId] ?? unitSystem;
+            final lastSessionLabel = !isCardio && !_isHyroxWorkout
+                ? ref
+                    .watch(
+                      exerciseHistoryProvider(
+                        ExerciseHistoryQuery(
+                          exerciseId: exercise.exerciseId,
+                          excludeWorkoutId: displayWorkout.id,
+                        ),
+                      ),
+                    )
+                    .maybeWhen(
+                      data: (history) => _lastSessionChipLabel(
+                        history,
+                        exerciseUnit,
+                        l10n,
+                      ),
+                      orElse: () => null,
+                    )
+                : null;
 
-          if (_showExerciseList || visibleExercises.isEmpty) {
             return Column(
               children: [
                 if (!_isHyroxWorkout || _hyroxRaceStarted)
@@ -1590,379 +1829,313 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   ),
                 if (_idlePausedAt != null && !_skipIdleGuard)
                   _buildIdlePauseBanner(l10n),
+                if (_isHyroxWorkout &&
+                    _hyroxRaceStarted &&
+                    _stationStartedAt != null)
+                  HyroxPhaseTimer(
+                    phaseIndex: exerciseIndex,
+                    totalPhases: visibleExercises.length,
+                    startedAt: _stationStartedAt!,
+                    stoppedAt: _workoutTimerStop(),
+                    targetDistanceMeters: () {
+                      final fromRoutine =
+                          _hyroxTargetMetersByExerciseId[exercise.exerciseId];
+                      if (fromRoutine != null) return fromRoutine;
+                      for (final s in sortedSets) {
+                        if (s.distanceMeters != null) return s.distanceMeters;
+                      }
+                      return null;
+                    }(),
+                  ),
                 if (_showRestTimer) _buildActiveRestTimer(),
+                _PinnedExerciseHeader(
+                  exerciseId: exercise.exerciseId,
+                  exerciseName: exercise.exerciseName,
+                  restSelector: !isCardio && !_isHyroxWorkout
+                      ? RestTimeSelector(
+                          key: TutorialTargets.workoutRestKey,
+                          selectedSeconds: _restSeconds,
+                          onChanged: _onRestSecondsChanged,
+                        )
+                      : null,
+                ),
                 Expanded(
-                  child: ActiveWorkoutExerciseList(
-                    workout: displayWorkout,
-                    removedExerciseIds: _removedExerciseIds,
-                    unitSystem: unitSystem,
-                    onOpenExercise: _openExercise,
-                    onAddExercise: () => _pickAndAddExercise(displayWorkout),
-                    onRemoveExercise: (exercise) {
-                      setState(() => _removedExerciseIds.add(exercise.id));
-                      unawaited(_removeExercise(exercise));
-                    },
-                    onSwapExercise: (exercise) => _swapExercise(displayWorkout, exercise),
-                    onReorderExercises: (orderedIds) =>
-                        _reorderExercises(displayWorkout, orderedIds),
-                    isCardioExercise: (exercise) => ExerciseLoggingResolver.isCardioExercise(
-                      exerciseId: exercise.exerciseId,
-                      exerciseName: exercise.exerciseName,
-                      catalog: exerciseCatalog,
-                      sets: exercise.sets,
-                    ),
-                    onJoinSuperset: (_isHyroxWorkout || _isRunnerWorkout)
-                        ? null
-                        : (blockIndex, ordered) =>
-                            _joinSuperset(displayWorkout, blockIndex, ordered),
-                    onLeaveSuperset: (_isHyroxWorkout || _isRunnerWorkout)
-                        ? null
-                        : (exercise) => _leaveSuperset(displayWorkout, exercise),
-                  ),
-                ),
-              ],
-            );
-          }
-
-          final exerciseIndex =
-              _currentExerciseIndex.clamp(0, displayWorkout.exercises.length - 1);
-          if (exerciseIndex != _currentExerciseIndex) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() => _currentExerciseIndex = exerciseIndex);
-            });
-          }
-          final exercise = displayWorkout.exercises[exerciseIndex];
-          if (_removedExerciseIds.contains(exercise.id)) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() => _showExerciseList = true);
-            });
-            return const FitForgeLoadingScreen();
-          }
-          final supersetMembers = SupersetGroups.membersOf(
-            visibleExercises,
-            exercise.supersetGroupId,
-          );
-          if (supersetMembers.length >= 2 && !_isHyroxWorkout) {
-            return _buildSupersetLogger(
-              displayWorkout: displayWorkout,
-              members: supersetMembers,
-              visibleExercises: visibleExercises,
-              unitSystem: unitSystem,
-              exerciseCatalog: exerciseCatalog,
-              l10n: l10n,
-            );
-          }
-          final sortedSets = _sortedSets(exercise)
-              .where((s) => !_removedSetIds.contains(s.id))
-              .toList();
-          final isCardio = ExerciseLoggingResolver.isCardioExercise(
-            exerciseId: exercise.exerciseId,
-            exerciseName: exercise.exerciseName,
-            catalog: exerciseCatalog,
-            sets: sortedSets,
-          );
-          final cardioConfig = ExerciseLoggingResolver.cardioConfigFor(
-            exerciseId: exercise.exerciseId,
-            exerciseName: exercise.exerciseName,
-            catalog: exerciseCatalog,
-          );
-
-          final exerciseUnit = _unitOverrides[exercise.exerciseId] ?? unitSystem;
-          final lastSessionLabel = !isCardio && !_isHyroxWorkout
-              ? ref.watch(
-                  exerciseHistoryProvider(
-                    ExerciseHistoryQuery(
-                      exerciseId: exercise.exerciseId,
-                      excludeWorkoutId: displayWorkout.id,
-                    ),
-                  ),
-                ).maybeWhen(
-                  data: (history) => _lastSessionChipLabel(
-                    history,
-                    exerciseUnit,
-                    l10n,
-                  ),
-                  orElse: () => null,
-                )
-              : null;
-
-          return Column(
-            children: [
-              if (!_isHyroxWorkout || _hyroxRaceStarted)
-                WorkoutElapsedTimer(
-                  startedAt: _elapsedTimerStart(displayWorkout),
-                  stoppedAt: _workoutTimerStop(),
-                ),
-              if (_idlePausedAt != null && !_skipIdleGuard)
-                _buildIdlePauseBanner(l10n),
-              if (_isHyroxWorkout && _hyroxRaceStarted && _stationStartedAt != null)
-                HyroxPhaseTimer(
-                  phaseIndex: exerciseIndex,
-                  totalPhases: visibleExercises.length,
-                  startedAt: _stationStartedAt!,
-                  stoppedAt: _workoutTimerStop(),
-                  targetDistanceMeters: () {
-                    final fromRoutine =
-                        _hyroxTargetMetersByExerciseId[exercise.exerciseId];
-                    if (fromRoutine != null) return fromRoutine;
-                    for (final s in sortedSets) {
-                      if (s.distanceMeters != null) return s.distanceMeters;
-                    }
-                    return null;
-                  }(),
-                ),
-              if (_showRestTimer) _buildActiveRestTimer(),
-              _PinnedExerciseHeader(
-                exerciseId: exercise.exerciseId,
-                exerciseName: exercise.exerciseName,
-                restSelector: !isCardio && !_isHyroxWorkout
-                    ? RestTimeSelector(
-                        selectedSeconds: _restSeconds,
-                        onChanged: _onRestSecondsChanged,
-                      )
-                    : null,
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  children: [
-                    ExerciseThumbnail(
-                      exerciseId: exercise.exerciseId,
-                      exerciseName: exercise.exerciseName,
-                      height: 160,
-                      fullWidth: true,
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => ExerciseImageViewer.open(
-                        context,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: [
+                      ExerciseThumbnail(
                         exerciseId: exercise.exerciseId,
                         exerciseName: exercise.exerciseName,
+                        height: 160,
+                        fullWidth: true,
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => ExerciseImageViewer.open(
+                          context,
+                          exerciseId: exercise.exerciseId,
+                          exerciseName: exercise.exerciseName,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton.filledTonal(
-                            tooltip: l10n.reportExerciseProblem,
-                            onPressed: () => ExerciseReportSheet.show(
-                              context,
-                              exerciseId: exercise.exerciseId,
-                              exerciseName: exercise.exerciseName,
-                              service: ref.read(exerciseReportServiceProvider),
-                            ),
-                            icon: const Icon(Icons.flag_outlined),
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton.filledTonal(
-                            tooltip: l10n.exerciseHistory,
-                            onPressed: () => ExerciseHistorySheet.show(
-                              context,
-                              exerciseId: exercise.exerciseId,
-                              exerciseName: exercise.exerciseName,
-                              excludeWorkoutId: displayWorkout.id,
-                            ),
-                            icon: const Icon(Icons.history),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!isCardio && !_isHyroxWorkout) ...[
                       const SizedBox(height: 8),
-                      ExerciseLoadControls(
-                        exerciseId: exercise.exerciseId,
-                        exerciseName: exercise.exerciseName,
-                        catalog: exerciseCatalog,
-                        perArmEnabled: ExerciseLoad.resolvePerArmWeight(
-                          exerciseId: exercise.exerciseId,
-                          catalog: exerciseCatalog,
-                          exerciseName: exercise.exerciseName,
-                          sessionOverride: _perArmOverrides[exercise.exerciseId],
-                        ),
-                        onPerArmChanged: (value) {
-                          setState(() => _perArmOverrides[exercise.exerciseId] = value);
-                        },
-                        bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
-                        unitSystem: exerciseUnit,
-                        onUnitSystemChanged: (value) {
-                          setState(() => _unitOverrides[exercise.exerciseId] = value);
-                        },
-                      ),
-                    ],
-                    if (lastSessionLabel != null) ...[
-                      const SizedBox(height: 12),
                       Align(
-                        alignment: Alignment.centerLeft,
-                        child: Chip(
-                          visualDensity: VisualDensity.compact,
-                          avatar: Icon(
-                            Icons.history,
-                            size: 16,
-                            color: context.accentColor,
-                          ),
-                          label: Text(lastSessionLabel),
-                          side: BorderSide(
-                            color: context.accentColor.withValues(alpha: 0.35),
-                          ),
-                          backgroundColor: context.accentColor.withValues(alpha: 0.1),
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton.filledTonal(
+                              tooltip: l10n.reportExerciseProblem,
+                              onPressed: () => ExerciseReportSheet.show(
+                                context,
+                                exerciseId: exercise.exerciseId,
+                                exerciseName: exercise.exerciseName,
+                                service:
+                                    ref.read(exerciseReportServiceProvider),
+                              ),
+                              icon: const Icon(Icons.flag_outlined),
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton.filledTonal(
+                              tooltip: l10n.exerciseHistory,
+                              onPressed: () => ExerciseHistorySheet.show(
+                                context,
+                                exerciseId: exercise.exerciseId,
+                                exerciseName: exercise.exerciseName,
+                                excludeWorkoutId: displayWorkout.id,
+                              ),
+                              icon: const Icon(Icons.history),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                    const SizedBox(height: 12),
-                    if (_isHyroxWorkout)
-                      ..._buildHyroxStation(
-                        displayWorkout: displayWorkout,
-                        exercise: exercise,
-                        sets: sortedSets,
-                        visibleExercises: visibleExercises,
-                        unitSystem: exerciseUnit,
-                        isCardio: isCardio,
-                        cardioConfig: cardioConfig,
-                      )
-                    else ...[
-                    ...sortedSets.asMap().entries.map(
-                      (entry) {
-                        if (isCardio) {
-                          return CardioSetLogTile(
-                            key: ValueKey(entry.value.id),
-                            set: entry.value,
-                            unitSystem: exerciseUnit,
-                            config: cardioConfig,
-                            isLast: entry.key == sortedSets.length - 1,
-                            isSaving: _savingSetIds.contains(entry.value.id),
-                            onValidationError: (message) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(message)),
-                              );
-                            },
-                            onChanged: (updated) => _logSet(
-                              displayWorkout,
-                              exercise,
-                              updated,
-                              wasAlreadyCompleted: entry.value.completed,
-                              isCardio: true,
-                              isLastSet: entry.key == sortedSets.length - 1,
-                              cardioConfig: cardioConfig,
-                            ),
-                            onDelete: () {
-                              setState(() => _removedSetIds.add(entry.value.id));
-                              unawaited(_deleteSet(displayWorkout, exercise, entry.value));
-                            },
-                          );
-                        }
-                        final loadMode = ExerciseLoad.loadModeForExerciseId(
-                          exercise.exerciseId,
-                          exerciseCatalog,
-                          exerciseName: exercise.exerciseName,
-                        );
-                        final perArm = ExerciseLoad.resolvePerArmWeight(
+                      if (!isCardio && !_isHyroxWorkout) ...[
+                        const SizedBox(height: 8),
+                        ExerciseLoadControls(
                           exerciseId: exercise.exerciseId,
-                          catalog: exerciseCatalog,
                           exerciseName: exercise.exerciseName,
-                          sessionOverride: _perArmOverrides[exercise.exerciseId],
-                        );
-                        final weightOptional = ExerciseLoad.weightOptionalForExerciseId(
+                          catalog: exerciseCatalog,
+                          perArmEnabled: ExerciseLoad.resolvePerArmWeight(
+                            exerciseId: exercise.exerciseId,
+                            catalog: exerciseCatalog,
+                            exerciseName: exercise.exerciseName,
+                            sessionOverride:
+                                _perArmOverrides[exercise.exerciseId],
+                          ),
+                          onPerArmChanged: (value) {
+                            setState(() =>
+                                _perArmOverrides[exercise.exerciseId] = value);
+                          },
+                          bodyWeightKg: ref
+                              .watch(profileProvider)
+                              .valueOrNull
+                              ?.bodyWeight,
+                          unitSystem: exerciseUnit,
+                          onUnitSystemChanged: (value) {
+                            setState(() =>
+                                _unitOverrides[exercise.exerciseId] = value);
+                          },
+                        ),
+                      ],
+                      if (lastSessionLabel != null) ...[
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Chip(
+                            visualDensity: VisualDensity.compact,
+                            avatar: Icon(
+                              Icons.history,
+                              size: 16,
+                              color: context.accentColor,
+                            ),
+                            label: Text(lastSessionLabel),
+                            side: BorderSide(
+                              color:
+                                  context.accentColor.withValues(alpha: 0.35),
+                            ),
+                            backgroundColor:
+                                context.accentColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      if (_isHyroxWorkout)
+                        ..._buildHyroxStation(
+                          displayWorkout: displayWorkout,
+                          exercise: exercise,
+                          sets: sortedSets,
+                          visibleExercises: visibleExercises,
+                          unitSystem: exerciseUnit,
+                          isCardio: isCardio,
+                          cardioConfig: cardioConfig,
+                        )
+                      else ...[
+                        ...sortedSets.asMap().entries.map(
+                          (entry) {
+                            if (isCardio) {
+                              return _anchorRemoveSet(
+                                highlight: entry.key == sortedSets.length - 1,
+                                child: CardioSetLogTile(
+                                  key: ValueKey(entry.value.id),
+                                  set: entry.value,
+                                  unitSystem: exerciseUnit,
+                                  config: cardioConfig,
+                                  isLast: entry.key == sortedSets.length - 1,
+                                  isSaving:
+                                      _savingSetIds.contains(entry.value.id),
+                                  onValidationError: (message) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(message)),
+                                    );
+                                  },
+                                  onChanged: (updated) => _logSet(
+                                    displayWorkout,
+                                    exercise,
+                                    updated,
+                                    wasAlreadyCompleted: entry.value.completed,
+                                    isCardio: true,
+                                    isLastSet:
+                                        entry.key == sortedSets.length - 1,
+                                    cardioConfig: cardioConfig,
+                                  ),
+                                  onDelete: () {
+                                    setState(() =>
+                                        _removedSetIds.add(entry.value.id));
+                                    unawaited(_deleteSet(
+                                        displayWorkout, exercise, entry.value));
+                                  },
+                                ),
+                              );
+                            }
+                            final loadMode = ExerciseLoad.loadModeForExerciseId(
                               exercise.exerciseId,
                               exerciseCatalog,
                               exerciseName: exercise.exerciseName,
-                            ) ??
-                            false;
-                        return SetLogTile(
-                          key: ValueKey(entry.value.id),
-                          set: entry.value,
-                          unitSystem: exerciseUnit,
-                          exerciseName: exercise.exerciseName,
-                          perArmWeight: perArm,
-                          weightOptional: weightOptional,
-                          loadMode: loadMode,
-                          useLegLabel: ExerciseLoad.isLowerBodySideLoad(
-                            exerciseName: exercise.exerciseName,
-                            exerciseId: exercise.exerciseId,
-                            catalog: exerciseCatalog,
-                          ),
-                          bodyWeightKg: ref.watch(profileProvider).valueOrNull?.bodyWeight,
-                          isLast: entry.key == sortedSets.length - 1,
-                          isSaving: _savingSetIds.contains(entry.value.id),
-                          requestFocus: _focusSetId == entry.value.id,
-                          onFocusHandled: () {
-                            if (_focusSetId == entry.value.id) {
-                              setState(() => _focusSetId = null);
-                            }
-                          },
-                          onValidationError: (message) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(message)),
+                            );
+                            final perArm = ExerciseLoad.resolvePerArmWeight(
+                              exerciseId: exercise.exerciseId,
+                              catalog: exerciseCatalog,
+                              exerciseName: exercise.exerciseName,
+                              sessionOverride:
+                                  _perArmOverrides[exercise.exerciseId],
+                            );
+                            final weightOptional =
+                                ExerciseLoad.weightOptionalForExerciseId(
+                                      exercise.exerciseId,
+                                      exerciseCatalog,
+                                      exerciseName: exercise.exerciseName,
+                                    ) ??
+                                    false;
+                            return _anchorRemoveSet(
+                              highlight: entry.key == sortedSets.length - 1,
+                              child: SetLogTile(
+                                key: ValueKey(entry.value.id),
+                                set: entry.value,
+                                unitSystem: exerciseUnit,
+                                exerciseName: exercise.exerciseName,
+                                perArmWeight: perArm,
+                                weightOptional: weightOptional,
+                                loadMode: loadMode,
+                                useLegLabel: ExerciseLoad.isLowerBodySideLoad(
+                                  exerciseName: exercise.exerciseName,
+                                  exerciseId: exercise.exerciseId,
+                                  catalog: exerciseCatalog,
+                                ),
+                                bodyWeightKg: ref
+                                    .watch(profileProvider)
+                                    .valueOrNull
+                                    ?.bodyWeight,
+                                isLast: entry.key == sortedSets.length - 1,
+                                isSaving:
+                                    _savingSetIds.contains(entry.value.id),
+                                requestFocus: _focusSetId == entry.value.id,
+                                onFocusHandled: () {
+                                  if (_focusSetId == entry.value.id) {
+                                    setState(() => _focusSetId = null);
+                                  }
+                                },
+                                onValidationError: (message) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(message)),
+                                  );
+                                },
+                                onChanged: (updated) => _logSet(
+                                  displayWorkout,
+                                  exercise,
+                                  updated,
+                                  wasAlreadyCompleted: entry.value.completed,
+                                  isCardio: false,
+                                  isLastSet: entry.key == sortedSets.length - 1,
+                                ),
+                                onDelete: () {
+                                  setState(
+                                      () => _removedSetIds.add(entry.value.id));
+                                  unawaited(_deleteSet(
+                                      displayWorkout, exercise, entry.value));
+                                },
+                              ),
                             );
                           },
-                          onChanged: (updated) => _logSet(
-                            displayWorkout,
-                            exercise,
-                            updated,
-                            wasAlreadyCompleted: entry.value.completed,
-                            isCardio: false,
-                            isLastSet: entry.key == sortedSets.length - 1,
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          key: TutorialTargets.workoutAddSetKey,
+                          onPressed: () => _addSet(displayWorkout, exercise),
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.addSet),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            side: BorderSide(color: context.accentColor),
+                            foregroundColor: context.accentColor,
                           ),
-                          onDelete: () {
-                            setState(() => _removedSetIds.add(entry.value.id));
-                            unawaited(_deleteSet(displayWorkout, exercise, entry.value));
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _addSet(displayWorkout, exercise),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.addSet),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        side: BorderSide(color: context.accentColor),
-                        foregroundColor: context.accentColor,
-                      ),
-                    ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              if (MediaQuery.viewInsetsOf(context).bottom <= 80)
-              _ExerciseNavigator(
-                l10n: l10n,
-                currentIndex: SupersetGroups.blockIndexOf(visibleExercises, exercise.id),
-                total: SupersetGroups.workoutBlocks(visibleExercises).length,
-                completing: _completing,
-                onPrevious: () {
-                  final previousIndex = SupersetGroups.resolvePreviousBlockWorkoutIndex(
-                    workoutExercises: displayWorkout.exercises,
-                    visibleExercises: visibleExercises,
-                    currentExerciseId: exercise.id,
-                  );
-                  if (previousIndex != null) {
-                    setState(() => _currentExerciseIndex = previousIndex);
-                  }
-                },
-                onNext: () {
-                  final nextIndex = SupersetGroups.resolveNextBlockWorkoutIndex(
-                    workoutExercises: displayWorkout.exercises,
-                    visibleExercises: visibleExercises,
-                    currentExerciseId: exercise.id,
-                  );
-                  if (nextIndex != null) {
-                    setState(() => _currentExerciseIndex = nextIndex);
-                  }
-                },
-                onEndTraining: () => _requestCompleteWorkout(displayWorkout),
-                hasPrevious: SupersetGroups.hasPreviousBlock(visibleExercises, exercise.id),
-                hasNext: SupersetGroups.hasNextBlock(visibleExercises, exercise.id),
-              ),
-            ],
-          );
-        },
-        loading: () => const FitForgeLoadingScreen(),
-        error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
+                if (MediaQuery.viewInsetsOf(context).bottom <= 80)
+                  _ExerciseNavigator(
+                    l10n: l10n,
+                    currentIndex: SupersetGroups.blockIndexOf(
+                        visibleExercises, exercise.id),
+                    total:
+                        SupersetGroups.workoutBlocks(visibleExercises).length,
+                    completing: _completing,
+                    onPrevious: () {
+                      final previousIndex =
+                          SupersetGroups.resolvePreviousBlockWorkoutIndex(
+                        workoutExercises: displayWorkout.exercises,
+                        visibleExercises: visibleExercises,
+                        currentExerciseId: exercise.id,
+                      );
+                      if (previousIndex != null) {
+                        setState(() => _currentExerciseIndex = previousIndex);
+                      }
+                    },
+                    onNext: () {
+                      final nextIndex =
+                          SupersetGroups.resolveNextBlockWorkoutIndex(
+                        workoutExercises: displayWorkout.exercises,
+                        visibleExercises: visibleExercises,
+                        currentExerciseId: exercise.id,
+                      );
+                      if (nextIndex != null) {
+                        setState(() => _currentExerciseIndex = nextIndex);
+                      }
+                    },
+                    onEndTraining: () =>
+                        _requestCompleteWorkout(displayWorkout),
+                    hasPrevious: SupersetGroups.hasPreviousBlock(
+                        visibleExercises, exercise.id),
+                    hasNext: SupersetGroups.hasNextBlock(
+                        visibleExercises, exercise.id),
+                  ),
+              ],
+            );
+          },
+          loading: () => const FitForgeLoadingScreen(),
+          error: (e, _) => Center(child: Text(l10n.errorGeneric('$e'))),
+        ),
       ),
-    ),
     );
   }
 
@@ -1986,7 +2159,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           startedAt: _elapsedTimerStart(displayWorkout),
           stoppedAt: _workoutTimerStop(),
         ),
-        if (_idlePausedAt != null && !_skipIdleGuard) _buildIdlePauseBanner(l10n),
+        if (_idlePausedAt != null && !_skipIdleGuard)
+          _buildIdlePauseBanner(l10n),
         if (_showRestTimer) _buildActiveRestTimer(),
         Material(
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -2000,11 +2174,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     Chip(
                       visualDensity: VisualDensity.compact,
                       label: Text(l10n.groupedSetKind(members.length)),
-                      side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
-                      backgroundColor: context.accentColor.withValues(alpha: 0.1),
+                      side: BorderSide(
+                          color: context.accentColor.withValues(alpha: 0.4)),
+                      backgroundColor:
+                          context.accentColor.withValues(alpha: 0.1),
                     ),
                     const Spacer(),
                     RestTimeSelector(
+                      key: TutorialTargets.workoutRestKey,
                       selectedSeconds: _restSeconds,
                       onChanged: _onRestSecondsChanged,
                     ),
@@ -2054,7 +2231,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       '${l10n.supersetRound(past, totalRounds)} · ${_supersetRoundSummary(members, past, unitSystem)}',
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      style: const TextStyle(
+                          color: AppColors.textMuted, fontSize: 13),
                     ),
                   ),
                 const SizedBox(height: 4),
@@ -2070,10 +2248,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                   exerciseCatalog: exerciseCatalog,
                   bodyWeightKg: bodyWeightKg,
                   l10n: l10n,
+                  highlightRemoveSet: i == 0,
                 ),
               ],
               const SizedBox(height: 12),
               OutlinedButton.icon(
+                key: TutorialTargets.workoutAddSetKey,
                 onPressed: () => _addSetToSuperset(displayWorkout, members),
                 icon: const Icon(Icons.add),
                 label: Text(l10n.addSet),
@@ -2087,35 +2267,39 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           ),
         ),
         if (MediaQuery.viewInsetsOf(context).bottom <= 80)
-        _ExerciseNavigator(
-          l10n: l10n,
-          currentIndex: SupersetGroups.blockIndexOf(visibleExercises, currentExercise.id),
-          total: SupersetGroups.workoutBlocks(visibleExercises).length,
-          completing: _completing,
-          onPrevious: () {
-            final previousIndex = SupersetGroups.resolvePreviousBlockWorkoutIndex(
-              workoutExercises: displayWorkout.exercises,
-              visibleExercises: visibleExercises,
-              currentExerciseId: currentExercise.id,
-            );
-            if (previousIndex != null) {
-              setState(() => _currentExerciseIndex = previousIndex);
-            }
-          },
-          onNext: () {
-            final nextIndex = SupersetGroups.resolveNextBlockWorkoutIndex(
-              workoutExercises: displayWorkout.exercises,
-              visibleExercises: visibleExercises,
-              currentExerciseId: currentExercise.id,
-            );
-            if (nextIndex != null) {
-              setState(() => _currentExerciseIndex = nextIndex);
-            }
-          },
-          onEndTraining: () => _requestCompleteWorkout(displayWorkout),
-          hasPrevious: SupersetGroups.hasPreviousBlock(visibleExercises, currentExercise.id),
-          hasNext: SupersetGroups.hasNextBlock(visibleExercises, currentExercise.id),
-        ),
+          _ExerciseNavigator(
+            l10n: l10n,
+            currentIndex: SupersetGroups.blockIndexOf(
+                visibleExercises, currentExercise.id),
+            total: SupersetGroups.workoutBlocks(visibleExercises).length,
+            completing: _completing,
+            onPrevious: () {
+              final previousIndex =
+                  SupersetGroups.resolvePreviousBlockWorkoutIndex(
+                workoutExercises: displayWorkout.exercises,
+                visibleExercises: visibleExercises,
+                currentExerciseId: currentExercise.id,
+              );
+              if (previousIndex != null) {
+                setState(() => _currentExerciseIndex = previousIndex);
+              }
+            },
+            onNext: () {
+              final nextIndex = SupersetGroups.resolveNextBlockWorkoutIndex(
+                workoutExercises: displayWorkout.exercises,
+                visibleExercises: visibleExercises,
+                currentExerciseId: currentExercise.id,
+              );
+              if (nextIndex != null) {
+                setState(() => _currentExerciseIndex = nextIndex);
+              }
+            },
+            onEndTraining: () => _requestCompleteWorkout(displayWorkout),
+            hasPrevious: SupersetGroups.hasPreviousBlock(
+                visibleExercises, currentExercise.id),
+            hasNext: SupersetGroups.hasNextBlock(
+                visibleExercises, currentExercise.id),
+          ),
       ],
     );
   }
@@ -2129,6 +2313,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     required List<Exercise> exerciseCatalog,
     required double? bodyWeightKg,
     required AppLocalizations l10n,
+    bool highlightRemoveSet = false,
   }) {
     final set = SupersetGroups.setForRound(member, round);
     final letter = SupersetGroups.slotLetter(member.supersetSlot ?? 1);
@@ -2228,40 +2413,43 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               },
             ),
             if (set != null)
-              SetLogTile(
-                key: ValueKey(set.id),
-                set: set,
-                unitSystem: exerciseUnit,
-                exerciseName: member.exerciseName,
-                perArmWeight: perArm,
-                weightOptional: weightOptional,
-                loadMode: loadMode,
-                useLegLabel: ExerciseLoad.isLowerBodySideLoad(
+              _anchorRemoveSet(
+                highlight: highlightRemoveSet,
+                child: SetLogTile(
+                  key: ValueKey(set.id),
+                  set: set,
+                  unitSystem: exerciseUnit,
                   exerciseName: member.exerciseName,
-                  exerciseId: member.exerciseId,
-                  catalog: exerciseCatalog,
-                ),
-                bodyWeightKg: bodyWeightKg,
-                isLast: true,
-                isSaving: _savingSetIds.contains(set.id),
-                requestFocus: _focusSetId == set.id,
-                onFocusHandled: () {
-                  if (_focusSetId == set.id) {
-                    setState(() => _focusSetId = null);
-                  }
-                },
-                onValidationError: (message) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(message)),
-                  );
-                },
-                onChanged: (updated) => _logSet(
-                  displayWorkout,
-                  member,
-                  updated,
-                  wasAlreadyCompleted: set.completed,
-                  isCardio: false,
-                  isLastSet: true,
+                  perArmWeight: perArm,
+                  weightOptional: weightOptional,
+                  loadMode: loadMode,
+                  useLegLabel: ExerciseLoad.isLowerBodySideLoad(
+                    exerciseName: member.exerciseName,
+                    exerciseId: member.exerciseId,
+                    catalog: exerciseCatalog,
+                  ),
+                  bodyWeightKg: bodyWeightKg,
+                  isLast: true,
+                  isSaving: _savingSetIds.contains(set.id),
+                  requestFocus: _focusSetId == set.id,
+                  onFocusHandled: () {
+                    if (_focusSetId == set.id) {
+                      setState(() => _focusSetId = null);
+                    }
+                  },
+                  onValidationError: (message) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(message)),
+                    );
+                  },
+                  onChanged: (updated) => _logSet(
+                    displayWorkout,
+                    member,
+                    updated,
+                    wasAlreadyCompleted: set.completed,
+                    isCardio: false,
+                    isLastSet: true,
+                  ),
                 ),
               ),
           ],
@@ -2562,17 +2750,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
     }
 
-    final stationSeconds = (_isHyroxWorkout && _stationStartedAt != null && !wasAlreadyCompleted)
-        ? (_workoutStoppedAt ?? DateTime.now())
-            .difference(_stationStartedAt!)
-            .inSeconds
-            .clamp(1, 24 * 3600)
-        : null;
+    final stationSeconds =
+        (_isHyroxWorkout && _stationStartedAt != null && !wasAlreadyCompleted)
+            ? (_workoutStoppedAt ?? DateTime.now())
+                .difference(_stationStartedAt!)
+                .inSeconds
+                .clamp(1, 24 * 3600)
+            : null;
 
     final completedSet = set.copyWith(
       completed: true,
       rir: rir,
-      loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
+      loggingType:
+          isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
       durationSeconds: stationSeconds ?? set.durationSeconds,
     );
 
@@ -2591,7 +2781,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         if (effective.completed) continue;
         final selectedRir = rir;
         if (selectedRir != null) {
-          final baseline = _rirWeightBaselines[effective.id] ?? effective.weight;
+          final baseline =
+              _rirWeightBaselines[effective.id] ?? effective.weight;
           if (baseline != null && baseline > 0) {
             _rirWeightBaselines[effective.id] = baseline;
             final nextKg = RirWeightAdjustment.apply(
@@ -2610,7 +2801,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       }
 
       final groupMembers = SupersetGroups.membersOf(
-        workout.exercises.where((e) => !_removedExerciseIds.contains(e.id)).toList(),
+        workout.exercises
+            .where((e) => !_removedExerciseIds.contains(e.id))
+            .toList(),
         exercise.supersetGroupId,
       );
       if (groupMembers.length >= 2) {
@@ -2634,14 +2827,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
           completedSet.setNumber,
         );
         if (nextInRound != null) {
-          final index = workout.exercises.indexWhere((e) => e.id == nextInRound.id);
+          final index =
+              workout.exercises.indexWhere((e) => e.id == nextInRound.id);
           if (index >= 0) nextExerciseIndex = index;
         } else {
-          final nextMember = SupersetGroups.activeMember(patchedGroup) ?? patchedGroup.first;
-          final index = workout.exercises.indexWhere((e) => e.id == nextMember.id);
+          final nextMember =
+              SupersetGroups.activeMember(patchedGroup) ?? patchedGroup.first;
+          final index =
+              workout.exercises.indexWhere((e) => e.id == nextMember.id);
           if (index >= 0) nextExerciseIndex = index;
         }
-        startRest = SupersetGroups.isRoundComplete(patchedGroup, completedSet.setNumber);
+        startRest = SupersetGroups.isRoundComplete(
+            patchedGroup, completedSet.setNumber);
       } else {
         startRest = true;
       }
@@ -2714,15 +2911,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
   Future<void> _addSet(Workout workout, WorkoutExercise exercise) async {
     final sorted = _sortedSets(exercise);
-    final previous = await ref.read(workoutServiceProvider).getPreviousSetsForExercise(
-          exercise.exerciseId,
-          excludeWorkoutId: workout.id,
-        );
+    final previous =
+        await ref.read(workoutServiceProvider).getPreviousSetsForExercise(
+              exercise.exerciseId,
+              excludeWorkoutId: workout.id,
+            );
     final setNumber = sorted.length + 1;
     final prevSet = sorted.isNotEmpty
         ? sorted.last
         : (previous != null
-            ? ref.read(workoutServiceProvider).previousSetForNumber(previous, setNumber)
+            ? ref
+                .read(workoutServiceProvider)
+                .previousSetForNumber(previous, setNumber)
             : null);
 
     final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
@@ -2744,10 +2944,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       weight: isCardio ? null : prevSet?.weight,
       reps: isCardio || isLoadedDistance ? 0 : (prevSet?.reps ?? 10),
       durationSeconds: isCardio ? prevSet?.durationSeconds : null,
-      distanceMeters: isCardio || isLoadedDistance ? prevSet?.distanceMeters : null,
+      distanceMeters:
+          isCardio || isLoadedDistance ? prevSet?.distanceMeters : null,
       inclinePercent: isCardio ? prevSet?.inclinePercent : null,
       steps: isCardio ? prevSet?.steps : null,
-      loggingType: isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
+      loggingType:
+          isCardio ? ExerciseLoggingType.cardio : ExerciseLoggingType.strength,
     );
 
     setState(() {
@@ -2888,7 +3090,10 @@ class _ExerciseNavigator extends StatelessWidget {
           children: [
             Text(
               l10n.exerciseProgress(currentIndex + 1, total),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: 10),
             Row(
@@ -2904,7 +3109,8 @@ class _ExerciseNavigator extends StatelessWidget {
                 Expanded(
                   child: isLastExercise
                       ? ElevatedButton.icon(
-                          onPressed: completing ? null : () => onEndTraining?.call(),
+                          onPressed:
+                              completing ? null : () => onEndTraining?.call(),
                           icon: const Icon(Icons.flag_outlined, size: 18),
                           label: Text(l10n.endTraining),
                         )

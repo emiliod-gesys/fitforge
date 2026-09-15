@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_accent.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_tokens.dart';
+import '../core/router/app_router.dart';
+import '../core/tutorials/tutorial_catalog.dart';
 import '../core/tutorials/tutorial_navigation.dart';
 import '../core/tutorials/tutorial_targets.dart';
+import '../core/tutorials/tutorial_workout_session.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/tutorial_controller.dart';
 
@@ -17,13 +22,23 @@ class TutorialSpotlightOverlay extends ConsumerStatefulWidget {
       _TutorialSpotlightOverlayState();
 }
 
-class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOverlay> {
+class _TutorialSpotlightOverlayState
+    extends ConsumerState<TutorialSpotlightOverlay> {
   Rect? _hole;
   int _misses = 0;
   String? _measuringToken;
+  bool _preparing = false;
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(tutorialWorkoutSessionProvider, (prev, next) {
+      if (prev == null || next != null) return;
+      final router = ref.read(routerProvider);
+      if (router.state.uri.path == '/workout/active') {
+        router.go('/');
+      }
+    });
+
     final tutorial = ref.watch(tutorialControllerProvider);
     final step = tutorial.activeStep;
     final tour = tutorial.activeTour;
@@ -42,7 +57,8 @@ class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOver
     final l10n = context.l10n;
     final accent = context.accentColor;
     final size = MediaQuery.sizeOf(context);
-    final stepLabel = l10n.onboardingStepOf(tutorial.stepIndex + 1, tour.steps.length);
+    final stepLabel =
+        l10n.onboardingStepOf(tutorial.stepIndex + 1, tour.steps.length);
     final isLast = tutorial.stepIndex >= tour.steps.length - 1;
 
     return Material(
@@ -63,22 +79,74 @@ class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOver
               onTap: () {},
             ),
           ),
-          if (_hole != null)
-            _TooltipCard(
-              hole: _hole!,
-              screenSize: size,
-              accent: accent,
-              stepLabel: stepLabel,
-              title: step.title(l10n),
-              body: step.body(l10n),
-              nextLabel: isLast ? l10n.tutorialFinish : l10n.next,
-              skipLabel: l10n.skip,
-              onNext: () => ref.read(tutorialControllerProvider.notifier).next(),
-              onSkip: () => ref.read(tutorialControllerProvider.notifier).skip(),
-            ),
+          _TooltipCard(
+            hole: _hole,
+            screenSize: size,
+            accent: accent,
+            stepLabel: stepLabel,
+            title: step.title(l10n),
+            body: _preparing ? l10n.startingWorkout : step.body(l10n),
+            nextLabel: isLast ? l10n.tutorialFinish : l10n.next,
+            skipLabel: l10n.skip,
+            busy: _preparing,
+            onNext: () => unawaited(_onNext()),
+            onSkip: () => ref.read(tutorialControllerProvider.notifier).skip(),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _onNext() async {
+    if (_preparing) return;
+    final tutorial = ref.read(tutorialControllerProvider);
+    final tour = tutorial.activeTour;
+    if (tour == null) return;
+    if (tutorial.stepIndex >= tour.steps.length - 1) {
+      ref.read(tutorialControllerProvider.notifier).next();
+      return;
+    }
+
+    final upcoming = tour.steps[tutorial.stepIndex + 1];
+    final route = upcoming.route;
+    if (route == null || TutorialNavigation.matches(ref, route)) {
+      ref.read(tutorialControllerProvider.notifier).next();
+      return;
+    }
+
+    setState(() => _preparing = true);
+    var shouldAdvance = false;
+    try {
+      await TutorialNavigation.prepareStep(ref, upcoming);
+      if (!mounted) return;
+      if (ref.read(tutorialControllerProvider).activeStep == null) return;
+      if (!TutorialNavigation.matches(ref, route)) return;
+      await _waitUntilTargetReady(upcoming);
+      if (!mounted) return;
+      if (ref.read(tutorialControllerProvider).activeStep == null) return;
+      shouldAdvance = true;
+    } finally {
+      if (mounted) setState(() => _preparing = false);
+    }
+    if (!shouldAdvance || !mounted) return;
+    if (ref.read(tutorialControllerProvider).activeStep == null) return;
+    ref.read(tutorialControllerProvider.notifier).next();
+  }
+
+  Future<void> _waitUntilTargetReady(TutorialStep step) async {
+    final key = TutorialTargets.keyFor(step.targetId);
+    if (key == null) return;
+    final limit = step.route == '/workout/active' ? 120 : 40;
+    for (var i = 0; i < limit; i++) {
+      if (!mounted) return;
+      if (ref.read(tutorialControllerProvider).activeStep == null) return;
+      final ctx = key.currentContext;
+      if (ctx != null && ctx.mounted) {
+        final box = ctx.findRenderObject();
+        if (box is RenderBox && box.hasSize && !box.size.isEmpty) return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
   }
 
   Future<void> _measure(String token) async {
@@ -90,9 +158,10 @@ class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOver
     if (step.route != null) {
       TutorialNavigation.ensureStep(ref, step);
       var waited = 0;
+      final waitLimit = step.route == '/workout/active' ? 120 : 40;
       while (mounted &&
           _measuringToken == token &&
-          waited < 40 &&
+          waited < waitLimit &&
           !TutorialNavigation.matches(ref, step.route!)) {
         await Future<void>.delayed(const Duration(milliseconds: 50));
         waited += 1;
@@ -101,42 +170,24 @@ class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOver
     }
 
     final key = TutorialTargets.keyFor(step.targetId);
-    final ctx = key?.currentContext;
-    if (ctx == null) {
-      _misses += 1;
-      final limit = step.optional ? 10 : 50;
-      if (_misses >= limit) {
-        ref.read(tutorialControllerProvider.notifier).next();
-        return;
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      if (mounted && _measuringToken == token) {
-        await _measure(token);
-      }
+    var ctx = key?.currentContext;
+    if (ctx == null || !ctx.mounted) {
+      _retryOrGiveUp(token, optional: step.optional);
       return;
     }
 
-    if (!ctx.mounted) return;
-    await Scrollable.ensureVisible(
-      ctx,
-      alignment: 0.35,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-    );
-    await Future<void>.delayed(const Duration(milliseconds: 40));
-    if (!mounted || !ctx.mounted || _measuringToken != token) return;
+    await _scrollIntoView(ctx);
+    if (!mounted || _measuringToken != token) return;
+
+    ctx = key?.currentContext;
+    if (ctx == null || !ctx.mounted) {
+      _retryOrGiveUp(token, optional: step.optional);
+      return;
+    }
 
     final box = ctx.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) {
-      _misses += 1;
-      final limit = step.optional ? 10 : 50;
-      if (_misses >= limit) {
-        ref.read(tutorialControllerProvider.notifier).next();
-        return;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _measure(token);
-      });
+    if (box is! RenderBox || !box.hasSize || box.size.isEmpty) {
+      _retryOrGiveUp(token, optional: step.optional);
       return;
     }
 
@@ -145,10 +196,42 @@ class _TutorialSpotlightOverlayState extends ConsumerState<TutorialSpotlightOver
     if (!mounted || _measuringToken != token) return;
     setState(() => _hole = rect.inflate(8));
   }
+
+  Future<void> _scrollIntoView(BuildContext ctx) async {
+    try {
+      await Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.28,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+      ).timeout(const Duration(milliseconds: 450));
+    } on TimeoutException {
+      // On some phones ensureVisible never completes if the target sits
+      // below the fold inside IntrinsicHeight / nested scrollables.
+    } catch (_) {
+      // No Scrollable ancestor, or the context was deactivated mid-scroll.
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+  }
+
+  void _retryOrGiveUp(String token, {required bool optional}) {
+    if (!mounted || _measuringToken != token) return;
+    _misses += 1;
+    final limit = optional ? 20 : 40;
+    if (_misses >= limit) {
+      if (optional) {
+        ref.read(tutorialControllerProvider.notifier).next();
+      }
+      return;
+    }
+    Future<void>.delayed(const Duration(milliseconds: 50), () {
+      if (mounted && _measuringToken == token) _measure(token);
+    });
+  }
 }
 
 class _TooltipCard extends StatelessWidget {
-  final Rect hole;
+  final Rect? hole;
   final Size screenSize;
   final Color accent;
   final String stepLabel;
@@ -156,6 +239,7 @@ class _TooltipCard extends StatelessWidget {
   final String body;
   final String nextLabel;
   final String skipLabel;
+  final bool busy;
   final VoidCallback onNext;
   final VoidCallback onSkip;
 
@@ -168,6 +252,7 @@ class _TooltipCard extends StatelessWidget {
     required this.body,
     required this.nextLabel,
     required this.skipLabel,
+    required this.busy,
     required this.onNext,
     required this.onSkip,
   });
@@ -175,8 +260,12 @@ class _TooltipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxWidth = (screenSize.width - 32).clamp(240.0, 360.0);
-    final spaceBelow = screenSize.height - hole.bottom;
-    final placeBelow = spaceBelow > 200 || spaceBelow >= hole.top;
+    final hole = this.hole;
+    final holeOnScreen =
+        hole != null && hole.bottom > 24 && hole.top < screenSize.height - 24;
+    final spaceBelow = holeOnScreen ? screenSize.height - hole.bottom : 0.0;
+    final placeBelow =
+        holeOnScreen && (spaceBelow > 200 || spaceBelow >= hole.top);
 
     final card = ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
@@ -233,8 +322,20 @@ class _TooltipCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   FilledButton(
-                    onPressed: onNext,
-                    child: Text(nextLabel),
+                    onPressed: busy ? null : onNext,
+                    child: busy
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: Padding(
+                              padding: EdgeInsets.all(3),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(nextLabel),
                   ),
                 ],
               ),
@@ -244,7 +345,7 @@ class _TooltipCard extends StatelessWidget {
       ),
     );
 
-    if (placeBelow) {
+    if (placeBelow && hole != null) {
       return Positioned(
         left: 16,
         right: 16,
@@ -253,10 +354,20 @@ class _TooltipCard extends StatelessWidget {
       );
     }
 
+    if (holeOnScreen && hole != null) {
+      return Positioned(
+        left: 16,
+        right: 16,
+        bottom: (screenSize.height - hole.top + 16)
+            .clamp(16, screenSize.height - 180),
+        child: Align(alignment: Alignment.bottomCenter, child: card),
+      );
+    }
+
     return Positioned(
       left: 16,
       right: 16,
-      bottom: (screenSize.height - hole.top + 16).clamp(16, screenSize.height - 180),
+      bottom: 108,
       child: Align(alignment: Alignment.bottomCenter, child: card),
     );
   }
@@ -275,7 +386,8 @@ class _SpotlightPainter extends CustomPainter {
     if (hole != null) {
       final rounded = Path()
         ..addRRect(
-          RRect.fromRectAndRadius(hole!, const Radius.circular(AppTokens.radiusMd)),
+          RRect.fromRectAndRadius(
+              hole!, const Radius.circular(AppTokens.radiusMd)),
         );
       cut = Path.combine(PathOperation.difference, overlay, rounded);
     }
@@ -285,7 +397,8 @@ class _SpotlightPainter extends CustomPainter {
     );
     if (hole != null) {
       canvas.drawRRect(
-        RRect.fromRectAndRadius(hole!, const Radius.circular(AppTokens.radiusMd)),
+        RRect.fromRectAndRadius(
+            hole!, const Radius.circular(AppTokens.radiusMd)),
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2

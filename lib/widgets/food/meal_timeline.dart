@@ -122,6 +122,9 @@ class _MealTimelineNode extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    key: mealType == MealType.breakfast
+                        ? TutorialTargets.foodAddMealKey
+                        : null,
                     children: [
                       Expanded(
                         child: Column(
@@ -146,9 +149,6 @@ class _MealTimelineNode extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        key: mealType == MealType.breakfast
-                            ? TutorialTargets.foodAddMealKey
-                            : null,
                         onPressed: onAdd,
                         icon: const Icon(Icons.add_circle_outline),
                         color: context.accentColor,

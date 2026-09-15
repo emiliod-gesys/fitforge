@@ -11,6 +11,7 @@ import '../models/workout.dart';
 import 'exercise_thumbnail.dart';
 import 'localized_exercise_name.dart';
 import '../core/theme/app_accent.dart';
+import '../core/tutorials/tutorial_targets.dart';
 
 class ActiveWorkoutExerciseList extends StatefulWidget {
   final Workout workout;
@@ -22,7 +23,8 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
   final void Function(WorkoutExercise exercise) onSwapExercise;
   final void Function(List<String> orderedExerciseIds)? onReorderExercises;
   final bool Function(WorkoutExercise exercise)? isCardioExercise;
-  final void Function(int blockIndex, List<WorkoutExercise> orderedExercises)? onJoinSuperset;
+  final void Function(int blockIndex, List<WorkoutExercise> orderedExercises)?
+      onJoinSuperset;
   final void Function(WorkoutExercise exercise)? onLeaveSuperset;
 
   const ActiveWorkoutExerciseList({
@@ -41,7 +43,8 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
   });
 
   @override
-  State<ActiveWorkoutExerciseList> createState() => _ActiveWorkoutExerciseListState();
+  State<ActiveWorkoutExerciseList> createState() =>
+      _ActiveWorkoutExerciseListState();
 }
 
 class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
@@ -143,9 +146,11 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
     if (total == 0) return l10n.noSets;
     if (done == total) return l10n.seriesCompleted(total);
 
-    final lastCompleted = exercise.sets.where((s) => s.completed && s.weight != null).lastOrNull;
+    final lastCompleted =
+        exercise.sets.where((s) => s.completed && s.weight != null).lastOrNull;
     if (lastCompleted != null) {
-      final w = GymWeight.formatDisplay(lastCompleted.weight!, widget.unitSystem);
+      final w =
+          GymWeight.formatDisplay(lastCompleted.weight!, widget.unitSystem);
       final label = UnitConverter.massLabel(widget.unitSystem);
       return l10n.seriesWithWeight(
         total,
@@ -252,7 +257,10 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: _AddExerciseRow(onTap: widget.onAddExercise),
+            child: KeyedSubtree(
+              key: TutorialTargets.workoutAddExerciseKey,
+              child: _AddExerciseRow(onTap: widget.onAddExercise),
+            ),
           ),
         ),
       ],
@@ -288,12 +296,15 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
         showConnector: !isLast,
         showDragHandle: showDragHandle,
         onTap: () {
-          final index = widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
+          final index =
+              widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
           if (index >= 0) widget.onOpenExercise(index);
         },
         onSwap: () => widget.onSwapExercise(exercise),
         onRemove: () => widget.onRemoveExercise(exercise),
-        onJoin: canJoin ? () => widget.onJoinSuperset!(listIndex, _orderedExercises) : null,
+        onJoin: canJoin
+            ? () => widget.onJoinSuperset!(listIndex, _orderedExercises)
+            : null,
       );
     }
 
@@ -305,11 +316,14 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
       showDragHandle: showDragHandle,
       onTap: () {
         final active = SupersetGroups.activeMember(block) ?? block.first;
-        final index = widget.workout.exercises.indexWhere((e) => e.id == active.id);
+        final index =
+            widget.workout.exercises.indexWhere((e) => e.id == active.id);
         if (index >= 0) widget.onOpenExercise(index);
       },
       onRemoveMember: widget.onRemoveExercise,
-      onJoin: canJoin ? () => widget.onJoinSuperset!(listIndex, _orderedExercises) : null,
+      onJoin: canJoin
+          ? () => widget.onJoinSuperset!(listIndex, _orderedExercises)
+          : null,
       onLeaveMember: widget.onLeaveSuperset,
     );
   }
@@ -350,7 +364,8 @@ class _ExerciseListRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final progress = totalSets <= 0 ? 0.0 : (doneSets / totalSets).clamp(0.0, 1.0);
+    final progress =
+        totalSets <= 0 ? 0.0 : (doneSets / totalSets).clamp(0.0, 1.0);
     final ringColor = isCompleted ? _completedGreen : context.accentColor;
 
     return InkWell(
@@ -366,11 +381,15 @@ class _ExerciseListRow extends ConsumerWidget {
             if (showDragHandle)
               ReorderableDragStartListener(
                 index: listIndex,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: AppColors.textMuted.withValues(alpha: 0.8),
+                child: KeyedSubtree(
+                  key:
+                      listIndex == 0 ? TutorialTargets.workoutReorderKey : null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Icon(
+                      Icons.drag_handle,
+                      color: AppColors.textMuted.withValues(alpha: 0.8),
+                    ),
                   ),
                 ),
               ),
@@ -389,7 +408,8 @@ class _ExerciseListRow extends ConsumerWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(11),
                             border: Border.all(
-                              color: AppColors.textMuted.withValues(alpha: 0.45),
+                              color:
+                                  AppColors.textMuted.withValues(alpha: 0.45),
                               width: 3,
                             ),
                           ),
@@ -420,7 +440,8 @@ class _ExerciseListRow extends ConsumerWidget {
                             bottom: -2,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).scaffoldBackgroundColor,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -451,12 +472,14 @@ class _ExerciseListRow extends ConsumerWidget {
                   LocalizedExerciseName(
                     exercise.exerciseName,
                     exerciseId: exercise.exerciseId,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 13),
                   ),
                   if (onJoin != null)
                     TextButton.icon(
@@ -474,6 +497,7 @@ class _ExerciseListRow extends ConsumerWidget {
               ),
             ),
             PopupMenuButton<String>(
+              key: listIndex == 0 ? TutorialTargets.workoutSwapKey : null,
               icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
               onSelected: (value) {
                 switch (value) {
@@ -507,7 +531,8 @@ class _ExerciseListRow extends ConsumerWidget {
                   value: 'remove',
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                    leading: const Icon(Icons.delete_outline,
+                        color: AppColors.error),
                     title: Text(l10n.remove),
                   ),
                 ),
@@ -539,7 +564,8 @@ class _RoundedRectProgressPainter extends CustomPainter {
     if (size.isEmpty || progress <= 0) return;
 
     final inset = strokeWidth / 2;
-    final rect = Rect.fromLTWH(inset, inset, size.width - strokeWidth, size.height - strokeWidth);
+    final rect = Rect.fromLTWH(
+        inset, inset, size.width - strokeWidth, size.height - strokeWidth);
     final radius = borderRadius.clamp(0.0, rect.shortestSide / 2);
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
 
@@ -601,7 +627,8 @@ class _SupersetListRow extends ConsumerWidget {
     final l10n = context.l10n;
     final totalRounds = SupersetGroups.roundCount(members);
     final doneRounds = SupersetGroups.completedRounds(members);
-    final progress = totalRounds <= 0 ? 0.0 : (doneRounds / totalRounds).clamp(0.0, 1.0);
+    final progress =
+        totalRounds <= 0 ? 0.0 : (doneRounds / totalRounds).clamp(0.0, 1.0);
     final isCompleted = totalRounds > 0 && doneRounds == totalRounds;
     final ringColor = isCompleted ? _completedGreen : context.accentColor;
     final names = members.map((m) => m.exerciseName).join(' · ');
@@ -619,11 +646,15 @@ class _SupersetListRow extends ConsumerWidget {
             if (showDragHandle)
               ReorderableDragStartListener(
                 index: listIndex,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: AppColors.textMuted.withValues(alpha: 0.8),
+                child: KeyedSubtree(
+                  key:
+                      listIndex == 0 ? TutorialTargets.workoutReorderKey : null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Icon(
+                      Icons.drag_handle,
+                      color: AppColors.textMuted.withValues(alpha: 0.8),
+                    ),
                   ),
                 ),
               ),
@@ -642,7 +673,8 @@ class _SupersetListRow extends ConsumerWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(11),
                             border: Border.all(
-                              color: AppColors.textMuted.withValues(alpha: 0.45),
+                              color:
+                                  AppColors.textMuted.withValues(alpha: 0.45),
                               width: 3,
                             ),
                           ),
@@ -661,12 +693,14 @@ class _SupersetListRow extends ConsumerWidget {
                             children: [
                               for (var i = 0; i < members.length; i++)
                                 Padding(
-                                  padding: EdgeInsets.only(left: i == 0 ? 0 : 2),
+                                  padding:
+                                      EdgeInsets.only(left: i == 0 ? 0 : 2),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        SupersetGroups.slotLetter(members[i].supersetSlot ?? (i + 1)),
+                                        SupersetGroups.slotLetter(
+                                            members[i].supersetSlot ?? (i + 1)),
                                         style: TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w800,
@@ -680,7 +714,8 @@ class _SupersetListRow extends ConsumerWidget {
                                           exerciseName: members[i].exerciseName,
                                           width: 16,
                                           height: 16,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                       ),
                                     ],
@@ -695,7 +730,8 @@ class _SupersetListRow extends ConsumerWidget {
                             bottom: -2,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).scaffoldBackgroundColor,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -725,14 +761,16 @@ class _SupersetListRow extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.groupedSetKind(members.length),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     names,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 13),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -742,7 +780,8 @@ class _SupersetListRow extends ConsumerWidget {
                             SupersetGroups.currentRound(members),
                             totalRounds,
                           ),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 13),
                   ),
                   if (onJoin != null)
                     TextButton.icon(
@@ -760,6 +799,7 @@ class _SupersetListRow extends ConsumerWidget {
               ),
             ),
             PopupMenuButton<String>(
+              key: listIndex == 0 ? TutorialTargets.workoutSwapKey : null,
               icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
               onSelected: (value) {
                 if (value == 'join') {
@@ -803,7 +843,8 @@ class _SupersetListRow extends ConsumerWidget {
                       child: ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.link_off),
-                        title: Text('${l10n.leaveGroupedSet(members.length)}: ${member.exerciseName}'),
+                        title: Text(
+                            '${l10n.leaveGroupedSet(members.length)}: ${member.exerciseName}'),
                       ),
                     ),
                 for (final member in members)
@@ -811,7 +852,8 @@ class _SupersetListRow extends ConsumerWidget {
                     value: 'remove:${member.id}',
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                      leading: const Icon(Icons.delete_outline,
+                          color: AppColors.error),
                       title: Text('${l10n.remove} ${member.exerciseName}'),
                     ),
                   ),
@@ -844,7 +886,9 @@ class _AddExerciseRow extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                border: Border.all(color: context.accentColor.withValues(alpha: 0.5), width: 1.5),
+                border: Border.all(
+                    color: context.accentColor.withValues(alpha: 0.5),
+                    width: 1.5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.add, color: context.accentColor),

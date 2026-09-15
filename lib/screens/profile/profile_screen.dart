@@ -10,6 +10,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/tutorials/tutorial_catalog.dart';
 import '../../core/tutorials/tutorial_navigation.dart';
+import '../../core/tutorials/tutorial_workout_session.dart';
 import '../../core/utils/age_calculator.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../l10n/app_localizations.dart';
@@ -64,7 +65,9 @@ enum _ProfileSection {
 }
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  final String? initialSection;
+
+  const ProfileScreen({super.key, this.initialSection});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -77,12 +80,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _runnerModeUpdating = false;
   _ProfileSection _section = _ProfileSection.hub;
   String? _sectionTitle;
+  String? _openedFromQuery;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(cloudExerciseDownloadProvider.notifier).refreshMeta(checkRemote: true);
+      ref
+          .read(cloudExerciseDownloadProvider.notifier)
+          .refreshMeta(checkRemote: true);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _openTutorialsFromRoute();
+  }
+
+  @override
+  void didUpdateWidget(ProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialSection != widget.initialSection) {
+      _openedFromQuery = null;
+      _openTutorialsFromRoute();
+    }
+  }
+
+  void _openTutorialsFromRoute() {
+    final section = widget.initialSection ??
+        GoRouterState.of(context).uri.queryParameters['section'];
+    if (section != 'tutorials') return;
+    if (_openedFromQuery == section && _section == _ProfileSection.tutorials) {
+      return;
+    }
+    _openedFromQuery = section;
+    final title = context.l10n.tutorialsTitle;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_section != _ProfileSection.tutorials) {
+        _openSection(_ProfileSection.tutorials, title);
+      }
     });
   }
 
@@ -101,10 +139,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _closeSection() {
     if (_section == _ProfileSection.hub) return;
+    final hadQuery =
+        GoRouterState.of(context).uri.queryParameters['section'] != null;
     setState(() {
       _section = _ProfileSection.hub;
       _sectionTitle = null;
     });
+    _openedFromQuery = null;
+    if (hadQuery) context.go('/profile');
   }
 
   @override
@@ -121,7 +163,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       },
       child: Scaffold(
         appBar: FitForgeAppBar(
-          title: inSection ? (_sectionTitle ?? l10n.profileTitle) : l10n.profileTitle,
+          title: inSection
+              ? (_sectionTitle ?? l10n.profileTitle)
+              : l10n.profileTitle,
           showBrandMark: !inSection,
           leading: inSection
               ? IconButton(
@@ -147,16 +191,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             if (inSection) {
               return switch (_section) {
                 _ProfileSection.hub => const SizedBox.shrink(),
-                _ProfileSection.personal => _personalSection(profile, unitSystem),
-                _ProfileSection.body => _bodySection(profile, unitSystem, metricsAsync),
+                _ProfileSection.personal =>
+                  _personalSection(profile, unitSystem),
+                _ProfileSection.body =>
+                  _bodySection(profile, unitSystem, metricsAsync),
                 _ProfileSection.goals => _goalsSection(profile),
-                _ProfileSection.nutrition => _nutritionSection(profile, metricsAsync),
+                _ProfileSection.nutrition =>
+                  _nutritionSection(profile, metricsAsync),
                 _ProfileSection.training => _trainingSection(profile),
                 _ProfileSection.appearance => _preferencesSection(profile),
                 _ProfileSection.tutorials => _tutorialsSection(),
                 _ProfileSection.offline => _offlineSection(context),
                 _ProfileSection.account => _accountSection(),
-                _ProfileSection.plan => SubscriptionPlanSection(profile: profile),
+                _ProfileSection.plan =>
+                  SubscriptionPlanSection(profile: profile),
               };
             }
 
@@ -180,21 +228,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.person_outline,
                     title: l10n.personalData,
                     subtitle: l10n.profileHubPersonalSubtitle,
-                    onTap: () => _openSection(_ProfileSection.personal, l10n.personalData),
+                    onTap: () => _openSection(
+                        _ProfileSection.personal, l10n.personalData),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
                     icon: Icons.monitor_weight_outlined,
                     title: l10n.bodyMetrics,
                     subtitle: l10n.profileHubBodySubtitle,
-                    onTap: () => _openSection(_ProfileSection.body, l10n.bodyMetrics),
+                    onTap: () =>
+                        _openSection(_ProfileSection.body, l10n.bodyMetrics),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
                     icon: Icons.track_changes_outlined,
                     title: l10n.profileHubGoalsTitle,
                     subtitle: l10n.profileHubGoalsSubtitle,
-                    onTap: () => _openSection(_ProfileSection.goals, l10n.profileHubGoalsTitle),
+                    onTap: () => _openSection(
+                        _ProfileSection.goals, l10n.profileHubGoalsTitle),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
@@ -211,7 +262,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.fitness_center_outlined,
                     title: l10n.trainingConfig,
                     subtitle: l10n.profileHubTrainingSubtitle,
-                    onTap: () => _openSection(_ProfileSection.training, l10n.trainingConfig),
+                    onTap: () => _openSection(
+                        _ProfileSection.training, l10n.trainingConfig),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
@@ -267,7 +319,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.manage_accounts_outlined,
                     title: l10n.profileHubAccount,
                     subtitle: l10n.profileHubAccountSubtitle,
-                    onTap: () => _openSection(_ProfileSection.account, l10n.profileHubAccount),
+                    onTap: () => _openSection(
+                        _ProfileSection.account, l10n.profileHubAccount),
                   ),
                   const SizedBox(height: AppTokens.space32),
                   Text(
@@ -279,7 +332,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           fontSize: 11,
                         ),
                   ),
-                  SizedBox(height: AppTokens.space24 + MediaQuery.paddingOf(context).bottom),
+                  SizedBox(
+                      height: AppTokens.space24 +
+                          MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             );
@@ -314,7 +369,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = context.l10n;
     final metaParts = [
       if (profile?.fitnessGoal != null) l10n.goalLabel(profile?.fitnessGoal),
-      if (profile?.experienceLevel != null) l10n.experienceLabel(profile?.experienceLevel),
+      if (profile?.experienceLevel != null)
+        l10n.experienceLabel(profile?.experienceLevel),
       if (profile != null) l10n.activityLevelLabel(profile.activityLevel),
     ];
     final meta = metaParts.join(' · ');
@@ -323,7 +379,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [context.accentColor.withValues(alpha: 0.22), AppColors.cardElevated],
+        colors: [
+          context.accentColor.withValues(alpha: 0.22),
+          AppColors.cardElevated
+        ],
       ),
       child: Column(
         children: [
@@ -334,7 +393,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [context.accentColor, context.accentColor.withValues(alpha: 0.35)],
+                    colors: [
+                      context.accentColor,
+                      context.accentColor.withValues(alpha: 0.35)
+                    ],
                   ),
                 ),
                 child: ProfileAvatar(
@@ -354,7 +416,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     customBorder: const CircleBorder(),
                     child: const Padding(
                       padding: EdgeInsets.all(AppTokens.space8),
-                      child: Icon(Icons.edit_rounded, size: 16, color: Colors.white),
+                      child: Icon(Icons.edit_rounded,
+                          size: 16, color: Colors.white),
                     ),
                   ),
                 ),
@@ -364,15 +427,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: AppTokens.space12),
           Text(
             profile?.displayName ?? l10n.user,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
-          if (profile != null) SubscriptionTierLabel(tier: profile.subscriptionTier),
+          if (profile != null)
+            SubscriptionTierLabel(tier: profile.subscriptionTier),
           if (meta.isNotEmpty) ...[
             const SizedBox(height: AppTokens.space4),
             Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => _openSection(_ProfileSection.goals, l10n.profileHubGoalsTitle),
+                onTap: () => _openSection(
+                    _ProfileSection.goals, l10n.profileHubGoalsTitle),
                 borderRadius: BorderRadius.circular(AppTokens.radiusSm),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -386,11 +454,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Text(
                           meta,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          style: const TextStyle(
+                              color: AppColors.textMuted, fontSize: 13),
                         ),
                       ),
                       const SizedBox(width: AppTokens.space4),
-                      Icon(Icons.edit_outlined, size: 14, color: context.accentColor.withValues(alpha: 0.85)),
+                      Icon(Icons.edit_outlined,
+                          size: 14,
+                          color: context.accentColor.withValues(alpha: 0.85)),
                     ],
                   ),
                 ),
@@ -417,7 +488,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final birthDate = profile?.dateOfBirth;
     final birthSubtitle = birthDate != null
         ? l10n.dateOfBirthSubtitle(
-            DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(birthDate),
+            DateFormat.yMMMMd(Localizations.localeOf(context).toString())
+                .format(birthDate),
             profile?.effectiveAge ?? 0,
           )
         : profile?.effectiveAge != null
@@ -483,7 +555,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               snapshots: snapshots,
               profile: profile,
               unitSystem: unitSystem,
-              onEdit: (def) => _editMetric(profile, def, snapshots[def.key], unitSystem),
+              onEdit: (def) =>
+                  _editMetric(profile, def, snapshots[def.key], unitSystem),
             ),
             const SizedBox(height: AppTokens.space16),
             const BodyMetricHealthLegend(),
@@ -518,7 +591,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       FfListRow(
         icon: Icons.directions_walk_outlined,
         title: l10n.activityLevel,
-        subtitle: l10n.activityLevelLabel(profile?.activityLevel ?? DailyActivityLevel.moderate),
+        subtitle: l10n.activityLevelLabel(
+            profile?.activityLevel ?? DailyActivityLevel.moderate),
         onTap: () => _editActivityLevel(profile),
       ),
     ]);
@@ -547,7 +621,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             WaterGoalCalculator.formatVolume(waterGoal, useFlOz: useFlOz),
           );
 
-    final bmr = BmrCalculator.calculate(profile: profile, snapshots: bodyMetrics);
+    final bmr =
+        BmrCalculator.calculate(profile: profile, snapshots: bodyMetrics);
     String calorieSubtitle = l10n.profileNutritionCaloriesSubtitle;
     if (bmr != null) {
       final tdee = DailyNutritionBudget.computeTdee(
@@ -559,7 +634,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         profile?.calorieAdjustmentPct,
       );
       final goalKcal = CalorieBudgetAdjustment.goalFromTdee(tdee, pct);
-      calorieSubtitle = '$goalKcal kcal · ${l10n.profileNutritionCaloriesSubtitle}';
+      calorieSubtitle =
+          '$goalKcal kcal · ${l10n.profileNutritionCaloriesSubtitle}';
     }
 
     return _sectionList([
@@ -608,7 +684,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         value: (profile?.isTrainer ?? false) &&
             (profile?.subscriptionTier.hasTrainerMode ?? false),
         activeThumbColor: context.accentColor,
-        onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) && !_trainerModeUpdating
+        onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) &&
+                !_trainerModeUpdating
             ? (value) => _setTrainerMode(enabled: value)
             : null,
       ),
@@ -618,7 +695,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         subtitle: Text(l10n.hyroxModeSubtitle),
         value: profile?.hyroxMode ?? false,
         activeThumbColor: context.accentColor,
-        onChanged: _hyroxModeUpdating ? null : (value) => _setHyroxMode(enabled: value, profile: profile),
+        onChanged: _hyroxModeUpdating
+            ? null
+            : (value) => _setHyroxMode(enabled: value, profile: profile),
       ),
       SwitchListTile(
         secondary: Icon(Icons.nordic_walking, color: context.accentColor),
@@ -626,7 +705,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         subtitle: Text(l10n.runnerModeSubtitle),
         value: profile?.runnerMode ?? false,
         activeThumbColor: context.accentColor,
-        onChanged: _runnerModeUpdating ? null : (value) => _setRunnerMode(enabled: value, profile: profile),
+        onChanged: _runnerModeUpdating
+            ? null
+            : (value) => _setRunnerMode(enabled: value, profile: profile),
       ),
       ref.watch(restTimerAlertModeProvider).when(
             skipLoadingOnReload: true,
@@ -655,7 +736,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _preferencesSection(UserProfile? profile) {
     final l10n = context.l10n;
     final accent = ref.watch(accentProvider);
-    final proactiveEnabled = ref.watch(aiProactiveEnabledProvider).valueOrNull ?? false;
+    final proactiveEnabled =
+        ref.watch(aiProactiveEnabledProvider).valueOrNull ?? false;
     return ListView(
       padding: AppTokens.pagePaddingWithBottomInset(context),
       children: [
@@ -685,7 +767,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             lockedMessage: l10n.featureGymratPlansOnly,
             onChanged: (profile?.subscriptionTier.hasCustomAccent ?? false)
                 ? (value) async {
-                    await ref.read(profileServiceProvider).updateProfile({'accent_color': value.name});
+                    await ref
+                        .read(profileServiceProvider)
+                        .updateProfile({'accent_color': value.name});
                     ref.invalidate(profileProvider);
                   }
                 : null,
@@ -713,7 +797,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       value: canProactive && enabled,
       activeThumbColor: context.accentColor,
       onChanged: canProactive
-          ? (value) => _setProactiveAi(enabled: value, currentlyEnabled: enabled)
+          ? (value) =>
+              _setProactiveAi(enabled: value, currentlyEnabled: enabled)
           : null,
     );
   }
@@ -742,22 +827,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = context.l10n;
     final tutorial = ref.watch(tutorialControllerProvider);
     final done = tutorial.isCompleted(tour.id);
+    final needsRoutine = tour.id == TutorialCatalog.workoutSession;
+    final routinesAsync = needsRoutine ? ref.watch(routinesProvider) : null;
+    final hasRoutine = routinesAsync?.maybeWhen(
+      data: (routines) => firstWorkoutTutorialRoutine(routines) != null,
+      orElse: () => null,
+    );
+    final locked = needsRoutine && hasRoutine == false;
+
     return FfListRow(
       icon: tour.icon,
       title: tour.title(l10n),
-      subtitle: tour.subtitle(l10n),
+      subtitle: locked
+          ? l10n.tutorialWorkoutSessionNeedsRoutine
+          : tour.subtitle(l10n),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (done)
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: Icon(Icons.check_circle, color: context.accentColor, size: 20),
+              child: Icon(Icons.check_circle,
+                  color: context.accentColor, size: 20),
             ),
           Text(
             done ? l10n.tutorialReplay : l10n.tutorialStart,
             style: TextStyle(
-              color: context.accentColor,
+              color: locked ? AppColors.textMuted : context.accentColor,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
@@ -765,7 +861,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
       showChevron: false,
-      onTap: () => TutorialNavigation.start(ref, tour),
+      onTap: () {
+        if (needsRoutine) {
+          if (hasRoutine == null) return;
+          if (!hasRoutine) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.tutorialWorkoutSessionNeedsRoutine),
+                action: SnackBarAction(
+                  label: l10n.emptyRoutinesAction,
+                  onPressed: () => context.go('/?tab=routines'),
+                ),
+              ),
+            );
+            return;
+          }
+        }
+        TutorialNavigation.start(ref, tour);
+      },
     );
   }
 
@@ -789,7 +902,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (selected == null) return;
     if (!AvatarCatalog.canSelect(selected, email)) return;
 
-    await ref.read(profileServiceProvider).updateProfile({'avatar_url': selected});
+    await ref
+        .read(profileServiceProvider)
+        .updateProfile({'avatar_url': selected});
     ref.invalidate(profileProvider);
   }
 
@@ -808,7 +923,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: InputDecoration(hintText: l10n.displayName),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () {
               final name = controller.text.trim();
@@ -826,7 +942,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
     if (result != null && result.isNotEmpty) {
-      await ref.read(profileServiceProvider).updateProfile({'display_name': result});
+      await ref
+          .read(profileServiceProvider)
+          .updateProfile({'display_name': result});
       ref.invalidate(profileProvider);
       ref.invalidate(leaderboardProvider);
     }
@@ -877,7 +995,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
     if (selected != null) {
-      await ref.read(profileServiceProvider).updateProfile({'gender': selected.code});
+      await ref
+          .read(profileServiceProvider)
+          .updateProfile({'gender': selected.code});
       ref.invalidate(profileProvider);
     }
   }
@@ -885,7 +1005,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _editHeight(UserProfile? profile) async {
     final l10n = context.l10n;
     final cmController = TextEditingController(
-      text: profile?.heightCm != null ? profile!.heightCm!.toStringAsFixed(0) : '',
+      text: profile?.heightCm != null
+          ? profile!.heightCm!.toStringAsFixed(0)
+          : '',
     );
 
     final result = await showDialog<double>(
@@ -899,10 +1021,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: const InputDecoration(suffixText: 'cm'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
-            onPressed: () =>
-                Navigator.pop(ctx, double.tryParse(cmController.text.replaceAll(',', '.'))),
+            onPressed: () => Navigator.pop(
+                ctx, double.tryParse(cmController.text.replaceAll(',', '.'))),
             child: Text(l10n.save),
           ),
         ],
@@ -910,7 +1033,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
 
     if (result != null && result > 50 && result < 280) {
-      await ref.read(profileServiceProvider).updateProfile({'height_cm': result});
+      await ref
+          .read(profileServiceProvider)
+          .updateProfile({'height_cm': result});
       ref.invalidate(profileProvider);
     }
   }
@@ -932,7 +1057,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
     if (selected != null && selected != profile?.preferredLanguage) {
-      await ref.read(profileServiceProvider).updateProfile({'preferred_language': selected});
+      await ref
+          .read(profileServiceProvider)
+          .updateProfile({'preferred_language': selected});
       ref.read(exerciseServiceProvider).configure(language: selected);
       ref.invalidate(profileProvider);
       ref.invalidate(exercisesProvider);
@@ -948,7 +1075,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: AppColors.cardElevated,
         shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -963,7 +1091,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                 child: Text(
                   l10n.fitnessGoalHint,
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                  style: const TextStyle(
+                      color: AppColors.textMuted, fontSize: 13, height: 1.35),
                 ),
               ),
               Flexible(
@@ -1082,7 +1211,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
                 child: Text(
                   l10n.activityLevelHint,
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                  style: const TextStyle(
+                      color: AppColors.textMuted, fontSize: 13, height: 1.35),
                 ),
               ),
               ...l10n.activityLevels.map(
@@ -1098,7 +1228,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
                 child: Text(
                   l10n.activityLevelFootnote,
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.35),
+                  style: const TextStyle(
+                      color: AppColors.textMuted, fontSize: 11, height: 1.35),
                 ),
               ),
             ],
@@ -1146,7 +1277,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(enabled ? l10n.hyroxModeEnabled : l10n.hyroxModeDisabled),
+          content:
+              Text(enabled ? l10n.hyroxModeEnabled : l10n.hyroxModeDisabled),
         ),
       );
     } catch (e) {
@@ -1180,7 +1312,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(enabled ? l10n.runnerModeEnabled : l10n.runnerModeDisabled),
+          content:
+              Text(enabled ? l10n.runnerModeEnabled : l10n.runnerModeDisabled),
         ),
       );
     } catch (e) {
@@ -1216,7 +1349,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Icon(Icons.cloud_download_outlined, color: context.accentColor),
+          leading:
+              Icon(Icons.cloud_download_outlined, color: context.accentColor),
           title: Text(l10n.offlineDownloadExercisesTitle),
           subtitle: Text(subtitle),
           trailing: download.isDownloading
@@ -1275,7 +1409,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            l10n.offlineDownloadExercisesUpToDate(status.localCount, status.localMediaCount),
+            l10n.offlineDownloadExercisesUpToDate(
+                status.localCount, status.localMediaCount),
           ),
         ),
       );
@@ -1314,9 +1449,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final result = await notifier.download();
       if (!context.mounted) return;
 
-      if (result.newlyDownloadedExercises == 0 && result.newlyDownloadedMedia == 0) {
+      if (result.newlyDownloadedExercises == 0 &&
+          result.newlyDownloadedMedia == 0) {
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.offlineDownloadExercisesUpToDate(result.exerciseCount, result.mediaCount))),
+          SnackBar(
+              content: Text(l10n.offlineDownloadExercisesUpToDate(
+                  result.exerciseCount, result.mediaCount))),
         );
         return;
       }
@@ -1341,15 +1479,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  String _downloadProgressLabel(AppLocalizations l10n, CloudExerciseDownloadState download) {
+  String _downloadProgressLabel(
+      AppLocalizations l10n, CloudExerciseDownloadState download) {
     if (download.phase == CloudExerciseDownloadPhase.media) {
       if (download.total != null) {
-        return l10n.offlineDownloadExercisesProgressMedia(download.downloaded, download.total!);
+        return l10n.offlineDownloadExercisesProgressMedia(
+            download.downloaded, download.total!);
       }
-      return l10n.offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
+      return l10n
+          .offlineDownloadExercisesProgressMediaUnknown(download.downloaded);
     }
     if (download.total != null) {
-      return l10n.offlineDownloadExercisesProgress(download.downloaded, download.total!);
+      return l10n.offlineDownloadExercisesProgress(
+          download.downloaded, download.total!);
     }
     return l10n.offlineDownloadExercisesProgressUnknown(download.downloaded);
   }
@@ -1382,7 +1524,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            enabled ? l10n.personalTrainerModeEnabled : l10n.personalTrainerModeDisabled,
+            enabled
+                ? l10n.personalTrainerModeEnabled
+                : l10n.personalTrainerModeDisabled,
           ),
         ),
       );
@@ -1419,7 +1563,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     if (mode == current)
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Icon(Icons.check, color: context.accentColor, size: 20),
+                        child: Icon(Icons.check,
+                            color: context.accentColor, size: 20),
                       ),
                     Expanded(child: Text(l10n.restTimerAlertModeLabel(mode))),
                   ],
@@ -1447,9 +1592,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     String initialText = '';
     if (snapshot?.hasValue == true) {
       if (def.kind == BodyMetricKind.mass) {
-        initialText = UnitConverter.kgToDisplay(snapshot!.valueKg!, unitSystem).toStringAsFixed(1);
+        initialText = UnitConverter.kgToDisplay(snapshot!.valueKg!, unitSystem)
+            .toStringAsFixed(1);
       } else {
-        final decimals = def.kind == BodyMetricKind.kcal || def.kind == BodyMetricKind.years ? 0 : 1;
+        final decimals =
+            def.kind == BodyMetricKind.kcal || def.kind == BodyMetricKind.years
+                ? 0
+                : 1;
         initialText = snapshot!.rawValue!.toStringAsFixed(decimals);
       }
     }
@@ -1473,9 +1622,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, double.tryParse(controller.text.replaceAll(',', '.'))),
+            onPressed: () => Navigator.pop(
+                ctx, double.tryParse(controller.text.replaceAll(',', '.'))),
             child: Text(l10n.save),
           ),
         ],
@@ -1615,7 +1766,8 @@ class _MetricsGrid extends StatelessWidget {
       itemCount: BodyMetricDefinition.all.length,
       itemBuilder: (context, index) {
         final def = BodyMetricDefinition.all[index];
-        final snapshot = snapshots[def.key] ?? BodyMetricSnapshot(type: def.key);
+        final snapshot =
+            snapshots[def.key] ?? BodyMetricSnapshot(type: def.key);
         return BodyMetricCard(
           definition: def,
           displayLabel: l10n.bodyMetricLabel(def.key),
@@ -1624,7 +1776,8 @@ class _MetricsGrid extends StatelessWidget {
           yearsLabel: l10n.years,
           profile: profile,
           allSnapshots: snapshots,
-          computedHint: def.isComputed ? l10n.metricCalculatedAutomatically : null,
+          computedHint:
+              def.isComputed ? l10n.metricCalculatedAutomatically : null,
           onTap: def.isComputed ? null : () => onEdit(def),
         );
       },
@@ -1667,12 +1820,16 @@ class _FreeAdvancedSettingsState extends State<_FreeAdvancedSettings> {
                     children: [
                       Text(
                         l10n.advancedSettings,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: muted),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(color: muted),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         l10n.advancedSettingsHint,
-                        style: TextStyle(color: muted.withValues(alpha: 0.85), fontSize: 12),
+                        style: TextStyle(
+                            color: muted.withValues(alpha: 0.85), fontSize: 12),
                       ),
                     ],
                   ),
@@ -1694,9 +1851,11 @@ class _FreeAdvancedSettingsState extends State<_FreeAdvancedSettings> {
               profile?.hasAiKey == true
                   ? l10n.apiKeysConfigured(profile?.aiProvider.name ?? '')
                   : l10n.bringYourOwnAiSubtitle,
-              style: TextStyle(color: muted.withValues(alpha: 0.85), fontSize: 13),
+              style:
+                  TextStyle(color: muted.withValues(alpha: 0.85), fontSize: 13),
             ),
-            trailing: Icon(Icons.chevron_right, color: muted.withValues(alpha: 0.7)),
+            trailing:
+                Icon(Icons.chevron_right, color: muted.withValues(alpha: 0.7)),
             onTap: () => context.push('/api-keys'),
           ),
       ],

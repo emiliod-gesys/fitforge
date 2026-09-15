@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/router/app_router.dart';
+import '../../core/workout/routine_to_workout_exercises.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
@@ -11,6 +12,8 @@ import '../../widgets/runner_surface_picker.dart';
 import '../../services/ai_preferences.dart';
 import '../../services/proactive_workout_enricher.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
+
+export '../../core/workout/routine_to_workout_exercises.dart';
 
 Future<void> startWorkoutAndNavigate(
   BuildContext context,
@@ -45,7 +48,8 @@ Future<void> startWorkoutAndNavigate(
     if (!context.mounted) return;
     await FitForgeLoadingOverlay.run(
       context,
-      message: useAi ? l10n.aiCalculatingWorkoutSuggestions : l10n.startingWorkout,
+      message:
+          useAi ? l10n.aiCalculatingWorkoutSuggestions : l10n.startingWorkout,
       task: () async {
         Future<List<WorkoutExercise>> Function(
           List<WorkoutExercise> locallyEnriched,
@@ -88,7 +92,8 @@ Future<void> startWorkoutAndNavigate(
   }
 }
 
-Future<({List<WorkoutExercise> exercises, bool aiApplied})> _enrichWithProactiveAi({
+Future<({List<WorkoutExercise> exercises, bool aiApplied})>
+    _enrichWithProactiveAi({
   required WidgetRef ref,
   required UserProfile profile,
   required List<WorkoutExercise> exercises,
@@ -99,7 +104,8 @@ Future<({List<WorkoutExercise> exercises, bool aiApplied})> _enrichWithProactive
 
   final catalog = ref.read(exercisesProvider).valueOrNull ?? [];
   final customRepo = ref.read(customExerciseRepositoryProvider);
-  final customs = (await customRepo.loadAll()).map((c) => c.toExercise()).toList();
+  final customs =
+      (await customRepo.loadAll()).map((c) => c.toExercise()).toList();
   final fullCatalog = [...catalog, ...customs];
 
   final recoveryWorkouts = await workoutService.getWorkoutsForMuscleRecovery();
@@ -120,39 +126,6 @@ Future<({List<WorkoutExercise> exercises, bool aiApplied})> _enrichWithProactive
     catalog: fullCatalog,
     excludeWorkoutId: excludeWorkoutId,
   );
-}
-
-List<WorkoutExercise> workoutExercisesFromRoutine(Routine routine) {
-  return routine.exercises
-      .map(
-        (e) => WorkoutExercise(
-          id: '',
-          exerciseId: e.exerciseId,
-          exerciseName: e.exerciseName,
-          imageUrl: e.imageUrl,
-          orderIndex: e.orderIndex,
-          supersetGroupId: e.supersetGroupId,
-          supersetSlot: e.supersetSlot,
-          sets: e.resolvedSetDetails
-              .asMap()
-              .entries
-              .map(
-                (entry) => WorkoutSet(
-                  id: '',
-                  setNumber: entry.key + 1,
-                  weight: e.isCardio ? null : entry.value.weight,
-                  reps: e.isCardio ? 0 : entry.value.reps,
-                  loggingType: e.loggingType,
-                  durationSeconds: e.targetDurationSeconds,
-                  distanceMeters: e.targetDistanceMeters,
-                  inclinePercent: e.targetInclinePercent,
-                  steps: e.targetSteps,
-                ),
-              )
-              .toList(),
-        ),
-      )
-      .toList();
 }
 
 Future<void> startWorkoutFromRoutine(

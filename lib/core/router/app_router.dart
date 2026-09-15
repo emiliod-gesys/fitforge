@@ -135,7 +135,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/ai-coach',
-            pageBuilder: (_, __) => const NoTransitionPage(child: AiCoachScreen()),
+            pageBuilder: (_, __) =>
+                const NoTransitionPage(child: AiCoachScreen()),
           ),
           GoRoute(
             path: '/food',
@@ -143,33 +144,43 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/progress',
-            pageBuilder: (_, __) => const NoTransitionPage(child: ProgressScreen()),
+            pageBuilder: (_, __) =>
+                const NoTransitionPage(child: ProgressScreen()),
           ),
           GoRoute(
             path: '/social',
-            pageBuilder: (_, __) => const NoTransitionPage(child: SocialScreen()),
+            pageBuilder: (_, __) =>
+                const NoTransitionPage(child: SocialScreen()),
           ),
           GoRoute(
             path: '/students',
-            pageBuilder: (_, __) => const NoTransitionPage(child: StudentsScreen()),
+            pageBuilder: (_, __) =>
+                const NoTransitionPage(child: StudentsScreen()),
           ),
           GoRoute(
             path: '/profile',
-            pageBuilder: (_, __) => const NoTransitionPage(child: ProfileScreen()),
+            pageBuilder: (_, state) => NoTransitionPage(
+              child: ProfileScreen(
+                initialSection: state.uri.queryParameters['section'],
+              ),
+            ),
           ),
         ],
       ),
       GoRoute(
         path: '/social/friend/:id',
-        builder: (_, state) => FriendProfileScreen(friendId: state.pathParameters['id']!),
+        builder: (_, state) =>
+            FriendProfileScreen(friendId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/social/post/:postId',
-        builder: (_, state) => FeedPostDetailScreen(postId: state.pathParameters['postId']!),
+        builder: (_, state) =>
+            FeedPostDetailScreen(postId: state.pathParameters['postId']!),
       ),
       GoRoute(
         path: '/students/:id',
-        builder: (_, state) => StudentDetailScreen(studentId: state.pathParameters['id']!),
+        builder: (_, state) =>
+            StudentDetailScreen(studentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/workout/active',
@@ -193,7 +204,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           final fromPending = ref.read(pendingWorkoutSummaryProvider);
           final initial = fromExtra ?? fromPending;
           final sessionId = ref.read(workoutSummarySessionIdProvider);
-          final hostKey = initial?.workout.id ?? sessionId ?? 'workout-summary-empty';
+          final hostKey =
+              initial?.workout.id ?? sessionId ?? 'workout-summary-empty';
           return WorkoutSummaryHost(
             key: ValueKey('workout-summary-$hostKey'),
             initialSummary: initial,
@@ -212,11 +224,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/routines/:id/edit',
-        builder: (_, state) => RoutineEditorScreen(routineId: state.pathParameters['id']),
+        builder: (_, state) =>
+            RoutineEditorScreen(routineId: state.pathParameters['id']),
       ),
       GoRoute(
         path: '/students/:studentId/routines/new',
-        builder: (_, state) => RoutineEditorScreen(studentId: state.pathParameters['studentId']),
+        builder: (_, state) =>
+            RoutineEditorScreen(studentId: state.pathParameters['studentId']),
       ),
       GoRoute(
         path: '/students/:studentId/routines/:id/edit',
@@ -227,7 +241,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/exercises/:id',
-        builder: (_, state) => ExerciseDetailScreen(exerciseId: state.pathParameters['id']!),
+        builder: (_, state) =>
+            ExerciseDetailScreen(exerciseId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/api-keys',
@@ -246,8 +261,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           return FoodAddScreen(
             mealType: meal,
             day: day,
-            onboardingMode: extra?['onboarding'] as bool? ?? stored?.onboardingMode ?? false,
-            initialMode: extra?['initialMode'] as FoodAddMode? ?? stored?.initialMode,
+            onboardingMode: extra?['onboarding'] as bool? ??
+                stored?.onboardingMode ??
+                false,
+            initialMode:
+                extra?['initialMode'] as FoodAddMode? ?? stored?.initialMode,
           );
         },
       ),
@@ -270,9 +288,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             source: extra?['source'] as FoodEntrySource? ??
                 stored?.source ??
                 FoodEntrySource.manual,
-            originalQuery: extra?['originalQuery'] as String? ?? stored?.originalQuery,
-            imageBytes: extra?['imageBytes'] as List<int>? ?? stored?.imageBytes,
-            onboardingMode: extra?['onboarding'] as bool? ?? stored?.onboardingMode ?? false,
+            originalQuery:
+                extra?['originalQuery'] as String? ?? stored?.originalQuery,
+            imageBytes:
+                extra?['imageBytes'] as List<int>? ?? stored?.imageBytes,
+            onboardingMode: extra?['onboarding'] as bool? ??
+                stored?.onboardingMode ??
+                false,
           );
         },
       ),

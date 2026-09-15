@@ -50,6 +50,7 @@ abstract final class TutorialCatalog {
   static const routines = 'routines';
   static const supersets = 'supersets';
   static const foodLog = 'foodLog';
+  static const workoutSession = 'workoutSession';
 
   static final List<TutorialTour> all = [
     TutorialTour(
@@ -240,6 +241,67 @@ abstract final class TutorialCatalog {
           targetId: TutorialTargets.foodAddModes,
           title: (l10n) => l10n.tutorialFoodLogModesTitle,
           body: (l10n) => l10n.tutorialFoodLogModesBody,
+        ),
+      ],
+    ),
+    TutorialTour(
+      id: workoutSession,
+      route: '/',
+      icon: Icons.play_circle_outline,
+      advanced: true,
+      title: (l10n) => l10n.tutorialWorkoutSessionTitle,
+      subtitle: (l10n) => l10n.tutorialWorkoutSessionSubtitle,
+      steps: [
+        TutorialStep(
+          targetId: TutorialTargets.trainStart,
+          route: '/',
+          title: (l10n) => l10n.tutorialWorkoutSessionStartTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionStartBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutAddExercise,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          title: (l10n) => l10n.tutorialWorkoutSessionAddTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionAddBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutSwap,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          title: (l10n) => l10n.tutorialWorkoutSessionSwapTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionSwapBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutReorder,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          optional: true,
+          title: (l10n) => l10n.tutorialWorkoutSessionReorderTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionReorderBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutRest,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          optional: true,
+          title: (l10n) => l10n.tutorialWorkoutSessionRestTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionRestBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutAddSet,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          title: (l10n) => l10n.tutorialWorkoutSessionAddSetTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionAddSetBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.workoutRemoveSet,
+          route: '/workout/active',
+          nav: TutorialNav.push,
+          optional: true,
+          title: (l10n) => l10n.tutorialWorkoutSessionRemoveSetTitle,
+          body: (l10n) => l10n.tutorialWorkoutSessionRemoveSetBody,
         ),
       ],
     ),

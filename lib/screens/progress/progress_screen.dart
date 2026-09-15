@@ -46,7 +46,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   /// Grupos musculares con records, en el orden canónico.
-  List<String> _availableMuscles(List<PersonalRecord> prs, List<Exercise> catalog) {
+  List<String> _availableMuscles(
+      List<PersonalRecord> prs, List<Exercise> catalog) {
     final present = <String>{};
     for (final pr in prs) {
       present.addAll(_categoriesFor(pr, catalog));
@@ -67,7 +68,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   bool _isRecentPr(PersonalRecord pr) {
-    return pr.achievedAt.isAfter(DateTime.now().subtract(const Duration(days: 7)));
+    return pr.achievedAt
+        .isAfter(DateTime.now().subtract(const Duration(days: 7)));
   }
 
   @override
@@ -105,7 +107,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             profileAsync.when(
               data: (profile) {
                 if (profile == null) return const SizedBox.shrink();
-                final progress = PlayerLevelCalculator.fromTotalXp(profile.totalXp);
+                final progress =
+                    PlayerLevelCalculator.fromTotalXp(profile.totalXp);
                 return Column(
                   children: [
                     ProgressHeroCard(
@@ -141,8 +144,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   key: TutorialTargets.progressStatsKey,
                   l10n: l10n,
                   unitSystem: unitSystem,
-                  monthlyWorkouts: ProgressStatsCalculator.workoutsThisMonth(workouts),
-                  monthlyVolumeKg: ProgressStatsCalculator.volumeThisMonth(workouts),
+                  monthlyWorkouts:
+                      ProgressStatsCalculator.workoutsThisMonth(workouts),
+                  monthlyVolumeKg:
+                      ProgressStatsCalculator.volumeThisMonth(workouts),
                   monthlyPrCount: _monthlyPrCount(prs),
                   streakWeeks: stats.streakWeeks,
                 );
@@ -202,7 +207,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
+                      Text(l10n.personalRecords,
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 16),
                       Text(l10n.noRecordsYet),
                     ],
@@ -214,7 +220,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.personalRecords, style: Theme.of(context).textTheme.titleLarge),
+                      Text(l10n.personalRecords,
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 16),
                       Text(l10n.noRecordsYet),
                     ],
@@ -224,16 +231,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 // Por defecto, el músculo del record más reciente.
                 final mostRecent = [...prs]
                   ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
-                final recentCats =
-                    _categoriesFor(mostRecent.first, catalog).where(available.contains);
+                final recentCats = _categoriesFor(mostRecent.first, catalog)
+                    .where(available.contains);
                 final defaultMuscle =
                     recentCats.isNotEmpty ? recentCats.first : available.first;
-                final selected = (_muscleFilter != null && available.contains(_muscleFilter))
-                    ? _muscleFilter!
-                    : defaultMuscle;
+                final selected =
+                    (_muscleFilter != null && available.contains(_muscleFilter))
+                        ? _muscleFilter!
+                        : defaultMuscle;
 
                 final filtered = prs
-                    .where((pr) => _categoriesFor(pr, catalog).contains(selected))
+                    .where(
+                        (pr) => _categoriesFor(pr, catalog).contains(selected))
                     .toList()
                   ..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
 
@@ -244,7 +253,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                     ProgressMuscleFilterBar(
                       selectedMuscle: selected,
                       muscles: available,
-                      onChanged: (value) => setState(() => _muscleFilter = value),
+                      onChanged: (value) =>
+                          setState(() => _muscleFilter = value),
                     ),
                     const SizedBox(height: 12),
                     if (filtered.isEmpty)
@@ -301,22 +311,34 @@ class _StatsSkeleton extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: AppColors.cardElevated,
       highlightColor: AppColors.card,
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 1.55,
-        children: List.generate(
-          4,
-          (_) => Container(
-            decoration: BoxDecoration(
-              color: AppColors.cardElevated,
-              borderRadius: BorderRadius.circular(16),
-            ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _skeletonTile()),
+              const SizedBox(width: 10),
+              Expanded(child: _skeletonTile()),
+            ],
           ),
-        ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _skeletonTile()),
+              const SizedBox(width: 10),
+              Expanded(child: _skeletonTile()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _skeletonTile() {
+    return Container(
+      height: 88,
+      decoration: BoxDecoration(
+        color: AppColors.cardElevated,
+        borderRadius: BorderRadius.circular(16),
       ),
     );
   }
