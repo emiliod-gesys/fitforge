@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_accent.dart';
 import 'app_colors.dart';
 import 'app_tokens.dart';
+import 'system_ui.dart';
 
 class AppTheme {
   /// @Deprecated: prefer [AppTokens.radiusMd]
@@ -38,6 +39,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        systemOverlayStyle: ForgenSystemUi.overlay,
         titleTextStyle: GoogleFonts.montserrat(
           fontSize: 18,
           fontWeight: FontWeight.w800,

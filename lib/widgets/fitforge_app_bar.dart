@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/theme/system_ui.dart';
 import 'fitforge_logo.dart';
 
 class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -74,6 +75,7 @@ class FitForgeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: titleWidget,
       actions: actions,
       bottom: bottom,
+      systemOverlayStyle: ForgenSystemUi.overlay,
     );
   }
 }
