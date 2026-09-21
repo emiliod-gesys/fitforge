@@ -6,13 +6,17 @@ import 'package:uuid/uuid.dart';
 import '../models/manual_food_template.dart';
 
 /// Biblioteca local de alimentos registrados manualmente (sin IA).
+/// Una clave por cuenta: el teléfono no debe mostrar la comida de otro usuario.
 class LocalManualFoodStore {
-  static const _storageKey = 'manual_food_templates_v1';
+  static const _storageKeyPrefix = 'manual_food_templates_v1_';
   final _uuid = const Uuid();
 
-  Future<List<ManualFoodTemplate>> getAll() async {
+  String _storageKey(String userId) => '$_storageKeyPrefix$userId';
+
+  Future<List<ManualFoodTemplate>> getAll(String userId) async {
+    if (userId.isEmpty) return const [];
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
+    final raw = prefs.getString(_storageKey(userId));
     if (raw == null || raw.isEmpty) return const [];
 
     try {
@@ -26,8 +30,12 @@ class LocalManualFoodStore {
     }
   }
 
-  Future<List<ManualFoodTemplate>> search({String? query, int limit = 30}) async {
-    final all = await getAll();
+  Future<List<ManualFoodTemplate>> search(
+    String userId, {
+    String? query,
+    int limit = 30,
+  }) async {
+    final all = await getAll(userId);
     final q = query?.trim().toLowerCase();
     if (q == null || q.isEmpty) return all.take(limit).toList();
 
@@ -38,6 +46,7 @@ class LocalManualFoodStore {
   }
 
   Future<ManualFoodTemplate> save({
+    required String userId,
     String? id,
     required String name,
     required int caloriesKcal,
@@ -47,7 +56,10 @@ class LocalManualFoodStore {
     double fiberG = 0,
     String? servingDescription,
   }) async {
-    final all = await getAll();
+    if (userId.isEmpty) {
+      throw ArgumentError('userId is required');
+    }
+    final all = await getAll(userId);
     final now = DateTime.now().toUtc();
     final template = ManualFoodTemplate(
       id: id ?? _uuid.v4(),
@@ -66,18 +78,19 @@ class LocalManualFoodStore {
       ...all.where((item) => item.id != template.id),
     ];
 
-    await _persist(updated);
+    await _persist(userId, updated);
     return template;
   }
 
-  Future<void> delete(String id) async {
-    final all = await getAll();
-    await _persist(all.where((item) => item.id != id).toList());
+  Future<void> delete(String userId, String id) async {
+    if (userId.isEmpty) return;
+    final all = await getAll(userId);
+    await _persist(userId, all.where((item) => item.id != id).toList());
   }
 
-  Future<void> _persist(List<ManualFoodTemplate> items) async {
+  Future<void> _persist(String userId, List<ManualFoodTemplate> items) async {
     final prefs = await SharedPreferences.getInstance();
     final encoded = jsonEncode(items.map((item) => item.toJson()).toList());
-    await prefs.setString(_storageKey, encoded);
+    await prefs.setString(_storageKey(userId), encoded);
   }
 }

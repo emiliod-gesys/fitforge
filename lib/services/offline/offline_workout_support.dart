@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/utils/connection_error.dart';
 import '../../models/workout.dart';
+import '../supabase_service.dart';
 import 'connectivity_service.dart';
 import 'local_workout_store.dart';
 import 'routine_cache_store.dart';
@@ -37,7 +38,10 @@ class OfflineWorkoutSupport {
   Future<void> triggerSync() => _syncService.syncPending();
 
   Future<int> pendingSyncCount() async {
-    final local = await _localStore.pendingSyncCount();
+    final userId = SupabaseService.currentUser?.id;
+    final local = userId == null
+        ? 0
+        : (await _localStore.pendingCompletedWorkouts(userId: userId)).length;
     final activeId = await _localStore.activeWorkoutId();
     final outbox = await _outbox.pendingWorkoutCount(excludeWorkoutId: activeId);
     return local > outbox ? local : outbox;
@@ -46,7 +50,9 @@ class OfflineWorkoutSupport {
   /// Deja de intentar subir entrenos atascados y oculta el aviso.
   Future<void> discardPendingUploads() async {
     final activeId = await _localStore.activeWorkoutId();
-    final pending = await _localStore.pendingCompletedWorkouts();
+    final pending = await _localStore.pendingCompletedWorkouts(
+      userId: SupabaseService.currentUser?.id,
+    );
     for (final workout in pending) {
       await _outbox.clearWorkout(workout.id);
       await _localStore.markSynced(workout.id);

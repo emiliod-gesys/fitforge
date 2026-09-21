@@ -70,27 +70,34 @@ class RoutineCacheStore {
 }
 
 /// Previous sets por ejercicio para autocompletar series offline.
+/// El archivo viejo sin usuario se ignora: mezclaba el historial de todas las cuentas del teléfono.
 class PreviousSetsCache {
   static const _fileName = 'previous_sets_cache.json';
 
-  Future<void> save(String exerciseId, List<WorkoutSet> sets) async {
+  Future<void> save(String userId, String exerciseId, List<WorkoutSet> sets) async {
+    if (userId.isEmpty || exerciseId.isEmpty) return;
     final state = await OfflineJsonFile.readMap(_fileName);
-    final map = Map<String, dynamic>.from(state['sets'] as Map? ?? {});
-    map[exerciseId] = sets
+    final byUser = Map<String, dynamic>.from(state['by_user'] as Map? ?? {});
+    final userSets = Map<String, dynamic>.from(byUser[userId] as Map? ?? {});
+    userSets[exerciseId] = sets
         .map((s) => {
               'id': s.id,
               ...s.toJson(),
             })
         .toList();
-    state['sets'] = map;
-    state['updated_at'] = DateTime.now().toUtc().toIso8601String();
-    await OfflineJsonFile.writeMap(_fileName, state);
+    byUser[userId] = userSets;
+    await OfflineJsonFile.writeMap(_fileName, {
+      'by_user': byUser,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
   }
 
-  Future<List<WorkoutSet>?> load(String exerciseId) async {
+  Future<List<WorkoutSet>?> load(String userId, String exerciseId) async {
+    if (userId.isEmpty || exerciseId.isEmpty) return null;
     final state = await OfflineJsonFile.readMap(_fileName);
-    final map = state['sets'] as Map?;
-    final raw = map?[exerciseId];
+    final byUser = state['by_user'] as Map?;
+    final userSets = byUser?[userId] as Map?;
+    final raw = userSets?[exerciseId];
     if (raw is! List) return null;
     return raw
         .whereType<Map>()

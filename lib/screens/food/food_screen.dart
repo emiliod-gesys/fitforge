@@ -47,6 +47,18 @@ class FoodScreen extends ConsumerWidget {
 
     final day = ref.watch(foodSelectedDayProvider);
 
+    final anchored = ref.watch(foodDayAnchoredOnProvider);
+
+    final today = foodCalendarDay(DateTime.now());
+
+    if (foodCalendarDay(anchored) != today && foodCalendarDay(day) == foodCalendarDay(anchored)) {
+
+      WidgetsBinding.instance.addPostFrameCallback((_) => reconcileFoodSelectedDay(ref));
+
+      return const FitForgeLoadingScreen();
+
+    }
+
     final summaryAsync = ref.watch(dailyNutritionProvider);
 
 
@@ -119,7 +131,7 @@ class FoodScreen extends ConsumerWidget {
 
         ),
 
-        onDayChanged: (d) => ref.read(foodSelectedDayProvider.notifier).state = d,
+        onDayChanged: (d) => selectFoodDay(ref, d),
 
       ),
 
@@ -189,7 +201,7 @@ class _FoodBody extends ConsumerWidget {
 
 
 
-    if (!summaryAsync.hasValue) {
+    if (summaryAsync.isLoading || !summaryAsync.hasValue) {
 
       return const FitForgeLoadingScreen();
 

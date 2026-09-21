@@ -579,6 +579,31 @@ final foodSelectedDayProvider = StateProvider<DateTime>((ref) {
   return DateTime(now.year, now.month, now.day);
 });
 
+/// Día en que el usuario eligió [foodSelectedDayProvider]. Si la app sigue
+/// abierta al día siguiente, el desayuno de ayer no debe verse como el de hoy.
+final foodDayAnchoredOnProvider = StateProvider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
+DateTime foodCalendarDay(DateTime value) =>
+    DateTime(value.year, value.month, value.day);
+
+void reconcileFoodSelectedDay(WidgetRef ref) {
+  final today = foodCalendarDay(DateTime.now());
+  final anchored = foodCalendarDay(ref.read(foodDayAnchoredOnProvider));
+  final selected = foodCalendarDay(ref.read(foodSelectedDayProvider));
+  if (anchored != today && selected == anchored) {
+    ref.read(foodSelectedDayProvider.notifier).state = today;
+    ref.read(foodDayAnchoredOnProvider.notifier).state = today;
+  }
+}
+
+void selectFoodDay(WidgetRef ref, DateTime day) {
+  ref.read(foodSelectedDayProvider.notifier).state = foodCalendarDay(day);
+  ref.read(foodDayAnchoredOnProvider.notifier).state = foodCalendarDay(DateTime.now());
+}
+
 final foodEntriesProvider = FutureProvider<List<FoodEntry>>((ref) async {
   ref.keepAlive();
   final userId = ref.watch(authUserIdProvider);

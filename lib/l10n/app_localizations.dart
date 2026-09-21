@@ -7470,13 +7470,13 @@ abstract class AppLocalizations {
   /// No description provided for @healthIntegrationSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Sincroniza métricas corporales y comparte entrenos con Apple Salud o Health Connect.'**
+  /// **'Importa peso y grasa corporal de los últimos 30 días y, si lo activas, guarda en Health Connect los entrenos que completes en FORGEN.'**
   String get healthIntegrationSubtitle;
 
   /// No description provided for @healthIntegrationDisclaimer.
   ///
   /// In es, this message translates to:
-  /// **'El peso/grasa importados pueden actualizar tu perfil. Los entrenos exportados aparecen en otras apps de salud. El presupuesto de comida sigue usando solo datos de FORGEN.'**
+  /// **'Solo leemos peso y grasa recientes; no pedimos historial antiguo. Los entrenos exportados incluyen ejercicio, calorías activas y distancia. El presupuesto de comida sigue usando solo datos de FORGEN.'**
   String get healthIntegrationDisclaimer;
 
   /// No description provided for @healthIntegrationConnect.

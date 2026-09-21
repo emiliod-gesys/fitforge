@@ -19,7 +19,10 @@ class LocalWorkoutStore {
 
   Future<void> saveWorkout(Workout workout, {required bool pendingSync, bool? syncedToServer}) async {
     final state = await _readState();
-    final workouts = Map<String, dynamic>.from(state['workouts'] as Map? ?? {});
+    final sameUser = state['user_id'] == null || state['user_id'] == workout.userId;
+    final workouts = sameUser
+        ? Map<String, dynamic>.from(state['workouts'] as Map? ?? {})
+        : <String, dynamic>{};
     final existing = workouts[workout.id];
     final preserveSynced = syncedToServer ??
         (existing is Map ? existing['synced_to_server'] as bool? : null) ??
@@ -35,7 +38,9 @@ class LocalWorkoutStore {
 
     await _writeState({
       'user_id': workout.userId,
-      'active_workout_id': workout.isActive ? workout.id : state['active_workout_id'],
+      'active_workout_id': workout.isActive
+          ? workout.id
+          : (sameUser ? state['active_workout_id'] : null),
       'workouts': workouts,
     });
 
@@ -138,6 +143,7 @@ class LocalWorkoutStore {
     var list = workouts.values
         .whereType<Map>()
         .map((raw) => WorkoutLocalSerializer.fromJson(Map<String, dynamic>.from(raw)))
+        .where((workout) => workout.userId == userId)
         .toList();
 
     if (completedOnly) {
@@ -156,14 +162,16 @@ class LocalWorkoutStore {
     return state['active_workout_id'] as String?;
   }
 
-  Future<List<Workout>> pendingCompletedWorkouts() async {
+  Future<List<Workout>> pendingCompletedWorkouts({String? userId}) async {
     final state = await _readState();
+    if (userId != null && state['user_id'] != userId) return [];
     final workouts = state['workouts'] as Map? ?? {};
     return workouts.values
         .whereType<Map>()
         .where((raw) =>
             (raw['pending_sync'] as bool? ?? false) && raw['completed_at'] != null)
         .map((raw) => WorkoutLocalSerializer.fromJson(Map<String, dynamic>.from(raw)))
+        .where((workout) => userId == null || workout.userId == userId)
         .toList();
   }
 

@@ -132,7 +132,12 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   }
 
   Future<void> _loadManualSaved() async {
-    final saved = await ref.read(localManualFoodStoreProvider).getAll();
+    final userId = ref.read(authUserIdProvider);
+    if (userId == null) {
+      if (mounted) setState(() => _manualSaved = const []);
+      return;
+    }
+    final saved = await ref.read(localManualFoodStoreProvider).getAll(userId);
     if (mounted) setState(() => _manualSaved = saved);
   }
 
@@ -140,9 +145,13 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
     final remote = await ref.read(foodServiceProvider).getDistinctRecentFoods(
           query: _filterController.text,
         );
-    final local = await ref.read(localManualFoodStoreProvider).search(
-          query: _filterController.text,
-        );
+    final userId = ref.read(authUserIdProvider);
+    final local = userId == null
+        ? const <ManualFoodTemplate>[]
+        : await ref.read(localManualFoodStoreProvider).search(
+              userId,
+              query: _filterController.text,
+            );
     final localEntries = local.map((template) => template.toPreviewEntry(mealType: widget.mealType)).toList();
     final seen = <String>{};
     final merged = <FoodEntry>[];
@@ -234,7 +243,10 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   }
 
   Future<void> _saveManualTemplate(ManualFoodTemplate template) async {
+    final userId = ref.read(authUserIdProvider);
+    if (userId == null) return;
     await ref.read(localManualFoodStoreProvider).save(
+          userId: userId,
           id: template.id,
           name: template.name,
           caloriesKcal: template.caloriesKcal,
@@ -489,7 +501,9 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         },
                         onSelectSaved: _openFromManualTemplate,
                         onDeleteSaved: (id) async {
-                          await ref.read(localManualFoodStoreProvider).delete(id);
+                          final userId = ref.read(authUserIdProvider);
+                          if (userId == null) return;
+                          await ref.read(localManualFoodStoreProvider).delete(userId, id);
                           await _loadManualSaved();
                           await _loadRecent();
                         },

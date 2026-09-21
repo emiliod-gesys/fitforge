@@ -891,8 +891,11 @@ class WorkoutService {
     String exerciseId, {
     String? excludeWorkoutId,
   }) async {
-    if (_offline != null && !_offline!.isOnline) {
-      return _previousSetsCache?.load(exerciseId);
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return null;
+
+    if (_offline != null && !_offline.isOnline) {
+      return _previousSetsCache?.load(userId, exerciseId);
     }
 
     try {
@@ -903,21 +906,21 @@ class WorkoutService {
         ),
       );
       if (entry == null) {
-        return _previousSetsCache?.load(exerciseId);
+        return _previousSetsCache?.load(userId, exerciseId);
       }
 
       final sets = await withNetworkTimeout(_loadSetsForWorkoutExercise(entry.weId));
-      if (sets.isEmpty) return _previousSetsCache?.load(exerciseId);
+      if (sets.isEmpty) return _previousSetsCache?.load(userId, exerciseId);
       final suggestion = ExerciseHistoryUtils.setsForNextWorkoutSuggestion(sets);
       if (suggestion.isNotEmpty) {
-        unawaited(_previousSetsCache?.save(exerciseId, suggestion));
+        unawaited(_previousSetsCache?.save(userId, exerciseId, suggestion));
       }
       return suggestion;
     } catch (e) {
       if (isConnectionError(e)) {
-        return _previousSetsCache?.load(exerciseId);
+        return _previousSetsCache?.load(userId, exerciseId);
       }
-      return _previousSetsCache?.load(exerciseId);
+      return _previousSetsCache?.load(userId, exerciseId);
     }
   }
 

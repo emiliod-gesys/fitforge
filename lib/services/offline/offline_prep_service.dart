@@ -42,7 +42,7 @@ class OfflinePrepService {
     for (final exerciseId in exerciseIds) {
       final previous = await _workoutService.getPreviousSetsForExercise(exerciseId);
       if (previous != null && previous.isNotEmpty) {
-        await _previousSetsCache.save(exerciseId, previous);
+        await _previousSetsCache.save(userId, exerciseId, previous);
         cachedPreviousSets++;
       }
     }

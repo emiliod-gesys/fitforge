@@ -9,27 +9,38 @@ class RecentPickerExerciseIds extends Notifier<List<String>> {
   static const prefKey = 'recent_picker_exercise_ids';
   static const maxIds = 80;
 
+  String? _userId;
+
   @override
   List<String> build() {
-    Future<void>.microtask(_hydrate);
+    _userId = ref.watch(authUserIdProvider);
+    final userId = _userId;
+    Future<void>.microtask(() => _hydrate(userId));
     return const [];
   }
 
-  Future<void> _hydrate() async {
+  String _key(String userId) => '${prefKey}_$userId';
+
+  Future<void> _hydrate(String? userId) async {
+    if (userId == null || userId.isEmpty) {
+      state = const [];
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
-    if (!ref.exists(recentPickerExerciseIdsProvider)) return;
-    state = prefs.getStringList(prefKey) ?? const [];
+    if (!ref.exists(recentPickerExerciseIdsProvider) || _userId != userId) return;
+    state = prefs.getStringList(_key(userId)) ?? const [];
   }
 
   Future<void> record(String exerciseId) async {
-    if (exerciseId.isEmpty) return;
+    final userId = _userId;
+    if (exerciseId.isEmpty || userId == null || userId.isEmpty) return;
     final next = [
       exerciseId,
       ...state.where((id) => id != exerciseId),
     ].take(maxIds).toList();
     state = next;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(prefKey, next);
+    await prefs.setStringList(_key(userId), next);
   }
 }
 

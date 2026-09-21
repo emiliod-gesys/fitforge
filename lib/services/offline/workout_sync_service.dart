@@ -46,8 +46,12 @@ class WorkoutSyncService {
     try {
       final ops = await _outbox.loadAll();
       final finishedWorkouts = <String>{};
+      final uid = SupabaseService.currentUser?.id;
       for (final op in ops.take(maxOperations)) {
         if (!_connectivity.isOnline) break;
+        if (uid == null) break;
+        final localOwner = await _localStore.getWorkout(op.workoutId);
+        if (localOwner != null && localOwner.userId != uid) continue;
         if (finishedWorkouts.contains(op.workoutId) &&
             op.type != SyncOperationType.cancelWorkout) {
           continue;
@@ -74,8 +78,9 @@ class WorkoutSyncService {
 
   /// Completados locales con `pending_sync` y sin ops útiles en la cola.
   Future<int> _syncOrphanedCompleted() async {
-    if (!_connectivity.isOnline || SupabaseService.currentUser == null) return 0;
-    final pending = await _localStore.pendingCompletedWorkouts();
+    final uid = SupabaseService.currentUser?.id;
+    if (!_connectivity.isOnline || uid == null) return 0;
+    final pending = await _localStore.pendingCompletedWorkouts(userId: uid);
     if (pending.isEmpty) return 0;
 
     var synced = 0;

@@ -49,6 +49,7 @@ class _ProfileGateListenerState extends ConsumerState<ProfileGateListener>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
+    reconcileFoodSelectedDay(ref);
     final profile = ref.read(profileProvider).valueOrNull;
     if (profile == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
