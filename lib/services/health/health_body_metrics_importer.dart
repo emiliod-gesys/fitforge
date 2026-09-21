@@ -54,9 +54,8 @@ class HealthBodyMetricsImporter {
         return const HealthSyncResult(error: 'permission_denied');
       }
 
-      await _health.requestHistoryAuthorizationIfNeeded();
-
       final now = DateTime.now();
+      // Health Connect read access covers the last 30 days without HISTORY.
       final start = now.subtract(HealthBodyMetricsEvaluator.historyLookback);
       final samples = await _health.fetchBodyMetricSamples(start: start, end: now);
 

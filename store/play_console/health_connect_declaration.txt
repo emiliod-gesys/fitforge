@@ -1,0 +1,87 @@
+Play Console — Salud conectada (Health Connect)
+Pegar en App content → Health / Health Connect permissions.
+Tras el rechazo del 20 sept 2026: NO declarar HealthData-History.
+El AAB ya no incluye android.permission.health.READ_HEALTH_DATA_HISTORY.
+
+==============================================================================
+Función principal de la app
+==============================================================================
+FORGEN is a fitness training, nutrition, and progress app. Users log workouts,
+body metrics, and meals in the app. Health Connect is an optional Profile
+setting so users can (1) copy recent weight and body-fat readings from Health
+Connect into their FORGEN profile, and (2) write workouts they finish in
+FORGEN back to Health Connect for other health apps.
+
+FORGEN es una app de entrenamiento, nutrición y progreso. Health Connect es
+opcional, en Perfil: importar peso y grasa corporal recientes, y exportar
+entrenos completados. No leemos historial de salud anterior a 30 días.
+
+Cómo probarlo
+1. Abre FORGEN → Perfil → Apple Salud / Health Connect.
+2. Pulsa Conectar (Health Connect) y concede peso y grasa corporal.
+3. Sincronizar métricas propone actualizar el perfil con lecturas de ≤30 días.
+4. Activa “Exportar entrenamientos”, completa un entreno; aparece en Health Connect.
+
+==============================================================================
+Por cada permiso (inglés; Play suele revisar en inglés)
+==============================================================================
+
+READ Weight
+Purpose: Read the user’s latest body weight from Health Connect.
+Why: FORGEN uses current body weight for calorie estimates, nutrition targets,
+and progress charts. Importing from Health Connect avoids duplicate manual entry.
+User benefit: One tap to keep the in-app profile aligned with their scale.
+Lookback: last 30 days only. We do not request Health Data History.
+
+READ Body fat
+Purpose: Read the user’s latest body-fat percentage from Health Connect.
+Why: Body-fat is a progress metric in the profile. Users who track it on a
+smart scale can import the newest reading instead of typing it.
+User benefit: Faster, more accurate body-composition tracking in FORGEN.
+Lookback: last 30 days only. We do not request Health Data History.
+
+WRITE Exercise
+Purpose: Write a workout session after the user finishes it in FORGEN.
+Why: Users want completed gym, run, or Hyrox sessions to appear alongside
+activity from other apps (Google Fit, watches, etc.).
+User benefit: A single Health Connect timeline of all training.
+Only sessions the user completes in FORGEN; optional toggle in Profile.
+
+WRITE Active calories burned
+Purpose: Attach active calories estimated for that FORGEN workout.
+Why: Health Connect exercise records include energy so other apps can show
+training load. We write calories for the session just completed, not a daily total.
+User benefit: Other health apps see the effort of the FORGEN workout.
+
+WRITE Distance
+Purpose: Attach distance for running/walking sessions logged in FORGEN.
+Why: Runner workouts include GPS or manual distance; writing it completes the
+exercise record. Strength-only workouts omit distance.
+User benefit: Run distance from FORGEN appears in Health Connect.
+
+DO NOT DECLARE
+Health Data History (READ_HEALTH_DATA_HISTORY)
+Background health data
+Steps, heart rate, sleep, nutrition, or any other Health Connect type.
+
+==============================================================================
+Respuestas cortas (español, si el formulario está en ES)
+==============================================================================
+
+¿Por qué Weight?
+Para copiar el peso reciente (máx. 30 días) al perfil y calcular calorías y
+progreso. El usuario confirma la importación. No leemos historial antiguo.
+
+¿Por qué Body fat?
+Para copiar el % de grasa reciente al perfil de progreso. El usuario confirma.
+No leemos historial antiguo.
+
+¿Por qué Exercise / calorías / distancia?
+Al terminar un entreno en FORGEN, si el usuario activó “Exportar
+entrenamientos”, escribimos esa sesión (tipo de ejercicio, calorías activas y
+distancia si aplica) para que otras apps de salud la vean.
+
+¿Por qué NO History?
+Health Connect ya permite leer los últimos 30 días. FORGEN solo importa
+muestras de ese periodo. Pedir History era innecesario y se eliminó del
+manifiesto.

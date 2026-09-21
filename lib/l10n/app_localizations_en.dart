@@ -4364,11 +4364,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthIntegrationSubtitle =>
-      'Sync body metrics and share workouts with Apple Health or Health Connect.';
+      'Import weight and body fat from the last 30 days and, if you enable it, save workouts you complete in FORGEN to Health Connect.';
 
   @override
   String get healthIntegrationDisclaimer =>
-      'Imported weight/body fat can update your profile. Exported workouts appear in other health apps. Food budget still uses FORGEN data only.';
+      'We only read recent weight and body fat; we do not request older health history. Exported workouts include exercise, active calories, and distance. Food budget still uses FORGEN data only.';
 
   @override
   String get healthIntegrationConnect => 'Connect';

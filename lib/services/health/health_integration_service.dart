@@ -94,15 +94,6 @@ class HealthIntegrationService {
     return granted ?? false;
   }
 
-  Future<void> requestHistoryAuthorizationIfNeeded() async {
-    if (!Platform.isAndroid) return;
-    await configure();
-    final authorized = await _health.isHealthDataHistoryAuthorized();
-    if (authorized != true) {
-      await _health.requestHealthDataHistoryAuthorization();
-    }
-  }
-
   Future<List<HealthBodyMetricSample>> fetchBodyMetricSamples({
     required DateTime start,
     required DateTime end,
