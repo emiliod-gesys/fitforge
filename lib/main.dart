@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/constants/app_scaffold.dart';
 import 'core/router/app_router.dart';
@@ -14,6 +16,7 @@ import 'services/local_notification_service.dart';
 import 'services/rest_sound_service.dart';
 import 'services/supabase_service.dart';
 import 'widgets/billing_bootstrap.dart';
+import 'widgets/ios_dismiss_keyboard.dart';
 import 'widgets/push_notification_bootstrap.dart';
 import 'widgets/offline_sync_bootstrap.dart';
 import 'widgets/offline_status_banner.dart';
@@ -47,17 +50,19 @@ class FitForgeApp extends ConsumerWidget {
           ],
           routerConfig: router,
           builder: (context, child) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Column(
-                  children: [
-                    const OfflineStatusBanner(),
-                    Expanded(child: child ?? const SizedBox.shrink()),
-                  ],
-                ),
-                const TutorialSpotlightOverlay(),
-              ],
+            return IosDismissKeyboard(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Column(
+                    children: [
+                      const OfflineStatusBanner(),
+                      Expanded(child: child ?? const SizedBox.shrink()),
+                    ],
+                  ),
+                  const TutorialSpotlightOverlay(),
+                ],
+              ),
             );
           },
         ),
@@ -69,6 +74,10 @@ class FitForgeApp extends ConsumerWidget {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final imagePicker = ImagePickerPlatform.instance;
+  if (imagePicker is ImagePickerAndroid) {
+    imagePicker.useAndroidPhotoPicker = true;
+  }
   await ForgenSystemUi.enableEdgeToEdge();
   await initializeDateFormatting('es');
   await initializeDateFormatting('en');
