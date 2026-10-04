@@ -1274,8 +1274,9 @@ Reglas:
 - Medidas de volumen: 1 cup avena/oatmeal cruda ≈ 80 g (~300 kcal, ~54 g carbs). 1 large egg ≈ 50 g (~78 kcal).
 - Si da calorías explícitas (ej. "56 kcal cada una"), usa ese valor exacto para ese ítem.
 - "Sin aceite" en huevos = sin grasa añadida, pero conserva la grasa natural del huevo (~5 g grasa por huevo grande).
-- serving_description: describe la porción real (ej. "2 huevos + 2 tortillas"), no uses 100 g por defecto.
-- reference_amount_g: peso total estimado en gramos de TODO lo descrito (huevos + tortillas + etc.).
+- serving_description: describe SOLO lo que el usuario escribió (ej. "3 huevos revueltos"), no uses 100 g por defecto.
+- reference_amount_g: peso total estimado en gramos de TODO lo descrito, y nada más.
+- NO agregues alimentos que el usuario no mencionó. Si pide solo huevos revueltos, el plato es solo huevos: sin tortilla, pan, queso, arroz ni aceite.
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
 - Si el usuario indica gramos (ej. "300 g espagueti", "14g de mantequilla de maní"), usa EXACTAMENTE esos gramos. NUNCA dupliques ni uses porción estándar (ej. 2 cucharadas ~28g) si el usuario dijo otro peso.
 - Adjetivos de tamaño modifican el peso estimado: pequeña/chica ~65% de porción típica, grande/gran ~175%. Ej. "gran pechuga de pollo" ≈ 200–220 g, no 100 g genérico.
@@ -1284,10 +1285,10 @@ Reglas:
 - NUNCA pongas reference_amount_g=300 con calories_kcal de solo 100 g de comida.
 - Frutas por peso: manzana ~52 kcal/100g, plátano ~89 kcal/100g.
 - Los macros deben ser coherentes con las calorías (proteína/carbs ~4 kcal/g, grasa ~9 kcal/g).
-- name: nombre ESPECÍFICO del plato con ingredientes o preparación visibles (máx. ~70 caracteres).
-  Buenos: "2 huevos revueltos con 2 tortillas de maíz", "Avena con plátano y mantequilla de maní".
-  Malos: "Comida", "Desayuno", "Plato", "Huevos" (demasiado genérico).
-- ingredients: lista cada componente del plato, no solo el principal.
+- name: repite el plato que el usuario describió, con preparación si la dio (máx. ~70 caracteres). No inventes acompañamientos.
+  Buenos: "3 huevos revueltos", "Avena con plátano" solo si el usuario mencionó ambos.
+  Malos: "Comida", "Desayuno", "Huevos revueltos con tortilla" cuando no pidió tortilla.
+- ingredients: solo componentes que el usuario mencionó.
 - ingredient_portions: OBLIGATORIO si hay uno o más componentes. Array con name y grams_g (peso estimado de CADA uno).
   La suma de grams_g debe aproximar reference_amount_g.
   Si el usuario indica gramos explícitos (ej. "300 g espagueti"), usa EXACTAMENTE esos gramos para ese ítem.
@@ -1342,19 +1343,18 @@ Comida descrita: "$query"
 $hintsBlock$userGramsBlock$sizeBlock$catalogBlock
 JSON:
 {
-  "name": "nombre específico del plato con ingredientes visibles",
+  "name": "3 huevos revueltos",
   "brand": null,
-  "calories_kcal": 420,
-  "protein_g": 28,
-  "carbs_g": 36,
-  "fat_g": 16,
-  "fiber_g": 4,
-  "serving_description": "2 huevos + 2 tortillas",
-  "reference_amount_g": 180,
-  "ingredients": ["huevos", "tortillas de maíz"],
+  "calories_kcal": 234,
+  "protein_g": 19.5,
+  "carbs_g": 1.7,
+  "fat_g": 16.5,
+  "fiber_g": 0,
+  "serving_description": "3 huevos revueltos",
+  "reference_amount_g": 150,
+  "ingredients": ["huevos revueltos"],
   "ingredient_portions": [
-    {"name": "huevos", "grams_g": 100},
-    {"name": "tortillas de maíz", "grams_g": 80}
+    {"name": "huevos revueltos", "grams_g": 150}
   ]
 }
 ''';

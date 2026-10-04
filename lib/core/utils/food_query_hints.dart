@@ -871,9 +871,110 @@ abstract final class FoodQueryHints {
     return null;
   }
 
+  /// Quita ingredientes que el modelo agregó y el usuario no escribió.
+  static FoodNutritionEstimate omitUnmentionedIngredients(
+    String query,
+    FoodNutritionEstimate ai,
+  ) {
+    final portions = ai.ingredientPortions;
+    if (portions.length < 2 && ai.ingredients.length < 2) {
+      return _renameIfNameInventsFood(query, ai);
+    }
+
+    final source = portions.isNotEmpty
+        ? portions
+        : ai.ingredients
+            .map((name) => FoodIngredientPortion(name: name, gramsG: 0))
+            .toList();
+    final kept = source.where((portion) => _ingredientMentioned(query, portion.name)).toList();
+    if (kept.isEmpty || kept.length == source.length) {
+      return _renameIfNameInventsFood(query, ai);
+    }
+
+    final allGrams = source.fold<double>(0, (sum, portion) => sum + portion.gramsG);
+    final keptGrams = kept.fold<double>(0, (sum, portion) => sum + portion.gramsG);
+    final ratio = allGrams > 0 && keptGrams > 0 ? keptGrams / allGrams : kept.length / source.length;
+    final reference = keptGrams > 0 ? keptGrams : ai.referenceAmount * ratio;
+
+    return _renameIfNameInventsFood(
+      query,
+      ai.copyWith(
+        caloriesKcal: (ai.caloriesKcal * ratio).round().clamp(0, 9999),
+        proteinG: double.parse((ai.proteinG * ratio).toStringAsFixed(1)),
+        carbsG: double.parse((ai.carbsG * ratio).toStringAsFixed(1)),
+        fatG: double.parse((ai.fatG * ratio).toStringAsFixed(1)),
+        fiberG: double.parse((ai.fiberG * ratio).toStringAsFixed(1)),
+        ingredients: kept.map((portion) => portion.name).toList(),
+        ingredientPortions: kept.where((portion) => portion.gramsG > 0).toList(),
+        referenceAmount: reference,
+        amountUnit: 'g',
+        servingDescription: keptGrams > 0 ? FoodServingParser.formatAmount(reference, 'g') : ai.servingDescription,
+      ),
+    );
+  }
+
+  static bool _ingredientMentioned(String query, String ingredient) {
+    if (_explicitlyExcluded(query, ingredient)) return false;
+    if (_namesOverlap(query, ingredient)) return true;
+    if (_isEggPortionName(ingredient) && _queryImpliesEggs(query)) return true;
+    for (final volume in parseVolumePortionsFromQuery(query)) {
+      if (_namesOverlap(volume.name, ingredient)) return true;
+    }
+    final queryNorm = _normalizeName(query);
+    final ingredientNorm = _normalizeName(ingredient);
+    const aliases = <List<String>>[
+      ['avena', 'oatmeal', 'oats'],
+      ['arroz', 'rice'],
+      ['pollo', 'chicken'],
+      ['platano', 'banana'],
+      ['manzana', 'apple'],
+      ['queso', 'cheese'],
+      ['pan', 'bread'],
+    ];
+    for (final group in aliases) {
+      final queryHits = group.any(queryNorm.contains);
+      final ingredientHits = group.any(ingredientNorm.contains);
+      if (queryHits && ingredientHits) return true;
+    }
+    return false;
+  }
+
+  static bool _queryImpliesEggs(String query) {
+    final normalized = _normalizeName(query);
+    return normalized.contains('huevo') ||
+        RegExp(r'\beggs?\b').hasMatch(normalized) ||
+        normalized.contains('omelet') ||
+        normalized.contains('revuelt') ||
+        normalized.contains('estrellad');
+  }
+
+  static bool _explicitlyExcluded(String query, String ingredient) {
+    final normalizedQuery = _normalizeName(query);
+    final tokens = _normalizeName(ingredient).split(' ').where((word) => word.length >= 4);
+    for (final token in tokens) {
+      if (RegExp('\\bsin\\s+$token\\b').hasMatch(normalizedQuery)) return true;
+      if (RegExp('\\bwithout\\s+$token\\b').hasMatch(normalizedQuery)) return true;
+    }
+    return false;
+  }
+
+  static FoodNutritionEstimate _renameIfNameInventsFood(
+    String query,
+    FoodNutritionEstimate ai,
+  ) {
+    final extra = RegExp(r'\s+con\s+(.+)$', caseSensitive: false).firstMatch(ai.name);
+    if (extra == null) return ai;
+    final added = extra.group(1)!;
+    if (_ingredientMentioned(query, added)) return ai;
+    final cleaned = query.trim();
+    if (cleaned.isEmpty) return ai;
+    return ai.copyWith(name: cleaned);
+  }
+
   /// Ajusta la estimación de IA si el usuario dio calorías explícitas o cantidades claras.
   static FoodNutritionEstimate reconcile(String query, FoodNutritionEstimate ai) {
-    final gramCorrected = correctGramBasedEstimate(query, ai);
+    final faithful = omitUnmentionedIngredients(query, ai);
+    final gramCorrected = correctGramBasedEstimate(query, faithful);
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
 

@@ -53,6 +53,32 @@ void main() {
       expect(fixed.ingredientPortions.length, greaterThanOrEqualTo(2));
     });
 
+    test('drops foods the user did not mention', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Huevos revueltos con tortilla',
+        caloriesKcal: 400,
+        proteinG: 22,
+        carbsG: 30,
+        fatG: 20,
+        fiberG: 2,
+        referenceAmount: 210,
+        ingredients: ['huevos revueltos', 'tortilla de maíz'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'huevos revueltos', gramsG: 150),
+          FoodIngredientPortion(name: 'tortilla de maíz', gramsG: 60),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile('3 huevos revueltos', ai);
+
+      expect(fixed.name.toLowerCase(), isNot(contains('tortilla')));
+      expect(
+        fixed.ingredientPortions.any((portion) => portion.name.toLowerCase().contains('tortilla')),
+        isFalse,
+      );
+      expect(fixed.caloriesKcal, lessThan(400));
+    });
+
     test('reconcile raises underestimated AI calories', () {
       const ai = FoodNutritionEstimate(
         name: 'huevos con tortillas',
