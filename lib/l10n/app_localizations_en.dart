@@ -754,6 +754,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enable location and grant permissions to track your run.';
 
   @override
+  String get runnerBackgroundLocationTitle => 'Background location';
+
+  @override
+  String get runnerBackgroundLocationBody =>
+      'FORGEN collects location data to record the distance, pace, and route of your outdoor run or walk even when the app is closed or not in use.';
+
+  @override
+  String get runnerBackgroundLocationAccept => 'Allow';
+
+  @override
+  String get runnerBackgroundLocationDecline => 'Don\'t allow';
+
+  @override
   String get runnerNoDistance =>
       'No distance recorded. Wait a few seconds with GPS on or move a bit more.';
 

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../core/runner/runner_standards.dart';
@@ -51,11 +53,52 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
       if (!mounted || _finishing) return;
       if (_snapshot != null) setState(() {});
     });
-    unawaited(_initTracking());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_initTracking());
+    });
+  }
+
+  Future<bool> _acceptBackgroundLocationDisclosure() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return true;
+    final current = await Geolocator.checkPermission();
+    if (current == LocationPermission.always) return true;
+    if (!mounted) return false;
+    final l10n = context.l10n;
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.runnerBackgroundLocationTitle),
+        content: SingleChildScrollView(
+          child: Text(l10n.runnerBackgroundLocationBody),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.runnerBackgroundLocationDecline),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.runnerBackgroundLocationAccept),
+          ),
+        ],
+      ),
+    );
+    return accepted == true;
   }
 
   Future<void> _initTracking() async {
-    final ok = await _tracking.ensurePermissions();
+    final accepted = await _acceptBackgroundLocationDisclosure();
+    if (!mounted) return;
+    if (!accepted) {
+      setState(() {
+        _gpsError = context.l10n.runnerGpsDenied;
+        _starting = false;
+      });
+      return;
+    }
+    final ok = await _tracking.ensurePermissions(requestBackground: true);
     if (!mounted) return;
     if (!ok) {
       setState(() {

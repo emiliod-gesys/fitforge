@@ -1448,6 +1448,30 @@ abstract class AppLocalizations {
   /// **'Activa la ubicación y concede permisos para registrar tu carrera.'**
   String get runnerGpsDenied;
 
+  /// No description provided for @runnerBackgroundLocationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación en segundo plano'**
+  String get runnerBackgroundLocationTitle;
+
+  /// No description provided for @runnerBackgroundLocationBody.
+  ///
+  /// In es, this message translates to:
+  /// **'FORGEN recoge datos de ubicación para registrar la distancia, el ritmo y la ruta de tu carrera o caminata al aire libre, incluso cuando la app está cerrada o no se está usando.'**
+  String get runnerBackgroundLocationBody;
+
+  /// No description provided for @runnerBackgroundLocationAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get runnerBackgroundLocationAccept;
+
+  /// No description provided for @runnerBackgroundLocationDecline.
+  ///
+  /// In es, this message translates to:
+  /// **'No permitir'**
+  String get runnerBackgroundLocationDecline;
+
   /// No description provided for @runnerNoDistance.
   ///
   /// In es, this message translates to:

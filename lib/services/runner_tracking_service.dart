@@ -29,7 +29,7 @@ class RunnerTrackingService {
   RunnerTrackingSnapshot? get snapshot => _snapshot;
   RunnerTrackingStatus status = RunnerTrackingStatus.idle;
 
-  Future<bool> ensurePermissions() async {
+  Future<bool> ensurePermissions({bool requestBackground = false}) async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return false;
 
@@ -40,6 +40,15 @@ class RunnerTrackingService {
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       return false;
+    }
+    if (requestBackground &&
+        Platform.isAndroid &&
+        permission == LocationPermission.whileInUse) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return false;
+      }
     }
     return true;
   }

@@ -763,6 +763,19 @@ class AppLocalizationsEs extends AppLocalizations {
       'Activa la ubicación y concede permisos para registrar tu carrera.';
 
   @override
+  String get runnerBackgroundLocationTitle => 'Ubicación en segundo plano';
+
+  @override
+  String get runnerBackgroundLocationBody =>
+      'FORGEN recoge datos de ubicación para registrar la distancia, el ritmo y la ruta de tu carrera o caminata al aire libre, incluso cuando la app está cerrada o no se está usando.';
+
+  @override
+  String get runnerBackgroundLocationAccept => 'Aceptar';
+
+  @override
+  String get runnerBackgroundLocationDecline => 'No permitir';
+
+  @override
   String get runnerNoDistance =>
       'No se registró distancia. Espera unos segundos con GPS activo o muévete un poco más.';
 
