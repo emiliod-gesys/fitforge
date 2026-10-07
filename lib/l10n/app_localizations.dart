@@ -1040,6 +1040,36 @@ abstract class AppLocalizations {
   /// **'Nueva rutina para alumno'**
   String get studentRoutineNew;
 
+  /// No description provided for @studentRoutineSendMine.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar una de mis rutinas'**
+  String get studentRoutineSendMine;
+
+  /// No description provided for @studentRoutineSendTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar rutina al alumno'**
+  String get studentRoutineSendTitle;
+
+  /// No description provided for @studentRoutineSendHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Se copia a las rutinas del alumno. La tuya no cambia.'**
+  String get studentRoutineSendHint;
+
+  /// No description provided for @studentRoutineSendEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes rutinas guardadas para enviar.'**
+  String get studentRoutineSendEmpty;
+
+  /// No description provided for @studentRoutineSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina enviada al alumno'**
+  String get studentRoutineSent;
+
   /// No description provided for @studentRoutineEdit.
   ///
   /// In es, this message translates to:

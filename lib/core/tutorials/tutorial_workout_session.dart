@@ -56,6 +56,7 @@ class TutorialWorkoutSession extends Notifier<String?> {
     final workout = await ref.read(workoutServiceProvider).startWorkout(
           name: routine.name,
           routineId: routine.id,
+          routineUpdatedAt: routine.updatedAt,
           exercises: workoutExercisesFromRoutine(routine),
         );
     if (!ref.exists(tutorialWorkoutSessionProvider)) return;

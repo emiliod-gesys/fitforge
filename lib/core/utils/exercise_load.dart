@@ -47,11 +47,15 @@ abstract final class ExerciseLoad {
     final exercise = _findInCatalog(exerciseId, catalog);
     final name = exerciseName ?? exercise?.name ?? exerciseId;
 
+    // Crunch en máquina/palanca: la carga es la pila, no el peso corporal.
+    if (_isSelectorizedCrunchMachine(name)) return false;
+
     // Nombre / asistido tienen prioridad: el catálogo a veces marca bodyweight como single_load.
     if (_inferBodyweightByName(name) || isAssistedExercise(name)) return true;
 
     if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
-      if (exercise.weightOptional || exercise.loadMode.weightOptional) return true;
+      if (exercise.weightOptional || exercise.loadMode.weightOptional)
+        return true;
       if (_isBodyweightEquipmentOnly(exercise.equipment)) return true;
       return false;
     }
@@ -68,10 +72,14 @@ abstract final class ExerciseLoad {
     String? exerciseName,
   }) {
     final exercise = _findInCatalog(exerciseId, catalog);
+    final name = exerciseName ?? exercise?.name ?? exerciseId;
+    if (_isSelectorizedCrunchMachine(name)) {
+      return ExerciseLoadMode.machineStack;
+    }
     if (exercise != null && _hasTrustedLoadMetadata(exercise)) {
       return exercise.loadMode;
     }
-    return _inferLoadModeByName(exerciseName ?? exercise?.name ?? exerciseId);
+    return _inferLoadModeByName(name);
   }
 
   /// Ejercicios donde el usuario puede alternar peso conjunto vs. por lado en la sesión.
@@ -249,6 +257,7 @@ abstract final class ExerciseLoad {
     Iterable<Exercise> catalog,
     String exerciseName,
   ) {
+    if (_isSelectorizedCrunchMachine(exerciseName)) return false;
     final mode = loadModeForExerciseId(
       exerciseId,
       catalog,
@@ -275,6 +284,10 @@ abstract final class ExerciseLoad {
     if (isAssistedExercise(exerciseName, loadMode: loadMode)) return null;
 
     final additional = additionalWeightKg(set);
+    if (_isSelectorizedCrunchMachine(exerciseName)) {
+      if (additional <= 0) return null;
+      return additional;
+    }
     final mode = loadMode ?? _inferLoadModeByName(exerciseName);
 
     if (mode == ExerciseLoadMode.bodyweight) {
@@ -498,10 +511,11 @@ abstract final class ExerciseLoad {
     String perLegSuffix = '(por pierna)',
     bool useLegLabel = false,
   }) {
-    final isBw = weightOptional == true ||
-        loadMode == ExerciseLoadMode.bodyweight ||
-        loadMode == ExerciseLoadMode.assistedBodyweight ||
-        _inferBodyweightByName(exerciseName);
+    final isBw = !_isSelectorizedCrunchMachine(exerciseName) &&
+        (weightOptional == true ||
+            loadMode == ExerciseLoadMode.bodyweight ||
+            loadMode == ExerciseLoadMode.assistedBodyweight ||
+            _inferBodyweightByName(exerciseName));
     if (isBw) {
       return '$unitLabel $additionalSuffix';
     }
@@ -610,7 +624,8 @@ abstract final class ExerciseLoad {
     if (_usesCable(n) || _usesBand(n)) return true;
     if (exercise == null) return false;
     return exercise.equipment.any(
-      (equipment) => _isCableEquipment(equipment) || _isBandEquipment(equipment),
+      (equipment) =>
+          _isCableEquipment(equipment) || _isBandEquipment(equipment),
     );
   }
 
@@ -663,9 +678,24 @@ abstract final class ExerciseLoad {
         n.contains('elastic');
   }
 
+  /// Crunch sentado en máquina o palanca: se empuja una pila, no el torso.
+  static bool _isSelectorizedCrunchMachine(String name) {
+    final n = _normalize(name);
+    if (n.isEmpty || _usesCable(n)) return false;
+    final hasCrunch = _hasWord(n, 'crunch') ||
+        _hasWord(n, 'crunches') ||
+        n.contains('abdominal');
+    if (!hasCrunch) return false;
+    return n.contains('maquina') ||
+        _hasWord(n, 'machine') ||
+        _hasWord(n, 'lever') ||
+        n.contains('palanca');
+  }
+
   static bool _inferBodyweightByName(String name) {
     final n = _normalize(name);
     if (isAssistedExercise(n)) return true;
+    if (_isSelectorizedCrunchMachine(name)) return false;
     if (_hasAny(n, [
       'peso corporal',
       'bodyweight',

@@ -495,6 +495,7 @@ class WorkoutService {
   Future<Workout> startWorkout({
     required String name,
     String? routineId,
+    DateTime? routineUpdatedAt,
     List<WorkoutExercise>? exercises,
     Future<List<WorkoutExercise>> Function(
       List<WorkoutExercise> locallyEnriched,
@@ -508,11 +509,18 @@ class WorkoutService {
 
     var workoutExercises = exercises;
     if (workoutExercises != null) {
+      final fromRoutine = routineId != null && routineId.isNotEmpty;
+      final planUpdatedAt = fromRoutine
+          ? (routineUpdatedAt ?? await _routineUpdatedAt(routineId))
+          : null;
       var enriched = await _applyPreviousSetSuggestions(
         workoutExercises,
         excludeWorkoutId: workoutId,
+        fromRoutine: fromRoutine,
+        routineUpdatedAt: planUpdatedAt,
       );
-      if (applyProactiveSuggestions != null) {
+      // La rutina o el último entreno ya definen series y pesos.
+      if (applyProactiveSuggestions != null && !fromRoutine) {
         try {
           enriched = await applyProactiveSuggestions(enriched, workoutId);
         } catch (_) {
@@ -786,17 +794,25 @@ class WorkoutService {
   Future<List<WorkoutExercise>> _applyPreviousSetSuggestions(
     List<WorkoutExercise> exercises, {
     String? excludeWorkoutId,
+    bool fromRoutine = false,
+    DateTime? routineUpdatedAt,
   }) async {
     final result = <WorkoutExercise>[];
     for (final ex in exercises) {
-      final previous = await getPreviousSetsForExercise(
+      final session = await _loadPreviousSession(
         ex.exerciseId,
         excludeWorkoutId: excludeWorkoutId,
       );
+      final previous = session?.sets;
       if (previous == null || previous.isEmpty) {
         result.add(ex);
         continue;
       }
+      final preserveTemplate = fromRoutine &&
+          !PreviousSetUtils.useLastPerformance(
+            routineUpdatedAt: routineUpdatedAt,
+            lastPerformedAt: session?.completedAt,
+          );
 
       final isCardio = ExerciseLoggingResolver.isCardioExercise(
         exerciseId: ex.exerciseId,
@@ -809,41 +825,13 @@ class WorkoutService {
         exerciseName: ex.exerciseName,
       );
 
-      final templates = [...ex.sets]..sort((a, b) => a.setNumber.compareTo(b.setNumber));
-      final setCount = PreviousSetUtils.resolveSetCount(
-        templateCount: templates.length,
+      final sets = PreviousSetUtils.mergeTemplateWithHistory(
+        template: ex.sets,
         previous: previous,
+        isCardio: isCardio,
+        isLoadedDistance: isLoadedDistance,
+        preserveTemplate: preserveTemplate,
       );
-
-      final sets = List.generate(setCount, (i) {
-        final setNumber = i + 1;
-        final template = PreviousSetUtils.forSetNumber(templates, setNumber) ??
-            (templates.isNotEmpty ? templates.last : null);
-        final prev = PreviousSetUtils.forSetNumber(previous, setNumber);
-        return WorkoutSet(
-          id: '',
-          setNumber: setNumber,
-          weight: isCardio ? null : (prev?.weight ?? template?.weight),
-          reps: isCardio || isLoadedDistance
-              ? 0
-              : ((prev?.reps ?? 0) > 0 ? prev!.reps : (template?.reps ?? 10)),
-          durationSeconds: isCardio
-              ? (prev?.durationSeconds ?? template?.durationSeconds)
-              : null,
-          distanceMeters: isCardio || isLoadedDistance
-              ? (prev?.distanceMeters ?? template?.distanceMeters)
-              : null,
-          inclinePercent: isCardio
-              ? (prev?.inclinePercent ?? template?.inclinePercent)
-              : null,
-          steps: isCardio ? (prev?.steps ?? template?.steps) : null,
-          loggingType: isCardio
-              ? ExerciseLoggingType.cardio
-              : (prev != null && prev.loggingType != ExerciseLoggingType.strength
-                  ? prev.loggingType
-                  : template?.loggingType ?? ExerciseLoggingType.strength),
-        );
-      });
 
       result.add(ex.copyWith(sets: sets));
     }
@@ -887,7 +875,34 @@ class WorkoutService {
     return history;
   }
 
+  Future<DateTime?> _routineUpdatedAt(String routineId) async {
+    try {
+      final row = await _client
+          .from('routines')
+          .select('updated_at')
+          .eq('id', routineId)
+          .maybeSingle();
+      final raw = row?['updated_at'] as String?;
+      if (raw == null || raw.isEmpty) return null;
+      return SupabaseDateTime.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<List<WorkoutSet>?> getPreviousSetsForExercise(
+    String exerciseId, {
+    String? excludeWorkoutId,
+  }) async {
+    final session = await _loadPreviousSession(
+      exerciseId,
+      excludeWorkoutId: excludeWorkoutId,
+    );
+    if (session == null || session.sets.isEmpty) return null;
+    return session.sets;
+  }
+
+  Future<({List<WorkoutSet> sets, DateTime? completedAt})?> _loadPreviousSession(
     String exerciseId, {
     String? excludeWorkoutId,
   }) async {
@@ -895,7 +910,7 @@ class WorkoutService {
     if (userId == null) return null;
 
     if (_offline != null && !_offline.isOnline) {
-      return _previousSetsCache?.load(userId, exerciseId);
+      return _previousSetsCache?.loadSession(userId, exerciseId);
     }
 
     try {
@@ -906,21 +921,29 @@ class WorkoutService {
         ),
       );
       if (entry == null) {
-        return _previousSetsCache?.load(userId, exerciseId);
+        return _previousSetsCache?.loadSession(userId, exerciseId);
       }
 
+      final completedRaw = entry.workout['completed_at'] as String?;
+      final completedAt =
+          completedRaw == null ? null : SupabaseDateTime.parse(completedRaw);
       final sets = await withNetworkTimeout(_loadSetsForWorkoutExercise(entry.weId));
-      if (sets.isEmpty) return _previousSetsCache?.load(userId, exerciseId);
+      if (sets.isEmpty) return _previousSetsCache?.loadSession(userId, exerciseId);
       final suggestion = ExerciseHistoryUtils.setsForNextWorkoutSuggestion(sets);
-      if (suggestion.isNotEmpty) {
-        unawaited(_previousSetsCache?.save(userId, exerciseId, suggestion));
+      if (suggestion.isEmpty) {
+        return _previousSetsCache?.loadSession(userId, exerciseId);
       }
-      return suggestion;
+      unawaited(
+        _previousSetsCache?.save(
+          userId,
+          exerciseId,
+          suggestion,
+          completedAt: completedAt,
+        ),
+      );
+      return (sets: suggestion, completedAt: completedAt);
     } catch (e) {
-      if (isConnectionError(e)) {
-        return _previousSetsCache?.load(userId, exerciseId);
-      }
-      return _previousSetsCache?.load(userId, exerciseId);
+      return _previousSetsCache?.loadSession(userId, exerciseId);
     }
   }
 

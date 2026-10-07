@@ -74,17 +74,25 @@ class RoutineCacheStore {
 class PreviousSetsCache {
   static const _fileName = 'previous_sets_cache.json';
 
-  Future<void> save(String userId, String exerciseId, List<WorkoutSet> sets) async {
+  Future<void> save(
+    String userId,
+    String exerciseId,
+    List<WorkoutSet> sets, {
+    DateTime? completedAt,
+  }) async {
     if (userId.isEmpty || exerciseId.isEmpty) return;
     final state = await OfflineJsonFile.readMap(_fileName);
     final byUser = Map<String, dynamic>.from(state['by_user'] as Map? ?? {});
     final userSets = Map<String, dynamic>.from(byUser[userId] as Map? ?? {});
-    userSets[exerciseId] = sets
-        .map((s) => {
-              'id': s.id,
-              ...s.toJson(),
-            })
-        .toList();
+    userSets[exerciseId] = {
+      if (completedAt != null) 'completed_at': completedAt.toUtc().toIso8601String(),
+      'sets': sets
+          .map((s) => {
+                'id': s.id,
+                ...s.toJson(),
+              })
+          .toList(),
+    };
     byUser[userId] = userSets;
     await OfflineJsonFile.writeMap(_fileName, {
       'by_user': byUser,
@@ -93,12 +101,36 @@ class PreviousSetsCache {
   }
 
   Future<List<WorkoutSet>?> load(String userId, String exerciseId) async {
+    return (await loadSession(userId, exerciseId))?.sets;
+  }
+
+  Future<({List<WorkoutSet> sets, DateTime? completedAt})?> loadSession(
+    String userId,
+    String exerciseId,
+  ) async {
     if (userId.isEmpty || exerciseId.isEmpty) return null;
     final state = await OfflineJsonFile.readMap(_fileName);
     final byUser = state['by_user'] as Map?;
     final userSets = byUser?[userId] as Map?;
     final raw = userSets?[exerciseId];
-    if (raw is! List) return null;
+    if (raw is List) {
+      final sets = _setsFromRaw(raw);
+      if (sets.isEmpty) return null;
+      return (sets: sets, completedAt: null);
+    }
+    if (raw is! Map) return null;
+    final setsRaw = raw['sets'];
+    if (setsRaw is! List) return null;
+    final sets = _setsFromRaw(setsRaw);
+    if (sets.isEmpty) return null;
+    final completedRaw = raw['completed_at'] as String?;
+    return (
+      sets: sets,
+      completedAt: completedRaw == null ? null : DateTime.tryParse(completedRaw),
+    );
+  }
+
+  List<WorkoutSet> _setsFromRaw(List<dynamic> raw) {
     return raw
         .whereType<Map>()
         .map((s) => WorkoutSet.fromJson(Map<String, dynamic>.from(s)))

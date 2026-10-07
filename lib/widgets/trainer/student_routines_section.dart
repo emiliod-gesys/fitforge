@@ -7,6 +7,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
 import '../../core/theme/app_accent.dart';
+import 'assign_trainer_routine_sheet.dart';
 
 class StudentRoutinesSection extends ConsumerWidget {
   final String studentId;
@@ -37,7 +38,21 @@ class StudentRoutinesSection extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: Text(l10n.studentRoutineNew),
               style: OutlinedButton.styleFrom(
-                minimumSize: Size.fromHeight(44),
+                minimumSize: const Size.fromHeight(44),
+                foregroundColor: context.accentColor,
+                side: BorderSide(color: context.accentColor),
+              ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => AssignTrainerRoutineSheet.show(
+                context,
+                studentId: studentId,
+              ),
+              icon: const Icon(Icons.ios_share_outlined),
+              label: Text(l10n.studentRoutineSendMine),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
                 foregroundColor: context.accentColor,
                 side: BorderSide(color: context.accentColor),
               ),

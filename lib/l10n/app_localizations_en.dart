@@ -528,6 +528,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentRoutineNew => 'New routine for student';
 
   @override
+  String get studentRoutineSendMine => 'Send one of my routines';
+
+  @override
+  String get studentRoutineSendTitle => 'Send routine to student';
+
+  @override
+  String get studentRoutineSendHint =>
+      'A copy is added to the student\'s routines. Yours stays as is.';
+
+  @override
+  String get studentRoutineSendEmpty =>
+      'You don\'t have any saved routines to send yet.';
+
+  @override
+  String get studentRoutineSent => 'Routine sent to the student';
+
+  @override
   String get studentRoutineEdit => 'Edit student routine';
 
   @override
