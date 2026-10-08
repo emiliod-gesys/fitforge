@@ -5006,7 +5006,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tutorialsAdvancedSubtitle =>
-      'Rutinas, superseries, el entreno en vivo y cómo registrar comidas';
+      'Rutinas, rutina inteligente, superseries, el entreno en vivo y cómo registrar comidas';
 
   @override
   String get tutorialRoutinesTitle => 'Crear una rutina';
@@ -5056,6 +5056,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tutorialRoutinesSaveBody =>
       'Cuando esté lista, pulsa Guardar. Luego aparece en esta pestaña para lanzar el entreno.';
+
+  @override
+  String get tutorialSmartRoutineTitle => 'Rutina inteligente';
+
+  @override
+  String get tutorialSmartRoutineSubtitle =>
+      'Elige músculos y deja que la app arme la sesión';
+
+  @override
+  String get tutorialSmartRoutineTabTitle => 'Entra en Rutinas';
+
+  @override
+  String get tutorialSmartRoutineTabBody =>
+      'La rutina inteligente está en esta pestaña, junto a crear una rutina a mano.';
+
+  @override
+  String get tutorialSmartRoutineButtonTitle => 'Abre Rutina inteligente';
+
+  @override
+  String get tutorialSmartRoutineButtonBody =>
+      'Arma la sesión con los músculos que marques. Primero usa lo que ya entrenaste y, si falta, los básicos del gym.';
+
+  @override
+  String get tutorialSmartRoutineMusclesTitle => 'Marca músculos concretos';
+
+  @override
+  String get tutorialSmartRoutineMusclesBody =>
+      'Puedes ser específico: pecho superior, dorsales o deltoides lateral. El orden en que los tocas reparte los ejercicios.';
+
+  @override
+  String get tutorialSmartRoutineGenerateTitle => 'Genera y revisa';
+
+  @override
+  String get tutorialSmartRoutineGenerateBody =>
+      'Generar propone la rutina. En la vista previa puedes cambiar un ejercicio por otro del mismo músculo y luego guardarla.';
 
   @override
   String get tutorialSupersetTitle => 'Superseries y circuitos';

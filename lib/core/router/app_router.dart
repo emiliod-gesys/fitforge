@@ -16,6 +16,7 @@ import '../../screens/profile/api_keys_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/progress/progress_screen.dart';
 import '../../screens/routines/routine_editor_screen.dart';
+import '../../screens/routines/routine_list_screen.dart';
 import '../../screens/social/friend_profile_screen.dart';
 import '../../screens/social/feed_post_detail_screen.dart';
 import '../../screens/social/social_screen.dart';
@@ -221,6 +222,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => RoutineEditorScreen(
           onboardingMode: state.uri.queryParameters['onboarding'] == '1',
         ),
+      ),
+      GoRoute(
+        path: '/routines/smart',
+        builder: (_, __) => const SmartRoutinePage(),
       ),
       GoRoute(
         path: '/routines/:id/edit',

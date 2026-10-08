@@ -13,6 +13,7 @@ void main() {
         'food',
         'progress',
         'routines',
+        'smartRoutine',
         'supersets',
         'foodLog',
         'workoutSession',
@@ -25,7 +26,7 @@ void main() {
         TutorialCatalog.basics.map((t) => t.id), ['train', 'food', 'progress']);
     expect(
       TutorialCatalog.advancedTours.map((t) => t.id),
-      ['routines', 'supersets', 'foodLog', 'workoutSession'],
+      ['routines', 'smartRoutine', 'supersets', 'foodLog', 'workoutSession'],
     );
 
     for (final tour in TutorialCatalog.all) {
@@ -41,6 +42,15 @@ void main() {
     expect(
       routines.steps.any(
         (s) => s.route == '/routines/new' && s.nav == TutorialNav.push,
+      ),
+      isTrue,
+    );
+
+    final smart = TutorialCatalog.byId('smartRoutine')!;
+    expect(smart.advanced, isTrue);
+    expect(
+      smart.steps.any(
+        (s) => s.route == '/routines/smart' && s.nav == TutorialNav.push,
       ),
       isTrue,
     );

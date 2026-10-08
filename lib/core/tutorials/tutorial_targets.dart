@@ -13,6 +13,9 @@ abstract final class TutorialTargets {
   static const progressStats = 'progressStats';
   static const routineCreate = 'routineCreate';
   static const routineAi = 'routineAi';
+  static const smartRoutineButton = 'smartRoutineButton';
+  static const smartRoutineMuscles = 'smartRoutineMuscles';
+  static const smartRoutineGenerate = 'smartRoutineGenerate';
   static const routineName = 'routineName';
   static const routineAddExercise = 'routineAddExercise';
   static const routineSave = 'routineSave';
@@ -44,6 +47,12 @@ abstract final class TutorialTargets {
   static final routineCreateKey =
       GlobalKey(debugLabel: 'tutorial_routineCreate');
   static final routineAiKey = GlobalKey(debugLabel: 'tutorial_routineAi');
+  static final smartRoutineButtonKey =
+      GlobalKey(debugLabel: 'tutorial_smartRoutineButton');
+  static final smartRoutineMusclesKey =
+      GlobalKey(debugLabel: 'tutorial_smartRoutineMuscles');
+  static final smartRoutineGenerateKey =
+      GlobalKey(debugLabel: 'tutorial_smartRoutineGenerate');
   static final routineNameKey = GlobalKey(debugLabel: 'tutorial_routineName');
   static final routineAddExerciseKey =
       GlobalKey(debugLabel: 'tutorial_routineAddExercise');
@@ -83,6 +92,9 @@ abstract final class TutorialTargets {
       progressStats => progressStatsKey,
       routineCreate => routineCreateKey,
       routineAi => routineAiKey,
+      smartRoutineButton => smartRoutineButtonKey,
+      smartRoutineMuscles => smartRoutineMusclesKey,
+      smartRoutineGenerate => smartRoutineGenerateKey,
       routineName => routineNameKey,
       routineAddExercise => routineAddExerciseKey,
       routineSave => routineSaveKey,

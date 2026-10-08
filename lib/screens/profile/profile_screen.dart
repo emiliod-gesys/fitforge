@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/l10n/app_locale.dart';
+import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/theme/app_accent.dart';
@@ -862,14 +863,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       data: (routines) => firstWorkoutTutorialRoutine(routines) != null,
       orElse: () => null,
     );
-    final locked = needsRoutine && hasRoutine == false;
+    final needsSmartPlan = tour.id == TutorialCatalog.smartRoutine;
+    final profileAsync = needsSmartPlan ? ref.watch(profileProvider) : null;
+    final smartLocked = needsSmartPlan &&
+        profileAsync!.hasValue &&
+        !(profileAsync.valueOrNull?.subscriptionTier.hasSmartRoutine ?? false);
+    final locked = (needsRoutine && hasRoutine == false) || smartLocked;
 
     return FfListRow(
       icon: tour.icon,
       title: tour.title(l10n),
-      subtitle: locked
+      subtitle: needsRoutine && hasRoutine == false
           ? l10n.tutorialWorkoutSessionNeedsRoutine
-          : tour.subtitle(l10n),
+          : smartLocked
+              ? l10n.featureGymratPlansOnly
+              : tour.subtitle(l10n),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -901,6 +909,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   label: l10n.emptyRoutinesAction,
                   onPressed: () => context.go('/?tab=routines'),
                 ),
+              ),
+            );
+            return;
+          }
+        }
+        if (needsSmartPlan) {
+          if (!profileAsync!.hasValue) return;
+          if (smartLocked) {
+            PlanUpgrade.showLimitSnackBar(
+              context,
+              message: l10n.featureGymratPlansOnly,
+              canUpgrade: PlanUpgrade.canOfferStoreUpgrade(
+                profileAsync.valueOrNull,
               ),
             );
             return;

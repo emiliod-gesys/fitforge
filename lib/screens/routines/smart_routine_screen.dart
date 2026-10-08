@@ -8,13 +8,18 @@ import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/workout/smart_routine_builder.dart';
 import '../../core/workout/smart_routine_catalog.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../../models/routine.dart';
 import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/fitforge_app_bar.dart';
 
 class SmartRoutineScreen extends ConsumerStatefulWidget {
-  const SmartRoutineScreen({super.key});
+  /// When set, the caller shows the preview. Otherwise the routine is popped.
+  final Future<void> Function(Routine routine)? onBuilt;
+
+  const SmartRoutineScreen({super.key, this.onBuilt});
 
   @override
   ConsumerState<SmartRoutineScreen> createState() => _SmartRoutineScreenState();
@@ -71,7 +76,12 @@ class _SmartRoutineScreenState extends ConsumerState<SmartRoutineScreen> {
         );
         return;
       }
-      Navigator.of(context).pop(routine);
+      final onBuilt = widget.onBuilt;
+      if (onBuilt != null) {
+        await onBuilt(routine);
+      } else if (mounted) {
+        Navigator.of(context).pop(routine);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -122,36 +132,25 @@ class _SmartRoutineScreenState extends ConsumerState<SmartRoutineScreen> {
                   style: const TextStyle(color: AppColors.textMuted, height: 1.35),
                 ),
                 const SizedBox(height: 20),
-                for (final group in groups) ...[
-                  Text(
-                    group,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                for (var index = 0; index < groups.length; index++)
+                  _MuscleGroup(
+                    key: index == 0
+                        ? TutorialTargets.smartRoutineMusclesKey
+                        : null,
+                    title: groups[index],
+                    targets: SmartRoutineCatalog.inGroup(groups[index], lang),
+                    languageCode: lang,
+                    selected: _selected,
+                    onToggle: (id, selected) {
+                      setState(() {
+                        if (selected) {
+                          _selected.add(id);
+                        } else {
+                          _selected.remove(id);
+                        }
+                      });
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final target in SmartRoutineCatalog.inGroup(group, lang))
-                        FilterChip(
-                          label: Text(target.label(lang)),
-                          selected: _selected.contains(target.id),
-                          selectedColor: context.accentColor.withValues(alpha: 0.22),
-                          checkmarkColor: context.accentColor,
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selected.add(target.id);
-                              } else {
-                                _selected.remove(target.id);
-                              }
-                            });
-                          },
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                ],
               ],
             ),
           ),
@@ -160,6 +159,7 @@ class _SmartRoutineScreenState extends ConsumerState<SmartRoutineScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: FilledButton(
+                key: TutorialTargets.smartRoutineGenerateKey,
                 onPressed: _building ? null : _generate,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
@@ -174,6 +174,54 @@ class _SmartRoutineScreenState extends ConsumerState<SmartRoutineScreen> {
                     : Text(l10n.smartRoutineGenerate),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MuscleGroup extends StatelessWidget {
+  final String title;
+  final List<SmartMuscleTarget> targets;
+  final String languageCode;
+  final Set<String> selected;
+  final void Function(String id, bool selected) onToggle;
+
+  const _MuscleGroup({
+    super.key,
+    required this.title,
+    required this.targets,
+    required this.languageCode,
+    required this.selected,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final target in targets)
+                FilterChip(
+                  label: Text(target.label(languageCode)),
+                  selected: selected.contains(target.id),
+                  selectedColor: context.accentColor.withValues(alpha: 0.22),
+                  checkmarkColor: context.accentColor,
+                  onSelected: (value) => onToggle(target.id, value),
+                ),
+            ],
           ),
         ],
       ),

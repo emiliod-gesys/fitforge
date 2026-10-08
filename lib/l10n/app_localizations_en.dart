@@ -4963,7 +4963,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialsAdvancedSubtitle =>
-      'Routines, supersets, the live workout, and how to log meals';
+      'Routines, smart routines, supersets, the live workout, and how to log meals';
 
   @override
   String get tutorialRoutinesTitle => 'Create a routine';
@@ -5012,6 +5012,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tutorialRoutinesSaveBody =>
       'When it’s ready, tap Save. It will show up in this tab to start a workout.';
+
+  @override
+  String get tutorialSmartRoutineTitle => 'Smart routine';
+
+  @override
+  String get tutorialSmartRoutineSubtitle =>
+      'Pick muscles and let the app build the session';
+
+  @override
+  String get tutorialSmartRoutineTabTitle => 'Open Routines';
+
+  @override
+  String get tutorialSmartRoutineTabBody =>
+      'Smart routine lives on this tab, next to building a routine yourself.';
+
+  @override
+  String get tutorialSmartRoutineButtonTitle => 'Open Smart routine';
+
+  @override
+  String get tutorialSmartRoutineButtonBody =>
+      'It builds the session from the muscles you pick. Your recent exercises come first, then common gym staples.';
+
+  @override
+  String get tutorialSmartRoutineMusclesTitle => 'Pick specific muscles';
+
+  @override
+  String get tutorialSmartRoutineMusclesBody =>
+      'You can be precise: upper chest, lats, or side delts. The order you tap them splits the exercises.';
+
+  @override
+  String get tutorialSmartRoutineGenerateTitle => 'Generate and review';
+
+  @override
+  String get tutorialSmartRoutineGenerateBody =>
+      'Generate proposes the routine. In the preview you can swap an exercise for another of the same muscle, then save it.';
 
   @override
   String get tutorialSupersetTitle => 'Supersets and circuits';

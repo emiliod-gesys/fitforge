@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/subscription/subscription_features.dart';
 import '../../models/food_entry.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/tutorial_controller.dart';
@@ -26,6 +27,10 @@ abstract final class TutorialNavigation {
     if (tour.id == TutorialCatalog.workoutSession) {
       final routines = ref.read(routinesProvider).valueOrNull ?? const [];
       if (firstWorkoutTutorialRoutine(routines) == null) return;
+    }
+    if (tour.id == TutorialCatalog.smartRoutine) {
+      final profile = ref.read(profileProvider).valueOrNull;
+      if (!(profile?.subscriptionTier.hasSmartRoutine ?? false)) return;
     }
     ref.read(tutorialControllerProvider.notifier).start(tour.id);
     goTo(ref, tour.route, TutorialNav.go);

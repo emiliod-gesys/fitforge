@@ -5,6 +5,8 @@ import '../../core/runner/runner_standards.dart';
 import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/routine_limit_gate.dart';
 import '../../core/subscription/subscription_features.dart';
+import '../../core/tutorials/tutorial_catalog.dart';
+import '../../core/tutorials/tutorial_targets.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -12,6 +14,7 @@ import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
 import '../../models/routine.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/tutorial_controller.dart';
 import '../../services/routine_service.dart';
 import '../../widgets/ai_routine_preview_card.dart';
 import '../../widgets/edit_routine_dialog.dart';
@@ -159,22 +162,12 @@ abstract final class RoutineListActions {
       return;
     }
 
-    final routine = await Navigator.of(context).push<Routine>(
-      MaterialPageRoute(
-        builder: (_) => const SmartRoutineScreen(),
-      ),
-    );
-    if (routine != null && context.mounted) {
-      await showRoutinePreview(
-        context,
-        ref,
-        routine,
-        title: l10n.smartRoutine,
-      );
-    }
+    if (!context.mounted) return;
+    context.push('/routines/smart');
   }
 
-  static Future<void> showRoutinePreview(
+  /// Returns true when the routine was saved.
+  static Future<bool> showRoutinePreview(
     BuildContext context,
     WidgetRef ref,
     Routine routine, {
@@ -182,21 +175,13 @@ abstract final class RoutineListActions {
   }) async {
     final l10n = context.l10n;
     var preview = routine;
-    var isSaved = false;
-    var isDiscarded = false;
     var isSaving = false;
 
-    await showDialog<void>(
+    final saved = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          if (isSaved || isDiscarded) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (ctx.mounted) Navigator.pop(ctx);
-            });
-          }
-
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
           return AlertDialog(
             title: Text(title ?? l10n.generateAiRoutineTitle),
             content: SizedBox(
@@ -205,13 +190,13 @@ abstract final class RoutineListActions {
                 child: Consumer(
                   builder: (_, ref, __) => AiRoutinePreviewCard(
                     routine: preview,
-                    isSaved: isSaved,
-                    isDiscarded: isDiscarded,
+                    isSaved: false,
+                    isDiscarded: false,
                     isSaving: isSaving,
                     onSave: () async {
                       if (isSaving) return;
                       final canCreate = await ensureCanCreateRoutine(context, ref);
-                      if (!canCreate) return;
+                      if (!canCreate || !dialogContext.mounted) return;
                       setDialogState(() => isSaving = true);
                       try {
                         await ref.read(routineServiceProvider).createRoutine(preview);
@@ -222,9 +207,13 @@ abstract final class RoutineListActions {
                             SnackBar(content: Text(l10n.routineSavedNamed(preview.name))),
                           );
                         }
-                        setDialogState(() => isSaved = true);
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop(true);
+                        }
                       } catch (e) {
-                        setDialogState(() => isSaving = false);
+                        if (dialogContext.mounted) {
+                          setDialogState(() => isSaving = false);
+                        }
                         if (context.mounted) {
                           showRoutineSaveErrorSnackBar(
                             context,
@@ -236,11 +225,11 @@ abstract final class RoutineListActions {
                     },
                     onEdit: () async {
                       final updated = await EditRoutineDialog.show(context, preview);
-                      if (updated != null) {
+                      if (updated != null && dialogContext.mounted) {
                         setDialogState(() => preview = updated);
                       }
                     },
-                    onDiscard: () => setDialogState(() => isDiscarded = true),
+                    onDiscard: () => Navigator.of(dialogContext).pop(false),
                   ),
                 ),
               ),
@@ -248,6 +237,31 @@ abstract final class RoutineListActions {
           );
         },
       ),
+    );
+    return saved ?? false;
+  }
+}
+
+/// Pantalla de rutina inteligente abierta por ruta, con vista previa al generar.
+class SmartRoutinePage extends ConsumerWidget {
+  const SmartRoutinePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    return SmartRoutineScreen(
+      onBuilt: (routine) async {
+        final saved = await RoutineListActions.showRoutinePreview(
+          context,
+          ref,
+          routine,
+          title: l10n.smartRoutine,
+        );
+        if (!saved || !context.mounted) return;
+        // go() replaces the stack. pop() here can remove the last page when
+        // the tutorial opened this screen as the only route above a dialog.
+        context.go('/?tab=routines');
+      },
     );
   }
 }
@@ -268,6 +282,13 @@ class RoutinesTab extends ConsumerWidget {
         final profile = ref.watch(profileProvider).valueOrNull;
         final canUpgrade = PlanUpgrade.canOfferStoreUpgrade(profile);
         final smartRoutineAllowed = profile?.subscriptionTier.hasSmartRoutine ?? false;
+        final tutorial = ref.watch(tutorialControllerProvider);
+        final highlightingSmartButton =
+            tutorial.activeTourId == TutorialCatalog.smartRoutine &&
+                tutorial.activeStep?.targetId ==
+                    TutorialTargets.smartRoutineButton;
+        final showSmartButton =
+            !atLimit || !smartRoutineAllowed || highlightingSmartButton;
 
         if (routines.isEmpty) {
           return Column(
@@ -297,12 +318,13 @@ class RoutinesTab extends ConsumerWidget {
                         },
                 ),
               ),
-              if (!atLimit || !smartRoutineAllowed)
+              if (showSmartButton)
                 SafeArea(
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                     child: OutlinedButton.icon(
+                      key: TutorialTargets.smartRoutineButtonKey,
                       onPressed: () => RoutineListActions.openSmartRoutine(context, ref),
                       icon: Icon(
                         smartRoutineAllowed
@@ -393,9 +415,10 @@ class RoutinesTab extends ConsumerWidget {
                 side: BorderSide(color: context.accentColor),
               ),
             ),
-            if (!atLimit || !smartRoutineAllowed) ...[
+            if (showSmartButton) ...[
               const SizedBox(height: 8),
               OutlinedButton.icon(
+                key: TutorialTargets.smartRoutineButtonKey,
                 onPressed: () => RoutineListActions.openSmartRoutine(context, ref),
                 icon: Icon(
                   smartRoutineAllowed ? Icons.auto_awesome_outlined : Icons.lock_outline,

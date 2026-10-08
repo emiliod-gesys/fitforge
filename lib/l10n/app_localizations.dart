@@ -8520,7 +8520,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialsAdvancedSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Rutinas, superseries, el entreno en vivo y cómo registrar comidas'**
+  /// **'Rutinas, rutina inteligente, superseries, el entreno en vivo y cómo registrar comidas'**
   String get tutorialsAdvancedSubtitle;
 
   /// No description provided for @tutorialRoutinesTitle.
@@ -8606,6 +8606,66 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cuando esté lista, pulsa Guardar. Luego aparece en esta pestaña para lanzar el entreno.'**
   String get tutorialRoutinesSaveBody;
+
+  /// No description provided for @tutorialSmartRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina inteligente'**
+  String get tutorialSmartRoutineTitle;
+
+  /// No description provided for @tutorialSmartRoutineSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige músculos y deja que la app arme la sesión'**
+  String get tutorialSmartRoutineSubtitle;
+
+  /// No description provided for @tutorialSmartRoutineTabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entra en Rutinas'**
+  String get tutorialSmartRoutineTabTitle;
+
+  /// No description provided for @tutorialSmartRoutineTabBody.
+  ///
+  /// In es, this message translates to:
+  /// **'La rutina inteligente está en esta pestaña, junto a crear una rutina a mano.'**
+  String get tutorialSmartRoutineTabBody;
+
+  /// No description provided for @tutorialSmartRoutineButtonTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre Rutina inteligente'**
+  String get tutorialSmartRoutineButtonTitle;
+
+  /// No description provided for @tutorialSmartRoutineButtonBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Arma la sesión con los músculos que marques. Primero usa lo que ya entrenaste y, si falta, los básicos del gym.'**
+  String get tutorialSmartRoutineButtonBody;
+
+  /// No description provided for @tutorialSmartRoutineMusclesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca músculos concretos'**
+  String get tutorialSmartRoutineMusclesTitle;
+
+  /// No description provided for @tutorialSmartRoutineMusclesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes ser específico: pecho superior, dorsales o deltoides lateral. El orden en que los tocas reparte los ejercicios.'**
+  String get tutorialSmartRoutineMusclesBody;
+
+  /// No description provided for @tutorialSmartRoutineGenerateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Genera y revisa'**
+  String get tutorialSmartRoutineGenerateTitle;
+
+  /// No description provided for @tutorialSmartRoutineGenerateBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar propone la rutina. En la vista previa puedes cambiar un ejercicio por otro del mismo músculo y luego guardarla.'**
+  String get tutorialSmartRoutineGenerateBody;
 
   /// No description provided for @tutorialSupersetTitle.
   ///

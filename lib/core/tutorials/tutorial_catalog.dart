@@ -48,6 +48,7 @@ abstract final class TutorialCatalog {
   static const food = 'food';
   static const progress = 'progress';
   static const routines = 'routines';
+  static const smartRoutine = 'smartRoutine';
   static const supersets = 'supersets';
   static const foodLog = 'foodLog';
   static const workoutSession = 'workoutSession';
@@ -165,6 +166,39 @@ abstract final class TutorialCatalog {
           targetId: TutorialTargets.routineSave,
           title: (l10n) => l10n.tutorialRoutinesSaveTitle,
           body: (l10n) => l10n.tutorialRoutinesSaveBody,
+        ),
+      ],
+    ),
+    TutorialTour(
+      id: smartRoutine,
+      route: '/?tab=routines',
+      icon: Icons.auto_awesome_outlined,
+      advanced: true,
+      title: (l10n) => l10n.tutorialSmartRoutineTitle,
+      subtitle: (l10n) => l10n.tutorialSmartRoutineSubtitle,
+      steps: [
+        TutorialStep(
+          targetId: TutorialTargets.trainRoutinesTab,
+          route: '/?tab=routines',
+          title: (l10n) => l10n.tutorialSmartRoutineTabTitle,
+          body: (l10n) => l10n.tutorialSmartRoutineTabBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.smartRoutineButton,
+          title: (l10n) => l10n.tutorialSmartRoutineButtonTitle,
+          body: (l10n) => l10n.tutorialSmartRoutineButtonBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.smartRoutineMuscles,
+          route: '/routines/smart',
+          nav: TutorialNav.push,
+          title: (l10n) => l10n.tutorialSmartRoutineMusclesTitle,
+          body: (l10n) => l10n.tutorialSmartRoutineMusclesBody,
+        ),
+        TutorialStep(
+          targetId: TutorialTargets.smartRoutineGenerate,
+          title: (l10n) => l10n.tutorialSmartRoutineGenerateTitle,
+          body: (l10n) => l10n.tutorialSmartRoutineGenerateBody,
         ),
       ],
     ),
