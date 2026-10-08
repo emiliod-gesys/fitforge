@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/runner/runner_standards.dart';
 import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/routine_limit_gate.dart';
+import '../../core/subscription/subscription_features.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -20,6 +21,7 @@ import '../../widgets/plan_limit_banner.dart';
 import '../../widgets/routine_share_friend_sheet.dart';
 import '../workouts/workout_start_helper.dart';
 import '../../widgets/train/train_start_sheet.dart';
+import 'smart_routine_screen.dart';
 import '../../core/theme/app_accent.dart';
 
 abstract final class RoutineListActions {
@@ -144,11 +146,40 @@ abstract final class RoutineListActions {
     );
   }
 
+  static Future<void> openSmartRoutine(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final profile = ref.read(profileProvider).valueOrNull;
+    final allowed = profile?.subscriptionTier.hasSmartRoutine ?? false;
+    if (!allowed) {
+      PlanUpgrade.showLimitSnackBar(
+        context,
+        message: l10n.featureGymratPlansOnly,
+        canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
+      );
+      return;
+    }
+
+    final routine = await Navigator.of(context).push<Routine>(
+      MaterialPageRoute(
+        builder: (_) => const SmartRoutineScreen(),
+      ),
+    );
+    if (routine != null && context.mounted) {
+      await showRoutinePreview(
+        context,
+        ref,
+        routine,
+        title: l10n.smartRoutine,
+      );
+    }
+  }
+
   static Future<void> showRoutinePreview(
     BuildContext context,
     WidgetRef ref,
-    Routine routine,
-  ) async {
+    Routine routine, {
+    String? title,
+  }) async {
     final l10n = context.l10n;
     var preview = routine;
     var isSaved = false;
@@ -167,7 +198,7 @@ abstract final class RoutineListActions {
           }
 
           return AlertDialog(
-            title: Text(l10n.generateAiRoutineTitle),
+            title: Text(title ?? l10n.generateAiRoutineTitle),
             content: SizedBox(
               width: double.maxFinite,
               child: SingleChildScrollView(
@@ -236,30 +267,58 @@ class RoutinesTab extends ConsumerWidget {
         final atLimit = limitStatus != null && !limitStatus.canCreate;
         final profile = ref.watch(profileProvider).valueOrNull;
         final canUpgrade = PlanUpgrade.canOfferStoreUpgrade(profile);
+        final smartRoutineAllowed = profile?.subscriptionTier.hasSmartRoutine ?? false;
 
         if (routines.isEmpty) {
-          return FfEmptyState(
-            icon: Icons.fitness_center_rounded,
-            title: l10n.emptyRoutinesTitle,
-            subtitle: limitStatus != null && atLimit
-                ? PlanUpgrade.routinesMessage(
-                    l10n,
-                    limitStatus.tier,
-                    limitStatus.limit,
-                  )
-                : limitStatus != null
-                    ? '${l10n.emptyRoutinesSubtitle}\n${l10n.routineLimitUsage(limitStatus.used, limitStatus.limit)}'
-                    : l10n.emptyRoutinesSubtitle,
-            actionLabel: atLimit
-                ? (canUpgrade ? l10n.subscriptionSeePlans : null)
-                : l10n.emptyRoutinesAction,
-            onAction: atLimit
-                ? (canUpgrade ? () => PlanUpgrade.openPlan(context) : null)
-                : () async {
-                    if (await ensureCanCreateRoutine(context, ref)) {
-                      if (context.mounted) context.push('/routines/new');
-                    }
-                  },
+          return Column(
+            children: [
+              Expanded(
+                child: FfEmptyState(
+                  icon: Icons.fitness_center_rounded,
+                  title: l10n.emptyRoutinesTitle,
+                  subtitle: limitStatus != null && atLimit
+                      ? PlanUpgrade.routinesMessage(
+                          l10n,
+                          limitStatus.tier,
+                          limitStatus.limit,
+                        )
+                      : limitStatus != null
+                          ? '${l10n.emptyRoutinesSubtitle}\n${l10n.routineLimitUsage(limitStatus.used, limitStatus.limit)}'
+                          : l10n.emptyRoutinesSubtitle,
+                  actionLabel: atLimit
+                      ? (canUpgrade ? l10n.subscriptionSeePlans : null)
+                      : l10n.emptyRoutinesAction,
+                  onAction: atLimit
+                      ? (canUpgrade ? () => PlanUpgrade.openPlan(context) : null)
+                      : () async {
+                          if (await ensureCanCreateRoutine(context, ref)) {
+                            if (context.mounted) context.push('/routines/new');
+                          }
+                        },
+                ),
+              ),
+              if (!atLimit || !smartRoutineAllowed)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                    child: OutlinedButton.icon(
+                      onPressed: () => RoutineListActions.openSmartRoutine(context, ref),
+                      icon: Icon(
+                        smartRoutineAllowed
+                            ? Icons.auto_awesome_outlined
+                            : Icons.lock_outline,
+                      ),
+                      label: Text(l10n.smartRoutine),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: context.accentColor,
+                        side: BorderSide(color: context.accentColor),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           );
         }
         final sorted = [...routines]..sort((a, b) {
@@ -334,6 +393,21 @@ class RoutinesTab extends ConsumerWidget {
                 side: BorderSide(color: context.accentColor),
               ),
             ),
+            if (!atLimit || !smartRoutineAllowed) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => RoutineListActions.openSmartRoutine(context, ref),
+                icon: Icon(
+                  smartRoutineAllowed ? Icons.auto_awesome_outlined : Icons.lock_outline,
+                ),
+                label: Text(l10n.smartRoutine),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  foregroundColor: context.accentColor,
+                  side: BorderSide(color: context.accentColor),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             ...sorted.map((routine) => _RoutineCard(
                   routine: routine,

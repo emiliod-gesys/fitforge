@@ -1,6 +1,7 @@
 import '../../models/exercise.dart';
 import 'exercise_picker_merge.dart';
 import 'muscle_inference.dart';
+import 'muscle_subcategory.dart';
 
 abstract final class SimilarExercises {
   /// Query cloud RPC para traer candidatos del mismo grupo muscular principal.
@@ -52,6 +53,18 @@ abstract final class SimilarExercises {
     );
   }
 
+  static bool _matchesTarget({
+    required Exercise exercise,
+    required String? primaryMuscleKey,
+    required String? primaryGroup,
+  }) {
+    if (primaryMuscleKey != null) {
+      return MuscleSubcategory.samePrimary(exercise, primaryMuscleKey);
+    }
+    if (primaryGroup == null || primaryGroup.isEmpty) return false;
+    return matchesPrimaryGroup(exercise: exercise, primaryGroup: primaryGroup);
+  }
+
   static List<Exercise> find({
     required String exerciseName,
     required String exerciseId,
@@ -61,20 +74,31 @@ abstract final class SimilarExercises {
     Exercise? sourceExercise,
   }) {
     final source = sourceExercise ?? findInCatalog(catalog, exerciseId);
-    final targetPrimary = primaryGroup ??
-        resolvePrimaryGroup(
-          exerciseName: exerciseName,
-          exerciseId: exerciseId,
-          catalogMatch: source,
-        );
-    if (targetPrimary == null) return const [];
+    final muscleKey = MuscleSubcategory.keyOf(source);
+    final targetPrimary = muscleKey == null
+        ? (primaryGroup ??
+            resolvePrimaryGroup(
+              exerciseName: exerciseName,
+              exerciseId: exerciseId,
+              catalogMatch: source,
+            ))
+        : primaryGroup;
+    if (muscleKey == null && (targetPrimary == null || targetPrimary.isEmpty)) {
+      return const [];
+    }
 
     final sourceCategory = source?.category ?? '';
     final matches = <Exercise>[];
 
     for (final candidate in catalog) {
       if (candidate.id == exerciseId || excludeIds.contains(candidate.id)) continue;
-      if (!matchesPrimaryGroup(exercise: candidate, primaryGroup: targetPrimary)) continue;
+      if (!_matchesTarget(
+        exercise: candidate,
+        primaryMuscleKey: muscleKey,
+        primaryGroup: targetPrimary,
+      )) {
+        continue;
+      }
       matches.add(candidate);
     }
 
@@ -88,11 +112,18 @@ abstract final class SimilarExercises {
     required String exerciseId,
     required Set<String> excludeIds,
     String sourceCategory = '',
+    String? primaryMuscleKey,
   }) {
     final matches = <Exercise>[];
     for (final candidate in cloud) {
       if (candidate.id == exerciseId || excludeIds.contains(candidate.id)) continue;
-      if (!matchesPrimaryGroup(exercise: candidate, primaryGroup: primaryGroup)) continue;
+      if (!_matchesTarget(
+        exercise: candidate,
+        primaryMuscleKey: primaryMuscleKey,
+        primaryGroup: primaryGroup,
+      )) {
+        continue;
+      }
       matches.add(candidate);
     }
     matches.sort((a, b) => _compareCandidates(a, b, sourceCategory));
@@ -110,6 +141,7 @@ abstract final class SimilarExercises {
     required String search,
     required String exerciseId,
     Set<String> excludeIds = const {},
+    String? primaryMuscleKey,
   }) {
     final query = search.trim();
     if (query.isEmpty) return const [];
@@ -117,7 +149,13 @@ abstract final class SimilarExercises {
     final matches = <Exercise>[];
     for (final candidate in catalog) {
       if (candidate.id == exerciseId || excludeIds.contains(candidate.id)) continue;
-      if (!matchesPrimaryGroup(exercise: candidate, primaryGroup: primaryGroup)) continue;
+      if (!_matchesTarget(
+        exercise: candidate,
+        primaryMuscleKey: primaryMuscleKey,
+        primaryGroup: primaryGroup,
+      )) {
+        continue;
+      }
       if (!exerciseMatchesTextFilter(candidate, query)) continue;
       matches.add(candidate);
     }

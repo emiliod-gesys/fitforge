@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/constants/app_constants.dart';
+import '../core/theme/app_accent.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/exercise_load.dart';
 import '../l10n/l10n_extensions.dart';
+import '../models/exercise.dart';
 import '../models/routine.dart';
+import '../models/workout.dart';
+import '../providers/app_providers.dart';
 import 'localized_exercise_name.dart';
+import 'similar_exercise_picker_sheet.dart';
 
 class EditRoutineDialog extends ConsumerStatefulWidget {
   final Routine routine;
@@ -38,6 +45,66 @@ class _EditRoutineDialogState extends ConsumerState<EditRoutineDialog> {
     super.dispose();
   }
 
+  Future<void> _swapExercise(int index) async {
+    final ex = _exercises[index];
+    final excludeIds = _exercises
+        .where((other) => other.id != ex.id)
+        .map((other) => other.exerciseId)
+        .toSet();
+    final picked = await SimilarExercisePickerSheet.show(
+      context,
+      current: WorkoutExercise(
+        id: ex.id,
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+        imageUrl: ex.imageUrl,
+        orderIndex: ex.orderIndex,
+      ),
+      excludeExerciseIds: excludeIds,
+    );
+    if (picked == null || !mounted) return;
+
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? const <Exercise>[];
+    final keepSets = !picked.isCardio && !ex.isCardio;
+    final details = keepSets
+        ? ex.resolvedSetDetails
+        : picked.isCardio
+            ? const <RoutineSetTarget>[]
+            : List.generate(
+                AppConstants.defaultSets,
+                (_) => const RoutineSetTarget(reps: AppConstants.defaultReps),
+              );
+
+    setState(() {
+      final next = List<RoutineExercise>.from(_exercises);
+      next[index] = RoutineExercise(
+        id: ex.id,
+        exerciseId: picked.id,
+        exerciseName: picked.name,
+        orderIndex: ex.orderIndex,
+        targetSets: details.isEmpty ? ex.targetSets : details.length,
+        targetReps: details.isEmpty ? ex.targetReps : details.first.reps,
+        targetWeight: details.isEmpty ? null : details.first.weight,
+        restSeconds: ex.restSeconds,
+        imageUrl: picked.isUserCustom ? null : picked.imageUrl,
+        loggingType: picked.loggingType,
+        targetDurationSeconds: picked.isCardio ? (ex.isCardio ? ex.targetDurationSeconds : 1200) : null,
+        targetDistanceMeters: picked.isCardio ? (ex.isCardio ? ex.targetDistanceMeters : 3000) : null,
+        targetInclinePercent: picked.isCardio ? ex.targetInclinePercent : null,
+        targetSteps: picked.isCardio ? ex.targetSteps : null,
+        perArmWeight: ExerciseLoad.resolvePerArmWeight(
+          exerciseId: picked.id,
+          catalog: catalog,
+          exerciseName: picked.name,
+        ),
+        targetSetDetails: details,
+        supersetGroupId: ex.supersetGroupId,
+        supersetSlot: ex.supersetSlot,
+      );
+      _exercises = next;
+    });
+  }
+
   void _apply() {
     if (_exercises.isEmpty) return;
 
@@ -66,7 +133,7 @@ class _EditRoutineDialogState extends ConsumerState<EditRoutineDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final listHeight = (_exercises.length * 56.0).clamp(56.0, 280.0);
+    final listHeight = (_exercises.length * 64.0).clamp(64.0, 320.0);
 
     return AlertDialog(
       title: Text(l10n.editRoutine),
@@ -88,21 +155,50 @@ class _EditRoutineDialogState extends ConsumerState<EditRoutineDialog> {
                 itemCount: _exercises.length,
                 itemBuilder: (_, i) {
                   final ex = _exercises[i];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: LocalizedExerciseName(
-                      ex.exerciseName,
-                      exerciseId: ex.exerciseId,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    subtitle: Text('${ex.targetSets}×${ex.targetReps}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, size: 18, color: AppColors.error),
-                      onPressed: () {
-                        setState(() {
-                          _exercises = List.from(_exercises)..removeAt(i);
-                        });
-                      },
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LocalizedExerciseName(
+                                ex.exerciseName,
+                                exerciseId: ex.exerciseId,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              Text(
+                                '${ex.targetSets}×${ex.targetReps}',
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.swapSimilar,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                          icon: Icon(Icons.swap_horiz, color: context.accentColor),
+                          onPressed: () => _swapExercise(i),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                          icon: const Icon(Icons.close, size: 18, color: AppColors.error),
+                          onPressed: () {
+                            setState(() {
+                              _exercises = List<RoutineExercise>.from(_exercises)..removeAt(i);
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },

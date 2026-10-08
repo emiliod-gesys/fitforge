@@ -128,7 +128,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) {
               final tab = _trainingHubInitialTab(state);
               return NoTransitionPage(
-                key: ValueKey('train-tab-$tab'),
+                key: const ValueKey('train-hub'),
                 child: TrainingHubScreen(initialTab: tab),
               );
             },

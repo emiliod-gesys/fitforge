@@ -4,6 +4,7 @@ import '../core/constants/cloud_exercise_catalog.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_picker_merge.dart';
 import '../core/utils/exercise_text_search.dart';
+import '../core/utils/muscle_subcategory.dart';
 import '../core/utils/similar_exercises.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -111,13 +112,14 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
 
               final bundledSource = SimilarExercises.findInCatalog(catalog, current.exerciseId);
               final source = bundledSource ?? cloudSourceAsync.valueOrNull;
+              final primaryMuscleKey = MuscleSubcategory.keyOf(source);
               final primaryGroup = SimilarExercises.resolvePrimaryGroup(
                 exerciseName: current.exerciseName,
                 exerciseId: current.exerciseId,
                 catalogMatch: source,
               );
 
-              if (primaryGroup == null) {
+              if (primaryMuscleKey == null && primaryGroup == null) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -134,7 +136,8 @@ class SimilarExercisePickerSheet extends ConsumerWidget {
                 catalog: catalog,
                 current: current,
                 excludeExerciseIds: excludeExerciseIds,
-                primaryGroup: primaryGroup,
+                primaryGroup: primaryGroup ?? '',
+                primaryMuscleKey: primaryMuscleKey,
                 sourceExercise: source,
               );
             },
@@ -150,6 +153,7 @@ class _SimilarExerciseResults extends ConsumerStatefulWidget {
   final WorkoutExercise current;
   final Set<String> excludeExerciseIds;
   final String primaryGroup;
+  final String? primaryMuscleKey;
   final Exercise? sourceExercise;
 
   const _SimilarExerciseResults({
@@ -157,6 +161,7 @@ class _SimilarExerciseResults extends ConsumerStatefulWidget {
     required this.current,
     required this.excludeExerciseIds,
     required this.primaryGroup,
+    required this.primaryMuscleKey,
     required this.sourceExercise,
   });
 
@@ -198,6 +203,7 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
       final bundledMatches = SimilarExercises.searchInPrimaryGroup(
         catalog: widget.catalog,
         primaryGroup: widget.primaryGroup,
+        primaryMuscleKey: widget.primaryMuscleKey,
         search: _search,
         exerciseId: widget.current.exerciseId,
         excludeIds: widget.excludeExerciseIds,
@@ -205,6 +211,7 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
       final cloudMatches = SimilarExercises.filterCloudCandidates(
         cloud: cloudState.exercises,
         primaryGroup: widget.primaryGroup,
+        primaryMuscleKey: widget.primaryMuscleKey,
         exerciseId: widget.current.exerciseId,
         excludeIds: widget.excludeExerciseIds,
         sourceCategory: sourceCategory,
@@ -228,6 +235,7 @@ class _SimilarExerciseResultsState extends ConsumerState<_SimilarExerciseResults
       final cloudSimilar = SimilarExercises.filterCloudCandidates(
         cloud: cloudState.exercises,
         primaryGroup: widget.primaryGroup,
+        primaryMuscleKey: widget.primaryMuscleKey,
         exerciseId: widget.current.exerciseId,
         excludeIds: widget.excludeExerciseIds,
         sourceCategory: sourceCategory,

@@ -2406,6 +2406,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newRoutine => 'New routine';
 
   @override
+  String get smartRoutine => 'Smart routine';
+
+  @override
+  String get smartRoutineHint =>
+      'Pick specific muscles. Exercises you already do come first, then the most common gym staples.';
+
+  @override
+  String get smartRoutineGenerate => 'Build routine';
+
+  @override
+  String get smartRoutineNeedSelection => 'Pick at least one muscle.';
+
+  @override
+  String get smartRoutineNoExercises => 'No exercises match that selection.';
+
+  @override
   String get generateWithAi => 'Generate with AI';
 
   @override

@@ -13,12 +13,14 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
 import '../../models/routine.dart';
+import '../../models/workout.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/onboarding_progress_provider.dart';
 import '../../providers/tutorial_controller.dart';
 import '../../core/tutorials/tutorial_catalog.dart';
 import '../../core/tutorials/tutorial_targets.dart';
 import '../../widgets/exercise_picker_sheet.dart';
+import '../../widgets/similar_exercise_picker_sheet.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/exercise_thumbnail.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
@@ -322,6 +324,64 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     setState(() => _exercises[index] = updated);
   }
 
+  Future<void> _swapExercise(RoutineExercise ex) async {
+    final excludeIds = _exercises
+        .where((other) => other.id != ex.id)
+        .map((other) => other.exerciseId)
+        .toSet();
+    final picked = await SimilarExercisePickerSheet.show(
+      context,
+      current: WorkoutExercise(
+        id: ex.id,
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+        imageUrl: ex.imageUrl,
+        orderIndex: ex.orderIndex,
+      ),
+      excludeExerciseIds: excludeIds,
+    );
+    if (picked == null || !mounted) return;
+
+    final catalog = ref.read(exercisesProvider).valueOrNull ?? const <Exercise>[];
+    final keepSets = !picked.isCardio && !ex.isCardio;
+    final details = keepSets
+        ? ex.resolvedSetDetails
+        : picked.isCardio
+            ? const <RoutineSetTarget>[]
+            : List.generate(
+                AppConstants.defaultSets,
+                (_) => const RoutineSetTarget(reps: AppConstants.defaultReps),
+              );
+
+    _updateExercise(
+      ex.id,
+      RoutineExercise(
+        id: ex.id,
+        exerciseId: picked.id,
+        exerciseName: picked.name,
+        orderIndex: ex.orderIndex,
+        targetSets: details.isEmpty ? ex.targetSets : details.length,
+        targetReps: details.isEmpty ? ex.targetReps : details.first.reps,
+        targetWeight: details.isEmpty ? null : details.first.weight,
+        restSeconds: ex.restSeconds,
+        imageUrl: picked.isUserCustom ? null : picked.imageUrl,
+        loggingType: picked.loggingType,
+        targetDurationSeconds: picked.isCardio ? (ex.isCardio ? ex.targetDurationSeconds : 1200) : null,
+        targetDistanceMeters: picked.isCardio ? (ex.isCardio ? ex.targetDistanceMeters : 3000) : null,
+        targetInclinePercent: picked.isCardio ? ex.targetInclinePercent : null,
+        targetSteps: picked.isCardio ? ex.targetSteps : null,
+        perArmWeight: ExerciseLoad.resolvePerArmWeight(
+          exerciseId: picked.id,
+          catalog: catalog,
+          exerciseName: picked.name,
+        ),
+        targetSetDetails: details,
+        supersetGroupId: ex.supersetGroupId,
+        supersetSlot: ex.supersetSlot,
+      ),
+    );
+  }
+
   void _joinBlock(int blockIndex) {
     setState(() {
       final updated = SupersetGroups.joinRoutineBlockWithNext(
@@ -578,6 +638,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                 icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
                 onSelected: (value) {
                   switch (value) {
+                    case 'swap':
+                      _swapExercise(ex);
                     case 'leave':
                       _leaveSuperset(ex.id);
                     case 'delete':
@@ -585,6 +647,10 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                   }
                 },
                 itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'swap',
+                    child: Text(l10n.swapSimilar),
+                  ),
                   PopupMenuItem(
                     value: 'leave',
                     child: Text(l10n.leaveGroupedSet(memberCount)),
@@ -615,6 +681,14 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
               onChanged: (updated) => _updateExercise(ex.id, updated),
             ),
           ],
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _swapExercise(ex),
+              icon: const Icon(Icons.swap_horiz, size: 18),
+              label: Text(l10n.swapSimilar),
+            ),
+          ),
         ],
       ),
     );
@@ -694,6 +768,14 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
                 onChanged: (updated) => _updateExercise(ex.id, updated),
               ),
             ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _swapExercise(ex),
+                icon: const Icon(Icons.swap_horiz, size: 18),
+                label: Text(l10n.swapSimilar),
+              ),
+            ),
             if (canJoin)
               Align(
                 alignment: Alignment.centerLeft,

@@ -8,6 +8,7 @@ import '../models/exercise_logging.dart';
 import '../models/routine.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/app_accent.dart';
+import 'exercise_thumbnail.dart';
 
 class AiRoutinePreviewCard extends ConsumerWidget {
   final Routine routine;
@@ -94,15 +95,7 @@ class AiRoutinePreviewCard extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 12),
-            ...routine.exercises.take(8).map((ex) => _exerciseLine(context, ref, ex)),
-          if (routine.exercises.length > 8)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                l10n.moreExercises(routine.exercises.length - 8),
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-              ),
-            ),
+          ...routine.exercises.map((ex) => _exerciseLine(context, ref, ex)),
           const SizedBox(height: 14),
           if (!previewOnly) ...[
           if (!shareMode)
@@ -175,15 +168,29 @@ class AiRoutinePreviewCard extends ConsumerWidget {
         ? _cardioDetail(ref, ex)
         : '${ex.targetSets}×${ex.targetReps}${ex.targetWeight != null ? ' · ${ex.targetWeight!.toStringAsFixed(0)} kg' : ''}';
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('• ', style: TextStyle(color: context.accentColor)),
+          ExerciseThumbnail(
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exerciseName,
+            width: 52,
+            height: 52,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              '$name — $detail',
-              style: const TextStyle(fontSize: 13),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(
+                  detail,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+              ],
             ),
           ),
         ],

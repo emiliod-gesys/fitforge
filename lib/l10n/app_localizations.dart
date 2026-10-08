@@ -4310,6 +4310,36 @@ abstract class AppLocalizations {
   /// **'Nueva rutina'**
   String get newRoutine;
 
+  /// No description provided for @smartRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina inteligente'**
+  String get smartRoutine;
+
+  /// No description provided for @smartRoutineHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige músculos concretos. Primero entran los que ya entrenas y, si faltan, los más habituales del gym.'**
+  String get smartRoutineHint;
+
+  /// No description provided for @smartRoutineGenerate.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar rutina'**
+  String get smartRoutineGenerate;
+
+  /// No description provided for @smartRoutineNeedSelection.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige al menos un músculo.'**
+  String get smartRoutineNeedSelection;
+
+  /// No description provided for @smartRoutineNoExercises.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay ejercicios para esa selección.'**
+  String get smartRoutineNoExercises;
+
   /// No description provided for @generateWithAi.
   ///
   /// In es, this message translates to:

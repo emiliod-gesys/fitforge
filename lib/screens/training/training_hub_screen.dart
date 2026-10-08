@@ -125,6 +125,7 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
                   ),
                   child: TabBar(
                     controller: _tabController,
+                    tabAlignment: TabAlignment.fill,
                     indicator: BoxDecoration(
                       color: context.accentColor.withValues(alpha: 0.18),
                       borderRadius: AppTokens.borderRadiusSm,
@@ -136,8 +137,10 @@ class _TrainingHubScreenState extends ConsumerState<TrainingHubScreen>
                     tabs: [
                       Tab(text: l10n.trainTabToday),
                       Tab(
-                        key: TutorialTargets.trainRoutinesTabKey,
-                        text: l10n.trainTabRoutines,
+                        child: Text(
+                          l10n.trainTabRoutines,
+                          key: TutorialTargets.trainRoutinesTabKey,
+                        ),
                       ),
                     ],
                   ),

@@ -14,6 +14,9 @@ extension SubscriptionFeatures on SubscriptionTier {
   /// Color de acento personalizable.
   bool get hasCustomAccent => !isFree;
 
+  /// Rutina inteligente a partir de músculos concretos.
+  bool get hasSmartRoutine => !isFree;
+
   /// Modo entrenador personal (pestaña Alumnos).
   bool get hasTrainerMode => this == SubscriptionTier.gymratPro;
 

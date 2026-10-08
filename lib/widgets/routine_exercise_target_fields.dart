@@ -66,6 +66,7 @@ class _RoutineExerciseTargetFieldsState extends State<RoutineExerciseTargetField
     final oldDetails = oldWidget.exercise.resolvedSetDetails;
     final newDetails = widget.exercise.resolvedSetDetails;
     if (oldWidget.exercise.id != widget.exercise.id ||
+        oldWidget.exercise.exerciseId != widget.exercise.exerciseId ||
         oldDetails.length != newDetails.length) {
       _disposeRows();
       _perArmWeight = widget.exercise.perArmWeight;
