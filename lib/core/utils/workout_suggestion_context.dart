@@ -27,6 +27,7 @@ class WorkoutSuggestionExerciseContext {
   final bool warmupSetsAllowed;
   final double? currentWorkingWeightKg;
   final List<double> currentSetWeightsKg;
+  final List<Map<String, dynamic>> lastSetRirs;
   final List<WorkoutSuggestionHistorySession> history;
 
   const WorkoutSuggestionExerciseContext({
@@ -44,6 +45,7 @@ class WorkoutSuggestionExerciseContext {
     this.warmupSetsAllowed = false,
     this.currentWorkingWeightKg,
     this.currentSetWeightsKg = const [],
+    this.lastSetRirs = const [],
     this.history = const [],
   });
 
@@ -63,6 +65,7 @@ class WorkoutSuggestionExerciseContext {
         if (currentWorkingWeightKg != null && currentWorkingWeightKg! > 0)
           'current_working_weight_kg': currentWorkingWeightKg,
         if (currentSetWeightsKg.isNotEmpty) 'current_set_weights_kg': currentSetWeightsKg,
+        if (lastSetRirs.isNotEmpty) 'last_set_rirs': lastSetRirs,
         'history': history.map((h) => h.toJson()).toList(),
       };
 }
@@ -110,6 +113,9 @@ abstract final class WorkoutSuggestionContextBuilder {
           : (history.map((h) => h.sets.length).reduce((a, b) => a + b) / history.length)
               .round();
 
+      final lastSetRirs = history.isEmpty
+          ? const <Map<String, dynamic>>[]
+          : _lastSetRirs(history.first);
       final anchoring = ExerciseHistoryUtils.anchoringSession(history);
       final latestSummary = anchoring == null
           ? null
@@ -150,6 +156,7 @@ abstract final class WorkoutSuggestionContextBuilder {
         ),
         currentWorkingWeightKg: currentWorking > 0 ? currentWorking : null,
         currentSetWeightsKg: currentSetWeights,
+        lastSetRirs: lastSetRirs,
         history: history
             .take(historyLimit)
             .map((session) => _historySession(session, isCardio))
@@ -249,6 +256,7 @@ abstract final class WorkoutSuggestionContextBuilder {
         };
       }
       return {
+        'set': set.setNumber,
         if (set.weight != null) 'w': set.weight,
         'r': set.reps,
         if (set.rir != null) 'rir': set.rir,
@@ -293,6 +301,7 @@ abstract final class WorkoutSuggestionContextBuilder {
         : working.fold<int>(0, (best, set) => set.reps > best ? set.reps : best);
     final pattern = ExerciseHistoryUtils.weightPattern(session.sets);
     final orderedWeights = weighted.map((set) => set.weight).toList();
+    final lastSetRirs = _lastSetRirs(session);
 
     return {
       'set_count': session.sets.length,
@@ -302,7 +311,21 @@ abstract final class WorkoutSuggestionContextBuilder {
       'weight_pattern': pattern,
       if (orderedWeights.isNotEmpty) 'set_weights_kg': orderedWeights,
       if (working.isNotEmpty) 'working_set_count': working.length,
+      if (lastSetRirs.isNotEmpty) 'last_set_rirs': lastSetRirs,
     };
+  }
+
+  static List<Map<String, dynamic>> _lastSetRirs(ExerciseSessionHistory session) {
+    final ordered = [...session.sets]
+      ..sort((a, b) => a.setNumber.compareTo(b.setNumber));
+    return [
+      for (final set in ordered)
+        if (set.rir != null)
+          {
+            'set_number': set.setNumber,
+            'rir': set.rir,
+          },
+    ];
   }
 
   static Map<String, dynamic>? _recentTopSet(

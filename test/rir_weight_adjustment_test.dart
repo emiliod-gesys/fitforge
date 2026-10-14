@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('RirWeightAdjustment', () {
-    test('kg: solo RIR 3+ sube 2.5; 0, 1 y 2 mantienen', () {
+    test('kg: ningún RIR cambia el peso', () {
       expect(
         RirWeightAdjustment.apply(baselineKg: 80, rir: 0, unitSystem: 'kg'),
         80,
@@ -19,11 +19,11 @@ void main() {
       );
       expect(
         RirWeightAdjustment.apply(baselineKg: 80, rir: 3, unitSystem: 'kg'),
-        82.5,
+        80,
       );
     });
 
-    test('lb: RIR 3+ sube 5 lb enteras', () {
+    test('lb: RIR 3+ no sube el peso', () {
       final baseline = UnitConverter.displayToKg(185, 'lb');
       final next = RirWeightAdjustment.apply(
         baselineKg: baseline,
@@ -31,7 +31,7 @@ void main() {
         unitSystem: 'lb',
       );
       expect(next, isNotNull);
-      expect(UnitConverter.kgToDisplay(next!, 'lb').round(), 190);
+      expect(UnitConverter.kgToDisplay(next!, 'lb').round(), 185);
     });
 
     test('lb: RIR 0 no baja el peso', () {

@@ -20,7 +20,6 @@ Future<void> startWorkoutAndNavigate(
   WidgetRef ref, {
   required String name,
   String? routineId,
-  DateTime? routineUpdatedAt,
   List<WorkoutExercise>? exercises,
   bool isHyrox = false,
   bool isRunner = false,
@@ -73,7 +72,6 @@ Future<void> startWorkoutAndNavigate(
         await ref.read(workoutServiceProvider).startWorkout(
               name: name,
               routineId: routineId,
-              routineUpdatedAt: routineUpdatedAt,
               exercises: exercises,
               applyProactiveSuggestions: applyProactive,
             );
@@ -140,7 +138,6 @@ Future<void> startWorkoutFromRoutine(
     ref,
     name: routine.name,
     routineId: routine.id,
-    routineUpdatedAt: routine.updatedAt,
     exercises: workoutExercisesFromRoutine(routine),
     isHyrox: routine.isHyroxSystem,
     isRunner: routine.isRunnerSystem,
@@ -166,7 +163,6 @@ Future<void> startRunnerWorkoutFromRoutine(
     ref,
     name: routine.name,
     routineId: routine.id,
-    routineUpdatedAt: routine.updatedAt,
     exercises: workoutExercisesFromRoutine(routine),
     isRunner: true,
   );

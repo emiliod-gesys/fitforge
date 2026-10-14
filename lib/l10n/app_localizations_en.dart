@@ -2083,12 +2083,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String summaryUpdateRoutineSubtitle(String name) {
-    return 'Save the exercises and sets from this workout to \"$name\".';
+    return 'Only if you swapped an exercise or added one in \"$name\". Weights, sets, and reps are already kept for the next session.';
   }
 
   @override
   String get summaryUpdateRoutineCheckbox =>
-      'Update my routine with this workout';
+      'Update the exercises in my routine';
+
+  @override
+  String get summaryRoutineStructureUnchanged =>
+      'No exercises were swapped or added. Weights, sets, and reps are already kept for next time.';
 
   @override
   String get summaryCreateRoutineTitle => 'Save as routine';
@@ -2389,7 +2393,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rirPickerSubtitle =>
-      'If you pick +3, we raise the next set by one gym step (5 lb or 2.5 kg).';
+      'Optional. It is saved on the set and does not change the next set\'s weight.';
 
   @override
   String get rirPickerRepsLeft => 'reps left';

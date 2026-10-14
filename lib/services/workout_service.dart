@@ -495,7 +495,6 @@ class WorkoutService {
   Future<Workout> startWorkout({
     required String name,
     String? routineId,
-    DateTime? routineUpdatedAt,
     List<WorkoutExercise>? exercises,
     Future<List<WorkoutExercise>> Function(
       List<WorkoutExercise> locallyEnriched,
@@ -510,16 +509,11 @@ class WorkoutService {
     var workoutExercises = exercises;
     if (workoutExercises != null) {
       final fromRoutine = routineId != null && routineId.isNotEmpty;
-      final planUpdatedAt = fromRoutine
-          ? (routineUpdatedAt ?? await _routineUpdatedAt(routineId))
-          : null;
       var enriched = await _applyPreviousSetSuggestions(
         workoutExercises,
         excludeWorkoutId: workoutId,
-        fromRoutine: fromRoutine,
-        routineUpdatedAt: planUpdatedAt,
       );
-      // La rutina o el último entreno ya definen series y pesos.
+      // El último entreno define series, reps y pesos. Sin historial, manda la rutina.
       if (applyProactiveSuggestions != null && !fromRoutine) {
         try {
           enriched = await applyProactiveSuggestions(enriched, workoutId);
@@ -794,8 +788,6 @@ class WorkoutService {
   Future<List<WorkoutExercise>> _applyPreviousSetSuggestions(
     List<WorkoutExercise> exercises, {
     String? excludeWorkoutId,
-    bool fromRoutine = false,
-    DateTime? routineUpdatedAt,
   }) async {
     final result = <WorkoutExercise>[];
     for (final ex in exercises) {
@@ -808,12 +800,6 @@ class WorkoutService {
         result.add(ex);
         continue;
       }
-      final preserveTemplate = fromRoutine &&
-          !PreviousSetUtils.useLastPerformance(
-            routineUpdatedAt: routineUpdatedAt,
-            lastPerformedAt: session?.completedAt,
-          );
-
       final isCardio = ExerciseLoggingResolver.isCardioExercise(
         exerciseId: ex.exerciseId,
         exerciseName: ex.exerciseName,
@@ -830,7 +816,7 @@ class WorkoutService {
         previous: previous,
         isCardio: isCardio,
         isLoadedDistance: isLoadedDistance,
-        preserveTemplate: preserveTemplate,
+        preserveTemplate: false,
       );
 
       result.add(ex.copyWith(sets: sets));
@@ -873,21 +859,6 @@ class WorkoutService {
       ));
     }
     return history;
-  }
-
-  Future<DateTime?> _routineUpdatedAt(String routineId) async {
-    try {
-      final row = await _client
-          .from('routines')
-          .select('updated_at')
-          .eq('id', routineId)
-          .maybeSingle();
-      final raw = row?['updated_at'] as String?;
-      if (raw == null || raw.isEmpty) return null;
-      return SupabaseDateTime.parse(raw);
-    } catch (_) {
-      return null;
-    }
   }
 
   Future<List<WorkoutSet>?> getPreviousSetsForExercise(

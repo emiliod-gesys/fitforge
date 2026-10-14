@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/rir_weight_adjustment.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/cardio_format.dart';
 import '../core/utils/exercise_logging_resolver.dart';
@@ -154,7 +155,7 @@ class ExerciseHistorySheet extends ConsumerWidget {
                                       catalog: catalog,
                                       sets: [set],
                                     );
-                                final line = isCardio
+                                final base = isCardio
                                     ? CardioFormat.setSummary(
                                         config: ExerciseLoggingResolver.cardioConfigFor(
                                           exerciseId: exerciseId,
@@ -170,6 +171,9 @@ class ExerciseHistorySheet extends ConsumerWidget {
                                     : (set.weight != null
                                         ? UnitConverter.formatSetLine(set.weight!, set.reps, unitSystem)
                                         : l10n.repsOnly(set.reps));
+                                final line = set.rir == null
+                                    ? base
+                                    : '$base · ${l10n.setRirCaption(RirWeightAdjustment.formatLabel(set.rir!))}';
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 4),
                                   child: Text(

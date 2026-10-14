@@ -93,29 +93,15 @@ void main() {
       );
     });
 
-    test('el último entreno manda si es posterior a la rutina', () {
-      final routineUpdated = DateTime.utc(2026, 10, 1);
-      final performed = DateTime.utc(2026, 10, 6);
-
+    test('el último entreno manda siempre que exista', () {
       expect(
         PreviousSetUtils.useLastPerformance(
-          routineUpdatedAt: routineUpdated,
-          lastPerformedAt: performed,
+          lastPerformedAt: DateTime.utc(2026, 10, 6),
         ),
         isTrue,
       );
       expect(
-        PreviousSetUtils.useLastPerformance(
-          routineUpdatedAt: performed,
-          lastPerformedAt: routineUpdated,
-        ),
-        isFalse,
-      );
-      expect(
-        PreviousSetUtils.useLastPerformance(
-          routineUpdatedAt: routineUpdated,
-          lastPerformedAt: null,
-        ),
+        PreviousSetUtils.useLastPerformance(lastPerformedAt: null),
         isFalse,
       );
     });

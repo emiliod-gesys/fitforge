@@ -3773,14 +3773,20 @@ abstract class AppLocalizations {
   /// No description provided for @summaryUpdateRoutineSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Guarda los ejercicios y series de este entreno en \"{name}\".'**
+  /// **'Solo si cambiaste un ejercicio por otro o agregaste ejercicios en \"{name}\". Pesos, series y reps ya quedan para la próxima sesión.'**
   String summaryUpdateRoutineSubtitle(String name);
 
   /// No description provided for @summaryUpdateRoutineCheckbox.
   ///
   /// In es, this message translates to:
-  /// **'Actualizar mi rutina con este entrenamiento'**
+  /// **'Actualizar los ejercicios de mi rutina'**
   String get summaryUpdateRoutineCheckbox;
+
+  /// No description provided for @summaryRoutineStructureUnchanged.
+  ///
+  /// In es, this message translates to:
+  /// **'No hubo ejercicios nuevos ni cambios. Pesos, series y reps ya quedan para la próxima vez.'**
+  String get summaryRoutineStructureUnchanged;
 
   /// No description provided for @summaryCreateRoutineTitle.
   ///
@@ -4283,7 +4289,7 @@ abstract class AppLocalizations {
   /// No description provided for @rirPickerSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Si marcas +3, subimos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).'**
+  /// **'Opcional. Queda guardado en la serie y no cambia el peso de la siguiente.'**
   String get rirPickerSubtitle;
 
   /// No description provided for @rirPickerRepsLeft.

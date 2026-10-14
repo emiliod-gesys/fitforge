@@ -177,11 +177,19 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
         throw StateError('routine_system_locked');
       }
 
-      final exercises = RoutineWorkoutSync.routineExercisesFromWorkout(
-        summary.workout,
+      final exercises = RoutineWorkoutSync.applyStructuralEdits(
+        routineExercises: existing.exercises,
+        workout: summary.workout,
         catalog: catalog,
       );
-      if (exercises.isEmpty) return;
+      if (exercises == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.summaryRoutineStructureUnchanged)),
+          );
+        }
+        return;
+      }
 
       final muscles = trainedMuscleGroupsForWorkout(summary.workout, catalog);
       await ref.read(routineServiceProvider).updateRoutine(

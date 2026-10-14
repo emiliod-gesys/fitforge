@@ -10,8 +10,11 @@ abstract final class RirWeightAdjustment {
 
   static String formatLabel(int rir) => rir >= 3 ? '+3' : '$rir';
 
-  /// Solo RIR 3+ sube un escalón. Ninguna opción baja el peso.
-  static int stepsForRir(int rir) => rir >= 3 ? 1 : 0;
+  /// El RIR queda registrado. No cambia el peso de la siguiente serie.
+  static int stepsForRir(int rir) {
+    if (rir < 0) return 0;
+    return 0;
+  }
 
   static double stepKg(String unitSystem) {
     if (UnitConverter.isLb(unitSystem)) {

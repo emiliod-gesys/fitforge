@@ -2105,12 +2105,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String summaryUpdateRoutineSubtitle(String name) {
-    return 'Guarda los ejercicios y series de este entreno en \"$name\".';
+    return 'Solo si cambiaste un ejercicio por otro o agregaste ejercicios en \"$name\". Pesos, series y reps ya quedan para la próxima sesión.';
   }
 
   @override
   String get summaryUpdateRoutineCheckbox =>
-      'Actualizar mi rutina con este entrenamiento';
+      'Actualizar los ejercicios de mi rutina';
+
+  @override
+  String get summaryRoutineStructureUnchanged =>
+      'No hubo ejercicios nuevos ni cambios. Pesos, series y reps ya quedan para la próxima vez.';
 
   @override
   String get summaryCreateRoutineTitle => 'Guardar como rutina';
@@ -2413,7 +2417,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rirPickerSubtitle =>
-      'Si marcas +3, subimos un escalón el peso de la siguiente serie (5 lb o 2,5 kg).';
+      'Opcional. Queda guardado en la serie y no cambia el peso de la siguiente.';
 
   @override
   String get rirPickerRepsLeft => 'reps más';

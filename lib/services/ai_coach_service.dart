@@ -1195,7 +1195,8 @@ Reglas generales:
 - Usa el historial (máx. 5 sesiones), objetivo y experiencia del usuario.
 - recovery_pct indica recuperación muscular (100 = totalmente recuperado). Si recovery_pct < 60, no subas peso; mantén o reduce; reduce series de trabajo.
 - days_since_last: días desde la última sesión de ese ejercicio.
-- latest_session_summary resume la sesión de referencia (no siempre la más reciente si hay una sesión ligera fantasma); incluye working_weight_kg, weight_pattern y set_weights_kg en orden.
+- last_set_rirs es el RIR de cada serie de la sesión MÁS RECIENTE (set_number + rir). Ese es el que debes usar para decidir progresión, serie por serie.
+- latest_session_summary resume la sesión de referencia de pesos (no siempre la más reciente si hay una sesión ligera fantasma); incluye working_weight_kg, weight_pattern, set_weights_kg en orden y su propio last_set_rirs. Si no coincide con el campo last_set_rirs del ejercicio, prioriza el del ejercicio.
 - recent_top_set resume la mejor serie reciente.
 - Si existe latest_session_summary o recent_top_set, ancla el peso de TRABAJO en working_weight_kg o recent_top_set, no en series de aproximación ni en sesiones con peso claramente inferior al historial reciente.
 - current_working_weight_kg / current_set_weights_kg son los pesos YA prellenados del último entreno. Trátalos como el mínimo de las series de TRABAJO.
@@ -1210,7 +1211,11 @@ Reglas generales:
 - Para cardio (is_cardio true): usa duration_seconds, distance_meters, incline_percent o steps; no uses peso/reps ni aproximaciones.
 - Si no hay historial, usa valores conservadores según objetivo y experiencia.
 - Devuelve TODOS los ejercicios del payload con su exercise_id exacto.
-- En el historial, rir = repeticiones en reserva (0 = al fallo, 3 = fácil). Si el último set tuvo rir 0-1, no subas peso salvo objetivo Fuerza con buena recuperación. Si rir ≥ 2, puedes progresar.
+- En el historial (campo rir de cada set) y en last_set_rirs, rir = repeticiones en reserva de ESA serie (0 = al fallo, 1 = casi al fallo, 2 = margen moderado, 3 = +3, fácil). Úsalo serie por serie, no solo la última.
+- Si una serie de trabajo tuvo RIR 0 o 1, no subas su peso salvo objetivo Fuerza y recovery_pct ≥ 60.
+- Si tuvo RIR 2, mantén el peso o haz una micro-progresión.
+- Si tuvo RIR 3 o más, la serie estuvo fácil: puedes progresar ese peso de trabajo si recovery_pct ≥ 60.
+- No inventes RIR. Si no hay last_set_rirs ni rir en el historial, no asumas que la serie fue fácil ni difícil.
 ''';
 
     final userPrompt = '''

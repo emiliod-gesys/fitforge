@@ -16,15 +16,12 @@ abstract final class PreviousSetUtils {
     return sortedBySetNumber(previous).length;
   }
 
-  /// La rutina manda solo si es más reciente que el último entreno registrado.
-  /// Si el usuario ya cambió series, reps o pesos, el último entreno manda.
+  /// Series, reps y pesos del último entreno mandan siempre que exista.
+  /// La plantilla solo se usa si ese ejercicio todavía no se ha entrenado.
   static bool useLastPerformance({
-    required DateTime? routineUpdatedAt,
     required DateTime? lastPerformedAt,
   }) {
-    if (lastPerformedAt == null) return false;
-    if (routineUpdatedAt == null) return true;
-    return lastPerformedAt.isAfter(routineUpdatedAt);
+    return lastPerformedAt != null;
   }
 
   /// Combina la plantilla (rutina) con el último entreno.
