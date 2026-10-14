@@ -199,6 +199,7 @@ class Workout {
   final List<String> hyroxValidationReasons;
   final WorkoutValidationStatus? validationStatus;
   final List<String> validationReasons;
+  final String? finishPhotoPath;
 
   const Workout({
     required this.id,
@@ -224,6 +225,7 @@ class Workout {
     this.hyroxValidationReasons = const [],
     this.validationStatus,
     this.validationReasons = const [],
+    this.finishPhotoPath,
   });
 
   factory Workout.fromJson(Map<String, dynamic> json, {List<WorkoutExercise>? exercises}) {
@@ -263,6 +265,7 @@ class Workout {
       validationStatus:
           WorkoutValidationStatus.fromCode(json['validation_status'] as String?),
       validationReasons: _parseReasons(json['validation_reasons']),
+      finishPhotoPath: json['finish_photo_path'] as String?,
     );
   }
 

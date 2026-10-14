@@ -649,6 +649,20 @@ class SocialService {
     });
   }
 
+  /// Sube la foto del entreno y la enlaza al resumen y a la publicación de rutina completada.
+  Future<String?> attachWorkoutFinishPhoto({
+    required String workoutId,
+    required File imageFile,
+  }) async {
+    if (_userId == null) return null;
+    final imagePath = await _feedMedia.uploadFeedImage(imageFile);
+    await _client.rpc('attach_workout_finish_photo', params: {
+      'p_workout_id': workoutId,
+      'p_image_path': imagePath,
+    });
+    return imagePath;
+  }
+
   /// PRs ordenados por fecha para adjuntar a una publicación (todos los récords actuales).
   List<PersonalRecord> personalRecordsForFeedAttach(List<PersonalRecord> all) {
     return [...all]..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));

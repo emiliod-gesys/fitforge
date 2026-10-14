@@ -10,6 +10,9 @@ class ProgressStatsGrid extends StatelessWidget {
   final int monthlyWorkouts;
   final double monthlyVolumeKg;
   final int monthlyPrCount;
+  final int previousMonthlyWorkouts;
+  final double previousMonthlyVolumeKg;
+  final int previousMonthlyPrCount;
   final int streakWeeks;
 
   const ProgressStatsGrid({
@@ -19,6 +22,9 @@ class ProgressStatsGrid extends StatelessWidget {
     required this.monthlyWorkouts,
     required this.monthlyVolumeKg,
     required this.monthlyPrCount,
+    required this.previousMonthlyWorkouts,
+    required this.previousMonthlyVolumeKg,
+    required this.previousMonthlyPrCount,
     required this.streakWeeks,
   });
 
@@ -36,6 +42,12 @@ class ProgressStatsGrid extends StatelessWidget {
                   icon: Icons.fitness_center,
                   label: l10n.progressStatsMonthlyWorkouts,
                   value: '$monthlyWorkouts',
+                  comparison: _countComparison(
+                    l10n,
+                    monthlyWorkouts,
+                    previousMonthlyWorkouts,
+                  ),
+                  comparisonUp: monthlyWorkouts > previousMonthlyWorkouts,
                   accent: context.accentColor,
                 ),
               ),
@@ -46,6 +58,13 @@ class ProgressStatsGrid extends StatelessWidget {
                   label: l10n.progressStatsMonthlyVolume,
                   value:
                       UnitConverter.formatVolume(monthlyVolumeKg, unitSystem),
+                  comparison: _volumeComparison(
+                    l10n,
+                    unitSystem,
+                    monthlyVolumeKg,
+                    previousMonthlyVolumeKg,
+                  ),
+                  comparisonUp: monthlyVolumeKg > previousMonthlyVolumeKg + 0.5,
                   accent: const Color(0xFF5BB8F0),
                 ),
               ),
@@ -62,6 +81,12 @@ class ProgressStatsGrid extends StatelessWidget {
                   icon: Icons.emoji_events_outlined,
                   label: l10n.progressStatsMonthlyPrs,
                   value: '$monthlyPrCount',
+                  comparison: _countComparison(
+                    l10n,
+                    monthlyPrCount,
+                    previousMonthlyPrCount,
+                  ),
+                  comparisonUp: monthlyPrCount > previousMonthlyPrCount,
                   accent: const Color(0xFFFFD54F),
                 ),
               ),
@@ -80,18 +105,42 @@ class ProgressStatsGrid extends StatelessWidget {
       ],
     );
   }
+
+  static String _countComparison(AppLocalizations l10n, int current, int previous) {
+    final delta = current - previous;
+    if (delta == 0) return l10n.progressSameAsLastMonth;
+    final signed = delta > 0 ? '+$delta' : '$delta';
+    return l10n.progressVsLastMonth(signed);
+  }
+
+  static String _volumeComparison(
+    AppLocalizations l10n,
+    String unitSystem,
+    double current,
+    double previous,
+  ) {
+    final delta = current - previous;
+    if (delta.abs() < 0.5) return l10n.progressSameAsLastMonth;
+    final amount = UnitConverter.formatVolume(delta.abs(), unitSystem);
+    final signed = delta > 0 ? '+$amount' : '-$amount';
+    return l10n.progressVsLastMonth(signed);
+  }
 }
 
 class _StatTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final String? comparison;
+  final bool comparisonUp;
   final Color accent;
 
   const _StatTile({
     required this.icon,
     required this.label,
     required this.value,
+    this.comparison,
+    this.comparisonUp = false,
     required this.accent,
   });
 
@@ -127,6 +176,19 @@ class _StatTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
+          if (comparison != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              comparison!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: comparisonUp ? AppColors.success : AppColors.textMuted,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ],
       ),
     );

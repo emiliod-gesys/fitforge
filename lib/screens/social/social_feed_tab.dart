@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_accent.dart';
+import '../../core/utils/center_aspect_crop.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/utils/feed_personal_record.dart';
@@ -228,12 +229,12 @@ class _FeedItemTile extends ConsumerWidget {
               ),
               style: const TextStyle(color: AppColors.textPrimary, height: 1.4, fontSize: 14.5),
             ),
-            if (item.isUserPost && post.imageUrl != null) ...[
+            if (post.imageUrl != null) ...[
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                 child: AspectRatio(
-                  aspectRatio: 4 / 3,
+                  aspectRatio: workoutFinishPhotoAspectRatio,
                   child: CachedNetworkImage(
                     imageUrl: post.imageUrl!,
                     fit: BoxFit.cover,

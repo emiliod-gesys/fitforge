@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../core/theme/app_accent.dart';
+import '../core/utils/center_aspect_crop.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/cardio_format.dart';
 import '../core/utils/milestone_badge.dart';
@@ -18,6 +21,7 @@ import '../models/exercise_logging.dart';
 import '../models/profile.dart';
 import '../models/workout.dart';
 import '../models/workout_summary.dart';
+import '../services/feed_media_service.dart';
 import '../widgets/fitforge_logo.dart';
 import '../widgets/localized_exercise_name.dart';
 import '../widgets/milestones_section.dart';
@@ -56,6 +60,7 @@ class _ShareCardShell extends StatelessWidget {
   final Color borderColor;
   final Color badgeColor;
   final String badgeLabel;
+  final Widget? photo;
   final Widget child;
 
   const _ShareCardShell({
@@ -63,6 +68,7 @@ class _ShareCardShell extends StatelessWidget {
     required this.borderColor,
     required this.badgeColor,
     required this.badgeLabel,
+    this.photo,
     required this.child,
   });
 
@@ -109,6 +115,10 @@ class _ShareCardShell extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          if (photo != null) ...[
+            photo!,
+            const SizedBox(height: 16),
+          ],
           child,
         ],
       ),
@@ -132,6 +142,7 @@ class _HyroxShareCard extends StatelessWidget {
       borderColor: _hyroxAccent.withValues(alpha: 0.35),
       badgeColor: _hyroxAccent,
       badgeLabel: l10n.hyroxSystemBadge.toUpperCase(),
+      photo: _finishPhoto(summary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -258,6 +269,7 @@ class _RunnerShareCard extends StatelessWidget {
       borderColor: _runnerAccent.withValues(alpha: 0.35),
       badgeColor: _runnerAccent,
       badgeLabel: l10n.runnerSystemBadge.toUpperCase(),
+      photo: _finishPhoto(summary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -459,6 +471,7 @@ class _GymShareCard extends StatelessWidget {
       isRepsRecord: summary.isRepsRecord,
       isMaxWeightRecord: summary.isMaxWeightRecord,
     );
+    final photo = _finishPhoto(summary);
 
     return Container(
       width: double.infinity,
@@ -483,6 +496,10 @@ class _GymShareCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          if (photo != null) ...[
+            photo,
+            const SizedBox(height: 16),
+          ],
           _GymHeroBanner(summary: summary, l10n: l10n),
           const SizedBox(height: 16),
           Text(
@@ -921,6 +938,66 @@ class _SharePersonalRecordsSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+Widget? _finishPhoto(WorkoutSummaryData summary) {
+  if (!summary.hasFinishPhoto) return null;
+  return _WorkoutFinishPhoto(
+    localPath: summary.finishPhotoLocalPath,
+    storagePath: summary.finishPhotoStoragePath,
+  );
+}
+
+class _WorkoutFinishPhoto extends StatefulWidget {
+  final String? localPath;
+  final String? storagePath;
+
+  const _WorkoutFinishPhoto({this.localPath, this.storagePath});
+
+  @override
+  State<_WorkoutFinishPhoto> createState() => _WorkoutFinishPhotoState();
+}
+
+class _WorkoutFinishPhotoState extends State<_WorkoutFinishPhoto> {
+  String? _url;
+
+  @override
+  void initState() {
+    super.initState();
+    final local = widget.localPath;
+    if (local != null && local.isNotEmpty) return;
+    final storage = widget.storagePath;
+    if (storage == null || storage.isEmpty) return;
+    FeedMediaService().signedUrlForPath(storage).then((url) {
+      if (mounted) setState(() => _url = url);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final local = widget.localPath;
+    final Widget image;
+    if (local != null && local.isNotEmpty) {
+      image = Image.file(File(local), fit: BoxFit.cover);
+    } else if (_url != null) {
+      image = CachedNetworkImage(
+        imageUrl: _url!,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => const ColoredBox(color: AppColors.cardElevated),
+        errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.cardElevated),
+      );
+    } else {
+      image = const ColoredBox(color: AppColors.cardElevated);
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: AspectRatio(
+        aspectRatio: workoutFinishPhotoAspectRatio,
+        child: image,
+      ),
     );
   }
 }

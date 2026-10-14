@@ -15,12 +15,21 @@ import 'fitforge_loading_indicator.dart';
 
 class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
   final Set<String> excludeExerciseIds;
+  final String? title;
+  final bool showCreate;
 
-  const WorkoutExercisePickerSheet({super.key, this.excludeExerciseIds = const {}});
+  const WorkoutExercisePickerSheet({
+    super.key,
+    this.excludeExerciseIds = const {},
+    this.title,
+    this.showCreate = true,
+  });
 
   static Future<Exercise?> show(
     BuildContext context, {
     Set<String> excludeExerciseIds = const {},
+    String? title,
+    bool showCreate = true,
   }) {
     return showModalBottomSheet<Exercise>(
       context: context,
@@ -35,7 +44,11 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
         initialChildSize: 0.85,
         minChildSize: 0.5,
         maxChildSize: 0.95,
-        builder: (_, __) => WorkoutExercisePickerSheet(excludeExerciseIds: excludeExerciseIds),
+        builder: (_, __) => WorkoutExercisePickerSheet(
+          excludeExerciseIds: excludeExerciseIds,
+          title: title,
+          showCreate: showCreate,
+        ),
       ),
     );
   }
@@ -80,7 +93,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
             children: [
               Expanded(
                 child: Text(
-                  l10n.addExercise,
+                  widget.title ?? l10n.addExercise,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -96,12 +109,14 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OutlinedButton.icon(
-                onPressed: () => openCreateCustomExerciseSheet(context, ref),
-                icon: const Icon(Icons.add_a_photo_outlined),
-                label: Text(l10n.createCustomExercise),
-              ),
-              const SizedBox(height: 8),
+              if (widget.showCreate) ...[
+                OutlinedButton.icon(
+                  onPressed: () => openCreateCustomExerciseSheet(context, ref),
+                  icon: const Icon(Icons.add_a_photo_outlined),
+                  label: Text(l10n.createCustomExercise),
+                ),
+                const SizedBox(height: 8),
+              ],
               TextField(
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(

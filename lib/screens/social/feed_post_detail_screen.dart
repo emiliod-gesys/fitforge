@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/social_feed.dart';
+import '../../core/utils/center_aspect_crop.dart';
 import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/feed_personal_record.dart';
@@ -252,12 +253,12 @@ class _FeedPostDetailScreenState extends ConsumerState<FeedPostDetailScreen> {
                                 _FeedPostBadge(item: item),
                               ],
                             ),
-                            if (item.isUserPost && post.imageUrl != null) ...[
+                            if (post.imageUrl != null) ...[
                               const SizedBox(height: 12),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxHeight: 220),
+                                child: AspectRatio(
+                                  aspectRatio: workoutFinishPhotoAspectRatio,
                                   child: CachedNetworkImage(
                                     imageUrl: post.imageUrl!,
                                     fit: BoxFit.cover,

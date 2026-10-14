@@ -72,7 +72,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>FORGEN usa la cámara para escanear códigos de barras, fotografiar comidas y ejercicios personalizados.</string>
+	<string>FORGEN usa la cámara para la foto al terminar un entreno, escanear códigos de barras y fotografiar comidas y ejercicios.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>FORGEN usa el micrófono para dictar descripciones de comida en el registro rápido.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

@@ -8,6 +8,7 @@ import '../core/utils/bmr_calculator.dart';
 import '../core/utils/daily_nutrition_budget.dart';
 import '../core/l10n/app_locale.dart';
 import '../core/theme/app_accent.dart';
+import '../core/utils/progress_exercise_curve.dart';
 import '../core/utils/workout_streak.dart';
 import '../data/exercise_translation_store.dart';
 import '../models/exercise.dart';
@@ -364,6 +365,17 @@ final muscleRecoveryProvider = FutureProvider((ref) async {
 
   final workouts = await service.getWorkoutsForMuscleRecovery();
   return service.calculateMuscleRecovery(workouts, catalog: catalog);
+});
+
+final loggedExercisesProvider = FutureProvider<List<LoggedExerciseRef>>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).listLoggedExercises();
+});
+
+final progressExerciseCurveProvider =
+    FutureProvider.family<List<ExerciseSessionHistory>, String>((ref, exerciseId) async {
+  ref.watch(authStateProvider);
+  return ref.watch(workoutServiceProvider).getExerciseHistory(exerciseId, limit: 12);
 });
 
 final exerciseHistoryProvider =

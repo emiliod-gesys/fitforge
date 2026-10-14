@@ -2090,6 +2090,48 @@ abstract class AppLocalizations {
   /// **'Tendencia de volumen'**
   String get progressVolumeTrend;
 
+  /// No description provided for @progressVsLastMonth.
+  ///
+  /// In es, this message translates to:
+  /// **'{delta} vs el mes pasado'**
+  String progressVsLastMonth(String delta);
+
+  /// No description provided for @progressSameAsLastMonth.
+  ///
+  /// In es, this message translates to:
+  /// **'Igual que el mes pasado'**
+  String get progressSameAsLastMonth;
+
+  /// No description provided for @progressExerciseCurveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Progreso de un ejercicio'**
+  String get progressExerciseCurveTitle;
+
+  /// No description provided for @progressExercisePickerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir ejercicio'**
+  String get progressExercisePickerTitle;
+
+  /// No description provided for @progressExerciseCurveEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando completes un ejercicio, aquí verás cómo cambia su peso.'**
+  String get progressExerciseCurveEmpty;
+
+  /// No description provided for @progressExerciseCurveNeedAnother.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa otra sesión de este ejercicio para ver la curva.'**
+  String get progressExerciseCurveNeedAnother;
+
+  /// No description provided for @progressExerciseCurveLatest.
+  ///
+  /// In es, this message translates to:
+  /// **'Última sesión: {detail}'**
+  String progressExerciseCurveLatest(String detail);
+
   /// No description provided for @progressBodyTitle.
   ///
   /// In es, this message translates to:
@@ -3727,6 +3769,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Resumen'**
   String get summaryTitle;
+
+  /// No description provided for @workoutFinishPhotoSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir'**
+  String get workoutFinishPhotoSkip;
+
+  /// No description provided for @workoutFinishPhotoCapture.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get workoutFinishPhotoCapture;
+
+  /// No description provided for @workoutFinishPhotoUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir la cámara. Puedes omitir la foto.'**
+  String get workoutFinishPhotoUnavailable;
 
   /// No description provided for @summaryWorkoutComplete.
   ///

@@ -1116,6 +1116,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progressVolumeTrend => 'Volume trend';
 
   @override
+  String progressVsLastMonth(String delta) {
+    return '$delta vs last month';
+  }
+
+  @override
+  String get progressSameAsLastMonth => 'Same as last month';
+
+  @override
+  String get progressExerciseCurveTitle => 'One exercise over time';
+
+  @override
+  String get progressExercisePickerTitle => 'Choose an exercise';
+
+  @override
+  String get progressExerciseCurveEmpty =>
+      'Finish an exercise and its weight will show up here.';
+
+  @override
+  String get progressExerciseCurveNeedAnother =>
+      'Log this exercise again to see the curve.';
+
+  @override
+  String progressExerciseCurveLatest(String detail) {
+    return 'Last session: $detail';
+  }
+
+  @override
   String get progressBodyTitle => 'Body';
 
   @override
@@ -2057,6 +2084,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summaryTitle => 'Summary';
+
+  @override
+  String get workoutFinishPhotoSkip => 'Skip';
+
+  @override
+  String get workoutFinishPhotoCapture => 'Take photo';
+
+  @override
+  String get workoutFinishPhotoUnavailable =>
+      'The camera couldn\'t open. You can skip the photo.';
 
   @override
   String get summaryWorkoutComplete => 'Workout complete!';

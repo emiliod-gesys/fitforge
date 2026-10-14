@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +39,7 @@ import '../../models/routine.dart';
 import '../../models/watch_session.dart';
 import '../../models/workout.dart';
 import '../../models/workout_summary.dart';
+import 'workout_finish_photo_screen.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/health_integration_provider.dart';
 import '../../services/rest_preferences.dart';
@@ -424,6 +426,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     ref.invalidate(workoutsProvider);
     ref.invalidate(recentWorkoutsProvider);
     ref.invalidate(workoutHistoryProvider);
+    ref.invalidate(loggedExercisesProvider);
+    ref.invalidate(progressExerciseCurveProvider);
     ref.invalidate(milestoneTotalsProvider);
     ref.invalidate(activeWorkoutProvider);
     ref.invalidate(personalRecordsProvider);
@@ -433,6 +437,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     ref.invalidate(dailyNutritionProvider);
     ref.invalidate(foodEntriesProvider);
     ref.invalidate(foodDayWorkoutsProvider);
+    ref.invalidate(socialFeedProvider);
   }
 
   Future<bool> _confirmLeaveActiveWorkout() async {
@@ -713,6 +718,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       setState(() => _completing = true);
     }
 
+    File? finishPhoto;
+    if (mounted) {
+      finishPhoto = await WorkoutFinishPhotoScreen.show(context);
+    }
+    if (!mounted) return;
+
     try {
       Workout effectiveWorkout;
       if (_isRunnerWorkout && _workoutHasCompletedCardio(workout)) {
@@ -913,6 +924,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         bodyWeightKg: bodyWeightKg,
       );
 
+      String? finishPhotoStoragePath;
+      if (finishPhoto != null && isOnline) {
+        try {
+          finishPhotoStoragePath =
+              await ref.read(socialServiceProvider).attachWorkoutFinishPhoto(
+                    workoutId: effectiveWorkout.id,
+                    imageFile: finishPhoto,
+                  );
+        } catch (_) {}
+      }
+
       final summary = WorkoutSummaryBuilder.build(
         workout: effectiveWorkout,
         durationMinutes: duration,
@@ -927,6 +949,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         isRunner: _isRunnerWorkout,
         hyroxValidation: hyroxValidation,
         validation: validation,
+        finishPhotoLocalPath: finishPhoto?.path,
+        finishPhotoStoragePath: finishPhotoStoragePath,
       );
 
       if (!mounted) return;

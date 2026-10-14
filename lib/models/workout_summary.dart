@@ -87,6 +87,8 @@ class WorkoutSummaryData {
   final bool isRunner;
   final HyroxValidationResult? hyroxValidation;
   final WorkoutValidationResult? validation;
+  final String? finishPhotoLocalPath;
+  final String? finishPhotoStoragePath;
 
   const WorkoutSummaryData({
     required this.workout,
@@ -113,7 +115,13 @@ class WorkoutSummaryData {
     this.isRunner = false,
     this.hyroxValidation,
     this.validation,
+    this.finishPhotoLocalPath,
+    this.finishPhotoStoragePath,
   });
+
+  bool get hasFinishPhoto =>
+      (finishPhotoLocalPath != null && finishPhotoLocalPath!.isNotEmpty) ||
+      (finishPhotoStoragePath != null && finishPhotoStoragePath!.isNotEmpty);
 
   bool get hasHyroxSplits => isHyrox && hyroxSplits.isNotEmpty;
 
@@ -172,6 +180,8 @@ abstract final class WorkoutSummaryBuilder {
     bool isRunner = false,
     HyroxValidationResult? hyroxValidation,
     WorkoutValidationResult? validation,
+    String? finishPhotoLocalPath,
+    String? finishPhotoStoragePath,
   }) {
     final catalog = exerciseCatalog ?? const [];
     final bodyWeightKg = profile?.bodyWeight;
@@ -248,6 +258,8 @@ abstract final class WorkoutSummaryBuilder {
       isRunner: isRunner,
       hyroxValidation: hyroxValidation,
       validation: validation,
+      finishPhotoLocalPath: finishPhotoLocalPath,
+      finishPhotoStoragePath: finishPhotoStoragePath ?? workout.finishPhotoPath,
     );
   }
 

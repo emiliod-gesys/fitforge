@@ -18,6 +18,7 @@ import '../../widgets/ff/ff_section_header.dart';
 import '../../widgets/fitforge_app_bar.dart';
 import '../../widgets/progress/personal_record_card.dart';
 import '../../widgets/progress/progress_body_snapshot.dart';
+import '../../widgets/progress/progress_exercise_curve.dart';
 import '../../widgets/progress/progress_hero_card.dart';
 import '../../widgets/progress/progress_milestones_carousel.dart';
 import '../../widgets/progress/progress_muscle_filter_bar.dart';
@@ -92,6 +93,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       ref.invalidate(profileProvider);
       ref.invalidate(workoutWeeklyStatsProvider);
       ref.invalidate(workoutHistoryProvider);
+      ref.invalidate(loggedExercisesProvider);
+      ref.invalidate(progressExerciseCurveProvider);
       ref.invalidate(bodyMeasurementsProvider);
       ref.invalidate(myTrainerProvider);
     }
@@ -123,6 +126,20 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               loading: () => const _HeroSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+            milestoneTotalsAsync.when(
+              data: (totals) => Column(
+                children: [
+                  ProgressMilestonesCarousel(
+                    totals: totals,
+                    l10n: l10n,
+                    unitSystem: unitSystem,
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+              loading: () => const _MilestonesSkeleton(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             myTrainerAsync.when(
               data: (trainerView) {
                 if (trainerView == null) return const SizedBox.shrink();
@@ -140,15 +157,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               data: (stats) {
                 final workouts = workoutsAsync.valueOrNull ?? const [];
                 final prs = prsAsync.valueOrNull ?? const [];
+                final now = DateTime.now();
+                final previousMonth = DateTime(now.year, now.month - 1);
                 return ProgressStatsGrid(
                   key: TutorialTargets.progressStatsKey,
                   l10n: l10n,
                   unitSystem: unitSystem,
                   monthlyWorkouts:
-                      ProgressStatsCalculator.workoutsThisMonth(workouts),
+                      ProgressStatsCalculator.workoutsThisMonth(workouts, now),
                   monthlyVolumeKg:
-                      ProgressStatsCalculator.volumeThisMonth(workouts),
+                      ProgressStatsCalculator.volumeThisMonth(workouts, now),
                   monthlyPrCount: _monthlyPrCount(prs),
+                  previousMonthlyWorkouts:
+                      ProgressStatsCalculator.workoutsThisMonth(workouts, previousMonth),
+                  previousMonthlyVolumeKg:
+                      ProgressStatsCalculator.volumeThisMonth(workouts, previousMonth),
+                  previousMonthlyPrCount:
+                      ProgressStatsCalculator.prsThisMonth(prs, previousMonth),
                   streakWeeks: stats.streakWeeks,
                 );
               },
@@ -170,6 +195,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               loading: () => const _ChartSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+            const ProgressExerciseCurve(),
+            const SizedBox(height: 20),
             bodyAsync.when(
               data: (measurements) {
                 if (measurements.isEmpty) return const SizedBox.shrink();
@@ -185,20 +212,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-            milestoneTotalsAsync.when(
-              data: (totals) => Column(
-                children: [
-                  ProgressMilestonesCarousel(
-                    totals: totals,
-                    l10n: l10n,
-                    unitSystem: unitSystem,
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-              loading: () => const _MilestonesSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
             prsAsync.when(

@@ -11,6 +11,7 @@ import '../core/runner/runner_standards.dart';
 import '../core/runner/runner_tracking.dart';
 import '../core/utils/exercise_history_utils.dart';
 import '../core/utils/previous_set_utils.dart';
+import '../core/utils/progress_exercise_curve.dart';
 import '../core/utils/superset_groups.dart';
 import '../models/exercise.dart';
 import '../models/exercise_history.dart';
@@ -859,6 +860,36 @@ class WorkoutService {
       ));
     }
     return history;
+  }
+
+  /// Ejercicios ya registrados, del más reciente al más antiguo.
+  Future<List<LoggedExerciseRef>> listLoggedExercises({int limit = 24}) async {
+    final userId = SupabaseService.currentUser?.id;
+    if (userId == null) return [];
+
+    final data = await _client
+        .from('workout_exercises')
+        .select(
+          'exercise_id, exercise_name, workouts!inner(completed_at, duration_minutes, total_volume, user_id)',
+        )
+        .eq('workouts.user_id', userId)
+        .not('workouts.completed_at', 'is', null)
+        .order('completed_at', referencedTable: 'workouts', ascending: false)
+        .limit(400);
+
+    final seen = <String, LoggedExerciseRef>{};
+    for (final row in data as List) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final workout = Map<String, dynamic>.from(map['workouts'] as Map);
+      if (ExerciseHistoryUtils.isStaleGhostWorkout(workout)) continue;
+      final id = map['exercise_id'] as String?;
+      if (id == null || id.isEmpty || seen.containsKey(id)) continue;
+      final name = (map['exercise_name'] as String?)?.trim();
+      if (name == null || name.isEmpty) continue;
+      seen[id] = LoggedExerciseRef(id: id, name: name);
+      if (seen.length >= limit) break;
+    }
+    return seen.values.toList();
   }
 
   Future<List<WorkoutSet>?> getPreviousSetsForExercise(
