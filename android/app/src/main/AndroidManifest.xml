@@ -25,6 +25,12 @@
     <uses-permission android:name="android.permission.health.WRITE_DISTANCE"/>
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- The finish photo is optional. camera_android_camerax marks camera.any
+         as required, which drops cars, Chromebooks and camera-less devices. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false"
+        tools:node="replace" />
     <!-- One-time photos use the Android photo picker. Broad media access must
          stay out of the merged manifest (Play photo and video permissions policy). -->
     <uses-permission

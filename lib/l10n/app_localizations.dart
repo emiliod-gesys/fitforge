@@ -3782,6 +3782,12 @@ abstract class AppLocalizations {
   /// **'Tomar foto'**
   String get workoutFinishPhotoCapture;
 
+  /// No description provided for @workoutFinishPhotoSwitchCamera.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar cámara'**
+  String get workoutFinishPhotoSwitchCamera;
+
   /// No description provided for @workoutFinishPhotoUnavailable.
   ///
   /// In es, this message translates to:

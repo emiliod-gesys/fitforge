@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/config/ai_secrets.dart';
+import '../../core/subscription/plan_upgrade.dart';
 import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/quantity_format.dart';
@@ -338,11 +339,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   Future<void> _processFoodImage(XFile image) async {
     final profile = await ref.read(profileProvider.future);
     if (profile == null || !profile.canUseFoodPhotoAi) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_foodPhotoLockMessage(context.l10n, profile))),
-        );
-      }
+      if (mounted) PlanUpgrade.openPlan(context);
       return;
     }
 
@@ -431,27 +428,15 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                   mode: _mode,
                   photoLocked: !photoAllowed,
                   barcodeLocked: !barcodeAllowed,
-                  onPhotoLockedTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
-                    );
-                  },
-                  onBarcodeLockedTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.featureGymratPlansOnly)),
-                    );
-                  },
+                  onPhotoLockedTap: () => PlanUpgrade.openPlan(context),
+                  onBarcodeLockedTap: () => PlanUpgrade.openPlan(context),
                   onChanged: (m) {
                     if (m == FoodAddMode.photo && !photoAllowed) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_foodPhotoLockMessage(l10n, profile))),
-                      );
+                      PlanUpgrade.openPlan(context);
                       return;
                     }
                     if (m == FoodAddMode.barcode && !barcodeAllowed) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.featureGymratPlansOnly)),
-                      );
+                      PlanUpgrade.openPlan(context);
                       return;
                     }
                     setState(() => _mode = m);
@@ -483,6 +468,7 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                         : _PhotoPane(
                             locked: true,
                             lockedMessage: l10n.featureGymratPlansOnly,
+                            onLockedTap: () => PlanUpgrade.openPlan(context),
                             onPickImage: (_) async {},
                           ),
                     FoodAddMode.quick => _QuickAddPane(
@@ -511,6 +497,9 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
                     FoodAddMode.photo => _PhotoPane(
                         locked: !photoAllowed,
                         lockedMessage: _foodPhotoLockMessage(l10n, profile),
+                        onLockedTap: photoAllowed
+                            ? null
+                            : () => PlanUpgrade.openPlan(context),
                         onPickImage: _pickFoodImage,
                       ),
                   },
@@ -1552,11 +1541,13 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
 class _PhotoPane extends StatelessWidget {
   final bool locked;
   final String lockedMessage;
+  final VoidCallback? onLockedTap;
   final Future<void> Function(ImageSource source) onPickImage;
 
   const _PhotoPane({
     required this.locked,
     required this.lockedMessage,
+    this.onLockedTap,
     required this.onPickImage,
   });
 
@@ -1565,23 +1556,31 @@ class _PhotoPane extends StatelessWidget {
     final l10n = context.l10n;
 
     if (locked) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline, size: 48, color: AppColors.textMuted.withValues(alpha: 0.7)),
-          const SizedBox(height: 16),
-          Text(
-            lockedMessage,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.foodPhotoHint,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.75), fontSize: 12),
-          ),
-        ],
+      return InkWell(
+        onTap: onLockedTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_outline, size: 48, color: AppColors.textMuted.withValues(alpha: 0.7)),
+            const SizedBox(height: 16),
+            Text(
+              lockedMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: onLockedTap,
+              style: FilledButton.styleFrom(
+                backgroundColor: context.accentColor,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(180, 48),
+              ),
+              child: Text(l10n.subscriptionSeePlans),
+            ),
+          ],
+        ),
       );
     }
 

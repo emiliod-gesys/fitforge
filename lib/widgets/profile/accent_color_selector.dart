@@ -7,12 +7,14 @@ class AccentColorSelector extends StatelessWidget {
   final AppAccent selected;
   final ValueChanged<AppAccent>? onChanged;
   final String? lockedMessage;
+  final VoidCallback? onLockedTap;
 
   const AccentColorSelector({
     super.key,
     required this.selected,
     required this.onChanged,
     this.lockedMessage,
+    this.onLockedTap,
   });
 
   bool get _locked => onChanged == null;
@@ -21,7 +23,7 @@ class AccentColorSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (_locked && lockedMessage != null) ...[
@@ -106,5 +108,14 @@ class AccentColorSelector extends StatelessWidget {
         ),
       ],
     );
+
+    if (_locked && onLockedTap != null) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onLockedTap,
+        child: body,
+      );
+    }
+    return body;
   }
 }

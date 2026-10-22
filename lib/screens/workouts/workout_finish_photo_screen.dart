@@ -9,7 +9,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/center_aspect_crop.dart';
 import '../../l10n/l10n_extensions.dart';
 
-/// Cámara frontal al terminar un entreno. Devuelve el archivo o null si se omite.
+/// Foto al terminar un entreno. Devuelve el archivo o null si se omite.
 class WorkoutFinishPhotoScreen extends StatefulWidget {
   const WorkoutFinishPhotoScreen({super.key});
 
@@ -28,10 +28,16 @@ class WorkoutFinishPhotoScreen extends StatefulWidget {
 
 class _WorkoutFinishPhotoScreenState extends State<WorkoutFinishPhotoScreen> {
   CameraController? _controller;
+  CameraDescription? _front;
+  CameraDescription? _back;
+  CameraDescription? _active;
+  int _mountGeneration = 0;
   bool _mirrorPreview = false;
   bool _opening = true;
   bool _capturing = false;
   bool _unavailable = false;
+
+  bool get _canSwitch => _front != null && _back != null;
 
   @override
   void initState() {
@@ -42,16 +48,15 @@ class _WorkoutFinishPhotoScreenState extends State<WorkoutFinishPhotoScreen> {
   Future<void> _openCamera() async {
     try {
       final cameras = await availableCameras();
-      CameraDescription? front;
       for (final camera in cameras) {
-        if (camera.lensDirection == CameraLensDirection.front) {
-          front = camera;
-          break;
+        if (camera.lensDirection == CameraLensDirection.front && _front == null) {
+          _front = camera;
+        } else if (camera.lensDirection == CameraLensDirection.back && _back == null) {
+          _back = camera;
         }
       }
-      final description = front ?? (cameras.isEmpty ? null : cameras.first);
-      final mirrorPreview = description?.lensDirection == CameraLensDirection.front;
-      if (description == null) {
+      final initial = _front ?? _back ?? (cameras.isEmpty ? null : cameras.first);
+      if (initial == null) {
         if (mounted) {
           setState(() {
             _opening = false;
@@ -60,7 +65,32 @@ class _WorkoutFinishPhotoScreenState extends State<WorkoutFinishPhotoScreen> {
         }
         return;
       }
+      await _mountCamera(initial);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _opening = false;
+        _unavailable = true;
+      });
+    }
+  }
 
+  Future<void> _toggleCamera() async {
+    if (_capturing || _opening || !_canSwitch) return;
+    final next = _active?.lensDirection == CameraLensDirection.front ? _back : _front;
+    if (next == null) return;
+    await _mountCamera(next);
+  }
+
+  Future<void> _mountCamera(CameraDescription description) async {
+    final generation = ++_mountGeneration;
+    final previous = _controller;
+    _controller = null;
+    if (mounted) setState(() => _opening = true);
+    await previous?.dispose();
+    if (!mounted || generation != _mountGeneration) return;
+
+    try {
       final controller = CameraController(
         description,
         ResolutionPreset.medium,
@@ -71,17 +101,19 @@ class _WorkoutFinishPhotoScreenState extends State<WorkoutFinishPhotoScreen> {
       try {
         await controller.lockCaptureOrientation(DeviceOrientation.portraitUp);
       } catch (_) {}
-      if (!mounted) {
+      if (!mounted || generation != _mountGeneration) {
         await controller.dispose();
         return;
       }
       setState(() {
         _controller = controller;
-        _mirrorPreview = mirrorPreview;
+        _active = description;
+        _mirrorPreview = description.lensDirection == CameraLensDirection.front;
         _opening = false;
+        _unavailable = false;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || generation != _mountGeneration) return;
       setState(() {
         _opening = false;
         _unavailable = true;
@@ -175,43 +207,59 @@ class _WorkoutFinishPhotoScreenState extends State<WorkoutFinishPhotoScreen> {
               ),
               SizedBox(
                 height: 120,
-                child: Center(
-                  child: ready
-                      ? Semantics(
-                          button: true,
-                          label: l10n.workoutFinishPhotoCapture,
-                          child: GestureDetector(
-                            onTap: _capturing ? null : _capture,
-                            child: Container(
-                              width: 76,
-                              height: 76,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 4),
+                child: ready
+                    ? Row(
+                        children: [
+                          const Expanded(child: SizedBox.shrink()),
+                          Semantics(
+                            button: true,
+                            label: l10n.workoutFinishPhotoCapture,
+                            child: GestureDetector(
+                              onTap: _capturing ? null : _capture,
+                              child: Container(
+                                width: 76,
+                                height: 76,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 4),
+                                ),
+                                alignment: Alignment.center,
+                                child: _capturing
+                                    ? const SizedBox(
+                                        width: 28,
+                                        height: 28,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
-                              alignment: Alignment.center,
-                              child: _capturing
-                                  ? const SizedBox(
-                                      width: 28,
-                                      height: 28,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                             ),
                           ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                          Expanded(
+                            child: _canSwitch
+                                ? IconButton(
+                                    onPressed: _capturing ? null : _toggleCamera,
+                                    tooltip: l10n.workoutFinishPhotoSwitchCamera,
+                                    icon: const Icon(
+                                      Icons.cameraswitch_outlined,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),

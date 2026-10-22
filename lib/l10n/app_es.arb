@@ -767,6 +767,7 @@
   "summaryTitle": "Resumen",
   "workoutFinishPhotoSkip": "Omitir",
   "workoutFinishPhotoCapture": "Tomar foto",
+  "workoutFinishPhotoSwitchCamera": "Cambiar cámara",
   "workoutFinishPhotoUnavailable": "No se pudo abrir la cámara. Puedes omitir la foto.",
   "summaryWorkoutComplete": "¡Entreno completado!",
   "summaryVolumeUp": "+{percent}% volumen vs última vez",

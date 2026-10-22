@@ -758,6 +758,7 @@
   "summaryTitle": "Summary",
   "workoutFinishPhotoSkip": "Skip",
   "workoutFinishPhotoCapture": "Take photo",
+  "workoutFinishPhotoSwitchCamera": "Switch camera",
   "workoutFinishPhotoUnavailable": "The camera couldn't open. You can skip the photo.",
   "summaryWorkoutComplete": "Workout complete!",
   "summaryVolumeUp": "+{percent}% volume vs last time",

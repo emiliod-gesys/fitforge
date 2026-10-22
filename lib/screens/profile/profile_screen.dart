@@ -702,23 +702,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _trainingSection(UserProfile? profile) {
     final l10n = context.l10n;
-    return _sectionList([
-      SwitchListTile(
-        secondary: Icon(Icons.school_outlined, color: context.accentColor),
-        title: Text(l10n.personalTrainerMode),
-        subtitle: Text(
-          (profile?.subscriptionTier.hasTrainerMode ?? false)
-              ? l10n.personalTrainerModeSubtitle
-              : l10n.featureGymratProOnly,
-        ),
-        value: (profile?.isTrainer ?? false) &&
-            (profile?.subscriptionTier.hasTrainerMode ?? false),
-        activeThumbColor: context.accentColor,
-        onChanged: (profile?.subscriptionTier.hasTrainerMode ?? false) &&
-                !_trainerModeUpdating
-            ? (value) => _setTrainerMode(enabled: value)
-            : null,
+    final canTrainer = profile?.subscriptionTier.hasTrainerMode ?? false;
+    final trainerTile = SwitchListTile(
+      secondary: Icon(Icons.school_outlined, color: context.accentColor),
+      title: Text(l10n.personalTrainerMode),
+      subtitle: Text(
+        canTrainer
+            ? l10n.personalTrainerModeSubtitle
+            : l10n.featureGymratProOnly,
       ),
+      value: (profile?.isTrainer ?? false) && canTrainer,
+      activeThumbColor: context.accentColor,
+      onChanged: canTrainer && !_trainerModeUpdating
+          ? (value) => _setTrainerMode(enabled: value)
+          : null,
+    );
+    return _sectionList([
+      if (canTrainer)
+        trainerTile
+      else
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => PlanUpgrade.openPlan(context),
+          child: IgnorePointer(child: trainerTile),
+        ),
       SwitchListTile(
         secondary: Icon(Icons.directions_run, color: context.accentColor),
         title: Text(l10n.hyroxMode),
@@ -795,6 +802,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: AccentColorSelector(
             selected: accent,
             lockedMessage: l10n.featureGymratPlansOnly,
+            onLockedTap: (profile?.subscriptionTier.hasCustomAccent ?? false)
+                ? null
+                : () => PlanUpgrade.openPlan(context),
             onChanged: (profile?.subscriptionTier.hasCustomAccent ?? false)
                 ? (value) async {
                     await ref
@@ -817,7 +827,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _proactiveAiTile(UserProfile? profile, bool enabled) {
     final l10n = context.l10n;
     final canProactive = profile?.canUseProactiveAi ?? false;
-    return SwitchListTile(
+    final tile = SwitchListTile(
       secondary: Icon(
         Icons.psychology_outlined,
         color: canProactive ? context.accentColor : AppColors.textMuted,
@@ -830,6 +840,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ? (value) =>
               _setProactiveAi(enabled: value, currentlyEnabled: enabled)
           : null,
+    );
+    if (canProactive) return tile;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => PlanUpgrade.openPlan(context),
+      child: IgnorePointer(child: tile),
     );
   }
 
@@ -1553,9 +1569,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final profile = ref.read(profileProvider).value;
     if (enabled && !(profile?.subscriptionTier.hasTrainerMode ?? false)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.featureGymratProOnly)),
-      );
+      PlanUpgrade.openPlan(context);
       return;
     }
 

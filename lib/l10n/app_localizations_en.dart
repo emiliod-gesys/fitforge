@@ -2092,6 +2092,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutFinishPhotoCapture => 'Take photo';
 
   @override
+  String get workoutFinishPhotoSwitchCamera => 'Switch camera';
+
+  @override
   String get workoutFinishPhotoUnavailable =>
       'The camera couldn\'t open. You can skip the photo.';
 
