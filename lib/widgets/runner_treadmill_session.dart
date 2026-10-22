@@ -26,12 +26,14 @@ class RunnerTreadmillResult {
 
 class RunnerTreadmillSession extends StatefulWidget {
   final String unitSystem;
-  final Future<void> Function(RunnerTreadmillResult result) onFinish;
+  final Future<bool> Function() confirmFinish;
+  final Future<bool> Function(RunnerTreadmillResult result) onFinish;
   final VoidCallback onCancel;
 
   const RunnerTreadmillSession({
     super.key,
     required this.unitSystem,
+    required this.confirmFinish,
     required this.onFinish,
     required this.onCancel,
   });
@@ -45,6 +47,7 @@ class _RunnerTreadmillSessionState extends State<RunnerTreadmillSession> {
   DateTime? _pausedAt;
   int _accumulatedPauseMs = 0;
   bool _paused = false;
+  bool _confirmOpen = false;
   bool _finishing = false;
   DateTime? _frozenAt;
   Timer? _timer;
@@ -98,7 +101,7 @@ class _RunnerTreadmillSessionState extends State<RunnerTreadmillSession> {
   }
 
   Future<void> _finish() async {
-    if (_finishing || _startedAt == null) return;
+    if (_finishing || _confirmOpen || _startedAt == null) return;
     final incline = double.tryParse(_inclineController.text.replaceAll(',', '.'));
     if (incline == null || incline < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -116,16 +119,41 @@ class _RunnerTreadmillSessionState extends State<RunnerTreadmillSession> {
       );
       return;
     }
+
+    _confirmOpen = true;
+    var confirmed = false;
+    try {
+      confirmed = await widget.confirmFinish();
+    } catch (_) {
+      confirmed = false;
+    } finally {
+      _confirmOpen = false;
+    }
+    if (!confirmed || !mounted || _finishing) return;
+
     _timer?.cancel();
     _frozenAt = DateTime.now();
     setState(() => _finishing = true);
-    await widget.onFinish(
-      RunnerTreadmillResult(
-        durationSeconds: _elapsedSeconds(),
-        distanceMeters: distanceMeters,
-        inclinePercent: incline,
-      ),
-    );
+    var saved = false;
+    try {
+      saved = await widget.onFinish(
+        RunnerTreadmillResult(
+          durationSeconds: _elapsedSeconds(),
+          distanceMeters: distanceMeters,
+          inclinePercent: incline,
+        ),
+      );
+    } catch (_) {
+      saved = false;
+    }
+    if (!mounted || saved) return;
+    setState(() {
+      _finishing = false;
+      _frozenAt = null;
+    });
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && !_finishing) setState(() {});
+    });
   }
 
   @override

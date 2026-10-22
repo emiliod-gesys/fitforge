@@ -471,6 +471,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.endTraining),
         content: Text(l10n.confirmEndTrainingMessage),
@@ -604,11 +605,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     }
   }
 
-  Future<void> _completeRunnerOutdoor(
+  Future<bool> _completeRunnerOutdoor(
     Workout workout,
     RunnerTrackingSnapshot snapshot,
   ) async {
-    if (_completing) return;
+    if (_completing) return false;
     _freezeWorkoutTimers();
     setState(() => _completing = true);
 
@@ -651,7 +652,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         runnerElevationGainMeters: snapshot.elevationGainMeters,
         runnerElevationLossMeters: snapshot.elevationLossMeters,
       );
-      await _completeWorkout(runnerWorkout, skipCompletingFlag: true);
+      return _completeWorkout(runnerWorkout, skipCompletingFlag: true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -659,14 +660,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         );
         setState(() => _completing = false);
       }
+      return false;
     }
   }
 
-  Future<void> _completeRunnerTreadmill(
+  Future<bool> _completeRunnerTreadmill(
     Workout workout,
     RunnerTreadmillResult result,
   ) async {
-    if (_completing) return;
+    if (_completing) return false;
     _freezeWorkoutTimers();
     setState(() => _completing = true);
 
@@ -699,7 +701,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         set,
         runnerAvgPaceSecPerKm: result.avgPaceSecPerKm,
       );
-      await _completeWorkout(runnerWorkout, skipCompletingFlag: true);
+      return _completeWorkout(runnerWorkout, skipCompletingFlag: true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -707,12 +709,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         );
         setState(() => _completing = false);
       }
+      return false;
     }
   }
 
-  Future<void> _completeWorkout(Workout workout,
+  Future<bool> _completeWorkout(Workout workout,
       {bool skipCompletingFlag = false}) async {
-    if (_completing && !skipCompletingFlag) return;
+    if (_completing && !skipCompletingFlag) return false;
     if (!skipCompletingFlag) {
       _freezeWorkoutTimers();
       setState(() => _completing = true);
@@ -722,7 +725,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     if (mounted) {
       finishPhoto = await WorkoutFinishPhotoScreen.show(context);
     }
-    if (!mounted) return;
+    if (!mounted) return false;
 
     try {
       Workout effectiveWorkout;
@@ -953,7 +956,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         finishPhotoStoragePath: finishPhotoStoragePath,
       );
 
-      if (!mounted) return;
+      if (!mounted) return false;
       if (durationResolution.trimmed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -969,6 +972,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _invalidateWorkoutProviders();
       });
+      return true;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -976,6 +980,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         );
         setState(() => _completing = false);
       }
+      return false;
     }
   }
 
@@ -1655,10 +1660,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                       onPressed: _completing
                           ? null
                           : () => _cancelWorkout(displayWorkout),
-                      child: Text(
-                        l10n.cancelWorkout,
-                        style: const TextStyle(color: AppColors.textMuted),
-                      ),
+                      child: Text(l10n.cancelWorkout),
                     ),
                     if ((!_isHyroxWorkout || _hyroxRaceStarted) &&
                         !_isRunnerWorkout)
@@ -1706,10 +1708,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                 surface: _runnerSurface,
                 isWalk: _runnerType?.isWalk ?? false,
                 onCancel: () => _cancelWorkout(displayWorkout),
-                onFinish: (snap) async {
-                  if (!await _confirmEndTraining() || !mounted) return;
-                  await _completeRunnerOutdoor(displayWorkout, snap);
-                },
+                confirmFinish: _confirmEndTraining,
+                onFinish: (snap) =>
+                    _completeRunnerOutdoor(displayWorkout, snap),
               );
             }
 
@@ -1717,10 +1718,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               return RunnerTreadmillSession(
                 unitSystem: unitSystem,
                 onCancel: () => _cancelWorkout(displayWorkout),
-                onFinish: (result) async {
-                  if (!await _confirmEndTraining() || !mounted) return;
-                  await _completeRunnerTreadmill(displayWorkout, result);
-                },
+                confirmFinish: _confirmEndTraining,
+                onFinish: (result) =>
+                    _completeRunnerTreadmill(displayWorkout, result),
               );
             }
 

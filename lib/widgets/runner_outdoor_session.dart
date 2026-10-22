@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../core/runner/runner_session_storage.dart';
 import '../core/runner/runner_standards.dart';
 import '../core/runner/runner_models.dart';
 import '../core/runner/runner_tracking.dart' as runner_math;
@@ -20,7 +21,8 @@ class RunnerOutdoorSession extends StatefulWidget {
   final RunningSurface? surface;
   final bool isWalk;
   final VoidCallback onCancel;
-  final Future<void> Function(RunnerTrackingSnapshot snapshot) onFinish;
+  final Future<bool> Function() confirmFinish;
+  final Future<bool> Function(RunnerTrackingSnapshot snapshot) onFinish;
 
   const RunnerOutdoorSession({
     super.key,
@@ -29,6 +31,7 @@ class RunnerOutdoorSession extends StatefulWidget {
     this.surface,
     this.isWalk = false,
     required this.onCancel,
+    required this.confirmFinish,
     required this.onFinish,
   });
 
@@ -39,8 +42,10 @@ class RunnerOutdoorSession extends StatefulWidget {
 class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
   final _tracking = RunnerTrackingService();
   final _mapController = MapController();
+  StreamSubscription<RunnerTrackingSnapshot>? _positions;
   RunnerTrackingSnapshot? _snapshot;
   bool _starting = true;
+  bool _confirmOpen = false;
   bool _finishing = false;
   String? _gpsError;
   Timer? _uiTimer;
@@ -107,54 +112,100 @@ class _RunnerOutdoorSessionState extends State<RunnerOutdoorSession> {
       });
       return;
     }
-    await _tracking.start(workoutId: widget.workoutId, surface: widget.surface);
-    _tracking.stream.listen((snap) {
+    _positions ??= _tracking.stream.listen((snap) {
       if (!mounted || _finishing) return;
       setState(() => _snapshot = snap);
-      if (snap.route.isNotEmpty) {
-        final last = snap.route.last;
-        _mapController.move(LatLng(last.lat, last.lng), _mapController.camera.zoom);
-      }
+      _moveMap(snap);
     });
+    await _tracking.start(workoutId: widget.workoutId, surface: widget.surface);
     if (mounted) setState(() => _starting = false);
+  }
+
+  void _moveMap(RunnerTrackingSnapshot snap) {
+    if (!mounted || snap.route.isEmpty) return;
+    final last = snap.route.last;
+    try {
+      _mapController.move(LatLng(last.lat, last.lng), _mapController.camera.zoom);
+    } catch (_) {}
+  }
+
+  void _ensureUiTimer() {
+    _uiTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || _finishing) return;
+      if (_snapshot != null) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _uiTimer?.cancel();
+    unawaited(_positions?.cancel());
     _tracking.dispose();
     super.dispose();
   }
 
+  Future<void> _releaseFinish() async {
+    if (!mounted) return;
+    setState(() {
+      _finishing = false;
+      _frozenAt = null;
+    });
+    _ensureUiTimer();
+    try {
+      await _tracking.start(workoutId: widget.workoutId, surface: widget.surface);
+    } catch (_) {}
+  }
+
   Future<void> _finish() async {
-    if (_finishing) return;
+    if (_finishing || _confirmOpen) return;
+    final preview = _tracking.snapshot;
+    if (preview == null || preview.distanceMeters <= 0) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.runnerNoDistance)),
+      );
+      return;
+    }
+
+    _confirmOpen = true;
+    var confirmed = false;
+    try {
+      confirmed = await widget.confirmFinish();
+    } catch (_) {
+      confirmed = false;
+    } finally {
+      _confirmOpen = false;
+    }
+    if (!confirmed || !mounted || _finishing) return;
+
     _uiTimer?.cancel();
-    await _tracking.pause();
-    final frozenAt = DateTime.now();
+    _uiTimer = null;
     setState(() {
       _finishing = true;
-      _frozenAt = frozenAt;
+      _frozenAt = DateTime.now();
     });
 
-    final snap = await _tracking.stop();
-    if (snap == null || snap.distanceMeters <= 0) {
-      if (mounted) {
+    try {
+      await _tracking.pause();
+      final snap = await _tracking.stop(clearStorage: false);
+      if (!mounted) return;
+      final finalSnap = snap ?? preview;
+      if (finalSnap.distanceMeters <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.runnerNoDistance)),
         );
-        setState(() {
-          _finishing = false;
-          _frozenAt = null;
-        });
-        _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-          if (!mounted || _finishing) return;
-          if (_snapshot != null) setState(() {});
-        });
-        await _tracking.resume();
+        await _releaseFinish();
+        return;
       }
-      return;
+      final saved = await widget.onFinish(finalSnap);
+      if (saved) {
+        await RunnerSessionStorage.clear(finalSnap.workoutId);
+        return;
+      }
+      await _releaseFinish();
+    } catch (_) {
+      await _releaseFinish();
     }
-    await widget.onFinish(snap);
   }
 
   DateTime get _displayNow => _frozenAt ?? DateTime.now();
