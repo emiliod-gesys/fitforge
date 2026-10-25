@@ -371,6 +371,7 @@ abstract final class FoodQueryHints {
     var portions = [...ai.ingredientPortions];
 
     for (final userPortion in userPortions) {
+      if (_portionNamesWholeDish(userPortion.name)) continue;
       final index = portions.indexWhere((p) => _namesOverlap(p.name, userPortion.name));
       if (index >= 0) {
         portions[index] = FoodIngredientPortion(
@@ -389,7 +390,9 @@ abstract final class FoodQueryHints {
     portions = _mergeOverlappingPortions(portions, [...userPortions, ...volumePortions]);
 
     final explicitGrams = parseGrams(query);
-    if (userPortions.isNotEmpty && explicitGrams != null && _isSingleItemQuery(query)) {
+    final keepsDishBase = _matchCompositeDish(query) != null &&
+        portions.any((portion) => _isDishBase(portion.name, _matchCompositeDish(query)!));
+    if (userPortions.isNotEmpty && explicitGrams != null && _isSingleItemQuery(query) && !keepsDishBase) {
       portions = userPortions.map((p) => FoodIngredientPortion(name: p.name, gramsG: p.gramsG)).toList();
     }
 
@@ -622,6 +625,14 @@ abstract final class FoodQueryHints {
     'bread': (kcal: 265, protein: 9.0, carbs: 49.0, fat: 3.2, fiber: 2.7),
     'queso': (kcal: 350, protein: 25.0, carbs: 2.0, fat: 27.0, fiber: 0.0),
     'cheese': (kcal: 350, protein: 25.0, carbs: 2.0, fat: 27.0, fiber: 0.0),
+    // Base y relleno de platos armados. La masa no puede desaparecer si el usuario solo nombró el relleno.
+    'pepperoni': (kcal: 494, protein: 22.5, carbs: 1.2, fat: 44.0, fiber: 0.0),
+    'masa de pizza': (kcal: 250, protein: 8.0, carbs: 44.0, fat: 4.5, fiber: 2.0),
+    'pizza dough': (kcal: 250, protein: 8.0, carbs: 44.0, fat: 4.5, fiber: 2.0),
+    'masa de pupusa': (kcal: 190, protein: 5.0, carbs: 36.0, fat: 3.5, fiber: 4.0),
+    'masa de maíz': (kcal: 190, protein: 5.0, carbs: 36.0, fat: 3.5, fiber: 4.0),
+    'chicharrón': (kcal: 360, protein: 22.0, carbs: 1.0, fat: 30.0, fiber: 0.0),
+    'chicharrones': (kcal: 360, protein: 22.0, carbs: 1.0, fat: 30.0, fiber: 0.0),
     'aceite de oliva': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
     'olive oil': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
     'aceite': (kcal: 884, protein: 0.0, carbs: 0.0, fat: 100.0, fiber: 0.0),
@@ -632,13 +643,34 @@ abstract final class FoodQueryHints {
   };
 
   static ({int kcal, double protein, double carbs, double fat, double fiber})? _lookupAnchor(String ingredientName) {
+    final token = _matchingAnchorKey(ingredientName);
+    if (token == null) return null;
+    return _anchorPer100g[token];
+  }
+
+  static String? _matchingAnchorKey(String ingredientName) {
     final normalized = _normalizeFoodText(ingredientName);
     if (normalized.isEmpty) return null;
+    final dish = _matchCompositeDish(normalized);
     final sortedKeys = _anchorPer100g.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
     for (final token in sortedKeys) {
-      if (_containsFoodPhrase(normalized, token)) return _anchorPer100g[token];
+      if (!_containsFoodPhrase(normalized, token)) continue;
+      if (dish != null && _anchorIsFillingInsideDish(dish, token, normalized)) continue;
+      return token;
     }
     return null;
+  }
+
+  /// "pupusa de chicharrón" no es 100% chicharrón. El ancla del relleno no se come el plato.
+  static bool _anchorIsFillingInsideDish(
+    _CompositeDish dish,
+    String token,
+    String normalizedName,
+  ) {
+    final anchor = _normalizeFoodText(token);
+    final namesTheDish = dish.keys.any((key) => anchor == key || anchor.startsWith('$key '));
+    if (namesTheDish) return false;
+    return dish.keys.any((key) => normalizedName == key || normalizedName.startsWith('$key '));
   }
 
   static String _normalizeFoodText(String value) {
@@ -717,16 +749,25 @@ abstract final class FoodQueryHints {
   }
 
   /// Corrige estimaciones de foto cuando la IA deja kcal en 0 pero sí da gramos.
-  static FoodNutritionEstimate reconcilePhotoEstimate(FoodNutritionEstimate ai) {
-    var result = ai;
-    if (ai.ingredientPortions.isNotEmpty) {
-      final sumGrams = ai.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG);
+  static FoodNutritionEstimate reconcilePhotoEstimate(
+    FoodNutritionEstimate ai, {
+    String? query,
+  }) {
+    final source = [
+      if (query != null && query.trim().isNotEmpty) query.trim(),
+      ai.name,
+    ].join(' ');
+    var result = _repairCompositeDish(source, ai, fromPhoto: true);
+    if (result.ingredientPortions.isNotEmpty) {
+      final sumGrams = result.ingredientPortions.fold<double>(0, (sum, p) => sum + p.gramsG);
       if (sumGrams > 0) {
-        result = ai.copyWith(
+        result = result.copyWith(
           referenceAmount: sumGrams,
           amountUnit: 'g',
-          servingDescription: ai.servingDescription?.trim().isNotEmpty == true ? ai.servingDescription : FoodServingParser.formatAmount(sumGrams, 'g'),
-          ingredients: ai.ingredientPortions.map((p) => p.name).toList(),
+          servingDescription: result.servingDescription?.trim().isNotEmpty == true
+              ? result.servingDescription
+              : FoodServingParser.formatAmount(sumGrams, 'g'),
+          ingredients: result.ingredientPortions.map((p) => p.name).toList(),
         );
       }
     }
@@ -742,8 +783,8 @@ abstract final class FoodQueryHints {
     }
 
     if (result.caloriesKcal <= 0 && result.referenceAmount > 0) {
-      final query = '${result.name} ${result.referenceAmount.round()}g';
-      final anchored = anchoredEstimateForQuery(query, result);
+      final anchoredQuery = '${result.name} ${result.referenceAmount.round()}g';
+      final anchored = anchoredEstimateForQuery(anchoredQuery, result);
       if (anchored != null) {
         return anchored.copyWith(
           ingredientPortions: result.ingredientPortions.isNotEmpty ? result.ingredientPortions : anchored.ingredientPortions,
@@ -848,10 +889,9 @@ abstract final class FoodQueryHints {
     if (grams == null || grams <= 0) return null;
 
     final primaryText = _normalizeFoodText(_primaryQueryText(query));
-    final sortedKeys = _anchorPer100g.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
-    for (final token in sortedKeys) {
-      if (!_containsFoodPhrase(primaryText, token)) continue;
-      final anchor = _anchorPer100g[token]!;
+    final token = _matchingAnchorKey(primaryText);
+    final anchor = token == null ? null : _anchorPer100g[token];
+    if (anchor != null && token != null) {
       final factor = grams / 100;
       return FoodNutritionEstimate(
         name: ai.name,
@@ -869,6 +909,351 @@ abstract final class FoodQueryHints {
       );
     }
     return null;
+  }
+
+  static const _compositeDishes = <_CompositeDish>[
+    _CompositeDish(
+      keys: ['pupusas', 'pupusa'],
+      baseName: 'masa de maíz',
+      pieceGrams: 150,
+      baseGrams: 110,
+      baseAliases: ['masa', 'masa de maiz', 'corn masa'],
+    ),
+    _CompositeDish(
+      keys: ['pizzas', 'pizza'],
+      baseName: 'masa de pizza',
+      pieceGrams: 140,
+      baseGrams: 80,
+      baseAliases: ['masa', 'dough', 'pizza dough'],
+    ),
+    _CompositeDish(
+      keys: ['quesadillas', 'quesadilla'],
+      baseName: 'tortilla de harina',
+      pieceGrams: 140,
+      baseGrams: 45,
+      baseAliases: ['tortilla', 'flour tortilla'],
+      defaultFilling: 'queso',
+      baseIsMajority: false,
+    ),
+    _CompositeDish(
+      keys: ['burritos', 'burrito'],
+      baseName: 'tortilla de harina',
+      pieceGrams: 280,
+      baseGrams: 70,
+      baseAliases: ['tortilla', 'flour tortilla'],
+      baseIsMajority: false,
+    ),
+    _CompositeDish(
+      keys: ['tacos', 'taco'],
+      baseName: 'tortilla de maíz',
+      pieceGrams: 90,
+      baseGrams: 30,
+      baseAliases: ['tortilla', 'corn tortilla'],
+      baseIsMajority: false,
+    ),
+  ];
+
+  static const _fillingLeadWords = {
+    'delgada',
+    'delgado',
+    'delgadas',
+    'delgados',
+    'thin',
+    'salvadorena',
+    'mexicana',
+    'mexicano',
+    'grande',
+    'pequena',
+    'pequeno',
+    'mini',
+    'estilo',
+    'tipo',
+    'clasica',
+    'clasico',
+  };
+
+  /// Devuelve la masa o tortilla que el nombre del plato ya implica.
+  static FoodNutritionEstimate _repairCompositeDish(
+    String query,
+    FoodNutritionEstimate ai, {
+    bool fromPhoto = false,
+  }) {
+    final dish = _matchCompositeDish(query);
+    if (dish == null) return ai;
+    if (!fromPhoto && parseTotalPlateGrams(query) != null && anchoredEstimateForQuery(query, ai) != null) {
+      return ai;
+    }
+
+    final count = _dishCount(query, dish);
+    final statedGrams = fromPhoto ? null : parseGrams(query);
+    if (!_plateNeedsRebuild(ai, dish, count, statedGrams)) {
+      final renamed = _renameBasePortions(ai, dish);
+      return estimateFromIngredientPortions(renamed) ?? renamed;
+    }
+
+    final fillings = _dishFillings(query, dish);
+    final target = _dishTargetGrams(
+      dish: dish,
+      count: count,
+      statedGrams: statedGrams,
+      ai: ai,
+      fromPhoto: fromPhoto,
+    );
+    final portions = _buildDishPortions(
+      dish: dish,
+      ai: ai,
+      fillings: fillings,
+      targetGrams: target,
+      fromPhoto: fromPhoto,
+    );
+    final rebuilt = ai.copyWith(
+      ingredientPortions: portions,
+      ingredients: portions.map((portion) => portion.name).toList(),
+      referenceAmount: portions.fold<double>(0, (sum, portion) => sum + portion.gramsG),
+      amountUnit: 'g',
+      servingDescription: FoodServingParser.formatAmount(
+        portions.fold<double>(0, (sum, portion) => sum + portion.gramsG),
+        'g',
+      ),
+    );
+    return _sumDishPortions(rebuilt);
+  }
+
+  static _CompositeDish? _matchCompositeDish(String text) {
+    final normalized = _normalizeFoodText(text);
+    if (normalized.isEmpty) return null;
+    _CompositeDish? found;
+    var foundLength = 0;
+    for (final dish in _compositeDishes) {
+      for (final key in dish.keys) {
+        if (!_containsFoodPhrase(normalized, key)) continue;
+        if (key.length > foundLength) {
+          found = dish;
+          foundLength = key.length;
+        }
+      }
+    }
+    return found;
+  }
+
+  static int _dishCount(String query, _CompositeDish dish) {
+    final normalized = _normalizeFoodText(query);
+    final keys = [...dish.keys]..sort((a, b) => b.length.compareTo(a.length));
+    final number = _wordCounts.keys.join('|');
+    for (final key in keys) {
+      final match = RegExp('(\\d+|$number)\\s+$key\\b').firstMatch(normalized);
+      if (match == null) continue;
+      return _parseCount(match.group(1)!) ?? 1;
+    }
+    for (final key in keys) {
+      if (key.endsWith('s') && _containsFoodPhrase(normalized, key)) return 2;
+    }
+    return 1;
+  }
+
+  static bool _plateNeedsRebuild(
+    FoodNutritionEstimate ai,
+    _CompositeDish dish,
+    int count,
+    double? statedGrams,
+  ) {
+    final portions = ai.ingredientPortions.where((portion) => portion.gramsG > 0).toList();
+    final total = portions.fold<double>(0, (sum, portion) => sum + portion.gramsG);
+    final baseGrams = portions
+        .where((portion) => _isDishBase(portion.name, dish))
+        .fold<double>(0, (sum, portion) => sum + portion.gramsG);
+    if (baseGrams <= 0) return true;
+    final expected = statedGrams ?? dish.pieceGrams * count;
+    if (total < expected * 0.7) return true;
+    if (dish.baseIsMajority && total > 0 && baseGrams < total * 0.45) return true;
+    if (statedGrams != null && (total - statedGrams).abs() > statedGrams * 0.12) return true;
+    return false;
+  }
+
+  static bool _portionNamesWholeDish(String name) {
+    final dish = _matchCompositeDish(name);
+    if (dish == null) return false;
+    final normalized = _normalizeFoodText(name);
+    return dish.keys.any((key) => normalized == key || normalized.startsWith('$key '));
+  }
+
+  static bool _isDishBase(String name, _CompositeDish dish) {
+    final normalized = _normalizeFoodText(name);
+    if (normalized.isEmpty) return false;
+    final base = _normalizeFoodText(dish.baseName);
+    if (normalized == base || normalized.contains(base)) return true;
+    for (final alias in dish.baseAliases) {
+      final normalizedAlias = _normalizeFoodText(alias);
+      if (normalized == normalizedAlias) return true;
+    }
+    return false;
+  }
+
+  static FoodNutritionEstimate _renameBasePortions(
+    FoodNutritionEstimate ai,
+    _CompositeDish dish,
+  ) {
+    if (ai.ingredientPortions.isEmpty) return ai;
+    final renamed = ai.ingredientPortions.map((portion) {
+      if (!_isDishBase(portion.name, dish)) return portion;
+      final normalized = _normalizeFoodText(portion.name);
+      final generic = dish.baseAliases.any((alias) => _normalizeFoodText(alias) == normalized);
+      if (!generic || normalized == _normalizeFoodText(dish.baseName)) return portion;
+      return FoodIngredientPortion(name: dish.baseName, gramsG: portion.gramsG);
+    }).toList();
+    return ai.copyWith(
+      ingredientPortions: renamed,
+      ingredients: renamed.map((portion) => portion.name).toList(),
+    );
+  }
+
+  static List<String> _dishFillings(String query, _CompositeDish dish) {
+    var text = _normalizeFoodText(query);
+    text = text.replaceAll(RegExp(r'\b\d+(?:[.,]\d+)?\b'), ' ');
+    final keys = [...dish.keys]..sort((a, b) => b.length.compareTo(a.length));
+    for (final key in keys) {
+      text = text.replaceAll(RegExp('(^|\\s)${RegExp.escape(key)}(\\s|\$)'), ' ');
+    }
+    text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    final chunks = text.split(RegExp(r'\s+(?:con|with)\s+'));
+    final fillings = <String>[];
+    for (var i = 0; i < chunks.length; i++) {
+      var part = chunks[i].trim();
+      if (i == 0 && part.contains(' de ')) {
+        part = part.split(RegExp(r'\s+de\s+')).last.trim();
+      }
+      for (final bit in part.split(RegExp(r'\s+(?:y|and|e)\s+'))) {
+        final cleaned = _stripLeadingFillers(bit);
+        if (cleaned.isEmpty) continue;
+        if (keys.any((key) => cleaned == key)) continue;
+        if (_isDishBase(cleaned, dish)) continue;
+        if (_explicitlyExcluded(query, cleaned)) continue;
+        if (fillings.any((existing) => _namesOverlap(existing, cleaned))) continue;
+        fillings.add(cleaned);
+      }
+    }
+    final fallback = dish.defaultFilling;
+    if (fallback != null &&
+        !fillings.any((filling) => _namesOverlap(filling, fallback)) &&
+        !_explicitlyExcluded(query, fallback)) {
+      fillings.add(fallback);
+    }
+    return fillings;
+  }
+
+  static String _stripLeadingFillers(String raw) {
+    final words = raw.split(' ').where((word) => word.isNotEmpty).toList();
+    while (words.isNotEmpty && _fillingLeadWords.contains(words.first)) {
+      words.removeAt(0);
+    }
+    return words.join(' ').trim();
+  }
+
+  static double _dishTargetGrams({
+    required _CompositeDish dish,
+    required int count,
+    required double? statedGrams,
+    required FoodNutritionEstimate ai,
+    required bool fromPhoto,
+  }) {
+    if (!fromPhoto && statedGrams != null && statedGrams > 0) return statedGrams;
+    if (fromPhoto) {
+      final seen = ai.ingredientPortions
+          .where((portion) => portion.gramsG > 0 && !_isDishBase(portion.name, dish))
+          .fold<double>(0, (sum, portion) => sum + portion.gramsG);
+      final templateFilling = dish.pieceGrams - dish.baseGrams;
+      if (seen > dish.pieceGrams && templateFilling > 0) {
+        return seen + dish.baseGrams * (seen / templateFilling);
+      }
+    }
+    return dish.pieceGrams * count;
+  }
+
+  static List<FoodIngredientPortion> _buildDishPortions({
+    required _CompositeDish dish,
+    required FoodNutritionEstimate ai,
+    required List<String> fillings,
+    required double targetGrams,
+    required bool fromPhoto,
+  }) {
+    final target = targetGrams.round();
+    if (target <= 1) {
+      return [FoodIngredientPortion(name: dish.baseName, gramsG: dish.pieceGrams)];
+    }
+    final base = (target * dish.baseGrams / dish.pieceGrams).round().clamp(1, target);
+    final names = <String>[];
+    final weights = <double>[];
+    final modelFillings = ai.ingredientPortions.where((portion) => portion.gramsG > 0 && !_isDishBase(portion.name, dish)).toList();
+    if (fromPhoto && modelFillings.isNotEmpty) {
+      for (final portion in modelFillings) {
+        names.add(portion.name);
+        weights.add(portion.gramsG);
+      }
+    } else {
+      for (final filling in fillings) {
+        names.add(filling);
+        weights.add(1);
+      }
+    }
+    if (names.isEmpty) {
+      return [FoodIngredientPortion(name: dish.baseName, gramsG: target.toDouble())];
+    }
+
+    final fillingBudget = target - base;
+    final weightSum = weights.fold<double>(0, (sum, weight) => sum + weight);
+    final portions = <FoodIngredientPortion>[
+      FoodIngredientPortion(name: dish.baseName, gramsG: base.toDouble()),
+    ];
+    var assigned = 0;
+    for (var i = 0; i < names.length; i++) {
+      final grams = i == names.length - 1
+          ? fillingBudget - assigned
+          : weightSum == 0
+              ? 0
+              : (fillingBudget * weights[i] / weightSum).round();
+      assigned += grams;
+      if (grams <= 0) continue;
+      portions.add(FoodIngredientPortion(name: names[i], gramsG: grams.toDouble()));
+    }
+    return portions;
+  }
+
+  /// Suma anclas conocidas. Lo que no está en la tabla usa una densidad de comida mixta.
+  static FoodNutritionEstimate _sumDishPortions(FoodNutritionEstimate ai) {
+    final strict = estimateFromIngredientPortions(ai);
+    if (strict != null) return strict;
+
+    const fallback = (kcal: 180, protein: 8.0, carbs: 20.0, fat: 7.0, fiber: 1.5);
+    var totalKcal = 0.0;
+    var totalProtein = 0.0;
+    var totalCarbs = 0.0;
+    var totalFat = 0.0;
+    var totalFiber = 0.0;
+    var totalGrams = 0.0;
+    for (final portion in ai.ingredientPortions) {
+      if (portion.gramsG <= 0) continue;
+      totalGrams += portion.gramsG;
+      final anchor = _lookupAnchor(portion.name) ?? fallback;
+      final factor = portion.gramsG / 100;
+      totalKcal += anchor.kcal * factor;
+      totalProtein += anchor.protein * factor;
+      totalCarbs += anchor.carbs * factor;
+      totalFat += anchor.fat * factor;
+      totalFiber += anchor.fiber * factor;
+    }
+    if (totalGrams <= 0 || totalKcal <= 0) return ai;
+    return ai.copyWith(
+      caloriesKcal: totalKcal.round().clamp(0, 9999),
+      proteinG: double.parse(totalProtein.toStringAsFixed(1)),
+      carbsG: double.parse(totalCarbs.toStringAsFixed(1)),
+      fatG: double.parse(totalFat.toStringAsFixed(1)),
+      fiberG: double.parse(totalFiber.toStringAsFixed(1)),
+      referenceAmount: totalGrams,
+      amountUnit: 'g',
+      servingDescription: FoodServingParser.formatAmount(totalGrams, 'g'),
+      ingredients: ai.ingredientPortions.map((portion) => portion.name).toList(),
+    );
   }
 
   /// Quita ingredientes que el modelo agregó y el usuario no escribió.
@@ -915,6 +1300,8 @@ abstract final class FoodQueryHints {
 
   static bool _ingredientMentioned(String query, String ingredient) {
     if (_explicitlyExcluded(query, ingredient)) return false;
+    final dish = _matchCompositeDish(query);
+    if (dish != null && _isDishBase(ingredient, dish)) return true;
     if (_namesOverlap(query, ingredient)) return true;
     if (_isEggPortionName(ingredient) && _queryImpliesEggs(query)) return true;
     for (final volume in parseVolumePortionsFromQuery(query)) {
@@ -973,7 +1360,8 @@ abstract final class FoodQueryHints {
 
   /// Ajusta la estimación de IA si el usuario dio calorías explícitas o cantidades claras.
   static FoodNutritionEstimate reconcile(String query, FoodNutritionEstimate ai) {
-    final faithful = omitUnmentionedIngredients(query, ai);
+    final repaired = _repairCompositeDish(query, ai);
+    final faithful = omitUnmentionedIngredients(query, repaired);
     final gramCorrected = correctGramBasedEstimate(query, faithful);
     final labeledKcal = labeledKcalTotal(query);
     final eggs = eggCount(query);
@@ -1081,6 +1469,26 @@ abstract final class FoodQueryHints {
 
     return estimate;
   }
+}
+
+class _CompositeDish {
+  const _CompositeDish({
+    required this.keys,
+    required this.baseName,
+    required this.pieceGrams,
+    required this.baseGrams,
+    this.baseAliases = const [],
+    this.defaultFilling,
+    this.baseIsMajority = true,
+  });
+
+  final List<String> keys;
+  final String baseName;
+  final double pieceGrams;
+  final double baseGrams;
+  final List<String> baseAliases;
+  final String? defaultFilling;
+  final bool baseIsMajority;
 }
 
 extension _IterableLastOrNull<E> on Iterable<E> {

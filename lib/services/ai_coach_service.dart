@@ -1281,7 +1281,9 @@ Reglas:
 - "Sin aceite" en huevos = sin grasa añadida, pero conserva la grasa natural del huevo (~5 g grasa por huevo grande).
 - serving_description: describe SOLO lo que el usuario escribió (ej. "3 huevos revueltos"), no uses 100 g por defecto.
 - reference_amount_g: peso total estimado en gramos de TODO lo descrito, y nada más.
-- NO agregues alimentos que el usuario no mencionó. Si pide solo huevos revueltos, el plato es solo huevos: sin tortilla, pan, queso, arroz ni aceite.
+- NO agregues acompañamientos que el usuario no pidió. Si pide solo huevos revueltos, el plato es solo huevos: sin tortilla, pan, queso, arroz ni aceite.
+- SÍ incluye la base que el nombre del plato ya implica: pizza incluye masa de pizza; pupusa incluye masa de maíz; taco incluye tortilla de maíz; burrito y quesadilla incluyen tortilla de harina. El relleno no reemplaza esa base.
+- Si no hay gramos, estima UNA pieza comible y no 100 g de puro relleno: 1 pupusa ~150 g (masa ~110 g, relleno ~40 g); 1 rebanada de pizza ~140 g (masa ~80 g, el resto relleno). Varias piezas si el usuario lo dice (2 pupusas, 3 tacos).
 - calories_kcal debe ser el TOTAL para reference_amount_g (no confundir con kcal/100g).
 - Si el usuario indica gramos (ej. "300 g espagueti", "14g de mantequilla de maní"), usa EXACTAMENTE esos gramos. NUNCA dupliques ni uses porción estándar (ej. 2 cucharadas ~28g) si el usuario dijo otro peso.
 - Adjetivos de tamaño modifican el peso estimado: pequeña/chica ~65% de porción típica, grande/gran ~175%. Ej. "gran pechuga de pollo" ≈ 200–220 g, no 100 g genérico.
@@ -1293,7 +1295,7 @@ Reglas:
 - name: repite el plato que el usuario describió, con preparación si la dio (máx. ~70 caracteres). No inventes acompañamientos.
   Buenos: "3 huevos revueltos", "Avena con plátano" solo si el usuario mencionó ambos.
   Malos: "Comida", "Desayuno", "Huevos revueltos con tortilla" cuando no pidió tortilla.
-- ingredients: solo componentes que el usuario mencionó.
+- ingredients: lo que el usuario mencionó, más la base implícita del plato (masa o tortilla). Nada más.
 - ingredient_portions: OBLIGATORIO si hay uno o más componentes. Array con name y grams_g (peso estimado de CADA uno).
   La suma de grams_g debe aproximar reference_amount_g.
   Si el usuario indica gramos explícitos (ej. "300 g espagueti"), usa EXACTAMENTE esos gramos para ese ítem.
@@ -1578,7 +1580,9 @@ Reglas:
 - name: identifica el plato con DETALLE: proteína principal, guarnición, salsa o método de cocción si se ven (máx. ~70 caracteres).
   Buenos: "Pechuga de pollo a la plancha con arroz blanco y brócoli", "Tacos de bistec con cebolla y cilantro", "Ensalada César con pollo empanizado".
   Malos: "Comida", "Plato", "Almuerzo", "Pollo", "Arroz con algo".
-- ingredients: lista cada componente visible del plato, no solo el principal.
+- ingredients: lista cada componente visible, incluida la base. Pizza incluye masa; pupusa incluye masa de maíz; taco, burrito y quesadilla incluyen su tortilla; incluye arroz, salsa o guarnición si se ven. No describas solo el relleno.
+- En una pizza o una pupusa, la masa suele ser la mayor parte del peso. Una rebanada de pizza delgada ronda 140 g; una pupusa ronda 150 g. No uses 100 g de puro pepperoni o puro chicharrón.
+- calories_kcal es la suma de la densidad típica de cada componente por sus grams_g.
 - ingredient_portions: OBLIGATORIO si hay varios componentes. Array de objetos con name y grams_g (peso estimado de cada uno).
   La suma de grams_g debe aproximar reference_amount_g.
   Ejemplo: [{"name": "pechuga de pollo", "grams_g": 150}, {"name": "arroz blanco", "grams_g": 120}, {"name": "brócoli", "grams_g": 50}]
@@ -1617,7 +1621,7 @@ JSON:
       }
       final parsed = _parseFoodEstimate(response);
       if (parsed == null) return null;
-      return FoodQueryHints.reconcilePhotoEstimate(parsed);
+      return FoodQueryHints.reconcilePhotoEstimate(parsed, query: extra);
     } catch (_) {
       return null;
     }
@@ -1667,7 +1671,10 @@ JSON:
         revised: parsed,
         correction: trimmed,
       );
-      return FoodQueryHints.reconcilePhotoEstimate(stabilized);
+      return FoodQueryHints.reconcilePhotoEstimate(
+        stabilized,
+        query: '${previous.name} $trimmed',
+      );
     } catch (_) {
       return null;
     }
@@ -1736,7 +1743,7 @@ JSON:
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'model': 'gpt-4o-mini',
+        'model': 'gpt-4o',
         'messages': [
           {
             'role': 'user',
@@ -1749,8 +1756,8 @@ JSON:
             ],
           },
         ],
-        'max_tokens': 800,
-        'temperature': 0.3,
+        'max_tokens': 1200,
+        'temperature': 0,
       }),
     );
     if (response.statusCode != 200) {

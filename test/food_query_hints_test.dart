@@ -422,6 +422,123 @@ void main() {
       expect(fixed.referenceAmount, lessThan(280));
     });
 
+    test('pizza keeps the dough when AI returns only toppings', () {
+      const ai = FoodNutritionEstimate(
+        name: 'pizza delgada de pepperoni con orilla de queso',
+        caloriesKcal: 160,
+        proteinG: 7,
+        carbsG: 18,
+        fatG: 7,
+        fiberG: 1,
+        referenceAmount: 100,
+        ingredients: ['pepperoni', 'queso'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'pepperoni', gramsG: 50),
+          FoodIngredientPortion(name: 'queso', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile(
+        'pizza delgada de pepperoni con orilla de queso',
+        ai,
+      );
+
+      expect(fixed.referenceAmount, closeTo(140, 1));
+      final masa = fixed.ingredientPortions.where(
+        (portion) => portion.name.toLowerCase().contains('masa'),
+      );
+      expect(masa, isNotEmpty);
+      expect(masa.first.gramsG, greaterThan(70));
+      expect(
+        fixed.ingredientPortions.any((portion) => portion.name.toLowerCase().contains('pepperoni')),
+        isTrue,
+      );
+      expect(fixed.caloriesKcal, greaterThan(400));
+      expect(fixed.caloriesKcal, lessThan(520));
+      expect(fixed.carbsG, greaterThan(25));
+    });
+
+    test('pupusa keeps corn masa instead of counting only the filling', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pupusa salvadoreña de chicharron',
+        caloriesKcal: 75,
+        proteinG: 4,
+        carbsG: 2,
+        fatG: 6,
+        referenceAmount: 50,
+        ingredients: ['chicharron'],
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'chicharron', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile('Pupusa salvadoreña de chicharron', ai);
+
+      expect(fixed.referenceAmount, closeTo(150, 1));
+      final masa = fixed.ingredientPortions.where(
+        (portion) => portion.name.toLowerCase().contains('masa'),
+      );
+      final filling = fixed.ingredientPortions.where(
+        (portion) => portion.name.toLowerCase().contains('chicharr'),
+      );
+      expect(masa, isNotEmpty);
+      expect(filling, isNotEmpty);
+      expect(masa.first.gramsG, greaterThan(90));
+      expect(filling.first.gramsG, lessThan(masa.first.gramsG));
+      expect(fixed.caloriesKcal, greaterThan(300));
+      expect(fixed.caloriesKcal, lessThan(420));
+    });
+
+    test('explicit pupusa grams stay a whole piece with masa', () {
+      const ai = FoodNutritionEstimate(
+        name: 'Pupusa de chicharron',
+        caloriesKcal: 75,
+        proteinG: 4,
+        carbsG: 2,
+        fatG: 6,
+        referenceAmount: 50,
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'chicharron', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcile('200g de pupusa de chicharron', ai);
+
+      expect(fixed.referenceAmount, closeTo(200, 1));
+      final masa = fixed.ingredientPortions.firstWhere(
+        (portion) => portion.name.toLowerCase().contains('masa'),
+      );
+      final filling = fixed.ingredientPortions.firstWhere(
+        (portion) => portion.name.toLowerCase().contains('chicharr'),
+      );
+      expect(masa.gramsG, greaterThan(filling.gramsG));
+      expect(fixed.caloriesKcal, greaterThan(400));
+    });
+
+    test('photo of a topping-only pizza is rebuilt as one slice', () {
+      const ai = FoodNutritionEstimate(
+        name: 'pizza delgada de pepperoni con orilla de queso',
+        caloriesKcal: 160,
+        proteinG: 7,
+        carbsG: 18,
+        fatG: 7,
+        referenceAmount: 100,
+        ingredientPortions: [
+          FoodIngredientPortion(name: 'pepperoni', gramsG: 50),
+          FoodIngredientPortion(name: 'queso', gramsG: 50),
+        ],
+      );
+
+      final fixed = FoodQueryHints.reconcilePhotoEstimate(ai);
+
+      expect(fixed.referenceAmount, closeTo(140, 1));
+      expect(
+        fixed.ingredientPortions.any((portion) => portion.name.toLowerCase().contains('masa')),
+        isTrue,
+      );
+      expect(fixed.caloriesKcal, greaterThan(400));
+    });
+
     test('reconcile applies size modifier when AI returns generic 100g', () {
       const query = 'big chicken breast';
       const ai = FoodNutritionEstimate(
