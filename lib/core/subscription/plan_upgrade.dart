@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/profile.dart';
+import '../../widgets/subscription/plan_upgrade_sheet.dart';
 
 /// Navegación y copy para subir de plan desde límites (Coach / rutinas).
 abstract final class PlanUpgrade {
-  static const planRoute = '/profile?section=plan';
-
   static SubscriptionTier? nextStoreTier(SubscriptionTier current) {
     return switch (current) {
       SubscriptionTier.free => SubscriptionTier.gymrat,
@@ -47,8 +45,8 @@ abstract final class PlanUpgrade {
     };
   }
 
-  static void openPlan(BuildContext context) {
-    context.go(planRoute);
+  static Future<void> openPlan(BuildContext context) {
+    return PlanUpgradeSheet.show(context);
   }
 
   static void showLimitSnackBar(
@@ -57,7 +55,7 @@ abstract final class PlanUpgrade {
     required bool canUpgrade,
   }) {
     final l10n = context.l10n;
-    final router = GoRouter.of(context);
+    final navigator = Navigator.of(context, rootNavigator: true);
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
@@ -67,7 +65,10 @@ abstract final class PlanUpgrade {
         action: canUpgrade
             ? SnackBarAction(
                 label: l10n.subscriptionSeePlans,
-                onPressed: () => router.go(planRoute),
+                onPressed: () {
+                  if (!navigator.context.mounted) return;
+                  openPlan(navigator.context);
+                },
               )
             : null,
       ),

@@ -608,7 +608,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                       textInputAction: TextInputAction.newline,
                       decoration: InputDecoration(
                         hintText: l10n.coachAskHint,
-                        counterText: '',
                       ),
                       buildCounter: (
                         context, {
@@ -617,8 +616,6 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                         maxLength,
                       }) {
                         if (maxLength == null) return null;
-                        final nearLimit = currentLength >= maxLength - 100;
-                        if (!nearLimit && !isFocused) return null;
                         return Align(
                           alignment: Alignment.centerRight,
                           child: Padding(

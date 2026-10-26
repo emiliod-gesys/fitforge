@@ -5,6 +5,16 @@ import 'package:fitforge/services/food_quick_add_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('quick add clamps descriptions to the character limit', () {
+    expect(FoodQuickAddService.clampQuery('  pizza  '), 'pizza');
+    expect(FoodQuickAddService.clampQuery(''), '');
+    final long = 'a' * (FoodQuickAddService.maxQueryLength + 25);
+    expect(
+      FoodQuickAddService.clampQuery(long).length,
+      FoodQuickAddService.maxQueryLength,
+    );
+  });
+
   const strawberries = CatalogFood(
     id: 'cf_fresas',
     nameEs: 'Fresas',

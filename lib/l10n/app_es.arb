@@ -979,6 +979,12 @@
       "max": { "type": "int" }
     }
   },
+  "inputCharLimitTrimmed": "Se acortó el texto al máximo de {max} caracteres.",
+  "@inputCharLimitTrimmed": {
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
   "coachRoutineReady": "Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.",
   "coachRoutinesReady": "Aquí tienes {count} rutinas para la semana. Revísalas y guarda las que quieras.",
   "@coachRoutinesReady": {
@@ -1768,6 +1774,8 @@
   "subscriptionUpgradeGymrat": "Pasar a Gymrat",
   "subscriptionUpgradePro": "Pasar a Gymrat Pro",
   "subscriptionSeePlans": "Ver planes",
+  "planUpgradeSheetSubtitle": "Compara lo que incluye cada plan. Puedes suscribirte sin salir de esta pantalla.",
+  "planUpgradeCurrentBadge": "Tu plan",
   "planUpgradeCoachFree": "Has alcanzado el límite diario de {limit} mensajes del Coach IA. Pasa a Gymrat para 30 al día, o a Gymrat Pro para ilimitados.",
   "@planUpgradeCoachFree": {
     "placeholders": {

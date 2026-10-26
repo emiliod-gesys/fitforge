@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/subscription/subscription_features.dart';
 import '../core/tutorials/tutorial_catalog.dart';
 import '../core/tutorials/tutorial_workout_session.dart';
+import '../models/profile.dart';
 import 'app_providers.dart';
 
 DateTime tutorialNudgeSnoozeUntil(DateTime now) {
@@ -26,6 +28,12 @@ String tutorialSnoozePrefKey(String userId) =>
 
 String tutorialLegacyDonePrefKey(String tourId) =>
     '$tutorialLegacyDonePrefix$tourId';
+
+/// Tutoriales que el plan actual no puede completar. No cuentan como pendientes.
+Set<String> tutorialUnavailableIds(SubscriptionTier? tier) {
+  if (tier == null || tier.hasSmartRoutine) return const {};
+  return const {TutorialCatalog.smartRoutine};
+}
 
 Set<String> tutorialCompletedIdsForUser(
   SharedPreferences prefs,
@@ -52,6 +60,7 @@ class TutorialState {
   final String? activeTourId;
   final int stepIndex;
   final Set<String> completedIds;
+  final Set<String> unavailableIds;
   final bool hydrated;
   final DateTime? snoozedUntil;
 
@@ -60,6 +69,7 @@ class TutorialState {
     this.activeTourId,
     this.stepIndex = 0,
     this.completedIds = const {},
+    this.unavailableIds = const {},
     this.hydrated = false,
     this.snoozedUntil,
   });
@@ -78,6 +88,7 @@ class TutorialState {
   int get pendingCount {
     var count = 0;
     for (final tour in TutorialCatalog.all) {
+      if (unavailableIds.contains(tour.id)) continue;
       if (!completedIds.contains(tour.id)) count++;
     }
     return count;
@@ -94,6 +105,7 @@ class TutorialState {
     String? activeTourId,
     int? stepIndex,
     Set<String>? completedIds,
+    Set<String>? unavailableIds,
     bool? hydrated,
     DateTime? snoozedUntil,
     bool clearActive = false,
@@ -105,6 +117,7 @@ class TutorialState {
       activeTourId: clearActive ? null : (activeTourId ?? this.activeTourId),
       stepIndex: stepIndex ?? this.stepIndex,
       completedIds: completedIds ?? this.completedIds,
+      unavailableIds: unavailableIds ?? this.unavailableIds,
       hydrated: hydrated ?? this.hydrated,
       snoozedUntil: clearSnooze ? null : (snoozedUntil ?? this.snoozedUntil),
     );
@@ -115,11 +128,21 @@ class TutorialController extends Notifier<TutorialState> {
   @override
   TutorialState build() {
     final userId = ref.watch(authUserIdProvider);
+    ref.listen(profileProvider, (_, next) {
+      final ids = tutorialUnavailableIds(next.valueOrNull?.subscriptionTier);
+      if (_sameIds(state.unavailableIds, ids)) return;
+      state = state.copyWith(unavailableIds: ids);
+    });
     if (userId == null || userId.isEmpty) {
       return const TutorialState(hydrated: true);
     }
     Future<void>.microtask(() => _hydrate(userId));
-    return TutorialState(userId: userId);
+    return TutorialState(
+      userId: userId,
+      unavailableIds: tutorialUnavailableIds(
+        ref.read(profileProvider).valueOrNull?.subscriptionTier,
+      ),
+    );
   }
 
   Future<void> _hydrate(String userId) async {
@@ -133,6 +156,7 @@ class TutorialController extends Notifier<TutorialState> {
     state = TutorialState(
       userId: userId,
       completedIds: done,
+      unavailableIds: state.unavailableIds,
       hydrated: true,
       snoozedUntil: snoozedUntil,
     );
@@ -141,6 +165,10 @@ class TutorialController extends Notifier<TutorialState> {
   bool _isCurrentUser(String userId) {
     return ref.exists(tutorialControllerProvider) &&
         ref.read(authUserIdProvider) == userId;
+  }
+
+  bool _sameIds(Set<String> left, Set<String> right) {
+    return left.length == right.length && left.containsAll(right);
   }
 
   void start(String tourId) {

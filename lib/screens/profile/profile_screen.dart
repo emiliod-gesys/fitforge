@@ -704,7 +704,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = context.l10n;
     final canTrainer = profile?.subscriptionTier.hasTrainerMode ?? false;
     final trainerTile = SwitchListTile(
-      secondary: Icon(Icons.school_outlined, color: context.accentColor),
+      secondary: Icon(
+        Icons.school_outlined,
+        color: canTrainer ? context.accentColor : AppColors.textMuted,
+      ),
       title: Text(l10n.personalTrainerMode),
       subtitle: Text(
         canTrainer
@@ -933,13 +936,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (needsSmartPlan) {
           if (!profileAsync!.hasValue) return;
           if (smartLocked) {
-            PlanUpgrade.showLimitSnackBar(
-              context,
-              message: l10n.featureGymratPlansOnly,
-              canUpgrade: PlanUpgrade.canOfferStoreUpgrade(
-                profileAsync.valueOrNull,
-              ),
-            );
+            PlanUpgrade.openPlan(context);
             return;
           }
         }

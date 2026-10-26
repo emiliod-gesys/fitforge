@@ -4688,6 +4688,12 @@ abstract class AppLocalizations {
   /// **'{current} de {max} caracteres'**
   String coachMessageCharCounter(int current, int max);
 
+  /// No description provided for @inputCharLimitTrimmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Se acortó el texto al máximo de {max} caracteres.'**
+  String inputCharLimitTrimmed(int max);
+
   /// No description provided for @coachRoutineReady.
   ///
   /// In es, this message translates to:
@@ -8162,6 +8168,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver planes'**
   String get subscriptionSeePlans;
+
+  /// No description provided for @planUpgradeSheetSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compara lo que incluye cada plan. Puedes suscribirte sin salir de esta pantalla.'**
+  String get planUpgradeSheetSubtitle;
+
+  /// No description provided for @planUpgradeCurrentBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan'**
+  String get planUpgradeCurrentBadge;
 
   /// No description provided for @planUpgradeCoachFree.
   ///

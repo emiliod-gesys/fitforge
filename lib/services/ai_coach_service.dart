@@ -28,7 +28,7 @@ import 'routine_limit_service.dart';
 class AiCoachService {
   AiCoachService(this._profileService);
 
-  static const maxUserMessageLength = 800;
+  static const maxUserMessageLength = 250;
   static const maxChatHistoryTurns = 12;
   static const maxChatHistoryChars = 8000;
   static const maxPriorAdviceChars = 2500;

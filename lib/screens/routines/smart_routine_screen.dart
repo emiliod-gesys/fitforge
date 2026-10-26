@@ -40,11 +40,7 @@ class _SmartRoutineScreenState extends ConsumerState<SmartRoutineScreen> {
     if (_building) return;
     final profile = ref.read(profileProvider).valueOrNull;
     if (!(profile?.subscriptionTier.hasSmartRoutine ?? false)) {
-      PlanUpgrade.showLimitSnackBar(
-        context,
-        message: l10n.featureGymratPlansOnly,
-        canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
-      );
+      await PlanUpgrade.openPlan(context);
       return;
     }
     final canCreate = await ensureCanCreateRoutine(context, ref);

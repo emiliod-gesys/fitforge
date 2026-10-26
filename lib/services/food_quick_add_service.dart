@@ -19,6 +19,15 @@ class FoodQuickAddService {
   })  : _catalog = catalog,
         _aiEstimate = aiEstimate;
 
+  /// Una comida descrita cabe aquí. Más texto no mejora la estimación.
+  static const maxQueryLength = 400;
+
+  static String clampQuery(String query) {
+    final trimmed = query.trim();
+    if (trimmed.length <= maxQueryLength) return trimmed;
+    return trimmed.substring(0, maxQueryLength);
+  }
+
   final CatalogFoodLookup _catalog;
   final FoodAiEstimator _aiEstimate;
 
@@ -26,6 +35,8 @@ class FoodQuickAddService {
     required String query,
     UserProfile? profile,
   }) async {
+    query = clampQuery(query);
+    if (query.isEmpty) return null;
     final languageCode = profile?.preferredLanguage == 'en' ? 'en' : 'es';
     final requested = _requestedPortions(query);
     final resolved = <_ResolvedCatalogPortion>[];

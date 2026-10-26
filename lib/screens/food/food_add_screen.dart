@@ -22,6 +22,7 @@ import '../../models/food_entry.dart';
 import '../../models/manual_food_template.dart';
 import '../../models/profile.dart';
 import '../../providers/app_providers.dart';
+import '../../services/food_quick_add_service.dart';
 import '../../services/food_voice_note_recorder.dart';
 import '../../widgets/fitforge_loading_indicator.dart';
 import '../../widgets/food/barcode_scanner_view.dart';
@@ -262,8 +263,18 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
   }
 
   Future<void> _quickAddWithAi() async {
-    final description = _quickController.text.trim();
+    final description = FoodQuickAddService.clampQuery(_quickController.text);
     if (description.isEmpty) return;
+    if (description != _quickController.text.trim()) {
+      _quickController.text = description;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.inputCharLimitTrimmed(FoodQuickAddService.maxQueryLength),
+          ),
+        ),
+      );
+    }
 
     setState(() => _loading = true);
     try {
@@ -316,10 +327,20 @@ class _FoodAddScreenState extends ConsumerState<FoodAddScreen> {
         return;
       }
 
-      _quickController.text = query;
+      final capped = FoodQuickAddService.clampQuery(query);
+      if (capped.length < query.length && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.inputCharLimitTrimmed(FoodQuickAddService.maxQueryLength),
+            ),
+          ),
+        );
+      }
+      _quickController.text = capped;
 
       final estimate = await ref.read(foodQuickAddServiceProvider).estimate(
-            query: query,
+            query: capped,
             profile: profile,
           );
 
@@ -1155,8 +1176,25 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
         final words = result.recognizedWords.trim();
         if (words.isEmpty) return;
         final spacer = _dictationPrefix.isEmpty ? '' : ' ';
-        widget.controller.text = '$_dictationPrefix$spacer$words';
-        widget.controller.selection = TextSelection.collapsed(offset: widget.controller.text.length);
+        final next = '$_dictationPrefix$spacer$words';
+        final max = FoodQuickAddService.maxQueryLength;
+        final over = next.length > max;
+        widget.controller.text = over ? next.substring(0, max) : next;
+        widget.controller.selection = TextSelection.collapsed(
+          offset: widget.controller.text.length,
+        );
+        if (over) {
+          unawaited(_speech.stop());
+          setState(() {
+            _starting = false;
+            _setListening(false);
+          });
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text(l10n.inputCharLimitTrimmed(max))),
+            );
+        }
       },
       listenOptions: SpeechListenOptions(
         localeId: locale,
@@ -1432,6 +1470,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
             enabled: !_inputLocked,
             minLines: 3,
             maxLines: 5,
+            maxLength: FoodQuickAddService.maxQueryLength,
             decoration: InputDecoration(
               hintText: l10n.foodQuickAddPlaceholder,
               alignLabelWithHint: true,
@@ -1481,6 +1520,29 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
                 ),
               ),
             ),
+            buildCounter: (
+              context, {
+              required currentLength,
+              required isFocused,
+              maxLength,
+            }) {
+              if (maxLength == null) return null;
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    l10n.coachMessageCharCounter(currentLength, maxLength),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: currentLength >= maxLength
+                          ? Theme.of(context).colorScheme.error
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(

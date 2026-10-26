@@ -150,15 +150,10 @@ abstract final class RoutineListActions {
   }
 
   static Future<void> openSmartRoutine(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
     final profile = ref.read(profileProvider).valueOrNull;
     final allowed = profile?.subscriptionTier.hasSmartRoutine ?? false;
     if (!allowed) {
-      PlanUpgrade.showLimitSnackBar(
-        context,
-        message: l10n.featureGymratPlansOnly,
-        canUpgrade: PlanUpgrade.canOfferStoreUpgrade(profile),
-      );
+      await PlanUpgrade.openPlan(context);
       return;
     }
 
@@ -332,10 +327,9 @@ class RoutinesTab extends ConsumerWidget {
                             : Icons.lock_outline,
                       ),
                       label: Text(l10n.smartRoutine),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        foregroundColor: context.accentColor,
-                        side: BorderSide(color: context.accentColor),
+                      style: _planFeatureButtonStyle(
+                        context,
+                        enabled: smartRoutineAllowed,
                       ),
                     ),
                   ),
@@ -424,10 +418,9 @@ class RoutinesTab extends ConsumerWidget {
                   smartRoutineAllowed ? Icons.auto_awesome_outlined : Icons.lock_outline,
                 ),
                 label: Text(l10n.smartRoutine),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  foregroundColor: context.accentColor,
-                  side: BorderSide(color: context.accentColor),
+                style: _planFeatureButtonStyle(
+                  context,
+                  enabled: smartRoutineAllowed,
                 ),
               ),
             ],
@@ -731,6 +724,19 @@ String _routineMetaLine(Routine routine, AppLocalizations l10n) {
   final count = l10n.exercisesInRoutine(routine.exercises.length);
   if (routine.targetMuscles.isEmpty) return count;
   return '$count · ${routine.targetMuscles.join(' · ')}';
+}
+
+ButtonStyle _planFeatureButtonStyle(
+  BuildContext context, {
+  required bool enabled,
+}) {
+  final color = enabled ? context.accentColor : AppColors.textMuted;
+  final border = enabled ? context.accentColor : AppColors.border;
+  return OutlinedButton.styleFrom(
+    minimumSize: const Size.fromHeight(48),
+    foregroundColor: color,
+    side: BorderSide(color: border),
+  );
 }
 
 class _RoutineListIcon extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'package:fitforge/core/tutorials/tutorial_catalog.dart';
 import 'package:fitforge/core/tutorials/tutorial_navigation.dart';
 import 'package:fitforge/core/tutorials/tutorial_targets.dart';
+import 'package:fitforge/models/profile.dart';
 import 'package:fitforge/providers/tutorial_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -134,5 +135,35 @@ void main() {
 
     const loggedOut = TutorialState(hydrated: true);
     expect(loggedOut.showPendingNudge, isFalse);
+  });
+
+  test('a plan-locked tutorial does not count as pending', () {
+    expect(
+      tutorialUnavailableIds(SubscriptionTier.free),
+      {TutorialCatalog.smartRoutine},
+    );
+    expect(tutorialUnavailableIds(SubscriptionTier.gymrat), isEmpty);
+    expect(tutorialUnavailableIds(SubscriptionTier.gymratPro), isEmpty);
+    expect(tutorialUnavailableIds(null), isEmpty);
+
+    final locked = TutorialState(
+      userId: 'user-a',
+      hydrated: true,
+      unavailableIds: tutorialUnavailableIds(SubscriptionTier.free),
+    );
+    expect(locked.pendingCount, TutorialCatalog.all.length - 1);
+    expect(locked.showPendingNudge, isTrue);
+
+    final onlySmartLeft = TutorialState(
+      userId: 'user-a',
+      hydrated: true,
+      completedIds: {
+        for (final tour in TutorialCatalog.all)
+          if (tour.id != TutorialCatalog.smartRoutine) tour.id,
+      },
+      unavailableIds: tutorialUnavailableIds(SubscriptionTier.free),
+    );
+    expect(onlySmartLeft.pendingCount, 0);
+    expect(onlySmartLeft.showPendingNudge, isFalse);
   });
 }

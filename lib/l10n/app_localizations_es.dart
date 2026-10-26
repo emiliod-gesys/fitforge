@@ -2657,6 +2657,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String inputCharLimitTrimmed(int max) {
+    return 'Se acortó el texto al máximo de $max caracteres.';
+  }
+
+  @override
   String get coachRoutineReady =>
       'Aquí tienes tu rutina. Revísala y pulsa Guardar cuando estés listo.';
 
@@ -4794,6 +4799,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get subscriptionSeePlans => 'Ver planes';
+
+  @override
+  String get planUpgradeSheetSubtitle =>
+      'Compara lo que incluye cada plan. Puedes suscribirte sin salir de esta pantalla.';
+
+  @override
+  String get planUpgradeCurrentBadge => 'Tu plan';
 
   @override
   String planUpgradeCoachFree(int limit) {

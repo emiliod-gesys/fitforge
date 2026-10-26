@@ -962,6 +962,12 @@
       "max": { "type": "int" }
     }
   },
+  "inputCharLimitTrimmed": "The text was shortened to the {max} character limit.",
+  "@inputCharLimitTrimmed": {
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
   "coachRoutineReady": "Here is your routine. Review it and tap Save when ready.",
   "coachRoutinesReady": "Here are your {count} routines for the week. Review each one and save the ones you want.",
   "@coachRoutinesReady": {
@@ -1729,6 +1735,8 @@
   "subscriptionUpgradeGymrat": "Upgrade to Gymrat",
   "subscriptionUpgradePro": "Upgrade to Gymrat Pro",
   "subscriptionSeePlans": "See plans",
+  "planUpgradeSheetSubtitle": "Compare what each plan includes. You can subscribe without leaving this screen.",
+  "planUpgradeCurrentBadge": "Your plan",
   "planUpgradeCoachFree": "You've reached today's limit of {limit} AI Coach messages. Upgrade to Gymrat for 30 a day, or Gymrat Pro for unlimited.",
   "@planUpgradeCoachFree": {
     "placeholders": {
