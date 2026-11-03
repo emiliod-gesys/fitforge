@@ -18,6 +18,8 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
   final Set<String> removedExerciseIds;
   final String unitSystem;
   final void Function(int index) onOpenExercise;
+  final bool addingExercise;
+  final String? swappingExerciseId;
   final VoidCallback onAddExercise;
   final void Function(WorkoutExercise exercise) onRemoveExercise;
   final void Function(WorkoutExercise exercise) onSwapExercise;
@@ -33,6 +35,8 @@ class ActiveWorkoutExerciseList extends StatefulWidget {
     required this.removedExerciseIds,
     required this.unitSystem,
     required this.onOpenExercise,
+    this.addingExercise = false,
+    this.swappingExerciseId,
     required this.onAddExercise,
     required this.onRemoveExercise,
     required this.onSwapExercise,
@@ -259,7 +263,10 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: KeyedSubtree(
               key: TutorialTargets.workoutAddExerciseKey,
-              child: _AddExerciseRow(onTap: widget.onAddExercise),
+              child: _AddExerciseRow(
+                loading: widget.addingExercise,
+                onTap: widget.addingExercise ? null : widget.onAddExercise,
+              ),
             ),
           ),
         ),
@@ -300,6 +307,7 @@ class _ActiveWorkoutExerciseListState extends State<ActiveWorkoutExerciseList> {
               widget.workout.exercises.indexWhere((e) => e.id == exercise.id);
           if (index >= 0) widget.onOpenExercise(index);
         },
+        swapping: widget.swappingExerciseId == exercise.id,
         onSwap: () => widget.onSwapExercise(exercise),
         onRemove: () => widget.onRemoveExercise(exercise),
         onJoin: canJoin
@@ -341,6 +349,7 @@ class _ExerciseListRow extends ConsumerWidget {
   final bool showConnector;
   final bool showDragHandle;
   final VoidCallback onTap;
+  final bool swapping;
   final VoidCallback onSwap;
   final VoidCallback onRemove;
   final VoidCallback? onJoin;
@@ -356,6 +365,7 @@ class _ExerciseListRow extends ConsumerWidget {
     required this.showConnector,
     required this.showDragHandle,
     required this.onTap,
+    this.swapping = false,
     required this.onSwap,
     required this.onRemove,
     this.onJoin,
@@ -496,7 +506,22 @@ class _ExerciseListRow extends ConsumerWidget {
                 ],
               ),
             ),
-            PopupMenuButton<String>(
+            swapping
+                ? SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.accentColor,
+                        ),
+                      ),
+                    ),
+                  )
+                : PopupMenuButton<String>(
               key: listIndex == 0 ? TutorialTargets.workoutSwapKey : null,
               icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
               onSelected: (value) {
@@ -867,19 +892,21 @@ class _SupersetListRow extends ConsumerWidget {
 }
 
 class _AddExerciseRow extends StatelessWidget {
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool loading;
 
-  const _AddExerciseRow({required this.onTap});
+  const _AddExerciseRow({required this.onTap, this.loading = false});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final accent = context.accentColor;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
             Container(
@@ -887,11 +914,22 @@ class _AddExerciseRow extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 border: Border.all(
-                    color: context.accentColor.withValues(alpha: 0.5),
+                    color: accent.withValues(alpha: 0.5),
                     width: 1.5),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.add, color: context.accentColor),
+              child: loading
+                  ? Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: accent,
+                        ),
+                      ),
+                    )
+                  : Icon(Icons.add, color: accent),
             ),
             const SizedBox(width: 16),
             Text(

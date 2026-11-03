@@ -5,16 +5,19 @@ import '../../core/tutorials/tutorial_targets.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/utils/workout_streak.dart';
 import '../../l10n/l10n_extensions.dart';
+import '../fitforge_loading_indicator.dart';
 
 class TrainHeroCard extends StatelessWidget {
   final WorkoutWeeklyStats? stats;
   final bool isLoading;
+  final bool canStartWorkout;
   final VoidCallback onStartWorkout;
 
   const TrainHeroCard({
     super.key,
     required this.stats,
     required this.isLoading,
+    required this.canStartWorkout,
     required this.onStartWorkout,
   });
 
@@ -92,12 +95,22 @@ class TrainHeroCard extends StatelessWidget {
               child: KeyedSubtree(
                 key: TutorialTargets.trainStartKey,
                 child: FilledButton.icon(
-                  onPressed: onStartWorkout,
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: Text(l10n.startWorkout),
+                  onPressed: canStartWorkout ? onStartWorkout : null,
+                  icon: canStartWorkout
+                      ? const Icon(Icons.play_arrow_rounded)
+                      : const SizedBox(
+                          width: 26,
+                          height: 26,
+                          child: FittedBox(
+                            child: FitForgeLoadingIndicator(size: 16),
+                          ),
+                        ),
+                  label: Text(canStartWorkout ? l10n.startWorkout : l10n.loadingRoutines),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: context.accentDark,
+                    disabledBackgroundColor: Colors.white,
+                    disabledForegroundColor: context.accentDark,
                     minimumSize: const Size.fromHeight(50),
                     textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                   ),

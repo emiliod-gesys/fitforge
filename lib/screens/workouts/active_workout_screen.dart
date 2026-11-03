@@ -96,6 +96,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   final Map<String, WorkoutSet> _setOverrides = {};
   final Map<String, List<WorkoutSet>> _insertedSets = {};
   final Set<String> _savingSetIds = {};
+  final Set<String> _addingSetExerciseIds = {};
+  String? _addingSupersetGroupId;
+  bool _addingExercise = false;
+  String? _swappingExerciseId;
   final Map<String, bool> _perArmOverrides = {};
   String? _focusSetId;
   bool _perArmSeeded = false;
@@ -1052,6 +1056,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   }
 
   Future<void> _pickAndAddExercise(Workout workout) async {
+    if (_addingExercise) return;
     final existingIds = workout.exercises.map((e) => e.exerciseId).toSet();
     final picked = await WorkoutExercisePickerSheet.show(
       context,
@@ -1061,35 +1066,30 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
 
     final l10n = context.l10n;
     Workout? updated;
+    setState(() => _addingExercise = true);
 
     try {
-      updated = await FitForgeLoadingOverlay.run<Workout?>(
-        context,
-        message: l10n.addingExercise,
-        task: () async {
-          String? imageUrl;
-          if (!picked.isUserCustom) {
-            imageUrl = picked.imageUrl ??
-                await ref.read(exerciseServiceProvider).resolveImageUrl(
-                      ExerciseImageLookup(
-                        exerciseId: picked.id,
-                        exerciseName: picked.name,
-                      ),
-                    );
-          }
+      String? imageUrl;
+      if (!picked.isUserCustom) {
+        imageUrl = picked.imageUrl ??
+            await ref.read(exerciseServiceProvider).resolveImageUrl(
+                  ExerciseImageLookup(
+                    exerciseId: picked.id,
+                    exerciseName: picked.name,
+                  ),
+                );
+      }
 
-          await ref.read(workoutServiceProvider).addExerciseToWorkout(
-                workout.id,
-                exerciseId: picked.id,
-                exerciseName: picked.name,
-                imageUrl: imageUrl,
-                loggingType: picked.loggingType,
-              );
+      await ref.read(workoutServiceProvider).addExerciseToWorkout(
+            workout.id,
+            exerciseId: picked.id,
+            exerciseName: picked.name,
+            imageUrl: imageUrl,
+            loggingType: picked.loggingType,
+          );
 
-          await _syncActiveWorkout();
-          return ref.read(activeWorkoutProvider).valueOrNull;
-        },
-      );
+      await _syncActiveWorkout();
+      updated = ref.read(activeWorkoutProvider).valueOrNull;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1097,6 +1097,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
         );
       }
       return;
+    } finally {
+      if (mounted) setState(() => _addingExercise = false);
     }
 
     if (!mounted || updated == null) return;
@@ -1138,6 +1140,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   }
 
   Future<void> _swapExercise(Workout workout, WorkoutExercise exercise) async {
+    if (_swappingExerciseId != null) return;
     final excludeIds = workout.exercises
         .where((e) => e.id != exercise.id)
         .map((e) => e.exerciseId)
@@ -1150,30 +1153,41 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     );
     if (picked == null || !mounted) return;
 
-    String? imageUrl;
-    if (!picked.isUserCustom) {
-      imageUrl = picked.imageUrl ??
-          await ref.read(exerciseServiceProvider).resolveImageUrl(
-                ExerciseImageLookup(
-                  exerciseId: picked.id,
-                  exerciseName: picked.name,
-                ),
-              );
-    }
+    setState(() => _swappingExerciseId = exercise.id);
+    try {
+      String? imageUrl;
+      if (!picked.isUserCustom) {
+        imageUrl = picked.imageUrl ??
+            await ref.read(exerciseServiceProvider).resolveImageUrl(
+                  ExerciseImageLookup(
+                    exerciseId: picked.id,
+                    exerciseName: picked.name,
+                  ),
+                );
+      }
 
-    await ref.read(workoutServiceProvider).swapExerciseInWorkout(
-          exercise.id,
-          workout.id,
-          newExerciseId: picked.id,
-          newExerciseName: picked.name,
-          newImageUrl: imageUrl,
+      await ref.read(workoutServiceProvider).swapExerciseInWorkout(
+            exercise.id,
+            workout.id,
+            newExerciseId: picked.id,
+            newExerciseName: picked.name,
+            newImageUrl: imageUrl,
+          );
+
+      await _syncActiveWorkout();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.changedTo(picked.name))),
         );
-
-    await _syncActiveWorkout();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.changedTo(picked.name))),
-      );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _swappingExerciseId = null);
     }
   }
 
@@ -1745,6 +1759,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                       removedExerciseIds: _removedExerciseIds,
                       unitSystem: unitSystem,
                       onOpenExercise: _openExercise,
+                      addingExercise: _addingExercise,
+                      swappingExerciseId: _swappingExerciseId,
                       onAddExercise: () => _pickAndAddExercise(displayWorkout),
                       onRemoveExercise: (exercise) {
                         setState(() => _removedExerciseIds.add(exercise.id));
@@ -2098,16 +2114,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                           },
                         ),
                         const SizedBox(height: 8),
-                        OutlinedButton.icon(
+                        _addSetButton(
                           key: TutorialTargets.workoutAddSetKey,
+                          busy: _addingSetExerciseIds.contains(exercise.id),
                           onPressed: () => _addSet(displayWorkout, exercise),
-                          icon: const Icon(Icons.add),
-                          label: Text(l10n.addSet),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            side: BorderSide(color: context.accentColor),
-                            foregroundColor: context.accentColor,
-                          ),
+                          label: l10n.addSet,
                         ),
                       ],
                     ],
@@ -2273,16 +2284,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                 ),
               ],
               const SizedBox(height: 12),
-              OutlinedButton.icon(
+              _addSetButton(
                 key: TutorialTargets.workoutAddSetKey,
+                busy: _addingSupersetGroupId != null &&
+                    _addingSupersetGroupId == members.first.supersetGroupId,
                 onPressed: () => _addSetToSuperset(displayWorkout, members),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.addSet),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  side: BorderSide(color: context.accentColor),
-                  foregroundColor: context.accentColor,
-                ),
+                label: l10n.addSet,
               ),
             ],
           ),
@@ -2502,10 +2509,45 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     List<WorkoutExercise> members,
   ) async {
     if (SupersetGroups.roundCount(members) >= SupersetGroups.maxRounds) return;
-    await _setSupersetRounds(
-      workout,
-      members,
-      SupersetGroups.roundCount(members) + 1,
+    final groupId = members.first.supersetGroupId;
+    if (groupId == null || _addingSupersetGroupId != null) return;
+    setState(() => _addingSupersetGroupId = groupId);
+    try {
+      await _setSupersetRounds(
+        workout,
+        members,
+        SupersetGroups.roundCount(members) + 1,
+      );
+    } finally {
+      if (mounted) setState(() => _addingSupersetGroupId = null);
+    }
+  }
+
+  Widget _addSetButton({
+    required bool busy,
+    required VoidCallback onPressed,
+    required String label,
+    Key? key,
+  }) {
+    final accent = context.accentColor;
+    return OutlinedButton.icon(
+      key: key,
+      onPressed: busy ? null : onPressed,
+      icon: busy
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: accent),
+            )
+          : const Icon(Icons.add),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        foregroundColor: accent,
+        disabledForegroundColor: accent,
+      ).copyWith(
+        side: WidgetStateProperty.all(BorderSide(color: accent)),
+      ),
     );
   }
 
@@ -2885,6 +2927,24 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
   }
 
   Future<void> _addSet(Workout workout, WorkoutExercise exercise) async {
+    if (_addingSetExerciseIds.contains(exercise.id)) return;
+    setState(() => _addingSetExerciseIds.add(exercise.id));
+    try {
+      await _insertSet(workout, exercise);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorGeneric('$e'))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _addingSetExerciseIds.remove(exercise.id));
+      }
+    }
+  }
+
+  Future<void> _insertSet(Workout workout, WorkoutExercise exercise) async {
     final sorted = _sortedSets(exercise);
     final previous =
         await ref.read(workoutServiceProvider).getPreviousSetsForExercise(

@@ -96,11 +96,7 @@ Future<void> showRoutineStartChoices(
   );
 }
 
-Future<void> showTrainStartSheet(
-  BuildContext context,
-  WidgetRef ref, {
-  required AsyncValue<List<Routine>> routinesAsync,
-}) {
+Future<void> showTrainStartSheet(BuildContext context) {
   final l10n = context.l10n;
 
   return showModalBottomSheet<void>(
@@ -111,84 +107,88 @@ Future<void> showTrainStartSheet(
     ),
     builder: (ctx) {
       final maxHeight = MediaQuery.sizeOf(ctx).height * 0.85;
-      return Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(Icons.history, color: context.accentColor),
-                  title: Text(l10n.logPastWorkout),
-                  subtitle: Text(l10n.logPastWorkoutSubtitle),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    showLogPastStartSheet(context, ref, routinesAsync: routinesAsync);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.flash_on, color: context.accentColor),
-                  title: Text(l10n.freeWorkout),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    await startWorkoutAndNavigate(
-                      context,
-                      ref,
-                      name: l10n.freeWorkout,
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                Flexible(
-                  child: routinesAsync.when(
-                    data: (routines) {
-                      if (routines.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            l10n.noRoutines,
-                            style: const TextStyle(color: AppColors.textMuted),
-                          ),
+      return Consumer(
+        builder: (ctx, ref, _) {
+          final routinesAsync = ref.watch(routinesProvider);
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.history, color: context.accentColor),
+                      title: Text(l10n.logPastWorkout),
+                      subtitle: Text(l10n.logPastWorkoutSubtitle),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        showLogPastStartSheet(context);
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: Icon(Icons.flash_on, color: context.accentColor),
+                      title: Text(l10n.freeWorkout),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await startWorkoutAndNavigate(
+                          context,
+                          ref,
+                          name: l10n.freeWorkout,
                         );
-                      }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: routines.length,
-                        itemBuilder: (context, index) {
-                          final routine = routines[index];
-                          return ListTile(
-                            leading: const Icon(Icons.list_alt),
-                            title: Text(routine.name),
-                            subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
-                            onTap: () async {
-                              Navigator.pop(ctx);
-                              await startWorkoutFromRoutine(context, ref, routine);
+                      },
+                    ),
+                    const Divider(height: 1),
+                    Flexible(
+                      child: routinesAsync.when(
+                        data: (routines) {
+                          if (routines.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(
+                                l10n.noRoutines,
+                                style: const TextStyle(color: AppColors.textMuted),
+                              ),
+                            );
+                          }
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: routines.length,
+                            itemBuilder: (context, index) {
+                              final routine = routines[index];
+                              return ListTile(
+                                leading: const Icon(Icons.list_alt),
+                                title: Text(routine.name),
+                                subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
+                                onTap: () async {
+                                  Navigator.pop(ctx);
+                                  await startWorkoutFromRoutine(context, ref, routine);
+                                },
+                              );
                             },
                           );
                         },
-                      );
-                    },
-                    loading: () => ListTile(title: Text(l10n.loadingRoutines)),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 28),
+                          child: Center(child: FitForgeLoadingIndicator(size: 48)),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       );
     },
   );
 }
 
-Future<void> showLogPastStartSheet(
-  BuildContext context,
-  WidgetRef ref, {
-  required AsyncValue<List<Routine>> routinesAsync,
-}) {
+Future<void> showLogPastStartSheet(BuildContext context) {
   final l10n = context.l10n;
 
   return showModalBottomSheet<void>(
@@ -199,86 +199,94 @@ Future<void> showLogPastStartSheet(
     ),
     builder: (ctx) {
       final maxHeight = MediaQuery.sizeOf(ctx).height * 0.85;
-      return Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      l10n.logPastWorkout,
-                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+      return Consumer(
+        builder: (ctx, ref, _) {
+          final routinesAsync = ref.watch(routinesProvider);
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          l10n.logPastWorkout,
+                          style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.flash_on, color: context.accentColor),
-                  title: Text(l10n.logPastFreeWorkout),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    if (!context.mounted) return;
-                    await openLogPastWorkout(
-                      context,
-                      ref,
-                      name: l10n.freeWorkout,
-                      exercises: const [],
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                Flexible(
-                  child: routinesAsync.when(
-                    data: (routines) {
-                      final gymRoutines = routines.where(_isGymRoutine).toList();
-                      if (gymRoutines.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            l10n.logPastNoGymRoutines,
-                            style: const TextStyle(color: AppColors.textMuted),
-                          ),
+                    ListTile(
+                      leading: Icon(Icons.flash_on, color: context.accentColor),
+                      title: Text(l10n.logPastFreeWorkout),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        if (!context.mounted) return;
+                        await openLogPastWorkout(
+                          context,
+                          ref,
+                          name: l10n.freeWorkout,
+                          exercises: const [],
                         );
-                      }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: gymRoutines.length,
-                        itemBuilder: (_, index) {
-                          final routine = gymRoutines[index];
-                          return ListTile(
-                            leading: const Icon(Icons.list_alt),
-                            title: Text(routine.name),
-                            subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
-                            onTap: () async {
-                              Navigator.pop(ctx);
-                              if (!context.mounted) return;
-                              await openLogPastWorkout(
-                                context,
-                                ref,
-                                name: routine.name,
-                                routineId: routine.id,
-                                exercises: workoutExercisesFromRoutine(routine),
+                      },
+                    ),
+                    const Divider(height: 1),
+                    Flexible(
+                      child: routinesAsync.when(
+                        data: (routines) {
+                          final gymRoutines = routines.where(_isGymRoutine).toList();
+                          if (gymRoutines.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(
+                                l10n.logPastNoGymRoutines,
+                                style: const TextStyle(color: AppColors.textMuted),
+                              ),
+                            );
+                          }
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: gymRoutines.length,
+                            itemBuilder: (_, index) {
+                              final routine = gymRoutines[index];
+                              return ListTile(
+                                leading: const Icon(Icons.list_alt),
+                                title: Text(routine.name),
+                                subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
+                                onTap: () async {
+                                  Navigator.pop(ctx);
+                                  if (!context.mounted) return;
+                                  await openLogPastWorkout(
+                                    context,
+                                    ref,
+                                    name: routine.name,
+                                    routineId: routine.id,
+                                    exercises: workoutExercisesFromRoutine(routine),
+                                  );
+                                },
                               );
                             },
                           );
                         },
-                      );
-                    },
-                    loading: () => ListTile(title: Text(l10n.loadingRoutines)),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 28),
+                          child: Center(child: FitForgeLoadingIndicator(size: 48)),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       );
     },
   );

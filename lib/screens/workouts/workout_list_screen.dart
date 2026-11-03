@@ -47,6 +47,7 @@ class WorkoutTodayTab extends ConsumerWidget {
     }
 
     final bottomPad = MediaQuery.paddingOf(context).bottom;
+    final routinesReady = routinesAsync.hasValue || routinesAsync.hasError;
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -64,14 +65,16 @@ class WorkoutTodayTab extends ConsumerWidget {
               return TrainHeroCard(
                 stats: statsAsync.valueOrNull,
                 isLoading: statsAsync.isLoading,
-                onStartWorkout: () => showTrainStartSheet(context, ref, routinesAsync: routinesAsync),
+                canStartWorkout: routinesReady,
+                onStartWorkout: () => showTrainStartSheet(context),
               );
             },
             loading: () => _HeroSkeleton(),
             error: (_, __) => TrainHeroCard(
               stats: statsAsync.valueOrNull,
               isLoading: statsAsync.isLoading,
-              onStartWorkout: () => showTrainStartSheet(context, ref, routinesAsync: routinesAsync),
+              canStartWorkout: routinesReady,
+              onStartWorkout: () => showTrainStartSheet(context),
             ),
           ),
           const SizedBox(height: 20),
