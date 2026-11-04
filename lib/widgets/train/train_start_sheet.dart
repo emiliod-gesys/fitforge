@@ -96,8 +96,9 @@ Future<void> showRoutineStartChoices(
   );
 }
 
-Future<void> showTrainStartSheet(BuildContext context) {
+Future<void> showTrainStartSheet(BuildContext context, WidgetRef ref) {
   final l10n = context.l10n;
+  final parentContext = context;
 
   return showModalBottomSheet<void>(
     context: context,
@@ -105,13 +106,13 @@ Future<void> showTrainStartSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (ctx) {
-      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.85;
+    builder: (sheetContext) {
+      final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.85;
       return Consumer(
-        builder: (ctx, ref, _) {
-          final routinesAsync = ref.watch(routinesProvider);
+        builder: (sheetContext, sheetRef, _) {
+          final routinesAsync = sheetRef.watch(routinesProvider);
           return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxHeight),
               child: SafeArea(
@@ -119,22 +120,23 @@ Future<void> showTrainStartSheet(BuildContext context) {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ListTile(
-                      leading: Icon(Icons.history, color: context.accentColor),
+                      leading: Icon(Icons.history, color: parentContext.accentColor),
                       title: Text(l10n.logPastWorkout),
                       subtitle: Text(l10n.logPastWorkoutSubtitle),
                       onTap: () {
-                        Navigator.pop(ctx);
-                        showLogPastStartSheet(context);
+                        Navigator.pop(sheetContext);
+                        showLogPastStartSheet(parentContext, ref);
                       },
                     ),
                     const Divider(height: 1),
                     ListTile(
-                      leading: Icon(Icons.flash_on, color: context.accentColor),
+                      leading: Icon(Icons.flash_on, color: parentContext.accentColor),
                       title: Text(l10n.freeWorkout),
                       onTap: () async {
-                        Navigator.pop(ctx);
+                        Navigator.pop(sheetContext);
+                        if (!parentContext.mounted) return;
                         await startWorkoutAndNavigate(
-                          context,
+                          parentContext,
                           ref,
                           name: l10n.freeWorkout,
                         );
@@ -156,15 +158,16 @@ Future<void> showTrainStartSheet(BuildContext context) {
                           return ListView.builder(
                             shrinkWrap: true,
                             itemCount: routines.length,
-                            itemBuilder: (context, index) {
+                            itemBuilder: (_, index) {
                               final routine = routines[index];
                               return ListTile(
                                 leading: const Icon(Icons.list_alt),
                                 title: Text(routine.name),
                                 subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
                                 onTap: () async {
-                                  Navigator.pop(ctx);
-                                  await startWorkoutFromRoutine(context, ref, routine);
+                                  Navigator.pop(sheetContext);
+                                  if (!parentContext.mounted) return;
+                                  await startWorkoutFromRoutine(parentContext, ref, routine);
                                 },
                               );
                             },
@@ -188,8 +191,9 @@ Future<void> showTrainStartSheet(BuildContext context) {
   );
 }
 
-Future<void> showLogPastStartSheet(BuildContext context) {
+Future<void> showLogPastStartSheet(BuildContext context, WidgetRef ref) {
   final l10n = context.l10n;
+  final parentContext = context;
 
   return showModalBottomSheet<void>(
     context: context,
@@ -197,13 +201,13 @@ Future<void> showLogPastStartSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (ctx) {
-      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.85;
+    builder: (sheetContext) {
+      final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.85;
       return Consumer(
-        builder: (ctx, ref, _) {
-          final routinesAsync = ref.watch(routinesProvider);
+        builder: (sheetContext, sheetRef, _) {
+          final routinesAsync = sheetRef.watch(routinesProvider);
           return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxHeight),
               child: SafeArea(
@@ -216,20 +220,20 @@ Future<void> showLogPastStartSheet(BuildContext context) {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           l10n.logPastWorkout,
-                          style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
                       ),
                     ),
                     ListTile(
-                      leading: Icon(Icons.flash_on, color: context.accentColor),
+                      leading: Icon(Icons.flash_on, color: parentContext.accentColor),
                       title: Text(l10n.logPastFreeWorkout),
                       onTap: () async {
-                        Navigator.pop(ctx);
-                        if (!context.mounted) return;
+                        Navigator.pop(sheetContext);
+                        if (!parentContext.mounted) return;
                         await openLogPastWorkout(
-                          context,
+                          parentContext,
                           ref,
                           name: l10n.freeWorkout,
                           exercises: const [],
@@ -260,10 +264,10 @@ Future<void> showLogPastStartSheet(BuildContext context) {
                                 title: Text(routine.name),
                                 subtitle: Text(l10n.exercisesInRoutine(routine.exercises.length)),
                                 onTap: () async {
-                                  Navigator.pop(ctx);
-                                  if (!context.mounted) return;
+                                  Navigator.pop(sheetContext);
+                                  if (!parentContext.mounted) return;
                                   await openLogPastWorkout(
-                                    context,
+                                    parentContext,
                                     ref,
                                     name: routine.name,
                                     routineId: routine.id,

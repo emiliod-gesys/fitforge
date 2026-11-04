@@ -66,7 +66,7 @@ class WorkoutTodayTab extends ConsumerWidget {
                 stats: statsAsync.valueOrNull,
                 isLoading: statsAsync.isLoading,
                 canStartWorkout: routinesReady,
-                onStartWorkout: () => showTrainStartSheet(context),
+                onStartWorkout: () => showTrainStartSheet(context, ref),
               );
             },
             loading: () => _HeroSkeleton(),
@@ -74,7 +74,7 @@ class WorkoutTodayTab extends ConsumerWidget {
               stats: statsAsync.valueOrNull,
               isLoading: statsAsync.isLoading,
               canStartWorkout: routinesReady,
-              onStartWorkout: () => showTrainStartSheet(context),
+              onStartWorkout: () => showTrainStartSheet(context, ref),
             ),
           ),
           const SizedBox(height: 20),
