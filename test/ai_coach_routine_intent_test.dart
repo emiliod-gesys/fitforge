@@ -18,6 +18,77 @@ void main() {
       expect(AiCoachService.isRoutineSaveIntent('crea una rutina de piernas'), isFalse);
     });
 
+    test('voz arma la rutina y no la lee', () {
+      expect(AiCoachService.voiceShouldBuildRoutine('piernas'), isTrue);
+      expect(AiCoachService.voiceShouldBuildRoutine('pecho y triceps'), isTrue);
+      expect(AiCoachService.voiceShouldBuildRoutine('recomiendame espalda'), isTrue);
+      expect(AiCoachService.voiceShouldBuildRoutine('día de hombros'), isTrue);
+      expect(AiCoachService.voiceShouldBuildRoutine('hoy toca gluteos'), isTrue);
+      expect(AiCoachService.voiceShouldBuildRoutine('qué puedo almorzar'), isFalse);
+      expect(AiCoachService.voiceShouldBuildRoutine('me duele el hombro'), isFalse);
+      expect(AiCoachService.voiceShouldBuildRoutine('cómo va mi rutina'), isFalse);
+      expect(AiCoachService.voiceShouldBuildRoutine('cuál es mi record de pecho'), isFalse);
+      expect(AiCoachService.voiceShouldBuildRoutine('cómo hago press de pecho'), isFalse);
+      expect(
+        AiCoachService.voiceShouldBuildRoutine(
+          'agrega un ejercicio de pecho superior',
+        ),
+        isFalse,
+      );
+      expect(
+        AiCoachService.voiceShouldBuildRoutine(
+          'agrega un ejercicio de pecho superior al entrenamiento',
+        ),
+        isFalse,
+      );
+      expect(
+        AiCoachService.parseTargetMuscles(
+          'agrega un ejercicio de pecho superior',
+        ),
+        ['Pecho'],
+      );
+      expect(AiCoachService.isRoutineCreationRequest('cómo va mi entrenamiento'), isFalse);
+      expect(AiCoachService.shouldGenerateStructuredRoutine('cómo va mi entrenamiento'), isFalse);
+    });
+
+    test('una rutina escrita no se muestra como texto', () {
+      const written = '''
+Para pecho:
+1. Press banca - 4 series de 8 repeticiones
+2. Press inclinado - 3 series de 10
+3. Aperturas - 3 series de 12
+''';
+      expect(AiCoachService.looksLikeWrittenRoutine(written), isTrue);
+      expect(
+        AiCoachService.looksLikeWrittenRoutine('Haz 4 series de 8 en sentadilla.'),
+        isFalse,
+      );
+      expect(
+        AiCoachService.looksLikeWrittenRoutine('1. Pollo\n2. Arroz\n3. Ensalada'),
+        isFalse,
+      );
+    });
+
+    test('piernas completas es una rutina', () {
+      expect(AiCoachService.isRoutineCreationRequest('piernas completas'), isTrue);
+      expect(AiCoachService.isRoutineCreationRequest('rutina completa de piernas'), isTrue);
+      expect(
+        AiCoachService.parseTargetMuscles('una rutina de piernas completas'),
+        containsAll(['Piernas', 'Glúteos']),
+      );
+    });
+
+    test('hombros con brazos o abdomen incluye cada grupo', () {
+      expect(
+        AiCoachService.parseTargetMuscles('Crea una rutina de hombros y brazos'),
+        containsAll(['Hombros', 'Bíceps', 'Tríceps']),
+      );
+      expect(
+        AiCoachService.parseTargetMuscles('hombros y abdomen'),
+        containsAll(['Hombros', 'Abdominales']),
+      );
+    });
+
     test('rutina de musculos concretos', () {
       expect(
         AiCoachService.isRoutineCreationRequest('rutina de biceps y triceps'),
@@ -116,6 +187,30 @@ void main() {
       final instruction = AiCoachService.languageInstruction('es');
       expect(instruction, contains('español'));
       expect(instruction, contains('inglés'));
+    });
+  });
+
+  group('spoken routine json', () {
+    test('spanish keys become a routine instead of raw json', () {
+      const answer = '''
+Para un entrenamiento de piernas completo, aquí tienes una rutina estructurada.
+json
+{
+  "nombre": "Piernas Completas",
+  "ejercicios": [
+    {"nombre": "Sentadilla", "series": 4, "repeticiones": 8},
+    {"nombre": "Peso muerto rumano", "series": 3, "repeticiones": 10}
+  ]
+}
+''';
+      final routine = AiCoachService.parseSpokenRoutine(answer, targetMuscles: const ['Piernas']);
+      expect(routine?.name, 'Piernas Completas');
+      expect(routine?.exercises.map((exercise) => exercise.exerciseName), [
+        'Sentadilla',
+        'Peso muerto rumano',
+      ]);
+      expect(AiCoachService.withoutRoutineJson(answer), isNot(contains('{')));
+      expect(AiCoachService.withoutRoutineJson(answer), isNot(contains('ejercicios')));
     });
   });
 

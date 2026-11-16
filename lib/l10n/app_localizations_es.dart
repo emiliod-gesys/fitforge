@@ -952,6 +952,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proactiveAiEnableConfirm => 'Activar';
 
   @override
+  String get voiceAssistant => 'Asistente de voz';
+
+  @override
+  String get voiceAssistantDescription =>
+      'Escucha «Hey Forgen» mientras la app está abierta';
+
+  @override
+  String get voiceAssistantIntroTitle =>
+      'Qué puede hacer Forgen por voz (BETA)';
+
+  @override
+  String get voiceAssistantIntroBody =>
+      'Con la app abierta di «Hey Forgen» y luego la orden.\n\n• Crear una rutina: «crea una rutina de hombros y brazos».\n• En un entrenamiento, agregar un ejercicio: «agrega curl de bíceps con mancuernas».\n• Con el ejercicio abierto, registrar una serie: «registra 60 libras y 12 reps».\n• Agregar o quitar series: «agrega una serie» o «quita la última serie».\n• Cambiar el descanso: «descanso de 90 segundos».\n• Preguntar cómo vas de comida o cuál es tu récord.\n\nEl micrófono sigue escuchando hasta que apagues esta opción.';
+
+  @override
+  String get voiceAssistantIntroClose => 'Entendido';
+
+  @override
   String get aiCalculatingWorkoutSuggestions => 'Calculando sugerencias de IA…';
 
   @override
@@ -4748,6 +4766,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingPlanBenefitPro4 => 'Modo entrenador (alumnos)';
+
+  @override
+  String get onboardingPlanBenefitPro5 => 'Asistente de voz Hey Forgen';
 
   @override
   String get onboardingPlanPaidSoon =>

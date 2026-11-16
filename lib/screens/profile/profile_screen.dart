@@ -778,12 +778,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final accent = ref.watch(accentProvider);
     final proactiveEnabled =
         ref.watch(aiProactiveEnabledProvider).valueOrNull ?? false;
+    final voiceEnabled =
+        ref.watch(voiceAssistantEnabledProvider).valueOrNull ?? false;
     return ListView(
       padding: AppTokens.pagePaddingWithBottomInset(context),
       children: [
         FfSurface(
           child: Column(
             children: [
+              _voiceAssistantTile(profile, voiceEnabled),
               _proactiveAiTile(profile, proactiveEnabled),
               FfListRow(
                 icon: Icons.auto_awesome,
@@ -824,6 +827,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
         const SizedBox(height: AppTokens.space24),
       ],
+    );
+  }
+
+  Widget _voiceAssistantTile(UserProfile? profile, bool enabled) {
+    final l10n = context.l10n;
+    final canUse = profile?.canUseVoiceAssistant ?? false;
+    final tile = SwitchListTile(
+      secondary: Icon(
+        Icons.mic_none,
+        color: canUse ? context.accentColor : AppColors.textMuted,
+      ),
+      title: Row(
+        children: [
+          Flexible(
+            child: Text(
+              l10n.voiceAssistant,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'BETA',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: canUse ? context.accentColor : AppColors.textMuted,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
+          ),
+        ],
+      ),
+      subtitle: Text(l10n.voiceAssistantDescription),
+      value: canUse && enabled,
+      activeThumbColor: context.accentColor,
+      onChanged: canUse
+          ? (value) => _setVoiceAssistant(
+                enabled: value,
+                currentlyEnabled: enabled,
+                explain: value,
+              )
+          : null,
+    );
+    if (canUse) return tile;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => PlanUpgrade.openPlan(context),
+      child: IgnorePointer(child: tile),
     );
   }
 
@@ -1317,6 +1366,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     await AiPreferences.setProactiveAiEnabled(enabled);
     ref.invalidate(aiProactiveEnabledProvider);
+  }
+
+  Future<void> _setVoiceAssistant({
+    required bool enabled,
+    required bool currentlyEnabled,
+    bool explain = false,
+  }) async {
+    if (enabled == currentlyEnabled) return;
+    await AiPreferences.setVoiceAssistantEnabled(enabled);
+    ref.invalidate(voiceAssistantEnabledProvider);
+    if (!explain || !mounted) return;
+    final l10n = context.l10n;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.voiceAssistantIntroTitle),
+        content: SingleChildScrollView(
+          child: Text(l10n.voiceAssistantIntroBody),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.voiceAssistantIntroClose),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _setHyroxMode({

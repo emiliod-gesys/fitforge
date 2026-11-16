@@ -12,6 +12,7 @@ import '../core/utils/gym_weight.dart';
 import '../core/utils/proactive_workout_ai_rules.dart';
 import '../core/utils/unit_converter.dart';
 import '../core/utils/workout_streak.dart';
+import '../core/voice/voice_command.dart';
 import '../core/utils/workout_suggestion_context.dart';
 import '../models/body_metric.dart';
 import '../models/coach_chat_turn.dart';
@@ -193,8 +194,63 @@ class AiCoachService {
     return message.toLowerCase().replaceAll(RegExp(r'\bretina\b'), 'rutina').replaceAll(RegExp(r'\brutna\b'), 'rutina');
   }
 
+  static bool isTrainingStatusQuestion(String message) {
+    final m = _fold(_normalizeRoutineTypos(message));
+    return RegExp(
+      r'\b(como va|como voy|como me fue|how am i|how did|que tal (mi|el|la)|how is my)\b',
+    ).hasMatch(m);
+  }
+
+  /// La voz debe abrir el editor, no leer una rutina escrita.
+  static bool voiceShouldBuildRoutine(String message) {
+    if (isRoutineSaveIntent(message)) return false;
+    if (isTrainingStatusQuestion(message)) return false;
+    if (voiceWantsExerciseAdded(message)) return false;
+    final folded = _fold(_normalizeRoutineTypos(message));
+    if (RegExp(r'\b(duele|dolor|lesion|lesionado|injury|hurt|pain)\b').hasMatch(folded)) {
+      return false;
+    }
+    if (RegExp(r'\b(record|mi mejor|personal record)\b').hasMatch(folded)) return false;
+    final aboutFood = RegExp(
+      r'\b(almuerzo|desayuno|cena|snack|proteina|protein|caloria|calorie|macros?|comida)\b',
+    ).hasMatch(folded);
+    final aboutRoutine = RegExp(r'rutin|workout|routine|entrenamiento').hasMatch(folded);
+    if (aboutFood && !aboutRoutine) return false;
+    if (isRoutineCreationRequest(message) || shouldGenerateStructuredRoutine(message)) {
+      return true;
+    }
+    final asksHow = RegExp(r'^(como|how|why|por que|porque)\b').hasMatch(folded.trim());
+    if (asksHow && !aboutRoutine) return false;
+    if (RegExp(r'\b(tecnica|technique)\b').hasMatch(folded)) return false;
+    return parseTargetMuscles(message).isNotEmpty;
+  }
+
+  /// Respuesta del modelo que ya es una rutina escrita (series, reps, listas).
+  static bool looksLikeWrittenRoutine(String text) {
+    final folded = _fold(text);
+    final dose = RegExp(r'\b\d+\s*[x×]\s*\d+\b').allMatches(folded).length;
+    final series = RegExp(r'\b\d+\s*(series|serie|sets)\b').allMatches(folded).length;
+    final reps = RegExp(r'\b\d+\s*(reps|repeticiones|repeticion|rep)\b').allMatches(folded).length;
+    if (dose >= 2 || series >= 2) return true;
+    final numbered = RegExp(r'(^|\n)\s*(\d+[\.\)]|[-•])\s+\S').allMatches(text).length;
+    return numbered >= 3 && (series >= 1 || dose >= 1 || reps >= 1 || folded.contains('ejercicio'));
+  }
+
+  static String _fold(String message) {
+    return message
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('ñ', 'n');
+  }
+
   static bool isRoutineCreationRequest(String message) {
     if (isRoutineSaveIntent(message)) return false;
+    if (isTrainingStatusQuestion(message)) return false;
 
     final m = _normalizeRoutineTypos(message);
     const triggers = [
@@ -228,7 +284,25 @@ class AiCoachService {
 
     if (triggers.any(m.contains)) return true;
 
-    if (RegExp(r'rutin\w*\s+(de|para)\b').hasMatch(m)) return true;
+    final fullLegs = (m.contains('pierna') || RegExp(r'\blegs?\b').hasMatch(m)) &&
+        (m.contains('completa') || m.contains('completo') || m.contains('full'));
+    if (fullLegs || m.contains('dia de piernas') || m.contains('día de piernas') || m.contains('leg day')) {
+      return true;
+    }
+
+    final folded = _fold(m);
+    if (RegExp(r'\bdia de\b').hasMatch(folded) && parseTargetMuscles(message).isNotEmpty) {
+      return true;
+    }
+    if (RegExp(r'\btoca\b').hasMatch(folded) && parseTargetMuscles(message).isNotEmpty) {
+      return true;
+    }
+    if (RegExp(r'\b(recomiend\w*|recomend\w*|sugier\w*|aconsej\w*|pasame)\b').hasMatch(folded) &&
+        (parseTargetMuscles(message).isNotEmpty || RegExp(r'rutin').hasMatch(folded))) {
+      return true;
+    }
+
+    if (RegExp(r'rutin\w*\s+(de|para|completa|completo)\b').hasMatch(m)) return true;
 
     if (RegExp(r'entrenamiento\s+(de|para)\b').hasMatch(m)) return true;
 
@@ -267,6 +341,7 @@ class AiCoachService {
   /// Petición de rutina que debe resolverse con JSON estructurado (preview guardable).
   static bool shouldGenerateStructuredRoutine(String message) {
     if (isRoutineSaveIntent(message)) return false;
+    if (isTrainingStatusQuestion(message)) return false;
     if (isRoutineCreationRequest(message)) return true;
 
     final m = _normalizeRoutineTypos(message);
@@ -324,6 +399,9 @@ REGLAS OBLIGATORIAS:
     if (m.contains('tren inferior') || m.contains('parte inferior') || m.contains('lower body') || m.contains('leg day') || m.contains('día de piernas') || m.contains('dia de piernas')) {
       found.addAll(['Piernas', 'Glúteos']);
     }
+    final fullLegs = (m.contains('pierna') || m.contains('leg')) &&
+        (m.contains('completa') || m.contains('completo') || m.contains('full'));
+    if (fullLegs) found.addAll(['Piernas', 'Glúteos']);
     if (m.contains('push day') || (m.contains('push') && !m.contains('pull'))) {
       found.addAll(['Pecho', 'Hombros', 'Tríceps']);
     }
@@ -355,6 +433,8 @@ REGLAS OBLIGATORIAS:
       'abdominales': 'Abdominales',
       'core': 'Abdominales',
       'antebrazo': 'Antebrazos',
+      'abdomen': 'Abdominales',
+      'abs': 'Abdominales',
       'cardio': 'Cardio',
       'full body': 'Pecho',
       'cuerpo completo': 'Pecho',
@@ -362,6 +442,11 @@ REGLAS OBLIGATORIAS:
 
     for (final entry in keywords.entries) {
       if (m.contains(entry.key)) found.add(entry.value);
+    }
+
+    final folded = _fold(m);
+    if (RegExp(r'\b(brazos|brazo|arms|arm)\b').hasMatch(folded)) {
+      found.addAll(['Bíceps', 'Tríceps']);
     }
 
     return found.toList();
@@ -435,13 +520,19 @@ REGLAS OBLIGATORIAS:
     if (normalized == 'en') {
       return 'ONLY answer questions related to fitness: training, exercise technique, '
           'workout programming, sports nutrition, recovery, physical health tied to exercise, '
-          'and using FORGEN. Politely decline off-topic requests (general knowledge, coding, '
-          'politics, homework, etc.) and offer to help with fitness instead.';
+          'and using FORGEN. Meals are fitness: breakfast, lunch, dinner, snacks, and what '
+          'they can eat today must be answered from their calories, protein, goal, and '
+          "today's intake. Never decline those or say you cannot help. Politely decline "
+          'off-topic requests (general knowledge, coding, politics, homework, etc.) and '
+          'offer to help with fitness instead.';
     }
     return 'Responde ÚNICAMENTE preguntas relacionadas con fitness: entrenamiento, técnica de '
         'ejercicios, programación de rutinas, nutrición deportiva, recuperación, salud física '
-        'vinculada al ejercicio y uso de FORGEN. Rechaza amablemente temas ajenos (cultura '
-        'general, programación, política, deberes, etc.) y ofrece ayuda con fitness.';
+        'vinculada al ejercicio y uso de FORGEN. Las comidas son fitness: desayuno, almuerzo, '
+        'comida, cena, snacks y qué puede comer hoy se responden con sus calorías, proteína, '
+        'objetivo e ingesta de hoy. Nunca las rechaces ni digas que no puedes ayudar. Rechaza '
+        'amablemente temas ajenos (cultura general, programación, política, deberes, etc.) y '
+        'ofrece ayuda con fitness.';
   }
 
   static String _resolveLanguageCode({
@@ -495,6 +586,7 @@ El bloque ANCLAJE OBLIGATORIO al inicio del contexto es la fuente de verdad del 
 Si el usuario pregunta cómo le fue, qué hacer hoy o cómo va de nutrición, ancla la respuesta ahí. Si no hay último entreno o no hay comidas hoy, dilo explícitamente; nunca inventes series, RIR, kcal ni macros.
 La ingesta del día se actualiza en tiempo real; también tienes el historial nutricional de los últimos 7 días.
 Usa esa información para personalizar ejercicios, volumen, series, reps, progresión y consejos de nutrición (macros, timing pre/post entreno, déficit/superávit) según su propósito y estado actual.
+Si preguntan qué pueden desayunar, almorzar, cenar o picar, responde con ideas concretas usando las kcal y la proteína que les faltan hoy. Es nutrición deportiva: no digas que no puedes ayudar.
 Basándote en el historial del usuario y en el hilo de esta conversación, recomienda ejercicios, rutinas, pesos, series y reps.
 Mantén coherencia con lo que ya recomendaste en mensajes anteriores de este chat.
 El usuario usa $weightUnit para pesos. Si sugieres pesos, exprésalos en $weightUnit con progresión gradual ($progressionHint).
@@ -546,6 +638,22 @@ $context
       catalog: catalog,
       userMessage: userMessage,
     );
+    final equipment = AiCoachRoutinePrompt.parseAvailableEquipment(userMessage);
+    final focused = AiCoachRoutinePrompt.matchingExercises(
+      catalog: preparedCatalog,
+      equipment: equipment,
+      muscles: targetMuscles,
+    );
+    if (focused.length >= 2) {
+      return AiCoachRoutinePrompt.routineFromExercises(
+        exercises: focused,
+        muscles: targetMuscles,
+        equipment: equipment,
+        languageCode: lang,
+        userId: profile?.id ?? '',
+        frequent: AiCoachRoutinePrompt.exerciseFrequency(recentWorkouts ?? const []),
+      );
+    }
     final aiCatalog = AiRoutineSanitizer.catalogForAi(preparedCatalog);
     final names = AiRoutineSanitizer.namesForMuscles(aiCatalog, targetMuscles);
     final equipmentSection = AiCoachRoutinePrompt.buildEquipmentSection(
@@ -1015,7 +1123,32 @@ $_routineRules
     return content.first['text'] as String;
   }
 
-  Routine? _parseRoutineJson(
+  static Routine? parseSpokenRoutine(
+    String response, {
+    List<String> targetMuscles = const [],
+    UserProfile? profile,
+  }) {
+    return _parseRoutineJson(response, targetMuscles: targetMuscles, profile: profile);
+  }
+
+  static bool containsRoutineJson(String response) {
+    final lower = response.toLowerCase();
+    return lower.contains('{') &&
+        (lower.contains('"exercises"') ||
+            lower.contains('"ejercicios"') ||
+            lower.contains('"nombre"'));
+  }
+
+  static String withoutRoutineJson(String response) {
+    final withoutFence = response.replaceAll(RegExp(r'```json|```', caseSensitive: false), '');
+    final start = withoutFence.indexOf('{');
+    final head = (start < 0 ? withoutFence : withoutFence.substring(0, start))
+        .replaceAll(RegExp(r'\bjson\b', caseSensitive: false), '')
+        .trim();
+    return head;
+  }
+
+  static Routine? _parseRoutineJson(
     String response, {
     required List<String> targetMuscles,
     UserProfile? profile,
@@ -1026,8 +1159,13 @@ $_routineRules
       final end = cleaned.lastIndexOf('}');
       if (start < 0 || end <= start) return null;
 
-      final json = jsonDecode(cleaned.substring(start, end + 1)) as Map<String, dynamic>;
-      return _parseRoutineFromMap(json, targetMuscles: targetMuscles, profile: profile);
+      final decoded = jsonDecode(cleaned.substring(start, end + 1));
+      if (decoded is! Map) return null;
+      return _parseRoutineFromMap(
+        Map<String, dynamic>.from(decoded),
+        targetMuscles: targetMuscles,
+        profile: profile,
+      );
     } catch (_) {
       return null;
     }
@@ -1086,47 +1224,69 @@ $_routineRules
     return routines;
   }
 
-  Routine? _parseRoutineFromMap(
+  static Routine? _parseRoutineFromMap(
     Map<String, dynamic> json, {
     required List<String> targetMuscles,
     UserProfile? profile,
   }) {
     try {
-      final parsedMuscles = (json['target_muscles'] as List?)?.map((m) => m.toString()).where((m) => m.isNotEmpty).toList() ?? targetMuscles;
+      final muscleValue = _jsonValue(json, const ['target_muscles', 'musculos', 'músculos']);
+      final parsedMuscles = muscleValue is List
+          ? muscleValue.map((muscle) => muscle.toString()).where((muscle) => muscle.isNotEmpty).toList()
+          : targetMuscles;
+      final rawExercises = _jsonValue(json, const ['exercises', 'ejercicios']);
+      if (rawExercises is! List) return null;
 
-      final exercises = (json['exercises'] as List? ?? []).asMap().entries.map((e) {
-        final ex = e.value as Map<String, dynamic>;
-        final loggingType = ExerciseLoggingType.fromJson(ex['logging_type'] as String?);
-        final isCardio = loggingType == ExerciseLoggingType.cardio;
-        return RoutineExercise(
-          id: '',
-          exerciseId: ex['name'] as String? ?? '',
-          exerciseName: ex['name'] as String? ?? '',
-          orderIndex: e.key,
-          targetSets: ex['sets'] as int? ?? AppConstants.defaultSets,
-          targetReps: isCardio ? 0 : (ex['reps'] as int? ?? AppConstants.defaultReps),
-          targetWeight: isCardio
-              ? null
-              : GymWeight.snapKgOrNull(
-                  (ex['weight_kg'] as num?)?.toDouble(),
-                  profile?.unitSystem ?? 'kg',
-                ),
-          restSeconds: isCardio ? 0 : (ex['rest_seconds'] as int? ?? AppConstants.defaultRestSeconds),
-          loggingType: loggingType,
-          targetDurationSeconds: ex['duration_seconds'] as int?,
-          targetDistanceMeters: (ex['distance_meters'] as num?)?.toDouble(),
-          targetInclinePercent: (ex['incline_percent'] as num?)?.toDouble(),
-          targetSteps: ex['steps'] as int?,
+      final exercises = <RoutineExercise>[];
+      for (var i = 0; i < rawExercises.length; i++) {
+        final item = rawExercises[i];
+        if (item is! Map) continue;
+        final ex = Map<String, dynamic>.from(item);
+        final name = _jsonValue(ex, const ['name', 'nombre', 'ejercicio'])?.toString().trim() ?? '';
+        if (name.isEmpty) continue;
+        final loggingType = ExerciseLoggingType.fromJson(
+          _jsonValue(ex, const ['logging_type'])?.toString(),
         );
-      }).toList();
+        final isCardio = loggingType == ExerciseLoggingType.cardio;
+        final weight = _jsonValue(ex, const ['weight_kg', 'peso']);
+        exercises.add(
+          RoutineExercise(
+            id: '',
+            exerciseId: name,
+            exerciseName: name,
+            orderIndex: exercises.length,
+            targetSets: _jsonInt(_jsonValue(ex, const ['sets', 'series']), AppConstants.defaultSets),
+            targetReps: isCardio
+                ? 0
+                : _jsonInt(_jsonValue(ex, const ['reps', 'repeticiones']), AppConstants.defaultReps),
+            targetWeight: isCardio
+                ? null
+                : GymWeight.snapKgOrNull(
+                    weight is num ? weight.toDouble() : double.tryParse('$weight'),
+                    profile?.unitSystem ?? 'kg',
+                  ),
+            restSeconds: isCardio
+                ? 0
+                : _jsonInt(
+                    _jsonValue(ex, const ['rest_seconds', 'descanso', 'descanso_segundos']),
+                    AppConstants.defaultRestSeconds,
+                  ),
+            loggingType: loggingType,
+            targetDurationSeconds: _jsonInt(_jsonValue(ex, const ['duration_seconds']), 0) == 0
+                ? null
+                : _jsonInt(_jsonValue(ex, const ['duration_seconds']), 0),
+          ),
+        );
+      }
 
       if (exercises.isEmpty) return null;
+      final rawName = _jsonValue(json, const ['name', 'nombre'])?.toString().trim();
 
       return Routine(
         id: '',
         userId: profile?.id ?? '',
-        name: json['name'] as String? ?? 'Rutina IA',
-        description: json['description'] as String?,
+        name: rawName == null || rawName.isEmpty ? 'Rutina IA' : rawName,
+        description: _jsonValue(json, const ['description', 'descripcion', 'descripción'])?.toString(),
         targetMuscles: parsedMuscles,
         exercises: exercises,
         createdAt: DateTime.now(),
@@ -1136,6 +1296,20 @@ $_routineRules
     } catch (_) {
       return null;
     }
+  }
+
+  static Object? _jsonValue(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      if (json.containsKey(key) && json[key] != null) return json[key];
+    }
+    return null;
+  }
+
+  static int _jsonInt(Object? value, int fallback) {
+    if (value is int) return value;
+    if (value is num) return value.round();
+    if (value is String) return int.tryParse(value) ?? fallback;
+    return fallback;
   }
 
   List<String> _catalogNamesForMuscles(List<Exercise> catalog, List<String> targetMuscles) {
@@ -1402,6 +1576,7 @@ JSON:
             audioBytes: audioBytes,
             fileExtension: fileExtension,
             language: lang,
+            prompt: _foodWhisperPrompt(lang),
           );
         case AiProvider.gemini:
           final apiKey = await _profileService.getApiKey(AiProvider.gemini);
@@ -1411,6 +1586,7 @@ JSON:
             audioBytes: audioBytes,
             mimeType: mimeType,
             language: lang,
+            prompt: _foodGeminiPrompt(lang),
           );
         case AiProvider.anthropic:
           final openAiKey = await _profileService.getApiKey(AiProvider.openai) ?? AiSecrets.openAiDefaultKey;
@@ -1420,6 +1596,7 @@ JSON:
             audioBytes: audioBytes,
             fileExtension: fileExtension,
             language: lang,
+            prompt: _foodWhisperPrompt(lang),
           );
         case AiProvider.none:
           return null;
@@ -1447,11 +1624,91 @@ JSON:
     return estimateFoodFromText(query: query, profile: profile);
   }
 
+  /// Transcribe una frase corta del asistente, sin el sesgo de comida.
+  Future<String?> transcribeUtterance({
+    required List<int> audioBytes,
+    required UserProfile? profile,
+  }) {
+    final lang = _resolveLanguageCode(profile: profile);
+    final prompt = lang == 'en'
+        ? 'Hey Forgen. A short fitness command.'
+        : 'Hey Forgen. Una orden corta de entrenamiento.';
+    return _transcribeWithPrompt(
+      audioBytes: audioBytes,
+      mimeType: 'audio/wav',
+      fileExtension: 'wav',
+      profile: profile,
+      prompt: prompt,
+    );
+  }
+
+  Future<String?> _transcribeWithPrompt({
+    required List<int> audioBytes,
+    required String mimeType,
+    required String fileExtension,
+    required UserProfile? profile,
+    required String prompt,
+  }) async {
+    if (audioBytes.isEmpty) return null;
+    final lang = _resolveLanguageCode(profile: profile);
+    final provider = _profileService.resolveAiProvider(profile);
+    try {
+      switch (provider) {
+        case AiProvider.openai:
+          final apiKey = await _profileService.getApiKey(AiProvider.openai);
+          if (apiKey == null || apiKey.isEmpty) return null;
+          return _callOpenAIWhisper(
+            apiKey: apiKey,
+            audioBytes: audioBytes,
+            fileExtension: fileExtension,
+            language: lang,
+            prompt: prompt,
+          );
+        case AiProvider.gemini:
+          final apiKey = await _profileService.getApiKey(AiProvider.gemini);
+          if (apiKey == null || apiKey.isEmpty) return null;
+          return _callGeminiTranscribe(
+            apiKey: apiKey,
+            audioBytes: audioBytes,
+            mimeType: mimeType,
+            language: lang,
+            prompt: prompt,
+          );
+        case AiProvider.anthropic:
+          final openAiKey = await _profileService.getApiKey(AiProvider.openai) ??
+              AiSecrets.openAiDefaultKey;
+          if (openAiKey == null || openAiKey.isEmpty) return null;
+          return _callOpenAIWhisper(
+            apiKey: openAiKey,
+            audioBytes: audioBytes,
+            fileExtension: fileExtension,
+            language: lang,
+            prompt: prompt,
+          );
+        case AiProvider.none:
+          return null;
+      }
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _foodWhisperPrompt(String language) => language == 'en'
+      ? 'Food description with portions, grams, and ingredients.'
+      : 'Descripción de comida con porciones, gramos e ingredientes.';
+
+  String _foodGeminiPrompt(String language) => language == 'en'
+      ? 'Transcribe exactly what the speaker says about food they are eating, '
+          'including portions and grams if mentioned. Return ONLY the transcription.'
+      : 'Transcribe exactamente lo que dice sobre la comida que está comiendo, '
+          'incluyendo porciones y gramos si los menciona. Devuelve SOLO la transcripción.';
+
   Future<String?> _callOpenAIWhisper({
     required String apiKey,
     required List<int> audioBytes,
     required String fileExtension,
     required String language,
+    required String prompt,
   }) async {
     final request = http.MultipartRequest(
       'POST',
@@ -1460,7 +1717,7 @@ JSON:
     request.headers['Authorization'] = 'Bearer $apiKey';
     request.fields['model'] = 'whisper-1';
     request.fields['language'] = language == 'en' ? 'en' : 'es';
-    request.fields['prompt'] = language == 'en' ? 'Food description with portions, grams, and ingredients.' : 'Descripción de comida con porciones, gramos e ingredientes.';
+    request.fields['prompt'] = prompt;
     request.files.add(
       http.MultipartFile.fromBytes(
         'file',
@@ -1487,12 +1744,9 @@ JSON:
     required List<int> audioBytes,
     required String mimeType,
     required String language,
+    required String prompt,
   }) async {
-    final prompt = language == 'en'
-        ? 'Transcribe exactly what the speaker says about food they are eating, '
-            'including portions and grams if mentioned. Return ONLY the transcription.'
-        : 'Transcribe exactamente lo que dice sobre la comida que está comiendo, '
-            'incluyendo porciones y gramos si los menciona. Devuelve SOLO la transcripción.';
+    if (language.isEmpty && prompt.isEmpty) return null;
 
     final response = await http
         .post(

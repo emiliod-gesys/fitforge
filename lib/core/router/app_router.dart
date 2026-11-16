@@ -24,6 +24,7 @@ import '../../core/router/food_route_extra.dart';
 import '../../screens/food/food_screen.dart';
 import '../../screens/food/food_add_screen.dart';
 import '../../screens/food/food_detail_screen.dart';
+import '../../models/routine.dart';
 import '../../models/workout_summary.dart';
 import '../../models/food_entry.dart';
 import '../../screens/training/training_hub_screen.dart';
@@ -219,9 +220,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/routines/new',
-        builder: (_, state) => RoutineEditorScreen(
-          onboardingMode: state.uri.queryParameters['onboarding'] == '1',
-        ),
+        builder: (_, state) {
+          final extra = state.extra;
+          final fromVoice = state.uri.queryParameters['voice'] == '1';
+          final pending = ref.read(pendingVoiceRoutineProvider);
+          final draft = extra is Routine ? extra : (fromVoice ? pending : null);
+          return RoutineEditorScreen(
+            key: draft == null
+                ? null
+                : ValueKey(
+                    'routine-draft-${draft.exercises.map((item) => item.exerciseId).join('|')}',
+                  ),
+            onboardingMode: state.uri.queryParameters['onboarding'] == '1',
+            draft: draft,
+          );
+        },
       ),
       GoRoute(
         path: '/routines/smart',

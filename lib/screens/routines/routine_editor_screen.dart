@@ -33,12 +33,14 @@ class RoutineEditorScreen extends ConsumerStatefulWidget {
   final String? routineId;
   final String? studentId;
   final bool onboardingMode;
+  final Routine? draft;
 
   const RoutineEditorScreen({
     super.key,
     this.routineId,
     this.studentId,
     this.onboardingMode = false,
+    this.draft,
   });
 
   bool get isStudentRoutine => studentId != null && studentId!.isNotEmpty;
@@ -62,6 +64,15 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     if (widget.routineId != null) {
       _loadRoutine();
     } else {
+      final draft = widget.draft;
+      if (draft != null) {
+        _nameController.text = draft.name;
+        _descController.text = draft.description ?? '';
+        final sorted = [...draft.exercises]
+          ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+        _exercises.addAll(sorted);
+        _targetMuscles.addAll(draft.targetMuscles);
+      }
       _loading = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _seedTutorialExercisesIfNeeded();
@@ -156,6 +167,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
   void _seedTutorialExercisesIfNeeded() {
     if (!mounted || _seededTutorialExercises || widget.routineId != null) return;
+    if (widget.draft != null) return;
     if (_exercises.isNotEmpty) return;
     final tutorial = ref.read(tutorialControllerProvider);
     if (tutorial.activeTourId != TutorialCatalog.supersets) return;

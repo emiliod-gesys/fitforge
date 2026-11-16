@@ -20,6 +20,9 @@ extension SubscriptionFeatures on SubscriptionTier {
   /// Modo entrenador personal (pestaña Alumnos).
   bool get hasTrainerMode => this == SubscriptionTier.gymratPro;
 
+  /// «Hey Forgen» con la app abierta. Solo el plan, sin clave propia.
+  bool get hasVoiceAssistant => this == SubscriptionTier.gymratPro;
+
   /// Mensajes diarios del Coach IA con la IA incluida en el plan.
   /// `null` = ilimitado. Free con API propia también se trata como ilimitado.
   int? get coachDailyMessageLimit => switch (this) {
@@ -53,4 +56,7 @@ extension ProfileSubscriptionAccess on UserProfile {
 
   /// Código de barras (Gymrat / Gymrat Pro).
   bool get canUseFoodBarcode => subscriptionTier.hasFoodBarcode;
+
+  /// Asistente de voz. No se enciende con clave propia en el plan gratis.
+  bool get canUseVoiceAssistant => subscriptionTier.hasVoiceAssistant;
 }

@@ -187,6 +187,9 @@ abstract final class ExerciseLoad {
     // El nombre ya es a un brazo: el flag del catálogo cloud a veces viene en false.
     if (_isUnilateral(n: n)) return true;
 
+    // Encogimiento en palanca: cada lado tiene su propia carga.
+    if (_isLeverShrug(n)) return true;
+
     // dual_load = dos implementos (p. ej. mancuernas): el peso es por lado.
     if (exercise != null &&
         exercise.loadMode == ExerciseLoadMode.dualLoad &&
@@ -588,7 +591,20 @@ abstract final class ExerciseLoad {
 
   static bool _inferMachineByName(String name) {
     final n = _normalize(name);
-    return n.contains('maquina') || _hasWord(n, 'machine');
+    return n.contains('maquina') ||
+        _hasWord(n, 'machine') ||
+        _hasWord(n, 'lever') ||
+        n.contains('leverage') ||
+        n.contains('palanca');
+  }
+
+  /// Máquina de encogimientos con palanca: el peso se anota por lado.
+  static bool _isLeverShrug(String n) {
+    final isShrug = _hasWord(n, 'shrug') || n.contains('encogimiento');
+    if (!isShrug) return false;
+    return _hasWord(n, 'lever') ||
+        n.contains('leverage') ||
+        n.contains('palanca');
   }
 
   static bool _isMachineEquipment(String equipment) {

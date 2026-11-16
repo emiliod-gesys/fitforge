@@ -1519,21 +1519,39 @@ class WorkoutService {
       if (completedSets.isEmpty) continue;
 
       final strengthSets = completedSets.where((s) => !s.isCardio && s.weight != null).toList();
+      final previousMax = strengthSets.isEmpty
+          ? 0.0
+          : await _maxRecordedWeightKg(
+              userId: userId,
+              exerciseId: ex.exerciseId,
+            );
+      WorkoutSet? bestOneRmSet;
+      var bestOneRm = 0.0;
       for (final set in strengthSets) {
-        final oneRm = PersonalRecord.calculate1RM(set.weight!, set.reps);
+        final weight = set.weight!;
+        final oneRm = PersonalRecord.calculate1RM(weight, set.reps);
+        final improves = bestOneRmSet == null ||
+            oneRm > bestOneRm ||
+            (oneRm == bestOneRm && weight > bestOneRmSet.weight!);
+        if (!improves) continue;
+        bestOneRm = oneRm;
+        bestOneRmSet = set;
+      }
+      final bestSet = bestOneRmSet;
+      if (bestSet != null) {
         await _upsertPersonalRecord(
           userId: userId,
           exerciseId: ex.exerciseId,
           exerciseName: ex.exerciseName,
           recordType: PersonalRecordType.strength,
           payload: {
-            'weight': set.weight,
-            'reps': set.reps,
-            'one_rep_max': oneRm,
+            'weight': bestSet.weight,
+            'reps': bestSet.reps,
+            'one_rep_max': bestOneRm,
           },
           isBetter: (existing) =>
               existing == null ||
-              ((existing['one_rep_max'] as num?)?.toDouble() ?? 0) < oneRm,
+              ((existing['one_rep_max'] as num?)?.toDouble() ?? 0) < bestOneRm,
         );
       }
 
@@ -1546,10 +1564,6 @@ class WorkoutService {
           }
         }
         if (maxWeightSet != null) {
-          final previousMax = await _maxRecordedWeightKg(
-            userId: userId,
-            exerciseId: ex.exerciseId,
-          );
           if (maxWeightSet.weight! <= previousMax) continue;
 
           await _upsertPersonalRecord(

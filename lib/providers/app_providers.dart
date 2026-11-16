@@ -163,6 +163,19 @@ final pendingRunnerSurfaceProvider =
 final pendingWorkoutSummaryProvider =
     StateProvider<WorkoutSummaryData?>((ref) => null);
 
+/// Borrador de rutina por voz. GoRouter a veces pierde `extra` al refrescar.
+final pendingVoiceRoutineProvider = StateProvider<Routine?>((ref) => null);
+
+/// Ejercicio abierto en el entreno en vivo. La voz agrega o quita series ahí.
+final activeWorkoutFocusProvider = StateProvider<String?>((ref) => null);
+
+/// Descanso pedido por voz. El entreno abierto lo aplica.
+final activeWorkoutRestRequestProvider =
+    StateProvider<(int seconds, int tick)?>((ref) => null);
+
+/// Cada registro de serie por voz avanza el contador para iniciar el descanso.
+final activeWorkoutVoiceLogTickProvider = StateProvider<int>((ref) => 0);
+
 /// Id del entreno cuyo resumen está en pantalla; estabiliza la key del host al reconstruir rutas.
 final workoutSummarySessionIdProvider = StateProvider<String?>((ref) => null);
 final workoutServiceProvider = Provider(
@@ -264,6 +277,10 @@ final restTimerAlertModeProvider =
 
 final aiProactiveEnabledProvider = FutureProvider<bool>((ref) async {
   return AiPreferences.isProactiveAiEnabled();
+});
+
+final voiceAssistantEnabledProvider = FutureProvider<bool>((ref) async {
+  return AiPreferences.isVoiceAssistantEnabled();
 });
 
 final customExerciseRepositoryProvider =

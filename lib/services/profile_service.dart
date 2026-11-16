@@ -41,10 +41,27 @@ class ProfileService {
 
       if (response == null) return null;
 
-      final provider = response['ai_provider'] as String?;
+      final row = Map<String, dynamic>.from(response);
+      if (_courtesyHasEnded(row)) {
+        row['subscription_tier'] = SubscriptionTier.free.code;
+        row['subscription_source'] = null;
+        row['subscription_product_id'] = null;
+        row['subscription_expires_at'] = null;
+        try {
+          await _client.from('profiles').update({
+            'subscription_tier': SubscriptionTier.free.code,
+            'subscription_source': null,
+            'subscription_product_id': null,
+            'subscription_expires_at': null,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          }).eq('id', user.id);
+        } catch (_) {}
+      }
+
+      final provider = row['ai_provider'] as String?;
       final hasKey = await _hasKeyForProvider(provider);
-      await _profileCache?.save(user.id, response, hasAiKey: hasKey);
-      return UserProfile.fromJson(response, hasAiKey: hasKey);
+      await _profileCache?.save(user.id, row, hasAiKey: hasKey);
+      return UserProfile.fromJson(row, hasAiKey: hasKey);
     } catch (e) {
       final cache = _profileCache;
       if (cache != null && isConnectionError(e)) {
@@ -52,6 +69,17 @@ class ProfileService {
       }
       rethrow;
     }
+  }
+
+  bool _courtesyHasEnded(Map<String, dynamic> row) {
+    if (row['subscription_source'] != SubscriptionSource.courtesy.code) {
+      return false;
+    }
+    final raw = row['subscription_expires_at'];
+    if (raw is! String || raw.isEmpty) return false;
+    final expires = DateTime.tryParse(raw);
+    if (expires == null) return false;
+    return !expires.toUtc().isAfter(DateTime.now().toUtc());
   }
 
   Future<void> upsertProfile(UserProfile profile) async {

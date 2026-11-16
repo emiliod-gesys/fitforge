@@ -23,6 +23,7 @@ List<String> planOfferBenefits(AppLocalizations l10n, SubscriptionTier tier) {
         l10n.onboardingPlanBenefitPro2,
         l10n.onboardingPlanBenefitPro3,
         l10n.onboardingPlanBenefitPro4,
+        l10n.onboardingPlanBenefitPro5,
       ],
   };
 }

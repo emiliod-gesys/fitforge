@@ -1784,6 +1784,36 @@ abstract class AppLocalizations {
   /// **'Activar'**
   String get proactiveAiEnableConfirm;
 
+  /// No description provided for @voiceAssistant.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistente de voz'**
+  String get voiceAssistant;
+
+  /// No description provided for @voiceAssistantDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Escucha «Hey Forgen» mientras la app está abierta'**
+  String get voiceAssistantDescription;
+
+  /// No description provided for @voiceAssistantIntroTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué puede hacer Forgen por voz (BETA)'**
+  String get voiceAssistantIntroTitle;
+
+  /// No description provided for @voiceAssistantIntroBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Con la app abierta di «Hey Forgen» y luego la orden.\n\n• Crear una rutina: «crea una rutina de hombros y brazos».\n• En un entrenamiento, agregar un ejercicio: «agrega curl de bíceps con mancuernas».\n• Con el ejercicio abierto, registrar una serie: «registra 60 libras y 12 reps».\n• Agregar o quitar series: «agrega una serie» o «quita la última serie».\n• Cambiar el descanso: «descanso de 90 segundos».\n• Preguntar cómo vas de comida o cuál es tu récord.\n\nEl micrófono sigue escuchando hasta que apagues esta opción.'**
+  String get voiceAssistantIntroBody;
+
+  /// No description provided for @voiceAssistantIntroClose.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get voiceAssistantIntroClose;
+
   /// No description provided for @aiCalculatingWorkoutSuggestions.
   ///
   /// In es, this message translates to:
@@ -8078,6 +8108,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Modo entrenador (alumnos)'**
   String get onboardingPlanBenefitPro4;
+
+  /// No description provided for @onboardingPlanBenefitPro5.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistente de voz Hey Forgen'**
+  String get onboardingPlanBenefitPro5;
 
   /// No description provided for @onboardingPlanPaidSoon.
   ///

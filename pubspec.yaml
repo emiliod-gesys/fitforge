@@ -1,7 +1,7 @@
 name: fitforge
 description: FORGEN — entrenamiento, nutrición y progreso con IA.
 publish_to: "none"
-version: 1.0.0+31
+version: 1.0.0+32
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -51,6 +51,7 @@ dependencies:
   image: ^4.8.0
   permission_handler: ^11.4.0
   speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.3
   in_app_purchase: ^3.3.0
   in_app_purchase_android: ^0.5.3
   in_app_purchase_storekit: ^0.4.11

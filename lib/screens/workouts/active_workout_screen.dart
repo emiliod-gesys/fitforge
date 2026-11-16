@@ -523,7 +523,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     _idleCheckTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     ref.read(watchWorkoutCoordinatorProvider).detach();
+    ref.read(activeWorkoutFocusProvider.notifier).state = null;
     super.dispose();
+  }
+
+  void _publishFocusedExercise(String? exerciseId) {
+    if (ref.read(activeWorkoutFocusProvider) == exerciseId) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (ref.read(activeWorkoutFocusProvider) == exerciseId) return;
+      ref.read(activeWorkoutFocusProvider.notifier).state = exerciseId;
+    });
   }
 
   @override
@@ -1611,6 +1621,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
     ref.listen(activeWorkoutProvider, (prev, next) {
       _scheduleTutorialWorkoutView(next.valueOrNull);
     });
+    ref.listen(activeWorkoutRestRequestProvider, (previous, next) {
+      if (next == null) return;
+      _onRestSecondsChanged(next.$1);
+      if (_showRestTimer) _startRestTimer();
+    });
+    ref.listen(activeWorkoutVoiceLogTickProvider, (previous, next) {
+      if (previous == next) return;
+      _startRestTimer();
+    });
 
     final l10n = context.l10n;
     final activeAsync = ref.watch(activeWorkoutProvider);
@@ -1743,6 +1762,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
                 .toList();
 
             if (_showExerciseList || visibleExercises.isEmpty) {
+              _publishFocusedExercise(null);
               return Column(
                 children: [
                   if (!_isHyroxWorkout || _hyroxRaceStarted)
@@ -1800,6 +1820,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen>
               });
             }
             final exercise = displayWorkout.exercises[exerciseIndex];
+            _publishFocusedExercise(exercise.id);
             if (_removedExerciseIds.contains(exercise.id)) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) setState(() => _showExerciseList = true);

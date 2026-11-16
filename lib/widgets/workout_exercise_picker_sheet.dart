@@ -17,12 +17,16 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
   final Set<String> excludeExerciseIds;
   final String? title;
   final bool showCreate;
+  final String initialSearch;
+  final String? initialMuscle;
 
   const WorkoutExercisePickerSheet({
     super.key,
     this.excludeExerciseIds = const {},
     this.title,
     this.showCreate = true,
+    this.initialSearch = '',
+    this.initialMuscle,
   });
 
   static Future<Exercise?> show(
@@ -30,6 +34,8 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
     Set<String> excludeExerciseIds = const {},
     String? title,
     bool showCreate = true,
+    String initialSearch = '',
+    String? initialMuscle,
   }) {
     return showModalBottomSheet<Exercise>(
       context: context,
@@ -48,6 +54,8 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
           excludeExerciseIds: excludeExerciseIds,
           title: title,
           showCreate: showCreate,
+          initialSearch: initialSearch,
+          initialMuscle: initialMuscle,
         ),
       ),
     );
@@ -58,9 +66,24 @@ class WorkoutExercisePickerSheet extends ConsumerStatefulWidget {
 }
 
 class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePickerSheet> {
-  String _search = '';
+  late final TextEditingController _searchController;
+  late String _search;
   String? _muscleFilter;
   bool _customOnly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _search = widget.initialSearch;
+    _muscleFilter = widget.initialMuscle;
+    _searchController = TextEditingController(text: _search);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +141,7 @@ class _WorkoutExercisePickerSheetState extends ConsumerState<WorkoutExercisePick
                 const SizedBox(height: 8),
               ],
               TextField(
+                controller: _searchController,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.searchExercises,

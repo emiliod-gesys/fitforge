@@ -13,6 +13,7 @@ import '../../core/subscription/subscription_features.dart';
 import '../../core/utils/food_serving_parser.dart';
 import '../../core/utils/quantity_format.dart';
 import '../../core/utils/speech_locale_utils.dart';
+import '../../core/voice/voice_mic_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/tutorials/tutorial_targets.dart';
 import '../../l10n/app_localizations.dart';
@@ -1059,8 +1060,10 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
     WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     if (_listening) {
+      VoiceMicGate.release();
       _speech.stop();
     }
+    if (_voiceNoteRecording) VoiceMicGate.release();
     unawaited(_voiceNoteRecorder.shutdown());
     super.dispose();
   }
@@ -1077,6 +1080,11 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
   void _setListening(bool value) {
     if (_listening == value) return;
     _listening = value;
+    if (value) {
+      VoiceMicGate.acquire();
+    } else {
+      VoiceMicGate.release();
+    }
     if (value) {
       _pulseController.forward(from: 0.35);
     } else {
@@ -1170,7 +1178,8 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
       return;
     }
 
-    final started = await _speech.listen(
+    try {
+      await _speech.listen(
       onResult: (result) {
         if (!mounted) return;
         final words = result.recognizedWords.trim();
@@ -1201,19 +1210,20 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
         listenMode: ListenMode.dictation,
       ),
     );
-
-    if (!mounted) return;
-    if (started) {
-      setState(() {
-        _starting = false;
-        _setListening(true);
-      });
-    } else {
+    } catch (_) {
+      if (!mounted) return;
       setState(() => _starting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.foodQuickAddDictateUnavailable)),
       );
+      return;
     }
+
+    if (!mounted) return;
+    setState(() {
+      _starting = false;
+      _setListening(true);
+    });
   }
 
   bool get _dictationActive => _starting || _listening;
@@ -1255,6 +1265,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
         onMaxDuration: _finishVoiceNote,
       );
       if (!mounted) return;
+      VoiceMicGate.acquire();
       setState(() {
         _voiceNoteRecording = true;
         _voiceNoteElapsed = Duration.zero;
@@ -1277,6 +1288,7 @@ class _QuickAddPaneState extends State<_QuickAddPane> with SingleTickerProviderS
 
     final l10n = context.l10n;
 
+    VoiceMicGate.release();
     setState(() {
       _voiceNoteFinishing = true;
       _voiceNoteRecording = false;

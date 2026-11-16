@@ -944,6 +944,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proactiveAiEnableConfirm => 'Enable';
 
   @override
+  String get voiceAssistant => 'Voice assistant';
+
+  @override
+  String get voiceAssistantDescription =>
+      'Listens for Hey Forgen while the app is open';
+
+  @override
+  String get voiceAssistantIntroTitle => 'What Forgen can do by voice (BETA)';
+
+  @override
+  String get voiceAssistantIntroBody =>
+      'With the app open, say Hey Forgen and then the command.\n\n• Create a routine: \"make a shoulder and arm routine\".\n• During a workout, add an exercise: \"add a dumbbell biceps curl\".\n• With the exercise open, log a set: \"log 60 pounds and 12 reps\".\n• Add or remove sets: \"add a set\" or \"remove the last set\".\n• Change the rest: \"rest 90 seconds\".\n• Ask how your food is going or what your record is.\n\nThe microphone keeps listening until you turn this off.';
+
+  @override
+  String get voiceAssistantIntroClose => 'Got it';
+
+  @override
   String get aiCalculatingWorkoutSuggestions => 'Calculating AI suggestions…';
 
   @override
@@ -4708,6 +4725,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPlanBenefitPro4 => 'Trainer mode (students)';
+
+  @override
+  String get onboardingPlanBenefitPro5 => 'Hey Forgen voice assistant';
 
   @override
   String get onboardingPlanPaidSoon =>

@@ -309,6 +309,55 @@ void main() {
       );
     });
 
+    test('lever shrug defaults to per-arm even outside the bundled catalog', () {
+      expect(
+        ExerciseLoad.supportsPerArmToggle('ext_0604', const [], 'lever shrug'),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: 'ext_0604',
+          catalog: const [],
+          exerciseName: 'lever shrug',
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: 'ext_0604',
+          catalog: const [],
+          exerciseName: 'lever shrug',
+          sessionOverride: false,
+        ),
+        isFalse,
+      );
+
+      const stored = Exercise(
+        catalogId: 'ext_0604',
+        name: 'lever shrug',
+        equipment: ['Máquina'],
+        perArmWeight: false,
+        unilateral: false,
+        loadMode: ExerciseLoadMode.machineStack,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: stored.id,
+          catalog: [stored],
+          exerciseName: stored.name,
+        ),
+        isTrue,
+      );
+      expect(
+        ExerciseLoad.resolvePerArmWeight(
+          exerciseId: 'ext_press',
+          catalog: const [],
+          exerciseName: 'lever shoulder press',
+        ),
+        isFalse,
+      );
+    });
+
     test('band reverse fly defaults to per-arm even if catalog flag is false',
         () {
       const bandFly = Exercise(

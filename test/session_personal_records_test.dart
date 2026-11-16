@@ -168,6 +168,81 @@ void main() {
       expect(detected.first.reps, 1);
     });
 
+    test('keeps the heaviest set when a later lighter set also beats the old PR', () {
+      final workout = Workout(
+        id: 'w1',
+        userId: 'u1',
+        name: 'Push',
+        startedAt: DateTime(2026, 1, 1),
+        exercises: const [
+          WorkoutExercise(
+            id: 'we1',
+            exerciseId: 'bench',
+            exerciseName: 'Bench Press',
+            orderIndex: 0,
+            sets: [
+              WorkoutSet(id: 's1', setNumber: 1, reps: 12, weight: 16, completed: true),
+              WorkoutSet(id: 's2', setNumber: 2, reps: 12, weight: 17, completed: true),
+              WorkoutSet(id: 's3', setNumber: 3, reps: 12, weight: 16, completed: true),
+            ],
+          ),
+        ],
+      );
+
+      final existing = [
+        PersonalRecord(
+          id: 'pr1',
+          exerciseId: 'bench',
+          exerciseName: 'Bench Press',
+          weight: 15,
+          reps: 12,
+          oneRepMax: PersonalRecord.calculate1RM(15, 12),
+          achievedAt: DateTime(2025, 12, 1),
+        ),
+      ];
+
+      final detected = SessionPersonalRecords.detect(
+        workout: workout,
+        existing: existing,
+      );
+
+      expect(detected, hasLength(1));
+      expect(detected.first.recordType, PersonalRecordType.strength);
+      expect(detected.first.weight, 17);
+      expect(detected.first.reps, 12);
+    });
+
+    test('first record of a session is the best set, not the last one', () {
+      final workout = Workout(
+        id: 'w1',
+        userId: 'u1',
+        name: 'Push',
+        startedAt: DateTime(2026, 1, 1),
+        exercises: const [
+          WorkoutExercise(
+            id: 'we1',
+            exerciseId: 'bench',
+            exerciseName: 'Bench Press',
+            orderIndex: 0,
+            sets: [
+              WorkoutSet(id: 's1', setNumber: 1, reps: 12, weight: 16, completed: true),
+              WorkoutSet(id: 's2', setNumber: 2, reps: 12, weight: 17, completed: true),
+              WorkoutSet(id: 's3', setNumber: 3, reps: 12, weight: 16, completed: true),
+            ],
+          ),
+        ],
+      );
+
+      final detected = SessionPersonalRecords.detect(
+        workout: workout,
+        existing: const [],
+      );
+
+      expect(detected, hasLength(1));
+      expect(detected.first.weight, 17);
+      expect(detected.first.reps, 12);
+    });
+
     test('collapses duplicate strength and max weight rows for summary', () {
       final workout = Workout(
         id: 'w1',

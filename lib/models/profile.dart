@@ -176,6 +176,15 @@ class UserProfile {
       (isReferralSubscription &&
           subscriptionTier == SubscriptionTier.gymratPro);
 
+  /// Cortesía con fecha: al pasar el día, el plan vuelve a gratis.
+  /// Sin fecha, la cortesía sigue activa.
+  bool get courtesyHasEnded {
+    if (!isCourtesySubscription) return false;
+    final expires = subscriptionExpiresAt;
+    if (expires == null) return false;
+    return !expires.toUtc().isAfter(DateTime.now().toUtc());
+  }
+
   /// Edad efectiva: prioriza fecha de nacimiento.
   int? get effectiveAge {
     if (dateOfBirth != null) {

@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AiPreferences {
   static const _proactiveAiKey = 'ai_proactive_enabled';
+  static const _voiceAssistantKey = 'voice_assistant_enabled';
 
   static Future<bool> isProactiveAiEnabled() async {
     final prefs = await SharedPreferences.getInstance();
@@ -17,5 +18,16 @@ class AiPreferences {
   static Future<void> setProactiveAiEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_proactiveAiKey, enabled);
+  }
+
+  /// Apagado hasta que el usuario lo encienda en Apariencia e IA.
+  static Future<bool> isVoiceAssistantEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_voiceAssistantKey) ?? false;
+  }
+
+  static Future<void> setVoiceAssistantEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_voiceAssistantKey, enabled);
   }
 }

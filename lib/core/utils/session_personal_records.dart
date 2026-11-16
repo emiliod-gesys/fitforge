@@ -24,6 +24,14 @@ abstract final class SessionPersonalRecords {
         catalog,
         exerciseName: ex.exerciseName,
       );
+      final prevStrength = _find(
+        existing,
+        ex.exerciseId,
+        PersonalRecordType.strength,
+      );
+      final previousOneRm = prevStrength?.oneRepMax ?? 0;
+      PersonalRecord? bestStrength;
+      var bestOneRm = 0.0;
       for (final set in completedSets.where((s) => !s.isCardio)) {
         final effective = ExerciseLoad.effectiveWeightKg(
           set,
@@ -34,22 +42,27 @@ abstract final class SessionPersonalRecords {
         if (effective == null || effective <= 0) continue;
 
         final oneRm = PersonalRecord.calculate1RM(effective, set.reps);
-        final prev = _find(existing, ex.exerciseId, PersonalRecordType.strength);
-        if (prev == null || (prev.oneRepMax ?? 0) < oneRm) {
-          _replaceOrAdd(
-            highlights,
-            PersonalRecord(
-              id: '',
-              exerciseId: ex.exerciseId,
-              exerciseName: ex.exerciseName,
-              weight: effective,
-              reps: set.reps,
-              oneRepMax: oneRm,
-              achievedAt: DateTime.now(),
-              recordType: PersonalRecordType.strength,
-            ),
-          );
-        }
+        if (prevStrength != null && previousOneRm >= oneRm) continue;
+
+        final improvesSession = bestStrength == null ||
+            oneRm > bestOneRm ||
+            (oneRm == bestOneRm && effective > (bestStrength.weight ?? 0));
+        if (!improvesSession) continue;
+
+        bestOneRm = oneRm;
+        bestStrength = PersonalRecord(
+          id: '',
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          weight: effective,
+          reps: set.reps,
+          oneRepMax: oneRm,
+          achievedAt: DateTime.now(),
+          recordType: PersonalRecordType.strength,
+        );
+      }
+      if (bestStrength != null) {
+        _replaceOrAdd(highlights, bestStrength);
       }
 
       final strengthSets = completedSets.where((s) => !s.isCardio).toList();
@@ -74,11 +87,6 @@ abstract final class SessionPersonalRecords {
             existing,
             ex.exerciseId,
             PersonalRecordType.strengthMaxWeight,
-          );
-          final prevStrength = _find(
-            existing,
-            ex.exerciseId,
-            PersonalRecordType.strength,
           );
           final previousMaxWeight = [
             prevMax?.weight,

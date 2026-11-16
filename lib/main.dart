@@ -21,6 +21,7 @@ import 'widgets/push_notification_bootstrap.dart';
 import 'widgets/offline_sync_bootstrap.dart';
 import 'widgets/offline_status_banner.dart';
 import 'widgets/tutorial_spotlight_overlay.dart';
+import 'widgets/voice_assistant_host.dart';
 
 class FitForgeApp extends ConsumerWidget {
   const FitForgeApp({super.key});
@@ -60,6 +61,7 @@ class FitForgeApp extends ConsumerWidget {
                       Expanded(child: child ?? const SizedBox.shrink()),
                     ],
                   ),
+                  const VoiceAssistantHost(),
                   const TutorialSpotlightOverlay(),
                 ],
               ),
