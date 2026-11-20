@@ -2710,10 +2710,16 @@
         "en": ""
       },
       "aliases": {
-        "es": [],
-        "en": []
+        "es": [
+          "Concentration Curl con mancuerna",
+          "Curl de concentración con mancuerna"
+        ],
+        "en": [
+          "Dumbbell Concentration Curl",
+          "Concentration Curl con mancuerna"
+        ]
       },
-      "imageUrl": "assets/exercises/ff_biceps_concentration_curl.webp",
+      "imageUrl": "assets/exercises/ff_biceps_concentration_curl.gif",
       "exercisedbId": "gvsWLQw",
       "matchConfidence": "high",
       "matchScore": 0.956

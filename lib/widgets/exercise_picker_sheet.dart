@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../core/subscription/subscription_features.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/exercise_picker_merge.dart';
+import '../core/utils/exercise_smart_search.dart';
 import '../core/utils/muscle_inference.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/exercise.dart';
@@ -12,6 +14,7 @@ import '../providers/recent_exercise_ids_provider.dart';
 import 'cloud_exercise_load_more_footer.dart';
 import 'create_custom_exercise_sheet.dart';
 import 'exercise_thumbnail.dart';
+import 'smart_exercise_search_field.dart';
 import 'localized_exercise_name.dart';
 import '../core/theme/app_accent.dart';
 
@@ -33,42 +36,58 @@ class ExercisePickerSheet extends ConsumerStatefulWidget {
 
 class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
   final _searchController = TextEditingController();
+  final _smartController = TextEditingController();
   String _search = '';
+  String _smartQuery = '';
   String? _muscleFilter;
   ExercisePickerFilter _filter = ExercisePickerFilter.all;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _smartController.dispose();
     super.dispose();
+  }
+
+  void _submitSmartSearch(String value) {
+    setState(() => _smartQuery = value.trim());
+  }
+
+  void _clearSmartSearch() {
+    _smartController.clear();
+    setState(() => _smartQuery = '');
   }
 
   List<Exercise> _filteredFrom(
     List<Exercise> bundled,
     List<Exercise> cloud,
-    List<String> recentIds,
-  ) {
+    List<String> recentIds, {
+    required bool smartActive,
+    required ExerciseSmartIntent smartIntent,
+  }) {
     final filteredBundled = filterBundledPickerExercises(
       exercises: bundled,
-      search: _search,
-      muscleFilter: _muscleFilter,
-      customOnly: _filter == ExercisePickerFilter.custom,
-      inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
+      search: smartActive ? '' : _search,
+      muscleFilter: smartActive ? null : _muscleFilter,
+      customOnly: !smartActive && _filter == ExercisePickerFilter.custom,
+      inRoutineOnly: !smartActive && _filter == ExercisePickerFilter.inRoutine,
       selectedExerciseIds: widget.selectedExerciseIds,
     );
     final filteredCloud = filterCloudPickerExercises(
       exercises: cloud,
-      search: _search,
-      muscleFilter: _muscleFilter,
-      customOnly: _filter == ExercisePickerFilter.custom,
-      inRoutineOnly: _filter == ExercisePickerFilter.inRoutine,
+      search: smartActive ? '' : _search,
+      muscleFilter: smartActive ? null : _muscleFilter,
+      customOnly: !smartActive && _filter == ExercisePickerFilter.custom,
+      inRoutineOnly: !smartActive && _filter == ExercisePickerFilter.inRoutine,
       selectedExerciseIds: widget.selectedExerciseIds,
     );
+    final merged = mergeBundledAndCloudExercises(
+      bundled: filteredBundled,
+      cloud: filteredCloud,
+    );
+    if (smartActive) return ExerciseSmartSearch.rank(merged, smartIntent);
     return sortPickerExercises(
-      exercises: mergeBundledAndCloudExercises(
-        bundled: filteredBundled,
-        cloud: filteredCloud,
-      ),
+      exercises: merged,
       recentIds: recentIds,
       search: _search,
     );
@@ -79,17 +98,32 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
     final l10n = context.l10n;
     final exercises = ref.watch(exercisesProvider).valueOrNull ?? widget.exercises;
     final recentIds = ref.watch(recentExerciseIdsProvider);
-    final cloudDisabled = _filter == ExercisePickerFilter.custom ||
-        _filter == ExercisePickerFilter.inRoutine;
+    final smartAllowed =
+        ref.watch(profileProvider).valueOrNull?.subscriptionTier.hasSmartExerciseSearch ??
+            false;
+    final smartIntent = smartAllowed && _smartQuery.isNotEmpty
+        ? ExerciseSmartSearch.interpret(_smartQuery)
+        : ExerciseSmartIntent.empty;
+    final smartActive = _smartQuery.isNotEmpty && smartAllowed;
+    final cloudDisabled = smartActive
+        ? smartIntent.cloudQuery.trim().length < 2
+        : (_filter == ExercisePickerFilter.custom ||
+            _filter == ExercisePickerFilter.inRoutine);
     final cloudKey = cloudExerciseCatalogNotifierKey(
-      search: _search,
-      muscleFilter: _muscleFilter,
+      search: smartActive ? smartIntent.cloudQuery : _search,
+      muscleFilter: smartActive ? null : _muscleFilter,
       cloudDisabled: cloudDisabled,
     );
     final cloudState = cloudKey != null
         ? ref.watch(cloudExerciseSearchNotifierProvider(cloudKey))
         : const CloudExerciseSearchState();
-    final filtered = _filteredFrom(exercises, cloudState.exercises, recentIds);
+    final filtered = _filteredFrom(
+      exercises,
+      cloudState.exercises,
+      recentIds,
+      smartActive: smartActive,
+      smartIntent: smartIntent,
+    );
     final showCloudLoadMore =
         cloudKey != null && cloudState.hasMore && !cloudDisabled;
     final inRoutineCount = widget.selectedExerciseIds.length;
@@ -140,7 +174,18 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                 ),
                 onChanged: (v) => setState(() => _search = v),
               ),
-              if (cloudKey == null) ...[
+              if (smartAllowed) ...[
+                const SizedBox(height: 10),
+                SmartExerciseSearchField(
+                  controller: _smartController,
+                  activeQuery: _smartQuery,
+                  label: l10n.smartExerciseSearchLabel,
+                  hint: l10n.smartExerciseSearchHint,
+                  onSubmit: _submitSmartSearch,
+                  onClear: _clearSmartSearch,
+                ),
+              ],
+              if (cloudKey == null && !smartActive) ...[
                 const SizedBox(height: 6),
                 Text(
                   l10n.cloudCatalogSearchHint,
@@ -206,7 +251,9 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.exerciseCount(filtered.length),
+                smartActive
+                    ? l10n.smartExerciseRecommendations
+                    : l10n.exerciseCount(filtered.length),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
               ),
             ],
@@ -219,7 +266,9 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Text(
-                      _filter == ExercisePickerFilter.inRoutine
+                      smartActive
+                          ? l10n.smartExerciseSearchEmpty
+                          : _filter == ExercisePickerFilter.inRoutine
                           ? l10n.noSearchInRoutine
                           : l10n.noExercisesFound,
                       textAlign: TextAlign.center,

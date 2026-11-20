@@ -1340,6 +1340,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get searchExercises => 'Buscar ejercicios…';
 
   @override
+  String get smartExerciseSearchLabel => 'Búsqueda inteligente';
+
+  @override
+  String get smartExerciseSearchHint =>
+      'Ejemplo: para hombro frontal con mancuernas';
+
+  @override
+  String get smartExerciseRecommendations => 'Recomendaciones';
+
+  @override
+  String get smartExerciseSearchEmpty =>
+      'No encontré ejercicios para esa descripción.';
+
+  @override
   String exerciseCount(int count) {
     return '$count ejercicios';
   }

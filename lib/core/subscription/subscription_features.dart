@@ -17,6 +17,9 @@ extension SubscriptionFeatures on SubscriptionTier {
   /// Rutina inteligente a partir de músculos concretos.
   bool get hasSmartRoutine => !isFree;
 
+  /// Descripción libre en el buscador de ejercicios. Gymrat y Gymrat Pro.
+  bool get hasSmartExerciseSearch => !isFree;
+
   /// Modo entrenador personal (pestaña Alumnos).
   bool get hasTrainerMode => this == SubscriptionTier.gymratPro;
 

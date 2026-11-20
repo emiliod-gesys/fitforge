@@ -1330,6 +1330,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchExercises => 'Search exercises…';
 
   @override
+  String get smartExerciseSearchLabel => 'Smart search';
+
+  @override
+  String get smartExerciseSearchHint => 'Example: front delts with dumbbells';
+
+  @override
+  String get smartExerciseRecommendations => 'Recommendations';
+
+  @override
+  String get smartExerciseSearchEmpty =>
+      'No exercises matched that description.';
+
+  @override
   String exerciseCount(int count) {
     return '$count exercises';
   }

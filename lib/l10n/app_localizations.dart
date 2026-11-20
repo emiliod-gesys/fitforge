@@ -2456,6 +2456,30 @@ abstract class AppLocalizations {
   /// **'Buscar ejercicios…'**
   String get searchExercises;
 
+  /// No description provided for @smartExerciseSearchLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Búsqueda inteligente'**
+  String get smartExerciseSearchLabel;
+
+  /// No description provided for @smartExerciseSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejemplo: para hombro frontal con mancuernas'**
+  String get smartExerciseSearchHint;
+
+  /// No description provided for @smartExerciseRecommendations.
+  ///
+  /// In es, this message translates to:
+  /// **'Recomendaciones'**
+  String get smartExerciseRecommendations;
+
+  /// No description provided for @smartExerciseSearchEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontré ejercicios para esa descripción.'**
+  String get smartExerciseSearchEmpty;
+
   /// No description provided for @exerciseCount.
   ///
   /// In es, this message translates to:

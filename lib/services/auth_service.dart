@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,14 +14,15 @@ import 'supabase_service.dart';
 
 class AuthService {
   final _client = SupabaseService.client;
+  GoogleSignIn? _googleSignIn;
 
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
   User? get currentUser => _client.auth.currentUser;
 
-  GoogleSignIn? get _googleSignIn {
+  GoogleSignIn? get _google {
     if (!GoogleAuthConfig.isNativeConfigured) return null;
-    return GoogleSignIn(
+    return _googleSignIn ??= GoogleSignIn(
       clientId: !kIsWeb &&
               defaultTargetPlatform == TargetPlatform.iOS &&
               GoogleAuthConfig.iosClientId.isNotEmpty
@@ -56,35 +58,89 @@ class AuthService {
     );
   }
 
-  /// Login con Google (nativo si hay `GOOGLE_WEB_CLIENT_ID`, si no OAuth en navegador).
+  /// Login con Google. En Android, si Play Services rechaza el token nativo,
+  /// sigue con el flujo OAuth del navegador (el que ya completa la sesión).
   Future<void> signInWithGoogle() async {
     if (!GoogleAuthConfig.enabled) {
       throw const AuthException('Google sign-in is disabled');
     }
-    final googleSignIn = _googleSignIn;
-    if (googleSignIn != null) {
-      final account = await googleSignIn.signIn();
-      if (account == null) {
-        throw const AuthException('Google sign-in cancelled');
-      }
-      final googleAuth = await account.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null || idToken.isEmpty) {
-        throw const AuthException('Missing Google ID token');
-      }
-      await _client.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: googleAuth.accessToken,
-      );
+    final googleSignIn = _google;
+    if (googleSignIn == null) {
+      await _signInWithGoogleOAuth();
       return;
     }
 
-    await _client.auth.signInWithOAuth(
+    try {
+      await _signInWithGoogleNative(googleSignIn);
+    } on AuthException catch (e) {
+      if (_isGoogleCancel(e) || !_canFallBackToGoogleOAuth) rethrow;
+      debugPrint('Google native sign-in failed: ${e.message}');
+      await _abandonNativeGoogleSession(googleSignIn);
+      await _signInWithGoogleOAuth();
+    } catch (e, stack) {
+      if (_isGoogleCancel(e) || !_canFallBackToGoogleOAuth) {
+        debugPrint('Google native sign-in failed: $e\n$stack');
+        if (_isGoogleCancel(e)) {
+          throw const AuthException('Google sign-in cancelled');
+        }
+        rethrow;
+      }
+      debugPrint('Google native sign-in failed, opening browser: $e\n$stack');
+      await _abandonNativeGoogleSession(googleSignIn);
+      await _signInWithGoogleOAuth();
+    }
+  }
+
+  bool get _canFallBackToGoogleOAuth =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  Future<void> _signInWithGoogleNative(GoogleSignIn googleSignIn) async {
+    final account = await googleSignIn.signIn();
+    if (account == null) {
+      throw const AuthException('Google sign-in cancelled');
+    }
+    final googleAuth = await account.authentication;
+    final idToken = googleAuth.idToken;
+    if (idToken == null || idToken.isEmpty) {
+      throw const AuthException('Missing Google ID token');
+    }
+    await _client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: googleAuth.accessToken,
+    );
+  }
+
+  Future<void> _signInWithGoogleOAuth() async {
+    final launched = await _client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: AuthRedirectConfig.loginCallback,
       authScreenLaunchMode: LaunchMode.externalApplication,
     );
+    if (!launched) {
+      throw const AuthException('Google sign-in failed');
+    }
+  }
+
+  Future<void> _abandonNativeGoogleSession(GoogleSignIn googleSignIn) async {
+    try {
+      await googleSignIn.signOut();
+    } catch (e) {
+      debugPrint('Google sign-out before browser fallback failed: $e');
+    }
+  }
+
+  bool _isGoogleCancel(Object error) {
+    if (error is AuthException) {
+      return error.message.toLowerCase().contains('cancel');
+    }
+    if (error is PlatformException) {
+      final code = error.code.toLowerCase();
+      final message = (error.message ?? '').toLowerCase();
+      return code.contains('cancel') || message.contains('12501');
+    }
+    final text = error.toString().toLowerCase();
+    return text.contains('cancel') || text.contains('12501');
   }
 
   /// Login con Apple: nativo en iOS/macOS; OAuth en Android/web.
