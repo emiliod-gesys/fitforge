@@ -1605,11 +1605,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get feedEmptySubtitle =>
-      'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.';
+      'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran una semana.';
 
   @override
   String get feedExpiryHint =>
-      'Solo se muestran publicaciones de las últimas 24 horas.';
+      'Solo se muestran publicaciones de la última semana.';
 
   @override
   String get feedLongPressToReact =>
@@ -2122,8 +2122,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadingWorkoutSummary => 'Cargando resumen del entreno…';
 
   @override
-  String get shareImageFallback =>
-      'No se pudo generar la imagen; se compartió solo el texto.';
+  String get shareImageFallback => 'No se pudo generar la imagen.';
+
+  @override
+  String shareStoryNewRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count récords nuevos',
+      one: '1 récord nuevo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareStoryStations => 'Estaciones';
+
+  @override
+  String shareStoryExerciseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ejercicios',
+      one: '1 ejercicio',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get summaryTitle => 'Resumen';
@@ -5505,4 +5529,50 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingReferralFailed =>
       'No se pudo guardar el código. Inténtalo de nuevo.';
+
+  @override
+  String get notificationCenterTitle => 'Notificaciones';
+
+  @override
+  String get notificationCenterSubtitle =>
+      'Llegan al celular. Vienen activadas.';
+
+  @override
+  String get profileHubNotificationsSubtitle =>
+      'Descanso, amistades y actividad social';
+
+  @override
+  String get notificationRestTitle => 'Fin del descanso';
+
+  @override
+  String get notificationRestSubtitle =>
+      'Aviso cuando termina el tiempo entre series.';
+
+  @override
+  String get notificationFriendRequestsTitle => 'Solicitudes de amistad';
+
+  @override
+  String get notificationFriendRequestsSubtitle =>
+      'Cuando alguien quiere agregarte.';
+
+  @override
+  String get notificationCommentsTitle => 'Comentarios y reacciones';
+
+  @override
+  String get notificationCommentsSubtitle =>
+      'Cuando responden o reaccionan a una publicación.';
+
+  @override
+  String get notificationRoutinesTitle => 'Rutinas y alumnos';
+
+  @override
+  String get notificationRoutinesSubtitle =>
+      'Rutinas compartidas y solicitudes de entrenador.';
+
+  @override
+  String get notificationFriendActivityTitle => 'Actividad de amigos';
+
+  @override
+  String get notificationFriendActivitySubtitle =>
+      'Entrenamientos, publicaciones, niveles y récords.';
 }

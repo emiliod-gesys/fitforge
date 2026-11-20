@@ -15,6 +15,7 @@ abstract final class WorkoutShareCapture {
   static Future<Uint8List?> capturePng(
     GlobalKey boundaryKey, {
     double pixelRatio = 3,
+    Size? expectedSize,
   }) async {
     for (var attempt = 0; attempt < _maxAttempts; attempt++) {
       await _waitForFrame();
@@ -22,6 +23,14 @@ abstract final class WorkoutShareCapture {
       final boundary =
           boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null || !boundary.hasSize || boundary.size.shortestSide <= 0) {
+        if (attempt < _maxAttempts - 1) {
+          await Future<void>.delayed(_frameDelay);
+        }
+        continue;
+      }
+      if (expectedSize != null &&
+          ((boundary.size.width - expectedSize.width).abs() > 1 ||
+              (boundary.size.height - expectedSize.height).abs() > 1)) {
         if (attempt < _maxAttempts - 1) {
           await Future<void>.delayed(_frameDelay);
         }

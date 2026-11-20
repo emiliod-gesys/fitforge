@@ -1,35 +1,26 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:intl/intl.dart';
 
-import '../core/theme/app_accent.dart';
-import '../core/utils/center_aspect_crop.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/center_aspect_crop.dart';
 import '../core/utils/cardio_format.dart';
-import '../core/utils/milestone_badge.dart';
-import '../core/utils/player_level.dart';
-import '../core/utils/player_level_badge.dart';
 import '../core/utils/quantity_format.dart';
 import '../core/utils/unit_converter.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
-import '../models/exercise_logging.dart';
-import '../models/profile.dart';
 import '../models/workout.dart';
 import '../models/workout_summary.dart';
 import '../services/feed_media_service.dart';
-import '../widgets/fitforge_logo.dart';
-import '../widgets/localized_exercise_name.dart';
-import '../widgets/milestones_section.dart';
-import '../widgets/runner_surface_picker.dart';
-import '../widgets/tappable_badge.dart';
+import 'fitforge_logo.dart';
+import 'runner_surface_picker.dart';
 
-const _hyroxAccent = Color(0xFFFF6B00);
-const _runnerAccent = Color(0xFF00A884);
+/// Lienzo lógico 9:16. Con [workoutShareStoryPixelRatio] la captura es 1080×1920.
+const workoutShareStoryWidth = 360.0;
+const workoutShareStoryHeight = 640.0;
+const workoutShareStoryPixelRatio = 3.0;
 
 class WorkoutShareCard extends StatelessWidget {
   final WorkoutSummaryData summary;
@@ -45,804 +36,307 @@ class WorkoutShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (summary.hasHyroxSplits) {
-      return _HyroxShareCard(summary: summary, l10n: l10n);
-    }
-    if (summary.isRunner) {
-      return _RunnerShareCard(summary: summary, unitSystem: unitSystem, l10n: l10n);
-    }
-    return _GymShareCard(summary: summary, unitSystem: unitSystem, l10n: l10n);
-  }
-}
-
-class _ShareCardShell extends StatelessWidget {
-  final List<Color> gradientColors;
-  final Color borderColor;
-  final Color badgeColor;
-  final String badgeLabel;
-  final Widget? photo;
-  final Widget child;
-
-  const _ShareCardShell({
-    required this.gradientColors,
-    required this.borderColor,
-    required this.badgeColor,
-    required this.badgeLabel,
-    this.photo,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const FitForgeLogo.icon(height: 28),
-              const SizedBox(width: 8),
-              const Text('FORGEN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: badgeColor.withValues(alpha: 0.55)),
-                ),
-                child: Text(
-                  badgeLabel,
-                  style: TextStyle(
-                    color: badgeColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (photo != null) ...[
-            photo!,
-            const SizedBox(height: 16),
-          ],
-          child,
-        ],
+    return AspectRatio(
+      aspectRatio: workoutShareStoryWidth / workoutShareStoryHeight,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: WorkoutShareStory(summary: summary, unitSystem: unitSystem, l10n: l10n),
       ),
     );
   }
 }
 
-class _HyroxShareCard extends StatelessWidget {
-  final WorkoutSummaryData summary;
-  final AppLocalizations l10n;
-
-  const _HyroxShareCard({required this.summary, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return _ShareCardShell(
-      gradientColors: [
-        _hyroxAccent.withValues(alpha: 0.14),
-        AppColors.card,
-      ],
-      borderColor: _hyroxAccent.withValues(alpha: 0.35),
-      badgeColor: _hyroxAccent,
-      badgeLabel: l10n.hyroxSystemBadge.toUpperCase(),
-      photo: _finishPhoto(summary),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.workoutDisplayName(summary.workout.name),
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.timer_outlined, color: _hyroxAccent, size: 22),
-              const SizedBox(width: 8),
-              Text(
-                l10n.shareHyroxTotalTime(CardioFormat.duration(summary.hyroxTotalSeconds)),
-                style: TextStyle(
-                  color: _hyroxAccent,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                  fontFeatures: const [ui.FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
-          ),
-          if (summary.hasCalorieEstimate) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _ShareStatTile(
-                    label: l10n.caloriesBurned,
-                    value: QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!),
-                    accent: _hyroxAccent,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              summary.calorieEstimate.usedDefaultWeight
-                  ? l10n.caloriesEstimateDefaultWeight
-                  : l10n.caloriesEstimateNote,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
-            ),
-          ],
-          const SizedBox(height: 16),
-          Text(
-            l10n.hyroxSplitsSummaryTitle,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          ...summary.hyroxSplits.asMap().entries.map(
-            (entry) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 22,
-                    child: Text(
-                      '${entry.key + 1}',
-                      style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  Expanded(
-                    child: LocalizedExerciseName(
-                      entry.value.exerciseName,
-                      exerciseId: entry.value.exerciseId,
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ),
-                  Text(
-                    CardioFormat.duration(entry.value.seconds),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: [ui.FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (summary.xpAward != null) ...[
-            const SizedBox(height: 16),
-            _ShareXpBanner(xpAward: summary.xpAward!, l10n: l10n, accent: _hyroxAccent),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RunnerShareCard extends StatelessWidget {
+/// Lienzo fijo 360×640. La vista lo escala; la captura usa este tamaño.
+class WorkoutShareStory extends StatelessWidget {
   final WorkoutSummaryData summary;
   final String unitSystem;
   final AppLocalizations l10n;
 
-  const _RunnerShareCard({
+  const WorkoutShareStory({
+    super.key,
     required this.summary,
     required this.unitSystem,
     required this.l10n,
   });
 
-  WorkoutSet? _cardioSet() {
-    for (final ex in summary.workout.exercises) {
-      for (final s in ex.sets) {
-        if (s.completed && s.isCardio) return s;
-      }
-    }
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      child: SizedBox(
+        width: workoutShareStoryWidth,
+        height: workoutShareStoryHeight,
+        child: _StoryCanvas(summary: summary, unitSystem: unitSystem, l10n: l10n),
+      ),
+    );
   }
+}
 
-  bool get _isOutdoor => summary.workout.runnerRoute.length >= 2;
+class _StoryCanvas extends StatelessWidget {
+  final WorkoutSummaryData summary;
+  final String unitSystem;
+  final AppLocalizations l10n;
+
+  const _StoryCanvas({
+    required this.summary,
+    required this.unitSystem,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final workout = summary.workout;
-    final cardio = _cardioSet();
-    final points = workout.runnerRoute.map((p) => LatLng(p.lat, p.lng)).toList();
+    final when = (summary.workout.completedAt ?? summary.workout.startedAt).toLocal();
+    final dateLabel = DateFormat('d MMM', l10n.localeName).format(when);
+    final mode = _modeLabel(summary, l10n);
+    final stats = _storyStats(summary, unitSystem, l10n);
+    final highlight = _storyHighlight(summary, unitSystem, l10n);
+    final calories = _calorieLine(summary, stats);
+    final subtitle = _subtitle(summary, l10n);
+    final hasPhoto = summary.hasFinishPhoto;
 
-    return _ShareCardShell(
-      gradientColors: [
-        _runnerAccent.withValues(alpha: 0.14),
-        AppColors.card,
-      ],
-      borderColor: _runnerAccent.withValues(alpha: 0.35),
-      badgeColor: _runnerAccent,
-      badgeLabel: l10n.runnerSystemBadge.toUpperCase(),
-      photo: _finishPhoto(summary),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.workoutDisplayName(summary.workout.name),
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          if (workout.runnerSurface != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              runnerSurfaceLabel(l10n, workout.runnerSurface!),
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ],
-          if (cardio?.inclinePercent != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${l10n.runnerInclineLabel}: ${CardioFormat.incline(cardio!.inclinePercent)}',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.runnerDistance,
-                  value: CardioFormat.distance(cardio?.distanceMeters, unitSystem),
-                  accent: _runnerAccent,
-                ),
-              ),
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.runnerAvgPace,
-                  value: CardioFormat.pace(workout.runnerAvgPaceSecPerKm, unitSystem),
-                  accent: _runnerAccent,
-                ),
-              ),
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.runnerTime,
-                  value: CardioFormat.duration(cardio?.durationSeconds),
-                  accent: _runnerAccent,
-                ),
-              ),
-            ],
-          ),
-          if (summary.hasCalorieEstimate) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _ShareStatTile(
-                    label: l10n.caloriesBurned,
-                    value: QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!),
-                    accent: _runnerAccent,
+    return ClipRect(
+      child: ColoredBox(
+        color: AppColors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (!hasPhoto) const _StoryScrim(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 36, 24, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const FitForgeLogo.icon(height: 26),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'FORGEN',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        dateLabel,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              summary.calorieEstimate.usedDefaultWeight
-                  ? l10n.caloriesEstimateDefaultWeight
-                  : l10n.caloriesEstimateNote,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
-            ),
-          ],
-          if (_isOutdoor) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _ShareStatTile(
-                    label: l10n.runnerElevationGain,
-                    value: CardioFormat.elevationLive(
-                      workout.runnerElevationGainMeters ?? 0,
-                      unitSystem,
+                  if (mode != null) ...[
+                    const SizedBox(height: 12),
+                    _ModeChip(label: mode),
+                  ],
+                  if (hasPhoto) ...[
+                    const SizedBox(height: 14),
+                    Flexible(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: ColoredBox(
+                          color: AppColors.card,
+                          child: AspectRatio(
+                            aspectRatio: workoutFinishPhotoAspectRatio,
+                            child: _StoryFinishPhoto(summary: summary),
+                          ),
+                        ),
+                      ),
                     ),
-                    accent: _runnerAccent,
-                  ),
-                ),
-                Expanded(
-                  child: _ShareStatTile(
-                    label: l10n.runnerElevationLoss,
-                    value: CardioFormat.elevationLive(
-                      workout.runnerElevationLossMeters ?? 0,
-                      unitSystem,
+                  ] else
+                    const Spacer(),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 36,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: AppColors.cobalt,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    accent: _runnerAccent,
                   ),
-                ),
-                Expanded(
-                  child: _ShareStatTile(
-                    label: l10n.runnerElevationNet,
-                    value: CardioFormat.elevationNet(
-                      gainMeters: workout.runnerElevationGainMeters ?? 0,
-                      lossMeters: workout.runnerElevationLossMeters ?? 0,
-                      unitSystem: unitSystem,
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.workoutDisplayName(summary.workout.name),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 32,
+                      height: 1.05,
+                      fontWeight: FontWeight.w800,
                     ),
-                    accent: _runnerAccent,
                   ),
-                ),
-              ],
-            ),
-          ],
-          if (_isOutdoor) ...[
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: _RouteMiniMap(points: points, accent: _runnerAccent),
-            ),
-          ],
-          if (workout.runnerSplits.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Text(l10n.runnerSplitsTitle, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            const SizedBox(height: 6),
-            ...workout.runnerSplits.take(8).map(
-              (s) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  children: [
-                    Expanded(child: Text(l10n.runnerSplitKm(s.km), style: const TextStyle(fontSize: 13))),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 8),
                     Text(
-                      CardioFormat.duration(s.seconds),
-                      style: const TextStyle(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _StatRow(
+                    stats: stats,
+                    calories: calories,
+                    calorieLabel: calories == null ? null : l10n.caloriesBurned,
+                  ),
+                  if (highlight != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      highlight.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: highlight.color,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        fontFeatures: [ui.FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
-                ),
+                  if (!hasPhoto) const Spacer(),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'forgen.app',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-          if (summary.xpAward != null) ...[
-            const SizedBox(height: 16),
-            _ShareXpBanner(xpAward: summary.xpAward!, l10n: l10n, accent: _runnerAccent),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RouteMiniMap extends StatelessWidget {
-  final List<LatLng> points;
-  final Color accent;
-
-  const _RouteMiniMap({required this.points, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    if (points.length < 2) return const SizedBox.shrink();
-
-    final bounds = LatLngBounds.fromPoints(points);
-
-    return SizedBox(
-      height: 120,
-      child: FlutterMap(
-        options: MapOptions(
-          initialCameraFit: CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(16),
-          ),
-          interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
         ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.fitforge.app',
-          ),
-          PolylineLayer(
-            polylines: [
-              Polyline(points: points, strokeWidth: 3, color: accent),
-            ],
-          ),
-        ],
       ),
     );
   }
 }
 
-class _GymShareCard extends StatelessWidget {
-  final WorkoutSummaryData summary;
-  final String unitSystem;
-  final AppLocalizations l10n;
+class _ModeChip extends StatelessWidget {
+  final String label;
 
-  const _GymShareCard({
-    required this.summary,
-    required this.unitSystem,
-    required this.l10n,
-  });
+  const _ModeChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final records = l10n.brokenRecordLabels(
-      isVolumeRecord: summary.isVolumeRecord,
-      isRepsRecord: summary.isRepsRecord,
-      isMaxWeightRecord: summary.isMaxWeightRecord,
-    );
-    final photo = _finishPhoto(summary);
-
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.cardElevated, AppColors.card],
+        color: AppColors.cobalt.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cobalt.withValues(alpha: 0.55)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          color: AppColors.cobalt,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
+          letterSpacing: 1.1,
         ),
-        borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  final List<_StoryStat> stats;
+  final String? calories;
+  final String? calorieLabel;
+
+  const _StatRow({required this.stats, this.calories, this.calorieLabel});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const FitForgeLogo.icon(height: 28),
-              const SizedBox(width: 8),
-              const Text('FORGEN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (photo != null) ...[
-            photo,
-            const SizedBox(height: 16),
-          ],
-          _GymHeroBanner(summary: summary, l10n: l10n),
-          const SizedBox(height: 16),
-          Text(
-            l10n.workoutDisplayName(summary.workout.name),
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.durationMinutesExercises(summary.durationMinutes, summary.exercises.length),
-            style: const TextStyle(color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.reps,
-                  value: '${summary.totalReps}',
-                  highlight: summary.isRepsRecord,
-                ),
-              ),
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.maxWeight,
-                  value: summary.maxWeightKg != null
-                      ? UnitConverter.formatGymMass(summary.maxWeightKg, unitSystem)
-                      : '—',
-                  highlight: summary.isMaxWeightRecord,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.volume,
-                  value: UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem),
-                  highlight: summary.isVolumeRecord,
-                ),
-              ),
-              Expanded(
-                child: _ShareStatTile(
-                  label: l10n.caloriesBurned,
-                  value: summary.hasCalorieEstimate
-                      ? QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!)
-                      : '—',
-                ),
-              ),
-            ],
-          ),
-          if (summary.hasCalorieEstimate) ...[
-            const SizedBox(height: 8),
-            Text(
-              summary.calorieEstimate.usedDefaultWeight
-                  ? l10n.caloriesEstimateDefaultWeight
-                  : l10n.caloriesEstimateNote,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.3),
-            ),
-          ],
-          if (records.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: records
-                  .map(
-                    (r) => Chip(
-                      avatar: Icon(Icons.emoji_events, size: 16, color: context.accentColor),
-                      label: Text(l10n.recordLabel(r)),
-                      backgroundColor: context.accentColor.withValues(alpha: 0.15),
-                      side: BorderSide(color: context.accentColor.withValues(alpha: 0.4)),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
-          if (summary.hasTrainedMuscles) ...[
-            const SizedBox(height: 16),
-            Text(l10n.summaryMusclesTrained, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: summary.trainedMuscleGroups
-                  .map(
-                    (muscle) => Chip(
-                      label: Text(l10n.muscleLabel(muscle), style: const TextStyle(fontSize: 12)),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: AppColors.cardElevated,
-                      side: const BorderSide(color: AppColors.border),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
-          if (summary.hasNewPersonalRecords) ...[
-            const SizedBox(height: 16),
-            _SharePersonalRecordsSection(
-              records: summary.newPersonalRecords,
-              unitSystem: unitSystem,
-              l10n: l10n,
-            ),
-          ],
-          if (summary.hasAchievements) ...[
-            const SizedBox(height: 16),
-            _ShareAchievementsSection(summary: summary, l10n: l10n),
-          ],
-          if (summary.xpAward != null) ...[
-            const SizedBox(height: 16),
-            _ShareXpBanner(xpAward: summary.xpAward!, l10n: l10n, accent: context.accentColor),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ShareStatTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool highlight;
-  final Color? accent;
-
-  const _ShareStatTile({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-    this.accent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = accent ?? (highlight ? context.accentColor : AppColors.textPrimary);
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
-        ),
-        if (highlight && accent == null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Icon(Icons.arrow_upward, size: 14, color: context.accentColor),
-          ),
-      ],
-    );
-  }
-}
-
-class _GymHeroBanner extends StatelessWidget {
-  final WorkoutSummaryData summary;
-  final AppLocalizations l10n;
-
-  const _GymHeroBanner({required this.summary, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    final percent = summary.volumeImprovementPercent;
-    final showCelebration =
-        summary.hasNewPersonalRecords || summary.brokenRecords.isNotEmpty || summary.hasAchievements;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            context.accentColor.withValues(alpha: showCelebration ? 0.22 : 0.12),
-            context.accentColor.withValues(alpha: 0.04),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.accentColor.withValues(alpha: showCelebration ? 0.5 : 0.25),
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(showCelebration ? '🎉' : '💪', style: const TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Text(
-                  l10n.summaryWorkoutComplete,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                if (percent != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.summaryVolumeUp(percent.toStringAsFixed(0)),
-                    style: TextStyle(color: context.accentColor, fontSize: 13),
-                  ),
+                for (var i = 0; i < stats.length; i++) ...[
+                  if (i > 0)
+                    const SizedBox(
+                      width: 1,
+                      height: 36,
+                      child: ColoredBox(color: AppColors.border),
+                    ),
+                  Expanded(child: _StatCell(stat: stats[i])),
                 ],
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShareXpBanner extends StatelessWidget {
-  final XpAwardResult xpAward;
-  final AppLocalizations l10n;
-  final Color accent;
-
-  const _ShareXpBanner({required this.xpAward, required this.l10n, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accent.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.bolt, color: accent, size: 22),
-          const SizedBox(width: 8),
-          Text(
-            l10n.xpEarned(xpAward.xpEarned),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: accent),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShareAchievementsSection extends StatelessWidget {
-  final WorkoutSummaryData summary;
-  final AppLocalizations l10n;
-
-  const _ShareAchievementsSection({required this.summary, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            context.accentColor.withValues(alpha: 0.18),
-            context.accentColor.withValues(alpha: 0.06),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.accentColor.withValues(alpha: 0.45)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.celebration, color: context.accentColor, size: 22),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.summaryAchievementsTitle,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: context.accentColor,
-                  ),
+            if (calories != null) ...[
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 10, 16, 8),
+                child: Divider(height: 1, thickness: 1, color: AppColors.border),
+              ),
+              Text(
+                calorieLabel ?? '',
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                calories!,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          if (summary.rankTierIncreased && summary.xpAward != null)
-            _ShareAchievementRow(
-              image: TappableBadge(
-                label: l10n.playerLevelBadgeName(summary.xpAward!.after.level),
-                child: _ShareLevelBadgeImage(level: summary.xpAward!.after.level),
-              ),
-              title: l10n.rankUp,
-              subtitle: l10n.playerLevelRankSummary(summary.xpAward!.after.level),
-            ),
-          ...summary.newMilestoneUnlocks.map(
-            (unlock) => _ShareAchievementRow(
-              image: TappableBadge(
-                label: l10n.milestoneTierName(unlock.tier),
-                child: Image.asset(
-                  MilestoneBadge.assetPathForTier(unlock.tier),
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) =>
-                      Icon(Icons.emoji_events, color: context.accentColor, size: 36),
-                ),
-              ),
-              title: l10n.summaryMilestoneUnlocked,
-              subtitle: l10n.summaryMilestoneDetail(
-                MilestonesSection.categoryLabel(l10n, unlock.category),
-                l10n.milestoneTierName(unlock.tier),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ShareAchievementRow extends StatelessWidget {
-  final Widget image;
-  final String title;
-  final String subtitle;
+class _StatCell extends StatelessWidget {
+  final _StoryStat stat;
 
-  const _ShareAchievementRow({
-    required this.image,
-    required this.title,
-    required this.subtitle,
-  });
+  const _StatCell({required this.stat});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
         children: [
-          SizedBox(width: 48, height: 48, child: image),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
-              ],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              stat.value,
+              maxLines: 1,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            stat.label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 11, height: 1.2),
           ),
         ],
       ),
@@ -850,125 +344,41 @@ class _ShareAchievementRow extends StatelessWidget {
   }
 }
 
-class _ShareLevelBadgeImage extends StatelessWidget {
-  final int level;
-
-  const _ShareLevelBadgeImage({required this.level});
+class _StoryScrim extends StatelessWidget {
+  const _StoryScrim();
 
   @override
   Widget build(BuildContext context) {
-    final asset = PlayerLevelBadge.assetForLevel(level);
-    if (asset == null) {
-      return Icon(Icons.military_tech, color: context.accentColor, size: 36);
-    }
-    return Image.asset(
-      asset,
-      width: 48,
-      height: 48,
-      fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => Icon(Icons.military_tech, color: context.accentColor, size: 36),
+    return const DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(0, -0.2),
+          radius: 0.95,
+          colors: [Color(0x474A9EFF), Color(0x00000000)],
+        ),
+      ),
     );
   }
 }
 
-class _SharePersonalRecordsSection extends StatelessWidget {
-  final List<PersonalRecord> records;
-  final String unitSystem;
-  final AppLocalizations l10n;
+class _StoryFinishPhoto extends StatefulWidget {
+  final WorkoutSummaryData summary;
 
-  const _SharePersonalRecordsSection({
-    required this.records,
-    required this.unitSystem,
-    required this.l10n,
-  });
-
-  String _value(PersonalRecord pr) {
-    switch (pr.recordType) {
-      case PersonalRecordType.strength:
-      case PersonalRecordType.strengthMaxWeight:
-        return UnitConverter.formatSetLine(pr.weight ?? 0, pr.reps, unitSystem);
-      case PersonalRecordType.cardioDistance:
-        return CardioFormat.distance(pr.distanceMeters, unitSystem);
-      case PersonalRecordType.cardioDuration:
-        return CardioFormat.duration(pr.durationSeconds);
-      case PersonalRecordType.cardioSteps:
-        return CardioFormat.steps(pr.steps);
-      case PersonalRecordType.cardioIncline:
-        return CardioFormat.incline(pr.inclinePercent);
-      case PersonalRecordType.cardioDifficulty:
-        return CardioFormat.difficulty(pr.inclinePercent);
-    }
-  }
+  const _StoryFinishPhoto({required this.summary});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.emoji_events, color: context.accentColor, size: 18),
-            const SizedBox(width: 6),
-            Text(l10n.summaryPersonalRecords, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...records.map(
-          (pr) => Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: LocalizedExerciseName(
-                    pr.exerciseName,
-                    exerciseId: pr.exerciseId,
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                ),
-                Text(
-                  _value(pr),
-                  style: TextStyle(
-                    color: context.accentColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  State<_StoryFinishPhoto> createState() => _StoryFinishPhotoState();
 }
 
-Widget? _finishPhoto(WorkoutSummaryData summary) {
-  if (!summary.hasFinishPhoto) return null;
-  return _WorkoutFinishPhoto(
-    localPath: summary.finishPhotoLocalPath,
-    storagePath: summary.finishPhotoStoragePath,
-  );
-}
-
-class _WorkoutFinishPhoto extends StatefulWidget {
-  final String? localPath;
-  final String? storagePath;
-
-  const _WorkoutFinishPhoto({this.localPath, this.storagePath});
-
-  @override
-  State<_WorkoutFinishPhoto> createState() => _WorkoutFinishPhotoState();
-}
-
-class _WorkoutFinishPhotoState extends State<_WorkoutFinishPhoto> {
+class _StoryFinishPhotoState extends State<_StoryFinishPhoto> {
   String? _url;
 
   @override
   void initState() {
     super.initState();
-    final local = widget.localPath;
+    final local = widget.summary.finishPhotoLocalPath;
     if (local != null && local.isNotEmpty) return;
-    final storage = widget.storagePath;
+    final storage = widget.summary.finishPhotoStoragePath;
     if (storage == null || storage.isEmpty) return;
     FeedMediaService().signedUrlForPath(storage).then((url) {
       if (mounted) setState(() => _url = url);
@@ -977,27 +387,189 @@ class _WorkoutFinishPhotoState extends State<_WorkoutFinishPhoto> {
 
   @override
   Widget build(BuildContext context) {
-    final local = widget.localPath;
+    final local = widget.summary.finishPhotoLocalPath;
     final Widget image;
     if (local != null && local.isNotEmpty) {
-      image = Image.file(File(local), fit: BoxFit.cover);
+      image = Image.file(
+        File(local),
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
     } else if (_url != null) {
       image = CachedNetworkImage(
         imageUrl: _url!,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => const ColoredBox(color: AppColors.cardElevated),
-        errorWidget: (_, __, ___) => const ColoredBox(color: AppColors.cardElevated),
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        placeholder: (_, __) => const SizedBox.shrink(),
+        errorWidget: (_, __, ___) => const SizedBox.shrink(),
       );
     } else {
-      image = const ColoredBox(color: AppColors.cardElevated);
+      image = const SizedBox.shrink();
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: workoutFinishPhotoAspectRatio,
-        child: image,
+    return SizedBox.expand(
+      child: ColoredBox(
+        color: AppColors.black,
+        child: ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (bounds) {
+            return const RadialGradient(
+              radius: 0.95,
+              colors: [
+                Color(0xFFFFFFFF),
+                Color(0xFFFFFFFF),
+                Color(0x00FFFFFF),
+              ],
+              stops: [0.72, 0.84, 1],
+            ).createShader(bounds);
+          },
+          child: image,
+        ),
       ),
     );
   }
+}
+
+enum _StoryStatKind { calories }
+
+class _StoryStat {
+  final String label;
+  final String value;
+  final _StoryStatKind? kind;
+
+  const _StoryStat(this.label, this.value, {this.kind});
+}
+
+class _StoryHighlight {
+  final String text;
+  final Color color;
+
+  const _StoryHighlight(this.text, this.color);
+}
+
+String? _modeLabel(WorkoutSummaryData summary, AppLocalizations l10n) {
+  if (summary.hasHyroxSplits) return l10n.hyroxSystemBadge;
+  if (summary.isRunner) return l10n.runnerSystemBadge;
+  return null;
+}
+
+String? _subtitle(WorkoutSummaryData summary, AppLocalizations l10n) {
+  if (summary.isRunner && !summary.hasHyroxSplits) {
+    final surface = summary.workout.runnerSurface;
+    if (surface != null) return runnerSurfaceLabel(l10n, surface);
+    return null;
+  }
+  final count = summary.exercises.length;
+  if (count <= 0) return null;
+  return l10n.shareStoryExerciseCount(count);
+}
+
+String? _calorieLine(WorkoutSummaryData summary, List<_StoryStat> stats) {
+  if (!summary.hasCalorieEstimate) return null;
+  if (stats.any((stat) => stat.kind == _StoryStatKind.calories)) return null;
+  return QuantityFormat.kcal(summary.calorieEstimate.caloriesKcal!);
+}
+
+WorkoutSet? _cardioSet(WorkoutSummaryData summary) {
+  for (final ex in summary.workout.exercises) {
+    for (final set in ex.sets) {
+      if (set.completed && set.isCardio) return set;
+    }
+  }
+  return null;
+}
+
+String _clock(WorkoutSummaryData summary, {int? seconds}) {
+  final value = seconds ?? (_cardioSet(summary)?.durationSeconds);
+  if (value != null && value > 0) return CardioFormat.duration(value);
+  if (summary.durationMinutes > 0) {
+    return CardioFormat.duration(summary.durationMinutes * 60);
+  }
+  return '—';
+}
+
+List<_StoryStat> _storyStats(
+  WorkoutSummaryData summary,
+  String unitSystem,
+  AppLocalizations l10n,
+) {
+  if (summary.hasHyroxSplits) {
+    return [
+      _StoryStat(l10n.runnerTime, _clock(summary, seconds: summary.hyroxTotalSeconds)),
+      _StoryStat(l10n.shareStoryStations, '${summary.hyroxSplits.length}'),
+      if (summary.hasCalorieEstimate)
+        _StoryStat(
+          l10n.caloriesBurned,
+          QuantityFormat.integer(summary.calorieEstimate.caloriesKcal!),
+          kind: _StoryStatKind.calories,
+        )
+      else
+        _StoryStat(l10n.minutes, '${summary.durationMinutes}'),
+    ];
+  }
+
+  if (summary.isRunner) {
+    final cardio = _cardioSet(summary);
+    return [
+      _StoryStat(
+        l10n.runnerDistance,
+        CardioFormat.distance(cardio?.distanceMeters, unitSystem),
+      ),
+      _StoryStat(
+        l10n.runnerAvgPace,
+        CardioFormat.pace(summary.workout.runnerAvgPaceSecPerKm, unitSystem),
+      ),
+      _StoryStat(l10n.runnerTime, _clock(summary)),
+    ];
+  }
+
+  final maxWeight = summary.maxWeightKg;
+  final third = maxWeight != null && maxWeight > 0
+      ? _StoryStat(l10n.maxWeight, UnitConverter.formatGymMass(maxWeight, unitSystem))
+      : _StoryStat(l10n.reps, QuantityFormat.integer(summary.totalReps));
+
+  return [
+    _StoryStat(l10n.minutes, '${summary.durationMinutes}'),
+    _StoryStat(l10n.volume, UnitConverter.formatVolume(summary.totalVolumeKg, unitSystem)),
+    third,
+  ];
+}
+
+_StoryHighlight? _storyHighlight(
+  WorkoutSummaryData summary,
+  String unitSystem,
+  AppLocalizations l10n,
+) {
+  final gym = !summary.isRunner && !summary.hasHyroxSplits;
+
+  if (gym) {
+    final percent = summary.volumeImprovementPercent;
+    if (percent != null && percent >= 1) {
+      return _StoryHighlight(
+        l10n.summaryVolumeUp(percent.toStringAsFixed(0)),
+        AppColors.cobalt,
+      );
+    }
+  }
+
+  if (summary.hasNewPersonalRecords) {
+    return _StoryHighlight(
+      l10n.shareStoryNewRecords(summary.newPersonalRecords.length),
+      AppColors.prHighlight,
+    );
+  }
+
+  if (summary.isRunner && !summary.hasHyroxSplits) {
+    final gain = summary.workout.runnerElevationGainMeters;
+    final outdoor = summary.workout.runnerRoute.length >= 2;
+    if (outdoor && gain != null && gain > 0) {
+      return _StoryHighlight(
+        '${l10n.runnerElevationGain} · ${CardioFormat.elevation(gain, unitSystem)}',
+        AppColors.cobalt,
+      );
+    }
+  }
+
+  return null;
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/app_providers.dart';
 import '../services/local_notification_service.dart';
+import '../services/notification_settings_store.dart';
 import '../services/push_notification_service.dart';
 
 /// Inicializa FCM al iniciar sesión y registra el token en Supabase.
@@ -72,6 +73,7 @@ class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBoot
     if (session != null) {
       await push.requestPermission();
       await push.registerToken();
+      await NotificationSettingsStore.load();
     }
   }
 

@@ -2,12 +2,13 @@ import 'package:fitforge/core/constants/social_feed.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('feed cutoff is 24 hours before now', () {
+  test('feed cutoff is 7 days before now', () {
     final now = DateTime.utc(2026, 7, 9, 18, 0);
     final cutoff = SocialFeed.cutoffSince(now);
 
-    expect(cutoff, DateTime.utc(2026, 7, 8, 18, 0));
+    expect(cutoff, DateTime.utc(2026, 7, 2, 18, 0));
     expect(now.difference(cutoff), SocialFeed.maxAge);
+    expect(SocialFeed.maxAge, const Duration(days: 7));
   });
 
   test('feed types include social events and user posts', () {

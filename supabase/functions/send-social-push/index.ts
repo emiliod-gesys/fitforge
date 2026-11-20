@@ -88,6 +88,7 @@ async function sendFcm(
   title: string,
   body: string,
   actorId: string,
+  notificationType: string,
 ): Promise<void> {
   const res = await fetch(
     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
@@ -102,7 +103,7 @@ async function sendFcm(
           token: deviceToken,
           notification: { title, body },
           data: {
-            type: "social_workout",
+            type: notificationType,
             route: "/social",
             actor_id: actorId,
           },
@@ -152,6 +153,28 @@ async function loadPushSecrets(
   webhookSecret = webhookSecret || Deno.env.get("WEBHOOK_SECRET") || null;
 
   return { serviceAccountJson, webhookSecret };
+}
+
+function preferenceColumnFor(type: string | undefined): string | null {
+  switch (type) {
+    case "friend_request":
+      return "friend_requests";
+    case "feed_comment":
+    case "feed_reaction":
+    case "feed_comment_reaction":
+      return "comments";
+    case "routine_share":
+    case "trainer_request":
+      return "routines";
+    case "workout_completed":
+    case "milestone_unlocked":
+    case "level_up":
+    case "pr_unlocked":
+    case "user_post":
+      return "friend_activity";
+    default:
+      return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -222,17 +245,23 @@ Deno.serve(async (req) => {
     });
   }
 
-  const bellTypes = new Set([
-    "friend_request",
-    "feed_comment",
-    "feed_reaction",
-    "feed_comment_reaction",
-    "routine_share",
-    "trainer_request",
-  ]);
+  const preferenceColumn = preferenceColumnFor(notificationType);
+  if (!preferenceColumn) {
+    return new Response(JSON.stringify({ skipped: true, reason: "unmapped_type" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
-  if (!notificationType || !bellTypes.has(notificationType)) {
-    return new Response(JSON.stringify({ skipped: true, reason: "feed_event" }), {
+  const { data: prefs, error: prefsError } = await supabase
+    .from("notification_settings")
+    .select("friend_requests, comments, routines, friend_activity")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const preferenceRow = (prefs ?? null) as Record<string, boolean> | null;
+  if (!prefsError && preferenceRow?.[preferenceColumn] === false) {
+    return new Response(JSON.stringify({ skipped: true, reason: "disabled" }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -260,12 +289,20 @@ Deno.serve(async (req) => {
   }
 
   const accessToken = await getGoogleAccessToken(sa);
-  const title = "FitForge";
+  const title = "FORGEN";
   let sent = 0;
 
   for (const row of tokens) {
     try {
-      await sendFcm(sa.project_id, accessToken, row.token, title, message, actorId ?? "");
+      await sendFcm(
+        sa.project_id,
+        accessToken,
+        row.token,
+        title,
+        message,
+        actorId ?? "",
+        notificationType ?? preferenceColumn,
+      );
       sent++;
     } catch (e) {
       console.error("FCM send failed:", e);

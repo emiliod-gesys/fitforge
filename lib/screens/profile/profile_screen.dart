@@ -18,6 +18,7 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/body_metric.dart';
 import '../../models/profile.dart';
+import '../../models/notification_settings.dart';
 import '../../models/rest_timer_alert_mode.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/cloud_exercise_download_provider.dart';
@@ -26,6 +27,8 @@ import '../../providers/tutorial_controller.dart';
 import '../../services/offline/cloud_exercise_download_service.dart';
 import '../../data/avatar_catalog.dart';
 import '../../services/supabase_service.dart';
+import '../../services/local_notification_service.dart';
+import '../../services/notification_settings_store.dart';
 import '../../services/rest_preferences.dart';
 import '../../services/ai_preferences.dart';
 import '../../widgets/avatar_picker_sheet.dart';
@@ -62,6 +65,7 @@ enum _ProfileSection {
   training,
   appearance,
   tutorials,
+  notifications,
   offline,
   account,
   plan,
@@ -214,6 +218,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileSection.nutrition =>
                   _nutritionSection(profile, metricsAsync),
                 _ProfileSection.training => _trainingSection(profile),
+                _ProfileSection.notifications => _notificationsSection(),
                 _ProfileSection.appearance => _preferencesSection(profile),
                 _ProfileSection.tutorials => _tutorialsSection(),
                 _ProfileSection.offline => _offlineSection(context),
@@ -280,6 +285,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     subtitle: l10n.profileHubTrainingSubtitle,
                     onTap: () => _openSection(
                         _ProfileSection.training, l10n.trainingConfig),
+                  ),
+                  const SizedBox(height: AppTokens.space12),
+                  FfHubTile(
+                    icon: Icons.notifications_outlined,
+                    title: l10n.notificationCenterTitle,
+                    subtitle: l10n.profileHubNotificationsSubtitle,
+                    onTap: () => _openSection(
+                      _ProfileSection.notifications,
+                      l10n.notificationCenterTitle,
+                    ),
                   ),
                   const SizedBox(height: AppTokens.space12),
                   FfHubTile(
@@ -698,6 +713,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     ]);
+  }
+
+  Widget _notificationsSection() {
+    return ref.watch(notificationSettingsProvider).when(
+          skipLoadingOnReload: true,
+          data: _notificationSwitches,
+          loading: () => _notificationSwitches(const NotificationSettings()),
+          error: (_, __) => _notificationSwitches(const NotificationSettings()),
+        );
+  }
+
+  Widget _notificationSwitches(NotificationSettings settings) {
+    final l10n = context.l10n;
+    return ListView(
+      padding: AppTokens.pagePaddingWithBottomInset(context),
+      children: [
+        FfSectionHeader(
+          title: l10n.notificationCenterTitle,
+          subtitle: l10n.notificationCenterSubtitle,
+        ),
+        FfSurface(
+          child: Column(
+            children: [
+              _notificationSwitch(
+                icon: Icons.timer_outlined,
+                title: l10n.notificationRestTitle,
+                subtitle: l10n.notificationRestSubtitle,
+                value: settings.restEnd,
+                onChanged: (value) => _saveNotifications(
+                  settings.copyWith(restEnd: value),
+                ),
+              ),
+              _notificationSwitch(
+                icon: Icons.person_add_alt_1_outlined,
+                title: l10n.notificationFriendRequestsTitle,
+                subtitle: l10n.notificationFriendRequestsSubtitle,
+                value: settings.friendRequests,
+                onChanged: (value) => _saveNotifications(
+                  settings.copyWith(friendRequests: value),
+                ),
+              ),
+              _notificationSwitch(
+                icon: Icons.chat_bubble_outline,
+                title: l10n.notificationCommentsTitle,
+                subtitle: l10n.notificationCommentsSubtitle,
+                value: settings.comments,
+                onChanged: (value) => _saveNotifications(
+                  settings.copyWith(comments: value),
+                ),
+              ),
+              _notificationSwitch(
+                icon: Icons.playlist_add_check_outlined,
+                title: l10n.notificationRoutinesTitle,
+                subtitle: l10n.notificationRoutinesSubtitle,
+                value: settings.routines,
+                onChanged: (value) => _saveNotifications(
+                  settings.copyWith(routines: value),
+                ),
+              ),
+              _notificationSwitch(
+                icon: Icons.groups_outlined,
+                title: l10n.notificationFriendActivityTitle,
+                subtitle: l10n.notificationFriendActivitySubtitle,
+                value: settings.friendActivity,
+                onChanged: (value) => _saveNotifications(
+                  settings.copyWith(friendActivity: value),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppTokens.space24),
+      ],
+    );
+  }
+
+  Widget _notificationSwitch({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return SwitchListTile(
+      secondary: Icon(icon, color: context.accentColor),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      value: value,
+      activeThumbColor: context.accentColor,
+      onChanged: onChanged,
+    );
+  }
+
+  Future<void> _saveNotifications(NotificationSettings settings) async {
+    await NotificationSettingsStore.save(settings);
+    if (!settings.restEnd) {
+      await LocalNotificationService.instance.cancelRememberedRest();
+    }
+    ref.invalidate(notificationSettingsProvider);
   }
 
   Widget _trainingSection(UserProfile? profile) {

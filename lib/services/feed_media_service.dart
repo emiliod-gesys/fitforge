@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/constants/social_feed.dart';
 import '../core/utils/feed_image_compressor.dart';
 
 /// Subida de imágenes del feed a Supabase Storage (`feed-media`).
@@ -11,7 +12,7 @@ class FeedMediaService {
 
   final SupabaseClient _client;
   static const _bucket = 'feed-media';
-  static const _signedUrlTtl = Duration(hours: 24);
+  static const _signedUrlTtl = SocialFeed.maxAge;
 
   String? get _userId => _client.auth.currentUser?.id;
 

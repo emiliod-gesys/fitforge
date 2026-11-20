@@ -18,7 +18,6 @@ import '../../core/utils/routine_workout_sync.dart';
 import '../../core/utils/unit_converter.dart';
 import '../../core/utils/workout_muscle_groups.dart';
 import '../../core/utils/workout_share_capture.dart';
-import '../../core/utils/workout_summary_share.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extensions.dart';
 import '../../models/exercise.dart';
@@ -87,12 +86,12 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
 
   String _shareImageFileName() => WorkoutShareCapture.safeFileName();
 
-  Future<bool> _shareWithImageCard({
-    required String text,
-    required String shareSubject,
-    Rect? shareOrigin,
-  }) async {
-    final pngBytes = await WorkoutShareCapture.capturePng(_shareCardKey);
+  Future<bool> _shareWithImageCard({Rect? shareOrigin}) async {
+    final pngBytes = await WorkoutShareCapture.capturePng(
+      _shareCardKey,
+      pixelRatio: workoutShareStoryPixelRatio,
+      expectedSize: const Size(workoutShareStoryWidth, workoutShareStoryHeight),
+    );
     if (pngBytes == null || !mounted) return false;
 
     final fileName = _shareImageFileName();
@@ -100,12 +99,9 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(pngBytes, flush: true);
 
-    // iOS lists image + text as separate items ("1 Document" / "Plain Text").
-    // The summary card image already contains the workout details.
+    // La historia ya lleva el resumen. Sin texto, WhatsApp no agrega un mensaje.
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'image/png', name: fileName)],
-      text: Platform.isIOS ? null : text,
-      subject: shareSubject,
       sharePositionOrigin: shareOrigin,
     );
     return true;
@@ -115,30 +111,15 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
     if (_sharing) return;
     setState(() => _sharing = true);
 
-    final unit = ref.read(unitSystemProvider);
     final l10n = context.l10n;
-    final displayName = l10n.workoutDisplayName(summary.workout.name);
-    final text = WorkoutSummaryShare.formatText(l10n, summary, unit, displayName: displayName);
-    final shareSubject = l10n.shareWorkoutTitle(displayName);
     final shareOrigin = _shareOriginRect();
 
     try {
-      final sharedWithImage = await _shareWithImageCard(
-        text: text,
-        shareSubject: shareSubject,
-        shareOrigin: shareOrigin,
-      );
-      if (!sharedWithImage) {
-        await Share.share(
-          text,
-          subject: shareSubject,
-          sharePositionOrigin: shareOrigin,
+      final sharedWithImage = await _shareWithImageCard(shareOrigin: shareOrigin);
+      if (!sharedWithImage && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.shareImageFallback)),
         );
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.shareImageFallback)),
-          );
-        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -316,15 +297,27 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
         ),
       ),
       body: Stack(
-        clipBehavior: Clip.none,
         children: [
+          _ShareStoryCapture(
+            captureKey: _shareCardKey,
+            summary: summary,
+            unitSystem: unit,
+            l10n: l10n,
+          ),
           Column(
         children: [
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               children: [
-                WorkoutShareCard(summary: summary, unitSystem: unit, l10n: l10n),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: (MediaQuery.sizeOf(context).height * 0.42).clamp(280.0, 380.0),
+                    ),
+                    child: WorkoutShareCard(summary: summary, unitSystem: unit, l10n: l10n),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 if (summary.hasRunnerSummary) ...[
                   _RunnerSummarySection(summary: summary, unitSystem: unit, l10n: l10n),
@@ -492,13 +485,6 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
           ),
         ],
       ),
-          _OffscreenShareCardCapture(
-            captureKey: _shareCardKey,
-            width: MediaQuery.sizeOf(context).width - 32,
-            summary: summary,
-            unitSystem: unit,
-            l10n: l10n,
-          ),
         ],
       ),
     ),
@@ -506,17 +492,16 @@ class _WorkoutSummaryScreenState extends ConsumerState<WorkoutSummaryScreen> {
   }
 }
 
-/// Tarjeta fuera de pantalla para captura fiable (no depende del scroll).
-class _OffscreenShareCardCapture extends StatelessWidget {
+/// Lienzo real de la historia, debajo del resumen. El borde lo pinta a escala
+/// para que el motor lo dibuje; la captura lee el lienzo sin esa escala.
+class _ShareStoryCapture extends StatelessWidget {
   final GlobalKey captureKey;
-  final double width;
   final WorkoutSummaryData summary;
   final String unitSystem;
   final AppLocalizations l10n;
 
-  const _OffscreenShareCardCapture({
+  const _ShareStoryCapture({
     required this.captureKey,
-    required this.width,
     required this.summary,
     required this.unitSystem,
     required this.l10n,
@@ -525,15 +510,18 @@ class _OffscreenShareCardCapture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: -12000,
-      top: 0,
-      width: width,
+      left: 0,
+      bottom: 0,
       child: IgnorePointer(
-        child: RepaintBoundary(
-          key: captureKey,
-          child: ColoredBox(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: WorkoutShareCard(summary: summary, unitSystem: unitSystem, l10n: l10n),
+        child: Opacity(
+          opacity: 0.01,
+          child: Transform.scale(
+            scale: 0.2,
+            alignment: Alignment.bottomLeft,
+            child: RepaintBoundary(
+              key: captureKey,
+              child: WorkoutShareStory(summary: summary, unitSystem: unitSystem, l10n: l10n),
+            ),
           ),
         ),
       ),

@@ -36,6 +36,8 @@ import '../services/food_quick_add_service.dart';
 import '../services/food_service.dart';
 import '../services/local_manual_food_store.dart';
 import '../services/open_food_facts_service.dart';
+import '../models/notification_settings.dart';
+import '../services/notification_settings_store.dart';
 import '../services/profile_service.dart';
 import '../services/referral_service.dart';
 import '../services/routine_service.dart';
@@ -273,6 +275,11 @@ final bodyMetricSnapshotsProvider = FutureProvider((ref) async {
 final restTimerAlertModeProvider =
     FutureProvider<RestTimerAlertMode>((ref) async {
   return RestPreferences.getRestTimerAlertMode();
+});
+
+final notificationSettingsProvider = FutureProvider<NotificationSettings>((ref) async {
+  ref.watch(authStateProvider);
+  return NotificationSettingsStore.load();
 });
 
 final aiProactiveEnabledProvider = FutureProvider<bool>((ref) async {

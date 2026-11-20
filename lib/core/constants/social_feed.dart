@@ -1,6 +1,6 @@
 /// Configuración del feed social (publicaciones efímeras).
 abstract final class SocialFeed {
-  static const maxAge = Duration(hours: 24);
+  static const maxAge = Duration(days: 7);
 
   static const feedTypes = [
     'workout_completed',

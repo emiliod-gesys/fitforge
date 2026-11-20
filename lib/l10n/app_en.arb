@@ -527,8 +527,8 @@
   "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Leaderboards",
   "feedEmptyTitle": "Your feed is empty",
-  "feedEmptySubtitle": "When you or friends work out, level up, unlock badges, or post updates, you'll see it here. Posts last 24 hours.",
-  "feedExpiryHint": "Only posts from the last 24 hours are shown.",
+  "feedEmptySubtitle": "When you or friends work out, level up, unlock badges, or post updates, you'll see it here. Posts last one week.",
+  "feedExpiryHint": "Only posts from the last week are shown.",
   "feedLongPressToReact": "Long-press a post to react.",
   "feedUserPost": "{name}: {text}",
   "@feedUserPost": {
@@ -709,7 +709,20 @@
   "noWorkoutsRegistered": "No workouts recorded",
   "workoutSummaryNotFound": "That workout could not be found.",
   "loadingWorkoutSummary": "Loading workout summary…",
-  "shareImageFallback": "Could not generate the image; shared text only.",
+  "shareImageFallback": "Could not generate the image.",
+  "shareStoryNewRecords": "{count, plural, one{1 new record} other{{count} new records}}",
+  "@shareStoryNewRecords": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shareStoryStations": "Stations",
+  "shareStoryExerciseCount": "{count, plural, one{1 exercise} other{{count} exercises}}",
+  "@shareStoryExerciseCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "startToday": "Start today",
   "viewFullHistory": "View full history",
   "activeWorkout": "Workout in progress",
@@ -1974,5 +1987,18 @@
   "onboardingReferralInvalid": "That code isn't the right format.",
   "onboardingReferralNotFound": "We couldn't find that code.",
   "onboardingReferralSelf": "You can't use your own code.",
-  "onboardingReferralFailed": "Couldn't save the code. Try again."
+  "onboardingReferralFailed": "Couldn't save the code. Try again.",
+  "notificationCenterTitle": "Notifications",
+  "notificationCenterSubtitle": "They arrive on your phone. They're on by default.",
+  "profileHubNotificationsSubtitle": "Rest, friends, and social activity",
+  "notificationRestTitle": "Rest timer finished",
+  "notificationRestSubtitle": "Alert when the time between sets ends.",
+  "notificationFriendRequestsTitle": "Friend requests",
+  "notificationFriendRequestsSubtitle": "When someone wants to add you.",
+  "notificationCommentsTitle": "Comments and reactions",
+  "notificationCommentsSubtitle": "When someone replies or reacts to a post.",
+  "notificationRoutinesTitle": "Routines and students",
+  "notificationRoutinesSubtitle": "Shared routines and trainer requests.",
+  "notificationFriendActivityTitle": "Friend activity",
+  "notificationFriendActivitySubtitle": "Workouts, posts, levels, and records."
 }

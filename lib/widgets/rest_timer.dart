@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/local_notification_service.dart';
+import '../services/notification_settings_store.dart';
 import '../services/rest_sound_service.dart';
 import '../core/theme/app_accent.dart';
 
@@ -153,7 +153,6 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
   @override
   void dispose() {
     _cancelled = true;
-    _cancelRestNotification();
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     if (widget.controller?._state == this) {
@@ -173,14 +172,17 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
       } else {
         unawaited(_syncFromClock());
       }
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _syncRestNotification();
     }
   }
 
   void _dismissParent({required bool skipped}) {
     if (_dismissed) return;
     _dismissed = true;
-    _cancelRestNotification();
     if (skipped) {
+      _cancelRestNotification();
       widget.onSkip();
     } else {
       widget.onComplete();
@@ -220,8 +222,15 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
         final title = l10n.restTimerAlertTitle;
         final body = l10n.rest;
 
-        if (inForeground) {
+        if (!await NotificationSettingsStore.restEnabled()) {
           await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
+        } else if (inForeground) {
+          await LocalNotificationService.instance.showRestEnd(
+            id: widget.sessionId,
+            title: title,
+            body: body,
+            audible: false,
+          );
           unawaited(RestSoundService.playRestCompleteAlert());
         } else {
           await LocalNotificationService.instance.showRestEnd(
@@ -229,7 +238,6 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
             title: title,
             body: body,
           );
-          await LocalNotificationService.instance.cancelRestEnd(widget.sessionId);
         }
       }
     } catch (_) {

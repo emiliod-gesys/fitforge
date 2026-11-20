@@ -534,8 +534,8 @@
   "socialTabFeed": "Feed",
   "socialTabLeaderboards": "Clasificaciones",
   "feedEmptyTitle": "Tu feed está vacío",
-  "feedEmptySubtitle": "Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.",
-  "feedExpiryHint": "Solo se muestran publicaciones de las últimas 24 horas.",
+  "feedEmptySubtitle": "Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran una semana.",
+  "feedExpiryHint": "Solo se muestran publicaciones de la última semana.",
   "feedLongPressToReact": "Mantén pulsado una publicación para reaccionar.",
   "feedUserPost": "{name}: {text}",
   "@feedUserPost": {
@@ -769,7 +769,20 @@
   "noWorkoutsRegistered": "Sin entrenamientos registrados",
   "workoutSummaryNotFound": "No se encontró ese entreno.",
   "loadingWorkoutSummary": "Cargando resumen del entreno…",
-  "shareImageFallback": "No se pudo generar la imagen; se compartió solo el texto.",
+  "shareImageFallback": "No se pudo generar la imagen.",
+  "shareStoryNewRecords": "{count, plural, one{1 récord nuevo} other{{count} récords nuevos}}",
+  "@shareStoryNewRecords": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shareStoryStations": "Estaciones",
+  "shareStoryExerciseCount": "{count, plural, one{1 ejercicio} other{{count} ejercicios}}",
+  "@shareStoryExerciseCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "summaryTitle": "Resumen",
   "workoutFinishPhotoSkip": "Omitir",
   "workoutFinishPhotoCapture": "Tomar foto",
@@ -2013,5 +2026,18 @@
   "onboardingReferralInvalid": "Ese código no tiene el formato correcto.",
   "onboardingReferralNotFound": "No encontramos ese código.",
   "onboardingReferralSelf": "No puedes usar tu propio código.",
-  "onboardingReferralFailed": "No se pudo guardar el código. Inténtalo de nuevo."
+  "onboardingReferralFailed": "No se pudo guardar el código. Inténtalo de nuevo.",
+  "notificationCenterTitle": "Notificaciones",
+  "notificationCenterSubtitle": "Llegan al celular. Vienen activadas.",
+  "profileHubNotificationsSubtitle": "Descanso, amistades y actividad social",
+  "notificationRestTitle": "Fin del descanso",
+  "notificationRestSubtitle": "Aviso cuando termina el tiempo entre series.",
+  "notificationFriendRequestsTitle": "Solicitudes de amistad",
+  "notificationFriendRequestsSubtitle": "Cuando alguien quiere agregarte.",
+  "notificationCommentsTitle": "Comentarios y reacciones",
+  "notificationCommentsSubtitle": "Cuando responden o reaccionan a una publicación.",
+  "notificationRoutinesTitle": "Rutinas y alumnos",
+  "notificationRoutinesSubtitle": "Rutinas compartidas y solicitudes de entrenador.",
+  "notificationFriendActivityTitle": "Actividad de amigos",
+  "notificationFriendActivitySubtitle": "Entrenamientos, publicaciones, niveles y récords."
 }

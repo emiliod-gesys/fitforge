@@ -1594,10 +1594,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedEmptySubtitle =>
-      'When you or friends work out, level up, unlock badges, or post updates, you\'ll see it here. Posts last 24 hours.';
+      'When you or friends work out, level up, unlock badges, or post updates, you\'ll see it here. Posts last one week.';
 
   @override
-  String get feedExpiryHint => 'Only posts from the last 24 hours are shown.';
+  String get feedExpiryHint => 'Only posts from the last week are shown.';
 
   @override
   String get feedLongPressToReact => 'Long-press a post to react.';
@@ -2099,8 +2099,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingWorkoutSummary => 'Loading workout summary…';
 
   @override
-  String get shareImageFallback =>
-      'Could not generate the image; shared text only.';
+  String get shareImageFallback => 'Could not generate the image.';
+
+  @override
+  String shareStoryNewRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new records',
+      one: '1 new record',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareStoryStations => 'Stations';
+
+  @override
+  String shareStoryExerciseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exercises',
+      one: '1 exercise',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get summaryTitle => 'Summary';
@@ -5457,4 +5481,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingReferralFailed => 'Couldn\'t save the code. Try again.';
+
+  @override
+  String get notificationCenterTitle => 'Notifications';
+
+  @override
+  String get notificationCenterSubtitle =>
+      'They arrive on your phone. They\'re on by default.';
+
+  @override
+  String get profileHubNotificationsSubtitle =>
+      'Rest, friends, and social activity';
+
+  @override
+  String get notificationRestTitle => 'Rest timer finished';
+
+  @override
+  String get notificationRestSubtitle =>
+      'Alert when the time between sets ends.';
+
+  @override
+  String get notificationFriendRequestsTitle => 'Friend requests';
+
+  @override
+  String get notificationFriendRequestsSubtitle =>
+      'When someone wants to add you.';
+
+  @override
+  String get notificationCommentsTitle => 'Comments and reactions';
+
+  @override
+  String get notificationCommentsSubtitle =>
+      'When someone replies or reacts to a post.';
+
+  @override
+  String get notificationRoutinesTitle => 'Routines and students';
+
+  @override
+  String get notificationRoutinesSubtitle =>
+      'Shared routines and trainer requests.';
+
+  @override
+  String get notificationFriendActivityTitle => 'Friend activity';
+
+  @override
+  String get notificationFriendActivitySubtitle =>
+      'Workouts, posts, levels, and records.';
 }

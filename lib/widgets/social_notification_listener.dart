@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/constants/app_scaffold.dart';
 import '../l10n/l10n_extensions.dart';
+import '../models/notification_settings.dart';
 import '../models/social.dart';
 import '../providers/app_providers.dart';
 import 'social_notifications_sheet.dart';
@@ -41,6 +42,11 @@ class _SocialNotificationListenerState extends ConsumerState<SocialNotificationL
 
     ref.invalidate(socialNotificationsProvider);
     ref.invalidate(socialUnreadCountProvider);
+
+    final settings = ref.read(notificationSettingsProvider).valueOrNull ??
+        const NotificationSettings();
+    final kind = NotificationKind.forSocialType(event.type);
+    if (kind != null && !settings.allows(kind)) return;
 
     final l10n = context.l10n;
     final messenger = rootScaffoldMessengerKey.currentState;

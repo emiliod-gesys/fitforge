@@ -6,13 +6,18 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/rest_timer_alert_mode.dart';
+import 'notification_settings_store.dart';
 import 'rest_preferences.dart';
 
 const socialChannelId = 'fitforge_social';
 const socialChannelName = 'Actividad social';
 const restChannelId = 'fitforge_rest_alarm';
 const restChannelName = 'Descanso entre series';
+const restSilentChannelId = 'fitforge_rest_status';
+const restSilentChannelName = 'Aviso de descanso';
 const _restBellSound = RawResourceAndroidNotificationSound('rest_timer_bell');
 
 const _androidSocialDetails = AndroidNotificationDetails(
@@ -77,6 +82,16 @@ class LocalNotificationService {
           enableVibration: true,
           sound: _restBellSound,
           audioAttributesUsage: AudioAttributesUsage.alarm,
+        ),
+      );
+      await android?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          restSilentChannelId,
+          restSilentChannelName,
+          description: 'Aviso visible al terminar el descanso con la app abierta',
+          importance: Importance.high,
+          playSound: false,
+          enableVibration: false,
         ),
       );
     }
@@ -176,22 +191,35 @@ class LocalNotificationService {
     );
   }
 
-  /// Muestra de inmediato el aviso de fin de descanso (p. ej. app en segundo plano).
+  /// Muestra de inmediato el aviso de fin de descanso.
+  ///
+  /// [audible] en falso deja el aviso en la bandeja sin repetir el sonido
+  /// que ya reproduce la app en primer plano.
   Future<void> showRestEnd({
     required int id,
     required String title,
     required String body,
     RestTimerAlertMode? alertMode,
+    bool audible = true,
   }) async {
+    if (!await NotificationSettingsStore.restEnabled()) {
+      await cancelRestEnd(id);
+      return;
+    }
     await ensureReadyForRestTimer();
 
-    final mode = alertMode ?? await RestPreferences.getRestTimerAlertMode();
+    final mode = audible
+        ? (alertMode ?? await RestPreferences.getRestTimerAlertMode())
+        : null;
     await _plugin.show(
       _restNotificationId(id),
       title,
       body,
-      await _restDetails(mode),
+      mode == null
+          ? await _silentRestDetails()
+          : await _restDetails(mode),
     );
+    await _rememberRestSession(id);
   }
 
   /// Programa aviso de fin de descanso aunque la app esté en segundo plano.
@@ -202,34 +230,97 @@ class LocalNotificationService {
     required String body,
     RestTimerAlertMode? alertMode,
   }) async {
+    if (!await NotificationSettingsStore.restEnabled()) {
+      await cancelRestEnd(id);
+      return;
+    }
     await ensureReadyForRestTimer();
 
-    final when = tz.TZDateTime.from(endsAt, tz.local);
-    if (!when.isAfter(tz.TZDateTime.now(tz.local))) return;
+    final when = tz.TZDateTime.from(endsAt.toUtc(), tz.UTC);
+    if (!when.isAfter(tz.TZDateTime.now(tz.UTC))) return;
 
     final mode = alertMode ?? await RestPreferences.getRestTimerAlertMode();
+    final details = await _restDetails(mode);
+    final notificationId = _restNotificationId(id);
 
     var scheduleMode = AndroidScheduleMode.inexactAllowWhileIdle;
     if (Platform.isAndroid) {
       final canExact = await _androidPlugin?.canScheduleExactNotifications();
       if (canExact == true) {
-        scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
+        scheduleMode = AndroidScheduleMode.alarmClock;
       }
     }
 
-    await _plugin.zonedSchedule(
-      _restNotificationId(id),
-      title,
-      body,
-      when,
-      await _restDetails(mode),
-      androidScheduleMode: scheduleMode,
-    );
+    try {
+      await _plugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        when,
+        details,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (_) {
+      if (scheduleMode == AndroidScheduleMode.inexactAllowWhileIdle) rethrow;
+      await _plugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        when,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    }
+    await _rememberRestSession(id);
   }
 
   Future<void> cancelRestEnd(int id) async {
+    if (!isSupported) return;
+    if (!_initialized) await initialize();
     if (!_initialized) return;
     await _plugin.cancel(_restNotificationId(id));
+    await _forgetRestSession(id);
+  }
+
+  Future<void> cancelRememberedRest() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getInt(NotificationSettingsStore.activeRestNotificationIdKey);
+    if (id == null) return;
+    await cancelRestEnd(id);
+  }
+
+  Future<void> _rememberRestSession(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(NotificationSettingsStore.activeRestNotificationIdKey, id);
+  }
+
+  Future<void> _forgetRestSession(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt(NotificationSettingsStore.activeRestNotificationIdKey) == id) {
+      await prefs.remove(NotificationSettingsStore.activeRestNotificationIdKey);
+    }
+  }
+
+  Future<NotificationDetails> _silentRestDetails() async {
+    return const NotificationDetails(
+      android: AndroidNotificationDetails(
+        restSilentChannelId,
+        restSilentChannelName,
+        channelDescription: 'Aviso visible al terminar el descanso con la app abierta',
+        importance: Importance.high,
+        priority: Priority.high,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.alarm,
+        icon: '@mipmap/ic_launcher',
+        playSound: false,
+        enableVibration: false,
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: false,
+        presentSound: false,
+      ),
+    );
   }
 
   int _restNotificationId(int sessionId) => 20000 + sessionId;

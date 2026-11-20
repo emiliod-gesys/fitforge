@@ -2945,13 +2945,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedEmptySubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran 24 horas.'**
+  /// **'Cuando tú o tus amigos entrenen, suban de nivel, desbloqueen medallas o publiquen novedades, lo verás aquí. Las publicaciones duran una semana.'**
   String get feedEmptySubtitle;
 
   /// No description provided for @feedExpiryHint.
   ///
   /// In es, this message translates to:
-  /// **'Solo se muestran publicaciones de las últimas 24 horas.'**
+  /// **'Solo se muestran publicaciones de la última semana.'**
   String get feedExpiryHint;
 
   /// No description provided for @feedLongPressToReact.
@@ -3797,8 +3797,26 @@ abstract class AppLocalizations {
   /// No description provided for @shareImageFallback.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo generar la imagen; se compartió solo el texto.'**
+  /// **'No se pudo generar la imagen.'**
   String get shareImageFallback;
+
+  /// No description provided for @shareStoryNewRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one{1 récord nuevo} other{{count} récords nuevos}}'**
+  String shareStoryNewRecords(int count);
+
+  /// No description provided for @shareStoryStations.
+  ///
+  /// In es, this message translates to:
+  /// **'Estaciones'**
+  String get shareStoryStations;
+
+  /// No description provided for @shareStoryExerciseCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one{1 ejercicio} other{{count} ejercicios}}'**
+  String shareStoryExerciseCount(int count);
 
   /// No description provided for @summaryTitle.
   ///
@@ -9380,6 +9398,84 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo guardar el código. Inténtalo de nuevo.'**
   String get onboardingReferralFailed;
+
+  /// No description provided for @notificationCenterTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get notificationCenterTitle;
+
+  /// No description provided for @notificationCenterSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Llegan al celular. Vienen activadas.'**
+  String get notificationCenterSubtitle;
+
+  /// No description provided for @profileHubNotificationsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descanso, amistades y actividad social'**
+  String get profileHubNotificationsSubtitle;
+
+  /// No description provided for @notificationRestTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fin del descanso'**
+  String get notificationRestTitle;
+
+  /// No description provided for @notificationRestSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Aviso cuando termina el tiempo entre series.'**
+  String get notificationRestSubtitle;
+
+  /// No description provided for @notificationFriendRequestsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes de amistad'**
+  String get notificationFriendRequestsTitle;
+
+  /// No description provided for @notificationFriendRequestsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando alguien quiere agregarte.'**
+  String get notificationFriendRequestsSubtitle;
+
+  /// No description provided for @notificationCommentsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comentarios y reacciones'**
+  String get notificationCommentsTitle;
+
+  /// No description provided for @notificationCommentsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando responden o reaccionan a una publicación.'**
+  String get notificationCommentsSubtitle;
+
+  /// No description provided for @notificationRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas y alumnos'**
+  String get notificationRoutinesTitle;
+
+  /// No description provided for @notificationRoutinesSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas compartidas y solicitudes de entrenador.'**
+  String get notificationRoutinesSubtitle;
+
+  /// No description provided for @notificationFriendActivityTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad de amigos'**
+  String get notificationFriendActivityTitle;
+
+  /// No description provided for @notificationFriendActivitySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrenamientos, publicaciones, niveles y récords.'**
+  String get notificationFriendActivitySubtitle;
 }
 
 class _AppLocalizationsDelegate
