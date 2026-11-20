@@ -97,6 +97,10 @@ class ProfileService {
       ...data,
       'updated_at': DateTime.now().toIso8601String(),
     };
+    // Un borrador a medias no puede borrar el objetivo ya elegido.
+    if (payload.containsKey('fitness_goal') && payload['fitness_goal'] == null) {
+      payload.remove('fitness_goal');
+    }
     if (data.containsKey('display_name') && data['display_name'] != null) {
       payload['search_name'] = (data['display_name'] as String).toLowerCase();
     }

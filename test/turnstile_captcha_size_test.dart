@@ -1,5 +1,6 @@
 import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import 'package:fitforge/widgets/turnstile_captcha.dart';
+import 'package:fitforge/widgets/turnstile_document_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,6 +16,13 @@ void main() {
       turnstileSizeForWidth(width: 400, current: null),
       TurnstileSize.normal,
     );
+  });
+
+  test('el documento del verificador usa el dominio permitido', () {
+    expect(turnstileDocumentUrl('https://fitforge.app'), 'https://fitforge.app/');
+    expect(turnstileDocumentUrl('http://localhost/'), 'http://localhost/');
+    expect(turnstileDocumentUrl(''), isNull);
+    expect(turnstileDocumentUrl('not a url'), isNull);
   });
 
   test('no cambia de tamaño en cada pixel al plegar', () {

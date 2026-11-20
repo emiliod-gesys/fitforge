@@ -1917,6 +1917,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Completa la verificación de seguridad';
 
   @override
+  String get turnstileRetry => 'Reintentar';
+
+  @override
   String get authError =>
       'Error de autenticación. Revisa tus datos e inténtalo de nuevo.';
 

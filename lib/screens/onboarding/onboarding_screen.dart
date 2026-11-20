@@ -128,8 +128,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               .toStringAsFixed(1);
     }
     if (profile.fitnessGoal != null) _fitnessGoal = profile.fitnessGoal;
-    if (profile.experienceLevel != null)
+    if (profile.experienceLevel != null) {
       _experienceLevel = profile.experienceLevel;
+    }
+    _activityLevel = profile.activityLevel;
     _preferredLanguage = profile.preferredLanguage;
     _hyroxMode = profile.hyroxMode;
     _runnerMode = profile.runnerMode;
@@ -345,7 +347,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         'gender': _gender!.code,
         'height_cm': heightCm,
         'unit_system': _unitSystem,
-        'fitness_goal': _fitnessGoal,
+        if (_fitnessGoal != null) 'fitness_goal': _fitnessGoal,
         'experience_level': _experienceLevel,
         'activity_level': _activityLevel!.code,
         'preferred_language': _preferredLanguage,
@@ -431,10 +433,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         await _saveProfileDraftQuiet();
       }
 
-      await ref.read(profileServiceProvider).updateProfile({
+      final existing = ref.read(profileProvider).valueOrNull;
+      final finish = <String, dynamic>{
         'onboarding_completed_at': DateTime.now().toUtc().toIso8601String(),
-        'subscription_tier': SubscriptionTier.free.code,
-      });
+      };
+      final protectedPlan = existing != null &&
+          (existing.subscriptionSource != SubscriptionSource.none ||
+              !existing.subscriptionTier.isFree);
+      if (!protectedPlan) {
+        finish['subscription_tier'] = SubscriptionTier.free.code;
+      }
+      await ref.read(profileServiceProvider).updateProfile(finish);
 
       if (!_selectedPlan.isFree) {
         final billing = ref.read(billingServiceProvider);
@@ -510,7 +519,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       'gender': _gender!.code,
       'height_cm': heightCm,
       'unit_system': _unitSystem,
-      'fitness_goal': _fitnessGoal,
+      if (_fitnessGoal != null) 'fitness_goal': _fitnessGoal,
       'experience_level': _experienceLevel,
       'activity_level': _activityLevel!.code,
       'preferred_language': _preferredLanguage,

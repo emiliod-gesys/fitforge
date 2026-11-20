@@ -704,6 +704,7 @@
   "appleSignInFailed": "No se pudo iniciar sesión con Apple. Inténtalo de nuevo.",
   "forgotPassword": "¿Olvidaste tu contraseña?",
   "completeSecurityVerification": "Completa la verificación de seguridad",
+  "turnstileRetry": "Reintentar",
   "authError": "Error de autenticación. Revisa tus datos e inténtalo de nuevo.",
   "enterEmailFirst": "Introduce tu email primero",
   "passwordResetSent": "Te enviamos un enlace para restablecer la contraseña",

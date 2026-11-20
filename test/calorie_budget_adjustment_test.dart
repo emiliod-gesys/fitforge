@@ -61,6 +61,17 @@ void main() {
       );
     });
 
+    test('a stored deficit does not match a surplus goal', () {
+      expect(
+        CalorieBudgetAdjustment.storedPercentMatchesGoal('Pérdida de grasa', -22),
+        isTrue,
+      );
+      expect(
+        CalorieBudgetAdjustment.storedPercentMatchesGoal('Hipertrofia', -22),
+        isFalse,
+      );
+    });
+
     test('warns when deficit kcal below 100', () {
       final warning = CalorieBudgetAdjustment.evaluate(
         goal: 'Pérdida de grasa',

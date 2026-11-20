@@ -697,6 +697,7 @@
   "appleSignInFailed": "Could not sign in with Apple. Try again.",
   "forgotPassword": "Forgot your password?",
   "completeSecurityVerification": "Complete the security verification",
+  "turnstileRetry": "Try again",
   "authError": "Authentication error. Check your details and try again.",
   "enterEmailFirst": "Enter your email first",
   "passwordResetSent": "We sent you a link to reset your password",

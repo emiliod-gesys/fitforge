@@ -146,7 +146,11 @@ class _CalorieBudgetEditorBodyState extends ConsumerState<_CalorieBudgetEditorBo
     final spec = CalorieBudgetAdjustment.displaySliderSpec(goal);
     final display = CalorieBudgetAdjustment.displayIntensity(goal, _adjustmentPct)
         .clamp(spec.min, spec.max);
-    _adjustmentPct = CalorieBudgetAdjustment.adjustmentFromDisplay(goal, display);
+    // No reescribir el porcentaje al dibujar. Si el objetivo y el signo no
+    // coinciden, ese reajuste convertía un déficit en superávit al guardar.
+    if (CalorieBudgetAdjustment.storedPercentMatchesGoal(goal, _adjustmentPct)) {
+      _adjustmentPct = CalorieBudgetAdjustment.adjustmentFromDisplay(goal, display);
+    }
     final baseGoal = CalorieBudgetAdjustment.goalFromTdee(tdee, _adjustmentPct);
     final absKcal = CalorieBudgetAdjustment.absoluteKcal(tdee, _adjustmentPct);
     final warning = CalorieBudgetAdjustment.evaluate(

@@ -57,6 +57,14 @@ abstract final class CalorieBudgetAdjustment {
   static int resolvedPercent(String? goal, int? storedPct) =>
       storedPct ?? defaultPercent(goal);
 
+  /// Un déficit guardado no corresponde a un objetivo de superávit, y al revés.
+  static bool storedPercentMatchesGoal(String? goal, int percent) =>
+      switch (goalMode(goal)) {
+        CalorieGoalMode.deficit => percent < 0,
+        CalorieGoalMode.surplus => percent > 0,
+        CalorieGoalMode.maintenance => true,
+      };
+
   static int goalFromTdee(int tdee, int adjustmentPct) =>
       (tdee * (1 + adjustmentPct / 100)).round().clamp(1200, 6000);
 

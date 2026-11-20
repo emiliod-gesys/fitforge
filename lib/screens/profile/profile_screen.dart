@@ -1181,76 +1181,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _editGoal(UserProfile? profile) async {
     final l10n = context.l10n;
     final accent = context.accentColor;
+    final current = profile?.fitnessGoal;
+    var pending = current;
     final selected = await showDialog<String>(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: AppColors.cardElevated,
-        shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
-        child: ConstrainedBox(
-          constraints:
-              BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-                child: Text(
-                  l10n.fitnessGoalTitle,
-                  style: Theme.of(ctx).textTheme.titleLarge,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => Dialog(
+          backgroundColor: AppColors.cardElevated,
+          shape: RoundedRectangleBorder(borderRadius: AppTokens.borderRadiusXl),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                  child: Text(
+                    l10n.fitnessGoalTitle,
+                    style: Theme.of(ctx).textTheme.titleLarge,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                child: Text(
-                  l10n.fitnessGoalHint,
-                  style: const TextStyle(
-                      color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                  child: Text(
+                    l10n.fitnessGoalHint,
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 13, height: 1.35),
+                  ),
                 ),
-              ),
-              Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    ...l10n.fitnessGoals.map((goal) {
-                      final canonical = l10n.canonicalGoal(goal);
-                      return FfSelectableTile(
-                        title: goal,
-                        badge: l10n.fitnessGoalCalorieModeLabel(goal),
-                        subtitle:
-                            '${l10n.fitnessGoalTrainingLabel}: ${l10n.fitnessGoalTrainingDescription(goal)}\n'
-                            '${l10n.fitnessGoalDietLabel}: ${l10n.fitnessGoalDietDescription(goal)}',
-                        selected: profile?.fitnessGoal == canonical,
-                        accent: accent,
-                        onTap: () => Navigator.pop(ctx, goal),
-                      );
-                    }),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-                      child: Text(
-                        l10n.fitnessGoalFootnote,
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 11,
-                          height: 1.35,
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      ...l10n.fitnessGoals.map((goal) {
+                        final canonical = l10n.canonicalGoal(goal);
+                        return FfSelectableTile(
+                          title: goal,
+                          badge: l10n.fitnessGoalCalorieModeLabel(goal),
+                          subtitle:
+                              '${l10n.fitnessGoalTrainingLabel}: ${l10n.fitnessGoalTrainingDescription(goal)}\n'
+                              '${l10n.fitnessGoalDietLabel}: ${l10n.fitnessGoalDietDescription(goal)}',
+                          selected: pending == canonical,
+                          accent: accent,
+                          onTap: () => setLocal(() => pending = canonical),
+                        );
+                      }),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                        child: Text(
+                          l10n.fitnessGoalFootnote,
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: pending == null || pending == current
+                              ? null
+                              : () => Navigator.pop(ctx, pending),
+                          child: Text(l10n.save),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-    if (selected != null) {
-      await ref.read(profileServiceProvider).updateProfile({
-        'fitness_goal': l10n.canonicalGoal(selected),
-      });
-      ref.invalidate(profileProvider);
-      ref.invalidate(dailyNutritionProvider);
+    if (selected == null || selected == current) return;
+    final patch = <String, dynamic>{'fitness_goal': selected};
+    final pct = profile?.calorieAdjustmentPct;
+    if (pct != null &&
+        !CalorieBudgetAdjustment.storedPercentMatchesGoal(selected, pct)) {
+      patch['calorie_adjustment_pct'] = null;
     }
+    await ref.read(profileServiceProvider).updateProfile(patch);
+    ref.invalidate(profileProvider);
+    ref.invalidate(dailyNutritionProvider);
   }
 
   Future<void> _editExperience(UserProfile? profile) async {

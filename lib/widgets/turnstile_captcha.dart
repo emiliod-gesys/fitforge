@@ -2,6 +2,8 @@ import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../core/constants/turnstile_config.dart';
+import '../l10n/l10n_extensions.dart';
+import 'turnstile_document_view.dart';
 
 /// El widget normal de Turnstile mide 300 px. En la pantalla exterior de un
 /// plegable (Z Fold) el formulario queda por debajo de eso: el WebView se
@@ -38,26 +40,34 @@ class TurnstileCaptchaState extends State<TurnstileCaptcha> {
   Key _widgetKey = UniqueKey();
   DateTime? _lastResetAt;
   TurnstileSize? _size;
+  bool _failed = false;
 
-  void reset() {
+  void reset({bool force = false}) {
     final now = DateTime.now();
-    if (_lastResetAt != null &&
+    if (!force &&
+        _lastResetAt != null &&
         now.difference(_lastResetAt!) < const Duration(seconds: 3)) {
       return;
     }
     _lastResetAt = now;
     widget.onTokenChanged(null);
-    setState(() => _widgetKey = UniqueKey());
+    setState(() {
+      _failed = false;
+      _widgetKey = UniqueKey();
+    });
+  }
+
+  void _onToken(String? token) {
+    if (token != null && token.isNotEmpty && _failed && mounted) {
+      setState(() => _failed = false);
+    }
+    widget.onTokenChanged(token);
   }
 
   void _onError(TurnstileException error) {
-    if (kDebugMode) {
-      debugPrint(
-        'Turnstile ${error.code}: ${error.message} '
-        '(retryable=${error.retryable})',
-      );
-    }
     widget.onTokenChanged(null);
+    if (!mounted) return;
+    setState(() => _failed = true);
   }
 
   @override
@@ -80,29 +90,54 @@ class TurnstileCaptchaState extends State<TurnstileCaptcha> {
         }
         _size = resolved;
 
+        final challengeKey = ValueKey((_widgetKey, resolved));
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
             width: resolved.width,
             height: resolved.height,
-            child: CloudflareTurnstile(
-              key: ValueKey((_widgetKey, resolved)),
-              siteKey: TurnstileConfig.siteKey,
-              baseUrl: TurnstileConfig.baseUrl,
-              options: TurnstileOptions(
-                size: resolved,
-                theme: TurnstileTheme.dark,
-                // Evita reintentos infinitos del JS de Turnstile en errores retryables
-                // (p. ej. 110200 "Domain not allowed" en WebView Android).
-                retryAutomatically: false,
-                refreshExpired: TurnstileRefreshExpired.manual,
-                refreshTimeout: TurnstileRefreshTimeout.manual,
-                // En Samsung plegable, animar el tamaño del WebView lo deja parpadeando.
-                animationDuration: Duration.zero,
-              ),
-              onTokenReceived: widget.onTokenChanged,
-              onError: _onError,
-              onTokenExpired: () => widget.onTokenChanged(null),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: kIsWeb
+                      ? CloudflareTurnstile(
+                          key: challengeKey,
+                          siteKey: TurnstileConfig.siteKey,
+                          baseUrl: TurnstileConfig.baseUrl,
+                          options: TurnstileOptions(
+                            size: resolved,
+                            theme: TurnstileTheme.dark,
+                            retryAutomatically: false,
+                            refreshExpired: TurnstileRefreshExpired.manual,
+                            refreshTimeout: TurnstileRefreshTimeout.manual,
+                            animationDuration: Duration.zero,
+                          ),
+                          onTokenReceived: _onToken,
+                          onError: _onError,
+                          onTokenExpired: () => widget.onTokenChanged(null),
+                        )
+                      : TurnstileDocumentView(
+                          key: challengeKey,
+                          siteKey: TurnstileConfig.siteKey,
+                          baseUrl: TurnstileConfig.baseUrl,
+                          size: resolved,
+                          onTokenChanged: _onToken,
+                          onError: _onError,
+                        ),
+                ),
+                if (_failed)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: const Color(0xFF1A1B1E),
+                      child: Center(
+                        child: TextButton(
+                          onPressed: () => reset(force: true),
+                          child: Text(context.l10n.turnstileRetry),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         );

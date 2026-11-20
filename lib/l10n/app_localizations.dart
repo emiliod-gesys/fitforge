@@ -3452,6 +3452,12 @@ abstract class AppLocalizations {
   /// **'Completa la verificación de seguridad'**
   String get completeSecurityVerification;
 
+  /// No description provided for @turnstileRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get turnstileRetry;
+
   /// No description provided for @authError.
   ///
   /// In es, this message translates to:
