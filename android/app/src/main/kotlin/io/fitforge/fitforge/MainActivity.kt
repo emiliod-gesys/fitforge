@@ -16,5 +16,6 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         WearSessionBridge(this, flutterEngine.dartExecutor.binaryMessenger)
+        RestAlarmBridge(this, flutterEngine.dartExecutor.binaryMessenger)
     }
 }

@@ -192,6 +192,7 @@
   "activityHighDescription": "Más de 10 mil pasos diarios",
   "activityLevelFootnote": "Estas son aproximaciones de actividad física para ayudar a orientar al usuario.",
   "restTimerAlert": "Aviso de descanso",
+  "restTimerActiveTitle": "Descanso Activo",
   "restTimerAlertTitle": "Fin del descanso",
   "restTimerAlertSound": "Sonido",
   "restTimerAlertVibration": "Vibración",

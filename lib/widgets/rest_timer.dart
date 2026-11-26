@@ -60,7 +60,7 @@ class _RestTimerState extends State<RestTimer> with WidgetsBindingObserver {
         id: widget.sessionId,
         endsAt: _endsAt,
         title: l10n.restTimerAlertTitle,
-        body: l10n.rest,
+        body: l10n.restTimerActiveTitle,
       ),
     );
   }

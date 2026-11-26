@@ -13,6 +13,7 @@ import 'core/theme/system_ui.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/app_providers.dart';
 import 'services/local_notification_service.dart';
+import 'services/push_notification_service.dart';
 import 'services/rest_sound_service.dart';
 import 'services/supabase_service.dart';
 import 'widgets/billing_bootstrap.dart';
@@ -87,6 +88,7 @@ Future<void> main() async {
   if (LocalNotificationService.isSupported) {
     await LocalNotificationService.instance.initialize();
   }
+  await PushNotificationService.prepare();
   unawaited(RestSoundService.warmUp());
 
   runApp(

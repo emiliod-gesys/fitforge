@@ -597,6 +597,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restTimerAlert => 'Rest timer alert';
 
   @override
+  String get restTimerActiveTitle => 'Active rest';
+
+  @override
   String get restTimerAlertTitle => 'Rest timer finished';
 
   @override

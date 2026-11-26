@@ -1166,6 +1166,12 @@ abstract class AppLocalizations {
   /// **'Aviso de descanso'**
   String get restTimerAlert;
 
+  /// No description provided for @restTimerActiveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descanso Activo'**
+  String get restTimerActiveTitle;
+
   /// No description provided for @restTimerAlertTitle.
   ///
   /// In es, this message translates to:

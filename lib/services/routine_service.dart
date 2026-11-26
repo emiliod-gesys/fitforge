@@ -8,6 +8,12 @@ import 'offline/connectivity_service.dart';
 import 'offline/routine_cache_store.dart';
 import 'supabase_service.dart';
 
+/// Id de fila en Postgres. Un borrador del Coach (`draft-0-ff_...`) no es UUID.
+String routineExerciseRowId(String id, {String Function()? create}) {
+  if (Uuid.isValidUUID(fromString: id)) return id;
+  return (create ?? const Uuid().v4)();
+}
+
 class RoutineService {
   final _client = SupabaseService.client;
   final _uuid = const Uuid();
@@ -146,7 +152,7 @@ class RoutineService {
               (ex) => {
                 ...ex.toJson(),
                 'routine_id': routineId,
-                'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
+                'id': routineExerciseRowId(ex.id, create: _uuid.v4),
               },
             )
             .toList(),
@@ -209,7 +215,7 @@ class RoutineService {
               (ex) => {
                 ...ex.toJson(),
                 'routine_id': routineId,
-                'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
+                'id': routineExerciseRowId(ex.id, create: _uuid.v4),
               },
             )
             .toList(),
@@ -308,7 +314,7 @@ class RoutineService {
   }
 
   Map<String, dynamic> _exerciseToRpcJson(RoutineExercise ex) => {
-        'id': ex.id.isEmpty ? null : ex.id,
+        'id': routineExerciseRowId(ex.id) == ex.id ? ex.id : null,
         'exercise_id': ex.exerciseId,
         'exercise_name': ex.exerciseName,
         'order_index': ex.orderIndex,
@@ -388,17 +394,22 @@ class RoutineService {
     });
 
     if (routine.exercises.isNotEmpty) {
-      await _client.from('routine_exercises').insert(
-        routine.exercises
-            .map(
-              (ex) => {
-                ...ex.toJson(),
-                'routine_id': routineId,
-                'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
-              },
-            )
-            .toList(),
-      );
+      try {
+        await _client.from('routine_exercises').insert(
+          routine.exercises
+              .map(
+                (ex) => {
+                  ...ex.toJson(),
+                  'routine_id': routineId,
+                  'id': routineExerciseRowId(ex.id, create: _uuid.v4),
+                },
+              )
+              .toList(),
+        );
+      } catch (_) {
+        await _client.from('routines').delete().eq('id', routineId);
+        rethrow;
+      }
     }
 
     return Routine(
@@ -447,7 +458,7 @@ class RoutineService {
             (ex) => {
               ...ex.toJson(),
               'routine_id': routine.id,
-              'id': ex.id.isEmpty ? _uuid.v4() : ex.id,
+              'id': routineExerciseRowId(ex.id, create: _uuid.v4),
             },
           )
           .toList(),

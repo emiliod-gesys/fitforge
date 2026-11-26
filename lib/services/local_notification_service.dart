@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -14,11 +15,17 @@ import 'rest_preferences.dart';
 
 const socialChannelId = 'fitforge_social';
 const socialChannelName = 'Actividad social';
-const restChannelId = 'fitforge_rest_alarm';
+const restChannelId = 'fitforge_rest_alarm_v2';
 const restChannelName = 'Descanso entre series';
 const restSilentChannelId = 'fitforge_rest_status';
 const restSilentChannelName = 'Aviso de descanso';
 const _restBellSound = RawResourceAndroidNotificationSound('rest_timer_bell');
+
+/// Nombre del drawable, sin @mipmap. El icono de la barra tiene que ser
+/// blanco y con transparencia; el launcher a color hace que Android
+/// descarte la notificación.
+const _notificationIcon = 'ic_stat_forgen';
+const _restAlarmChannel = MethodChannel('forgen/rest_alarm');
 
 const _androidSocialDetails = AndroidNotificationDetails(
   socialChannelId,
@@ -28,7 +35,7 @@ const _androidSocialDetails = AndroidNotificationDetails(
   priority: Priority.high,
   visibility: NotificationVisibility.public,
   category: AndroidNotificationCategory.social,
-  icon: '@mipmap/ic_launcher',
+  icon: _notificationIcon,
   playSound: true,
   enableVibration: true,
 );
@@ -44,12 +51,18 @@ class LocalNotificationService {
 
   static bool get isSupported => !kIsWeb;
 
+  void Function()? _onTap;
+
   Future<void> initialize({void Function()? onNotificationTap}) async {
+    if (onNotificationTap != null) _onTap = onNotificationTap;
     if (!isSupported || _initialized) return;
 
     tz.initializeTimeZones();
+    // Las horas del descanso ya van en UTC. Fijar la zona evita que el
+    // plugin consulte tz.local antes de que exista y cancele la alarma.
+    tz.setLocalLocation(tz.UTC);
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings(_notificationIcon);
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -57,7 +70,7 @@ class LocalNotificationService {
     );
     await _plugin.initialize(
       const InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: (_) => onNotificationTap?.call(),
+      onDidReceiveNotificationResponse: (_) => _onTap?.call(),
     );
 
     if (Platform.isAndroid) {
@@ -154,7 +167,7 @@ class LocalNotificationService {
         priority: Priority.high,
         visibility: NotificationVisibility.public,
         category: AndroidNotificationCategory.alarm,
-        icon: '@mipmap/ic_launcher',
+        icon: _notificationIcon,
         playSound: playSound,
         enableVibration: enableVibration,
         sound: playSound ? _restBellSound : null,
@@ -173,6 +186,7 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
+    if (!_initialized) await initialize();
     if (!_initialized) return;
     if (body.isEmpty && title == 'FORGEN') return;
 
@@ -219,6 +233,7 @@ class LocalNotificationService {
           ? await _silentRestDetails()
           : await _restDetails(mode),
     );
+    await _cancelNativeRestAlarm(id, keepVisible: true);
     await _rememberRestSession(id);
   }
 
@@ -243,11 +258,34 @@ class LocalNotificationService {
     final details = await _restDetails(mode);
     final notificationId = _restNotificationId(id);
 
+    if (Platform.isAndroid) {
+      final playSound =
+          mode == RestTimerAlertMode.sound || mode == RestTimerAlertMode.both;
+      final vibrate =
+          mode == RestTimerAlertMode.vibration || mode == RestTimerAlertMode.both;
+      try {
+        await _plugin.cancel(notificationId);
+        await _restAlarmChannel.invokeMethod<void>('schedule', {
+          'id': notificationId,
+          'countdownId': _restCountdownId(id),
+          'atMillis': endsAt.millisecondsSinceEpoch,
+          'title': title,
+          'body': body,
+          'playSound': playSound,
+          'vibrate': vibrate,
+        });
+        await _rememberRestSession(id);
+        return;
+      } catch (error, stack) {
+        debugPrint('Alarma nativa de descanso falló: $error\n$stack');
+      }
+    }
+
     var scheduleMode = AndroidScheduleMode.inexactAllowWhileIdle;
     if (Platform.isAndroid) {
       final canExact = await _androidPlugin?.canScheduleExactNotifications();
       if (canExact == true) {
-        scheduleMode = AndroidScheduleMode.alarmClock;
+        scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
       }
     }
 
@@ -260,7 +298,8 @@ class LocalNotificationService {
         details,
         androidScheduleMode: scheduleMode,
       );
-    } catch (_) {
+    } catch (error, stack) {
+      debugPrint('No se pudo programar la alarma de descanso: $error\n$stack');
       if (scheduleMode == AndroidScheduleMode.inexactAllowWhileIdle) rethrow;
       await _plugin.zonedSchedule(
         notificationId,
@@ -276,10 +315,24 @@ class LocalNotificationService {
 
   Future<void> cancelRestEnd(int id) async {
     if (!isSupported) return;
+    await _cancelNativeRestAlarm(id, keepVisible: false);
     if (!_initialized) await initialize();
     if (!_initialized) return;
     await _plugin.cancel(_restNotificationId(id));
     await _forgetRestSession(id);
+  }
+
+  Future<void> _cancelNativeRestAlarm(int id, {required bool keepVisible}) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _restAlarmChannel.invokeMethod<void>('cancel', {
+        'id': _restNotificationId(id),
+        'countdownId': _restCountdownId(id),
+        'keepVisible': keepVisible,
+      });
+    } catch (error, stack) {
+      debugPrint('No se pudo cancelar la alarma de descanso: $error\n$stack');
+    }
   }
 
   Future<void> cancelRememberedRest() async {
@@ -311,7 +364,7 @@ class LocalNotificationService {
         priority: Priority.high,
         visibility: NotificationVisibility.public,
         category: AndroidNotificationCategory.alarm,
-        icon: '@mipmap/ic_launcher',
+        icon: _notificationIcon,
         playSound: false,
         enableVibration: false,
       ),
@@ -324,6 +377,8 @@ class LocalNotificationService {
   }
 
   int _restNotificationId(int sessionId) => 20000 + sessionId;
+
+  int _restCountdownId(int sessionId) => 30000 + sessionId;
 
   Future<void> showRemoteMessage(RemoteMessage message) async {
     final payload = _parseRemoteMessage(message);

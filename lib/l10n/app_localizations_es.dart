@@ -602,6 +602,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get restTimerAlert => 'Aviso de descanso';
 
   @override
+  String get restTimerActiveTitle => 'Descanso Activo';
+
+  @override
   String get restTimerAlertTitle => 'Fin del descanso';
 
   @override

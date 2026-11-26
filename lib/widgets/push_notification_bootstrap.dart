@@ -49,31 +49,39 @@ class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBoot
     if (!PushNotificationService.isAvailable) return;
     final session = ref.read(authStateProvider).valueOrNull?.session;
     if (session == null) return;
-    await ref.read(pushNotificationServiceProvider).registerToken();
+    try {
+      await ref.read(pushNotificationServiceProvider).registerToken();
+    } catch (error, stack) {
+      debugPrint('No se pudo refrescar el token de notificaciones: $error\n$stack');
+    }
   }
 
   Future<void> _syncPush() async {
-    if (LocalNotificationService.isSupported) {
-      final local = LocalNotificationService.instance;
-      await local.initialize(onNotificationTap: () {
-        if (mounted) widget.router.go('/social');
-      });
-      if (Platform.isAndroid || Platform.isIOS) {
-        await local.requestPermission();
+    try {
+      if (LocalNotificationService.isSupported) {
+        final local = LocalNotificationService.instance;
+        await local.initialize(onNotificationTap: () {
+          if (mounted) widget.router.go('/social');
+        });
+        if (Platform.isAndroid || Platform.isIOS) {
+          await local.requestPermission();
+        }
       }
-    }
 
-    if (!PushNotificationService.isAvailable) return;
+      if (!PushNotificationService.isAvailable) return;
 
-    final push = ref.read(pushNotificationServiceProvider);
-    push.setRouter(widget.router);
-    await push.initialize();
+      final push = ref.read(pushNotificationServiceProvider);
+      push.setRouter(widget.router);
+      await push.initialize();
 
-    final session = ref.read(authStateProvider).valueOrNull?.session;
-    if (session != null) {
-      await push.requestPermission();
-      await push.registerToken();
-      await NotificationSettingsStore.load();
+      final session = ref.read(authStateProvider).valueOrNull?.session;
+      if (session != null) {
+        await push.requestPermission();
+        await push.registerToken();
+        await NotificationSettingsStore.load();
+      }
+    } catch (error, stack) {
+      debugPrint('No se pudieron preparar las notificaciones: $error\n$stack');
     }
   }
 
@@ -86,11 +94,15 @@ class _PushNotificationBootstrapState extends ConsumerState<PushNotificationBoot
       final wasLoggedIn = prev?.valueOrNull?.session != null;
       final isLoggedIn = next.valueOrNull?.session != null;
 
-      if (!wasLoggedIn && isLoggedIn) {
-        await push.requestPermission();
-        await push.registerToken();
-      } else if (wasLoggedIn && !isLoggedIn) {
-        await push.unregisterToken();
+      try {
+        if (!wasLoggedIn && isLoggedIn) {
+          await push.requestPermission();
+          await push.registerToken();
+        } else if (wasLoggedIn && !isLoggedIn) {
+          await push.unregisterToken();
+        }
+      } catch (error, stack) {
+        debugPrint('No se pudo actualizar el token de notificaciones: $error\n$stack');
       }
     });
 

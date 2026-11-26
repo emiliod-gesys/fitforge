@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,7 @@ import '../l10n/l10n_extensions.dart';
 import '../models/notification_settings.dart';
 import '../models/social.dart';
 import '../providers/app_providers.dart';
+import '../services/local_notification_service.dart';
 import 'social_notifications_sheet.dart';
 
 /// Escucha notificaciones sociales en tiempo real y muestra un aviso breve.
@@ -48,6 +51,20 @@ class _SocialNotificationListenerState extends ConsumerState<SocialNotificationL
     final kind = NotificationKind.forSocialType(event.type);
     if (kind != null && !settings.allows(kind)) return;
 
+    final inForeground =
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    if (!inForeground) {
+      unawaited(
+        LocalNotificationService.instance.showSocial(
+          id: event.notificationId.hashCode & 0x7fffffff,
+          title: 'FORGEN',
+          body: event.message,
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
     final l10n = context.l10n;
     final messenger = rootScaffoldMessengerKey.currentState;
     if (messenger == null) return;
