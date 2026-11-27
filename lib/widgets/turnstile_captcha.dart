@@ -99,8 +99,20 @@ class TurnstileCaptchaState extends State<TurnstileCaptcha> {
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: kIsWeb
-                      ? CloudflareTurnstile(
+                  // TurnstileDocumentView solo en Android: evita el reload
+                  // infinito por about:blank. En iOS el paquete ya funcionaba;
+                  // el WebView custom del update lo rompió.
+                  child: !kIsWeb &&
+                          defaultTargetPlatform == TargetPlatform.android
+                      ? TurnstileDocumentView(
+                          key: challengeKey,
+                          siteKey: TurnstileConfig.siteKey,
+                          baseUrl: TurnstileConfig.baseUrl,
+                          size: resolved,
+                          onTokenChanged: _onToken,
+                          onError: _onError,
+                        )
+                      : CloudflareTurnstile(
                           key: challengeKey,
                           siteKey: TurnstileConfig.siteKey,
                           baseUrl: TurnstileConfig.baseUrl,
@@ -115,14 +127,6 @@ class TurnstileCaptchaState extends State<TurnstileCaptcha> {
                           onTokenReceived: _onToken,
                           onError: _onError,
                           onTokenExpired: () => widget.onTokenChanged(null),
-                        )
-                      : TurnstileDocumentView(
-                          key: challengeKey,
-                          siteKey: TurnstileConfig.siteKey,
-                          baseUrl: TurnstileConfig.baseUrl,
-                          size: resolved,
-                          onTokenChanged: _onToken,
-                          onError: _onError,
                         ),
                 ),
                 if (_failed)

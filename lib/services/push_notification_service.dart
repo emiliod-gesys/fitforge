@@ -18,7 +18,11 @@ Future<void> _ensureFirebaseApp() async {
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } on FirebaseException catch (error) {
-    if (error.code != 'duplicate-app') rethrow;
+    if (error.code == 'duplicate-app') return;
+    // App ID de otra plataforma / mal configurado: no tumbar el arranque.
+    debugPrint('Firebase init skipped: ${error.code} ${error.message}');
+  } catch (error, stack) {
+    debugPrint('Firebase init skipped: $error\n$stack');
   }
 }
 

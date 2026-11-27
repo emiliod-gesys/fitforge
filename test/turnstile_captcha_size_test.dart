@@ -19,7 +19,7 @@ void main() {
   });
 
   test('el documento del verificador usa el dominio permitido', () {
-    expect(turnstileDocumentUrl('https://fitforge.app'), 'https://fitforge.app/');
+    expect(turnstileDocumentUrl('https://www.forgen.app'), 'https://www.forgen.app/');
     expect(turnstileDocumentUrl('http://localhost/'), 'http://localhost/');
     expect(turnstileDocumentUrl(''), isNull);
     expect(turnstileDocumentUrl('not a url'), isNull);

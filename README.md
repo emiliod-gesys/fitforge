@@ -50,10 +50,12 @@ flutter pub get
 
 ```json
 "TURNSTILE_SITE_KEY": "tu-site-key",
-"TURNSTILE_BASE_URL": "http://localhost/"
+"TURNSTILE_BASE_URL": "https://www.forgen.app/"
 ```
 
-`TURNSTILE_BASE_URL` debe coincidir con un dominio del widget de Turnstile.
+`TURNSTILE_BASE_URL` debe coincidir con un dominio del widget de Turnstile
+(p. ej. `www.forgen.app`). En iOS/Android reales no uses `http://localhost/` —
+el captcha falla y el login con email queda bloqueado.
 
 ### 3. Variables de entorno
 

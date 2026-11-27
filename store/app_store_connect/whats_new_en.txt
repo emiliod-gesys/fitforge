@@ -1,0 +1,4 @@
+Sign in with email works again on iOS.
+
+Fixed
+• Email/password login no longer gets stuck when the security check fails to load on iPhone

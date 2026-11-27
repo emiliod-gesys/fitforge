@@ -74,9 +74,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>FORGEN usa la cámara para la foto al terminar un entreno, escanear códigos de barras y fotografiar comidas y ejercicios.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>FORGEN usa el micrófono para dictar descripciones de comida en el registro rápido.</string>
+	<string>FORGEN usa el micrófono para dictar lo que comiste y para darle instrucciones por voz al asistente de entrenamiento.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>FORGEN convierte tu voz en texto para describir lo que comiste.</string>
+	<string>FORGEN convierte tu voz en texto para registrar comidas y para que el asistente de voz arme rutinas y anote tus series.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FORGEN accede a tu galería para elegir fotos de ejercicios personalizados.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

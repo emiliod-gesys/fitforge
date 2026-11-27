@@ -1,0 +1,4 @@
+El inicio de sesión con email vuelve a funcionar en iOS.
+
+Correcciones
+• El login con email/contraseña ya no se queda bloqueado cuando la verificación de seguridad no carga en iPhone
