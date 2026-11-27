@@ -1,4 +1,5 @@
-Sign in with email works again on iOS.
+Sign in with email works again on iOS, and the security check fits the login form.
 
 Fixed
 • Email/password login no longer gets stuck when the security check fails to load on iPhone
+• The security check now matches the width of the login fields

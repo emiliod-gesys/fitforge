@@ -164,7 +164,11 @@ class _TurnstileDocumentViewState extends State<TurnstileDocumentView> {
 
 String _pageHtml({required String siteKey, required String sizeName}) {
   final safeKey = siteKey.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
-  final safeSize = sizeName == 'compact' ? 'compact' : 'normal';
+  final safeSize = switch (sizeName) {
+    'compact' => 'compact',
+    'flexible' => 'flexible',
+    _ => 'normal',
+  };
   return '''
 <!DOCTYPE html>
 <html lang="en">
@@ -173,7 +177,8 @@ String _pageHtml({required String siteKey, required String sizeName}) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
   <style>
-    html, body { margin: 0; padding: 0; background: #1A1B1E; overflow: hidden; }
+    html, body { margin: 0; padding: 0; background: #1A1B1E; overflow: hidden; width: 100%; height: 100%; }
+    #cf-turnstile { width: 100%; }
   </style>
 </head>
 <body>

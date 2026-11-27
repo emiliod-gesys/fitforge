@@ -11,10 +11,10 @@ void main() {
     );
   });
 
-  test('pantalla ancha usa el captcha normal', () {
+  test('pantalla ancha usa el captcha flexible a todo el ancho', () {
     expect(
       turnstileSizeForWidth(width: 400, current: null),
-      TurnstileSize.normal,
+      TurnstileSize.flexible,
     );
   });
 
@@ -31,16 +31,20 @@ void main() {
       TurnstileSize.compact,
     );
     expect(
-      turnstileSizeForWidth(width: 300, current: TurnstileSize.normal),
-      TurnstileSize.normal,
+      turnstileSizeForWidth(width: 300, current: TurnstileSize.flexible),
+      TurnstileSize.flexible,
     );
     expect(
       turnstileSizeForWidth(width: 340, current: TurnstileSize.compact),
-      TurnstileSize.normal,
+      TurnstileSize.flexible,
     );
     expect(
-      turnstileSizeForWidth(width: 279, current: TurnstileSize.normal),
+      turnstileSizeForWidth(width: 279, current: TurnstileSize.flexible),
       TurnstileSize.compact,
+    );
+    expect(
+      turnstileSizeForWidth(width: 300, current: TurnstileSize.normal),
+      TurnstileSize.flexible,
     );
   });
 }
